@@ -306,7 +306,7 @@ adouble daeParameter::Create_adouble(const size_t* indexes, const size_t N) cons
 	{
 		adRuntimeParameterNode* node = new adRuntimeParameterNode();
 		node->m_pParameter = const_cast<daeParameter*>(this);
-		node->m_dValue = m_darrValues[nIndex];
+        node->m_pdValue    = const_cast<real_t*>(&m_darrValues[nIndex]);
 		if(N > 0)
 		{
 			node->m_narrDomains.resize(N);

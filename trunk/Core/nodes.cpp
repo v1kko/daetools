@@ -1061,17 +1061,23 @@ bool adEventPortDataNode::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adRuntimeParameterNode::adRuntimeParameterNode(daeParameter* pParameter, 
 											   vector<size_t>& narrDomains, 
-											   real_t dValue) 
-               : m_dValue(dValue),
+                                               real_t* pdValue)
+               : m_pdValue(pdValue),
 			     m_pParameter(pParameter), 
 			     m_narrDomains(narrDomains)
 {
+    if(!m_pdValue)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "NULL value in the adRuntimeParameterNode for the parameter " << m_pParameter->GetCanonicalName() << "(" << toString(m_narrDomains) << ")";
+        throw e;
+    }
 }
 
 adRuntimeParameterNode::adRuntimeParameterNode(void)
 {
 	m_pParameter = NULL;
-	m_dValue     = 0;
+    m_pdValue    = NULL;
 }
 
 adRuntimeParameterNode::~adRuntimeParameterNode()
@@ -1080,16 +1086,23 @@ adRuntimeParameterNode::~adRuntimeParameterNode()
 
 adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+    if(!m_pdValue)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "NULL value in the adRuntimeParameterNode for the parameter " << m_pParameter->GetCanonicalName() << "(" << toString(m_narrDomains) << ")";
+        throw e;
+    }
+
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
-        adouble tmp(m_dValue);
+        adouble tmp(*m_pdValue);
         tmp.setGatherInfo(true);
 		tmp.node = adNodePtr( Clone() );
         return tmp;
 	}
     else
     {
-        return adouble(m_dValue);
+        return adouble(*m_pdValue);
     }
 }
 
@@ -1097,9 +1110,15 @@ const quantity adRuntimeParameterNode::GetQuantity(void) const
 {
 	if(!m_pParameter)
 		daeDeclareAndThrowException(exInvalidCall);
-	
+    if(!m_pdValue)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "NULL value in the adRuntimeParameterNode for the parameter " << m_pParameter->GetCanonicalName() << "(" << toString(m_narrDomains) << ")";
+        throw e;
+    }
+
 	//std::cout << (boost::format("%s units = %s") % m_pParameter->GetCanonicalName() % m_pParameter->GetUnits().getBaseUnit().toString()).str() << std::endl;
-	return quantity(m_dValue, m_pParameter->GetUnits());
+    return quantity(*m_pdValue, m_pParameter->GetUnits());
 }
 
 adNode* adRuntimeParameterNode::Clone(void) const
@@ -1147,22 +1166,31 @@ void adRuntimeParameterNode::Open(io::xmlTag_t* pTag)
 	strName = "DomainIndexes";
 	pTag->OpenArray(strName, m_narrDomains);
 
-	strName = "Value";
-	pTag->Open(strName, m_dValue);
+    //strName = "Value";
+    //pTag->Open(strName, m_pdValue);
 }
 
 void adRuntimeParameterNode::Save(io::xmlTag_t* pTag) const
 {
 	string strName;
 
-	strName = "Name";
+    if(!m_pParameter)
+        daeDeclareAndThrowException(exInvalidCall);
+    if(!m_pdValue)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "NULL value in the adRuntimeParameterNode for the parameter " << m_pParameter->GetCanonicalName() << "(" << toString(m_narrDomains) << ")";
+        throw e;
+    }
+
+    strName = "Name";
 	pTag->Save(strName, m_pParameter->GetName());
 
 	strName = "DomainIndexes";
 	pTag->SaveArray(strName, m_narrDomains);
 
 	strName = "Value";
-	pTag->Save(strName, m_dValue);
+    pTag->Save(strName, *m_pdValue);
 }
 
 void adRuntimeParameterNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const

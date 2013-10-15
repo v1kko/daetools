@@ -166,30 +166,46 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._currentDOFItem              = None
         self._currentInitialConditionItem = None
         
+        # treeStates-related data
+        self._allowUnchecking                 = False
+        self._treeStates_itemChanged_disabled = False
+        
         addItemsToTree(self._ui.treeParameters,        self._ui.treeParameters,        self._inspector.treeParameters)
         addItemsToTree(self._ui.treeOutputVariables,   self._ui.treeOutputVariables,   self._inspector.treeOutputVariables)
-        addItemsToTree(self._ui.treeSTNs,              self._ui.treeSTNs,              self._inspector.treeSTNs)
+        addItemsToTree(self._ui.treeSTNs,              self._ui.treeSTNs,              self._inspector.treeStates)
         addItemsToTree(self._ui.treeDomains,           self._ui.treeDomains,           self._inspector.treeDomains)
         addItemsToTree(self._ui.treeDOFs,              self._ui.treeDOFs,              self._inspector.treeDOFs)
         addItemsToTree(self._ui.treeInitialConditions, self._ui.treeInitialConditions, self._inspector.treeInitialConditions)
         
         self._ui.treeDomains.expandAll()
         self._ui.treeDomains.resizeColumnToContents(0)
+        self._ui.treeDomains.setSortingEnabled(True)
+        self._ui.treeDomains.sortItems(0, QtCore.Qt.AscendingOrder)
         
         self._ui.treeParameters.expandAll()
         self._ui.treeParameters.resizeColumnToContents(0)
+        self._ui.treeParameters.setSortingEnabled(True)
+        self._ui.treeParameters.sortItems(0, QtCore.Qt.AscendingOrder)
         
         self._ui.treeInitialConditions.expandAll()
         self._ui.treeInitialConditions.resizeColumnToContents(0)
+        self._ui.treeInitialConditions.setSortingEnabled(True)
+        self._ui.treeInitialConditions.sortItems(0, QtCore.Qt.AscendingOrder)
         
         self._ui.treeDOFs.expandAll()
         self._ui.treeDOFs.resizeColumnToContents(0)
+        self._ui.treeDOFs.setSortingEnabled(True)
+        self._ui.treeDOFs.sortItems(0, QtCore.Qt.AscendingOrder)
         
         self._ui.treeSTNs.expandAll()
         self._ui.treeSTNs.resizeColumnToContents(0)
+        self._ui.treeSTNs.setSortingEnabled(True)
+        self._ui.treeSTNs.sortItems(0, QtCore.Qt.AscendingOrder)
         
         self._ui.treeOutputVariables.expandAll()
         self._ui.treeOutputVariables.resizeColumnToContents(0)
+        self._ui.treeOutputVariables.setSortingEnabled(True)
+        self._ui.treeOutputVariables.sortItems(0, QtCore.Qt.AscendingOrder)
 
         # First populate trees and set values. Only after that connect signals to slots (otherwise the event handlers might be triggered in the process)
         self.connect(self._ui.buttonCancel,                    QtCore.SIGNAL('clicked()'),                          self._slotCancel)
@@ -198,7 +214,8 @@ class daeSimulationExplorer(QtGui.QDialog):
         self.connect(self._ui.buttonSaveRuntimeSettingsAsJSON, QtCore.SIGNAL('clicked()'),                          self._slotSaveRuntimeSettingsAsJSON)        
         self.connect(self._ui.treeParameters,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotParameterTreeItemSelectionChanged)
         self.connect(self._ui.treeOutputVariables,             QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotOutputVariablesTreeItemChanged)
-        self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
+        self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotSTNsTreeItemChanged)
+        #self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
         self.connect(self._ui.treeDomains,                     QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDomainsTreeItemChanged)
         self.connect(self._ui.treeDOFs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
         self.connect(self._ui.treeInitialConditions,           QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
@@ -308,18 +325,25 @@ class daeSimulationExplorer(QtGui.QDialog):
         # Update STNs
         if printInfo:
             print 'Update STNs...'
-        for canonicalName, (stn, item) in self._inspector.stns.iteritems():
-            if printInfo:
-                print '    Changing the active state for %s:' % canonicalName
-                print '        from: %s' % stn.ActiveState
-                print '          to: %s' % item.getValue()
-            stn.ActiveState = item.getValue()
-                
-    
+        for canonicalName, (stn, lstates) in self._inspector.stns.iteritems():
+            # Iterate over states and detect which of them is checked
+            for state, item in lstates:
+                if item.getValue():
+                    print 'state %s is active' % state.CanonicalName
+                    activeState = state.Name
+                    if True:
+                        print '    Changing the active state for %s:' % canonicalName
+                        print '        from: %s' % stn.ActiveState
+                        print '          to: %s' % activeState
+                    stn.ActiveState = activeState
+                    break
+        
+        self._simulation.Reinitialize()
+        
     def generateCode(self, language):
         if not language in ['ANSI C','Modelica','FMI']:
             return
-        #QtGui.QMessageBox.warning(self, "Code generator", 'Selected language: %s\nDirectory: %s' % (language, directory))
+        
         try:
             if language == 'ANSI C':
                 from daetools.code_generators.ansi_c import daeCodeGenerator_ANSI_C
@@ -361,9 +385,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             
     @property
     def jsonRuntimeSettings(self):
-        #import pprint, inspect
-        #pprint.pprint(inspect.stack())
-        return json.dumps(self.runtimeSettings, indent = 4)
+        return json.dumps(self.runtimeSettings, indent = 4, sort_keys = True)
     
     @property
     def runtimeSettings(self):
@@ -417,7 +439,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         if not self._quazySteadyState:
             self._runtimeSettings['InitialConditions'] = self._inspector.treeInitialConditions.toDictionary()
         self._runtimeSettings['DOFs']                  = self._inspector.treeDOFs.toDictionary()
-        self._runtimeSettings['STNs']                  = self._inspector.treeSTNs.toDictionary()
+        self._runtimeSettings['STNs']                  = self._inspector.treeStates.toDictionary()
         self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
         
     def _slotCancel(self):
@@ -441,6 +463,8 @@ class daeSimulationExplorer(QtGui.QDialog):
             f = open(jsonFilename, 'w')
             f.write(self.jsonRuntimeSettings)
             f.close()
+            
+            QtGui.QMessageBox.information(self, "Save Runtime Settings As JSON File", 'JSON file successfuly saved!')
         
         except Exception as e:
             QtGui.QMessageBox.critical(self, "Save RuntimeSettings As JSON", 'Error:\n%s' % str(e))
@@ -455,7 +479,7 @@ class daeSimulationExplorer(QtGui.QDialog):
 
     def _slotParameterTreeItemSelectionChanged(self):
         currentItem = self._ui.treeParameters.selectedItems()[0]
-        data = currentItem.data(1, QtCore.Qt.UserRole)
+        data = currentItem.data(0, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
         if self._currentParameterItem:
@@ -467,7 +491,7 @@ class daeSimulationExplorer(QtGui.QDialog):
 
     def _slotOutputVariablesTreeItemChanged(self, treeWidgetItem, column):
         if column == 0:
-            data = treeWidgetItem.data(1, QtCore.Qt.UserRole)
+            data = treeWidgetItem.data(0, QtCore.Qt.UserRole)
             if not data:
                 return
             item = data.toPyObject()
@@ -477,9 +501,10 @@ class daeSimulationExplorer(QtGui.QDialog):
                 else:
                     item.setValue(False)
 
-    def _slotSTNsTreeItemChanged(self):
+    def _slotSTNsTreeItemChanged(self, treeWidgetItem, column):
+        """
         currentItem = self._ui.treeSTNs.selectedItems()[0]
-        data = currentItem.data(1, QtCore.Qt.UserRole)
+        data = currentItem.data(0, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
         if self._currentStateTransitionItem:
@@ -488,11 +513,113 @@ class daeSimulationExplorer(QtGui.QDialog):
         if item.editor:
             self._currentStateTransitionItem = item
             self._currentStateTransitionItem.show(self._ui.frameStateTransitions)
-
-
+        """
+        if column == 0:
+            if self._treeStates_itemChanged_disabled:
+                return
+                
+            data = treeWidgetItem.data(0, QtCore.Qt.UserRole)
+            if not data:
+                return
+            item = data.toPyObject()
+            if item.itemType == treeItem.typeState:
+                if treeWidgetItem.checkState(0) == Qt.Unchecked:
+                    # Do not allow item to be unchecked unless the flag _allowUnchecking is set
+                    if self._allowUnchecking:
+                        item.setValue(False)
+                        #print 'Item: %s unchecked' % item.canonicalName
+                    
+                    else:
+                        # If unchecking is not allowed check it again
+                        self._treeStates_itemChanged_disabled = True
+                        treeWidgetItem.setCheckState(0, Qt.Checked)
+                        self._treeStates_itemChanged_disabled = False
+                
+                else: 
+                    # Item has just been checked, either through GUI or from a function
+                    try:
+                        # 1. Set the value to True
+                        item.setValue(True)
+                        #print 'Item: %s checked' % item.canonicalName
+                        
+                        # Prevent itemChanged event to be handled
+                        self._allowUnchecking                 = True
+                        self._treeStates_itemChanged_disabled = True
+                        
+                        # 2. Uncheck all siblings and their children (except the current item)
+                        parent = treeWidgetItem.parent()
+                        self._uncheckSiblings(parent, treeWidgetItem)
+                        
+                        # 3. Check first children of the current item 
+                        self._checkFirstChildren(treeWidgetItem)
+                    
+                        # 4. Check all parents of the current item
+                        self._checkAllParents(treeWidgetItem)
+                        
+                    except:
+                        pass
+                    finally:
+                        # Restore flags back
+                        self._allowUnchecking                 = False
+                        self._treeStates_itemChanged_disabled = False
+                    
+    def _checkAllParents(self, treeWidgetItem):
+        # The item is checked and all its parents must be checked as well, 
+        # while the siblings of its parents (and their children) must be unchecked
+        parent = treeWidgetItem.parent()
+        if not parent:
+            return
+        data = parent.data(0, QtCore.Qt.UserRole)
+        item = data.toPyObject()
+        if item and item.itemType == treeItem.typeState:
+            item.setValue(True)
+            parent.setCheckState(0, Qt.Checked)
+            #print 'Item: %s checked' % item.canonicalName
+            
+            grandpa = parent.parent()
+            self._uncheckSiblings(grandpa, parent)
+        
+        self._checkAllParents(parent)
+        
+    def _uncheckSiblings(self, parent, currentTreeWidgetItem):
+        # The unchecked item is checked so its siblings (and all their children) must be unchecked.
+        # This means that when a state becomes active all other states (and their nested STNS) within 
+        # the same STN must be inactive.
+        if not parent:
+            return
+        
+        for i  in range(parent.childCount()):
+            child = parent.child(i)
+            # Do not uncheck the item currently being set ()
+            if child != currentTreeWidgetItem:
+                data = child.data(0, QtCore.Qt.UserRole)
+                item = data.toPyObject()
+                if item and item.itemType == treeItem.typeState:
+                    item.setValue(False)
+                    child.setCheckState(0, Qt.Unchecked)
+                    #print 'Item: %s unchecked' % item.canonicalName
+                
+                # Now uncheck all down through the hierarchy of children 
+                # (since thier parent is unchecked they should be too) 
+                self._uncheckSiblings(child, None)
+    
+    def _checkFirstChildren(self, parent):
+        # Once the unchecked item is checked some defaults must be provided for its children.
+        # Here we chose to check the first items (this means that the first states will be initially active).
+        if parent.childCount() > 0:
+            child = parent.child(0)
+            data = child.data(0, QtCore.Qt.UserRole)
+            item = data.toPyObject()
+            if item and item.itemType == treeItem.typeState:
+                item.setValue(True)
+                child.setCheckState(0, Qt.Checked)
+                #print 'Child item: %s checked' % item.canonicalName
+            
+            self._checkFirstChildren(child)
+        
     def _slotDomainsTreeItemChanged(self):
         currentItem = self._ui.treeDomains.selectedItems()[0]
-        data = currentItem.data(1, QtCore.Qt.UserRole)
+        data = currentItem.data(0, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
         if self._currentDomainItem:
@@ -504,7 +631,7 @@ class daeSimulationExplorer(QtGui.QDialog):
 
     def _slotDOFsTreeItemChanged(self):
         currentItem = self._ui.treeDOFs.selectedItems()[0]
-        data = currentItem.data(1, QtCore.Qt.UserRole)
+        data = currentItem.data(0, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
         if self._currentDOFItem:
@@ -516,7 +643,7 @@ class daeSimulationExplorer(QtGui.QDialog):
 
     def _slotInitialConditionsTreeItemChanged(self):
         currentItem = self._ui.treeInitialConditions.selectedItems()[0]
-        data = currentItem.data(1, QtCore.Qt.UserRole)
+        data = currentItem.data(0, QtCore.Qt.UserRole)
         item = data.toPyObject()
 
         if self._currentInitialConditionItem:

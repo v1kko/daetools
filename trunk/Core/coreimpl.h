@@ -2654,7 +2654,11 @@ public:
 	const std::vector<daeVariable*>& Variables() const;
     const std::vector<daeEquation*>& Equations() const;
     const std::vector<daeSTN*>& STNs() const;
-	const std::vector<daePortArray*>& PortArrays() const;
+    const std::vector<daeOnEventActions*>& OnEventActions() const;
+    const std::vector<daeOnConditionActions*>& OnConditionActions() const;
+    const std::vector<daePortConnection*>& PortConnections() const;
+    const std::vector<daeEventPortConnection*>& EventPortConnections() const;
+    const std::vector<daePortArray*>& PortArrays() const;
 	const std::vector<daeModelArray*>& ModelArrays() const;
 	
 // Overridables		
@@ -2675,33 +2679,34 @@ protected:
 	void DeclareEquationsBase(void);
 
 	daeSTN* AddSTN(const string& strName);
-	daeIF*  AddIF();
+    daeIF*  AddIF(const string& strName);
 
-	void IF(const daeCondition& rCondition, real_t dEventTolerance = 0);
-	void ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance = 0);
-	void ELSE(void);
-	void END_IF(void);
-	
-	daeSTN*   STN(const string& strSTN);
-	daeState* STATE(const string& strState);
-	void      END_STN(void);
-	void      SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0);
-	
-    void ON_CONDITION(const daeCondition&                                       rCondition, 
-                      std::vector< std::pair<string, string> >&					arrSwitchToStates, 
-                      std::vector< std::pair<daeVariableWrapper, adouble> >&    arrSetVariables,
-                      std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents, 
-                      std::vector<daeAction*>&                                  ptrarrUserDefinedActions, 
-                      real_t                                                    dEventTolerance = 0.0);
-    
-	void ON_EVENT(daeEventPort*												pTriggerEventPort, 
-				  std::vector< std::pair<string, string> >&					arrSwitchToStates, 
-				  std::vector< std::pair<daeVariableWrapper, adouble> >&	arrSetVariables,
-				  std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents,
-			      std::vector<daeAction*>&									ptrarrUserDefinedOnEventActions);
-	
 public:
-	daeDomain*		FindDomain(unsigned long nID) const;
+    void IF(const daeCondition& rCondition, real_t dEventTolerance = 0, const string& strIFName= "", const string& strIFDescription = "",
+                                                                        const string& strStateName = "", const string& strStateDescription = "");
+    void ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance = 0, const string& strStateName = "", const string& strStateDescription = "");
+    void ELSE(const string& strStateDescription = "");
+    void END_IF(void);
+
+    daeSTN*   STN(const string& strName, const string& strDescription = "");
+    daeState* STATE(const string& strName, const string& strDescription = "");
+    void      END_STN(void);
+    void      SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0);
+
+    void ON_CONDITION(const daeCondition&                                       rCondition,
+                      std::vector< std::pair<string, string> >&					arrSwitchToStates,
+                      std::vector< std::pair<daeVariableWrapper, adouble> >&    arrSetVariables,
+                      std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents,
+                      std::vector<daeAction*>&                                  ptrarrUserDefinedActions,
+                      real_t                                                    dEventTolerance = 0.0);
+
+    void ON_EVENT(daeEventPort*												pTriggerEventPort,
+                  std::vector< std::pair<string, string> >&					arrSwitchToStates,
+                  std::vector< std::pair<daeVariableWrapper, adouble> >&	arrSetVariables,
+                  std::vector< std::pair<daeEventPort*, adouble> >&			arrTriggerEvents,
+                  std::vector<daeAction*>&									ptrarrUserDefinedOnEventActions);
+
+    daeDomain*		FindDomain(unsigned long nID) const;
 	daePort*		FindPort(unsigned long nID) const;
 	daeEventPort*	FindEventPort(unsigned long nID) const;
 	daeVariable*	FindVariable(unsigned long nID) const;
@@ -3083,7 +3088,7 @@ public:
 	virtual bool		CheckDiscontinuities(void);
 	virtual void		ExecuteOnConditionActions(void);
 	virtual size_t		GetNumberOfEquations(void) const;
-	virtual daeState*	AddState(string strName);
+    virtual daeState*	AddState(const string& strName);
 
 	size_t			GetNumberOfStates(void) const;
 	string			GetActiveState2(void) const;
@@ -3153,7 +3158,7 @@ public:
 	virtual void		FinalizeDeclaration(void);
 	virtual bool		CheckDiscontinuities(void);
 	virtual void		ExecuteOnConditionActions(void);
-	virtual daeState*	AddState(string strName);
+    virtual daeState*	AddState(const string& strName);
 
 public:	
 	void Open(io::xmlTag_t* pTag);
@@ -3165,7 +3170,7 @@ public:
 	virtual void Clone(const daeIF& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
-	daeState* CreateElse(void);
+    daeState* CreateElse(const string& strName);
 	
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);

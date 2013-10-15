@@ -151,6 +151,15 @@ string daeOnEventActions__repr__(const daeOnEventActions& self);
 string daeOnConditionActions__str__(const daeOnConditionActions& self);
 string daeOnConditionActions__repr__(const daeOnConditionActions& self);
 
+string daeAction__str__(daeAction& self);
+string daeAction__repr__(daeAction& self);
+
+string daeScalarExternalFunction__str__(daeScalarExternalFunction& self);
+string daeScalarExternalFunction__repr__(daeScalarExternalFunction& self);
+
+string daeVectorExternalFunction__str__(daeVectorExternalFunction& self);
+string daeVectorExternalFunction__repr__(daeVectorExternalFunction& self);
+
 /*******************************************************
 	Common functions
 *******************************************************/
@@ -198,7 +207,7 @@ daeVariable* adSetupPartialDerivativeNode_Variable(adSetupPartialDerivativeNode&
 daeDomain* adSetupPartialDerivativeNode_Domain(adSetupPartialDerivativeNode& node);
 boost::python::list adSetupPartialDerivativeNode_Domains(adSetupPartialDerivativeNode& node);
 
-
+real_t adRuntimeParameterNode_Value(adRuntimeParameterNode& node);
 daeParameter* adRuntimeParameterNode_Parameter(adRuntimeParameterNode& node);
 boost::python::list adRuntimeParameterNode_Domains(adRuntimeParameterNode& node);
 
@@ -313,6 +322,7 @@ daeDomain* daeIndexRange_GetDomain(daeIndexRange& self);
 /*******************************************************
 	daeParameter
 *******************************************************/
+/*
 class daeParameterWrapper : public daeParameter,
 	                        public boost::python::wrapper<daeParameter>
 {
@@ -502,6 +512,34 @@ public:
 		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
 	}
 };
+*/
+
+daeParameter* daeParameter_init1(string strName, const unit& units, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list());
+daeParameter* daeParameter_init2(string strName, const unit& units, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list());
+
+boost::python::list daeParameter_GetDomains(daeParameter& self);
+boost::python::dict daeParameter_GetDomainsIndexesMap1(daeParameter& self, size_t nIndexBase);
+real_t lGetParameterValue(daeParameter& self, boost::python::list indexes);
+quantity lGetParameterQuantity(daeParameter& self, boost::python::list indexes);
+
+real_t GetParameterValue0(daeParameter& self);
+real_t GetParameterValue1(daeParameter& self, size_t n1);
+real_t GetParameterValue2(daeParameter& self, size_t n1, size_t n2);
+real_t GetParameterValue3(daeParameter& self, size_t n1, size_t n2, size_t n3);
+real_t GetParameterValue4(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4);
+real_t GetParameterValue5(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
+real_t GetParameterValue6(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6);
+real_t GetParameterValue7(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7);
+real_t GetParameterValue8(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8);
+quantity GetParameterQuantity0(daeParameter& self);
+quantity GetParameterQuantity1(daeParameter& self, size_t n1);
+quantity GetParameterQuantity2(daeParameter& self, size_t n1, size_t n2);
+quantity GetParameterQuantity3(daeParameter& self, size_t n1, size_t n2, size_t n3);
+quantity GetParameterQuantity4(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4);
+quantity GetParameterQuantity5(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5);
+quantity GetParameterQuantity6(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6);
+quantity GetParameterQuantity7(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7);
+quantity GetParameterQuantity8(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8);
 
 boost::python::object GetNumPyArrayParameter(daeParameter& param);
 
@@ -1009,22 +1047,12 @@ public:
 	{
         this->get_override("Execute")();
 	}
-    
-    std::string __str__()
-    {
-        return daeGetStrippedRelativeName(NULL, this);
-    }
-    
-    std::string __repr__()
-    {
-        return daeGetStrippedRelativeName(NULL, this);
-    }
 };
-
 
 /*******************************************************
 	daePort
 *******************************************************/
+/*
 class daePortWrapper : public daePort,
 	                   public boost::python::wrapper<daePort>
 {
@@ -1039,21 +1067,6 @@ public:
 	}
 
 public:
-	boost::python::list GetDomains(void)
-	{
-        return getListFromVector(m_ptrarrDomains);
-	}
-
-	boost::python::list GetParameters(void)
-	{
-        return getListFromVector(m_ptrarrParameters);
-	}
-
-	boost::python::list GetVariables(void)
-	{
-        return getListFromVector(m_ptrarrVariables);
-	}
-
 	std::string GetObjectClassName(void) const
 	{
 		boost::python::reference_existing_object::apply<const daePort*>::type converter;
@@ -1064,6 +1077,11 @@ public:
 		return name;
 	}
 };
+*/
+
+boost::python::list daePort_GetDomains(daePort& self);
+boost::python::list daePort_GetParameters(daePort& self);
+boost::python::list daePort_GetVariables(daePort& self);
 
 /*******************************************************
 	daeEventPort
@@ -1119,451 +1137,54 @@ public:
 	{
 	}
 
-	daeModelWrapper(string strName, daeModel* pModel = NULL, string strDescription = "") : daeModel(strName, pModel, strDescription)
+    daeModelWrapper(string strName, daeModel* pModel = NULL, string strDescription = "") : daeModel(strName, pModel, strDescription)
 	{
 	}
 
-	void IF(const daeCondition& rCondition, real_t dEventTolerance = 0.0)
-	{
-		daeModel::IF(rCondition, dEventTolerance);
-	}
-
-	void ELSE_IF(const daeCondition& rCondition, real_t dEventTolerance = 0.0)
-	{
-		daeModel::ELSE_IF(rCondition, dEventTolerance);
-	}
-
-	void ELSE(void)
-	{
-		daeModel::ELSE();
-	}
-
-	void END_IF(void)
-	{
-		daeModel::END_IF();
-	}
-
-	daeSTN* STN(const string& strSTN)
-	{
-		return daeModel::STN(strSTN);
-	}
-
-	daeState* STATE(const string& strState)
-	{
-		return daeModel::STATE(strState);
-	}
-
-	void END_STN(void)
-	{
-		daeModel::END_STN();
-	}
-
-	void SWITCH_TO(const string& strState, const daeCondition& rCondition, real_t dEventTolerance = 0.0)
-	{
-		daeModel::SWITCH_TO(strState, rCondition, dEventTolerance);
-	}
-
-    void ON_CONDITION(const daeCondition& rCondition,
-                      boost::python::list switchToStates     = boost::python::list(),
-                      boost::python::list setVariableValues  = boost::python::list(),
-	                  boost::python::list triggerEvents      = boost::python::list(),
-					  boost::python::list userDefinedActions = boost::python::list(),
-                      real_t dEventTolerance = 0.0)
+    void DeclareEquations(void)
     {
-		daeAction* pAction;
-        string strSTN;
-        string strStateTo;
-        std::vector< std::pair<string, string> > arrSwitchToStates;
-        daeEventPort* pEventPort;
-        std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
-        std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
-		std::vector<daeAction*> ptrarrUserDefinedActions;
-        boost::python::ssize_t i, n;
-        boost::python::tuple t;
-
-        n = boost::python::len(switchToStates);
-        for(i = 0; i < n; i++)
-        {
-            t = boost::python::extract<boost::python::tuple>(switchToStates[i]);
-            if(boost::python::len(t) != 2)
-                daeDeclareAndThrowException(exInvalidCall);
-
-            strSTN     = boost::python::extract<string>(t[0]);
-            strStateTo = boost::python::extract<string>(t[1]);
-            
-			std::pair<string, string> p(strSTN, strStateTo);
-            arrSwitchToStates.push_back(p);
-        }
-
-        n = boost::python::len(setVariableValues);
-        for(i = 0; i < n; i++)
-        {
-            t = boost::python::extract<boost::python::tuple>(setVariableValues[i]);
-            if(boost::python::len(t) != 2)
-                daeDeclareAndThrowException(exInvalidCall);
-
-            boost::python::object var = boost::python::extract<boost::python::object>(t[0]);
-            boost::python::object o   = boost::python::extract<boost::python::object>(t[1]);
-			
-			boost::python::extract<daeVariable*> pvar(var);
-			boost::python::extract<adouble>      avar(var);
-			
-			boost::python::extract<real_t>  dValue(o);
-			boost::python::extract<adouble> aValue(o);
-            
-            std::pair<daeVariableWrapper, adouble> p;
-
-			if(pvar.check())
-			{
-				p.first = daeVariableWrapper(*pvar());
-			}
-			else if(avar.check())
-			{
-				adouble a = avar();
-				p.first = daeVariableWrapper(a);
-			}
-			else
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Invalid setVariableValues argument in ON_CONDITION function";
-				throw e;
-			}
-
-			if(aValue.check())
-			{
-				p.second = aValue();
-			}
-			else if(dValue.check())
-			{
-				p.second = adouble(dValue());
-			}
-			else
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Invalid setVariableValues argument in ON_CONDITION function";
-				throw e;
-			}
-
-			arrSetVariables.push_back(p);
-        }
-
-        n = boost::python::len(triggerEvents);
-        for(i = 0; i < n; i++)
-        {
-            t = boost::python::extract<boost::python::tuple>(triggerEvents[i]);
-            if(boost::python::len(t) != 2)
-                daeDeclareAndThrowException(exInvalidCall);
-
-            pEventPort              = boost::python::extract<daeEventPort*>(t[0]);
-            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
-			
-			boost::python::extract<real_t>  dValue(o);
-			boost::python::extract<adouble> aValue(o);
-
-            std::pair<daeEventPort*, adouble> p;
-			
-			p.first = pEventPort;
-			if(aValue.check())
-			{
-				p.second = aValue();
-			}
-			else if(dValue.check())
-			{
-				p.second = adouble(dValue());
-			}
-			else
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Invalid trigger events argument in ON_CONDITION function";
-				throw e;
-			}
-
-            arrTriggerEvents.push_back(p);
-        }
-
-        n = boost::python::len(userDefinedActions);
-        for(i = 0; i < n; i++)
-        {
-            pAction = boost::python::extract<daeAction*>(userDefinedActions[i]);
-			if(!pAction)
-				daeDeclareAndThrowException(exInvalidPointer);
-			
-            ptrarrUserDefinedActions.push_back(pAction);
-		}
-
-        daeModel::ON_CONDITION(rCondition,
-                               arrSwitchToStates,
-                               arrSetVariables,
-                               arrTriggerEvents,
-							   ptrarrUserDefinedActions,
-                               dEventTolerance);
-    }
-
-    void ON_EVENT(daeEventPort* pTriggerEventPort,
-                  boost::python::list switchToStates     = boost::python::list(),
-	              boost::python::list setVariableValues  = boost::python::list(),
-                  boost::python::list triggerEvents      = boost::python::list(),
-				  boost::python::list userDefinedActions = boost::python::list())
-    {
-		daeAction* pAction;
-        daeEventPort* pEventPort;
-        string strSTN;
-        string strStateTo;
-        std::vector< std::pair<string, string> > arrSwitchToStates;
-        std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
-        std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
-		std::vector<daeAction*> ptrarrUserDefinedActions;
-        boost::python::ssize_t i, n;
-        boost::python::tuple t;
-
-        n = boost::python::len(switchToStates);
-        for(i = 0; i < n; i++)
-        {
-            t = boost::python::extract<boost::python::tuple>(switchToStates[i]);
-            if(boost::python::len(t) != 2)
-                daeDeclareAndThrowException(exInvalidCall);
-
-            strSTN     = boost::python::extract<string>(t[0]);
-            strStateTo = boost::python::extract<string>(t[1]);
-            
-			std::pair<string, string> p(strSTN, strStateTo);
-            arrSwitchToStates.push_back(p);
-        }
-
-        n = boost::python::len(setVariableValues);
-        for(i = 0; i < n; i++)
-        {
-            t = boost::python::extract<boost::python::tuple>(setVariableValues[i]);
-            if(boost::python::len(t) != 2)
-                daeDeclareAndThrowException(exInvalidCall);
-
-			boost::python::object var = boost::python::extract<boost::python::object>(t[0]);
-            boost::python::object o   = boost::python::extract<boost::python::object>(t[1]);
-			
-			boost::python::extract<daeVariable*> pvar(var);
-			boost::python::extract<adouble>      avar(var);
-
-			boost::python::extract<real_t>  dValue(o);
-			boost::python::extract<adouble> aValue(o);
-            
-			std::pair<daeVariableWrapper, adouble> p;
-
-			if(pvar.check())
-			{
-				p.first = daeVariableWrapper(*pvar());
-			}
-			else if(avar.check())
-			{
-				adouble a = avar();
-				p.first = daeVariableWrapper(a);
-			}
-			else
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Invalid setVariableValues argument in ON_CONDITION function";
-				throw e;
-			}
-
-			if(aValue.check())
-			{
-				p.second = aValue();
-			}
-			else if(dValue.check())
-			{
-				p.second = adouble(dValue());
-			}
-			else
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Invalid setVariableValues argument in ON_EVENT function";
-				throw e;
-			}
-
-            arrSetVariables.push_back(p);
-        }
-
-        n = boost::python::len(triggerEvents);
-        for(i = 0; i < n; i++)
-        {
-            t = boost::python::extract<boost::python::tuple>(triggerEvents[i]);
-            if(boost::python::len(t) != 2)
-                daeDeclareAndThrowException(exInvalidCall);
-
-            pEventPort              = boost::python::extract<daeEventPort*>(t[0]);
-            boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
-			
-			boost::python::extract<real_t>  dValue(o);
-			boost::python::extract<adouble> aValue(o);
-
-            std::pair<daeEventPort*, adouble> p;
-			
-			p.first = pEventPort;
-			if(aValue.check())
-			{
-				p.second = aValue();
-			}
-			else if(dValue.check())
-			{
-				p.second = adouble(dValue());
-			}
-			else
-			{
-				daeDeclareException(exInvalidCall);
-				e << "Invalid triggerEvents argument in ON_EVENT function";
-				throw e;
-			}
-
-            arrTriggerEvents.push_back(p);
-        }
-
-        n = boost::python::len(userDefinedActions);
-        for(i = 0; i < n; i++)
-        {
-            pAction = boost::python::extract<daeAction*>(userDefinedActions[i]);
-			if(!pAction)
-				daeDeclareAndThrowException(exInvalidPointer);
-			
-            ptrarrUserDefinedActions.push_back(pAction);
-		} 
-
-        daeModel::ON_EVENT(pTriggerEventPort,
-                           arrSwitchToStates,
-                           arrSetVariables,
-                           arrTriggerEvents,
-						   ptrarrUserDefinedActions);
-    }
-	
-    boost::python::dict GetOverallIndex_BlockIndex_VariableNameMap()
-    {
-        boost::python::dict d;
-        std::map<size_t, std::pair<size_t, string> > mapOverallIndex_BlockIndex_VariableName;
-        std::map<size_t, std::pair<size_t, string> >::iterator iter;
-        const std::map<size_t, size_t>& mapOverallIndex_BlockIndex = m_pDataProxy->GetBlock()->m_mapVariableIndexes;
-
-        CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
-
-        for(iter = mapOverallIndex_BlockIndex_VariableName.begin(); iter != mapOverallIndex_BlockIndex_VariableName.end(); iter++)
-        {
-            d[iter->first] = boost::python::make_tuple(iter->second.first, iter->second.second);
-        }
-
-        return d;
-    }
-
-	void DeclareData()
-	{
-		// Must be declared since I dont need it in python
-	}
-
-	void DeclareEquations(void)
-	{
         if(boost::python::override f = this->get_override("DeclareEquations"))
             f();
-		else
-			this->daeModel::DeclareEquations();
-	}
-	void def_DeclareEquations(void)
-	{
-        this->daeModel::DeclareEquations();
-	}
-
-	boost::python::list GetDomains(void)
-	{
-        return getListFromVector(m_ptrarrDomains);
-	}
-
-	boost::python::list GetParameters(void)
-	{
-        return getListFromVector(m_ptrarrParameters);
-	}
-
-	boost::python::list GetVariables(void)
-	{
-        return getListFromVector(m_ptrarrVariables);
-	}
-
-	boost::python::list GetPorts(void)
-	{
-        return getListFromVector(m_ptrarrPorts);
-	}
-
-	boost::python::list GetEventPorts(void)
-	{
-        return getListFromVector(m_ptrarrEventPorts);
-	}
-	
-	boost::python::list GetOnEventActions(void)
-	{
-        return getListFromVector(m_ptrarrOnEventActions);
-	}
-    
-    boost::python::list GetOnConditionActions(void)
-	{
-        return getListFromVector(m_ptrarrOnConditionActions);
-	}
-	
-	boost::python::list GetPortArrays(void)
-	{
-        return getListFromVector(m_ptrarrPortArrays);
-	}
-
-	boost::python::list GetComponents(void)
-	{
-        return getListFromVector(m_ptrarrComponents);
-	}
-
-	boost::python::list GetComponentArrays(void)
-	{
-        return getListFromVector(m_ptrarrComponentArrays);
-	}
-
-	boost::python::list GetSTNs(void)
-	{
-        return getListFromVector(m_ptrarrSTNs);
-	}
-    
-    boost::python::list GetEquations(void)
-	{
-        return getListFromVector(m_ptrarrEquations);
+        else
+            this->daeModel::DeclareEquations();
     }
-    
-    boost::python::list GetPortConnections(void)
-	{
-        return getListFromVector(m_ptrarrPortConnections);
-    }
-
-    boost::python::list GetEventPortConnections(void)
+    void def_DeclareEquations(void)
     {
-        return getListFromVector(m_ptrarrEventPortConnections);
+        this->daeModel::DeclareEquations();
     }
-
-	string ExportObjects(boost::python::list objects, daeeModelLanguage eLanguage) const
-	{
-		daeObject* pObject;
-		daeExportable_t* pExportable;
-		std::vector<daeExportable_t*> ptrarrObjects;
-		boost::python::ssize_t n = boost::python::len(objects);
-		for(boost::python::ssize_t i = 0; i < n; i++)
-		{
-			pObject = boost::python::extract<daeObject*>(objects[i]);
-			pExportable = dynamic_cast<daeExportable_t*>(pObject);
-			ptrarrObjects.push_back(pExportable);
-		}
-
-		return daeModel::ExportObjects(ptrarrObjects, eLanguage);
-	}
-
-	std::string GetObjectClassName(void) const
-	{
-		boost::python::reference_existing_object::apply<const daeModel*>::type converter;
-		PyObject* pyobj = converter( this );
-		boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
-		boost::python::object o_class = obj.attr("__class__");
-		string name = boost::python::extract<string>(o_class.attr("__name__"));
-		return name;
-	}
 
 };
+void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,
+                                           boost::python::list switchToStates     = boost::python::list(),
+                                           boost::python::list setVariableValues  = boost::python::list(),
+                                           boost::python::list triggerEvents      = boost::python::list(),
+                                           boost::python::list userDefinedActions = boost::python::list(),
+                                           real_t dEventTolerance = 0.0);
+
+void daeModel_ON_EVENT(daeModel& self, daeEventPort* pTriggerEventPort,
+                                       boost::python::list switchToStates     = boost::python::list(),
+                                       boost::python::list setVariableValues  = boost::python::list(),
+                                       boost::python::list triggerEvents      = boost::python::list(),
+                                       boost::python::list userDefinedActions = boost::python::list());
+
+boost::python::dict daeModel_GetOverallIndex_BlockIndex_VariableNameMap(daeModel& self);
+
+void daeModel_DeclareEquations(daeModel& self);
+void daeModel_def_DeclareEquations(daeModel& self);
+boost::python::list daeModel_GetDomains(daeModel& self);
+boost::python::list daeModel_GetParameters(daeModel& self);
+boost::python::list daeModel_GetVariables(daeModel& self);
+boost::python::list daeModel_GetPorts(daeModel& self);
+boost::python::list daeModel_GetEventPorts(daeModel& self);
+boost::python::list daeModel_GetOnEventActions(daeModel& self);
+boost::python::list daeModel_GetOnConditionActions(daeModel& self);
+boost::python::list daeModel_GetPortArrays(daeModel& self);
+boost::python::list daeModel_GetComponents(daeModel& self);
+boost::python::list daeModel_GetComponentArrays(daeModel& self);
+boost::python::list daeModel_GetSTNs(daeModel& self);
+boost::python::list daeModel_GetEquations(daeModel& self);
+boost::python::list daeModel_GetPortConnections(daeModel& self);
+boost::python::list daeModel_GetEventPortConnections(daeModel& self);
 
 /*******************************************************
 	daeState
@@ -1664,16 +1285,6 @@ public:
             return adouble();
 		}
 	}
-    
-    std::string __str__()
-    {
-        return daeGetStrippedRelativeName(NULL, this);
-    }
-    
-    std::string __repr__()
-    {
-        return daeGetStrippedRelativeName(NULL, this);
-    }
 };
 
 /*******************************************************
@@ -1758,16 +1369,6 @@ public:
             return arrResults;
 		}
 	}
-    
-    std::string __str__()
-    {
-        return daeGetStrippedRelativeName(NULL, this);
-    }
-    
-    std::string __repr__()
-    {
-        return daeGetStrippedRelativeName(NULL, this);
-    }
 };
 
 

@@ -396,27 +396,29 @@ void daeIF::CheckState(daeState* pState)
 //	}
 }
 
-daeState* daeIF::AddState(string strName)
+daeState* daeIF::AddState(const string& strName)
 {
 // Instantiate a new state and add it to STN
 	daeState* pState = new daeState();
 
 	dae_push_back(m_ptrarrStates, pState);
 	
-	string strStateName = "State_" + toString<size_t>(m_ptrarrStates.size());
+    string strStateName = strName;
+    if(strStateName.empty())
+        strStateName = "State_" + toString<size_t>(m_ptrarrStates.size());
 	pState->Create(strStateName, this);
 
     return pState;
 }
 
-daeState* daeIF::CreateElse(void)
+daeState* daeIF::CreateElse(const string& strName)
 {
-	string strName = "ELSE";
-	daeState* pELSE = daeSTN::AddState(strName);
+    string strELSEName = strName;
+    if(strELSEName.empty())
+        strELSEName = "ELSE";
+
+    daeState* pELSE = daeSTN::AddState(strELSEName);
     
-// Override default State_XXX name with ELSE
-	pELSE->SetName(strName);
-	
     return pELSE;
 }
 

@@ -772,6 +772,16 @@ string daeCondition__repr__(const daeCondition& self)
                            self.SaveNodeAsPlainText() % self.GetEventTolerance()).str();
 }
 
+string daeAction__str__(daeAction& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeAction__repr__(daeAction& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
 string adNode__str__(const adNode& self)
 {
     string str;
@@ -860,6 +870,26 @@ string adouble_array__repr__(const adouble_array& self)
             self.getGatherInfo() % strNode).str();
 }
 
+string daeScalarExternalFunction__str__(daeScalarExternalFunction& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeScalarExternalFunction__repr__(daeScalarExternalFunction& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeVectorExternalFunction__str__(daeVectorExternalFunction& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeVectorExternalFunction__repr__(daeVectorExternalFunction& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
 /*******************************************************
 	adNode...
 *******************************************************/
@@ -912,6 +942,11 @@ boost::python::list adSetupPartialDerivativeNode_Domains(adSetupPartialDerivativ
 daeParameter* adRuntimeParameterNode_Parameter(adRuntimeParameterNode& node)
 {
     return node.m_pParameter;
+}
+
+real_t adRuntimeParameterNode_Value(adRuntimeParameterNode& node)
+{
+    return *node.m_pdValue;
 }
 
 boost::python::list adRuntimeParameterNode_Domains(adRuntimeParameterNode& node)
@@ -1432,6 +1467,193 @@ daeIndexRange FunctionCallDomain3(daeDomain& domain)
 /*******************************************************
 	daeParameter
 *******************************************************/
+daeParameter* daeParameter_init1(string strName, const unit& units, daeModel* pModel, string strDescription, boost::python::list domains)
+{
+    daeDomain* pDomain;
+    boost::python::ssize_t n = boost::python::len(domains);
+
+    daeParameter* pParameter = new daeParameter(strName, units, pModel, strDescription);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        pDomain = boost::python::extract<daeDomain*>(domains[i]);
+        pParameter->DistributeOnDomain(*pDomain);
+    }
+
+    return pParameter;
+}
+
+daeParameter* daeParameter_init2(string strName, const unit& units, daePort* pPort, string strDescription, boost::python::list domains)
+{
+    daeDomain* pDomain;
+    boost::python::ssize_t n = boost::python::len(domains);
+
+    daeParameter* pParameter = new daeParameter(strName, units, pPort, strDescription);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        pDomain = boost::python::extract<daeDomain*>(domains[i]);
+        pParameter->DistributeOnDomain(*pDomain);
+    }
+
+    return pParameter;
+}
+
+boost::python::list daeParameter_GetDomains(daeParameter& self)
+{
+    return getListFromVector(self.Domains());
+}
+
+boost::python::dict daeParameter_GetDomainsIndexesMap1(daeParameter& self, size_t nIndexBase)
+{
+   // Returns dictionary {integer : [list of integers]}
+    boost::python::dict d;
+    std::map<size_t, std::vector<size_t> > mapIndexes;
+    typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
+
+    self.GetDomainsIndexesMap(mapIndexes, nIndexBase);
+
+    for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
+        d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
+
+    return d;
+}
+
+real_t lGetParameterValue(daeParameter& self, boost::python::list indexes)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in GetValue for parameter " << self.GetCanonicalName();
+            throw e;
+        }
+    }
+    return self.GetValue(narrIndexes);
+}
+
+quantity lGetParameterQuantity(daeParameter& self, boost::python::list indexes)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in GetQuantity for parameter " << self.GetCanonicalName();
+            throw e;
+        }
+    }
+    return self.GetQuantity(narrIndexes);
+}
+
+real_t GetParameterValue0(daeParameter& self)
+{
+    return self.GetValue();
+}
+
+real_t GetParameterValue1(daeParameter& self, size_t n1)
+{
+    return self.GetValue(n1);
+}
+
+real_t GetParameterValue2(daeParameter& self, size_t n1, size_t n2)
+{
+    return self.GetValue(n1, n2);
+}
+
+real_t GetParameterValue3(daeParameter& self, size_t n1, size_t n2, size_t n3)
+{
+    return self.GetValue(n1, n2, n3);
+}
+
+real_t GetParameterValue4(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4)
+{
+    return self.GetValue(n1, n2, n3, n4);
+}
+
+real_t GetParameterValue5(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+{
+    return self.GetValue(n1, n2, n3, n4, n5);
+}
+
+real_t GetParameterValue6(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+{
+    return self.GetValue(n1, n2, n3, n4, n5, n6);
+}
+
+real_t GetParameterValue7(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+{
+    return self.GetValue(n1, n2, n3, n4, n5, n6, n7);
+}
+
+real_t GetParameterValue8(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+{
+    return self.GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
+}
+
+quantity GetParameterQuantity0(daeParameter& self)
+{
+    return self.GetQuantity();
+}
+
+quantity GetParameterQuantity1(daeParameter& self, size_t n1)
+{
+    return self.GetQuantity(n1);
+}
+
+quantity GetParameterQuantity2(daeParameter& self, size_t n1, size_t n2)
+{
+    return self.GetQuantity(n1, n2);
+}
+
+quantity GetParameterQuantity3(daeParameter& self, size_t n1, size_t n2, size_t n3)
+{
+    return self.GetQuantity(n1, n2, n3);
+}
+
+quantity GetParameterQuantity4(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4)
+{
+    return self.GetQuantity(n1, n2, n3, n4);
+}
+
+quantity GetParameterQuantity5(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+{
+    return self.GetQuantity(n1, n2, n3, n4, n5);
+}
+
+quantity GetParameterQuantity6(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+{
+    return self.GetQuantity(n1, n2, n3, n4, n5, n6);
+}
+
+quantity GetParameterQuantity7(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+{
+    return self.GetQuantity(n1, n2, n3, n4, n5, n6, n7);
+}
+
+quantity GetParameterQuantity8(daeParameter& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+{
+    return self.GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
+}
+
+
 boost::python::object GetNumPyArrayParameter(daeParameter& param)
 {
 	size_t nType, nDomains, nTotalSize;
@@ -3463,6 +3685,24 @@ void qSetInitialGuesses(daeVariable& var, const quantity& q)
 }
 
 /*******************************************************
+    daePort
+*******************************************************/
+boost::python::list daePort_GetDomains(daePort& self)
+{
+    return getListFromVector(self.Domains());
+}
+
+boost::python::list daePort_GetParameters(daePort& self)
+{
+    return getListFromVector(self.Parameters());
+}
+
+boost::python::list daePort_GetVariables(daePort& self)
+{
+    return getListFromVector(self.Variables());
+}
+
+/*******************************************************
 	daeEventPort
 *******************************************************/
 boost::python::list GetEventPortEventsList(daeEventPort& self)
@@ -3635,6 +3875,366 @@ boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActio
     return getListFromVector(self.UserDefinedActions());
 }
 
+
+/*******************************************************
+    daeModel
+*******************************************************/
+void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,
+                                           boost::python::list switchToStates,
+                                           boost::python::list setVariableValues,
+                                           boost::python::list triggerEvents,
+                                           boost::python::list userDefinedActions,
+                                           real_t dEventTolerance)
+{
+    daeAction* pAction;
+    string strSTN;
+    string strStateTo;
+    std::vector< std::pair<string, string> > arrSwitchToStates;
+    daeEventPort* pEventPort;
+    std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
+    std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
+    std::vector<daeAction*> ptrarrUserDefinedActions;
+    boost::python::ssize_t i, n;
+    boost::python::tuple t;
+
+    n = boost::python::len(switchToStates);
+    for(i = 0; i < n; i++)
+    {
+        t = boost::python::extract<boost::python::tuple>(switchToStates[i]);
+        if(boost::python::len(t) != 2)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        strSTN     = boost::python::extract<string>(t[0]);
+        strStateTo = boost::python::extract<string>(t[1]);
+
+        std::pair<string, string> p(strSTN, strStateTo);
+        arrSwitchToStates.push_back(p);
+    }
+
+    n = boost::python::len(setVariableValues);
+    for(i = 0; i < n; i++)
+    {
+        t = boost::python::extract<boost::python::tuple>(setVariableValues[i]);
+        if(boost::python::len(t) != 2)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        boost::python::object var = boost::python::extract<boost::python::object>(t[0]);
+        boost::python::object o   = boost::python::extract<boost::python::object>(t[1]);
+
+        boost::python::extract<daeVariable*> pvar(var);
+        boost::python::extract<adouble>      avar(var);
+
+        boost::python::extract<real_t>  dValue(o);
+        boost::python::extract<adouble> aValue(o);
+
+        std::pair<daeVariableWrapper, adouble> p;
+
+        if(pvar.check())
+        {
+            p.first = daeVariableWrapper(*pvar());
+        }
+        else if(avar.check())
+        {
+            adouble a = avar();
+            p.first = daeVariableWrapper(a);
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid setVariableValues argument in ON_CONDITION function";
+            throw e;
+        }
+
+        if(aValue.check())
+        {
+            p.second = aValue();
+        }
+        else if(dValue.check())
+        {
+            p.second = adouble(dValue());
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid setVariableValues argument in ON_CONDITION function";
+            throw e;
+        }
+
+        arrSetVariables.push_back(p);
+    }
+
+    n = boost::python::len(triggerEvents);
+    for(i = 0; i < n; i++)
+    {
+        t = boost::python::extract<boost::python::tuple>(triggerEvents[i]);
+        if(boost::python::len(t) != 2)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        pEventPort              = boost::python::extract<daeEventPort*>(t[0]);
+        boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+
+        boost::python::extract<real_t>  dValue(o);
+        boost::python::extract<adouble> aValue(o);
+
+        std::pair<daeEventPort*, adouble> p;
+
+        p.first = pEventPort;
+        if(aValue.check())
+        {
+            p.second = aValue();
+        }
+        else if(dValue.check())
+        {
+            p.second = adouble(dValue());
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid trigger events argument in ON_CONDITION function";
+            throw e;
+        }
+
+        arrTriggerEvents.push_back(p);
+    }
+
+    n = boost::python::len(userDefinedActions);
+    for(i = 0; i < n; i++)
+    {
+        pAction = boost::python::extract<daeAction*>(userDefinedActions[i]);
+        if(!pAction)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        ptrarrUserDefinedActions.push_back(pAction);
+    }
+
+    self.ON_CONDITION(rCondition,
+                      arrSwitchToStates,
+                      arrSetVariables,
+                      arrTriggerEvents,
+                      ptrarrUserDefinedActions,
+                      dEventTolerance);
+}
+
+void daeModel_ON_EVENT(daeModel& self, daeEventPort* pTriggerEventPort,
+                                       boost::python::list switchToStates,
+                                       boost::python::list setVariableValues,
+                                       boost::python::list triggerEvents,
+                                       boost::python::list userDefinedActions)
+{
+    daeAction* pAction;
+    daeEventPort* pEventPort;
+    string strSTN;
+    string strStateTo;
+    std::vector< std::pair<string, string> > arrSwitchToStates;
+    std::vector< std::pair<daeVariableWrapper, adouble> > arrSetVariables;
+    std::vector< std::pair<daeEventPort*, adouble> > arrTriggerEvents;
+    std::vector<daeAction*> ptrarrUserDefinedActions;
+    boost::python::ssize_t i, n;
+    boost::python::tuple t;
+
+    n = boost::python::len(switchToStates);
+    for(i = 0; i < n; i++)
+    {
+        t = boost::python::extract<boost::python::tuple>(switchToStates[i]);
+        if(boost::python::len(t) != 2)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        strSTN     = boost::python::extract<string>(t[0]);
+        strStateTo = boost::python::extract<string>(t[1]);
+
+        std::pair<string, string> p(strSTN, strStateTo);
+        arrSwitchToStates.push_back(p);
+    }
+
+    n = boost::python::len(setVariableValues);
+    for(i = 0; i < n; i++)
+    {
+        t = boost::python::extract<boost::python::tuple>(setVariableValues[i]);
+        if(boost::python::len(t) != 2)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        boost::python::object var = boost::python::extract<boost::python::object>(t[0]);
+        boost::python::object o   = boost::python::extract<boost::python::object>(t[1]);
+
+        boost::python::extract<daeVariable*> pvar(var);
+        boost::python::extract<adouble>      avar(var);
+
+        boost::python::extract<real_t>  dValue(o);
+        boost::python::extract<adouble> aValue(o);
+
+        std::pair<daeVariableWrapper, adouble> p;
+
+        if(pvar.check())
+        {
+            p.first = daeVariableWrapper(*pvar());
+        }
+        else if(avar.check())
+        {
+            adouble a = avar();
+            p.first = daeVariableWrapper(a);
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid setVariableValues argument in ON_CONDITION function";
+            throw e;
+        }
+
+        if(aValue.check())
+        {
+            p.second = aValue();
+        }
+        else if(dValue.check())
+        {
+            p.second = adouble(dValue());
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid setVariableValues argument in ON_EVENT function";
+            throw e;
+        }
+
+        arrSetVariables.push_back(p);
+    }
+
+    n = boost::python::len(triggerEvents);
+    for(i = 0; i < n; i++)
+    {
+        t = boost::python::extract<boost::python::tuple>(triggerEvents[i]);
+        if(boost::python::len(t) != 2)
+            daeDeclareAndThrowException(exInvalidCall);
+
+        pEventPort              = boost::python::extract<daeEventPort*>(t[0]);
+        boost::python::object o = boost::python::extract<boost::python::object>(t[1]);
+
+        boost::python::extract<real_t>  dValue(o);
+        boost::python::extract<adouble> aValue(o);
+
+        std::pair<daeEventPort*, adouble> p;
+
+        p.first = pEventPort;
+        if(aValue.check())
+        {
+            p.second = aValue();
+        }
+        else if(dValue.check())
+        {
+            p.second = adouble(dValue());
+        }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid triggerEvents argument in ON_EVENT function";
+            throw e;
+        }
+
+        arrTriggerEvents.push_back(p);
+    }
+
+    n = boost::python::len(userDefinedActions);
+    for(i = 0; i < n; i++)
+    {
+        pAction = boost::python::extract<daeAction*>(userDefinedActions[i]);
+        if(!pAction)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        ptrarrUserDefinedActions.push_back(pAction);
+    }
+
+    self.ON_EVENT(pTriggerEventPort,
+                  arrSwitchToStates,
+                  arrSetVariables,
+                  arrTriggerEvents,
+                  ptrarrUserDefinedActions);
+}
+
+boost::python::dict daeModel_GetOverallIndex_BlockIndex_VariableNameMap(daeModel& self)
+{
+    boost::python::dict d;
+    std::map<size_t, std::pair<size_t, string> > mapOverallIndex_BlockIndex_VariableName;
+    std::map<size_t, std::pair<size_t, string> >::iterator iter;
+    const std::map<size_t, size_t>& mapOverallIndex_BlockIndex = self.GetDataProxy()->GetBlock()->m_mapVariableIndexes;
+
+    self.CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
+
+    for(iter = mapOverallIndex_BlockIndex_VariableName.begin(); iter != mapOverallIndex_BlockIndex_VariableName.end(); iter++)
+    {
+        d[iter->first] = boost::python::make_tuple(iter->second.first, iter->second.second);
+    }
+
+    return d;
+}
+
+boost::python::list daeModel_GetDomains(daeModel& self)
+{
+    return getListFromVector(self.Domains());
+}
+
+boost::python::list daeModel_GetParameters(daeModel& self)
+{
+    return getListFromVector(self.Parameters());
+}
+
+boost::python::list daeModel_GetVariables(daeModel& self)
+{
+    return getListFromVector(self.Variables());
+}
+
+boost::python::list daeModel_GetPorts(daeModel& self)
+{
+    return getListFromVector(self.Ports());
+}
+
+boost::python::list daeModel_GetEventPorts(daeModel& self)
+{
+    return getListFromVector(self.EventPorts());
+}
+
+boost::python::list daeModel_GetOnEventActions(daeModel& self)
+{
+    return getListFromVector(self.OnEventActions());
+}
+
+boost::python::list daeModel_GetOnConditionActions(daeModel& self)
+{
+    return getListFromVector(self.OnConditionActions());
+}
+
+boost::python::list daeModel_GetPortArrays(daeModel& self)
+{
+    return getListFromVector(self.PortArrays());
+}
+
+boost::python::list daeModel_GetComponents(daeModel& self)
+{
+    return getListFromVector(self.Models());
+}
+
+boost::python::list daeModel_GetComponentArrays(daeModel& self)
+{
+    return getListFromVector(self.ModelArrays());
+}
+
+boost::python::list daeModel_GetSTNs(daeModel& self)
+{
+    return getListFromVector(self.STNs());
+}
+
+boost::python::list daeModel_GetEquations(daeModel& self)
+{
+    return getListFromVector(self.Equations());
+}
+
+boost::python::list daeModel_GetPortConnections(daeModel& self)
+{
+    return getListFromVector(self.PortConnections());
+}
+
+boost::python::list daeModel_GetEventPortConnections(daeModel& self)
+{
+    return getListFromVector(self.EventPortConnections());
+}
 
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint

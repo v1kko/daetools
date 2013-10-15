@@ -452,9 +452,6 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
         </layout>
        </item>
       </layout>
-      <zorder>horizontalLayoutWidget</zorder>
-      <zorder>initialConditionsLabel</zorder>
-      <zorder>horizontalLayoutWidget_2</zorder>
      </widget>
      <widget class="QWidget" name="tab_DOFs">
       <attribute name="title">
@@ -551,6 +548,12 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
          <property name="alternatingRowColors">
           <bool>true</bool>
          </property>
+         <property name="columnCount">
+          <number>1</number>
+         </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
          <attribute name="headerDefaultSectionSize">
           <number>300</number>
          </attribute>
@@ -562,33 +565,6 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
            <string>Name</string>
           </property>
          </column>
-         <column>
-          <property name="text">
-           <string>Value</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="frameStateTransitions">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>250</width>
-           <height>200</height>
-          </size>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
         </widget>
        </item>
       </layout>

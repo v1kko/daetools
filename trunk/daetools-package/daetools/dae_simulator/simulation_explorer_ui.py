@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Sun Oct 13 23:44:03 2013
+# Created: Tue Oct 15 01:36:00 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -272,21 +272,12 @@ class Ui_SimulationExplorer(object):
         self.treeSTNs.setMinimumSize(QtCore.QSize(400, 200))
         self.treeSTNs.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.treeSTNs.setAlternatingRowColors(True)
+        self.treeSTNs.setColumnCount(1)
         self.treeSTNs.setObjectName(_fromUtf8("treeSTNs"))
+        self.treeSTNs.header().setVisible(False)
         self.treeSTNs.header().setDefaultSectionSize(300)
         self.treeSTNs.header().setMinimumSectionSize(100)
         self.horizontalLayout_5.addWidget(self.treeSTNs)
-        self.frameStateTransitions = QtGui.QFrame(self.tab_StateTransitions)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(1)
-        sizePolicy.setHeightForWidth(self.frameStateTransitions.sizePolicy().hasHeightForWidth())
-        self.frameStateTransitions.setSizePolicy(sizePolicy)
-        self.frameStateTransitions.setMinimumSize(QtCore.QSize(250, 200))
-        self.frameStateTransitions.setFrameShape(QtGui.QFrame.NoFrame)
-        self.frameStateTransitions.setFrameShadow(QtGui.QFrame.Raised)
-        self.frameStateTransitions.setObjectName(_fromUtf8("frameStateTransitions"))
-        self.horizontalLayout_5.addWidget(self.frameStateTransitions)
         self.tabWidget.addTab(self.tab_StateTransitions, _fromUtf8(""))
         self.tab_Results = QtGui.QWidget()
         self.tab_Results.setObjectName(_fromUtf8("tab_Results"))
@@ -363,7 +354,6 @@ class Ui_SimulationExplorer(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_DOFs), QtGui.QApplication.translate("SimulationExplorer", "DoFs", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_DOFs), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the values of assigned variables (Degrees of Freedom).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeSTNs.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
-        self.treeSTNs.headerItem().setText(1, QtGui.QApplication.translate("SimulationExplorer", "Value", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_StateTransitions), QtGui.QApplication.translate("SimulationExplorer", "STNs", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_StateTransitions), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the data related to State Transition Networks.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeOutputVariables.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))

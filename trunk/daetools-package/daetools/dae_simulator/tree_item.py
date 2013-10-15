@@ -40,6 +40,7 @@ class treeItem(object):
     typeQuantity         =  1
     typeSTN              =  2
     typeOutputVariable   =  3
+    typeState            =  4
 
     def __init__(self, parent, name, itemType = typeNone):
         self.parent         = parent
@@ -115,9 +116,18 @@ class treeItem(object):
             d['Units'] = self._value[1].toDict()  # units
             dictItems[self.canonicalName] = d
         
-        elif self.itemType == treeItem.typeSTN:
-            d['ActiveState'] = str(self._value)
-            dictItems[self.canonicalName] = d
+        elif self.itemType == treeItem.typeState:
+            if self._value:
+                # We have to split the canonical name into: stnCanonicalName & stateName
+                names = self.canonicalName.split('.')
+                stnCanonicalName = '.'.join(names[0:-1])
+                stateName        = names[-1]                
+                d['ActiveState'] = stateName
+                dictItems[stnCanonicalName] = d
+        
+        #elif self.itemType == treeItem.typeSTN:
+        #    d['ActiveState'] = str(self._value)
+        #    dictItems[self.canonicalName] = d
         
         elif self.itemType == treeItem.typeOutputVariable:
             dictItems[self.canonicalName] = bool(self._value)
@@ -343,7 +353,7 @@ class editor_StateTransition(QtGui.QFrame):
         index = self.ui.activeStateComboBox.currentIndex()
         self.treeItem.setValue( str(self.ui.activeStateComboBox.currentText()) )
 
-class treeItem_StateTransition(treeItem):
+class treeItem_STN(treeItem):
     def __init__(self, parent, name, description, states, active_state):
         treeItem.__init__(self, parent, name, treeItem.typeSTN)
 
@@ -372,6 +382,42 @@ class treeItem_StateTransition(treeItem):
     def hide(self):
         self._editor.hide()
         
+class treeItem_State(treeItem):
+    def __init__(self, parent, name, description, isActive):
+        treeItem.__init__(self, parent, name, treeItem.typeState)
+
+        self.setValue(isActive)
+       
+    def setValue(self, value):
+        if isinstance(value, bool):
+            self._value = value
+        elif str(value) in ['true', 'True', 'yes', 'y', '1']:
+            self._value = True
+        else:
+            self._value = False
+    
+    def getValueAsText(self):
+        if self._value:
+            return 'True'
+        else:
+            return 'False'
+            
+def uncheckAllChildren(item):
+    # Unchecks all children
+    for child in item.children:
+        if child.itemType == treeItem.typeState:
+            child.setValue(False)
+        uncheckAllChildren(child)
+
+def correctSelections(item):
+    # Checks whether an item is unchecked but some of its children is checked and corrects it
+    for child in item.children:
+        if child.itemType == treeItem.typeState:
+            # If it is not checked then uncheck the whole tree downwards
+            if not child.getValue():
+                uncheckAllChildren(child)
+        
+        correctSelections(child)
 
 class editor_ArrayDomain(QtGui.QFrame):
     def __init__(self, treeItem, description, numberOfPoints):
@@ -502,7 +548,7 @@ def addItem(treeWidget, parent, item):
     item.treeWidgetItem = widgetItem
 
     # Item's data is always the tree item object
-    widgetItem.setData(1, QtCore.Qt.UserRole, QtCore.QVariant(item))
+    widgetItem.setData(0, QtCore.Qt.UserRole, QtCore.QVariant(item))
 
     # The common flags
     widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsSelectable | Qt.ItemIsEnabled)
@@ -516,6 +562,13 @@ def addItem(treeWidget, parent, item):
         #widgetItem.setForeground(0, brush)
     
     elif item.itemType == treeItem.typeOutputVariable:
+        widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsUserCheckable)
+        if item.getValue():
+            widgetItem.setCheckState(0, Qt.Checked)
+        else:
+            widgetItem.setCheckState(0, Qt.Unchecked)
+    
+    elif item.itemType == treeItem.typeState:
         widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsUserCheckable)
         if item.getValue():
             widgetItem.setCheckState(0, Qt.Checked)

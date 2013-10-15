@@ -839,7 +839,7 @@ void daeSTN::SetType(daeeSTNType eType)
     m_eSTNType = eType;
 }
 
-daeState* daeSTN::AddState(string strName)
+daeState* daeSTN::AddState(const string& strName)
 {
 // Instantiate a new state and add it to this STN
 	daeState* pState = new daeState();
@@ -885,7 +885,11 @@ void daeSTN::SetActiveState(daeState* pState)
 	if(!pState)
 		daeDeclareAndThrowException(exInvalidPointer); 
 	
-	if(m_pModel->m_pDataProxy->PrintInfo())
+    // If it is the same state - do nothing
+    if(m_pActiveState == pState)
+        return;
+
+    if(m_pModel->m_pDataProxy->PrintInfo())
 		LogMessage(string("The state: ") + pState->GetCanonicalName() + string(" is active now"), 0);
 	
 	m_pModel->m_pDataProxy->SetReinitializationFlag(true);

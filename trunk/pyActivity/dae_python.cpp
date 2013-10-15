@@ -219,7 +219,7 @@ BOOST_PYTHON_MODULE(pyActivity)
 
         .add_property("Simulation",	   make_function(&daepython::daeOptimizationWrapper::GetSimulation_, return_internal_reference<>()))
             
-        .def("Initialize",             &daeOptimization::Initialize, ( arg("self"), 
+        .def("Initialize",             &daeOptimization::Initialize, ( arg("self"),
                                                                        arg("simulation"),
                                                                        arg("nlpSolver"), 
                                                                        arg("daeSolver"),
@@ -227,7 +227,7 @@ BOOST_PYTHON_MODULE(pyActivity)
                                                                        arg("log"),
                                                                        arg("initializationFile") = std::string("")
                                                                      ), DOCSTR_daeOptimization_Initialize)
-		.def("Run",                    &daeOptimization::Run,        ( arg("self") ), DOCSTR_daeOptimization_Run)
+        .def("Run",                    &daeOptimization::Run,        ( arg("self") ), DOCSTR_daeOptimization_Run)
 		.def("Finalize",               &daeOptimization::Finalize,   ( arg("self") ), DOCSTR_daeOptimization_Finalize)
             
         .def("StartIterationRun",      &daeOptimization_t::StartIterationRun, &daepython::daeOptimizationWrapper::def_StartIterationRun,

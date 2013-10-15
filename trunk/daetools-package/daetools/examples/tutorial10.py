@@ -116,7 +116,7 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 25
+        n = 10
 
         # The domain for a semi-circle
         self.m.c.CreateDistributed(eCFDM, 2, 100, -1, 1)
@@ -135,15 +135,10 @@ class simTutorial(daeSimulation):
         self.m.Qt.SetValue(0 * W/(m**2))
 
     def SetUpVariables(self):
+        self.m.T.SetInitialGuesses(250*K)
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
-
-        # Load initialization file previously saved after the successful initialization phase.
-        # The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, however
-        # here the system is still being built and the initial conditions/guesses etc. will be copied
-        # automatically to the DAE solver at later stage.
-        self.LoadInitializationValues("tutorial10.init")
 
 # Use daeSimulator class
 def guiRun(app):
@@ -181,8 +176,21 @@ def consoleRun():
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
+    # Load initialization file previously saved after the successful initialization phase.
+    # The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, 
+    # however here the system has not been solved initially (at t = 0) and the values and  
+    # initial conditions will be copied automatically to DAE solver during SolveInitial call.
+    print 'T before loading:'
+    print simulation.m.T.npyValues
+    simulation.LoadInitializationValues("tutorial10.init")
+    print 'T after loading:'
+    print simulation.m.T.npyValues
+    
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
+    print 'T after SolveInitial:'
+    print simulation.m.T.npyValues
+    
     # Save the initialization file that can be used during later initialization
     simulation.StoreInitializationValues("tutorial10.init")
 

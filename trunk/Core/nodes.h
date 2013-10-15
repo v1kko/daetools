@@ -133,7 +133,7 @@ public:
 	adRuntimeParameterNode(void);
 	adRuntimeParameterNode(daeParameter* pParameter, 
 	                       std::vector<size_t>& narrDomains, 
-						   real_t dValue);
+                           real_t* pdValue);
 	virtual ~adRuntimeParameterNode(void);
 
 public:
@@ -152,7 +152,7 @@ public:
 
 public:
 // Runtime part
-	real_t			m_dValue;
+    real_t*			m_pdValue;
 // Report/GUI part
 	daeParameter*	m_pParameter;
 	std::vector<size_t>	m_narrDomains;
