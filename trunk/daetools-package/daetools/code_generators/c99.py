@@ -6,13 +6,13 @@ from analyzer import daeCodeGeneratorAnalyzer
 
 """
 Compile with:
-  g++ -O3 -Wall -o daetools_simulation adouble.cpp main.cpp
+  gcc -O3 -Wall -std=c99 -pedantic -o daetools_simulation auxiliary.c adouble.c main.c -lsundials_idas -lsundials_nvecserial -lblas -llapack
 """
 
-mainTemplate = """\
+daetools_model_h_templ = """\
 /***********************************************************************************
                  DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2013
 ************************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -29,7 +29,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
-/* ANSI C CODE GENERATOR WARNINGS!!!
+/* C99 CODE GENERATOR WARNINGS!!!
 %(warnings)s
 */
 
@@ -40,12 +40,17 @@ extern "C" {
 #define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   _adouble_(_current_time_, 0.0)
 
+/* General runtime information */          
+%(runtimeInformation_h)s
+
 typedef struct
 {
     real_t* values;
     real_t* timeDerivatives;
-    %(floatValuesReferences)s
-    %(stringValuesReferences)s
+    bool quasySteadyState;
+    %(intValuesReferences_Def)s
+    %(floatValuesReferences_Def)s
+    %(stringValuesReferences_Def)s
 
     /* Domains and parameters */
     %(parameters)s
@@ -54,24 +59,24 @@ typedef struct
     %(assignedVariablesDefs)s
 
     /* State Transition Networks */
-    %(activeStates)s
+    %(stns)s
 
-} daetools_model_t;
+} daeModel_t;
 
-void initialize_model(daetools_model_t* _m_);
-void initialize_values_references(daetools_model_t* _m_);
+void initialize_model(daeModel_t* _m_);
+void initialize_values_references(daeModel_t* _m_);
 void set_initial_conditions(real_t* values);
-void get_float_value(daetools_model_t* _m_, int index, real_t* value);
-void set_float_value(daetools_model_t* _m_, int index, real_t value);
-void get_string_value(daetools_model_t* _m_, int index, char* value);
-void set_string_value(daetools_model_t* _m_, int index, const char* value);
+void get_float_value(daeModel_t* _m_, int index, real_t* value);
+void set_float_value(daeModel_t* _m_, int index, real_t value);
+void get_string_value(daeModel_t* _m_, int index, char* value);
+void set_string_value(daeModel_t* _m_, int index, const char* value);
 
-int residuals(daetools_model_t* _m_,
+int residuals(daeModel_t* _m_,
               real_t _current_time_,
               real_t* _values_,
               real_t* _time_derivatives_,
               real_t* _residuals_);
-int jacobian(daetools_model_t* _m_,
+int jacobian(daeModel_t* _m_,
              long int _number_of_equations_,
              real_t _current_time_,
              real_t _inverse_time_step_,
@@ -79,28 +84,62 @@ int jacobian(daetools_model_t* _m_,
              real_t* _time_derivatives_,
              real_t* _residuals_,
              matrix_t _jacobian_matrix_);
-int number_of_roots(daetools_model_t* _m_);
-int roots(daetools_model_t* _m_,
+int number_of_roots(daeModel_t* _m_);
+int roots(daeModel_t* _m_,
           real_t _current_time_,
           real_t* _values_,
           real_t* _time_derivatives_,
           real_t* _roots_);
-bool check_for_discontinuities(daetools_model_t* _m_,
+bool check_for_discontinuities(daeModel_t* _m_,
                                real_t _current_time_,
                                real_t* _values_,
                                real_t* _time_derivatives_);
-bool execute_actions(daetools_model_t* _m_,
-                     real_t _current_time_,
-                     real_t* _values_,
-                     real_t* _time_derivatives_);
+daeeDiscontinuityType execute_actions(daeModel_t* _m_,
+                                      real_t _current_time_,
+                                      real_t* _values_,
+                                      real_t* _time_derivatives_);
+adouble calculate_scalar_ext_function(char* fun_name, 
+                                      daeModel_t* _m_,
+                                      real_t _current_time_,
+                                      real_t* _values_,
+                                      real_t* _time_derivatives_);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+"""
+
+daetools_model_c_templ = """\
+/***********************************************************************************
+                 DAE Tools Project: www.daetools.com
+                 Copyright (C) Dragan Nikolic, 2013
+************************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+***********************************************************************************/
+#include "daetools_model.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* General info */          
-%(model)s
+%(runtimeInformation_c)s
 
-void initialize_model(daetools_model_t* _m_)
+void initialize_model(daeModel_t* _m_)
 {
+    _m_->quasySteadyState = %(quasySteadyState)s;
     %(parametersInits)s
     %(assignedVariablesInits)s
+    %(stnActiveStates)s
 }
 
 void set_initial_conditions(real_t* values)
@@ -108,7 +147,7 @@ void set_initial_conditions(real_t* values)
     %(initialConditions)s
 }
 
-int residuals(daetools_model_t* _m_,
+int residuals(daeModel_t* _m_,
               real_t _current_time_,
               real_t* _values_,
               real_t* _time_derivatives_,
@@ -127,7 +166,7 @@ int residuals(daetools_model_t* _m_,
     return 0;
 }
 
-int jacobian(daetools_model_t* _m_,
+int jacobian(daeModel_t* _m_,
              long int _number_of_equations_,
              real_t _current_time_,
              real_t _inverse_time_step_,
@@ -148,7 +187,7 @@ int jacobian(daetools_model_t* _m_,
     return 0;
 }
 
-int number_of_roots(daetools_model_t* _m_)
+int number_of_roots(daeModel_t* _m_)
 {
     int _noRoots_;
 
@@ -159,7 +198,7 @@ int number_of_roots(daetools_model_t* _m_)
     return _noRoots_;
 }
 
-int roots(daetools_model_t* _m_,
+int roots(daeModel_t* _m_,
           real_t _current_time_,
           real_t* _values_,
           real_t* _time_derivatives_,
@@ -178,7 +217,7 @@ int roots(daetools_model_t* _m_,
     return 0;
 }
 
-bool check_for_discontinuities(daetools_model_t* _m_,
+bool check_for_discontinuities(daeModel_t* _m_,
                                real_t _current_time_,
                                real_t* _values_,
                                real_t* _time_derivatives_)
@@ -197,60 +236,92 @@ bool check_for_discontinuities(daetools_model_t* _m_,
     return foundDiscontinuity;
 }
 
-bool execute_actions(daetools_model_t* _m_,
-                     real_t _current_time_,
-                     real_t* _values_,
-                     real_t* _time_derivatives_)
+daeeDiscontinuityType execute_actions(daeModel_t* _m_,
+                                      real_t _current_time_,
+                                      real_t* _values_,
+                                      real_t* _time_derivatives_)
 {
     adouble _temp_;
     real_t _inverse_time_step_;
-    bool _copy_values_to_solver_;
+    daeeDiscontinuityType _discontinuity_type_;
     int _current_index_for_jacobian_evaluation_;
 
     _inverse_time_step_                     = 0.0;
     _current_index_for_jacobian_evaluation_ = -1;
-    _copy_values_to_solver_                 = false;
+    _discontinuity_type_                    = eModelDiscontinuityWithDataChange;
 
 %(executeActions)s
 
-    return _copy_values_to_solver_;
+    return _discontinuity_type_;
 }
 
-void initialize_values_references(daetools_model_t* _m_)
+void initialize_values_references(daeModel_t* _m_)
 {
     /*
     Values references is an array of pointers that point to the values
-    of domains/parameters/DOFs/variables in the daetools_model_t structure.
+    of domains/parameters/DOFs/variables in the daeModel_t structure.
     Can be used to set/get values from the model (ie. for FMI) having only
     index of some value.
     */
-    %(valuesReferencesInit)s
+    
+    /* Integers */
+    %(intValuesReferences_Init)s
+
+    /* Floats */
+    %(floatValuesReferences_Init)s
+    
+    /* Strings */
+    %(stringValuesReferences_Init)s
 }
 
-void get_float_value(daetools_model_t* _m_, int index, real_t* value)
+adouble calculate_scalar_ext_function(char* fun_name, 
+                                      daeModel_t* _m_,
+                                      real_t _current_time_,
+                                      real_t* _values_,
+                                      real_t* _time_derivatives_)
+{
+    _log_message_("calculate_scalar_ext_function: ");    
+    _log_message_(fun_name);    
+    _log_message_("\\n");    
+    
+    if(_compare_strings_(fun_name, ""))
+    {
+    }
+    return _adouble_(0.0, 0.0);
+}
+
+void get_float_value(daeModel_t* _m_, int index, real_t* value)
 {
     *value = *_m_->floatValuesReferences[index];
 }
 
-void set_float_value(daetools_model_t* _m_, int index, real_t value)
+void set_float_value(daeModel_t* _m_, int index, real_t value)
 {
     *_m_->floatValuesReferences[index] = value;
 }
 
-void get_string_value(daetools_model_t* _m_, int index, char* value)
+void get_string_value(daeModel_t* _m_, int index, char* value)
 {
-    *value = _m_->stringValuesReferences[index];
+    /* *value = _m_->stringValuesReferences[index]; */
 }
 
-void set_string_value(daetools_model_t* _m_, int index, const char* value)
+void set_string_value(daeModel_t* _m_, int index, const char* value)
 {
-    _m_->stringValuesReferences[index] = value;
+    /* _m_->stringValuesReferences[index] = value; */
+}
+
+void get_int_value(daeModel_t* _m_, int index, int* value)
+{
+    *value = *_m_->intValuesReferences[index];
+}
+
+void set_int_value(daeModel_t* _m_, int index, int value)
+{
+    *_m_->intValuesReferences[index] = value;
 }
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
 """
 
@@ -287,6 +358,10 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
 
         # Constants
         self.constant = '_adouble_({value}, 0)'
+        
+        # External functions
+        self.scalarExternalFunction = 'calculate_scalar_ext_function("{name}", _m_, _current_time_, _values_, _time_derivatives_)'
+        self.vectorExternalFunction = '_adouble_(0.0, 0.0)'
 
         # Logical operators
         self.AND   = '_and_({leftValue}, {rightValue})'
@@ -349,13 +424,17 @@ class daeCodeGenerator_c99(object):
         self.simulation              = None
         self.equationGenerationMode  = ''
         
+        self.quasySteadyState        = False
         self.assignedVariablesDefs   = []
         self.assignedVariablesInits  = []
         self.initialConditions       = []
+        self.stnDefs                 = []
         self.initiallyActiveStates   = []
-        self.modelDef                = []
+        self.runtimeInformation_h    = []
+        self.runtimeInformation_c    = []
         self.parametersDefs          = []
         self.parametersInits         = []
+        self.intValuesReferences     = []
         self.floatValuesReferences   = []
         self.stringValuesReferences  = []
         self.residuals               = []
@@ -377,13 +456,17 @@ class daeCodeGenerator_c99(object):
 
         directory = kwargs.get('projectDirectory', None)
 
+        self.quasySteadyState        = False
         self.assignedVariablesDefs   = []
         self.assignedVariablesInits  = []
         self.initialConditions       = []
+        self.stnDefs                 = []
         self.initiallyActiveStates   = []
-        self.modelDef                = []
+        self.runtimeInformation_h    = []
+        self.runtimeInformation_c    = []
         self.parametersDefs          = []
         self.parametersInits         = []
+        self.intValuesReferences     = []
         self.floatValuesReferences   = []
         self.stringValuesReferences  = []
         self.residuals               = []
@@ -416,10 +499,12 @@ class daeCodeGenerator_c99(object):
 
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
-        modelDef          = '\n'.join(self.modelDef)
+        rtInformation_h   = '\n'.join(self.runtimeInformation_h)
+        rtInformation_c   = '\n'.join(self.runtimeInformation_c)
         paramsDef         = '\n    '.join(self.parametersDefs)
         paramsInits       = '\n    '.join(self.parametersInits)
-        stnDef            = '\n    '.join(self.initiallyActiveStates)
+        stnDef            = '\n    '.join(self.stnDefs)
+        stnActiveStates   = '\n    '.join(self.initiallyActiveStates)
         assignedVarsDefs  = '\n    '.join(self.assignedVariablesDefs)
         assignedVarsInits = '\n    '.join(self.assignedVariablesInits)
         initConds         = '\n    '.join(self.initialConditions)
@@ -430,11 +515,28 @@ class daeCodeGenerator_c99(object):
         execActionsDef    = '\n'.join(self.executeActions)
         noRootsDef        = '\n'.join(self.numberOfRoots)
         warnings          = '\n'.join(self.warnings)
+        quasySteadyState  = 'true' if self.quasySteadyState else 'false'
 
-        if len(self.floatValuesReferences) > 0:
-            floatValuesReferences = 'real_t* floatValuesReferences[{0}];'.format(len(self.floatValuesReferences))
+        # intValuesReferences
+        if len(self.intValuesReferences) > 0:
+            intValuesReferences_Def = 'int* intValuesReferences[{0}];'.format(len(self.intValuesReferences))
         else:
-            floatValuesReferences = 'real_t* floatValuesReferences[1];' # dummy array
+            intValuesReferences_Def = 'int* intValuesReferences[1]; /* Array is empty but we need its declaration */'
+
+        valRefInit = []
+        for i, (ref_type, ref_name, ref_flat_name, block_index) in enumerate(self.intValuesReferences):
+            if ref_type == 'NumberOfPointsInDomain':
+                init = '_m_->intValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
+            else:
+                raise RuntimeError('Invalid integer variable reference type')
+            valRefInit.append(init)            
+        intValuesReferences_Init = '\n    '.join(valRefInit)
+            
+        # floatValuesReferences
+        if len(self.floatValuesReferences) > 0:
+            floatValuesReferences_Def = 'real_t* floatValuesReferences[{0}];'.format(len(self.floatValuesReferences))
+        else:
+            floatValuesReferences_Def = 'real_t* floatValuesReferences[1]; /* Array is empty but we need its declaration */'
 
         # FMI: initialize value references tuple: (ref_type, name)
         valRefInit = []
@@ -451,31 +553,39 @@ class daeCodeGenerator_c99(object):
             elif ref_type == 'Parameter':
                 init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
 
-            elif ref_type == 'NumberOfPointsInDomain':
-                init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
+            #elif ref_type == 'NumberOfPointsInDomain':
+            #    init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
 
             elif ref_type == 'DomainPoints':
                 init = '_m_->floatValuesReferences[{0}] = &_m_->{1};'.format(i, ref_flat_name)
 
             else:
-                raise RuntimeError('Invalid variable reference type')
+                raise RuntimeError('Invalid variable reference type (%s): %s' % (ref_type, ref_name))
             
             valRefInit.append(init)            
-        valuesReferencesInit = '\n    '.join(valRefInit)
+        floatValuesReferences_Init = '\n    '.join(valRefInit)
         
         if len(self.stringValuesReferences) > 0:
-            stringValuesReferences = 'char* stringValuesReferences[{0}];'.format(len(self.stringValuesReferences))
+            stringValuesReferences_Def = 'char* stringValuesReferences[{0}];'.format(len(self.stringValuesReferences))
         else:
-            stringValuesReferences = 'char* stringValuesReferences[1];' # dummy array
+            stringValuesReferences_Def = 'char* stringValuesReferences[1]; /* Array is empty but we need its declaration */'
+        
+        valRefInit = []
+        stringValuesReferences_Init = '\n    '.join(valRefInit)
             
         dictInfo = {
-                        'model' : modelDef,
+                        'runtimeInformation_h' : rtInformation_h,
+                        'runtimeInformation_c' : rtInformation_c,
                         'parameters' : paramsDef,
                         'parametersInits' : paramsInits,
-                        'valuesReferencesInit' : valuesReferencesInit,
-                        'floatValuesReferences' : floatValuesReferences,
-                        'stringValuesReferences' : stringValuesReferences,
-                        'activeStates' : stnDef,
+                        'intValuesReferences_Init' : intValuesReferences_Init,
+                        'intValuesReferences_Def' : intValuesReferences_Def,
+                        'floatValuesReferences_Init' : floatValuesReferences_Init,
+                        'floatValuesReferences_Def' : floatValuesReferences_Def,
+                        'stringValuesReferences_Init' : stringValuesReferences_Init,
+                        'stringValuesReferences_Def' : stringValuesReferences_Def,
+                        'stns' : stnDef,
+                        'stnActiveStates' : stnActiveStates,
                         'assignedVariablesDefs' : assignedVarsDefs,
                         'assignedVariablesInits' : assignedVarsInits,
                         'initialConditions' : initConds,
@@ -485,12 +595,14 @@ class daeCodeGenerator_c99(object):
                         'numberOfRoots' : noRootsDef,
                         'checkForDiscontinuities' : checkDiscont,
                         'executeActions' : execActionsDef,
+                        'quasySteadyState' : quasySteadyState,
                         'warnings' : warnings
                    }
 
-        results = mainTemplate % dictInfo;
+        daetools_model_h_contents = daetools_model_h_templ % dictInfo;
+        daetools_model_c_contents = daetools_model_c_templ % dictInfo;
 
-        ansic_dir = os.path.join(os.path.dirname(__file__), 'ansic')
+        ansic_dir = os.path.join(os.path.dirname(__file__), 'c99')
 
         # If the argument 'directory' is given create the folder and the project
         if directory:
@@ -498,24 +610,35 @@ class daeCodeGenerator_c99(object):
             if not os.path.exists(directory):
                 os.makedirs(directory)
 
-            daetools_model_h = os.path.join(directory, 'daetools_model.h')
-            shutil.copy2(os.path.join(ansic_dir, 'main-dense.c'),   os.path.join(directory, 'main.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'adouble.h'),      os.path.join(directory, 'adouble.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'adouble.c'),      os.path.join(directory, 'adouble.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'typedefs.h'),     os.path.join(directory, 'typedefs.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.h'),    os.path.join(directory, 'auxiliary.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.c'),    os.path.join(directory, 'auxiliary.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'qt_project.pro'), os.path.join(directory, '{0}.pro'.format(dirName)))
+            shutil.copy2(os.path.join(ansic_dir, 'main.c'),          os.path.join(directory, 'main.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'adouble.h'),       os.path.join(directory, 'adouble.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'adouble.c'),       os.path.join(directory, 'adouble.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'typedefs.h'),      os.path.join(directory, 'typedefs.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'dae_solver.h'),    os.path.join(directory, 'dae_solver.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'dae_solver.c'),    os.path.join(directory, 'dae_solver.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'simulation.h'),    os.path.join(directory, 'simulation.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'simulation.c'),    os.path.join(directory, 'simulation.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.h'),     os.path.join(directory, 'auxiliary.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.c'),     os.path.join(directory, 'auxiliary.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'Makefile-gcc'),    os.path.join(directory, 'Makefile'))
+            shutil.copy2(os.path.join(ansic_dir, 'vc++2008.vcproj'), os.path.join(directory, '{0}.vcproj'))
+            shutil.copy2(os.path.join(ansic_dir, 'qt_project.pro'),  os.path.join(directory, '{0}.pro'.format(dirName)))
 
+            daetools_model_h = os.path.join(directory, 'daetools_model.h')
             f = open(daetools_model_h, "w")
-            f.write(results)
+            f.write(daetools_model_h_contents)
+            f.close()
+            
+            daetools_model_c = os.path.join(directory, 'daetools_model.c')
+            f = open(daetools_model_c, "w")
+            f.write(daetools_model_c_contents)
             f.close()
 
         if len(self.warnings) > 0:
             print 'CODE GENERATOR WARNINGS:'
             print warnings
         
-        return results
+        return (daetools_model_h_contents, daetools_model_c_contents)
 
     def _processEquations(self, Equations, indent):
         s_indent  = indent     * self.defaultIndent
@@ -569,16 +692,18 @@ class daeCodeGenerator_c99(object):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                varTemplate = 'char* {name} = "{activeState}"; /* States: {states}; {description} */ \n'
+                varTemplate = 'char* {name}; /* States: [{states}] ({description}) */'
+                self.stnDefs.append(varTemplate.format(name = stnVariableName,
+                                                       states = states,
+                                                       description = description))
+                varTemplate = '_m_->{name} = "{activeState}";'
                 self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
-                                                                     states = states,
-                                                                     activeState = activeState,
-                                                                     description = description))
+                                                                     activeState = activeState))
 
                 nStates = len(stn['States'])
                 for i, state in enumerate(stn['States']):
                     # Not all states have state_transitions ('else' state has no state transitions)
-                    state_transition = None
+                    on_condition_action = None
                     if i == 0:
                         temp = s_indent + '/* IF {0} */'.format(stnVariableName)
                         self.residuals.append(temp)
@@ -588,10 +713,11 @@ class daeCodeGenerator_c99(object):
                         self.numberOfRoots.append(temp)
                         self.rootFunctions.append(temp)
 
-                        state_transition = state['StateTransitions'][0]
-                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
+                        # There is only one OnConditionAction in IF
+                        on_condition_action = state['OnConditionActions'][0]
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'if(_compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
 
@@ -600,10 +726,11 @@ class daeCodeGenerator_c99(object):
                         self.executeActions.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
-                        state_transition = state['StateTransitions'][0]
-                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
+                        # There is only one OnConditionAction in ELSE_IFs
+                        on_condition_action = state['OnConditionActions'][0]
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'else if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'else if(_compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
 
@@ -628,29 +755,28 @@ class daeCodeGenerator_c99(object):
                     self._processEquations(state['Equations'], indent+1)
                     self.jacobians.append(s_indent + '}')
 
-                    nStateTransitions = len(state['StateTransitions'])
                     s_indent2 = (indent + 1) * self.defaultIndent
                     s_indent3 = (indent + 2) * self.defaultIndent
 
                     # 2. checkForDiscontinuities
-                    self.checkForDiscontinuities.append(s_indent2 + 'if(! _compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name']))
+                    self.checkForDiscontinuities.append(s_indent2 + 'if(! _compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name']))
                     self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
                     self.checkForDiscontinuities.append(s_indent2 + '}')
                     self.checkForDiscontinuities.append(s_indent + '}')
 
                     # 3. executeActions
-                    self.executeActions.append(s_indent2 + 'printf("The state {0} from {1} is active now.\\n");'.format(state['Name'], stnVariableName))
-                    self.executeActions.append(s_indent2 + '{0} = "{1}";'.format(stnVariableName, state['Name']))
+                    self.executeActions.append(s_indent2 + 'printf("The state [{0}] in the IF [{1}] is active now.\\n");'.format(state['Name'], relativeName))
+                    self.executeActions.append(s_indent2 + '_m_->{0} = "{1}";'.format(stnVariableName, state['Name']))
                     self.executeActions.append(s_indent + '}')
 
                     # 4. numberOfRoots
-                    if state_transition: # For 'else' state has no state transitions
-                        nExpr = len(state_transition['Expressions'])
+                    if on_condition_action: # For 'else' state has no state transitions
+                        nExpr = len(on_condition_action['Expressions'])
                         self.numberOfRoots.append(s_indent + '_noRoots_ += {0};'.format(nExpr))
 
                     # 5. rootFunctions
-                    if state_transition: # For 'else' state has no state transitions
-                        for expression in state_transition['Expressions']:
+                    if on_condition_action: # For 'else' state has no state transitions
+                        for expression in on_condition_action['Expressions']:
                             self.rootFunctions.append(s_indent + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
                             self.rootFunctions.append(s_indent + '_roots_[_rc_++] = _getValue_(&_temp_);')
 
@@ -665,11 +791,13 @@ class daeCodeGenerator_c99(object):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                varTemplate = 'char* {name} = "{activeState}"; /* States: {states}; {description} */ \n'
+                varTemplate = 'char* {name}; /* States: [{states}] ({description}) */'
+                self.stnDefs.append(varTemplate.format(name = stnVariableName,
+                                                       states = states,
+                                                       description = description))
+                varTemplate = '_m_->{name} = "{activeState}";'
                 self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
-                                                                     states = states,
-                                                                     activeState = activeState,
-                                                                     description = description))
+                                                                     activeState = activeState))
 
                 nStates = len(stn['States'])
                 for i, state in enumerate(stn['States']):
@@ -682,7 +810,7 @@ class daeCodeGenerator_c99(object):
                         self.numberOfRoots.append(temp)
                         self.rootFunctions.append(temp)
 
-                        temp = s_indent + 'if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'if(_compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
@@ -691,7 +819,7 @@ class daeCodeGenerator_c99(object):
                         self.rootFunctions.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
-                        temp = s_indent + 'else if(_compare_strings_({0}, "{1}")) {{'.format(stnVariableName, state['Name'])
+                        temp = s_indent + 'else if(_compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
@@ -718,13 +846,12 @@ class daeCodeGenerator_c99(object):
                     self._processEquations(state['Equations'], indent+1)
                     self.jacobians.append(s_indent + '}')
 
-                    nStateTransitions = len(state['StateTransitions'])
                     s_indent2 = (indent + 1) * self.defaultIndent
                     s_indent3 = (indent + 2) * self.defaultIndent
 
                     # 2. checkForDiscontinuities
-                    for i, state_transition in enumerate(state['StateTransitions']):
-                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
+                    for i, on_condition_action in enumerate(state['OnConditionActions']):
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
                         if i == 0:
                             self.checkForDiscontinuities.append(s_indent2 + 'if({0}) {{'.format(condition))
                             self.checkForDiscontinuities.append(s_indent3 + 'foundDiscontinuity = true;')
@@ -743,8 +870,8 @@ class daeCodeGenerator_c99(object):
                     self.checkForDiscontinuities.append(s_indent + '}')
                     
                     # 3. executeActions
-                    for i, state_transition in enumerate(state['StateTransitions']):
-                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
+                    for i, on_condition_action in enumerate(state['OnConditionActions']):
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
                         if i == 0:
                             self.executeActions.append(s_indent2 + 'if({0}) {{'.format(condition))
 
@@ -754,28 +881,29 @@ class daeCodeGenerator_c99(object):
                         else:
                             self.executeActions.append(s_indent2 + 'else {')
 
-                        self._processActions(state_transition['Actions'], indent+2)
+                        self._processActions(on_condition_action['Actions'], indent+2)
                         self.executeActions.append(s_indent2 + '}')
 
                     self.executeActions.append(s_indent + '}')
 
                     # 4. numberOfRoots
-                    for i, state_transition in enumerate(state['StateTransitions']):
-                        nExpr = len(state_transition['Expressions'])
+                    for i, on_condition_action in enumerate(state['OnConditionActions']):
+                        nExpr = len(on_condition_action['Expressions'])
                         self.numberOfRoots.append(s_indent2 + '_noRoots_ += {0};'.format(nExpr))
 
                     self.numberOfRoots.append(s_indent + '}')
 
                     # 5. rootFunctions
-                    for i, state_transition in enumerate(state['StateTransitions']):
-                        for expression in state_transition['Expressions']:
+                    for i, on_condition_action in enumerate(state['OnConditionActions']):
+                        for expression in on_condition_action['Expressions']:
                             self.rootFunctions.append(s_indent2 + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
                             self.rootFunctions.append(s_indent2 + '_roots_[_rc_++] = _getValue_(&_temp_);')
 
                     self.rootFunctions.append(s_indent + '}')
 
                     if len(state['NestedSTNs']) > 0:
-                        raise RuntimeError('C code cannot be generated for nested state transition networks')
+                        self.warnings.append('C code cannot be generated for nested state transition networks (state %s)' % (state['Name'])) 
+                        #raise RuntimeError('C code cannot be generated for nested state transition networks')
 
     def _processActions(self, Actions, indent):
         s_indent = indent * self.defaultIndent
@@ -786,8 +914,8 @@ class daeCodeGenerator_c99(object):
                 relativeName    = self.exprFormatter.formatIdentifier(relativeName)
                 stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_stn'
                 stateTo         = action['StateTo']
-                self.executeActions.append(s_indent + '_log_message_("The state [{0}] in STN [{1}] is active now.\\n");'.format(stateTo, stnVariableName))
-                self.executeActions.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
+                self.executeActions.append(s_indent + '_log_message_("The state: [{0}] in the STN [{1}] is active now.\\n");'.format(stateTo, relativeName))
+                self.executeActions.append(s_indent + '_m_->{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
                 self.warnings.append('C code cannot be generated for SendEvent actions - the model will not work as expected!!')
@@ -840,22 +968,32 @@ class daeCodeGenerator_c99(object):
         self.variableNames = Neq * ['']
         
         Nvars = '#define _Ntotal_vars_ {0}'.format(Ntotal)
-        self.modelDef.append(Nvars)
+        self.runtimeInformation_h.append(Nvars)
 
         Neqns = '#define _Neqns_ {0}'.format(Neq)
-        self.modelDef.append(Neqns)
+        self.runtimeInformation_h.append(Neqns)
 
+        startTime = 'extern const real_t _start_time_;'
+        self.runtimeInformation_h.append(startTime)
         startTime = 'const real_t _start_time_ = {0};'.format(0.0)
-        self.modelDef.append(startTime)
+        self.runtimeInformation_c.append(startTime)
 
+        endTime = 'extern const real_t _end_time_;'
+        self.runtimeInformation_h.append(endTime)
         endTime = 'const real_t _end_time_ = {0};'.format(runtimeInformation['TimeHorizon'])
-        self.modelDef.append(endTime)
+        self.runtimeInformation_c.append(endTime)
 
+        reportingInterval = 'extern const real_t _reporting_interval_;'
+        self.runtimeInformation_h.append(reportingInterval)
         reportingInterval = 'const real_t _reporting_interval_ = {0};'.format(runtimeInformation['ReportingInterval'])
-        self.modelDef.append(reportingInterval)
+        self.runtimeInformation_c.append(reportingInterval)
 
+        relTolerance = 'extern const real_t _relative_tolerance_;'
+        self.runtimeInformation_h.append(relTolerance)
         relTolerance = 'const real_t _relative_tolerance_ = {0};'.format(runtimeInformation['RelativeTolerance'])
-        self.modelDef.append(relTolerance)
+        self.runtimeInformation_c.append(relTolerance)
+        
+        self.quasySteadyState = runtimeInformation['QuasySteadyState']
 
         blockIDs             = Neq * [-1]
         blockInitValues      = Neq * [-1]
@@ -872,17 +1010,25 @@ class daeCodeGenerator_c99(object):
                 blockInitDerivatives[bi] = initDerivatives[oi]
                 absTolerances[bi]        = absoluteTolerances[oi]
 
+        strIDs = 'extern const int _IDs_[_Neqns_];'
+        self.runtimeInformation_h.append(strIDs)
         strIDs = 'const int _IDs_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockIDs))
-        self.modelDef.append(strIDs)
+        self.runtimeInformation_c.append(strIDs)
             
+        strInitValues = 'extern const real_t _initValues_[_Neqns_];'
+        self.runtimeInformation_h.append(strInitValues)
         strInitValues = 'const real_t _initValues_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitValues))
-        self.modelDef.append(strInitValues)
+        self.runtimeInformation_c.append(strInitValues)
 
+        strInitDerivs = 'extern const real_t _initDerivatives_[_Neqns_];'
+        self.runtimeInformation_h.append(strInitDerivs)
         strInitDerivs = 'const real_t _initDerivatives_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitDerivatives))
-        self.modelDef.append(strInitDerivs)
+        self.runtimeInformation_c.append(strInitDerivs)
 
+        strAbsTol = 'extern const real_t _absolute_tolerances_[_Neqns_];'
+        self.runtimeInformation_h.append(strAbsTol)
         strAbsTol = 'const real_t _absolute_tolerances_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(absTolerances))
-        self.modelDef.append(strAbsTol)
+        self.runtimeInformation_c.append(strAbsTol)
 
         for domain in runtimeInformation['Domains']:
             relativeName   = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
@@ -893,11 +1039,12 @@ class daeCodeGenerator_c99(object):
             domains        = '[' + str(domain['NumberOfPoints']) + ']'
             points         = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
 
-            domTemplate   = 'int {name}_np; /* Number of points in domain {name} */'
-            paramTemplate = 'real_t {name}{domains}; /* {description} */ \n'
-            self.parametersDefs.append(domTemplate.format(name = name))
+            domTemplate   = 'int {name}_np; /* Number of points in domain: {relativeName} */'
+            paramTemplate = 'real_t {name}{domains}; /* Domain: {relativeName} ({description}) */'
+            self.parametersDefs.append(domTemplate.format(name = name, relativeName = relativeName))
             self.parametersDefs.append(paramTemplate.format(name = name,
                                                             domains = domains,
+                                                            relativeName = relativeName,
                                                             description = description))
 
             domTemplate   = 'const int {name}_np = {numberOfPoints};'
@@ -917,7 +1064,7 @@ class daeCodeGenerator_c99(object):
 
             struct_name = formattedName + '_np'
             flat_name   = name + '_np'
-            self.floatValuesReferences.append( ('NumberOfPointsInDomain', struct_name, flat_name, None) )
+            self.intValuesReferences.append( ('NumberOfPointsInDomain', struct_name, flat_name, None) )
             for i in range(len(domain['Points'])):
                 struct_name = '{0}[{1}]'.format(formattedName, i)
                 flat_name   = '{0}[{1}]'.format(name, i)
@@ -935,9 +1082,10 @@ class daeCodeGenerator_c99(object):
             if numberOfDomains > 0:
                 domains = '[{0}]'.format(']['.join(str(np) for np in parameter['Domains']))
 
-                paramTemplate = 'real_t {name}{domains}; /* {description} */ \n'
+                paramTemplate = 'real_t {name}{domains}; /* Parameter: {relativeName} ({description}) */'
                 self.parametersDefs.append(paramTemplate.format(name = name,
                                                                 domains = domains,
+                                                                relativeName = relativeName,
                                                                 description = description))
 
                 paramTemplate = 'real_t {name}{domains} = {values};'
@@ -949,8 +1097,9 @@ class daeCodeGenerator_c99(object):
                 self.parametersInits.append(paramTemplate.format(name = name,
                                                                 numberOfPoints = numberOfPoints))
             else:
-                paramTemplate = 'real_t {name}; /* {description} */ \n'
+                paramTemplate = 'real_t {name}; /* Parameter: {relativeName} ({description}) */'
                 self.parametersDefs.append(paramTemplate.format(name = name,
+                                                                relativeName = relativeName,
                                                                 description = description))
 
                 paramTemplate = '_m_->{name} = {value};\n'
@@ -1002,6 +1151,7 @@ class daeCodeGenerator_c99(object):
                     temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
                     self.initialConditions.append(temp)
                 elif ID == cnAssigned:
+                    name_ = name
                     temp = 'real_t {name}; /* {fullName} */'.format(name = name, fullName = fullName)
                     self.assignedVariablesDefs.append(temp)
                     temp = '_m_->{name} = {value};'.format(name = name, value = value)
@@ -1014,7 +1164,7 @@ class daeCodeGenerator_c99(object):
                 else:
                     ref_type = 'Algebraic'
 
-                struct_name = formattedName
+                struct_name = name # Name as it appears in daeModel_t (Assigned vars. only)
                 flat_name   = self.exprFormatter.flattenIdentifier(struct_name)
                 self.floatValuesReferences.append( (ref_type, struct_name, flat_name, blockIndex) )
 
@@ -1037,33 +1187,35 @@ class daeCodeGenerator_c99(object):
                         temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
                         self.initialConditions.append(temp)
                     elif ID == cnAssigned:
-                        raise RuntimeError('')
-                    
-                        name_ = formattedName + '_' + '_'.join(str(di) for di in domIndexes)
-                        temp = 'real_t {name}; /* {fullName} */'.format(name = name, fullName = fullName)
+                        name_ = name + '_' + '_'.join(str(di) for di in domIndexes)
+                        temp = 'real_t {name}; /* {fullName} */'.format(name = name_, fullName = fullName)
                         self.assignedVariablesDefs.append(temp)
 
-                        temp = '{name} = {value};'.format(name = name, value = value)
+                        temp = '_m_->{name} = {value};'.format(name = name_, value = value)
                         self.assignedVariablesInits.append(temp)
 
                     if ID == cnAssigned:
                         ref_type = 'Assigned'
+                        struct_name = name_ # Name as it appears in daeModel_t (Assigned vars. only)
                     elif ID == cnDifferential:
                         ref_type = 'Differential'
+                        struct_name = name
                     else:
                         ref_type = 'Algebraic'
+                        struct_name = name
 
-                    struct_name = '{0}[{1}]'.format(formattedName,  ']['.join(str(di) for di in domIndexes))
                     flat_name   = self.exprFormatter.flattenIdentifier(struct_name)
                     self.floatValuesReferences.append( (ref_type, struct_name, flat_name, blockIndex) )
 
         varNames = ['"' + name_ + '"' for name_ in self.variableNames]
+        strVariableNames = 'extern const char* _variable_names_[_Neqns_];'
+        self.runtimeInformation_h.append(strVariableNames)
         strVariableNames = 'const char* _variable_names_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(varNames))
-        self.modelDef.append(strVariableNames)
+        self.runtimeInformation_c.append(strVariableNames)
 
-        import pprint
-        pp = pprint.PrettyPrinter(indent=2)
-        pp.pprint(self.floatValuesReferences)
+        #import pprint
+        #pp = pprint.PrettyPrinter(indent=2)
+        #pp.pprint(self.floatValuesReferences)
 
         indent = 1
         s_indent = indent * self.defaultIndent

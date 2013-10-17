@@ -9,8 +9,8 @@ OBJECTS_DIR   = ./
 TARGET        = daetools_simulation
 DEL_FILE      = rm -f
 
-SOURCES = auxiliary.c adouble.c daetools_model.c main.c 
-OBJECTS = auxiliary.o adouble.o daetools_model.o main.o
+SOURCES = auxiliary.c adouble.c dae_solver.c simulation.c daetools_model.c main.c 
+OBJECTS = auxiliary.o adouble.o dae_solver.o simulation.o daetools_model.o main.o
 
 first: all
 
@@ -21,6 +21,12 @@ $(TARGET): $(OBJECTS)
 
 clean: 
 	-$(DEL_FILE) $(OBJECTS)
+
+dae_solver.o: dae_solver.c auxiliary.h typedefs.h dae_solver.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o dae_solver.o dae_solver.c
+
+simulation.o: simulation.c auxiliary.h typedefs.h daetools_model.h simulation.h dae_solver.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o simulation.o simulation.c
 
 auxiliary.o: auxiliary.c auxiliary.h typedefs.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o auxiliary.o auxiliary.c

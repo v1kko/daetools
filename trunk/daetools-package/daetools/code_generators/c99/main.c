@@ -10,15 +10,32 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_AUXILIARY_H
-#define DAE_AUXILIARY_H
+#include "auxiliary.h"
+#include "daetools_model.h"
+#include "simulation.h"
 
-#include "typedefs.h"
+int main(int argc, char *argv[])
+{
+    daeModel_t       model;
+    daeIDASolver_t   dae_solver;
+    daeSimulation_t  simulation;
 
-typedef real_t** matrix_t;
+    memset(&model,      0, sizeof(daeModel_t));
+    memset(&dae_solver, 0, sizeof(daeIDASolver_t));
+    memset(&simulation, 0, sizeof(daeSimulation_t));
 
-void _set_matrix_item_(real_t** matrix, size_t row, size_t col, real_t value);
-bool _compare_strings_(const char* s1, const char* s2);
-void _log_message_(const char* msg);
+    initialize_model(&model);
+    simInitialize(&simulation, &model, &dae_solver, false);
 
-#endif
+    model.values          = dae_solver.yval;
+    model.timeDerivatives = dae_solver.ypval;
+    initialize_values_references(&model);
+
+    simSolveInitial(&simulation);
+    simRun(&simulation);
+    simFinalize(&simulation);
+
+    return 0;
+}
+
+

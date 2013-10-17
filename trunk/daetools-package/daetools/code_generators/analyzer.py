@@ -56,6 +56,7 @@ class daeCodeGeneratorAnalyzer(object):
         self.runtimeInformation['AbsoluteTolerances']     = self._simulation.AbsoluteTolerances
         self.runtimeInformation['TimeHorizon']            = self._simulation.TimeHorizon
         self.runtimeInformation['ReportingInterval']      = self._simulation.ReportingInterval
+        self.runtimeInformation['QuasySteadyState']       = True if self._simulation.InitialConditionMode == eQuasySteadyState else False
 
         self._collectRuntimeInformationFromModel(self._simulation.m)
        
