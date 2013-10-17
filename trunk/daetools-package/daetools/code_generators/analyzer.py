@@ -69,11 +69,10 @@ class daeCodeGeneratorAnalyzer(object):
                  
         result['Class'] = port.__class__.__name__
         
-        if len(port.Domains) > 0:
-            raise RuntimeError('Ports cannot contain domains')
-
-        if len(port.Parameters) > 0:
-            raise RuntimeError('Ports cannot contain parameters')
+        #if len(port.Domains) > 0:
+        #    raise RuntimeError('Ports cannot contain domains')
+        #if len(port.Parameters) > 0:
+        #    raise RuntimeError('Ports cannot contain parameters')
 
         # Domains
         for domain in port.Domains:
@@ -100,8 +99,8 @@ class daeCodeGeneratorAnalyzer(object):
             result['Parameters'].append(data)
 
         for variable in port.Variables:
-            if len(variable.Domains) > 0:
-                raise RuntimeError('Ports cannot contain distributed variables')
+            #if len(variable.Domains) > 0:
+            #    raise RuntimeError('Ports cannot contain distributed variables')
 
             data = {}
             data['Name']              = variable.Name

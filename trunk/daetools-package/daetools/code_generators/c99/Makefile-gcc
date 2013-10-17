@@ -1,0 +1,36 @@
+CC            = gcc
+DEFINES       = 
+CFLAGS        = -std=c99 -pedantic -O0 -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable $(DEFINES)
+INCPATH       = -I.
+LINK          = g++
+LFLAGS        = -Wl,-O1
+LIBS          = -lsundials_idas -lsundials_nvecserial -lblas -llapack -lpthread 
+OBJECTS_DIR   = ./
+TARGET        = daetools_simulation
+DEL_FILE      = rm -f
+
+SOURCES = auxiliary.c adouble.c daetools_model.c main.c 
+OBJECTS = auxiliary.o adouble.o daetools_model.o main.o
+
+first: all
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)  
+	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
+
+clean: 
+	-$(DEL_FILE) $(OBJECTS)
+
+auxiliary.o: auxiliary.c auxiliary.h typedefs.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o auxiliary.o auxiliary.c
+
+adouble.o: adouble.c adouble.h typedefs.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o adouble.o adouble.c
+
+daetools_model.o: daetools_model.c daetools_model.h auxiliary.h typedefs.h adouble.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o daetools_model.o daetools_model.c
+
+main.o: main.c auxiliary.h typedefs.h daetools_model.h adouble.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o main.o main.c
+

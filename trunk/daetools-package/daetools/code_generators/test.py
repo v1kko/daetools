@@ -217,7 +217,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("test")
+        self.m = modTutorial("test_&rho;")
         self.m.Description = "This tutorial explains how to define and set up domains, ordinary and distributed parameters " \
                              "and variables, how to define distributed domains, declare distributed equations and set " \
                              "their boundary and initial conditions."
@@ -300,21 +300,21 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from modelica import daeCodeGenerator_Modelica
-    cg = daeCodeGenerator_Modelica()
-    cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
-    import pprint
-    pprint.pprint(cg.analyzer.models, indent=4)
-    return
+    #from modelica import daeCodeGenerator_Modelica
+    #cg = daeCodeGenerator_Modelica()
+    #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
+    #import pprint
+    #pprint.pprint(cg.analyzer.models, indent=2)
+    #return
     
-    cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
-    cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
+    #cg.generateModel(simulation.m,        simulation.m.Name + '_model_export.mo')
+    #cg.generatePort(simulation.m.portOut, simulation.m.Name + '_port_export.mo')
 
-    #import os
-    #from ansi_c import daeCodeGenerator_ANSI_C
-    #cg = daeCodeGenerator_ANSI_C()
-    #folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    #cg.generateSimulation(simulation, projectDirectory = folder)
+    import os
+    from c99 import daeCodeGenerator_c99
+    cg = daeCodeGenerator_c99()
+    folder = os.path.join('tests', simulation.m.GetStrippedName())
+    cg.generateSimulation(simulation, projectDirectory = folder)
 
     #import os
     #from fmi import daeCodeGenerator_FMI

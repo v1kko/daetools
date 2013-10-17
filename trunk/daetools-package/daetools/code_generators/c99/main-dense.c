@@ -1,6 +1,6 @@
 /***********************************************************************************
 *                 DAE Tools Project: www.daetools.com
-*                 Copyright (C) Dragan Nikolic, 2010
+*                 Copyright (C) Dragan Nikolic, 2013
 ************************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -166,7 +166,12 @@ int main(int argc, char *argv[])
     if(check_flag(&retval, "IDADlsSetDenseJacFn", 1))
         return(1);
 
+    printf("Solving the system at time = 0.0s ...\n");
     retval = IDACalcIC(mem, IDA_YA_YDP_INIT, 0.1);
+    if(check_flag(&retval, "IDACalcIC", 1))
+        return(1);
+
+    retval = IDAGetConsistentIC(mem, yy, yp); 
     if(check_flag(&retval, "IDACalcIC", 1))
         return(1);
 
@@ -179,21 +184,25 @@ int main(int argc, char *argv[])
     tret = t0;
     while(tret < tend)
     {
+        printf("Integrating from %fs to %fs ...\n", t, tret);
         retval = IDASolve(mem, t, &tret, yy, yp, IDA_NORMAL);
         if(check_flag(&retval, "IDASolve", 1))
-            return(1);
-
+        {
+            printf("Errror occured:\n");
+            printf("  %s", IDAGetReturnFlagName(retval));
+            printf("Exiting...\n");
+            return(-1);
+        }
         yval  = NV_DATA_S(yy);
         ypval = NV_DATA_S(yp);
 
         if(retval == IDA_ROOT_RETURN)
         {
+            printf("Checking for discontinuities at time: %fs ...\n", tret);
             discontinuity_found = check_for_discontinuities(&model, tret, yval, ypval);
             if(discontinuity_found)
             {
-                printf("**************************************\n");
-                printf("DISCONTINUITY FOUND: %f \n", tret);
-                printf("**************************************\n");
+                printf("    Discontinuity found at time: %fs \n", tret);
 
                 /* Print results before the discontinuity */
                 _print_results_(tret, yval, _variable_names_, _Neqns_);
@@ -201,25 +210,31 @@ int main(int argc, char *argv[])
                 /* Execute ON_CONDITION actions
                  * Here some actions write directly into the yval array and we do not need
                  * to copy values to the solver (it will be done during the IDAReInit() call) */
+                printf("    Executing OnCondition actions...\n");
                 copy_to_solver = execute_actions(&model, tret, yval, ypval);
 
                 /* Find the number of root functions and inform ida */
                 no_roots = number_of_roots(&model);
+                printf("    Setting root functions...\n");
                 retval = IDARootInit(mem, no_roots, root);
                 if (check_flag(&retval, "IDARootInit", 1))
                      return(1);
 
                 /* Reinitialize the system */
+                printf("    Resetting the system...\n");
                 retval = IDAReInit(mem, tret, yy, yp);
                 if(check_flag(&retval, "IDAReInit", 1))
                     return(1);
 
+                printf("    Reinitializing the system...\n");
                 retval = IDACalcIC(mem, IDA_YA_YDP_INIT, t + 1E-05);
                 if(check_flag(&retval, "IDACalcIC", 1))
                     return(1);
 
                 /* Print results again after the discontinuity */
                 _print_results_(tret, yval, _variable_names_, _Neqns_);
+                
+                printf("    Done...\n");
             }
             
             /* This is important if the root is exactly at the end of the reporting interval */
@@ -230,9 +245,11 @@ int main(int argc, char *argv[])
         {
             _print_results_(tret, yval, _variable_names_, _Neqns_);
         }
-        else
+        else if(retval == IDA_TSTOP_RETURN)
         {
-            printf("IDA return value: %d", retval);
+            printf("Final time reached.\n");
+            _print_results_(tret, yval, _variable_names_, _Neqns_);
+            break;
         }
 
         t += treport;
@@ -243,7 +260,6 @@ int main(int argc, char *argv[])
     print_final_stats(mem);
 
     /* Free memory */
-
     IDAFree(&mem);
     N_VDestroy_Serial(yy);
     N_VDestroy_Serial(yp);

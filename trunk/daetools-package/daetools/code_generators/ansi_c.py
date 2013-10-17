@@ -50,10 +50,10 @@ typedef struct
     /* Domains and parameters */
     %(parameters)s
 
-    /* Assigned variables */
+    /* Assigned variables (Degrees of Freedom) */
     %(assignedVariablesDefs)s
 
-    /* StateTransitionNetworks */
+    /* State Transition Networks */
     %(activeStates)s
 
 } daetools_model_t;
@@ -220,8 +220,9 @@ void initialize_values_references(daetools_model_t* _m_)
 {
     /*
     Values references is an array of pointers that point to the values
-    of parametere/variables in the daetools_model_t structure.
-    Can be uset to set/get values from the model (ie. for FMI).
+    of domains/parameters/DOFs/variables in the daetools_model_t structure.
+    Can be used to set/get values from the model (ie. for FMI) having only
+    index of some value.
     */
     %(valuesReferencesInit)s
 }
@@ -253,7 +254,7 @@ void set_string_value(daetools_model_t* _m_, int index, const char* value)
 #endif
 """
 
-class daeANSICExpressionFormatter(daeExpressionFormatter):
+class daeExpressionFormatter_c99(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
         self.indexBase                              = 0
@@ -339,7 +340,7 @@ class daeANSICExpressionFormatter(daeExpressionFormatter):
         # Formats constants/quantities in equations that have a value and units
         return str(quantity.value)
      
-class daeCodeGenerator_ANSI_C(object):
+class daeCodeGenerator_c99(object):
     def __init__(self, simulation = None):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '    '
@@ -367,7 +368,7 @@ class daeCodeGenerator_ANSI_C(object):
 
         self.fmiInterface            = []
 
-        self.exprFormatter = daeANSICExpressionFormatter()
+        self.exprFormatter = daeExpressionFormatter_c99()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
     def generateSimulation(self, simulation, **kwargs):
@@ -395,7 +396,11 @@ class daeCodeGenerator_ANSI_C(object):
         self.warnings                = []
         self.simulation              = simulation
         self.topLevelModel           = simulation.m
-        self.wrapperInstanceName     = simulation.m.Name
+        
+        # Achtung, Achtung!!
+        # wrapperInstanceName and exprFormatter.modelCanonicalName should not be stripped 
+        # of illegal characters, since they are used to get relative names
+        self.wrapperInstanceName              = simulation.m.Name
         self.exprFormatter.modelCanonicalName = simulation.m.Name
 
         indent   = 1
@@ -459,9 +464,9 @@ class daeCodeGenerator_ANSI_C(object):
         valuesReferencesInit = '\n    '.join(valRefInit)
         
         if len(self.stringValuesReferences) > 0:
-            stringValuesReferences = 'real_t* stringValuesReferences[{0}];'.format(len(self.stringValuesReferences))
+            stringValuesReferences = 'char* stringValuesReferences[{0}];'.format(len(self.stringValuesReferences))
         else:
-            stringValuesReferences = 'real_t* stringValuesReferences[1];' # dummy array
+            stringValuesReferences = 'char* stringValuesReferences[1];' # dummy array
             
         dictInfo = {
                         'model' : modelDef,

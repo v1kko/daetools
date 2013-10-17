@@ -222,6 +222,9 @@ real_t adDomainIndexNode_Value(adDomainIndexNode& node);
 
 boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRuntimeSpecialFunctionForLargeArraysNode& node);
 
+daeScalarExternalFunction* adScalarExternalFunctionNode_ExternalFunction(adScalarExternalFunctionNode& node);
+daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVectorExternalFunctionNode& node);
+
 /*******************************************************
 	adouble
 *******************************************************/

@@ -49,7 +49,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         QtGui.QDialog.__init__(self)
         self._ui = Ui_SimulationExplorer()
         self._ui.setupUi(self)
-        
+
         self._qt_app                      = qt_app
         self._simulation                  = kwargs.get('simulation',                 None)
         self._optimization                = kwargs.get('optimization',               None)
@@ -347,18 +347,18 @@ class daeSimulationExplorer(QtGui.QDialog):
             print 'Done!'
         
     def generateCode(self, language):
-        if not language in ['ANSI C','Modelica','FMI']:
+        if not language in ['c99','Modelica','FMI']:
             return
         
         try:
-            if language == 'ANSI C':
-                from daetools.code_generators.ansi_c import daeCodeGenerator_ANSI_C
+            if language == 'c99':
+                from daetools.code_generators.c99 import daeCodeGenerator_c99
                 directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
                                                                              '', 
                                                                              QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
                 if directory == '':
                     return
-                cg = daeCodeGenerator_ANSI_C()
+                cg = daeCodeGenerator_c99()
                 cg.generateSimulation(self._simulation, projectDirectory = directory)
             
             elif language == 'Modelica':
@@ -482,7 +482,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             QtGui.QMessageBox.critical(self, "Save RuntimeSettings As JSON", 'Error:\n%s' % str(e))
             
     def _slotGenerateCode(self):
-        languages = ['ANSI C','Modelica','FMI']
+        languages = ['c99','Modelica','FMI']
         language, ok = QtGui.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
         if not ok:
             return

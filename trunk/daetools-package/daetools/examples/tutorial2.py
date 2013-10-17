@@ -134,8 +134,8 @@ class simTutorial(daeSimulation):
         Ny = self.m.y.NumberOfPoints
         
         # There are several ways to set a value of distributed parameters:
-        #  a) Call SetValues(ndarray-of-floats-or-quantities) once to set the corresponding values
-        #  b) Call SetValues(float/quantity) once to set all to the same value
+        #  a) Call SetValues(ndarray-of-floats-or-quantities) to set all values at once
+        #  b) Call SetValues(float/quantity) to set all values to the same value
         #  c) In a loop call SetValue([index1, index2], float/quantity) to set a value for individual points
         #  d) In a loop call SetValue(index1, index2, float/quantity) to set a value for individual points
         

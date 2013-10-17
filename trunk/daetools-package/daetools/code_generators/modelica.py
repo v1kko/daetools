@@ -43,7 +43,7 @@ end %(model)s_simulation;
 """
 
 
-class daeModelicaExpressionFormatter(daeExpressionFormatter):
+class daeExpressionFormatter_Modelica(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
 
@@ -173,7 +173,7 @@ class daeCodeGenerator_Modelica(object):
         self.topLevelModel           = None
         self.simulation              = None
         
-        self.exprFormatter = daeModelicaExpressionFormatter()
+        self.exprFormatter = daeExpressionFormatter_Modelica()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
     def generateModel(self, model, filename = None):
@@ -247,7 +247,11 @@ class daeCodeGenerator_Modelica(object):
         self.warnings                = []
         self.simulation              = simulation
         self.topLevelModel           = simulation.m
-        self.wrapperInstanceName     = self.exprFormatter.formatIdentifier(simulation.m.Name)
+        
+        # Achtung, Achtung!!
+        # wrapperInstanceName should not be stripped 
+        # of illegal characters, since it is used to get relative names
+        self.wrapperInstanceName     = simulation.m.Name
 
         indent   = 1
         s_indent = indent * self.defaultIndent
@@ -368,6 +372,8 @@ class daeCodeGenerator_Modelica(object):
         s_indent = indent * self.defaultIndent
 
         # Achtung, Achtung!!
+        # exprFormatter.modelCanonicalName should not be stripped 
+        # of illegal characters, since it is used to get relative names
         self.exprFormatter.modelCanonicalName = data['CanonicalName']
         
         # These concepts are not supported by the Modelica code-generator:

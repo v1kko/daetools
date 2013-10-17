@@ -351,9 +351,11 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adScalarExternalFunctionNode, bases<adNode>, boost::noncopyable>("adScalarExternalFunctionNode", no_init)
+        .add_property("ExternalFunction",  make_function(&daepython::adScalarExternalFunctionNode_ExternalFunction, return_internal_reference<>()))
     ;
     
     class_<adVectorExternalFunctionNode, bases<adNode>, boost::noncopyable>("adVectorExternalFunctionNode", no_init)
+        .add_property("ExternalFunction",  make_function(&daepython::adVectorExternalFunctionNode_ExternalFunction, return_internal_reference<>()))
     ;
 
     class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)

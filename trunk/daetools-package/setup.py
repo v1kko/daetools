@@ -159,7 +159,7 @@ setup(name = 'daetools',
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
                        'daetools.dae_plotter':     ['images/*.png'],
-                       'daetools.code_generators': ['ansic/*.h', 'ansic/*.c', 'ansic/*.pro', 'fmi/*.h', 'fmi/*.c'],
+                       'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'fmi/*.h', 'fmi/*.c'],
                        'daetools.dae_simulator':   ['images/*.png'],
                        'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']
                      },

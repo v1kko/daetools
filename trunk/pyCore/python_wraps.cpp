@@ -989,6 +989,15 @@ boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRu
     return getListFromVector(node.m_ptrarrRuntimeNodes);
 }
 
+daeScalarExternalFunction* adScalarExternalFunctionNode_ExternalFunction(adScalarExternalFunctionNode& node)
+{
+    return node.m_pExternalFunction;
+}
+
+daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVectorExternalFunctionNode& node)
+{
+    return node.m_pExternalFunction;
+}
 
 /*******************************************************
 	adouble

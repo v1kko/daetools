@@ -48,6 +48,10 @@ class daeExpressionFormatter(object):
         # Constants
         self.constant = '{value}'
         
+        # External functions
+        self.scalarExternalFunction = '{name}()'
+        self.vectorExternalFunction = '{name}()'
+        
         # Logical operators
         self.AND   = '{leftValue} and {rightValue}'
         self.OR    = '{leftValue} or {rightValue}'
@@ -152,6 +156,9 @@ class daeExpressionFormatter(object):
             name = daeGetRelativeName(self.modelCanonicalName, domainCanonicalName)
         else:
             name = domainCanonicalName
+        
+        # Always remove illegal characters
+        name = self.formatIdentifier(name)
 
         if self.flattenIdentifiers:
             name = self.flattenIdentifier(name)
@@ -167,6 +174,9 @@ class daeExpressionFormatter(object):
             name = daeGetRelativeName(self.modelCanonicalName, parameterCanonicalName)
         else:
             name = parameterCanonicalName
+        
+        # Always remove illegal characters
+        name = self.formatIdentifier(name)
 
         if self.flattenIdentifiers:
             name = self.flattenIdentifier(name)
@@ -188,11 +198,14 @@ class daeExpressionFormatter(object):
 
         if self.useFlattenedNamesForAssignedVariables and (self.IDs[overallIndex] == cnAssigned):
             name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
+            # Always remove illegal characters
+            name = self.formatIdentifier(name)
+            # Flatten the name as requested
             name = self.flattenIdentifier(name)
 
             domainindexes = ''
             if len(domainIndexes) > 0:
-                domainindexes = '_' + '_'.join([str(di+self.indexBase) for di in domainIndexes]) + '_'
+                domainindexes = '_' + '_'.join([str(di+self.indexBase) for di in domainIndexes])
 
             res = self.assignedVariable.format(variable = name+domainindexes, overallIndex = overall_, blockIndex = block_)
 
@@ -201,6 +214,9 @@ class daeExpressionFormatter(object):
                 name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
             else:
                 name = variableCanonicalName
+            
+            # Always remove illegal characters
+            name = self.formatIdentifier(name)
 
             if self.flattenIdentifiers:
                 name = self.flattenIdentifier(name)
@@ -219,6 +235,9 @@ class daeExpressionFormatter(object):
             name = daeGetRelativeName(self.modelCanonicalName, variableCanonicalName)
         else:
             name = variableCanonicalName
+        
+        # Always remove illegal characters
+        name = self.formatIdentifier(name)
 
         if self.flattenIdentifiers:
             name = self.flattenIdentifier(name)
@@ -281,7 +300,7 @@ class daeExpressionFormatter(object):
                 res = self.LTEQ.format(leftValue = leftValue, rightValue = rightValue)
 
             else:
-                raise RuntimeError('Not supported condition type')
+                raise RuntimeError('Not supported condition type: %s' % node.ConditionType)
         else:
             raise RuntimeError('Not supported condition node: {0}'.format(type(node)))
 
@@ -343,7 +362,7 @@ class daeExpressionFormatter(object):
                 res = self.FLOOR.format(value = value)
 
             else:
-                raise RuntimeError('Not supported unary function')
+                raise RuntimeError('Not supported unary function: %s' % node.Function)
 
         elif isinstance(node, adBinaryNode):
             leftValue  = '(' + self.formatRuntimeNode(node.LNode) + ')'
@@ -371,27 +390,29 @@ class daeExpressionFormatter(object):
                 res = self.MAX.format(leftValue = leftValue, rightValue = rightValue)
 
             else:
-                raise RuntimeError('Not supported binary function')
+                raise RuntimeError('Not supported binary function: %s' % node.Function)
 
         elif isinstance(node, adScalarExternalFunctionNode):
-            raise RuntimeError('External functions are not supported')
+            name = node.ExternalFunction.Name
+            res  = self.scalarExternalFunction.format(name = name)
 
         elif isinstance(node, adVectorExternalFunctionNode):
-            raise RuntimeError('External functions are not supported')
+            name = node.ExternalFunction.Name
+            res  = self.vectorExternalFunction.format(name = name)
 
         elif isinstance(node, adDomainIndexNode):
-            res = self.formatDomain(self.formatIdentifier(node.Domain.CanonicalName), node.Index, node.Value)
+            res = self.formatDomain(node.Domain.CanonicalName, node.Index, node.Value)
 
         elif isinstance(node, adRuntimeParameterNode):
-            res = self.formatParameter(self.formatIdentifier(node.Parameter.CanonicalName), node.DomainIndexes, node.Value)
+            res = self.formatParameter(node.Parameter.CanonicalName, node.DomainIndexes, node.Value)
 
         elif isinstance(node, adRuntimeVariableNode):
-            res = self.formatVariable(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes, node.OverallIndex)
+            res = self.formatVariable(node.Variable.CanonicalName, node.DomainIndexes, node.OverallIndex)
 
         elif isinstance(node, adRuntimeTimeDerivativeNode):
-            res = self.formatTimeDerivative(self.formatIdentifier(node.Variable.CanonicalName), node.DomainIndexes, node.OverallIndex, node.Order)
+            res = self.formatTimeDerivative(node.Variable.CanonicalName, node.DomainIndexes, node.OverallIndex, node.Order)
 
         else:
-            raise RuntimeError('Not supported node')
+            raise RuntimeError('Not supported node: %s' % type(node))
 
         return res
