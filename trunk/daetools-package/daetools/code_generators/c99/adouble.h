@@ -15,6 +15,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "typedefs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct  
 {
     real_t m_dValue;
@@ -72,5 +76,9 @@ real_t _getDerivative_(const adouble* a);
 void   _setDerivative_(adouble* a, real_t v); 
 
 real_t _makeNaN_();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

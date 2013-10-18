@@ -128,9 +128,9 @@
 			<File
 				RelativePath="auxiliary.c" />
 			<File
-				RelativePath="dae_solver.c" />
+				RelativePath="daesolver.c" />
 			<File
-				RelativePath="daetools_model.c" />
+				RelativePath="model.c" />
 			<File
 				RelativePath="main.c" />
 			<File
@@ -145,9 +145,9 @@
 			<File
 				RelativePath="auxiliary.h" />
 			<File
-				RelativePath="dae_solver.h" />
+				RelativePath="daesolver.h" />
 			<File
-				RelativePath="daetools_model.h" />
+				RelativePath="model.h" />
 			<File
 				RelativePath="simulation.h" />
 			<File

@@ -213,7 +213,7 @@ class simTutorial(daeSimulation):
         # Initial conditions can be set in all four above-mentioned ways.
         # Note: In this case init. conditions must be set for open-ended domains (excluding boundary points).
         # a) Use an array of quantity objects:
-        #    Again, use numpy to create an empty two-dimensional numpy array with datatype=object.
+        #    Again, use numpy to create an empty two-dimensional array with datatype=object.
         #    However we do not set ALL values to 300 K but only those that correspond to the points in the domain interior,
         #    thus leaving points at the boundaries to None (which by design means they will be excluded).
         ic = numpy.empty((Nx,Ny), dtype=object)
@@ -258,17 +258,6 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-
-    # daeThirdPartyVariable class is used when interfacing DAE Tools with a 3rd party software.
-    # The variable obviously must not be a state variable (that is it must have assigned value).
-    # The class has attribute Value for a quick access to the variable value and it hides the
-    # particulars about getting/setting a variable value.
-    # It should be straightforward to create a wrapper around DAE Tools simulation,
-    # which sets the inputs from the 3rd party software, runs a simulation with daeSimulation.ReRun()
-    # and finally gets the results from DAE Tools. 
-    # This procedure can be repeated as many times as necessary.
-    ro = daeVariableWrapper(simulation.m.ro, 'ro')
-    log.Message('{0} = {1}'.format(ro.Name, ro.Value), 0)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

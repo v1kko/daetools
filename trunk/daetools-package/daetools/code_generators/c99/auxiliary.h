@@ -15,10 +15,18 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "typedefs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef real_t** matrix_t;
 
 void _set_matrix_item_(real_t** matrix, size_t row, size_t col, real_t value);
 bool _compare_strings_(const char* s1, const char* s2);
 void _log_message_(const char* msg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

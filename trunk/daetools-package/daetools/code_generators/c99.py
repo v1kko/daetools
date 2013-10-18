@@ -45,9 +45,9 @@ extern "C" {
 
 typedef struct
 {
+    bool quasySteadyState;
     real_t* values;
     real_t* timeDerivatives;
-    bool quasySteadyState;
     %(intValuesReferences_Def)s
     %(floatValuesReferences_Def)s
     %(stringValuesReferences_Def)s
@@ -63,42 +63,44 @@ typedef struct
 
 } daeModel_t;
 
-void initialize_model(daeModel_t* _m_);
-void initialize_values_references(daeModel_t* _m_);
-void set_initial_conditions(real_t* values);
-void get_float_value(daeModel_t* _m_, int index, real_t* value);
-void set_float_value(daeModel_t* _m_, int index, real_t value);
-void get_string_value(daeModel_t* _m_, int index, char* value);
-void set_string_value(daeModel_t* _m_, int index, const char* value);
+void modInitialize(daeModel_t* _m_);
+void modInitializeValuesReferences(daeModel_t* _m_);
+void modSetInitialConditions(daeModel_t* _m_, real_t* values);
+void modGetValue_float(daeModel_t* _m_, int index, real_t* value);
+void modSetValue_float(daeModel_t* _m_, int index, real_t value);
+void modGetValue_string(daeModel_t* _m_, int index, char* value);
+void modSetValue_string(daeModel_t* _m_, int index, const char* value);
+void modGetValue_int(daeModel_t* _m_, int index, int* value);
+void modSetValue_int(daeModel_t* _m_, int index, int value);
 
-int residuals(daeModel_t* _m_,
-              real_t _current_time_,
-              real_t* _values_,
-              real_t* _time_derivatives_,
-              real_t* _residuals_);
-int jacobian(daeModel_t* _m_,
-             long int _number_of_equations_,
+int modResiduals(daeModel_t* _m_,
+                 real_t _current_time_,
+                 real_t* _values_,
+                 real_t* _time_derivatives_,
+                 real_t* _residuals_);
+int modJacobian(daeModel_t* _m_,
+                long int _number_of_equations_,
+                real_t _current_time_,
+                real_t _inverse_time_step_,
+                real_t* _values_,
+                real_t* _time_derivatives_,
+                real_t* _residuals_,
+                matrix_t _jacobian_matrix_);
+int modNumberOfRoots(daeModel_t* _m_);
+int modRoots(daeModel_t* _m_,
              real_t _current_time_,
-             real_t _inverse_time_step_,
              real_t* _values_,
              real_t* _time_derivatives_,
-             real_t* _residuals_,
-             matrix_t _jacobian_matrix_);
-int number_of_roots(daeModel_t* _m_);
-int roots(daeModel_t* _m_,
-          real_t _current_time_,
-          real_t* _values_,
-          real_t* _time_derivatives_,
-          real_t* _roots_);
-bool check_for_discontinuities(daeModel_t* _m_,
-                               real_t _current_time_,
-                               real_t* _values_,
-                               real_t* _time_derivatives_);
-daeeDiscontinuityType execute_actions(daeModel_t* _m_,
-                                      real_t _current_time_,
-                                      real_t* _values_,
-                                      real_t* _time_derivatives_);
-adouble calculate_scalar_ext_function(char* fun_name, 
+             real_t* _roots_);
+bool modCheckForDiscontinuities(daeModel_t* _m_,
+                                real_t _current_time_,
+                                real_t* _values_,
+                                real_t* _time_derivatives_);
+daeeDiscontinuityType modExecuteActions(daeModel_t* _m_,
+                                        real_t _current_time_,
+                                        real_t* _values_,
+                                        real_t* _time_derivatives_);
+adouble modCalculateScalarExtFunction(char* fun_name, 
                                       daeModel_t* _m_,
                                       real_t _current_time_,
                                       real_t* _values_,
@@ -125,7 +127,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "daetools_model.h"
+#include "model.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,24 +136,46 @@ extern "C" {
 /* General info */          
 %(runtimeInformation_c)s
 
-void initialize_model(daeModel_t* _m_)
+void modInitialize(daeModel_t* _m_)
 {
+    /* If true all diff. parts are equal to zero */
     _m_->quasySteadyState = %(quasySteadyState)s;
+    
     %(parametersInits)s
     %(assignedVariablesInits)s
-    %(stnActiveStates)s
+    %(stnActiveStates)s    
 }
 
-void set_initial_conditions(real_t* values)
+void modInitializeValuesReferences(daeModel_t* _m_)
 {
+    /* Values references is an array of pointers that point to the values
+     * of domains/parameters/DOFs/variables in the daeModel_t structure.
+     * Can be used to set/get values from the model (ie. for FMI) having only
+     * index of some value. */
+    
+    /* Integers */
+    %(intValuesReferences_Init)s
+
+    /* Floats */
+    %(floatValuesReferences_Init)s
+    
+    /* Strings */
+    %(stringValuesReferences_Init)s
+}
+
+void modSetInitialConditions(daeModel_t* _m_, real_t* values)
+{
+    if(_m_->quasySteadyState)
+        return;
+
     %(initialConditions)s
 }
 
-int residuals(daeModel_t* _m_,
-              real_t _current_time_,
-              real_t* _values_,
-              real_t* _time_derivatives_,
-              real_t* _residuals_)
+int modResiduals(daeModel_t* _m_,
+                 real_t _current_time_,
+                 real_t* _values_,
+                 real_t* _time_derivatives_,
+                 real_t* _residuals_)
 {
     adouble _temp_;
     real_t _inverse_time_step_;
@@ -166,14 +190,14 @@ int residuals(daeModel_t* _m_,
     return 0;
 }
 
-int jacobian(daeModel_t* _m_,
-             long int _number_of_equations_,
-             real_t _current_time_,
-             real_t _inverse_time_step_,
-             real_t* _values_,
-             real_t* _time_derivatives_,
-             real_t* _residuals_,
-             matrix_t _jacobian_matrix_)
+int modJacobian(daeModel_t* _m_,
+                long int _number_of_equations_,
+                real_t _current_time_,
+                real_t _inverse_time_step_,
+                real_t* _values_,
+                real_t* _time_derivatives_,
+                real_t* _residuals_,
+                matrix_t _jacobian_matrix_)
 {
     adouble _temp_;
     real_t _jacobianItem_;
@@ -187,7 +211,7 @@ int jacobian(daeModel_t* _m_,
     return 0;
 }
 
-int number_of_roots(daeModel_t* _m_)
+int modNumberOfRoots(daeModel_t* _m_)
 {
     int _noRoots_;
 
@@ -198,11 +222,11 @@ int number_of_roots(daeModel_t* _m_)
     return _noRoots_;
 }
 
-int roots(daeModel_t* _m_,
-          real_t _current_time_,
-          real_t* _values_,
-          real_t* _time_derivatives_,
-          real_t* _roots_)
+int modRoots(daeModel_t* _m_,
+             real_t _current_time_,
+             real_t* _values_,
+             real_t* _time_derivatives_,
+             real_t* _roots_)
 {
     adouble _temp_;
     real_t _inverse_time_step_;
@@ -217,10 +241,10 @@ int roots(daeModel_t* _m_,
     return 0;
 }
 
-bool check_for_discontinuities(daeModel_t* _m_,
-                               real_t _current_time_,
-                               real_t* _values_,
-                               real_t* _time_derivatives_)
+bool modCheckForDiscontinuities(daeModel_t* _m_,
+                                real_t _current_time_,
+                                real_t* _values_,
+                                real_t* _time_derivatives_)
 {
     adouble _temp_;
     bool foundDiscontinuity;
@@ -236,10 +260,10 @@ bool check_for_discontinuities(daeModel_t* _m_,
     return foundDiscontinuity;
 }
 
-daeeDiscontinuityType execute_actions(daeModel_t* _m_,
-                                      real_t _current_time_,
-                                      real_t* _values_,
-                                      real_t* _time_derivatives_)
+daeeDiscontinuityType modExecuteActions(daeModel_t* _m_,
+                                        real_t _current_time_,
+                                        real_t* _values_,
+                                        real_t* _time_derivatives_)
 {
     adouble _temp_;
     real_t _inverse_time_step_;
@@ -255,26 +279,7 @@ daeeDiscontinuityType execute_actions(daeModel_t* _m_,
     return _discontinuity_type_;
 }
 
-void initialize_values_references(daeModel_t* _m_)
-{
-    /*
-    Values references is an array of pointers that point to the values
-    of domains/parameters/DOFs/variables in the daeModel_t structure.
-    Can be used to set/get values from the model (ie. for FMI) having only
-    index of some value.
-    */
-    
-    /* Integers */
-    %(intValuesReferences_Init)s
-
-    /* Floats */
-    %(floatValuesReferences_Init)s
-    
-    /* Strings */
-    %(stringValuesReferences_Init)s
-}
-
-adouble calculate_scalar_ext_function(char* fun_name, 
+adouble modCalculateScalarExtFunction(char* fun_name, 
                                       daeModel_t* _m_,
                                       real_t _current_time_,
                                       real_t* _values_,
@@ -290,32 +295,32 @@ adouble calculate_scalar_ext_function(char* fun_name,
     return _adouble_(0.0, 0.0);
 }
 
-void get_float_value(daeModel_t* _m_, int index, real_t* value)
+void modGetValue_float(daeModel_t* _m_, int index, real_t* value)
 {
     *value = *_m_->floatValuesReferences[index];
 }
 
-void set_float_value(daeModel_t* _m_, int index, real_t value)
+void modSetValue_float(daeModel_t* _m_, int index, real_t value)
 {
     *_m_->floatValuesReferences[index] = value;
 }
 
-void get_string_value(daeModel_t* _m_, int index, char* value)
+void modGetValue_string(daeModel_t* _m_, int index, char* value)
 {
     /* *value = _m_->stringValuesReferences[index]; */
 }
 
-void set_string_value(daeModel_t* _m_, int index, const char* value)
+void modSetValue_string(daeModel_t* _m_, int index, const char* value)
 {
     /* _m_->stringValuesReferences[index] = value; */
 }
 
-void get_int_value(daeModel_t* _m_, int index, int* value)
+void modGetValue_int(daeModel_t* _m_, int index, int* value)
 {
     *value = *_m_->intValuesReferences[index];
 }
 
-void set_int_value(daeModel_t* _m_, int index, int value)
+void modSetValue_int(daeModel_t* _m_, int index, int value)
 {
     *_m_->intValuesReferences[index] = value;
 }
@@ -360,7 +365,7 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
         self.constant = '_adouble_({value}, 0)'
         
         # External functions
-        self.scalarExternalFunction = 'calculate_scalar_ext_function("{name}", _m_, _current_time_, _values_, _time_derivatives_)'
+        self.scalarExternalFunction = 'modCalculateScalarExtFunction("{name}", _m_, _current_time_, _values_, _time_derivatives_)'
         self.vectorExternalFunction = '_adouble_(0.0, 0.0)'
 
         # Logical operators
@@ -614,22 +619,22 @@ class daeCodeGenerator_c99(object):
             shutil.copy2(os.path.join(ansic_dir, 'adouble.h'),       os.path.join(directory, 'adouble.h'))
             shutil.copy2(os.path.join(ansic_dir, 'adouble.c'),       os.path.join(directory, 'adouble.c'))
             shutil.copy2(os.path.join(ansic_dir, 'typedefs.h'),      os.path.join(directory, 'typedefs.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'dae_solver.h'),    os.path.join(directory, 'dae_solver.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'dae_solver.c'),    os.path.join(directory, 'dae_solver.c'))
+            shutil.copy2(os.path.join(ansic_dir, 'daesolver.h'),     os.path.join(directory, 'daesolver.h'))
+            shutil.copy2(os.path.join(ansic_dir, 'daesolver.c'),     os.path.join(directory, 'daesolver.c'))
             shutil.copy2(os.path.join(ansic_dir, 'simulation.h'),    os.path.join(directory, 'simulation.h'))
             shutil.copy2(os.path.join(ansic_dir, 'simulation.c'),    os.path.join(directory, 'simulation.c'))
             shutil.copy2(os.path.join(ansic_dir, 'auxiliary.h'),     os.path.join(directory, 'auxiliary.h'))
             shutil.copy2(os.path.join(ansic_dir, 'auxiliary.c'),     os.path.join(directory, 'auxiliary.c'))
             shutil.copy2(os.path.join(ansic_dir, 'Makefile-gcc'),    os.path.join(directory, 'Makefile'))
-            shutil.copy2(os.path.join(ansic_dir, 'vc++2008.vcproj'), os.path.join(directory, '{0}.vcproj'))
-            shutil.copy2(os.path.join(ansic_dir, 'qt_project.pro'),  os.path.join(directory, '{0}.pro'.format(dirName)))
+            shutil.copy2(os.path.join(ansic_dir, 'vc++2008.vcproj'), os.path.join(directory, '%s.vcproj' % dirName))
+            shutil.copy2(os.path.join(ansic_dir, 'qt_project.pro'),  os.path.join(directory, '%s.pro' % dirName))
 
-            daetools_model_h = os.path.join(directory, 'daetools_model.h')
+            daetools_model_h = os.path.join(directory, 'model.h')
             f = open(daetools_model_h, "w")
             f.write(daetools_model_h_contents)
             f.close()
             
-            daetools_model_c = os.path.join(directory, 'daetools_model.c')
+            daetools_model_c = os.path.join(directory, 'model.c')
             f = open(daetools_model_c, "w")
             f.write(daetools_model_c_contents)
             f.close()
@@ -1102,7 +1107,7 @@ class daeCodeGenerator_c99(object):
                                                                 relativeName = relativeName,
                                                                 description = description))
 
-                paramTemplate = '_m_->{name} = {value};\n'
+                paramTemplate = '_m_->{name} = {value};'
                 self.parametersInits.append(paramTemplate.format(name = name,
                                                                  value = values))
                 

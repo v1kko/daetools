@@ -12,9 +12,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "auxiliary.h"
 #include "simulation.h"
-#include "dae_solver.h"
-#include "daetools_model.h"
-
 
 void simInitialize(daeSimulation_t* s, daeModel_t* model, daeIDASolver_t* dae_solver, bool bCalculateSensitivities)
 {
@@ -26,34 +23,34 @@ void simInitialize(daeSimulation_t* s, daeModel_t* model, daeIDASolver_t* dae_so
     s->m_dTimeHorizon            = _end_time_;
     s->m_dReportingInterval      = _reporting_interval_;
 
-    int no_roots = number_of_roots(model);
-    solInitialize(dae_solver, model, s, _Neqns_, _initValues_, _initDerivatives_, _absolute_tolerances_, _IDs_, no_roots, _relative_tolerance_);
+    solInitialize(dae_solver, model, s, _Neqns_, _initValues_, _initDerivatives_, _absolute_tolerances_, _IDs_, _relative_tolerance_);
+    
+    model->values          = dae_solver->yval;
+    model->timeDerivatives = dae_solver->ypval;
+    modSetInitialConditions(model, dae_solver->yval);
+    modInitializeValuesReferences(model);
 }
 
 void simFinalize(daeSimulation_t* s)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
-    solDestroy(dae_solver);
+    solDestroy(s->m_pDAESolver);
 }
 
 void simReinitialize(daeSimulation_t* s)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
-    solReinitialize(dae_solver, true, false);
+    solReinitialize(s->m_pDAESolver, true, false);
 }
 
 void simSolveInitial(daeSimulation_t* s)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
     s->m_dCurrentTime = 0.0;
-    solSolveInitial(dae_solver);
+    solSolveInitial(s->m_pDAESolver);
     simReportData(s);
 }
 
 void simRun(daeSimulation_t* s)
 {
     real_t t;
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
 
     while(s->m_dCurrentTime < s->m_dTimeHorizon)
     {
@@ -76,31 +73,27 @@ void simRun(daeSimulation_t* s)
 
 real_t simIntegrate(daeSimulation_t* s, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
-    s->m_dCurrentTime = solSolve(dae_solver, s->m_dTimeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
+    s->m_dCurrentTime = solSolve(s->m_pDAESolver, s->m_dTimeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
     return s->m_dCurrentTime;
 }
 
 real_t simIntegrateForTimeInterval(daeSimulation_t* s, real_t time_interval, bool bReportDataAroundDiscontinuities)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
-    s->m_dCurrentTime = solSolve(dae_solver, s->m_dCurrentTime + time_interval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
+    s->m_dCurrentTime = solSolve(s->m_pDAESolver, s->m_dCurrentTime + time_interval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
     return s->m_dCurrentTime;
 }
 
 real_t simIntegrateUntilTime(daeSimulation_t* s, real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
-    s->m_dCurrentTime = solSolve(dae_solver, time, eStopCriterion, bReportDataAroundDiscontinuities);
+    s->m_dCurrentTime = solSolve(s->m_pDAESolver, time, eStopCriterion, bReportDataAroundDiscontinuities);
     return s->m_dCurrentTime;
 }
 
 void simReportData(daeSimulation_t* s)
 {
-    daeIDASolver_t* dae_solver = (daeIDASolver_t*)s->m_pDAESolver;
-    printf("Results at time: %12.5f\n", dae_solver->m_dCurrentTime);
-    for(int i = 0; i < dae_solver->Neqns; i++)
-        printf("%s = %20.14e\n", _variable_names_[i], dae_solver->yval[i]);
+    printf("Results at time: %12.5f\n", s->m_pDAESolver->m_dCurrentTime);
+    for(int i = 0; i < s->m_pDAESolver->Neqns; i++)
+        printf("%s = %20.14e\n", _variable_names_[i], s->m_pDAESolver->yval[i]);
     printf("\n");
 }
 

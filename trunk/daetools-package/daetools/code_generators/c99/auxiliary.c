@@ -22,7 +22,6 @@ bool _compare_strings_(const char* s1, const char* s2)
     return (strcmp(s1, s2) == 0 ? true : false);
 }
 
-
 void _log_message_(const char* msg)
 {
     printf(msg);

@@ -26,5 +26,5 @@ QMAKE_LIBDIR +=
 
 LIBS += -lsundials_idas -lsundials_nvecserial -lblas -llapack
 
-SOURCES += auxiliary.c adouble.c dae_solver.c simulation.c daetools_model.c main.c
-HEADERS += adouble.h typedefs.h auxiliary.h dae_solver.h simulation.h daetools_model.h
+SOURCES += auxiliary.c adouble.c daesolver.c simulation.c model.c main.c
+HEADERS += typedefs.h auxiliary.h adouble.h daesolver.h simulation.h model.h

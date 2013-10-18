@@ -21,6 +21,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef real_t
 #define real_t double
 #endif
@@ -58,7 +62,7 @@ typedef struct
     real_t* idsval;
     long    Neqns;
 
-    /* Opaque IDA pointers */
+    /* Opaque pointers */
     void*   model;
     void*   simulation;
     void*   mem;
@@ -78,5 +82,9 @@ typedef struct
     real_t                   m_dReportingInterval;
 
 } daeSimulation_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

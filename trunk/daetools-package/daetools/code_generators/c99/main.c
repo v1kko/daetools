@@ -11,7 +11,6 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "auxiliary.h"
-#include "daetools_model.h"
 #include "simulation.h"
 
 int main(int argc, char *argv[])
@@ -24,12 +23,8 @@ int main(int argc, char *argv[])
     memset(&dae_solver, 0, sizeof(daeIDASolver_t));
     memset(&simulation, 0, sizeof(daeSimulation_t));
 
-    initialize_model(&model);
+    modInitialize(&model);
     simInitialize(&simulation, &model, &dae_solver, false);
-
-    model.values          = dae_solver.yval;
-    model.timeDerivatives = dae_solver.ypval;
-    initialize_values_references(&model);
 
     simSolveInitial(&simulation);
     simRun(&simulation);
