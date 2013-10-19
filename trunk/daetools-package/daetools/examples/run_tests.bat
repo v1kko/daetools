@@ -16,6 +16,8 @@ python tutorial14.py console
 python tutorial15.py console
 python tutorial16.py console
 python tutorial17.py console
+python tutorial18.py console
+python tutorial19.py console
 
 python opt_tutorial1.py console
 python opt_tutorial2.py console
@@ -23,3 +25,4 @@ python opt_tutorial3.py console
 python opt_tutorial4.py console
 python opt_tutorial5.py console
 python opt_tutorial6.py console
+python opt_tutorial7.py console

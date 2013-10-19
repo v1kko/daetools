@@ -7,13 +7,14 @@ class daeCodeGenerator_FMI(fmiModelDescription):
     def __init__(self):
         fmiModelDescription.__init__(self)        
     
-    def generateSimulation(self, simulation, **kwargs):
+    def generateSimulation(self, simulation, directory):
         try:
-            fmu_directory = kwargs.get('projectDirectory', None)
-            if not os.path.isdir(fmu_directory):
-                raise RuntimeError('Invalid project directory: {0}'.format(fmu_directory))
             if not simulation:
                 raise RuntimeError('Invalid simulation object')
+            if not os.path.isdir(directory):
+                os.makedirs(directory)
+            
+            fmu_directory = directory
             
             tmp_folder               = tempfile.mkdtemp(prefix = 'daetools-fmu-')
             xml_description_filename = os.path.join(tmp_folder, 'modelDescription.xml')

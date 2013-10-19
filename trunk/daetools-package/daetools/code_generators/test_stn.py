@@ -162,7 +162,7 @@ def consoleRun():
     from c99 import daeCodeGenerator_c99
     cg = daeCodeGenerator_c99()
     folder = os.path.join('tests', simulation.m.GetStrippedName())
-    cg.generateSimulation(simulation, projectDirectory = folder)
+    cg.generateSimulation(simulation, folder)
 
     # Run
     #simulation.Run()

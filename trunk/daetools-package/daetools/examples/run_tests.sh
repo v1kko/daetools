@@ -55,6 +55,12 @@ python tutorial16.py console
 echo tutorial17.py
 python tutorial17.py console
 
+echo tutorial18.py
+python tutorial18.py console
+
+echo tutorial19.py
+python tutorial19.py console
+
 echo opt_tutorial1.py
 python opt_tutorial1.py console
 

@@ -9,327 +9,6 @@ Compile with:
   gcc -O3 -Wall -std=c99 -pedantic -o daetools_simulation auxiliary.c adouble.c main.c -lsundials_idas -lsundials_nvecserial -lblas -llapack
 """
 
-daetools_model_h_templ = """\
-/***********************************************************************************
-                 DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2013
-************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-***********************************************************************************/
-#ifndef DAETOOLS_MODEL_H
-#define DAETOOLS_MODEL_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* C99 CODE GENERATOR WARNINGS!!!
-%(warnings)s
-*/
-
-#include "auxiliary.h"
-#include "adouble.h"
-
-#define _v_(i)   _adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
-#define _time_   _adouble_(_current_time_, 0.0)
-
-/* General runtime information */          
-%(runtimeInformation_h)s
-
-typedef struct
-{
-    bool quasySteadyState;
-    real_t* values;
-    real_t* timeDerivatives;
-    %(intValuesReferences_Def)s
-    %(floatValuesReferences_Def)s
-    %(stringValuesReferences_Def)s
-
-    /* Domains and parameters */
-    %(parameters)s
-
-    /* Assigned variables (Degrees of Freedom) */
-    %(assignedVariablesDefs)s
-
-    /* State Transition Networks */
-    %(stns)s
-
-} daeModel_t;
-
-void modInitialize(daeModel_t* _m_);
-void modInitializeValuesReferences(daeModel_t* _m_);
-void modSetInitialConditions(daeModel_t* _m_, real_t* values);
-void modGetValue_float(daeModel_t* _m_, int index, real_t* value);
-void modSetValue_float(daeModel_t* _m_, int index, real_t value);
-void modGetValue_string(daeModel_t* _m_, int index, char* value);
-void modSetValue_string(daeModel_t* _m_, int index, const char* value);
-void modGetValue_int(daeModel_t* _m_, int index, int* value);
-void modSetValue_int(daeModel_t* _m_, int index, int value);
-
-int modResiduals(daeModel_t* _m_,
-                 real_t _current_time_,
-                 real_t* _values_,
-                 real_t* _time_derivatives_,
-                 real_t* _residuals_);
-int modJacobian(daeModel_t* _m_,
-                long int _number_of_equations_,
-                real_t _current_time_,
-                real_t _inverse_time_step_,
-                real_t* _values_,
-                real_t* _time_derivatives_,
-                real_t* _residuals_,
-                matrix_t _jacobian_matrix_);
-int modNumberOfRoots(daeModel_t* _m_);
-int modRoots(daeModel_t* _m_,
-             real_t _current_time_,
-             real_t* _values_,
-             real_t* _time_derivatives_,
-             real_t* _roots_);
-bool modCheckForDiscontinuities(daeModel_t* _m_,
-                                real_t _current_time_,
-                                real_t* _values_,
-                                real_t* _time_derivatives_);
-daeeDiscontinuityType modExecuteActions(daeModel_t* _m_,
-                                        real_t _current_time_,
-                                        real_t* _values_,
-                                        real_t* _time_derivatives_);
-adouble modCalculateScalarExtFunction(char* fun_name, 
-                                      daeModel_t* _m_,
-                                      real_t _current_time_,
-                                      real_t* _values_,
-                                      real_t* _time_derivatives_);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
-
-"""
-
-daetools_model_c_templ = """\
-/***********************************************************************************
-                 DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2013
-************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-***********************************************************************************/
-#include "model.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* General info */          
-%(runtimeInformation_c)s
-
-void modInitialize(daeModel_t* _m_)
-{
-    /* If true all diff. parts are equal to zero */
-    _m_->quasySteadyState = %(quasySteadyState)s;
-    
-    %(parametersInits)s
-    %(assignedVariablesInits)s
-    %(stnActiveStates)s    
-}
-
-void modInitializeValuesReferences(daeModel_t* _m_)
-{
-    /* Values references is an array of pointers that point to the values
-     * of domains/parameters/DOFs/variables in the daeModel_t structure.
-     * Can be used to set/get values from the model (ie. for FMI) having only
-     * index of some value. */
-    
-    /* Integers */
-    %(intValuesReferences_Init)s
-
-    /* Floats */
-    %(floatValuesReferences_Init)s
-    
-    /* Strings */
-    %(stringValuesReferences_Init)s
-}
-
-void modSetInitialConditions(daeModel_t* _m_, real_t* values)
-{
-    if(_m_->quasySteadyState)
-        return;
-
-    %(initialConditions)s
-}
-
-int modResiduals(daeModel_t* _m_,
-                 real_t _current_time_,
-                 real_t* _values_,
-                 real_t* _time_derivatives_,
-                 real_t* _residuals_)
-{
-    adouble _temp_;
-    real_t _inverse_time_step_;
-    int i, _ec_, _current_index_for_jacobian_evaluation_;
-    
-    _ec_                                    = 0;
-    _current_index_for_jacobian_evaluation_ = -1;
-    _inverse_time_step_                     = 0.0;
-
-%(residuals)s
-
-    return 0;
-}
-
-int modJacobian(daeModel_t* _m_,
-                long int _number_of_equations_,
-                real_t _current_time_,
-                real_t _inverse_time_step_,
-                real_t* _values_,
-                real_t* _time_derivatives_,
-                real_t* _residuals_,
-                matrix_t _jacobian_matrix_)
-{
-    adouble _temp_;
-    real_t _jacobianItem_;
-    int _i_, _ec_, _block_index_, _current_index_for_jacobian_evaluation_;
-
-    _ec_                                    = 0;
-    _current_index_for_jacobian_evaluation_ = -1;
-    
-%(jacobian)s
-
-    return 0;
-}
-
-int modNumberOfRoots(daeModel_t* _m_)
-{
-    int _noRoots_;
-
-    _noRoots_ = 0;
-    
-%(numberOfRoots)s
-
-    return _noRoots_;
-}
-
-int modRoots(daeModel_t* _m_,
-             real_t _current_time_,
-             real_t* _values_,
-             real_t* _time_derivatives_,
-             real_t* _roots_)
-{
-    adouble _temp_;
-    real_t _inverse_time_step_;
-    int _rc_, _current_index_for_jacobian_evaluation_;
-    
-    _rc_                                    = 0;
-    _inverse_time_step_                     = 0.0;
-    _current_index_for_jacobian_evaluation_ = -1;
-    
-%(roots)s
-
-    return 0;
-}
-
-bool modCheckForDiscontinuities(daeModel_t* _m_,
-                                real_t _current_time_,
-                                real_t* _values_,
-                                real_t* _time_derivatives_)
-{
-    adouble _temp_;
-    bool foundDiscontinuity;
-    real_t _inverse_time_step_;
-    int _current_index_for_jacobian_evaluation_;
-
-    _inverse_time_step_                     = 0.0;
-    _current_index_for_jacobian_evaluation_ = -1;
-    foundDiscontinuity                      = false;
-    
-%(checkForDiscontinuities)s
-
-    return foundDiscontinuity;
-}
-
-daeeDiscontinuityType modExecuteActions(daeModel_t* _m_,
-                                        real_t _current_time_,
-                                        real_t* _values_,
-                                        real_t* _time_derivatives_)
-{
-    adouble _temp_;
-    real_t _inverse_time_step_;
-    daeeDiscontinuityType _discontinuity_type_;
-    int _current_index_for_jacobian_evaluation_;
-
-    _inverse_time_step_                     = 0.0;
-    _current_index_for_jacobian_evaluation_ = -1;
-    _discontinuity_type_                    = eModelDiscontinuityWithDataChange;
-
-%(executeActions)s
-
-    return _discontinuity_type_;
-}
-
-adouble modCalculateScalarExtFunction(char* fun_name, 
-                                      daeModel_t* _m_,
-                                      real_t _current_time_,
-                                      real_t* _values_,
-                                      real_t* _time_derivatives_)
-{
-    _log_message_("calculate_scalar_ext_function: ");    
-    _log_message_(fun_name);    
-    _log_message_("\\n");    
-    
-    if(_compare_strings_(fun_name, ""))
-    {
-    }
-    return _adouble_(0.0, 0.0);
-}
-
-void modGetValue_float(daeModel_t* _m_, int index, real_t* value)
-{
-    *value = *_m_->floatValuesReferences[index];
-}
-
-void modSetValue_float(daeModel_t* _m_, int index, real_t value)
-{
-    *_m_->floatValuesReferences[index] = value;
-}
-
-void modGetValue_string(daeModel_t* _m_, int index, char* value)
-{
-    /* *value = _m_->stringValuesReferences[index]; */
-}
-
-void modSetValue_string(daeModel_t* _m_, int index, const char* value)
-{
-    /* _m_->stringValuesReferences[index] = value; */
-}
-
-void modGetValue_int(daeModel_t* _m_, int index, int* value)
-{
-    *value = *_m_->intValuesReferences[index];
-}
-
-void modSetValue_int(daeModel_t* _m_, int index, int value)
-{
-    *_m_->intValuesReferences[index] = value;
-}
-
-#ifdef __cplusplus
-}
-#endif
-"""
-
 class daeExpressionFormatter_c99(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
@@ -455,12 +134,13 @@ class daeCodeGenerator_c99(object):
         self.exprFormatter = daeExpressionFormatter_c99()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
-    def generateSimulation(self, simulation, **kwargs):
+    def generateSimulation(self, simulation, directory):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
 
-        directory = kwargs.get('projectDirectory', None)
-
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
+            
         self.quasySteadyState        = False
         self.assignedVariablesDefs   = []
         self.assignedVariablesInits  = []
@@ -604,40 +284,42 @@ class daeCodeGenerator_c99(object):
                         'warnings' : warnings
                    }
 
+        c99_dir = os.path.join(os.path.dirname(__file__), 'c99')
+        
+        f = open(os.path.join(c99_dir, 'model.h'), "r")
+        daetools_model_h_templ = f.read()
+        f.close()
+        
+        f = open(os.path.join(c99_dir, 'model.c'), "r")
+        daetools_model_c_templ = f.read()
+        f.close()
+        
         daetools_model_h_contents = daetools_model_h_templ % dictInfo;
         daetools_model_c_contents = daetools_model_c_templ % dictInfo;
 
-        ansic_dir = os.path.join(os.path.dirname(__file__), 'c99')
+        path, dirName = os.path.split(directory)
 
-        # If the argument 'directory' is given create the folder and the project
-        if directory:
-            path, dirName = os.path.split(directory)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
+        shutil.copy2(os.path.join(c99_dir, 'main.c'),          os.path.join(directory, 'main.c'))
+        shutil.copy2(os.path.join(c99_dir, 'adouble.h'),       os.path.join(directory, 'adouble.h'))
+        shutil.copy2(os.path.join(c99_dir, 'adouble.c'),       os.path.join(directory, 'adouble.c'))
+        shutil.copy2(os.path.join(c99_dir, 'typedefs.h'),      os.path.join(directory, 'typedefs.h'))
+        shutil.copy2(os.path.join(c99_dir, 'daesolver.h'),     os.path.join(directory, 'daesolver.h'))
+        shutil.copy2(os.path.join(c99_dir, 'daesolver.c'),     os.path.join(directory, 'daesolver.c'))
+        shutil.copy2(os.path.join(c99_dir, 'simulation.h'),    os.path.join(directory, 'simulation.h'))
+        shutil.copy2(os.path.join(c99_dir, 'simulation.c'),    os.path.join(directory, 'simulation.c'))
+        shutil.copy2(os.path.join(c99_dir, 'auxiliary.h'),     os.path.join(directory, 'auxiliary.h'))
+        shutil.copy2(os.path.join(c99_dir, 'auxiliary.c'),     os.path.join(directory, 'auxiliary.c'))
+        shutil.copy2(os.path.join(c99_dir, 'Makefile-gcc'),    os.path.join(directory, 'Makefile'))
+        shutil.copy2(os.path.join(c99_dir, 'vc++2008.vcproj'), os.path.join(directory, '%s.vcproj' % dirName))
+        shutil.copy2(os.path.join(c99_dir, 'qt_project.pro'),  os.path.join(directory, '%s.pro' % dirName))
 
-            shutil.copy2(os.path.join(ansic_dir, 'main.c'),          os.path.join(directory, 'main.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'adouble.h'),       os.path.join(directory, 'adouble.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'adouble.c'),       os.path.join(directory, 'adouble.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'typedefs.h'),      os.path.join(directory, 'typedefs.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'daesolver.h'),     os.path.join(directory, 'daesolver.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'daesolver.c'),     os.path.join(directory, 'daesolver.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'simulation.h'),    os.path.join(directory, 'simulation.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'simulation.c'),    os.path.join(directory, 'simulation.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.h'),     os.path.join(directory, 'auxiliary.h'))
-            shutil.copy2(os.path.join(ansic_dir, 'auxiliary.c'),     os.path.join(directory, 'auxiliary.c'))
-            shutil.copy2(os.path.join(ansic_dir, 'Makefile-gcc'),    os.path.join(directory, 'Makefile'))
-            shutil.copy2(os.path.join(ansic_dir, 'vc++2008.vcproj'), os.path.join(directory, '%s.vcproj' % dirName))
-            shutil.copy2(os.path.join(ansic_dir, 'qt_project.pro'),  os.path.join(directory, '%s.pro' % dirName))
-
-            daetools_model_h = os.path.join(directory, 'model.h')
-            f = open(daetools_model_h, "w")
-            f.write(daetools_model_h_contents)
-            f.close()
-            
-            daetools_model_c = os.path.join(directory, 'model.c')
-            f = open(daetools_model_c, "w")
-            f.write(daetools_model_c_contents)
-            f.close()
+        f = open(os.path.join(directory, 'model.h'), "w")
+        f.write(daetools_model_h_contents)
+        f.close()
+        
+        f = open(os.path.join(directory, 'model.c'), "w")
+        f.write(daetools_model_c_contents)
+        f.close()
 
         if len(self.warnings) > 0:
             print 'CODE GENERATOR WARNINGS:'

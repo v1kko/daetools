@@ -49,7 +49,7 @@ except Exception, e:
 try:
     import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
     import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
-    import tutorial14, tutorial15, tutorial16, tutorial17
+    import tutorial14, tutorial15, tutorial16, tutorial17, tutorial18, tutorial19
 except Exception, e:
     exc_traceback = sys.exc_info()[2]
     print '\n'.join(traceback.format_tb(exc_traceback))
@@ -162,6 +162,8 @@ class RunExamples(QtGui.QDialog):
         self.ui.comboBoxExample.addItem("tutorial15", QtCore.QVariant(tutorial15))
         self.ui.comboBoxExample.addItem("tutorial16", QtCore.QVariant(tutorial16))
         self.ui.comboBoxExample.addItem("tutorial17", QtCore.QVariant(tutorial17))
+        self.ui.comboBoxExample.addItem("tutorial18", QtCore.QVariant(tutorial18))
+        self.ui.comboBoxExample.addItem("tutorial19", QtCore.QVariant(tutorial19))
         self.ui.comboBoxExample.addItem("opt_tutorial1", QtCore.QVariant(opt_tutorial1))
         self.ui.comboBoxExample.addItem("opt_tutorial2", QtCore.QVariant(opt_tutorial2))
         self.ui.comboBoxExample.addItem("opt_tutorial3", QtCore.QVariant(opt_tutorial3))
@@ -237,6 +239,10 @@ class RunExamples(QtGui.QDialog):
                 tutorial16.guiRun(self.app)
             elif simName == "tutorial17":
                 tutorial17.guiRun(self.app)
+            elif simName == "tutorial18":
+                tutorial18.guiRun(self.app)
+            elif simName == "tutorial19":
+                tutorial19.guiRun(self.app)
             elif simName == "whats_the_time":
                 whats_the_time.guiRun(self.app)
             elif simName == "opt_tutorial1":

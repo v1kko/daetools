@@ -59,7 +59,7 @@
             </h1>
 
             <xsl:if test="Model/Description != ''">
-                <pre>
+                <pre style="font-family:Monospace">
                     <xsl:value-of select="Model/Description"/>
                 </pre>
             </xsl:if>

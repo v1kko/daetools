@@ -316,10 +316,10 @@ def consoleRun():
     #cg.generateSimulation(simulation,     simulation.m.Name + '.mo')
 
     import os
-    from ansi_c import daeCodeGenerator_ANSI_C
-    cg = daeCodeGenerator_ANSI_C()
+    from ansi_c import daeCodeGenerator_c99
+    cg = daeCodeGenerator_c99()
     folder = os.path.join(os.path.expanduser('~'), simulation.m.Name)
-    cg.generateSimulation(simulation, projectDirectory = folder, language = 'c')
+    cg.generateSimulation(simulation, folder)
 
     # Run
     simulation.Run()

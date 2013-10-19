@@ -526,6 +526,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("arctanh", &daepython::ad_atanh)
         .def("arctan2", &daepython::ad_atan2)
         */
+        .def("abs",    &daepython::ad_abs)
         .def("fabs",   &daepython::ad_abs)
         .def("ceil",   &daepython::ad_ceil)
         .def("floor",  &daepython::ad_floor)

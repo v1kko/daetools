@@ -103,7 +103,7 @@ Also, we need to write the following 5 equations:
 
 """
 
-import sys, tempfile
+import sys
 from daetools.pyDAE import *
 from time import localtime, strftime
 
