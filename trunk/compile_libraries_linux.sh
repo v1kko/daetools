@@ -41,6 +41,9 @@ SOLVERS:
     
     bonmin           Bonmin solver
     nlopt            NLopt solver 
+
+    libmesh          libMesh FE library 
+    deal.ii          deal.II FE library
 EOF
 }
 
@@ -160,6 +163,8 @@ vCOLAMD=2.8.0
 vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
+vLIBMESH=0.9.2.2
+vDEALII=8.0.0
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
@@ -180,6 +185,8 @@ CAMD_HTTP=http://www.cise.ufl.edu/research/sparse/camd
 COLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/colamd
 CCOLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/ccolamd
 SUITESPARSE_CONFIG_HTTP=http://www.cise.ufl.edu/research/sparse/UFconfig
+LIBMESH_HTTP=http://sourceforge.net/projects/libmesh/files/libmesh
+DEALII_HTTP=https://dealii.googlecode.com/files
 
 # If no option is set use defaults
 if [ "${DO_CONFIGURE}" = "no" -a "${DO_BUILD}" = "no" -a "${DO_CLEAN}" = "no" ]; then
@@ -208,6 +215,8 @@ else
         superlu_mt)       ;;
         bonmin)           ;;
         nlopt)            ;; 
+        libmesh)          ;;
+        deal.ii)          ;;
         *) echo Unrecognized solver: "$solver"
         exit
         ;;
@@ -244,7 +253,7 @@ configure_boost()
     rm -r boost
   fi
   echo ""
-  echo "[*] Setting-up BOOST..."
+  echo "[*] Setting-up boost"
   echo ""
   if [ ! -e boost_${vBOOST_}.tar.gz ]; then
     wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
@@ -264,7 +273,7 @@ compile_boost()
 {
   cd boost
   echo ""
-  echo "[*] Building BOOST..."
+  echo "[*] Building boost"
   echo ""
   
   BOOST_USER_CONFIG=~/user-config.jam
@@ -980,6 +989,112 @@ clean_trilinos()
   echo ""
 }
 
+#######################################################
+#                     libMesh                         #
+#######################################################
+configure_libmesh() 
+{
+  if [ -e libmesh ]; then
+    rm -r libmesh
+  fi
+  echo ""
+  echo "[*] Setting-up libmesh..."
+  echo ""
+  if [ ! -e libmesh-${vLIBMESH}.tar.gz ]; then
+    wget ${LIBMESH_HTTP}/${vLIBMESH}/libmesh-${vLIBMESH}.tar.gz
+  fi
+  
+  tar -xzf libmesh-${vLIBMESH}.tar.gz
+  mv libmesh-${vLIBMESH} libmesh
+  cd libmesh
+  mkdir build
+  export BOOST_ROOT="${TRUNK}/boost"
+  ./configure --prefix="${TRUNK}/libmesh/build" --with-boost="${TRUNK}/boost"
+
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_libmesh() 
+{
+  cd libmesh
+  echo ""
+  echo "[*] Building libmesh..."
+  echo ""
+  make -j${Ncpu}
+  make install
+  cd "${TRUNK}"
+}
+
+clean_libmesh()
+{
+  echo ""
+  echo "[*] Cleaning libmesh..."
+  echo ""
+  cd libmesh
+  make clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+#######################################################
+#                     deal.II                         #
+#######################################################
+configure_dealii() 
+{
+  if [ -e deal.II ]; then
+    rm -r deal.II
+  fi
+  echo ""
+  echo "[*] Setting-up deal.II..."
+  echo ""
+  if [ ! -e deal.II-${vDEALII}.tar.gz ]; then
+    wget ${DEALII_HTTP}/deal.II-${vDEALII}.tar.gz
+  fi
+  
+  tar -xzf deal.II-${vDEALII}.tar.gz
+  cd deal.II
+  mkdir build
+  cmake \
+    -DCMAKE_INSTALL_PREFIX="${TRUNK}/deal.II/build" \
+    -DDEAL_II_WITH_THREADS=OFF \
+    -DDEAL_II_WITH_MPI=OFF \
+    -DDEAL_II_COMPONENT_PARAMETER_GUI=OFF \
+    -DDEAL_II_COMPONENT_MESH_CONVERTER=ON 
+
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_dealii() 
+{
+  cd deal.II
+  echo ""
+  echo "[*] Building deal.II..."
+  echo ""
+  make -j${Ncpu} install
+  cd "${TRUNK}"
+}
+
+clean_dealii()
+{
+  echo ""
+  echo "[*] Cleaning deal.II..."
+  echo ""
+  cd deal.II
+  make clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
 
 #######################################################
 #                Actual work                          #
@@ -1154,6 +1269,32 @@ do
                       
                       if [ "${DO_CLEAN}" = "yes" ]; then 
                         clean_nlopt
+                      fi
+                      ;; 
+                      
+    libmesh)          if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_libmesh
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_libmesh
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_libmesh
+                      fi
+                      ;; 
+                      
+    deal.ii)          if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_dealii
+                      fi
+                      
+                      if [ "${DO_BUILD}" = "yes" ]; then 
+                        compile_dealii
+                      fi
+                      
+                      if [ "${DO_CLEAN}" = "yes" ]; then 
+                        clean_dealii
                       fi
                       ;; 
                       

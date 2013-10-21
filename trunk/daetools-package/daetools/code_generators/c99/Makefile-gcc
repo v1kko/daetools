@@ -22,8 +22,8 @@ $(TARGET): $(OBJECTS)
 clean: 
 	-$(DEL_FILE) $(OBJECTS)
 
-daesolver.o: daesolver.c auxiliary.h typedefs.h dae_solver.h
-	$(CC) -c $(CFLAGS) $(INCPATH) -o daesolver.o dae_solver.c
+daesolver.o: daesolver.c auxiliary.h typedefs.h daesolver.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o daesolver.o daesolver.c
 
 simulation.o: simulation.c auxiliary.h typedefs.h model.h simulation.h daesolver.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o simulation.o simulation.c
@@ -35,8 +35,8 @@ adouble.o: adouble.c adouble.h typedefs.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o adouble.o adouble.c
 
 model.o: model.c model.h auxiliary.h typedefs.h adouble.h
-	$(CC) -c $(CFLAGS) $(INCPATH) -o daetools_model.o daetools_model.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o model.o model.c
 
-main.o: main.c auxiliary.h typedefs.h daetools_model.h adouble.h
+main.o: main.c auxiliary.h typedefs.h model.h adouble.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o main.o main.c
 

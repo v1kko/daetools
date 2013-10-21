@@ -12,21 +12,31 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "model.h"
 
+#define _v_(i)   _adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
+#define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _time_   _adouble_(_current_time_, 0.0)
+
 /* General info */          
 %(runtimeInformation_c)s
 
 void modInitialize(daeModel_t* _m_)
 {
-    /* If true all diff. parts are equal to zero */
-    _m_->quasySteadyState = %(quasySteadyState)s;
+    %(runtimeInformation_init)s
+
+    //memset(_m_->initValues, 0, 125 * sizeof(real_t));
+    //memset(_m_->initDerivatives, 0, 125 * sizeof(real_t));
+    modSetInitialConditions(_m_, _m_->initValues);
     
     %(parametersInits)s
     %(assignedVariablesInits)s
     %(stnActiveStates)s    
 }
 
-void modInitializeValuesReferences(daeModel_t* _m_)
+void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* timeDerivatives)
 {
+    _m_->values          = values;
+    _m_->timeDerivatives = timeDerivatives;
+
     /* Values references is an array of pointers that point to the values
      * of domains/parameters/DOFs/variables in the daeModel_t structure.
      * Can be used to set/get values from the model (ie. for FMI) having only

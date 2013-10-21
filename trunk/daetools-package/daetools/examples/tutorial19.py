@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial19.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2010
+                Copyright (C) Dragan Nikolic, 2013
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -26,8 +26,8 @@ Linear finite elements discretization:
 
 .. code-block:: none
 
-                  φ                    phi
-                   (k-1)                (k)
+                  phi                 phi
+                     (k-1)               (k)
                      
                     *                   *             
                   * | *               * | *            
@@ -38,14 +38,14 @@ Linear finite elements discretization:
         *           |       *   *       |           *      
       *             |     *       *     |             *    
     *               |   *           *   |               *  
-  *                 | *   element     * |                 *
-*-------------------|-------------------|-------------------*-
+  *                 | *  element (k)  * |                 *
+*-------------------*+++++++++++++++++++*-------------------*-
                     x                   x
                      (k-i                (k)
                    
-                    |_________ _________|
-                              *
-                              ∆x
+                    \_________ _________/
+                              v
+                              dx
        
  - Simple FE matrix assembly 
 
@@ -91,9 +91,9 @@ class modTutorial(daeModel):
         ##################################################################################
         # First way: use constant global stiffness matrix and load array
         ##################################################################################
-        print '##################################################################################'
+        print '***************************************************************************'
         print '    First way'
-        print '##################################################################################'
+        print '***************************************************************************'
         # Create global stiffness matrix and load vector (dtype = float):
         A = numpy.zeros((N,N))        
         F = numpy.zeros(N)
@@ -145,11 +145,12 @@ class modTutorial(daeModel):
 
         ##################################################################################
         # Second way: use global stiffness matrix and load array that depend on DAE Tools
-        #             model parameters/variables (not constant in a general case)
+        #             model parameters/variables (not constant in a general case).
+        #             Obviously, they are constant here - this is only to show the concept
         ##################################################################################
-        print '##################################################################################'
+        print '***************************************************************************'
         print '    Second way'
-        print '##################################################################################'
+        print '***************************************************************************'
         # Create global stiffness matrix and load vector (dtype = object). This matrix and
         # load vector will be functions of model parameters/variables.  
         # In this simple example that is not a case; however, the procedure is analogous.
@@ -172,7 +173,7 @@ class modTutorial(daeModel):
             # Element stiffness matrix and load vector are the same:
             #       | 1 -1 |          | 1 |
             # Ael = |-1  1 |    Fel = | 1 |
-                 
+            #
             Ael = (1 / dx) * numpy.array( [[1, -1], [-1, 1]] )
             Fel = (dx / 2) * numpy.array([1, 1])
             

@@ -60,7 +60,7 @@ typedef struct
     real_t* ypval;
     real_t* atval;
     real_t* idsval;
-    long    Neqns;
+    long    Nequations;
 
     /* Opaque pointers */
     void*   model;

@@ -44,8 +44,7 @@ int jacob(long int Neq,
           N_Vector tempv2,
           N_Vector tempv3);
 
-
-int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Neqns, const real_t*  initValues, const real_t* initDerivatives,
+int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Nequations, const real_t*  initValues, const real_t* initDerivatives,
                   const real_t*  absTolerances, const int* IDs, real_t  relativeTolerance)
 {
     int i, retval;
@@ -54,44 +53,44 @@ int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Neqns, 
 
     s->model      = model;
     s->simulation = simulation;
-    s->Neqns      = Neqns;
+    s->Nequations = Nequations;
     s->rtol       = relativeTolerance;
 
     /* Allocate N-vectors. */
-    yy = N_VNew_Serial(Neqns);
+    yy = N_VNew_Serial(s->Nequations);
     if(check_flag((void *)yy, "N_VNew_Serial", 0))
         return(-1);
     s->yy = yy;
 
-    yp = N_VNew_Serial(Neqns);
+    yp = N_VNew_Serial(s->Nequations);
     if(check_flag((void *)yp, "N_VNew_Serial", 0))
         return(-1);
     s->yp = yp;
 
-    avtol = N_VNew_Serial(Neqns);
+    avtol = N_VNew_Serial(s->Nequations);
     if(check_flag((void *)avtol, "N_VNew_Serial", 0))
         return(-1);
 
-    ids = N_VNew_Serial(Neqns);
+    ids = N_VNew_Serial(s->Nequations);
     if(check_flag((void *)ids, "N_VNew_Serial", 0))
         return(-1);
 
     /* Create and initialize  y, y', and absolute tolerance vectors. */
     s->yval = NV_DATA_S(yy);
     /* First copy default values and then set initial conditions */
-    for(i = 0; i < Neqns; i++)
+    for(i = 0; i < s->Nequations; i++)
         s->yval[i] = initValues[i];
 
     s->ypval = NV_DATA_S(yp);
-    for(i = 0; i < Neqns; i++)
+    for(i = 0; i < s->Nequations; i++)
         s->ypval[i] = initDerivatives[i];
 
     s->atval = NV_DATA_S(avtol);
-    for(i = 0; i < Neqns; i++)
+    for(i = 0; i < s->Nequations; i++)
         s->atval[i] = absTolerances[i];
 
     s->idsval = NV_DATA_S(ids);
-    for(i = 0; i < Neqns; i++)
+    for(i = 0; i < s->Nequations; i++)
         s->idsval[i] = (real_t)IDs[i];
 
     /* Integration limits */
@@ -129,7 +128,7 @@ int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Neqns, 
          return(-1);
 
     /* Call IDADense and set up the linear solver. */
-    retval = IDADense(s->mem, Neqns);
+    retval = IDADense(s->mem, s->Nequations);
     if(check_flag(&retval, "IDADense", 1))
         return(-1);
 
@@ -168,9 +167,9 @@ int solResetIDASolver(daeIDASolver_t* s, bool bCopyDataFromBlock, real_t dCurren
 real_t solSolve(daeIDASolver_t* s, real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities)
 {
     int retval;
-    bool copyValuesToSolver;
     daeeDiscontinuityType eDiscontinuityType;
 
+    daeModel_t* model = (daeModel_t*)s->model;
     daeSimulation_t* simulation = (daeSimulation_t*)s->simulation;
     s->m_dTargetTime = dTime;
 
@@ -196,14 +195,14 @@ real_t solSolve(daeIDASolver_t* s, real_t dTime, daeeStopCriterion eCriterion, b
         /* If a root has been found, check if any of conditions are satisfied and do what is necessary */
         if(retval == IDA_ROOT_RETURN)
         {
-            bool discontinuity_found = modCheckForDiscontinuities((daeModel_t*)s->model, s->m_dCurrentTime, s->yval, s->ypval);
+            bool discontinuity_found = modCheckForDiscontinuities(model, s->m_dCurrentTime, s->yval, s->ypval);
             if(discontinuity_found)
             {
                 /* Data will be reported only if there is a discontinuity */
                 if(bReportDataAroundDiscontinuities)
                     simReportData(simulation);
 
-                eDiscontinuityType = modExecuteActions((daeModel_t*)s->model, s->m_dCurrentTime, s->yval, s->ypval);
+                eDiscontinuityType = modExecuteActions(model, s->m_dCurrentTime, s->yval, s->ypval);
 
                 if(eDiscontinuityType == eModelDiscontinuity)
                 {
@@ -254,21 +253,21 @@ int solSolveInitial(daeIDASolver_t* s)
     for(iCounter = 0; iCounter < 100; iCounter++)
     {
         if(model->quasySteadyState)
-            retval = IDACalcIC(s->mem, IDA_YA_YDP_INIT, 0.001);
-        else
             retval = IDACalcIC(s->mem, IDA_Y_INIT, 0.001);
+        else
+            retval = IDACalcIC(s->mem, IDA_YA_YDP_INIT, 0.001);
 
         if(retval < 0)
         {
-            printf("Sundials IDAS solver cowardly failed re-initialize the system at TIME = %f; %s\n",  s->m_dCurrentTime, IDAGetReturnFlagName(retval));
+            printf("Sundials IDAS solver cowardly failed to solve the system at TIME = %f; %s\n",  s->m_dCurrentTime, IDAGetReturnFlagName(retval));
             return -1;
         }
 
-        bool discontinuity_found = modCheckForDiscontinuities((daeModel_t*)s->model, s->m_dCurrentTime, s->yval, s->ypval);
+        bool discontinuity_found = modCheckForDiscontinuities(model, s->m_dCurrentTime, s->yval, s->ypval);
         if(discontinuity_found)
         {
-            modExecuteActions((daeModel_t*)s->model, s->m_dCurrentTime, s->yval, s->ypval);
-            noRoots = modNumberOfRoots((daeModel_t*)s->model);
+            modExecuteActions(model, s->m_dCurrentTime, s->yval, s->ypval);
+            noRoots = modNumberOfRoots(model);
             solRefreshRootFunctions(s, noRoots);
             solResetIDASolver(s, true, s->m_dCurrentTime, false);
         }
@@ -301,7 +300,8 @@ int solReinitialize(daeIDASolver_t* s, bool bCopyDataFromBlock, bool bResetSensi
 
     printf("    Reinitializing at time: %f\n", s->m_dCurrentTime);
 
-    int noRoots = modNumberOfRoots((daeModel_t*)s->model);
+    daeModel_t* model = (daeModel_t*)s->model;
+    int noRoots = modNumberOfRoots(model);
     solRefreshRootFunctions(s, noRoots);
     solResetIDASolver(s, bCopyDataFromBlock, s->m_dCurrentTime, bResetSensitivities);
 
@@ -318,11 +318,11 @@ int solReinitialize(daeIDASolver_t* s, bool bCopyDataFromBlock, bool bResetSensi
             return -1;
         }
 
-        bool discontinuity_found = modCheckForDiscontinuities((daeModel_t*)s->model, s->m_dCurrentTime, s->yval, s->ypval);
+        bool discontinuity_found = modCheckForDiscontinuities(model, s->m_dCurrentTime, s->yval, s->ypval);
         if(discontinuity_found)
         {
-            modExecuteActions((daeModel_t*)s->model, s->m_dCurrentTime, s->yval, s->ypval);
-            noRoots = modNumberOfRoots((daeModel_t*)s->model);
+            modExecuteActions(model, s->m_dCurrentTime, s->yval, s->ypval);
+            noRoots = modNumberOfRoots(model);
             solRefreshRootFunctions(s, noRoots);
             solResetIDASolver(s, true, s->m_dCurrentTime, false);
         }

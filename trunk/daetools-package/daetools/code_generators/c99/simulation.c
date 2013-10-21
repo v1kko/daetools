@@ -19,16 +19,18 @@ void simInitialize(daeSimulation_t* s, daeModel_t* model, daeIDASolver_t* dae_so
     s->m_pModel                  = model;
     s->m_pDAESolver              = dae_solver;
     s->m_bIsInitialized          = true;
-    s->m_dCurrentTime            = 0.0;
-    s->m_dTimeHorizon            = _end_time_;
-    s->m_dReportingInterval      = _reporting_interval_;
+    s->m_dCurrentTime            = model->startTime;
+    s->m_dTimeHorizon            = model->timeHorizon;
+    s->m_dReportingInterval      = model->reportingInterval;
 
-    solInitialize(dae_solver, model, s, _Neqns_, _initValues_, _initDerivatives_, _absolute_tolerances_, _IDs_, _relative_tolerance_);
+    solInitialize(dae_solver, model, s, model->Nequations,
+                                        model->initValues,
+                                        model->initDerivatives,
+                                        model->absoluteTolerances,
+                                        model->IDs,
+                                        model->relativeTolerance);
     
-    model->values          = dae_solver->yval;
-    model->timeDerivatives = dae_solver->ypval;
-    modSetInitialConditions(model, dae_solver->yval);
-    modInitializeValuesReferences(model);
+    modInitializeValuesReferences(model, dae_solver->yval, dae_solver->ypval);
 }
 
 void simFinalize(daeSimulation_t* s)
@@ -43,7 +45,6 @@ void simReinitialize(daeSimulation_t* s)
 
 void simSolveInitial(daeSimulation_t* s)
 {
-    s->m_dCurrentTime = 0.0;
     solSolveInitial(s->m_pDAESolver);
     simReportData(s);
 }
@@ -91,10 +92,55 @@ real_t simIntegrateUntilTime(daeSimulation_t* s, real_t time, daeeStopCriterion 
 
 void simReportData(daeSimulation_t* s)
 {
+    daeModel_t* model = (daeModel_t*)s->m_pModel;
+
     printf("Results at time: %12.5f\n", s->m_pDAESolver->m_dCurrentTime);
-    for(int i = 0; i < s->m_pDAESolver->Neqns; i++)
-        printf("%s = %20.14e\n", _variable_names_[i], s->m_pDAESolver->yval[i]);
+    for(int i = 0; i < s->m_pDAESolver->Nequations; i++)
+        printf("%s = %20.14e\n", model->variableNames[i], s->m_pDAESolver->yval[i]);
     printf("\n");
+/*
+    int i;
+    char* out;
+    daeModel_t* model = (daeModel_t*)s->m_pModel;
+    int* lengths = malloc(s->m_pDAESolver->Nequations * sizeof(int));
+
+    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+        lengths[i] = MAX(strlen(model->variableNames[i]) + 1, 21);
+
+    printf("\n");
+    printf("Results at time: %.7f\n", s->m_pDAESolver->m_dCurrentTime);
+    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    {
+        out = calloc(lengths[i]+1, sizeof(char));
+        memset(out, '-', lengths[i]);
+        printf("+-%s-", out);
+    }
+    printf("+\n");
+    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+        printf("| %-*s ", lengths[i], model->variableNames[i]);
+    printf("|\n");
+    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    {
+        out = calloc(lengths[i]+1, sizeof(char));
+        memset(out, '-', lengths[i]);
+        printf("+-%s-", out);
+    }
+    printf("+\n");
+
+    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+        printf("| %-*.14e ", lengths[i], s->m_pDAESolver->yval[i]);
+    printf("|\n");
+    for(i = 0; i < s->m_pDAESolver->Nequations; i++)
+    {
+        out = calloc(lengths[i]+1, sizeof(char));
+        memset(out, '-', lengths[i]);
+        printf("+-%s-", out);
+    }
+    printf("+\n");
+
+    free(out);
+    free(lengths);
+*/
 }
 
 void simStoreInitializationValues(daeSimulation_t* s, const char* strFileName)

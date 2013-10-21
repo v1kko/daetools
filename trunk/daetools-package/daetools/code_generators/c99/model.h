@@ -24,18 +24,20 @@ extern "C" {
 %(warnings)s
 */
 
-#define _v_(i)   _adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
-#define _time_   _adouble_(_current_time_, 0.0)
-
-/* General runtime information */          
-%(runtimeInformation_h)s
-
 typedef struct
 {
-    bool quasySteadyState;
+    long        Ntotal_vars; /* Total number of variables (including Degrees of Freedom) */ 
+    long        Nequations;  /* Number of equations/state variables */
+    real_t      startTime;
+    real_t      timeHorizon;
+    real_t      reportingInterval;
+    real_t      relativeTolerance;    
+    bool        quasySteadyState;
+    %(runtimeInformation_h)s
+    
     real_t* values;
     real_t* timeDerivatives;
+    
     %(intValuesReferences_Def)s
     %(floatValuesReferences_Def)s
     %(stringValuesReferences_Def)s
@@ -52,7 +54,7 @@ typedef struct
 } daeModel_t;
 
 void modInitialize(daeModel_t* _m_);
-void modInitializeValuesReferences(daeModel_t* _m_);
+void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* timeDerivatives);
 void modSetInitialConditions(daeModel_t* _m_, real_t* values);
 void modGetValue_float(daeModel_t* _m_, int index, real_t* value);
 void modSetValue_float(daeModel_t* _m_, int index, real_t value);

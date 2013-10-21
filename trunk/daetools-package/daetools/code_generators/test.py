@@ -252,7 +252,7 @@ class simTutorial(daeSimulation):
         # thus we start the loop with 1 and end with NumberOfPoints-1 (for both domains)
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300 * K)
+                self.m.T.SetInitialCondition(x, y, 250 * K)
 
         self.m.test.T2.AssignValue(1.03 * K)
         self.m.portOut.t1.AssignValue(2)

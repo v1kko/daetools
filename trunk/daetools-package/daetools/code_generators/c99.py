@@ -48,9 +48,9 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
         self.vectorExternalFunction = '_adouble_(0.0, 0.0)'
 
         # Logical operators
-        self.AND   = '_and_({leftValue}, {rightValue})'
-        self.OR    = '_or_({leftValue}, {rightValue})'
-        self.NOT   = '_not_({value})'
+        self.AND   = '({leftValue} && {rightValue})'
+        self.OR    = '({leftValue} || {rightValue})'
+        self.NOT   = '(! {value})'
 
         self.EQ    = '_eq_({leftValue}, {rightValue})'
         self.NEQ   = '_neq_({leftValue}, {rightValue})'
@@ -108,7 +108,6 @@ class daeCodeGenerator_c99(object):
         self.simulation              = None
         self.equationGenerationMode  = ''
         
-        self.quasySteadyState        = False
         self.assignedVariablesDefs   = []
         self.assignedVariablesInits  = []
         self.initialConditions       = []
@@ -116,6 +115,7 @@ class daeCodeGenerator_c99(object):
         self.initiallyActiveStates   = []
         self.runtimeInformation_h    = []
         self.runtimeInformation_c    = []
+        self.runtimeInformation_init = []
         self.parametersDefs          = []
         self.parametersInits         = []
         self.intValuesReferences     = []
@@ -141,7 +141,6 @@ class daeCodeGenerator_c99(object):
         if not os.path.isdir(directory):
             os.makedirs(directory)
             
-        self.quasySteadyState        = False
         self.assignedVariablesDefs   = []
         self.assignedVariablesInits  = []
         self.initialConditions       = []
@@ -149,6 +148,7 @@ class daeCodeGenerator_c99(object):
         self.initiallyActiveStates   = []
         self.runtimeInformation_h    = []
         self.runtimeInformation_c    = []
+        self.runtimeInformation_init = []
         self.parametersDefs          = []
         self.parametersInits         = []
         self.intValuesReferences     = []
@@ -184,8 +184,9 @@ class daeCodeGenerator_c99(object):
 
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
-        rtInformation_h   = '\n'.join(self.runtimeInformation_h)
+        rtInformation_h   = '\n    '.join(self.runtimeInformation_h)
         rtInformation_c   = '\n'.join(self.runtimeInformation_c)
+        rtInformation_init= '\n    '.join(self.runtimeInformation_init)
         paramsDef         = '\n    '.join(self.parametersDefs)
         paramsInits       = '\n    '.join(self.parametersInits)
         stnDef            = '\n    '.join(self.stnDefs)
@@ -200,7 +201,6 @@ class daeCodeGenerator_c99(object):
         execActionsDef    = '\n'.join(self.executeActions)
         noRootsDef        = '\n'.join(self.numberOfRoots)
         warnings          = '\n'.join(self.warnings)
-        quasySteadyState  = 'true' if self.quasySteadyState else 'false'
 
         # intValuesReferences
         if len(self.intValuesReferences) > 0:
@@ -258,9 +258,9 @@ class daeCodeGenerator_c99(object):
         valRefInit = []
         stringValuesReferences_Init = '\n    '.join(valRefInit)
             
-        dictInfo = {
-                        'runtimeInformation_h' : rtInformation_h,
+        dictInfo = {    'runtimeInformation_h' : rtInformation_h,
                         'runtimeInformation_c' : rtInformation_c,
+                        'runtimeInformation_init' : rtInformation_init,
                         'parameters' : paramsDef,
                         'parametersInits' : paramsInits,
                         'intValuesReferences_Init' : intValuesReferences_Init,
@@ -280,7 +280,6 @@ class daeCodeGenerator_c99(object):
                         'numberOfRoots' : noRootsDef,
                         'checkForDiscontinuities' : checkDiscont,
                         'executeActions' : execActionsDef,
-                        'quasySteadyState' : quasySteadyState,
                         'warnings' : warnings
                    }
 
@@ -407,6 +406,11 @@ class daeCodeGenerator_c99(object):
                         temp = s_indent + 'if(_compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
+                        # We need to detect the number of roots and root functions for the current state of affairs,
+                        # that is active states after execute actions (or at the very beggining of a simulation).
+                        # Therefore, put those here and not below in the: if(condition) block.
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
 
                         temp = s_indent + 'if({0}) {{'.format(condition)
                         self.checkForDiscontinuities.append(temp)
@@ -420,6 +424,11 @@ class daeCodeGenerator_c99(object):
                         temp = s_indent + 'else if(_compare_strings_(_m_->{0}, "{1}")) {{'.format(stnVariableName, state['Name'])
                         self.residuals.append(temp)
                         self.jacobians.append(temp)
+                        # We need to detect the number of roots and root functions for the current state of affairs,
+                        # that is active states after execute actions (or at the very beggining of a simulation).
+                        # Therefore, put those here and not below in the: if(condition) block.
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
 
                         temp = s_indent + 'else if({0}) {{'.format(condition)
                         self.checkForDiscontinuities.append(temp)
@@ -431,13 +440,19 @@ class daeCodeGenerator_c99(object):
                         self.jacobians.append(temp)
                         self.checkForDiscontinuities.append(temp)
                         self.executeActions.append(temp)
+                        # Here it does not matter
+                        self.numberOfRoots.append(temp)
+                        self.rootFunctions.append(temp)
 
-                    # 1a. Put equations into the residuals list
+                    # 1a. Generate NestedSTNs
+                    self._processSTNs(state['NestedSTNs'], indent+1)
+                    
+                    # 1b. Put equations into the residuals list
                     self.equationGenerationMode  = 'residuals'
                     self._processEquations(state['Equations'], indent+1)
                     self.residuals.append(s_indent + '}')
 
-                    # 1b. Put equations into the jacobians list
+                    # 1c. Put equations into the jacobians list
                     self.equationGenerationMode  = 'jacobian'
                     self._processEquations(state['Equations'], indent+1)
                     self.jacobians.append(s_indent + '}')
@@ -460,15 +475,14 @@ class daeCodeGenerator_c99(object):
                     if on_condition_action: # For 'else' state has no state transitions
                         nExpr = len(on_condition_action['Expressions'])
                         self.numberOfRoots.append(s_indent + '_noRoots_ += {0};'.format(nExpr))
+                    self.numberOfRoots.append(s_indent + '}')
 
                     # 5. rootFunctions
                     if on_condition_action: # For 'else' state has no state transitions
                         for expression in on_condition_action['Expressions']:
                             self.rootFunctions.append(s_indent + '_temp_ = {0};'.format(self.exprFormatter.formatRuntimeNode(expression)))
                             self.rootFunctions.append(s_indent + '_roots_[_rc_++] = _getValue_(&_temp_);')
-
-                    if len(state['NestedSTNs']) > 0:
-                        raise RuntimeError('C code cannot be generated for nested state transition networks')
+                    self.rootFunctions.append(s_indent + '}')
 
             elif stn['Class'] == 'daeSTN':
                 relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
@@ -523,12 +537,15 @@ class daeCodeGenerator_c99(object):
                         self.numberOfRoots.append(temp)
                         self.rootFunctions.append(temp)
 
-                    # 1. Put equations into the residuals list
+                    # 1a. Generate NestedSTNs
+                    self._processSTNs(state['NestedSTNs'], indent+1)
+                    
+                    # 1b. Put equations into the residuals list
                     self.equationGenerationMode  = 'residuals'
                     self._processEquations(state['Equations'], indent+1)
                     self.residuals.append(s_indent + '}')
 
-                    # 1b. Put equations into the jacobians list
+                    # 1c. Put equations into the jacobians list
                     self.equationGenerationMode  = 'jacobian'
                     self._processEquations(state['Equations'], indent+1)
                     self.jacobians.append(s_indent + '}')
@@ -588,10 +605,6 @@ class daeCodeGenerator_c99(object):
 
                     self.rootFunctions.append(s_indent + '}')
 
-                    if len(state['NestedSTNs']) > 0:
-                        self.warnings.append('C code cannot be generated for nested state transition networks (state %s)' % (state['Name'])) 
-                        #raise RuntimeError('C code cannot be generated for nested state transition networks')
-
     def _processActions(self, Actions, indent):
         s_indent = indent * self.defaultIndent
 
@@ -605,7 +618,7 @@ class daeCodeGenerator_c99(object):
                 self.executeActions.append(s_indent + '_m_->{0} = "{1}";'.format(stnVariableName, stateTo))
 
             elif action['Type'] == 'eSendEvent':
-                self.warnings.append('C code cannot be generated for SendEvent actions - the model will not work as expected!!')
+                self.warnings.append('C code cannot be generated for SendEvent actions on [%s] event port' % action['SendEventPort'])
 
             elif action['Type'] == 'eReAssignOrReInitializeVariable':
                 relativeName  = daeGetRelativeName(self.wrapperInstanceName, action['VariableCanonicalName'])
@@ -638,7 +651,7 @@ class daeCodeGenerator_c99(object):
                 self.executeActions.append(s_indent + '_copy_values_to_solver_ = true;')
 
             elif action['Type'] == 'eUserDefinedAction':
-                self.warnings.append('C code cannot be generated for UserDefined actions - the model will not work as expected!!')
+                self.warnings.append('C code cannot be generated for UserDefined actions')
 
             else:
                 raise RuntimeError('Unknown action type')
@@ -654,33 +667,22 @@ class daeCodeGenerator_c99(object):
 
         self.variableNames = Neq * ['']
         
-        Nvars = '#define _Ntotal_vars_ {0}'.format(Ntotal)
-        self.runtimeInformation_h.append(Nvars)
-
-        Neqns = '#define _Neqns_ {0}'.format(Neq)
-        self.runtimeInformation_h.append(Neqns)
-
-        startTime = 'extern const real_t _start_time_;'
-        self.runtimeInformation_h.append(startTime)
-        startTime = 'const real_t _start_time_ = {0};'.format(0.0)
-        self.runtimeInformation_c.append(startTime)
-
-        endTime = 'extern const real_t _end_time_;'
-        self.runtimeInformation_h.append(endTime)
-        endTime = 'const real_t _end_time_ = {0};'.format(runtimeInformation['TimeHorizon'])
-        self.runtimeInformation_c.append(endTime)
-
-        reportingInterval = 'extern const real_t _reporting_interval_;'
-        self.runtimeInformation_h.append(reportingInterval)
-        reportingInterval = 'const real_t _reporting_interval_ = {0};'.format(runtimeInformation['ReportingInterval'])
-        self.runtimeInformation_c.append(reportingInterval)
-
-        relTolerance = 'extern const real_t _relative_tolerance_;'
-        self.runtimeInformation_h.append(relTolerance)
-        relTolerance = 'const real_t _relative_tolerance_ = {0};'.format(runtimeInformation['RelativeTolerance'])
-        self.runtimeInformation_c.append(relTolerance)
+        self.runtimeInformation_h.append('int         IDs               [%d];' % Neq)
+        self.runtimeInformation_h.append('real_t      initValues        [%d];' % Neq)
+        self.runtimeInformation_h.append('real_t      initDerivatives   [%d];' % Neq)
+        self.runtimeInformation_h.append('real_t      absoluteTolerances[%d];' % Neq)
+        self.runtimeInformation_h.append('const char* variableNames     [%d];' % Neq)
         
-        self.quasySteadyState = runtimeInformation['QuasySteadyState']
+        #self.runtimeInformation_c.append('#define __total_number_of_variables__ {0}'.format(Ntotal))
+        #self.runtimeInformation_c.append('#define __number_of_equations__       {0}'.format(Neq))
+        
+        self.runtimeInformation_init.append('_m_->Ntotal_vars       = %d;' % Ntotal)
+        self.runtimeInformation_init.append('_m_->Nequations        = %d;' % Neq)
+        self.runtimeInformation_init.append('_m_->startTime         = %f;'   % 0.0)
+        self.runtimeInformation_init.append('_m_->timeHorizon       = %f;'   % runtimeInformation['TimeHorizon'])
+        self.runtimeInformation_init.append('_m_->reportingInterval = %f;'   % runtimeInformation['ReportingInterval'])
+        self.runtimeInformation_init.append('_m_->relativeTolerance = %f;'   % runtimeInformation['RelativeTolerance'])        
+        self.runtimeInformation_init.append('_m_->quasySteadyState  = %s;\n' % ('true' if runtimeInformation['QuasySteadyState'] else 'false'))
 
         blockIDs             = Neq * [-1]
         blockInitValues      = Neq * [-1]
@@ -697,25 +699,15 @@ class daeCodeGenerator_c99(object):
                 blockInitDerivatives[bi] = initDerivatives[oi]
                 absTolerances[bi]        = absoluteTolerances[oi]
 
-        strIDs = 'extern const int _IDs_[_Neqns_];'
-        self.runtimeInformation_h.append(strIDs)
-        strIDs = 'const int _IDs_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockIDs))
-        self.runtimeInformation_c.append(strIDs)
-            
-        strInitValues = 'extern const real_t _initValues_[_Neqns_];'
-        self.runtimeInformation_h.append(strInitValues)
-        strInitValues = 'const real_t _initValues_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitValues))
-        self.runtimeInformation_c.append(strInitValues)
+        self.runtimeInformation_c.append('const int    _IDs_                [%d] = %s;' % (Neq, self.exprFormatter.formatNumpyArray(blockIDs)))
+        self.runtimeInformation_c.append('const real_t _init_values_        [%d] = %s;' % (Neq, self.exprFormatter.formatNumpyArray(blockInitValues)))
+        self.runtimeInformation_c.append('const real_t _init_derivatives_   [%d] = %s;' % (Neq, self.exprFormatter.formatNumpyArray(blockInitDerivatives)))
+        self.runtimeInformation_c.append('const real_t _absolute_tolerances_[%d] = %s;' % (Neq, self.exprFormatter.formatNumpyArray(absTolerances)))
 
-        strInitDerivs = 'extern const real_t _initDerivatives_[_Neqns_];'
-        self.runtimeInformation_h.append(strInitDerivs)
-        strInitDerivs = 'const real_t _initDerivatives_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(blockInitDerivatives))
-        self.runtimeInformation_c.append(strInitDerivs)
-
-        strAbsTol = 'extern const real_t _absolute_tolerances_[_Neqns_];'
-        self.runtimeInformation_h.append(strAbsTol)
-        strAbsTol = 'const real_t _absolute_tolerances_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(absTolerances))
-        self.runtimeInformation_c.append(strAbsTol)
+        self.runtimeInformation_init.append('memcpy(_m_->IDs,                &_IDs_,                 %d * sizeof(int));'    % Neq)
+        self.runtimeInformation_init.append('memcpy(_m_->initValues,         &_init_values_,         %d * sizeof(real_t));' % Neq)
+        self.runtimeInformation_init.append('memcpy(_m_->initDerivatives,    &_init_derivatives_,    %d * sizeof(real_t));' % Neq)
+        self.runtimeInformation_init.append('memcpy(_m_->absoluteTolerances, &_absolute_tolerances_, %d * sizeof(real_t));' % Neq)
 
         for domain in runtimeInformation['Domains']:
             relativeName   = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
@@ -723,24 +715,27 @@ class daeCodeGenerator_c99(object):
             name           = self.exprFormatter.flattenIdentifier(formattedName)
             description    = domain['Description']
             numberOfPoints = domain['NumberOfPoints']
+            units          = ('-' if (domain['Units'] == unit()) else str(domain['Units']))
             domains        = '[' + str(domain['NumberOfPoints']) + ']'
             points         = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
 
             domTemplate   = 'int {name}_np; /* Number of points in domain: {relativeName} */'
-            paramTemplate = 'real_t {name}{domains}; /* Domain: {relativeName} ({description}) */'
+            paramTemplate = 'real_t {name}{domains}; /* Domain: {relativeName} ({units}, {description}) */'
             self.parametersDefs.append(domTemplate.format(name = name, relativeName = relativeName))
             self.parametersDefs.append(paramTemplate.format(name = name,
+                                                            units = units,
                                                             domains = domains,
                                                             relativeName = relativeName,
                                                             description = description))
 
             domTemplate   = 'const int {name}_np = {numberOfPoints};'
-            paramTemplate = 'real_t {name}{domains} = {points};'
+            paramTemplate = 'real_t {name}{domains} = {points}; /* {units} */'
             self.parametersInits.append(domTemplate.format(name = name,
                                                            numberOfPoints = numberOfPoints))
             self.parametersInits.append(paramTemplate.format(name = name,
                                                             domains = domains,
                                                             points = points,
+                                                            units = units,
                                                             description = description))
 
             domTemplate   = '_m_->{name}_np = {name}_np;'
@@ -763,34 +758,39 @@ class daeCodeGenerator_c99(object):
             name            = self.exprFormatter.flattenIdentifier(formattedName)
             description     = parameter['Description']
             numberOfPoints  = int(parameter['NumberOfPoints'])
+            units           = ('-' if (parameter['Units'] == unit()) else str(parameter['Units']))
             values          = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
             numberOfDomains = len(parameter['Domains'])
             domains         = ''
             if numberOfDomains > 0:
                 domains = '[{0}]'.format(']['.join(str(np) for np in parameter['Domains']))
 
-                paramTemplate = 'real_t {name}{domains}; /* Parameter: {relativeName} ({description}) */'
+                paramTemplate = 'real_t {name}{domains}; /* Parameter: {relativeName} ({units}, {description}) */'
                 self.parametersDefs.append(paramTemplate.format(name = name,
+                                                                units = units,
                                                                 domains = domains,
                                                                 relativeName = relativeName,
                                                                 description = description))
 
-                paramTemplate = 'real_t {name}{domains} = {values};'
+                paramTemplate = 'real_t {name}{domains} = {values} /* {units} */;'
                 self.parametersInits.append(paramTemplate.format(name = name,
-                                                                domains = domains,
-                                                                values = values))
+                                                                 units = units,
+                                                                 domains = domains,
+                                                                 values = values))
 
                 paramTemplate = 'memcpy(&_m_->{name}, &{name}, {numberOfPoints} * sizeof(real_t));\n'
                 self.parametersInits.append(paramTemplate.format(name = name,
                                                                 numberOfPoints = numberOfPoints))
             else:
-                paramTemplate = 'real_t {name}; /* Parameter: {relativeName} ({description}) */'
+                paramTemplate = 'real_t {name}; /* Parameter: {relativeName} ({units}, {description}) */'
                 self.parametersDefs.append(paramTemplate.format(name = name,
+                                                                units = units,
                                                                 relativeName = relativeName,
                                                                 description = description))
 
-                paramTemplate = '_m_->{name} = {value};'
+                paramTemplate = '_m_->{name} = {value} /* {units} */;'
                 self.parametersInits.append(paramTemplate.format(name = name,
+                                                                 units = units,
                                                                  value = values))
                 
             if numberOfDomains == 0:
@@ -821,6 +821,7 @@ class daeCodeGenerator_c99(object):
             formattedName  = self.exprFormatter.formatIdentifier(relativeName)
             name           = self.exprFormatter.flattenIdentifier(formattedName)
             numberOfPoints = variable['NumberOfPoints']
+            units          = ('-' if (variable['Units'] == unit()) else str(variable['Units']))
 
             if numberOfPoints == 1:
                 ID           = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
@@ -835,13 +836,13 @@ class daeCodeGenerator_c99(object):
 
                 if ID == cnDifferential:
                     name_ = 'values[{0}]'.format(blockIndex)
-                    temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
+                    temp = '{name} = {value} /* {units} */; /* {fullName} */'.format(name = name_, value = value, units = units, fullName = fullName)
                     self.initialConditions.append(temp)
                 elif ID == cnAssigned:
                     name_ = name
-                    temp = 'real_t {name}; /* {fullName} */'.format(name = name, fullName = fullName)
+                    temp = 'real_t {name}; /* {fullName}, {units} */'.format(name = name, units = units, fullName = fullName)
                     self.assignedVariablesDefs.append(temp)
-                    temp = '_m_->{name} = {value};'.format(name = name, value = value)
+                    temp = '_m_->{name} = {value} /* {units} */;'.format(name = name, value = value, units = units)
                     self.assignedVariablesInits.append(temp)
                     
                 if ID == cnAssigned:
@@ -871,14 +872,14 @@ class daeCodeGenerator_c99(object):
 
                     if ID == cnDifferential:
                         name_ = 'values[{0}]'.format(blockIndex)
-                        temp = '{name} = {value}; /* {fullName} */'.format(name = name_, value = value, fullName = fullName)
+                        temp = '{name} = {value} /* {units}*/; /* {fullName} */'.format(name = name_, value = value, units = units, fullName = fullName)
                         self.initialConditions.append(temp)
                     elif ID == cnAssigned:
                         name_ = name + '_' + '_'.join(str(di) for di in domIndexes)
-                        temp = 'real_t {name}; /* {fullName} */'.format(name = name_, fullName = fullName)
+                        temp = 'real_t {name}; /* {fullName}, {units} */'.format(name = name_, units = units, fullName = fullName)
                         self.assignedVariablesDefs.append(temp)
 
-                        temp = '_m_->{name} = {value};'.format(name = name_, value = value)
+                        temp = '_m_->{name} = {value} /* {units} */;'.format(name = name_, value = value, units = units)
                         self.assignedVariablesInits.append(temp)
 
                     if ID == cnAssigned:
@@ -895,10 +896,10 @@ class daeCodeGenerator_c99(object):
                     self.floatValuesReferences.append( (ref_type, struct_name, flat_name, blockIndex) )
 
         varNames = ['"' + name_ + '"' for name_ in self.variableNames]
-        strVariableNames = 'extern const char* _variable_names_[_Neqns_];'
-        self.runtimeInformation_h.append(strVariableNames)
-        strVariableNames = 'const char* _variable_names_[_Neqns_] = {0};'.format(self.exprFormatter.formatNumpyArray(varNames))
-        self.runtimeInformation_c.append(strVariableNames)
+        
+        self.runtimeInformation_c.append('const char*  _variable_names_     [%d] = %s;' % (Neq, self.exprFormatter.formatNumpyArray(varNames)))
+        self.runtimeInformation_init.append('for(int i = 0; i < %d; i++)' % Neq)
+        self.runtimeInformation_init.append('    _m_->variableNames[i] = _variable_names_[i];')
 
         #import pprint
         #pp = pprint.PrettyPrinter(indent=2)

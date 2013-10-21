@@ -918,6 +918,9 @@ real_t daeIDASolver::Solve(real_t dTime, daeeStopCriterion eCriterion, bool bRep
         }
         else if(!CheckFlag(retval))
 		{
+			// First report data at the last successful time and then raise an exception
+			m_pSimulation->ReportData(m_dCurrentTime);
+
 			daeDeclareException(exMiscellanous);
 			e << "Sundials IDAS solver cowardly failed to solve the system at TIME = " << m_dCurrentTime 
 			  << "; time horizon [" << m_dTargetTime << "]; " << CreateIDAErrorMessage(retval);

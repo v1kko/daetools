@@ -15,7 +15,7 @@ TARGET = daetools_simulation
 TEMPLATE = app
 
 unix::QMAKE_CFLAGS_RELEASE   -= -O2
-unix::QMAKE_CFLAGS           += -std=c99 -pedantic
+unix::QMAKE_CFLAGS           += -std=c99 -pedantic -O0
 unix::QMAKE_CFLAGS_WARN_ON    = -Wall -Wextra \
                                 -Wno-unused-parameter \
                                 -Wno-unused-variable \

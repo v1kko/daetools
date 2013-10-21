@@ -10,24 +10,34 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#include "auxiliary.h"
+#include "model.h"
 #include "simulation.h"
+#include "daesolver.h"
 
 int main(int argc, char *argv[])
 {
     daeModel_t       model;
-    daeIDASolver_t   dae_solver;
+    daeIDASolver_t   daesolver;
     daeSimulation_t  simulation;
 
+    /* Initialize all data structures to zero */
     memset(&model,      0, sizeof(daeModel_t));
-    memset(&dae_solver, 0, sizeof(daeIDASolver_t));
+    memset(&daesolver,  0, sizeof(daeIDASolver_t));
     memset(&simulation, 0, sizeof(daeSimulation_t));
 
+    /* Initialize the model */
     modInitialize(&model);
-    simInitialize(&simulation, &model, &dae_solver, false);
-
+    
+    /* Initialize the simulation and the dae solver */
+    simInitialize(&simulation, &model, &daesolver, false);
+    
+    /* Solve the system at time = 0.0 */
     simSolveInitial(&simulation);
+    
+    /* Run the simulation */
     simRun(&simulation);
+    
+    /* Finalize the simulation */
     simFinalize(&simulation);
 
     return 0;

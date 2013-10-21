@@ -424,6 +424,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
             data['DiscretizationOrder']  = domain.DiscretizationOrder
             data['Points']               = domain.npyPoints
+            data['Units']                = domain.Units
 
             self.runtimeInformation['Domains'].append(data)
 
@@ -436,6 +437,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = parameter.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
             data['ReportingOn']          = parameter.ReportingOn
+            data['Units']                = parameter.Units
 
             self.runtimeInformation['Parameters'].append(data)
 
@@ -450,6 +452,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['IDs']                  = variable.npyIDs                   # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
             data['ReportingOn']          = variable.ReportingOn
+            data['Units']                = variable.VariableType.Units
 
             self.runtimeInformation['Variables'].append(data)
 
@@ -503,6 +506,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
             data['DiscretizationOrder']  = domain.DiscretizationOrder
             data['Points']               = domain.npyPoints
+            data['Units']                = domain.Units
 
             self.runtimeInformation['Domains'].append(data)
 
@@ -515,6 +519,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = parameter.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
             data['ReportingOn']          = parameter.ReportingOn
+            data['Units']                = parameter.Units
 
             self.runtimeInformation['Parameters'].append(data)
 
@@ -529,5 +534,6 @@ class daeCodeGeneratorAnalyzer(object):
             data['IDs']                  = variable.npyIDs                   # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
             data['ReportingOn']          = variable.ReportingOn
+            data['Units']                = variable.VariableType.Units
 
             self.runtimeInformation['Variables'].append(data)
