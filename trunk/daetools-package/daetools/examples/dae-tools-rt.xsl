@@ -130,8 +130,11 @@
                 </td>
 
                 <td>
-                    <xsl:if test="Type = 'eDistributed'">
-                        Distributed
+                    <xsl:if test="Type = 'eStructuredGrid'">
+                        StructuredGrid
+                    </xsl:if>
+                    <xsl:if test="Type = 'eUnstructuredGrid'">
+                        UnstructuredGrid
                     </xsl:if>
                     <xsl:if test="Type = 'eArray'">
                         Array

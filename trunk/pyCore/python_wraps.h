@@ -110,6 +110,8 @@ string daeModel__str__(const daeModel& self);
 string daeModel__repr__(const daeModel& self);
 string daeEquation__str__(const daeEquation& self);
 string daeEquation__repr__(const daeEquation& self);
+string daeFiniteElementEquation__str__(const daeFiniteElementEquation& self);
+string daeFiniteElementEquation__repr__(const daeFiniteElementEquation& self);
 string daeSTN__str__(const daeSTN& self);
 string daeSTN__repr__(const daeSTN& self);
 string daeIF__str__(const daeIF& self);
@@ -318,6 +320,8 @@ adouble_array DomainArray(daeDomain& domain, boost::python::object indexes);
 //daeIndexRange FunctionCallDomain3(daeDomain& domain);
 boost::python::list GetDomainPoints(daeDomain& domain);
 void SetDomainPoints(daeDomain& domain, boost::python::list l);
+boost::python::list GetDomainCoordinates(daeDomain& domain);
+void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords);
 
 daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list CustomPoints);
 daeDomain* daeIndexRange_GetDomain(daeIndexRange& self);
@@ -1100,8 +1104,15 @@ boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self);
 boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self);
 
 /*******************************************************
+    daeFiniteElementEquation
+*******************************************************/
+void daeFiniteElementEquation_UpdateEquation(daeFiniteElementEquation& self, boost::python::tuple matK, boost::python::tuple matKdt, boost::python::list arrF);
+boost::python::list daeFiniteElementEquation_GetEquationExecutionInfos(daeFiniteElementEquation& self);
+
+/*******************************************************
 	daeEquationExecutionInfo
 *******************************************************/
+adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self);
 boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
 boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
 
@@ -1157,6 +1168,7 @@ public:
     }
 
 };
+
 void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,
                                            boost::python::list switchToStates     = boost::python::list(),
                                            boost::python::list setVariableValues  = boost::python::list(),
@@ -1188,6 +1200,44 @@ boost::python::list daeModel_GetSTNs(daeModel& self);
 boost::python::list daeModel_GetEquations(daeModel& self);
 boost::python::list daeModel_GetPortConnections(daeModel& self);
 boost::python::list daeModel_GetEventPortConnections(daeModel& self);
+
+/*******************************************************
+    daeFiniteElementModel
+*******************************************************/
+class daeFiniteElementModelWrapper : public daeFiniteElementModel,
+                                     public boost::python::wrapper<daeFiniteElementModel>
+{
+public:
+    daeFiniteElementModelWrapper(void)
+    {
+    }
+
+    daeFiniteElementModelWrapper(string strName, daeModel* pModel = NULL, string strDescription = "")
+         : daeFiniteElementModel(strName, pModel, strDescription)
+    {
+    }
+
+    void DeclareEquations(void)
+    {
+        if(boost::python::override f = this->get_override("DeclareEquations"))
+            f();
+        else
+            this->daeFiniteElementModel::DeclareEquations();
+    }
+    void def_DeclareEquations(void)
+    {
+        this->daeFiniteElementModel::DeclareEquations();
+    }
+
+    void AssembleEquation(daeFiniteElementEquation* pEquation)
+    {
+        this->get_override("AssembleEquation")(boost::ref(pEquation));
+    }
+
+};
+
+boost::python::list daeFiniteElementModelWrapper_GetVariableRuntimeNodes(daeFiniteElementModel& self, daeVariable& variable);
+boost::python::list daeFiniteElementModelWrapper_GetTimeDerivativeRuntimeNodes(daeFiniteElementModel& self, daeVariable& variable);
 
 /*******************************************************
 	daeState

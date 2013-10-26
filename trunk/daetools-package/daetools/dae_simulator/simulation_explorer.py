@@ -240,7 +240,8 @@ class daeSimulationExplorer(QtGui.QDialog):
             print 'Update Domains...'
         for canonicalName, (domain, item) in self._inspector.domains.iteritems():
             val_ = item.getValue()
-            if item.type == eDistributed:                
+            
+            if item.type == eStructuredGrid:                
                 points = item.getValue()
                 if verbose:
                     print '    Updating domain %s points ...' % canonicalName
@@ -249,6 +250,9 @@ class daeSimulationExplorer(QtGui.QDialog):
                 domain.Points = points
             
             elif item.type == eArray:
+                pass
+            
+            elif item.type == eUnstructuredGrid:
                 pass
                 
         # Update Parameters

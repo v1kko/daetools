@@ -32,7 +32,8 @@ enum daeeDomainType
 {
 	eDTUnknown = 0,
 	eArray,
-	eDistributed
+    eStructuredGrid,
+    eUnstructuredGrid
 };
 		
 enum daeeParameterType
@@ -713,6 +714,7 @@ public:
 	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)                              = 0;
 	virtual void	GetNestedSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)                                       = 0;
 	virtual void	CleanUpSetupData()                                                                      = 0;
+    virtual void    UpdateEquations(void)                                                                   = 0;
 };
 
 /******************************************************************
@@ -724,6 +726,7 @@ public:
 	virtual void		GetStates(std::vector<daeState_t*>& ptrarrStates)	= 0;
 	virtual daeState_t*	GetActiveState(void)								= 0;
 	virtual void		CleanUpSetupData()									= 0;
+    virtual void        UpdateEquations(void) = 0;
 };
 
 /******************************************************************
@@ -764,6 +767,7 @@ public:
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5) = 0;
 	
 	virtual void CleanUpSetupData(void) = 0;
+    virtual void UpdateEquations(void) = 0;
 };
 
 /*********************************************************************************************
@@ -974,6 +978,7 @@ public:
 									 std::vector<daeBlock_t*>& ptrarrBlocks) = 0;
 	
 	virtual void	CleanUpSetupData(void) = 0;
+    virtual void    UpdateEquations(void) = 0;
 
 	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
 	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;

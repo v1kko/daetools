@@ -22,7 +22,7 @@ real_t _makeNaN_()
 #endif
 }
 
-adouble _adouble_(real_t value, real_t derivative)
+adouble _adouble_(real_t value, real_t derivative) 
 {
     adouble a;
     a.m_dValue = value;

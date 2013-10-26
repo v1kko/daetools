@@ -1571,8 +1571,8 @@ void adRuntimeVariableNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const d
 
 void adRuntimeVariableNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-	pair<size_t, size_t> mapPair(m_nOverallIndex, mapIndexes.size());
-	
+    pair<size_t, size_t> mapPair(m_nOverallIndex, mapIndexes.size());
+
 	
 	if(bAddFixed)
 	{

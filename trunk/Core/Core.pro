@@ -33,13 +33,13 @@ SOURCES += xmlreadstream.cpp \
     model.cpp \
     helpers.cpp \
     equation.cpp \
+    equation_fe.cpp \
     domain.cpp \
     dllmain.cpp \
     distributed_variable_array.cpp \
     condnode.cpp \
     condition.cpp \
     class_factory.cpp \
-    bool_array.cpp \
     block.cpp \
     adouble.cpp \
     setup_nodes.cpp \

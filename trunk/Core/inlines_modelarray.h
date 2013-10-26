@@ -35,7 +35,13 @@ public:
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
 			it->CleanUpSetupData();
 	}
-    
+
+    virtual void UpdateEquations(void)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->UpdateEquations();
+    }
+
     virtual void BuildExpressions(daeBlock* pBlock)
     {
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)

@@ -118,8 +118,8 @@ class simTutorial(daeSimulation):
     def SetUpParametersAndDomains(self):
         n = 10
 
-        self.m.x.CreateDistributed(eCFDM, 2, n, 0, 0.1)
-        self.m.y.CreateDistributed(eCFDM, 2, n, 0, 0.1)
+        self.m.x.CreateStructuredGrid(eCFDM, 2, n, 0, 0.1)
+        self.m.y.CreateStructuredGrid(eCFDM, 2, n, 0, 0.1)
 
         # Nq is an array of size 2
         self.m.Nq.CreateArray(2)

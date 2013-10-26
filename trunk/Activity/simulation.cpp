@@ -1464,7 +1464,7 @@ void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
                 throw e;
             }
         }
-        else if(strType == "eDistributed")
+        else if(strType == "eStructuredGrid")
         {
             try
             {
@@ -1496,14 +1496,20 @@ void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
                     std::cout << "          UpperBound            = " << UpperBound << std::endl;
                 }
 
-                pDomain->CreateDistributed(DiscretizationMethod, DiscretizationOrder, NumberOfIntervals, LowerBound, UpperBound);
+                pDomain->CreateStructuredGrid(DiscretizationMethod, DiscretizationOrder, NumberOfIntervals, LowerBound, UpperBound);
             }
             catch(std::exception& ex)
             {
                 daeDeclareException(exInvalidCall);
-                e << "Cannot process distributed domain " << strDomainName << " in the runtime settings: " << ex.what();
+                e << "Cannot process structured grid domain " << strDomainName << " in the runtime settings: " << ex.what();
                 throw e;
             }
+        }
+        else if(strType == "eStructuredGrid")
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid domain type " << strType << " in domain " << strDomainName << " in the runtime settings";
+            throw e;
         }
         else
         {
@@ -2153,16 +2159,25 @@ void daeSimulation::Register(daeDomain* pDomain)
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daeDataReporterDomain domain;
+    daeDataReporterDomain domain;
 	domain.m_strName            = m_strIteration + pDomain->GetCanonicalName();
 	domain.m_eType				= pDomain->GetType();
 	domain.m_nNumberOfPoints	= pDomain->GetNumberOfPoints();
 	if(pDomain->GetNumberOfPoints() == 0)
 		daeDeclareAndThrowException(exInvalidCall);
 	
-	domain.m_pPoints = new real_t[domain.m_nNumberOfPoints];
-	for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
-		domain.m_pPoints[i] = *pDomain->GetPoint(i);
+    if(pDomain->GetType() == eUnstructuredGrid)
+    {
+        domain.m_pPoints = new real_t[domain.m_nNumberOfPoints];
+        for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
+            domain.m_pPoints[i] = real_t(i);
+    }
+    else
+    {
+        domain.m_pPoints = new real_t[domain.m_nNumberOfPoints];
+        for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
+            domain.m_pPoints[i] = *pDomain->GetPoint(i);
+    }
 
 	if(!m_pDataReporter->RegisterDomain(&domain))
 	{

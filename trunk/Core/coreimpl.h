@@ -17,6 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/variant.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "../config.h"
 #include "io_impl.h"
@@ -293,6 +294,8 @@ public:
 /******************************************************************
 	daeDomain
 *******************************************************************/
+typedef boost::tuple<real_t,real_t,real_t> daePoint;
+
 class daePort;
 class daeArrayRange;
 class DAE_CORE_API daeDomain : virtual public daeObject,
@@ -325,6 +328,8 @@ public:
 	virtual void						GetPoints(std::vector<real_t>& darrPoints) const;
 	virtual void						SetPoints(const std::vector<real_t>& darrPoints);
 
+    const std::vector<daePoint>& GetCoordinates() const;
+
 public:	
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
@@ -346,9 +351,10 @@ public:
 	adouble	operator[](size_t nIndex) const;
 	adouble	operator()(size_t nIndex) const;
 	
-	void	CreateArray(size_t nNoIntervals);
-	void	CreateDistributed(daeeDiscretizationMethod eMethod, size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dRB);
-    
+    void CreateArray(size_t nNoPoints);
+    void CreateStructuredGrid(daeeDiscretizationMethod eMethod, size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dRB);
+    void CreateUnstructuredGrid(const std::vector<daePoint>& coordinates);
+
     daePort* GetParentPort(void) const;
 	
 protected:
@@ -362,15 +368,21 @@ protected:
 
 protected:
 	unit							m_Unit;
+    daeeDomainType					m_eDomainType;
+    size_t							m_nNumberOfPoints;
+    std::vector<real_t>				m_darrPoints;
+    daePort*						m_pParentPort;
+
+    // StructuredGrid:
 	daeeDiscretizationMethod		m_eDiscretizationMethod;
 	size_t							m_nDiscretizationOrder;
-	daeeDomainType					m_eDomainType;
-	real_t							m_dLowerBound;
-	real_t							m_dUpperBound;
-	size_t							m_nNumberOfPoints;
-	size_t							m_nNumberOfIntervals;
-	std::vector<real_t>				m_darrPoints;
-	daePort*						m_pParentPort;
+    real_t							m_dLowerBound;
+    real_t							m_dUpperBound;
+    size_t							m_nNumberOfIntervals;
+
+    // UnstructuredGrid:
+    std::vector<daePoint> m_arrCoordinates;
+
 	friend class daePort;
 	friend class daeModel;
 	friend class daeParameter;
@@ -380,17 +392,17 @@ protected:
 };
 
 /******************************************************************
-	daeBoolArray
+    daeBoolArray
 *******************************************************************/
 class DAE_CORE_API daeBoolArray : public std::vector<bool>
 {
 public:
-	daeBoolArray(void);
-	virtual ~daeBoolArray(void);
+    daeBoolArray(void);
+    virtual ~daeBoolArray(void);
 
 public:
-	void OR(const daeBoolArray& rArray);
-	bool CheckOverlapping(const daeBoolArray& rArray);
+    void OR(const daeBoolArray& rArray);
+    bool CheckOverlapping(const daeBoolArray& rArray);
 };
 
 /******************************************************************
@@ -413,23 +425,23 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 public:
-	void GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel);
-	void Residual(daeExecutionContext& EC);
-	void Jacobian(daeExecutionContext& EC);
-	void SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
-	void SensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
-	
-	void AddVariableInEquation(size_t nIndex);
-	void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
+    virtual void GatherInfo(daeExecutionContext& EC, daeModel* pModel);
+    virtual void Residual(daeExecutionContext& EC);
+    virtual void Jacobian(daeExecutionContext& EC);
+    virtual void SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
+    virtual void SensitivityParametersGradients(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes);
 
-	size_t GetEquationIndexInBlock(void) const;
-	adNodePtr GetEquationEvaluationNode(void) const;
+    void AddVariableInEquation(size_t nIndex);
+    void GetVariableIndexes(std::vector<size_t>& narrVariableIndexes) const;
+
+    size_t GetEquationIndexInBlock(void) const;
+    adNodePtr GetEquationEvaluationNode(void) const;
 
     adNode* GetEquationEvaluationNodeRawPtr(void) const;
-    
+
     daeeEquationType GetEquationType(void) const;
     daeEquation* GetEquation(void) const;
-    
+
     std::string GetName(void) const;
 
     const std::map< size_t, std::pair<size_t, adNodePtr> >& GetJacobianExpressions() const;
@@ -445,12 +457,40 @@ protected:
     daeEquation*                m_pEquation;
     adNodePtr                   m_EquationEvaluationNode;
     std::map< size_t, std::pair<size_t, adNodePtr> > m_mapJacobianExpressions;
+
     friend class daeEquation;
-	friend class daeSTN;
+    friend class daeFiniteElementEquation;
+    friend class daeSTN;
 	friend class daeIF;
 	friend class daeModel;
+    friend class daeFiniteElementModel;
 	friend class daeState;
 	friend class daeBlock;
+};
+
+/******************************************************************
+    daeFiniteElementEquationExecutionInfo
+*******************************************************************/
+class DAE_CORE_API daeFiniteElementEquationExecutionInfo : public daeEquationExecutionInfo
+{
+public:
+    daeDeclareDynamicClass(daeFiniteElementEquationExecutionInfo)
+    daeFiniteElementEquationExecutionInfo(daeEquation* pEquation);
+    virtual ~daeFiniteElementEquationExecutionInfo(void);
+
+public:
+    virtual void GatherInfo(daeExecutionContext& EC, daeModel* pModel);
+    void SetEvaluationNode(adouble a);
+
+protected:
+
+    friend class daeEquation;
+    friend class daeFiniteElementEquation;
+    friend class daeSTN;
+    friend class daeIF;
+    friend class daeModel;
+    friend class daeState;
+    friend class daeBlock;
 };
 
 /*********************************************************************************************
@@ -524,11 +564,14 @@ protected:
 	size_t				m_nCurrentIndex;
 	daeEquation*		m_pEquation;
 	std::vector<size_t>	m_narrDomainPoints;
+
 	friend class daeModel;
 	friend class daeDomain;
 	friend class daeEquation;
-	friend class daeParameter;
+    friend class daeFiniteElementEquation;
+    friend class daeParameter;
 	friend class daeVariable;
+    friend class daeEquationExecutionInfo;
 };
 typedef daeDistributedEquationDomainInfo daeDEDI;
 
@@ -2109,7 +2152,8 @@ protected:
 	daePort*				m_pParentPort;
 	friend class daePort;
 	friend class daeModel;
-	friend class daeAction;
+    friend class daeFiniteElementModel;
+    friend class daeAction;
 	friend class daePortConnection;
 	friend class daePartialDerivativeVariable;
 	friend class adSetupVariableNode;
@@ -2538,6 +2582,7 @@ class daeSTN;
 class daeModelArray;
 class daePortArray;
 class daeExternalFunction_t;
+class daeFiniteElementEquation;
 class DAE_CORE_API daeModel : virtual public daeObject,
 						      virtual public daeModel_t
 {
@@ -2568,6 +2613,7 @@ public:
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 	
 	virtual void	CleanUpSetupData(void);
+    virtual void    UpdateEquations(void);
 
 	virtual void	SaveModelReport(const string& strFileName) const;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const;
@@ -2628,7 +2674,7 @@ public:
 
 	daeEquation* CreateEquation(const string& strName, string strDescription = "", real_t dScaling = 1.0);
 
-	void AddEquation(daeEquation* pEquation);
+    void AddEquation(daeEquation* pEquation);
 	void AddDomain(daeDomain* pDomain);
 	void AddVariable(daeVariable* pVariable);
 	void AddParameter(daeParameter* pParameter);
@@ -2745,7 +2791,6 @@ protected:
 	void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
 	void		BuildUpSTNsAndEquations(void);
-	//void		BuildUpPortConnectionEquations();
 	void		CreatePortConnectionEquations(void);
 
 	void		PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy);
@@ -2756,7 +2801,6 @@ protected:
 
 	void		AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecutionInfo);
 	void		GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos);
-	void		CreateEquationExecutionInfo(daeEquation* pEquation, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
 
 	bool		FindObject(string& strCanonicalName, daeObjectType& ObjectType);
 	bool		FindObject(std::vector<string>& strarrHierarchy, daeObjectType& ObjectType);
@@ -2790,7 +2834,8 @@ protected:
 	daePtrVector<daeModelArray*>			m_ptrarrComponentArrays;
 	daePtrVector<daeExternalFunction_t*>	m_ptrarrExternalFunctions;
 
-	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
+    // daeEquation owns the pointers
+    std::vector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 
 // Used to nest STNs/IFs
 	std::stack<daeState*> m_ptrarrStackStates;
@@ -2813,8 +2858,10 @@ protected:
 	friend class daeVariable;
 	friend class daeParameter;
 	friend class daeEquation;
-	friend class daeEquationExecutionInfo;
-	friend class daeDistributedEquationDomainInfo;
+    friend class daeFiniteElementEquation;
+    friend class daeEquationExecutionInfo;
+    friend class daeFiniteElementEquationExecutionInfo;
+    friend class daeDistributedEquationDomainInfo;
 	friend class daeFunctionWithGradients;
 	friend class daeOptimizationVariable;
 	friend class daeVariableWrapper;
@@ -3012,7 +3059,8 @@ public:
 	void Clone(const daeState& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	void CleanUpSetupData();
-	
+    void UpdateEquations();
+
 	void AddEquation(daeEquation* pEquation);
 
 //	size_t GetNumberOfEquations(void) const;
@@ -3048,11 +3096,14 @@ protected:
 	daePtrVector<daeEquation*>				m_ptrarrEquations;
 	daePtrVector<daeOnConditionActions*>	m_ptrarrOnConditionActions;
 	daePtrVector<daeOnEventActions*>		m_ptrarrOnEventActions;
-	daePtrVector<daeEquationExecutionInfo*> m_ptrarrEquationExecutionInfos;
 	daePtrVector<daeSTN*>					m_ptrarrSTNs;
+    // daeEquation owns the pointers
+    std::vector<daeEquationExecutionInfo*>  m_ptrarrEquationExecutionInfos;
+
 	friend class daeIF;
 	friend class daeSTN;
 	friend class daeModel;
+    friend class daeFiniteElementModel;
 	friend class daeOnConditionActions;
 };
 
@@ -3079,7 +3130,9 @@ public:
 	void SaveRuntime(io::xmlTag_t* pTag) const;
 
 	void CleanUpSetupData();
-	bool CheckObject(std::vector<string>& strarrErrors) const;
+    void UpdateEquations(void);
+
+    bool CheckObject(std::vector<string>& strarrErrors) const;
 	virtual void Clone(const daeSTN& rObject);
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
@@ -3185,7 +3238,7 @@ class DAE_CORE_API daeEquation : virtual public daeObject,
 {
 public:
 	daeDeclareDynamicClass(daeEquation)
-	daeEquation(void);
+    daeEquation(void);
 	virtual ~daeEquation(void);
 
 public:
@@ -3193,7 +3246,12 @@ public:
 	virtual void   GetDomainDefinitions(std::vector<daeDistributedEquationDomainInfo_t*>& arrDistributedEquationDomainInfo);
 
 public:	
-	void	SetResidual(adouble res);
+    // Updates equation before every call to Residuals/Jacobian/Sens.Residuals. Does nothing by default.
+    virtual void Update();
+
+    virtual void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
+
+    void	SetResidual(adouble res);
 	adouble	GetResidual(void) const;
 	
 	real_t	GetScaling(void) const;
@@ -3205,9 +3263,9 @@ public:
     bool GetBuildJacobianExpressions(void) const;
     void SetBuildJacobianExpressions(bool bBuildJacobianExpressions);
 
-    daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
-	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
-	daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
 
 	daeeEquationType GetEquationType(void) const;
 
@@ -3220,7 +3278,7 @@ public:
 	void Clone(const daeEquation& rObject);
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
-	void InitializeDEDIs(void);
+    void InitializeDEDIs(void);
 
 	virtual size_t	GetNumberOfEquations(void) const;
 	
@@ -3230,8 +3288,6 @@ public:
     std::vector<daeDEDI*> GetDEDIs() const;
 
 protected:
-	void GatherInfo(const std::vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, adNodePtr& node);
-
 	void SetResidualValue(size_t nEquationIndex, real_t dResidual, daeBlock* pBlock);
 	void SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, real_t dJacobValue, daeBlock* pBlock);
 	
@@ -3244,9 +3300,9 @@ protected:
     daeState*											m_pParentState;
 	adNodePtr											m_pResidualNode;
 	daePtrVector<daeDistributedEquationDomainInfo*>		m_ptrarrDistributedEquationDomainInfos;
-// This vector is redundant - all EquationExecutionInfos already exist in models and states
-// However, it is useful when saving RuntimeReport and generating code
-	std::vector<daeEquationExecutionInfo*>				m_ptrarrEquationExecutionInfos;
+// This vector is redundant - all EquationExecutionInfos already exist in models and states;
+// However, daeEquation is the owner of pointers and responsible for freeing the memory.
+    daePtrVector<daeEquationExecutionInfo*>				m_ptrarrEquationExecutionInfos;
 	
     friend class daeSTN;
     friend class daeModel;
@@ -3280,6 +3336,67 @@ public:
 protected:
 	daeVariable* m_pLeft;
 	daeVariable* m_pRight;
+};
+
+/******************************************************************
+    daeFiniteElementModel
+*******************************************************************/
+class daeFiniteElementEquation;
+class DAE_CORE_API daeFiniteElementModel : public daeModel
+{
+public:
+    daeDeclareDynamicClass(daeFiniteElementModel)
+    daeFiniteElementModel(void);
+    daeFiniteElementModel(string strName, daeModel* pModel = NULL, string strDescription = "");
+    virtual ~daeFiniteElementModel(void);
+
+public:
+    void Open(io::xmlTag_t* pTag);
+    void Save(io::xmlTag_t* pTag) const;
+    void OpenRuntime(io::xmlTag_t* pTag);
+    void SaveRuntime(io::xmlTag_t* pTag) const;
+    bool CheckObject(std::vector<string>& strarrErrors) const;
+    void UpdateEquations(void);
+
+    void GetVariableRuntimeNodes(daeVariable& variable, std::vector<adouble>& arrRuntimeNodes);
+    void GetTimeDerivativeRuntimeNodes(daeVariable& variable, std::vector<adouble>& arrRuntimeNodes);
+
+    daeFiniteElementEquation* CreateFiniteElementEquation(const string& strName, daeDomain* pDomain, string strDescription = "", real_t dScaling = 1.0);
+
+    virtual void AssembleEquation(daeFiniteElementEquation* pEquation);
+
+};
+
+/******************************************************************
+    daeFiniteElementEquation
+*******************************************************************/
+class DAE_CORE_API daeFiniteElementEquation : public daeEquation
+{
+public:
+    daeDeclareDynamicClass(daeFiniteElementEquation)
+    daeFiniteElementEquation(daeFiniteElementModel* fe);
+    virtual ~daeFiniteElementEquation(void);
+
+public:
+    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
+    void Update();
+    bool CheckObject(std::vector<string>& strarrErrors) const;
+
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
+
+protected:
+    void Initialize();
+
+public:
+    daeFiniteElementModel* m_pFEModel;
+
+    friend class daeSTN;
+    friend class daeModel;
+    friend class daeFiniteElementModel;
+    friend class daeState;
+    friend class daeEquationExecutionInfo;
 };
 
 /******************************************************************

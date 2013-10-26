@@ -271,7 +271,7 @@ public:
 	daeEnumTypesCollection(void)
 	{
 		using namespace dae::core;
-		daeesmapAdd2(esmap_daeDomainType,               eArray, eDistributed);
+        daeesmapAdd3(esmap_daeDomainType,               eArray, eStructuredGrid, eUnstructuredGrid);
 		daeesmapAdd3(esmap_daeeParameterType,           eReal, eInteger, eBool);		
         daeesmapAdd3(esmap_daeePortType,                eUnknownPort, eInletPort, eOutletPort);		
         daeesmapAdd3(esmap_daeeOptimizationVariableType,eIntegerVariable, eBinaryVariable, eContinuousVariable);		

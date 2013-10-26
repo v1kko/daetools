@@ -30,6 +30,20 @@ void daeState::CleanUpSetupData()
 		m_ptrarrSTNs[i]->CleanUpSetupData();
 }
 
+void daeState::UpdateEquations(void)
+{
+    size_t i;
+
+    for(i = 0; i < m_ptrarrEquations.size(); i++)
+    {
+        daeEquation* pEquation = m_ptrarrEquations[i];
+        pEquation->Update();
+    }
+
+    for(i = 0; i < m_ptrarrSTNs.size(); i++)
+        m_ptrarrSTNs[i]->UpdateEquations();
+}
+
 void daeState::Open(io::xmlTag_t* pTag)
 {
 	string strName;

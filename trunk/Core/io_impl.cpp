@@ -82,9 +82,11 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeDomainTy
 {
 	if(eValue == eArray)
 		pTag->AddTag(strEnumName, string("eArray"));
-	else if(eValue == eDistributed)
-		pTag->AddTag(strEnumName, string("eDistributed"));
-	else
+    else if(eValue == eStructuredGrid)
+        pTag->AddTag(strEnumName, string("eStructuredGrid"));
+    else if(eValue == eUnstructuredGrid)
+        pTag->AddTag(strEnumName, string("eUnstructuredGrid"));
+    else
 		pTag->AddTag(strEnumName, strUnknown);
 }
 
@@ -349,9 +351,11 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeDomainType& eV
 
 	if(strValue == "eArray")
 		eValue = eArray;
-	else if(strValue == "eDistributed")
-		eValue = eDistributed;
-	else
+    else if(strValue == "eStructuredGrid")
+        eValue = eStructuredGrid;
+    else if(strValue == "eUnstructuredGrid")
+        eValue = eUnstructuredGrid;
+    else
 		eValue = eDTUnknown;
 }
 

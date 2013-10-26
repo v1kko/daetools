@@ -44,7 +44,7 @@ Linear finite elements discretization:
                      (k-i                (k)
                    
                     \_________ _________/
-                              v
+                              |
                               dx
        
  - Simple FE matrix assembly 

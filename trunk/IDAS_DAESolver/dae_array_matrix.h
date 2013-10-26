@@ -438,7 +438,7 @@ public:
 	{
 		indexing = ind;
 	}
-	
+
 	void Reset(INT n, INT nnz, bool ind)
 	{
 		N        = n;

@@ -130,8 +130,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateDistributed(eCFDM, 2, 4, 0, 0.1)
-        self.m.y.CreateDistributed(eCFDM, 2, 4, 0, 0.1)
+        self.m.x.CreateStructuredGrid(eCFDM, 2, 4, 0, 0.1)
+        self.m.y.CreateStructuredGrid(eCFDM, 2, 4, 0, 0.1)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))

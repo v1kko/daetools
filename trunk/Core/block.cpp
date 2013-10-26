@@ -92,6 +92,9 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	SetTimeDerivativesArray(&arrTimeDerivatives);
 	SetResidualArray(&arrResiduals);
 
+    // Update equations if necessary (in general, applicable only to FE equations)
+    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
+
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
@@ -150,6 +153,9 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	SetResidualArray(&arrResiduals);
 	SetJacobianMatrix(&matJacobian); 
 	SetInverseTimeStep(dInverseTimeStep);
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
 
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
@@ -211,7 +217,10 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 	m_pDataProxy->SetSensitivityMatrixes(&matSValues,
 										 &matSTimeDerivatives,
 										 &matSResiduals);
-	
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
+
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
@@ -266,7 +275,10 @@ void daeBlock::CalculateSensitivityParametersGradients(const std::vector<size_t>
 	SetValuesArray(&arrValues);
 	SetTimeDerivativesArray(&arrTimeDerivatives);
 	m_pDataProxy->SetSensitivityMatrixes(NULL, NULL, &matSResiduals);
-	
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
+
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;

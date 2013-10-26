@@ -1,14 +1,12 @@
 include(../dae.pri)
 QT -= core gui
 TARGET = pyDealII
-TEMPLATE = lib
+TEMPLATE = lib #app
 
-DEALII_DIR     = ../deal.II
-TBB_DIR        = ../deal.II/contrib/tbb/tbb30_104oss
-DEALII_INCLUDE = $${DEALII_DIR}/include \
-                 $${TBB_DIR}/include
+DEALII_DIR     = ../deal.II/build
+DEALII_INCLUDE = $${DEALII_DIR}/include
 DEALII_LIB_DIR = $${DEALII_DIR}/lib
-DEALII_LIBS    = -ldeal_II -ltbb -lz -lblas -lgfortran
+DEALII_LIBS    = -ldeal_II -lz -lblas -lgfortran -lm
 
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
@@ -19,9 +17,12 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${DEALII_LIB_DIR}
 
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
+                  -std=c++11 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused \
+                  -DBOOST_NO_HASH -DBOOST_NO_SLIST
 
-#QMAKE_CXXFLAGS += -DHAVE_CONFIG_H -DHAVE_ISNAN -ggdb  -DBOOST_NO_HASH -DBOOST_NO_SLIST -DDEBUG -Wall -W -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-long-long -std=c++0x -Wa,--compress-debug-sections -pthread -D_REENTRANT -fPIC
+QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
+                  -std=c++11 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
 
 LIBS += $${DEALII_LIBS} \
         $${DAE_CORE_LIB} \
@@ -31,16 +32,14 @@ LIBS += $${DEALII_LIBS} \
         $${RT}
 
 SOURCES += stdafx.cpp \
-    dllmain.cpp \
-    dae_python.cpp \
-    fem_common.cpp \
-    python_wraps.cpp
+           dllmain.cpp \
+           dae_python.cpp
 
 HEADERS += stdafx.h \
-    docstrings.h \
-    fem_common.h \
-    deal_ii.h \
-    python_wraps.h
+           docstrings.h \
+           dealii_diffusion.h \
+           diffusion.h \
+           python_wraps.h
 
 #######################################################
 #                Install files
@@ -48,11 +47,11 @@ HEADERS += stdafx.h \
 win32{
 QMAKE_POST_LINK = move /y \
 	$${DAE_DEST_DIR}/pyDealII1.dll \
-	$${PYDAE_DIR}/pyDealII.pyd
+    $${SOLVERS_DIR}/pyDealII.pyd
 }
 
 unix{
 QMAKE_POST_LINK = cp -f \
         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${PYDAE_DIR}/$${TARGET}.so
+        $${SOLVERS_DIR}/$${TARGET}.so
 }

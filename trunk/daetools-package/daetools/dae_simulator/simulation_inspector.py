@@ -52,9 +52,8 @@ def _collectDomains(nodeItem, model, dictDomains):
         description = obj.Description
         if obj.Type == eArray:
             numberOfPoints = obj.NumberOfPoints
-            item = treeItem_Domain(nodeItem, type, name, description, numberOfPoints=numberOfPoints, 
-                                                                units=units)
-        else:
+            item = treeItem_Domain(nodeItem, type, name, description, numberOfPoints=numberOfPoints, units=units)
+        elif obj.Type == eStructuredGrid:
             discrMethod        = obj.DiscretizationMethod # not edited
             order              = obj.DiscretizationOrder  # not edited
             numberOfIntervals  = obj.NumberOfIntervals    # not edited
@@ -62,6 +61,13 @@ def _collectDomains(nodeItem, model, dictDomains):
             item = treeItem_Domain(nodeItem, type, name, description, discrMethod = discrMethod, 
                                                    order = order, numberOfIntervals = numberOfIntervals, 
                                                    points = points, units = units)
+        elif obj.Type == eUnstructuredGrid:
+            discrMethod        = obj.DiscretizationMethod # not edited
+            order              = obj.DiscretizationOrder  # not edited
+            numberOfIntervals  = obj.NumberOfIntervals    # not edited
+            points             = obj.Points
+            item = treeItem_Domain(nodeItem, type, name, description, numberOfPoints=numberOfPoints, units=units)
+        
         dictDomains[obj.CanonicalName] = (obj, item)
 
     for component in model.Components:

@@ -146,10 +146,12 @@ const char* DOCSTR_daeDomain = "";
     const char* DOCSTR_daeDomain_UpperBound = "";  
     const char* DOCSTR_daeDomain_Units = "";  
     const char* DOCSTR_daeDomain_npyPoints = "";  
+    const char* DOCSTR_daeDomain_Coordinates = "";
     const char* DOCSTR_daeDomain_Points = "";  
     const char* DOCSTR_daeDomain_CreateArray = "";  
-    const char* DOCSTR_daeDomain_CreateDistributed = "";  
-    const char* DOCSTR_daeDomain_getitem = "";  
+    const char* DOCSTR_daeDomain_CreateStructuredGrid = "";
+    const char* DOCSTR_daeDomain_CreateUnstructuredGrid = "";
+    const char* DOCSTR_daeDomain_getitem = "";
     const char* DOCSTR_daeDomain_call = "";  
     const char* DOCSTR_daeDomain_array = "";  
 
@@ -290,6 +292,7 @@ const char* DOCSTR_daeModel = "Base model class.";
 
     const char* DOCSTR_daeModel_CreateEquation = "Creates a new equation. Used to add equations to models or "
                                                  "states in state transition networks";
+    const char* DOCSTR_daeModel_CreateFiniteElementEquation = "";
     const char* DOCSTR_daeModel_DeclareEquations = "User-defined function where all model equations ans state transition networks "
                                                    "are declared. Must be always implemented in derived classes.";
     const char* DOCSTR_daeModel_ConnectPorts = "Connects two ports.";
@@ -311,6 +314,14 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_ExportObjects = ".";
     const char* DOCSTR_daeModel_Export = ".";
 
+const char* DOCSTR_daeFiniteElementModel = "";
+    const char* DOCSTR_daeFiniteElementModel_init = "";
+    const char* DOCSTR_daeFiniteElementModel_DeclareEquations = "";
+    const char* DOCSTR_daeFiniteElementModel_AssembleEquation = "";
+    const char* DOCSTR_daeFiniteElementModel_CreateFiniteElementEquation = "";
+    const char* DOCSTR_daeFiniteElementModel_VariableRuntimeNodes = "";
+    const char* DOCSTR_daeFiniteElementModel_GetTimeDerivativeRuntimeNodes = "";
+
 const char* DOCSTR_daeEquationExecutionInfo = "";  
     const char* DOCSTR_daeEquationExecutionInfo_Node = "";  
     const char* DOCSTR_daeEquationExecutionInfo_Name = "";  
@@ -319,6 +330,9 @@ const char* DOCSTR_daeEquationExecutionInfo = "";
     const char* DOCSTR_daeEquationExecutionInfo_JacobianExpressions = "";
     const char* DOCSTR_daeEquationExecutionInfo_EquationIndex = "";
     const char* DOCSTR_daeEquationExecutionInfo_Equation = "";  
+
+const char* DOCSTR_daeFiniteElementEquationExecutionInfo = "";
+    const char* DOCSTR_daeFiniteElementEquationExecutionInfo_Node = "";
 
 const char* DOCSTR_daeEquation = "";  
     const char* DOCSTR_daeEquation_init = "";  
@@ -331,6 +345,9 @@ const char* DOCSTR_daeEquation = "";
     const char* DOCSTR_daeEquation_EquationType = "";  
     const char* DOCSTR_daeEquation_DistributeOnDomain1 = "";  
     const char* DOCSTR_daeEquation_DistributeOnDomain2 = "";  
+
+const char* DOCSTR_daeFiniteElementEquation = "";
+    const char* DOCSTR_daeFiniteElementEquation_EquationExecutionInfos = "";
 
 const char* DOCSTR_daePortConnection = "";  
     const char* DOCSTR_daePortConnection_PortFrom = "";  

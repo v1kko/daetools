@@ -30,6 +30,14 @@ void daeSTN::Clone(const daeSTN& rObject)
 	}
 }
 
+void daeSTN::UpdateEquations(void)
+{
+    if(!m_pActiveState)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    m_pActiveState->UpdateEquations();
+}
+
 void daeSTN::CleanUpSetupData()
 {
 	for(size_t i = 0; i < m_ptrarrStates.size(); i++)
@@ -292,7 +300,7 @@ void daeSTN::CreateEquationExecutionInfo(void)
 		// Create EqnExecInfos, call GatherInfo for each of them, but DON'T add them to the model
 		// They are added to the vector which belongs to the state
 			ptrarrEqnExecutionInfosCreated.clear();
-			m_pModel->CreateEquationExecutionInfo(pEquation, ptrarrEqnExecutionInfosCreated, false);
+            pEquation->CreateEquationExecutionInfos(m_pModel, ptrarrEqnExecutionInfosCreated, false);
 
 		// Now add all of them to the state
 			pState->m_ptrarrEquationExecutionInfos.insert(pState->m_ptrarrEquationExecutionInfos.end(),

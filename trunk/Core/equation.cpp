@@ -160,16 +160,31 @@ const std::map< size_t, std::pair<size_t, adNodePtr> >& daeEquationExecutionInfo
     return m_mapJacobianExpressions;
 }
 
-void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeEquation* pEquation, daeModel* pModel)
+void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pModel)
 {
 // Here m_pDataProxy->GatherInfo is true!!
+    if(!pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pEquation)
+        daeDeclareAndThrowException(exInvalidPointer);
 
 // We need to propagate this as a global execution context for it will be used to add variable indexes
 	EC.m_pEquationExecutionInfo = this;
 	pModel->PropagateGlobalExecutionContext(&EC);
 
-// Get a runtime node by evaluating the setup node
-	pEquation->GatherInfo(m_narrDomainIndexes, EC, m_EquationEvaluationNode);
+// Get a runtime node by evaluating the equation's setup node
+    size_t nNumberOfDomains = m_pEquation->m_ptrarrDistributedEquationDomainInfos.size();
+    if(nNumberOfDomains != m_narrDomainIndexes.size())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Illegal number of domains in equation [ " << m_pEquation->GetCanonicalName() << "]";
+        throw e;
+    }
+
+    for(size_t i = 0; i < nNumberOfDomains; i++)
+        m_pEquation->m_ptrarrDistributedEquationDomainInfos[i]->m_nCurrentIndex = m_narrDomainIndexes[i];
+
+    m_EquationEvaluationNode = m_pEquation->m_pResidualNode->Evaluate(&EC).node;
 
 // Restore NULL as a global execution context
 	pModel->PropagateGlobalExecutionContext(NULL);
@@ -1328,24 +1343,26 @@ void daeEquation::InitializeDEDIs(void)
 	}
 }
 
+/*
 void daeEquation::GatherInfo(const vector<size_t>& narrDomainIndexes, const daeExecutionContext& EC, adNodePtr& node)
 {
-	if(!m_pModel)
+    if(!this->m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	size_t nNumberOfDomains = m_ptrarrDistributedEquationDomainInfos.size();
+    size_t nNumberOfDomains = this->m_ptrarrDistributedEquationDomainInfos.size();
 	if(nNumberOfDomains != narrDomainIndexes.size())
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Illegal number of domains in equation [ " << GetCanonicalName() << "]";
+        e << "Illegal number of domains in equation [ " << this->GetCanonicalName() << "]";
 		throw e;
 	}
     
     for(size_t i = 0; i < nNumberOfDomains; i++)
-        m_ptrarrDistributedEquationDomainInfos[i]->m_nCurrentIndex = narrDomainIndexes[i];
+        this->m_ptrarrDistributedEquationDomainInfos[i]->m_nCurrentIndex = narrDomainIndexes[i];
 
-    node = m_pResidualNode->Evaluate(&EC).node;
+    node = this->m_pResidualNode->Evaluate(&EC).node;
 }
+*/
 
 daeDEDI* daeEquation::DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName)
 {
@@ -1460,6 +1477,367 @@ void daeEquation::SetCheckUnitsConsistency(bool bCheck)
 	m_bCheckUnitsConsistency = bCheck;
 }
 
+void daeEquation::Update()
+{
+    // Do nothing here
+}
+
+void daeEquation::CreateEquationExecutionInfos(daeModel* pModel, vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel)
+{
+    size_t d1, d2, d3, d4, d5, d6, d7, d8;
+    size_t nNoDomains;
+    daeEquationExecutionInfo* pEquationExecutionInfo;
+    daeDistributedEquationDomainInfo *pDistrEqnDomainInfo1, *pDistrEqnDomainInfo2, *pDistrEqnDomainInfo3,
+                                     *pDistrEqnDomainInfo4, *pDistrEqnDomainInfo5, *pDistrEqnDomainInfo6,
+                                     *pDistrEqnDomainInfo7, *pDistrEqnDomainInfo8;
+
+    ptrarrEqnExecutionInfosCreated.clear();
+
+    nNoDomains = m_ptrarrDistributedEquationDomainInfos.size();
+
+/***************************************************************************************************/
+// Try to predict requirements and reserve the memory for all EquationExecutionInfos (could save a lot of memory)
+// AddEquationExecutionInfo() does not use dae_push_back() !!!
+    size_t NoEqns = this->GetNumberOfEquations();
+    if(bAddToTheModel)
+    {
+        pModel->m_ptrarrEquationExecutionInfos.reserve( pModel->m_ptrarrEquationExecutionInfos.size() + NoEqns );
+    }
+    else
+    {
+        ptrarrEqnExecutionInfosCreated.reserve(NoEqns);
+        this->m_ptrarrEquationExecutionInfos.reserve(NoEqns);
+    }
+/***************************************************************************************************/
+
+    daeExecutionContext EC;
+    EC.m_pDataProxy					= pModel->m_pDataProxy.get();
+    EC.m_pEquationExecutionInfo		= NULL;
+    EC.m_eEquationCalculationMode	= eGatherInfo;
+
+    if(nNoDomains > 0)
+    {
+        // Here I have to create one EquationExecutionInfo for each point in each domain
+        // where the equation is defined
+        if(nNoDomains == 1)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            if(!pDistrEqnDomainInfo1)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(1);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 2)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(2);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 3)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            pDistrEqnDomainInfo3 = this->m_ptrarrDistributedEquationDomainInfos[2];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(3);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 4)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            pDistrEqnDomainInfo3 = this->m_ptrarrDistributedEquationDomainInfos[2];
+            pDistrEqnDomainInfo4 = this->m_ptrarrDistributedEquationDomainInfos[3];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
+            for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(4);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo4->m_narrDomainPoints[d4]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 5)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            pDistrEqnDomainInfo3 = this->m_ptrarrDistributedEquationDomainInfos[2];
+            pDistrEqnDomainInfo4 = this->m_ptrarrDistributedEquationDomainInfos[3];
+            pDistrEqnDomainInfo5 = this->m_ptrarrDistributedEquationDomainInfos[4];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4 || !pDistrEqnDomainInfo5)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
+            for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
+            for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(5);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo4->m_narrDomainPoints[d4]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo5->m_narrDomainPoints[d5]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 6)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            pDistrEqnDomainInfo3 = this->m_ptrarrDistributedEquationDomainInfos[2];
+            pDistrEqnDomainInfo4 = this->m_ptrarrDistributedEquationDomainInfos[3];
+            pDistrEqnDomainInfo5 = this->m_ptrarrDistributedEquationDomainInfos[4];
+            pDistrEqnDomainInfo6 = this->m_ptrarrDistributedEquationDomainInfos[5];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4 ||
+               !pDistrEqnDomainInfo5 || !pDistrEqnDomainInfo6)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
+            for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
+            for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
+            for(d6 = 0; d6 < pDistrEqnDomainInfo6->m_narrDomainPoints.size(); d6++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(6);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo4->m_narrDomainPoints[d4]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo5->m_narrDomainPoints[d5]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo6->m_narrDomainPoints[d6]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 7)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            pDistrEqnDomainInfo3 = this->m_ptrarrDistributedEquationDomainInfos[2];
+            pDistrEqnDomainInfo4 = this->m_ptrarrDistributedEquationDomainInfos[3];
+            pDistrEqnDomainInfo5 = this->m_ptrarrDistributedEquationDomainInfos[4];
+            pDistrEqnDomainInfo6 = this->m_ptrarrDistributedEquationDomainInfos[5];
+            pDistrEqnDomainInfo7 = this->m_ptrarrDistributedEquationDomainInfos[6];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4 ||
+               !pDistrEqnDomainInfo5 || !pDistrEqnDomainInfo6 || !pDistrEqnDomainInfo7)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
+            for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
+            for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
+            for(d6 = 0; d6 < pDistrEqnDomainInfo6->m_narrDomainPoints.size(); d6++)
+            for(d7 = 0; d7 < pDistrEqnDomainInfo7->m_narrDomainPoints.size(); d7++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(7);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo4->m_narrDomainPoints[d4]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo5->m_narrDomainPoints[d5]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo6->m_narrDomainPoints[d6]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo7->m_narrDomainPoints[d7]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else if(nNoDomains == 8)
+        {
+            pDistrEqnDomainInfo1 = this->m_ptrarrDistributedEquationDomainInfos[0];
+            pDistrEqnDomainInfo2 = this->m_ptrarrDistributedEquationDomainInfos[1];
+            pDistrEqnDomainInfo3 = this->m_ptrarrDistributedEquationDomainInfos[2];
+            pDistrEqnDomainInfo4 = this->m_ptrarrDistributedEquationDomainInfos[3];
+            pDistrEqnDomainInfo5 = this->m_ptrarrDistributedEquationDomainInfos[4];
+            pDistrEqnDomainInfo6 = this->m_ptrarrDistributedEquationDomainInfos[5];
+            pDistrEqnDomainInfo7 = this->m_ptrarrDistributedEquationDomainInfos[6];
+            pDistrEqnDomainInfo8 = this->m_ptrarrDistributedEquationDomainInfos[7];
+            if(!pDistrEqnDomainInfo1 || !pDistrEqnDomainInfo2 || !pDistrEqnDomainInfo3 || !pDistrEqnDomainInfo4 ||
+
+
+               !pDistrEqnDomainInfo5 || !pDistrEqnDomainInfo6 || !pDistrEqnDomainInfo7 || !pDistrEqnDomainInfo8)
+                daeDeclareAndThrowException(exInvalidPointer);
+
+            for(d1 = 0; d1 < pDistrEqnDomainInfo1->m_narrDomainPoints.size(); d1++)
+            for(d2 = 0; d2 < pDistrEqnDomainInfo2->m_narrDomainPoints.size(); d2++)
+            for(d3 = 0; d3 < pDistrEqnDomainInfo3->m_narrDomainPoints.size(); d3++)
+            for(d4 = 0; d4 < pDistrEqnDomainInfo4->m_narrDomainPoints.size(); d4++)
+            for(d5 = 0; d5 < pDistrEqnDomainInfo5->m_narrDomainPoints.size(); d5++)
+            for(d6 = 0; d6 < pDistrEqnDomainInfo6->m_narrDomainPoints.size(); d6++)
+            for(d7 = 0; d7 < pDistrEqnDomainInfo7->m_narrDomainPoints.size(); d7++)
+            for(d8 = 0; d8 < pDistrEqnDomainInfo8->m_narrDomainPoints.size(); d8++)
+            {
+                pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+                pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+
+                pEquationExecutionInfo->m_narrDomainIndexes.reserve(8);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo1->m_narrDomainPoints[d1]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo2->m_narrDomainPoints[d2]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo3->m_narrDomainPoints[d3]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo4->m_narrDomainPoints[d4]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo5->m_narrDomainPoints[d5]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo6->m_narrDomainPoints[d6]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo7->m_narrDomainPoints[d7]);
+                pEquationExecutionInfo->m_narrDomainIndexes.push_back(pDistrEqnDomainInfo8->m_narrDomainPoints[d8]);
+
+                if(bAddToTheModel)
+                    pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+                else
+                    ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+                pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+                // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+                // However, daeEquation owns the pointers.
+                this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+            }
+        }
+        else
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+    }
+    else
+    {
+        pEquationExecutionInfo = new daeEquationExecutionInfo(this);
+        pEquationExecutionInfo->m_dScaling = this->m_dScaling;
+        if(bAddToTheModel)
+            pModel->AddEquationExecutionInfo(pEquationExecutionInfo);
+        else
+            ptrarrEqnExecutionInfosCreated.push_back(pEquationExecutionInfo);
+
+        pEquationExecutionInfo->GatherInfo(EC, pModel);
+
+        // This vector is redundant - all EquationExecutionInfos exist in models and states too.
+        // However, daeEquation owns the pointers.
+        this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
+    }
+}
+
 bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 {
 	string strError;
@@ -1474,13 +1852,16 @@ bool daeEquation::CheckObject(vector<string>& strarrErrors) const
 		bCheck = false;
 
 // Check residual node	
-	if(!m_pResidualNode)
+    if(!m_pResidualNode)
 	{
 		strError = "Invalid residual in equation [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);
 		bCheck = false;
+
+        // Immediately return since we cannot operate on the residual node
+        return false;
 	}
-	
+
 // Check unit-consistency of the equation	
 	if(m_bCheckUnitsConsistency)
 	{

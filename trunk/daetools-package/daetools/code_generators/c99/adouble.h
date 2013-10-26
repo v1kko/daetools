@@ -25,57 +25,59 @@ typedef struct
     real_t m_dDeriv;
 } adouble;
 
-adouble _adouble_(real_t value, real_t derivative);
+#define NO_INLINE __attribute__((noinline))
 
-adouble _sign_(adouble a);
+adouble _adouble_(real_t value, real_t derivative) NO_INLINE;
 
-adouble _plus_(const adouble a, const adouble b);
-adouble _minus_(const adouble a, const adouble b);
-adouble _multi_(const adouble a, const adouble b);
-adouble _divide_(const adouble a, const adouble b);
+adouble _sign_(adouble a) NO_INLINE;
 
-adouble _exp_(const adouble a);
-adouble _log_(const adouble a);
-adouble _log10_(const adouble a);
-adouble _sqrt_(const adouble a);
-adouble _sin_(const adouble a);
-adouble _cos_(const adouble a);
-adouble _tan_(const adouble a);
-adouble _asin_(const adouble a);
-adouble _acos_(const adouble a);
-adouble _atan_(const adouble a);
+adouble _plus_(const adouble a, const adouble b) NO_INLINE;
+adouble _minus_(const adouble a, const adouble b) NO_INLINE;
+adouble _multi_(const adouble a, const adouble b) NO_INLINE;
+adouble _divide_(const adouble a, const adouble b) NO_INLINE;
 
-adouble _sinh_(const adouble a);
-adouble _cosh_(const adouble a);
-adouble _tanh_(const adouble a);
-adouble _asinh_(const adouble a);
-adouble _acosh_(const adouble a);
-adouble _atanh_(const adouble a);
-adouble _atan2_(const adouble a, const adouble b);
+adouble _exp_(const adouble a) NO_INLINE;
+adouble _log_(const adouble a) NO_INLINE;
+adouble _log10_(const adouble a) NO_INLINE;
+adouble _sqrt_(const adouble a) NO_INLINE;
+adouble _sin_(const adouble a) NO_INLINE;
+adouble _cos_(const adouble a) NO_INLINE;
+adouble _tan_(const adouble a) NO_INLINE;
+adouble _asin_(const adouble a) NO_INLINE;
+adouble _acos_(const adouble a) NO_INLINE;
+adouble _atan_(const adouble a) NO_INLINE;
 
-adouble _pow_(const adouble a, const adouble b);
+adouble _sinh_(const adouble a) NO_INLINE;
+adouble _cosh_(const adouble a) NO_INLINE;
+adouble _tanh_(const adouble a) NO_INLINE;
+adouble _asinh_(const adouble a) NO_INLINE;
+adouble _acosh_(const adouble a) NO_INLINE;
+adouble _atanh_(const adouble a) NO_INLINE;
+adouble _atan2_(const adouble a, const adouble b) NO_INLINE;
+
+adouble _pow_(const adouble a, const adouble b) NO_INLINE;
 
 /* ceil/floor are non-differentiable: should I remove them? */
-adouble _ceil_(const adouble a);
-adouble _floor_(const adouble a);
+adouble _ceil_(const adouble a) NO_INLINE;
+adouble _floor_(const adouble a) NO_INLINE;
 
-adouble _abs_(const adouble a);
-adouble _max_(const adouble a, const adouble b);
-adouble _min_(const adouble a, const adouble b);
+adouble _abs_(const adouble a) NO_INLINE;
+adouble _max_(const adouble a, const adouble b) NO_INLINE;
+adouble _min_(const adouble a, const adouble b) NO_INLINE;
 
-bool _neq_(const adouble a, const adouble b);
-bool _eq_(const adouble a, const adouble b);
-bool _lteq_(const adouble a, const adouble b);
-bool _gteq_(const adouble a, const adouble b);
-bool _gt_(const adouble a, const adouble b);
-bool _lt_(const adouble a, const adouble b);
+bool _neq_(const adouble a, const adouble b) NO_INLINE;
+bool _eq_(const adouble a, const adouble b) NO_INLINE;
+bool _lteq_(const adouble a, const adouble b) NO_INLINE;
+bool _gteq_(const adouble a, const adouble b) NO_INLINE;
+bool _gt_(const adouble a, const adouble b) NO_INLINE;
+bool _lt_(const adouble a, const adouble b) NO_INLINE;
 
-real_t _getValue_(const adouble* a);
-void   _setValue_(adouble* a, const real_t v); 
-real_t _getDerivative_(const adouble* a);
-void   _setDerivative_(adouble* a, real_t v); 
+real_t _getValue_(const adouble* a) NO_INLINE;
+void   _setValue_(adouble* a, const real_t v) NO_INLINE; 
+real_t _getDerivative_(const adouble* a) NO_INLINE;
+void   _setDerivative_(adouble* a, real_t v) NO_INLINE; 
 
-real_t _makeNaN_();
+real_t _makeNaN_() NO_INLINE;
 
 #ifdef __cplusplus
 }

@@ -119,14 +119,14 @@ class simTutorial(daeSimulation):
         n = 10
 
         # The domain for a semi-circle
-        self.m.c.CreateDistributed(eCFDM, 2, 100, -1, 1)
+        self.m.c.CreateStructuredGrid(eCFDM, 2, 100, -1, 1)
 
         self.m.dx.SetValue(0.1 * m)
         self.m.dy.SetValue(0.1 * m)
 
         # Domain bounds can depend on input parameters:
-        self.m.x.CreateDistributed(eCFDM, 2, n, 0, self.m.dx.GetValue())
-        self.m.y.CreateDistributed(eCFDM, 2, n, 0, self.m.dy.GetValue())
+        self.m.x.CreateStructuredGrid(eCFDM, 2, n, 0, self.m.dx.GetValue())
+        self.m.y.CreateStructuredGrid(eCFDM, 2, n, 0, self.m.dy.GetValue())
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))

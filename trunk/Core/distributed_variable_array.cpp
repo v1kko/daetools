@@ -970,10 +970,10 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 		e << "Illegal number of domains, variable " << GetCanonicalName();
 		throw e;
 	}
-	if(D.GetType() != eDistributed)
+    if(D.GetType() != eStructuredGrid)
 	{	
 		daeDeclareException(exInvalidCall);
-		e << "Cannot get partial derivative for non-distributed domain [" << D.GetCanonicalName() << "], variable [" << GetCanonicalName() << "]";
+        e << "Partial derivatives can be get only for structured grids, domain [" << D.GetCanonicalName() << "], variable [" << GetCanonicalName() << "]";
 		throw e;
 	}
 

@@ -467,7 +467,8 @@ class treeItem_Domain(treeItem):
             numberOfPoints = kwargs['numberOfPoints']
             self.setValue(numberOfPoints)
             self._editor = editor_ArrayDomain(self, description, numberOfPoints)
-        else:
+        
+        elif self.type == eStructuredGrid:
             self.discrMethod        = kwargs['discrMethod']       # not edited
             self.order              = kwargs['order']             # not edited
             self.numberOfIntervals  = kwargs['numberOfIntervals'] # not edited
@@ -475,6 +476,11 @@ class treeItem_Domain(treeItem):
             points                  = kwargs['points']
             self.setValue(points)
             self._editor = editor_DistributedDomain(self, description, self.discrMethod, self.order, self.numberOfIntervals, points, self.units)
+        
+        elif self.type == eUnstructuredGrid:
+            numberOfPoints = kwargs['numberOfPoints']
+            self.setValue(numberOfPoints)
+            self._editor = editor_ArrayDomain(self, description, numberOfPoints)
             
         self._layout = QtGui.QHBoxLayout()
         self._layout.setObjectName("domainLayout")
@@ -490,7 +496,15 @@ class treeItem_Domain(treeItem):
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
                 return
 
-        else:
+        elif self.type == eUnstructuredGrid:
+            try:
+                self._value = int(value)
+            except Exception as e:
+                errorMsg = 'Cannot set value for the domain tree item: %s\nError: Invalid value specified' % (daeGetStrippedName(self.name))
+                QtGui.QMessageBox.critical(None, "Error", errorMsg)
+                return
+                
+        elif self.type == eStructuredGrid:
             if isinstance(value, basestring):
                 try:
                     val = eval(value)

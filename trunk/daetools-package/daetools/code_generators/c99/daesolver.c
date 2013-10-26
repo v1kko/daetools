@@ -198,7 +198,7 @@ real_t solSolve(daeIDASolver_t* s, real_t dTime, daeeStopCriterion eCriterion, b
             bool discontinuity_found = modCheckForDiscontinuities(model, s->m_dCurrentTime, s->yval, s->ypval);
             if(discontinuity_found)
             {
-                /* Data will be reported only if there is a discontinuity */
+                /* The data will be reported only if there is a discontinuity */
                 if(bReportDataAroundDiscontinuities)
                     simReportData(simulation);
 

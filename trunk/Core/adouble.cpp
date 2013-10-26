@@ -44,7 +44,7 @@ adouble::adouble(real_t value/* = 0.0*/,
 	m_bGatherInfo = gatherInfo;
     
     if(gatherInfo)
-        node = adNodePtr( (node_ ? node_->Clone() : new adConstantNode(value)) );            
+        node = adNodePtr( (node_ ? node_ : new adConstantNode(value)) );
 }
 
 adouble::adouble(const adouble& a)

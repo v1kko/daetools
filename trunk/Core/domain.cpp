@@ -219,16 +219,16 @@ void daeDomain::SaveRuntime(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_nDiscretizationOrder);
 }
 
-void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod, 
-								  size_t nOrder, 
-								  size_t nNoIntervals, 
-								  real_t dLB, 
-								  real_t dUB)
+void daeDomain::CreateStructuredGrid(daeeDiscretizationMethod eMethod,
+                                     size_t nOrder,
+                                     size_t nNoIntervals,
+                                     real_t dLB,
+                                     real_t dUB)
 {
     if(eMethod != eCFDM)
 	{
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot create a distributed domain [%s]: the only supported discretization method is [eCFDM]";
+        string msg = "Cannot create a uniform grid domain [%s]: the only supported discretization method is [eCFDM]";
         e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
@@ -236,7 +236,7 @@ void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod,
     if(nOrder != 2)
 	{
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot create a distributed domain [%s]: the only supported discretization order is 2";
+        string msg = "Cannot create a uniform grid domain [%s]: the only supported discretization order is 2";
         e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
@@ -244,7 +244,7 @@ void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod,
     if(nNoIntervals < 2)
 	{
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot create a distributed domain [%s]: the number of intervals is less than 2 (%d)";
+        string msg = "Cannot create a uniform grid domain [%s]: the number of intervals is less than 2 (%d)";
         e << (boost::format(msg) % GetCanonicalName() % nNoIntervals).str();
 		throw e;
 	}
@@ -252,7 +252,7 @@ void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod,
 	if(dLB >= dUB)
 	{
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot create a distributed domain [%s]: the lower bound is greater than or equal the upper bound (%f >= %f)";
+        string msg = "Cannot create a uniform grid domain [%s]: the lower bound is greater than or equal the upper bound (%f >= %f)";
         e << (boost::format(msg) % GetCanonicalName() % dLB % dUB).str();
 		throw e;
 	}
@@ -260,11 +260,23 @@ void daeDomain::CreateDistributed(daeeDiscretizationMethod eMethod,
 	m_dLowerBound			= dLB;
 	m_dUpperBound			= dUB;
 	m_nNumberOfIntervals	= nNoIntervals;
-	m_eDomainType			= eDistributed;
+    m_eDomainType			= eStructuredGrid;
 	m_nDiscretizationOrder  = nOrder;
 	m_eDiscretizationMethod	= eMethod;
 
 	CreatePoints();
+}
+
+void daeDomain::CreateUnstructuredGrid(const std::vector<daePoint>& coordinates)
+{
+    m_arrCoordinates        = coordinates;
+    m_dLowerBound			= 0;
+    m_dUpperBound			= 0;
+    m_nNumberOfIntervals	= coordinates.size();
+    m_nNumberOfPoints       = coordinates.size();
+    m_eDomainType			= eUnstructuredGrid;
+    m_nDiscretizationOrder  = 0;
+    m_eDiscretizationMethod	= eDMUnknown;
 }
 
 void daeDomain::CreateArray(size_t nNoIntervals)
@@ -295,12 +307,17 @@ string daeDomain::GetCanonicalName(void) const
 		return daeObject::GetCanonicalName();
 }
 
+const std::vector<daePoint>& daeDomain::GetCoordinates() const
+{
+    return m_arrCoordinates;
+}
+
 adouble daeDomain::partial(daePartialDerivativeVariable& pdv) const
 {
-    if(m_eDomainType != eDistributed)
+    if(m_eDomainType != eStructuredGrid)
     {	
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot calculate partial derivative per domain [%s]: domain not initialized with a CreateArray/CreateDistributed call";
+        string msg = "Cannot calculate partial derivative per domain [%s]: domain is not structured grid";
         e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
@@ -417,10 +434,10 @@ void daeDomain::GetPoints(std::vector<real_t>& darrPoints) const
 
 void daeDomain::SetPoints(const vector<real_t>& darrPoints)
 {
-	if(m_eDomainType == eArray)
+    if(m_eDomainType == eArray || m_eDomainType == eUnstructuredGrid)
 	{	
 		daeDeclareException(exInvalidCall);
-        string msg = "Cannot reset the points of the domain [%s]: a domain is not a distributed domain";
+        string msg = "Cannot reset the points of the domain [%s]: it is not a stuctured grid domain";
         e << (boost::format(msg) % GetCanonicalName()).str();
 		throw e;
 	}
@@ -453,8 +470,8 @@ void daeDomain::CreatePoints()
 		for(i = 0; i < m_nNumberOfPoints; i++)
 			m_darrPoints[i] = i + 1;
 	}
-	else
-	{
+    else if(m_eDomainType == eStructuredGrid)
+    {
 		switch(m_eDiscretizationMethod)
 		{
 		case eFFDM:
@@ -475,6 +492,10 @@ void daeDomain::CreatePoints()
 			daeDeclareAndThrowException(exNotImplemented); 
 		}
 	}
+    else
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+    }
 }
 
 void daeDomain::SetType(daeeDomainType eDomainType)
@@ -651,12 +672,6 @@ bool daeDomain::CheckObject(vector<string>& strarrErrors) const
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}
-	if(m_nNumberOfPoints != m_darrPoints.size())
-	{
-		strError = "Number of allocated points not equal to the given number in domain [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
 
 // Depending on the type, perform some type-dependant tasks
 	if(m_eDomainType == eDTUnknown)
@@ -665,9 +680,15 @@ bool daeDomain::CheckObject(vector<string>& strarrErrors) const
 		strarrErrors.push_back(strError);
 		bCheck = false;
 	}
-	else if(m_eDomainType == eDistributed)
+    else if(m_eDomainType == eStructuredGrid)
 	{
-		if(m_nNumberOfPoints < 2)
+        if(m_nNumberOfPoints != m_darrPoints.size())
+        {
+            strError = "Number of allocated points not equal to the given number in domain [" + GetCanonicalName() + "]";
+            strarrErrors.push_back(strError);
+            bCheck = false;
+        }
+        if(m_nNumberOfPoints < 2)
 		{
 			strError = "Invalid number of points in domain [" + GetCanonicalName() + "]";
 			strarrErrors.push_back(strError);
@@ -696,6 +717,9 @@ bool daeDomain::CheckObject(vector<string>& strarrErrors) const
 			bCheck = false;
 		}
 	}
+    else if(m_eDomainType == eUnstructuredGrid)
+    {
+    }
 
 	return bCheck;
 }

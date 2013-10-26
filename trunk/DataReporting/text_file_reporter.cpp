@@ -36,8 +36,15 @@ void daeTEXTFileDataReporter::WriteDataToFile()
 
 		of << pDomain->m_strName << ", ";
 		of << pDomain->m_nNumberOfPoints << ", ";
-		of << (pDomain->m_eType == eArray ? "Array" : "Distributed") << endl;
-	}
+        if(pDomain->m_eType == eArray)
+            of << "Array" << endl;
+        else if(pDomain->m_eType == eStructuredGrid)
+            of << "StructuredGrid" << endl;
+        else if(pDomain->m_eType == eUnstructuredGrid)
+            of << "UnstructuredGrid" << endl;
+        else
+            of << "INVALID_TYPE" << endl;
+    }
 	of << endl;
 
 	of << "Variables:" << endl;

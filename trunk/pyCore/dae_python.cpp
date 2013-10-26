@@ -16,10 +16,11 @@ BOOST_PYTHON_MODULE(pyCore)
     Enums
 ***************************************************************/
     enum_<daeeDomainType>("daeeDomainType")
-		.value("eDTUnknown",	dae::core::eDTUnknown)
-		.value("eArray",		dae::core::eArray)
-		.value("eDistributed",	dae::core::eDistributed)
-		.export_values()
+        .value("eDTUnknown",        dae::core::eDTUnknown)
+        .value("eArray",            dae::core::eArray)
+        .value("eStructuredGrid",   dae::core::eStructuredGrid)
+        .value("eUnstructuredGrid",	dae::core::eUnstructuredGrid)
+        .export_values()
 		;
 
 	enum_<daeeParameterType>("daeeParameterType")
@@ -757,22 +758,34 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Units",					&daeDomain::GetUnits,               DOCSTR_daeDomain_Units)
         .add_property("npyPoints",              &daepython::GetNumPyArrayDomain,    DOCSTR_daeDomain_npyPoints)
         .add_property("Points",					&daepython::GetDomainPoints, 
-                                                &daepython::SetDomainPoints, DOCSTR_daeDomain_Points) 
+                                                &daepython::SetDomainPoints,        DOCSTR_daeDomain_Points)
+        .add_property("Coordinates",			&daepython::GetDomainCoordinates,   DOCSTR_daeDomain_Coordinates)
 
 		.def("__str__",	 					    &daepython::daeDomain__str__)
         .def("__repr__",						&daepython::daeDomain__repr__)
 		
         .def("CreateArray",						&daeDomain::CreateArray, ( arg("self"), 
-                                                                           arg("noIntervals") 
+                                                                           arg("noPoints")
                                                                          ), DOCSTR_daeDomain_CreateArray)
-		.def("CreateDistributed",				&daeDomain::CreateDistributed, ( arg("self"),
-                                                                                 arg("discretizationMethod"), 
-                                                                                 arg("discretizationOrder"), 
-                                                                                 arg("numberOfIntervals"),
-                                                                                 arg("lowerBound"),
-                                                                                 arg("upperBound")
-                                                                                ), DOCSTR_daeDomain_CreateDistributed)
-		.def("__getitem__",						&daeDomain::operator[], ( arg("self"), arg("index") ), DOCSTR_daeDomain_getitem)
+        // CreateDistributed is deprecated; CreateStructuredGrid should be used instead
+        .def("CreateStructuredGrid",			&daeDomain::CreateStructuredGrid, ( arg("self"),
+                                                                                    arg("discretizationMethod"),
+                                                                                    arg("discretizationOrder"),
+                                                                                    arg("numberOfIntervals"),
+                                                                                    arg("lowerBound"),
+                                                                                    arg("upperBound")
+                                                                                  ), DOCSTR_daeDomain_CreateStructuredGrid)
+        .def("CreateDistributed",				&daeDomain::CreateStructuredGrid, ( arg("self"),
+                                                                                    arg("discretizationMethod"),
+                                                                                    arg("discretizationOrder"),
+                                                                                    arg("numberOfIntervals"),
+                                                                                    arg("lowerBound"),
+                                                                                    arg("upperBound")
+                                                                                  ), DOCSTR_daeDomain_CreateStructuredGrid)
+        .def("CreateUnstructuredGrid",			&daepython::CreateUnstructuredGrid, ( arg("self"),
+                                                                                      arg("coordinates")
+                                                                                    ), DOCSTR_daeDomain_CreateUnstructuredGrid)
+        .def("__getitem__",						&daeDomain::operator[], ( arg("self"), arg("index") ), DOCSTR_daeDomain_getitem)
         .def("__call__",						&daeDomain::operator(), ( arg("self"), arg("index") ), DOCSTR_daeDomain_call) 
 		.def("array",							&daepython::DomainArray, ( arg("self"), arg("indexes") ), DOCSTR_daeDomain_array)
     ;
@@ -1359,7 +1372,8 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(),
                                  ( arg("self"), arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_daeModel_CreateEquation)
-		.def("ConnectPorts",     &daeModel::ConnectPorts, 
+
+        .def("ConnectPorts",     &daeModel::ConnectPorts,
                                  ( arg("self"), arg("portFrom"), arg("portTo") ), DOCSTR_daeModel_ConnectPorts)
 		.def("ConnectEventPorts",&daeModel::ConnectEventPorts, 
                                  ( arg("self"), arg("portFrom"), arg("portTo") ), DOCSTR_daeModel_ConnectEventPorts)
@@ -1418,9 +1432,33 @@ BOOST_PYTHON_MODULE(pyCore)
         */
     ;
 
+    class_<daepython::daeFiniteElementModelWrapper, bases<daeModel>, boost::noncopyable>("daeFiniteElementModel", DOCSTR_daeFiniteElementModel, no_init)
+        .def(init<string, optional<daeModel*, string> >(( arg("self"),
+                                                          arg("name"),
+                                                          arg("parentModel") = NULL,
+                                                          arg("description") = ""
+                                                        ), DOCSTR_daeFiniteElementModel_init))
+
+        // Virtual function that must be implemented in derived classes in python
+        .def("DeclareEquations",            &daepython::daeFiniteElementModelWrapper::DeclareEquations,  &daepython::daeFiniteElementModelWrapper::def_DeclareEquations,
+                                            ( arg("self") ), DOCSTR_daeFiniteElementModel_DeclareEquations)
+
+        .def("AssembleEquation",            pure_virtual(&daepython::daeFiniteElementModelWrapper::AssembleEquation),
+                                            ( arg("self"), arg("feEquation") ), DOCSTR_daeFiniteElementModel_AssembleEquation)
+
+        .def("CreateFiniteElementEquation", &daeFiniteElementModel::CreateFiniteElementEquation, return_internal_reference<>(),
+                                            ( arg("self"), arg("name"), arg("domain"), arg("description") = "", arg("scaling") = 1.0),
+                                            DOCSTR_daeFiniteElementModel_CreateFiniteElementEquation)
+
+        .def("GetVariableRuntimeNodes",     &daepython::daeFiniteElementModelWrapper_GetVariableRuntimeNodes, ( arg("self"), arg("variable") ),
+                                            DOCSTR_daeFiniteElementModel_VariableRuntimeNodes)
+
+        .def("GetTimeDerivativeRuntimeNodes", &daepython::daeFiniteElementModelWrapper_GetTimeDerivativeRuntimeNodes, ( arg("self"), arg("variable") ),
+                                              DOCSTR_daeFiniteElementModel_GetTimeDerivativeRuntimeNodes)
+    ;
+
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", DOCSTR_daeEquationExecutionInfo, no_init)
-        .add_property("Node",	             make_function(&daeEquationExecutionInfo::GetEquationEvaluationNodeRawPtr, return_internal_reference<>()),
-                                             DOCSTR_daeEquationExecutionInfo_Node)
+        .add_property("Node",	             make_function(&daepython::daeEquationExecutionInfo_GetNode, return_internal_reference<>()), DOCSTR_daeEquationExecutionInfo_Node)
         .add_property("Name",                &daeEquationExecutionInfo::GetName, DOCSTR_daeEquationExecutionInfo_Name)
         .add_property("VariableIndexes",     &daepython::daeEquationExecutionInfo_GetVariableIndexes, DOCSTR_daeEquationExecutionInfo_VariableIndexes)
         .add_property("EquationIndex",       &daeEquationExecutionInfo::GetEquationIndexInBlock, DOCSTR_daeEquationExecutionInfo_EquationIndex)
@@ -1428,6 +1466,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("JacobianExpressions", &daepython::daeEquationExecutionInfo_JacobianExpressions, DOCSTR_daeEquationExecutionInfo_JacobianExpressions)
         .add_property("Equation",            make_function(&daeEquationExecutionInfo::GetEquation, return_internal_reference<>()),
                                              DOCSTR_daeEquationExecutionInfo_Equation)
+    ;
+
+    class_<daeFiniteElementEquationExecutionInfo, boost::noncopyable>("daeFiniteElementEquationExecutionInfo", DOCSTR_daeFiniteElementEquationExecutionInfo, no_init)
+        .def("SetNode",   &daeFiniteElementEquationExecutionInfo::SetEvaluationNode, DOCSTR_daeFiniteElementEquationExecutionInfo_Node)
     ;
 
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation", DOCSTR_daeEquation, no_init)
@@ -1447,6 +1489,13 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain2, return_internal_reference<>(), 
                                     ( arg("self"), arg("domain"), arg("domainIndexes"), arg("name") = string("") ), DOCSTR_daeEquation_DistributeOnDomain1)
 	;
+
+    class_<daeFiniteElementEquation, bases<daeEquation>, boost::noncopyable>("daeFiniteElementEquation", DOCSTR_daeFiniteElementEquation, no_init)
+        .add_property("EquationExecutionInfos",	&daepython::daeFiniteElementEquation_GetEquationExecutionInfos, DOCSTR_daeFiniteElementEquation_EquationExecutionInfos)
+
+        .def("__str__",			&daepython::daeFiniteElementEquation__str__)
+        .def("__repr__",		&daepython::daeFiniteElementEquation__repr__)
+    ;
 
     class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", DOCSTR_daePortConnection, no_init)
         .add_property("PortFrom",   make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()), DOCSTR_daePortConnection_PortFrom)

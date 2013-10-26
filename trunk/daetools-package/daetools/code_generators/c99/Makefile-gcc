@@ -1,9 +1,9 @@
 CC            = gcc
 DEFINES       = 
-CFLAGS        = -std=c99 -pedantic -O0 -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable $(DEFINES)
+CFLAGS        = -std=c99 -pedantic -Os -fno-inline-small-functions -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable $(DEFINES)
 INCPATH       = -I.
 LINK          = g++
-LFLAGS        = -Wl,-O1
+LFLAGS        = -Wl,-Os
 LIBS          = -lsundials_idas -lsundials_nvecserial -lblas -llapack -lpthread 
 OBJECTS_DIR   = ./
 TARGET        = daetools_simulation

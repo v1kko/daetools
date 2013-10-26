@@ -1079,6 +1079,9 @@ compile_dealii()
   echo "[*] Building deal.II..."
   echo ""
   make -j${Ncpu} install
+  
+  cp -a build/lib/libdeal_II* ../daetools-package/solibs
+  
   cd "${TRUNK}"
 }
 
