@@ -749,27 +749,83 @@ public:
 	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
 	virtual bool	IsLinear(void) const;
 	virtual bool	IsFunctionOfVariables(void) const;
-	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual bool    IsDifferential(void) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 	virtual const quantity GetQuantity(void) const;
 
 public:
 	daeScalarExternalFunction* m_pExternalFunction;
 };
 
+//These two classes (adSetupFEMatrixItemNode and adSetupFEVectorItemNode) are both setup and runtime at the same time
 /*********************************************************************************************
-	daeFPUCommand
+    adFEMatrixItemNode
 **********************************************************************************************/
-//class DAE_CORE_API daeFPU
-//{
-//public:
-//	static void	CreateCommandStack(adNode* node, std::vector<daeFPUCommand*>& ptrarrCommands);
-//	static void	fpuResidual(const daeExecutionContext* pEC, const std::vector<daeFPUCommand*>& ptrarrCommands, real_t& result);
-//	static void	fpuJacobian(const daeExecutionContext* pEC, const std::vector<daeFPUCommand*>& ptrarrCommands, real_t& result);
-//};
+class DAE_CORE_API adFEMatrixItemNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adFEMatrixItemNode)
+    adFEMatrixItemNode(void);
+    adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<real_t>& matrix, size_t row, size_t column, const unit& units);
+    virtual ~adFEMatrixItemNode(void);
 
-//DAE_CORE_API std::ostream& operator<<(std::ostream& os, const daeFPUCommand& cmd);
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual bool    IsDifferential(void) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual const quantity GetQuantity(void) const;
 
-	
+public:
+    string                          m_strMatrixName;
+    const dae::daeMatrix<real_t>&   m_matrix;
+    size_t                          m_row;
+    size_t                          m_column;
+    unit                            m_units;
+};
+
+/*********************************************************************************************
+    adFEVectorItemNode
+**********************************************************************************************/
+class DAE_CORE_API adFEVectorItemNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adFEVectorItemNode)
+    adFEVectorItemNode(void);
+    adFEVectorItemNode(const string& strVectorName, const dae::daeArray<real_t>& array, size_t row, const unit& units);
+    virtual ~adFEVectorItemNode(void);
+
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual bool    IsDifferential(void) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual const quantity GetQuantity(void) const;
+
+public:
+    string                          m_strVectorName;
+    const dae::daeArray<real_t>&    m_vector;
+    size_t                          m_row;
+    unit                            m_units;
+};
+
+
 inline void FillDomains(const std::vector<daeDomainIndex>& arrDomains, std::vector<string>& strarrDomains)
 {
 	size_t n = arrDomains.size();

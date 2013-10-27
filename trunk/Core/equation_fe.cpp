@@ -470,11 +470,6 @@ daeFiniteElementEquation* daeFiniteElementModel::CreateFiniteElementEquation(con
     return pEquation;
 }
 
-void daeFiniteElementModel::UpdateEquations()
-{
-    daeModel::UpdateEquations();
-}
-
 void daeFiniteElementModel::AssembleEquation(daeFiniteElementEquation* /*pEquation*/)
 {
     daeDeclareAndThrowException(exNotImplemented);

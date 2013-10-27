@@ -467,15 +467,50 @@ public:
 	}
 
 public:
-	REAL& operator [](size_t i)
+    const REAL& operator [](size_t i) const
+    {
+        if(!data || i >= N)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in daeArray: " << i;
+            throw e;
+        }
+        return data[i];
+    }
+
+    REAL& operator [](size_t i)
 	{
-#ifdef DAE_DEBUG
-		if(!data || i >= N) 
-			daeDeclareAndThrowException(exOutOfBounds);
-#endif
-		return data[i];
+        if(!data || i >= N)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in daeArray: " << i;
+            throw e;
+        }
+        return data[i];
 	}
-	
+
+    const REAL&	GetItem(size_t i) const
+    {
+        if(!data || i >= N)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in daeArray: " << i;
+            throw e;
+        }
+        return data[i];
+    }
+
+    REAL& GetItem(size_t i)
+    {
+        if(!data || i >= N)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in daeArray: " << i;
+            throw e;
+        }
+        return data[i];
+    }
+
 	size_t GetSize(void) const
 	{
 		return N;
@@ -489,11 +524,7 @@ public:
 	
 	REAL* Data()
 	{
-#ifdef DAE_DEBUG
-		if(!data) 
-			daeDeclareAndThrowException(exInvalidPointer);
-#endif
-		return data;
+        return data;
 	}
 	
 	void Print(void) const
@@ -533,8 +564,11 @@ public:
 	virtual ~daeMatrix(void){}
 
 public:
-	virtual REAL	GetItem(size_t row, size_t col) const       = 0;
-	virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
+    virtual const REAL&	GetItem(size_t row, size_t col) const   = 0;
+    virtual REAL&	    GetItem(size_t row, size_t col)         = 0;
+
+    virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
+
 	virtual size_t	GetNrows(void) const                        = 0;
 	virtual size_t	GetNcols(void) const                        = 0;
 };

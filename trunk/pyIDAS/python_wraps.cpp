@@ -23,4 +23,10 @@ boost::python::list daeArray_GetValues(daeArray<real_t>& self)
     return l;
 }
 
+real_t daeDenseMatrix_GetItem(daeDenseMatrix& self, size_t i, size_t j)
+{
+    return self.GetItem(i, j);
+}
+
+
 }

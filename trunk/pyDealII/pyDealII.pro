@@ -20,6 +20,8 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
 QMAKE_CXXFLAGS += -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                   -std=c++11 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused \
                   -DBOOST_NO_HASH -DBOOST_NO_SLIST
+QMAKE_CXXFLAGS_DEBUG += -DDEBUG
+QMAKE_CFLAGS_DEBUG   += -DDEBUG
 
 QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                   -std=c++11 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused

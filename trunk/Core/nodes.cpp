@@ -3695,7 +3695,250 @@ bool adScalarExternalFunctionNode::IsFunctionOfVariables(void) const
 {
 	return true;
 }
-	
+
+bool adScalarExternalFunctionNode::IsDifferential(void) const
+{
+    return false;
+}
+
+
+/*********************************************************************************************
+    adFEMatrixItemNode
+**********************************************************************************************/
+adFEMatrixItemNode::adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<real_t>& matrix, size_t row, size_t column, const unit& units)
+                  : m_strMatrixName(strMatrixName),
+                    m_matrix(matrix),
+                    m_row(row),
+                    m_column(column),
+                    m_units(units)
+{
+}
+
+adFEMatrixItemNode::~adFEMatrixItemNode()
+{
+}
+
+adouble adFEMatrixItemNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    adouble tmp;
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr( Clone() );
+        return tmp;
+    }
+
+    tmp.setValue(m_matrix.GetItem(m_row, m_column));
+    return tmp;
+}
+
+const quantity adFEMatrixItemNode::GetQuantity(void) const
+{
+    return quantity(0.0, m_units);
+}
+
+adNode* adFEMatrixItemNode::Clone(void) const
+{
+    return new adFEMatrixItemNode(*this);
+}
+
+void adFEMatrixItemNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+}
+//string adFEMatrixItemNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
+//{
+//	return string("");
+//}
+
+string adFEMatrixItemNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+    string strLatex;
+
+    strLatex += "{ ";
+    strLatex += m_strMatrixName;
+
+    strLatex += " \\left( ";
+    strLatex += toString(m_row);
+    strLatex += ", ";
+    strLatex += toString(m_column);
+    strLatex += " \\right) ";
+    strLatex += "}";
+
+    return strLatex;
+}
+
+void adFEMatrixItemNode::Open(io::xmlTag_t* pTag)
+{
+}
+
+void adFEMatrixItemNode::Save(io::xmlTag_t* pTag) const
+{
+    string strName, strValue;
+    daeExternalFunctionNode_t argument;
+
+    strName = "Name";
+    strValue = m_strMatrixName;
+    pTag->Save(strName, strValue);
+
+    strName = "Row";
+    strValue = toString(m_row);
+    pTag->Save(strName, strValue);
+
+    strName = "Column";
+    strValue = toString(m_column);
+    pTag->Save(strName, strValue);
+}
+
+void adFEMatrixItemNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
+{
+}
+
+void adFEMatrixItemNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    io::xmlTag_t* pRowTag = pTag->AddTag(string("mrow"));
+
+    io::xmlTag_t* pFunctionTag = pRowTag->AddTag(string("mi"), m_strMatrixName);
+    pFunctionTag->AddAttribute(string("fontstyle"), string("italic"));
+
+    io::xmlTag_t* pFencedTag = pRowTag->AddTag(string("mfenced"));
+        pFencedTag->AddTag(string("mn"), m_row);
+        pFencedTag->AddTag(string("mn"), m_column);
+}
+
+void adFEMatrixItemNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+bool adFEMatrixItemNode::IsLinear(void) const
+{
+    return false;
+}
+
+bool adFEMatrixItemNode::IsFunctionOfVariables(void) const
+{
+    return true;
+}
+
+bool adFEMatrixItemNode::IsDifferential(void) const
+{
+    return false;
+}
+
+/*********************************************************************************************
+    adFEVectorItemNode
+**********************************************************************************************/
+adFEVectorItemNode::adFEVectorItemNode(const string& strVectorName, const dae::daeArray<real_t>& array, size_t row, const unit& units)
+                  : m_strVectorName(strVectorName),
+                    m_vector(array),
+                    m_row(row),
+                    m_units(units)
+{
+}
+
+adFEVectorItemNode::~adFEVectorItemNode()
+{
+}
+
+adouble adFEVectorItemNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    adouble tmp;
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodePtr( Clone() );
+        return tmp;
+    }
+
+    tmp.setValue(m_vector.GetItem(m_row));
+    return tmp;
+}
+
+const quantity adFEVectorItemNode::GetQuantity(void) const
+{
+    return quantity(0.0, m_units);
+}
+
+adNode* adFEVectorItemNode::Clone(void) const
+{
+    return new adFEVectorItemNode(*this);
+}
+
+void adFEVectorItemNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+}
+//string adFEVectorItemNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
+//{
+//	return string("");
+//}
+
+string adFEVectorItemNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+    string strLatex;
+
+    strLatex += "{ ";
+    strLatex += m_strVectorName;
+
+    strLatex += " \\left( ";
+    strLatex += toString(m_row);
+    strLatex += " \\right) ";
+    strLatex += "}";
+
+    return strLatex;
+}
+
+void adFEVectorItemNode::Open(io::xmlTag_t* pTag)
+{
+}
+
+void adFEVectorItemNode::Save(io::xmlTag_t* pTag) const
+{
+    string strName, strValue;
+
+    strName = "Name";
+    strValue = m_strVectorName;
+    pTag->Save(strName, strValue);
+
+    strName = "Row";
+    strValue = toString(m_row);
+    pTag->Save(strName, strValue);
+}
+
+void adFEVectorItemNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
+{
+}
+
+void adFEVectorItemNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    io::xmlTag_t* pRowTag = pTag->AddTag(string("mrow"));
+
+    io::xmlTag_t* pFunctionTag = pRowTag->AddTag(string("mi"), m_strVectorName);
+    pFunctionTag->AddAttribute(string("fontstyle"), string("italic"));
+
+    io::xmlTag_t* pFencedTag = pRowTag->AddTag(string("mfenced"));
+        pFencedTag->AddTag(string("mn"), m_row);
+}
+
+void adFEVectorItemNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    daeDeclareAndThrowException(exInvalidCall);
+}
+
+bool adFEVectorItemNode::IsLinear(void) const
+{
+    return false;
+}
+
+bool adFEVectorItemNode::IsFunctionOfVariables(void) const
+{
+    return true;
+}
+
+bool adFEVectorItemNode::IsDifferential(void) const
+{
+    return false;
+}
+
 
 }
 }

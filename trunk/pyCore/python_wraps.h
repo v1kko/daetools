@@ -1167,6 +1167,17 @@ public:
         this->daeModel::DeclareEquations();
     }
 
+    void UpdateEquations(const daeExecutionContext* pExecutionContext)
+    {
+        if(boost::python::override f = this->get_override("UpdateEquations"))
+            f(pExecutionContext);
+        else
+            this->daeModel::UpdateEquations(pExecutionContext);
+    }
+    void def_UpdateEquations(const daeExecutionContext* pExecutionContext)
+    {
+        this->daeModel::UpdateEquations(pExecutionContext);
+    }
 };
 
 void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,

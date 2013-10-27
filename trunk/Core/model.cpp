@@ -121,34 +121,23 @@ void daeModel::Clone(const daeModel& rObject)
 	}
 }
 
-void daeModel::UpdateEquations(void)
+void daeModel::UpdateEquations(const daeExecutionContext* pExecutionContext)
 {
+// Default implementation does nothing (just propagates call to child models and model arrays)
     size_t i;
-
-    for(i = 0; i < m_ptrarrEquations.size(); i++)
-    {
-        daeEquation* pEquation = m_ptrarrEquations[i];
-        pEquation->Update();
-    }
-
-    for(i = 0; i < m_ptrarrSTNs.size(); i++)
-    {
-        daeSTN* pSTN = m_ptrarrSTNs[i];
-        pSTN->UpdateEquations();
-    }
 
 // Then, create port connection equations for each child-model
     for(i = 0; i < m_ptrarrComponents.size(); i++)
     {
         daeModel* pModel = m_ptrarrComponents[i];
-        pModel->UpdateEquations();
+        pModel->UpdateEquations(pExecutionContext);
     }
 
 // Finally, create port connection equations for each modelarray
     for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
     {
         daeModelArray* pModelArray = m_ptrarrComponentArrays[i];
-        pModelArray->UpdateEquations();
+        pModelArray->UpdateEquations(pExecutionContext);
     }
 }
 

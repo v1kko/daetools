@@ -49,7 +49,7 @@ public:
 // That internally translates to :
 //      [row][col] if eRowWise
 //      [col][row] if eColumnWise
-	virtual real_t GetItem(size_t row, size_t col) const
+    virtual const real_t& GetItem(size_t row, size_t col) const
 	{
 		if(!data) 
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -62,7 +62,20 @@ public:
 			return data[col][row];
 	}
 
-	virtual void SetItem(size_t row, size_t col, real_t value)
+    virtual real_t& GetItem(size_t row, size_t col)
+    {
+        if(!data)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(row >= Nrow || col >= Ncol)
+            daeDeclareAndThrowException(exOutOfBounds);
+
+        if(data_access == eRowWise)
+            return data[row][col];
+        else
+            return data[col][row];
+    }
+
+    virtual void SetItem(size_t row, size_t col, real_t value)
 	{
 		if(!data) 
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -262,7 +275,7 @@ public:
 // That internally translates to :
 //      [row][col] if eRowWise
 //      [col][row] if eColumnWise
-	virtual real_t GetItem(size_t row, size_t col) const
+    virtual const real_t& GetItem(size_t row, size_t col) const
 	{
 		if(!data) 
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -274,6 +287,19 @@ public:
 		else
 			return data[col*Nrow + row];
 	}
+
+    virtual real_t& GetItem(size_t row, size_t col)
+    {
+        if(!data)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(row >= Nrow || col >= Ncol)
+            daeDeclareAndThrowException(exOutOfBounds);
+
+        if(data_access == eRowWise)
+            return data[row*Ncol + col];
+        else
+            return data[col*Nrow + row];
+    }
 
 	virtual void SetItem(size_t row, size_t col, real_t value)
 	{
@@ -494,33 +520,60 @@ public:
 		BTF = NULL;
 	}
 
-    FLOAT& operator()(size_t i, size_t j)
+    const FLOAT& operator()(size_t i, size_t j) const
     {
         INT index = CalcIndex(i, j);
         if(index < 0)
 		{
-			daeDeclareException(exMiscellanous);
+            daeDeclareException(exOutOfBounds);
 			e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
 			throw e;
 		}
     	return A[index];
 	}
-	
-    FLOAT GetItem(size_t i, size_t j) const
+
+    FLOAT& operator()(size_t i, size_t j)
+    {
+        INT index = CalcIndex(i, j);
+        if(index < 0)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
+            throw e;
+        }
+        return A[index];
+    }
+
+    const FLOAT& GetItem(size_t i, size_t j) const
 	{
         INT index = CalcIndex(i, j);
         if(index < 0)
-			return 0.0;
-		else
-			return A[index];
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
+            throw e;
+        }
+        return A[index];
 	}
-	
+
+    FLOAT& GetItem(size_t i, size_t j)
+    {
+        INT index = CalcIndex(i, j);
+        if(index < 0)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
+            throw e;
+        }
+        return A[index];
+    }
+
     void SetItem(size_t i, size_t j, FLOAT val)
 	{
         INT index = CalcIndex(i, j);
         if(index < 0)
 		{
-			daeDeclareException(exMiscellanous);
+            daeDeclareException(exOutOfBounds);
 			e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
 			throw e;
 		}

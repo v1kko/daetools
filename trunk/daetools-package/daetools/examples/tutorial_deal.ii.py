@@ -22,7 +22,7 @@ __doc__ = """
 import sys, numpy
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import pyDealII
-from pyDealII import daeTransitionalDiffusion_2D
+from pyDealII import daeDiffusion_2D
 from time import localtime, strftime
 
 # Standard variable types are defined in variable_types.py
@@ -32,8 +32,8 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
-        self.hp = daeTransitionalDiffusion_2D('hp', self, 'hp description')
-        self.hp.Initialize('ex49.msh', 100, 2)
+        self.fe = daeDiffusion_2D('fe', self, 'hp description')
+        self.fe.Initialize('step-7.msh', 100, 1)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -83,8 +83,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

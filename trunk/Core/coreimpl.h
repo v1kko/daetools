@@ -2613,7 +2613,7 @@ public:
 	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
 	
 	virtual void	CleanUpSetupData(void);
-    virtual void    UpdateEquations(void);
+    virtual void    UpdateEquations(const daeExecutionContext* pExecutionContext);
 
 	virtual void	SaveModelReport(const string& strFileName) const;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const;
@@ -2930,6 +2930,7 @@ protected:
     virtual void ExecuteOnConditionActions(void)                                                                                    = 0;
     virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                                const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)          = 0;
+    virtual void UpdateEquations(const daeExecutionContext* pExecutionContext)                                                      = 0;
 
 protected:
 	virtual void Create(void);
@@ -3356,7 +3357,6 @@ public:
     void OpenRuntime(io::xmlTag_t* pTag);
     void SaveRuntime(io::xmlTag_t* pTag) const;
     bool CheckObject(std::vector<string>& strarrErrors) const;
-    void UpdateEquations(void);
 
     void GetVariableRuntimeNodes(daeVariable& variable, std::vector<adouble>& arrRuntimeNodes);
     void GetTimeDerivativeRuntimeNodes(daeVariable& variable, std::vector<adouble>& arrRuntimeNodes);

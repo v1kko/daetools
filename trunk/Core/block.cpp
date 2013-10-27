@@ -92,16 +92,16 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 	SetTimeDerivativesArray(&arrTimeDerivatives);
 	SetResidualArray(&arrResiduals);
 
-    // Update equations if necessary (in general, applicable only to FE equations)
-    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
-
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
 	EC.m_dInverseTimeStep			= GetInverseTimeStep();
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculate;
-	
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel())->UpdateEquations(&EC);
+
     double startTime, endTime;
     bool bPrintInfo = m_pDataProxy->PrintInfo();
     if(bPrintInfo)
@@ -154,16 +154,16 @@ void daeBlock::CalculateJacobian(real_t				dTime,
 	SetJacobianMatrix(&matJacobian); 
 	SetInverseTimeStep(dInverseTimeStep);
 
-    // Update equations if necessary (in general, applicable only to FE equations)
-    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
-
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
 	EC.m_dInverseTimeStep			= GetInverseTimeStep();
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculateJacobian;
-	
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel())->UpdateEquations(&EC);
+
     double startTime, endTime;
     bool bPrintInfo = m_pDataProxy->PrintInfo();
     if(bPrintInfo)
@@ -218,15 +218,15 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 										 &matSTimeDerivatives,
 										 &matSResiduals);
 
-    // Update equations if necessary (in general, applicable only to FE equations)
-    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
-
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
 	EC.m_dInverseTimeStep			= GetInverseTimeStep(); // ??????
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel())->UpdateEquations(&EC);
 
     double startTime, endTime;
     bool bPrintInfo = m_pDataProxy->PrintInfo();
@@ -276,15 +276,15 @@ void daeBlock::CalculateSensitivityParametersGradients(const std::vector<size_t>
 	SetTimeDerivativesArray(&arrTimeDerivatives);
 	m_pDataProxy->SetSensitivityMatrixes(NULL, NULL, &matSResiduals);
 
-    // Update equations if necessary (in general, applicable only to FE equations)
-    m_pDataProxy->GetTopLevelModel()->UpdateEquations();
-
 	daeExecutionContext EC;
 	EC.m_pBlock						= this;
 	EC.m_pDataProxy					= m_pDataProxy;
 	EC.m_dInverseTimeStep			= GetInverseTimeStep();
 	EC.m_pEquationExecutionInfo		= NULL;
 	EC.m_eEquationCalculationMode	= eCalculateSensitivityParametersGradients;
+
+    // Update equations if necessary (in general, applicable only to FE equations)
+    dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel())->UpdateEquations(&EC);
 
 	for(i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
 	{

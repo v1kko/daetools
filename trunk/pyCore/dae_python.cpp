@@ -359,6 +359,17 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ExternalFunction",  make_function(&daepython::adVectorExternalFunctionNode_ExternalFunction, return_internal_reference<>()))
     ;
 
+    class_<adFEMatrixItemNode, bases<adNode>, boost::noncopyable>("adFEMatrixItemNode", no_init)
+        .def_readonly("MatrixName",   &adFEMatrixItemNode::m_strMatrixName)
+        .def_readonly("Row",          &adFEMatrixItemNode::m_row)
+        .def_readonly("Column",       &adFEMatrixItemNode::m_column)
+    ;
+
+    class_<adFEVectorItemNode, bases<adNode>, boost::noncopyable>("adFEVectorItemNode", no_init)
+        .def_readonly("VectorName",   &adFEVectorItemNode::m_strVectorName)
+        .def_readonly("Row",          &adFEVectorItemNode::m_row)
+    ;
+
     class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)
         .def_readonly("Index",   &adDomainIndexNode::m_nIndex)
         .add_property("Domain",  make_function(&daepython::adDomainIndexNode_Domain, return_internal_reference<>()))
@@ -1335,6 +1346,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__repr__", &daepython::daeOnConditionActions__repr__)
     ;
     
+
+    class_<daeExecutionContext, boost::noncopyable>("daeExecutionContext", DOCSTR_daeExecutionContext, no_init)
+    ;
+
     class_<daepython::daeModelWrapper, bases<daeObject>, boost::noncopyable>("daeModel", DOCSTR_daeModel, no_init)
 		.def(init<string, optional<daeModel*, string> >(( arg("self"), 
                                                           arg("name"),
@@ -1364,11 +1379,15 @@ BOOST_PYTHON_MODULE(pyCore)
                       &daepython::daeModel_GetOverallIndex_BlockIndex_VariableNameMap,          DOCSTR_daeModel_OverallIndex_BlockIndex_VariableNameMap)
 
         .def("__str__",           &daepython::daeModel__str__)
-        .def("__repr__",          &daepython::daeModel__repr__)  
+        .def("__repr__",          &daepython::daeModel__repr__)
             
         // Virtual function that must be implemented in derived classes in python
         .def("DeclareEquations", &daepython::daeModelWrapper::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations,
                                  ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
+
+        // Virtual function that can be implemented in derived classes in python if equations need an update (useful for FE models)
+        .def("UpdateEquations", &daepython::daeModelWrapper::UpdateEquations,  &daepython::daeModelWrapper::def_UpdateEquations,
+                                 ( arg("self"), arg("executionContext") ), DOCSTR_daeModel_UpdateEquations)
 
         .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(),
                                  ( arg("self"), arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_daeModel_CreateEquation)

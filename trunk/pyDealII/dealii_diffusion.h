@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <boost/format.hpp>
+
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
 #include <deal.II/base/logstream.h>
@@ -39,117 +41,23 @@ namespace diffusion
 {
 using namespace dealii;
 
-template <int dim>
-class SolutionBase
-{
-protected:
-    static const unsigned int n_source_centers = 3;
-    static const Point<dim>   source_centers[n_source_centers];
-    static const double       width;
-};
-
 
 template <int dim>
-const Point<dim> SolutionBase<dim>::source_centers[SolutionBase<dim>::n_source_centers]
-= { Point<dim>(-0.5, +0.5),
-    Point<dim>(-0.5, -0.5),
-    Point<dim>(+0.5, -0.5)   };
-
-template <int dim>
-const double SolutionBase<dim>::width = 1./3.;
-
-
-
-template <int dim>
-class Solution : public Function<dim>,
-        protected SolutionBase<dim>
+class SingleValue_Function : public Function<dim>
 {
 public:
-    Solution () : Function<dim>() {}
-    
-    virtual double value (const Point<dim>   &p,
-                          const unsigned int  component = 0) const;
-    
-    virtual Tensor<1,dim> gradient (const Point<dim>   &p,
-                                    const unsigned int  component = 0) const;
-};
-
-
-template <int dim>
-double Solution<dim>::value (const Point<dim>   &p,
-                             const unsigned int) const
-{
-    double return_value = 0;
-    for (unsigned int i=0; i<this->n_source_centers; ++i)
+    SingleValue_Function(double value = 0.0) : Function<dim>()
     {
-        const Point<dim> x_minus_xi = p - this->source_centers[i];
-        return_value += std::exp(-x_minus_xi.square() /
-                                 (this->width * this->width));
+        m_value = value;
     }
-    
-    return return_value;
-}
 
-
-template <int dim>
-Tensor<1,dim> Solution<dim>::gradient (const Point<dim>   &p,
-                                       const unsigned int) const
-{
-    Tensor<1,dim> return_value;
-    
-    for (unsigned int i=0; i<this->n_source_centers; ++i)
+    virtual double value(const Point<dim> &p, const unsigned int component = 0) const
     {
-        const Point<dim> x_minus_xi = p - this->source_centers[i];
-        
-        return_value += (-2 / (this->width * this->width) *
-                         std::exp(-x_minus_xi.square() /
-                                  (this->width * this->width)) *
-                         x_minus_xi);
+        return m_value;
     }
-    
-    return return_value;
-}
 
-
-
-template <int dim>
-class RightHandSide : public Function<dim>,
-        protected SolutionBase<dim>
-{
 public:
-    RightHandSide () : Function<dim>() {}
-    
-    virtual double value (const Point<dim>   &p,
-                          const unsigned int  component = 0) const;
-};
-
-
-template <int dim>
-double RightHandSide<dim>::value (const Point<dim>   &p,
-                                  const unsigned int) const
-{
-    double return_value = 0;
-    for (unsigned int i=0; i<this->n_source_centers; ++i)
-    {
-        const Point<dim> x_minus_xi = p - this->source_centers[i];
-        
-        return_value += ((2*dim - 4*x_minus_xi.square()/
-                          (this->width * this->width)) /
-                         (this->width * this->width) *
-                         std::exp(-x_minus_xi.square() /
-                                  (this->width * this->width)));
-        return_value += std::exp(-x_minus_xi.square() /
-                                 (this->width * this->width));
-    }
-    
-    return return_value;
-}
-
-
-enum RefinementMode 
-{
-    global_refinement, 
-    adaptive_refinement
+    double m_value;
 };
 
 
@@ -159,21 +67,17 @@ class dealiiDiffusion
 public:
     
     dealiiDiffusion (double diffusivity,
-                                 unsigned int polynomialOrder,
-                                 const std::map<int, double>& dirichletBC,
-                                 const std::map<int, double>& neumanBC);
+                     unsigned int polynomialOrder,
+                     const std::map<unsigned int, double>& dirichletBC,
+                     const std::map<unsigned int, double>& neumannBC);
     
     virtual ~dealiiDiffusion ();
-    
-    void run ();
     
 public:
     virtual void setup_system ();
     virtual void assemble_system ();
-    virtual void solve ();
-    virtual void refine_grid ();
-    virtual void process_solution (const unsigned int cycle);
-    
+
+public:
     Triangulation<dim>                      triangulation;
     DoFHandler<dim>                         dof_handler;
     
@@ -183,46 +87,75 @@ public:
     
     SparsityPattern                         sparsity_pattern;
   
-    SparseMatrix<double>                    system_matrix;
-    SparseMatrix<double>                    system_matrix_dt;
+    SparseMatrix<double>                    K_diffusion;
+    //SparseMatrix<double>                    K_convection;
+    //SparseMatrix<double>                    K_generation;
+    SparseMatrix<double>                    K_dirichlet;
+    SparseMatrix<double>                    K_accumulation;
+    Vector<double>                          f_generation;
+    Vector<double>                          f_dirichlet;
+    Vector<double>                          f_neuman;
+
     Vector<double>                          solution;
-    Vector<double>                          system_rhs;
-    
-    const RefinementMode                    refinement_mode;
-    
+
     ConvergenceTable                        convergence_table;
 
     double                                  Diffusivity;
-    std::map<int, double>                   DirichletBC;
-    std::map<int, double>                   NeumanBC;
+    std::map<unsigned int, double>          DirichletBC;
+    std::map<unsigned int, double>          NeumanBC;
+
+    SingleValue_Function<dim> funDiffusivity;
+    SingleValue_Function<dim> funVelocity;
+    SingleValue_Function<dim> funGeneration;
+
+    std::map<unsigned int, SingleValue_Function<dim> > funsDirichletBC;
+    std::map<unsigned int, SingleValue_Function<dim> > funsNeumannBC;
+
+//    adoubleCSRMatrix     Kdiff;
+//    adoubleCSRMatrix     Kdt;
+//    std::vector<adouble> Kdt;
 };
-
-
-
 
 template <int dim>
 dealiiDiffusion<dim>::dealiiDiffusion (double diffusivity,
-                                                               unsigned int polynomialOrder,
-                                                               const std::map<int, double>& dirichletBC,
-                                                               const std::map<int, double>& neumanBC):
+                                       unsigned int polynomialOrder,
+                                       const std::map<unsigned int, double>& dirichletBC,
+                                       const std::map<unsigned int, double>& neumannBC):
     dof_handler (triangulation),
-    fe (new FE_Q<dim>(polynomialOrder)),
-    refinement_mode (global_refinement)
+    fe (new FE_Q<dim>(polynomialOrder))
 {
-    Diffusivity = diffusivity;
-    DirichletBC = dirichletBC;
-    NeumanBC    = neumanBC;
+    Diffusivity        = diffusivity;
+    DirichletBC        = dirichletBC;
+    NeumanBC           = neumannBC;
+
+
+    // New style
+    funDiffusivity.m_value = diffusivity;
+    funVelocity.m_value    = 0.0;
+    funGeneration.m_value  = 0.0;
+
+    for(std::map<unsigned int, double>::const_iterator it = dirichletBC.begin(); it != dirichletBC.end(); it++)
+    {
+        const unsigned int id    = it->first;
+        const double       value = it->second;
+
+        funsDirichletBC[id] = SingleValue_Function<dim>(value);
+    }
+
+    for(std::map<unsigned int, double>::const_iterator it = neumannBC.begin(); it != neumannBC.end(); it++)
+    {
+        const unsigned int id    = it->first;
+        const double       value = it->second;
+
+        funsNeumannBC[id] = SingleValue_Function<dim>(value);
+    }
 }
-
-
 
 template <int dim>
 dealiiDiffusion<dim>::~dealiiDiffusion ()
 {
     dof_handler.clear ();
 }
-
-
 
 template <int dim>
 void dealiiDiffusion<dim>::setup_system ()
@@ -231,8 +164,8 @@ void dealiiDiffusion<dim>::setup_system ()
     
     SparsityPattern sparsity_pattern_pre;
     sparsity_pattern_pre.reinit (dof_handler.n_dofs(),
-                             dof_handler.n_dofs(),
-                             dof_handler.max_couplings_between_dofs());
+                                 dof_handler.n_dofs(),
+                                 dof_handler.max_couplings_between_dofs());
     DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern_pre);
     hanging_node_constraints.condense (sparsity_pattern_pre);
     sparsity_pattern_pre.compress();
@@ -253,15 +186,41 @@ void dealiiDiffusion<dim>::setup_system ()
     DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
     hanging_node_constraints.condense (sparsity_pattern);
     sparsity_pattern.compress();
-    
-    system_matrix.reinit (sparsity_pattern);
-    system_matrix_dt.reinit (sparsity_pattern);
 
+    // Global matrices
+    K_diffusion.reinit (sparsity_pattern);
+    K_accumulation.reinit (sparsity_pattern);
+    K_dirichlet.reinit (sparsity_pattern);
+    f_dirichlet.reinit (dof_handler.n_dofs());
+    f_neuman.reinit (dof_handler.n_dofs());
+    f_generation.reinit (dof_handler.n_dofs());
+
+    // Global rhs arrays
     solution.reinit (dof_handler.n_dofs());
-    system_rhs.reinit (dof_handler.n_dofs());
     
     std::ofstream out ("sparsity_pattern_after");
     sparsity_pattern.print_gnuplot (out);
+
+/*
+    std::map<size_t, size_t> mapIndexes;
+    size_t nrows = system_matrix.m();
+    size_t nnz = sparsity_pattern.n_nonzero_elements();
+
+    b.resize(nrows);
+    A.Reset(nrows, nnz, CSR_C_STYLE);
+    A.ResetCounters();
+
+    for(size_t row = 0; row < nrows; row++)
+    {
+        mapIndexes.clear();
+        for(SparsityPattern::row_iterator iter = sparsity_pattern.row_begin(row); iter != sparsity_pattern.row_end(row); iter++)
+            mapIndexes.insert(std::make_pair(mapIndexes.size(), *iter));
+
+        A.AddRow(mapIndexes);
+    }
+    A.Sort();
+    //A.Print(true);
+*/
 }
 
 template <int dim>
@@ -270,15 +229,18 @@ void dealiiDiffusion<dim>::assemble_system ()
     QGauss<dim>   quadrature_formula(3);
     QGauss<dim-1> face_quadrature_formula(3);
     
-    const unsigned int n_q_points    = quadrature_formula.size();
+    const unsigned int n_q_points      = quadrature_formula.size();
     const unsigned int n_face_q_points = face_quadrature_formula.size();
     
     const unsigned int dofs_per_cell = fe->dofs_per_cell;
     
-    FullMatrix<double>  cell_matrix    (dofs_per_cell, dofs_per_cell);
-    FullMatrix<double>  cell_matrix_dt (dofs_per_cell, dofs_per_cell);
-    Vector<double>      cell_rhs       (dofs_per_cell);
-    
+    FullMatrix<double>  Kel_diffusion(dofs_per_cell, dofs_per_cell);
+    FullMatrix<double>  Kel_accumulation(dofs_per_cell, dofs_per_cell);
+    FullMatrix<double>  Kel_dirichlet(dofs_per_cell, dofs_per_cell);
+    Vector<double>      fel_dirichlet(dofs_per_cell);
+    Vector<double>      fel_neuman(dofs_per_cell);
+    Vector<double>      fel_generation(dofs_per_cell);
+
     std::vector<unsigned int> local_dof_indices (dofs_per_cell);
     
     FEValues<dim>  fe_values (*fe, quadrature_formula,
@@ -289,98 +251,244 @@ void dealiiDiffusion<dim>::assemble_system ()
                                       update_values         | update_quadrature_points  |
                                       update_normal_vectors | update_JxW_values);
     
-    const RightHandSide<dim> right_hand_side;
-    std::vector<double>  rhs_values (n_q_points);
-    
-    const Solution<dim> exact_solution;
-    
-    typename DoFHandler<dim>::active_cell_iterator
-            cell = dof_handler.begin_active(),
-            endc = dof_handler.end();
-    for (; cell!=endc; ++cell)
+    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
+                                                   endc = dof_handler.end();
+
+    // All DOFs at the boundary ID that have Dirichlet BCs imposed
+    // mapDirichlets: map< boundary_id, map<dof, value> >
+    std::map< unsigned int, std::map<unsigned int,double> > mapDirichlets;
+    for(std::map<unsigned int, double>::iterator it = DirichletBC.begin(); it != DirichletBC.end(); it++)
     {
-        cell_matrix    = 0;
-        cell_matrix_dt = 0;
-        cell_rhs       = 0;
+        const unsigned int id        = it->first;
+        const double dirichlet_value = it->second;
+
+        std::map<unsigned int,double> boundary_values;
+        VectorTools::interpolate_boundary_values (dof_handler,
+                                                  id,
+                                                  SingleValue_Function<dim>(dirichlet_value),
+                                                  boundary_values);
+
+        mapDirichlets[id] = boundary_values;
+    }
+
+    // All DOFs at the boundary ID that have Neumann BCs imposed
+    // mapNeumanns: map< boundary_id, map<global_dof_index, value> >
+    std::map< unsigned int, std::map<unsigned int,double> > mapNeumanns;
+    for(std::map<unsigned int, double>::iterator it = NeumanBC.begin(); it != NeumanBC.end(); it++)
+    {
+        const unsigned int id      = it->first;
+        const double neumann_value = it->second;
+
+        std::map<unsigned int,double> boundary_values;
+        VectorTools::interpolate_boundary_values (dof_handler,
+                                                  id,
+                                                  SingleValue_Function<dim>(neumann_value),
+                                                  boundary_values);
+
+        mapNeumanns[id] = boundary_values;
+    }
+
+    int cellCounter = 0;
+    for (; cell!=endc; ++cell, ++cellCounter)
+    {
+        Kel_diffusion    = 0;
+        Kel_accumulation = 0;
+        Kel_dirichlet    = 0;
+        fel_neuman       = 0;
+        fel_generation   = 0;
         
         fe_values.reinit (cell);
-        
-        right_hand_side.value_list (fe_values.get_quadrature_points(),
-                                    rhs_values);
-        
-        for (unsigned int q_point=0; q_point<n_q_points; ++q_point)
-        {
-            for (unsigned int i=0; i<dofs_per_cell; ++i)
-            {
-                for (unsigned int j=0; j<dofs_per_cell; ++j)
-                {
-                    cell_matrix(i,j)    += (
-                                             fe_values.shape_grad(i,q_point) *
-                                             fe_values.shape_grad(j,q_point)
-                                           )
-                                           * Diffusivity
-                                           * fe_values.JxW(q_point);
 
-                    cell_matrix_dt(i,j) += (
-                                             fe_values.shape_value(i,q_point) *
-                                             fe_values.shape_value(j,q_point)
-                                           )
-                                           * fe_values.JxW(q_point);
+        cell->get_dof_indices (local_dof_indices);
+
+        for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
+        {
+            for(unsigned int i = 0; i < dofs_per_cell; ++i)
+            {
+                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                {
+                    Kel_diffusion(i,j)    += (
+                                                fe_values.shape_grad(i, q_point) *
+                                                fe_values.shape_grad(j, q_point)
+                                                +
+                                                fe_values.shape_value(i, q_point) *
+                                                fe_values.shape_value(j, q_point)
+                                             )
+                                             /* * Diffusivity */
+                                             * fe_values.JxW(q_point);
+
+                    Kel_accumulation(i,j) += (
+                                               fe_values.shape_value(i, q_point) *
+                                               fe_values.shape_value(j, q_point)
+                                             )
+                                             * fe_values.JxW(q_point);
                 }
                 
-                // No generation in the interior elements
-                //cell_rhs(i) +=  fe_values.shape_value(i,q_point) *
-                //                rhs_values [q_point] *
-                //                fe_values.JxW(q_point);
+                // No generation in the interior elements - we have only diffusion
+                fel_generation(i) +=  fe_values.shape_value(i,q_point) *
+                                      /*rhs_values [q_point] */  1 *
+                                      fe_values.JxW(q_point);
             }
         }
 
-        for (unsigned int face = 0; face<GeometryInfo<dim>::faces_per_cell; ++face)
+        for(unsigned int face = 0; face<GeometryInfo<dim>::faces_per_cell; ++face)
         {
             if(cell->face(face)->at_boundary())
             {
-                for(std::map<int, double>::iterator it = NeumanBC.begin(); it != NeumanBC.end(); it++)
-                {
-                    fe_face_values.reinit (cell, face);
+                fe_face_values.reinit (cell, face);
 
+                const unsigned int face_dofs_per_cell = fe_face_values.dofs_per_cell;
+                std::cout << (boost::format("     cell=%d, face=%d, dofs_per_cell=%d, n_face_q_points=%d") % cellCounter % face % dofs_per_cell % n_face_q_points).str() << std::endl;
+
+                for(std::map<unsigned int, double>::iterator it = NeumanBC.begin(); it != NeumanBC.end(); it++)
+                {
                     if(cell->face(face)->boundary_indicator() == it->first)
                     {
-                        std::cout << "    face " << face << ", id = " << it->first << ", NeumanBC = " << it->second << std::endl;
+                        std::cout << (boost::format("  NeumanBC(cell=%d, face=%d, id= %d) = %f") % cellCounter % face % it->first % it->second).str() << std::endl;
 
                         for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                         {
-                            const double neumann_value = it->first;
-                            for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                                cell_rhs(i) += neumann_value *
-                                               fe_face_values.shape_value(i, q_point) *
-                                               fe_face_values.JxW(q_point);
+                            // Achtung, Achtung!
+                            // Note the sign '-' since we have the term: -integral(q * φ(i) * dΓq)
+                            const double neumann_value = (it->second);
+
+                            for (unsigned int i = 0; i < face_dofs_per_cell; ++i)
+                                fel_neuman(i) += neumann_value *
+                                                 fe_face_values.shape_value(i, q_point) *
+                                                 fe_face_values.JxW(q_point);
                         }
                     }
                 }
+
+                /*
+                for(std::map<int, double>::iterator it = DirichletBC.begin(); it != DirichletBC.end(); it++)
+                {
+                    if(cell->face(face)->boundary_indicator() == it->first)
+                    {
+                        std::cout << (boost::format("  DirichletBC(cell=%d, face=%d, id= %d) = %f") % cellCounter % face % it->first % it->second).str() << std::endl;
+
+                        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
+                        {
+                            const double dirichlet_value = it->second;
+
+                            for(unsigned int i = 0; i < face_dofs_per_cell; ++i)
+                            {
+                                // RHS Dirichlet contribution
+                                fel_dirichlet(i) += DirichletBCPenalty * dirichlet_value *
+                                                    fe_face_values.shape_value(i, q_point) *
+                                                    fe_face_values.JxW(q_point);
+
+                                // LHS Dirichlet contribution
+                                for(unsigned int j = 0; j < face_dofs_per_cell; ++j)
+                                    Kel_dirichlet(i,j) += DirichletBCPenalty *
+                                                          fe_face_values.shape_value(i, q_point) *
+                                                          fe_face_values.shape_value(j, q_point) *
+                                                          fe_face_values.JxW(q_point);
+                            }
+                        }
+                    }
+                }
+                */
             }
         }
-        
-        cell->get_dof_indices (local_dof_indices);
+
+        bool bCellHaveDirichletBC = false;
+        bool bCellHaveNeumannBC   = false;
+        for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapDirichlets.begin(); it != mapDirichlets.end(); it++)
+        {
+            unsigned int id                                 = it->first;
+            std::map<unsigned int, double>& boundary_values = it->second;
+
+            for(size_t m = 0; m < local_dof_indices.size(); m++)
+            {
+                unsigned int dof = local_dof_indices[m];
+                if(boundary_values.find(dof) != boundary_values.end())
+                {
+                    // Cell have one or more nodes with Dirichlet BCs
+                    bCellHaveDirichletBC = true;
+                    break;
+                }
+            }
+        }
+        for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapNeumanns.begin(); it != mapNeumanns.end(); it++)
+        {
+            unsigned int id                                 = it->first;
+            std::map<unsigned int, double>& boundary_values = it->second;
+
+            for(size_t m = 0; m < local_dof_indices.size(); m++)
+            {
+                unsigned int dof = local_dof_indices[m];
+                if(boundary_values.find(dof) != boundary_values.end())
+                {
+                    // Cell have one or more nodes with Dirichlet BCs
+                    bCellHaveNeumannBC = true;
+                    break;
+                }
+            }
+        }
+
+        if(bCellHaveDirichletBC && bCellHaveNeumannBC)
+        {
+            std::cout << "*******************************************" << std::endl;
+            std::cout << "bCellHaveDirichletBC && bCellHaveNeumannBC" << std::endl;
+            std::cout << "*******************************************" << std::endl;
+        }
+
+
+        // We already have a pre-calculated map<global_dof_index, bc_value> for every ID marked as having Dirichlet BCs imposed
+        for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapDirichlets.begin(); it != mapDirichlets.end(); it++)
+        {
+            unsigned int id                                 = it->first;
+            std::map<unsigned int, double>& boundary_values = it->second;
+
+            std::cout << "boundary_values" << std::endl;
+            for(std::map<unsigned int,double>::iterator bviter = boundary_values.begin(); bviter != boundary_values.end(); bviter++)
+                std::cout << "(" << bviter->first << ", " << bviter->second << ") ";
+            std::cout << std::endl;
+
+            std::cout << "local_dof_indices" << std::endl;
+            for(std::vector<unsigned int>::iterator ldiiter = local_dof_indices.begin(); ldiiter != local_dof_indices.end(); ldiiter++)
+                std::cout << *ldiiter << " ";
+            std::cout << std::endl;
+
+            std::cout << "fel_neuman" << std::endl;
+            fel_neuman.print(std::cout);
+
+            std::cout << "Kel_diffusion pre" << std::endl;
+            Kel_diffusion.print_formatted(std::cout);
+            std::cout << "fel_generation pre" << std::endl;
+            fel_generation.print(std::cout);
+            MatrixTools::local_apply_boundary_values(boundary_values,
+                                                     local_dof_indices,
+                                                     Kel_diffusion,
+                                                     fel_generation,
+                                                     true);
+            std::cout << "Kel_diffusion posle" << std::endl;
+            Kel_diffusion.print_formatted(std::cout);
+            std::cout << "fel_generation posle" << std::endl;
+            fel_generation.print(std::cout);
+        }
+
+
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
         {
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
             { 
-                system_matrix.add(local_dof_indices[i],
-                                  local_dof_indices[j],
-                                  cell_matrix(i,j));
-
-                system_matrix_dt.add(local_dof_indices[i],
-                                     local_dof_indices[j],
-                                     cell_matrix_dt(i,j));
+                K_diffusion.add   (local_dof_indices[i], local_dof_indices[j], Kel_diffusion(i,j));
+                K_accumulation.add(local_dof_indices[i], local_dof_indices[j], Kel_accumulation(i,j));
+                K_dirichlet.add   (local_dof_indices[i], local_dof_indices[j], Kel_dirichlet(i,j));
             }
             
-            system_rhs(local_dof_indices[i]) += cell_rhs(i);
+            f_neuman    (local_dof_indices[i]) += fel_neuman(i);
+            f_dirichlet (local_dof_indices[i]) += fel_dirichlet(i);
+            f_generation(local_dof_indices[i]) += fel_generation(i);
         }
     }
     
-    hanging_node_constraints.condense(system_matrix);
-    hanging_node_constraints.condense(system_matrix_dt);
-    hanging_node_constraints.condense(system_rhs);
+//  A part we do not need for we use the way of imposing a penalty for DirichletBC
+//    hanging_node_constraints.condense(system_matrix);
+//    hanging_node_constraints.condense(system_matrix_dt);
+//    hanging_node_constraints.condense(system_rhs);
     
 //    std::map<unsigned int,double> boundary_values;
 //    VectorTools::interpolate_boundary_values (dof_handler,
@@ -393,296 +501,4 @@ void dealiiDiffusion<dim>::assemble_system ()
 //                                        system_rhs);
 }
 
-
-
-template <int dim>
-void dealiiDiffusion<dim>::solve ()
-{
-    SolverControl           solver_control (1000, 1e-12);
-    SolverCG<>              cg (solver_control);
-    
-    PreconditionSSOR<> preconditioner;
-    preconditioner.initialize(system_matrix, 1.2);
-    
-    cg.solve (system_matrix, solution, system_rhs,
-              preconditioner);
-    
-    hanging_node_constraints.distribute (solution);
-}
-
-
-
-template <int dim>
-void dealiiDiffusion<dim>::refine_grid ()
-{
-    switch (refinement_mode)
-    {
-    case global_refinement:
-    {
-        triangulation.refine_global (1);
-        break;
-    }
-        
-    case adaptive_refinement:
-    {
-        Vector<float> estimated_error_per_cell (triangulation.n_active_cells());
-        
-        typename FunctionMap<dim>::type neumann_boundary;
-        KellyErrorEstimator<dim>::estimate (dof_handler,
-                                            QGauss<dim-1>(3),
-                                            neumann_boundary,
-                                            solution,
-                                            estimated_error_per_cell);
-        
-        GridRefinement::refine_and_coarsen_fixed_number (triangulation,
-                                                         estimated_error_per_cell,
-                                                         0.3, 0.03);
-        
-        triangulation.execute_coarsening_and_refinement ();
-        
-        break;
-    }
-        
-    default:
-    {
-        Assert (false, ExcNotImplemented());
-    }
-    }
-}
-
-
-
-template <int dim>
-void dealiiDiffusion<dim>::process_solution (const unsigned int cycle)
-{
-    Vector<float> difference_per_cell (triangulation.n_active_cells());
-    VectorTools::integrate_difference (dof_handler,
-                                       solution,
-                                       Solution<dim>(),
-                                       difference_per_cell,
-                                       QGauss<dim>(3),
-                                       VectorTools::L2_norm);
-    const double L2_error = difference_per_cell.l2_norm();
-    
-    VectorTools::integrate_difference (dof_handler,
-                                       solution,
-                                       Solution<dim>(),
-                                       difference_per_cell,
-                                       QGauss<dim>(3),
-                                       VectorTools::H1_seminorm);
-    const double H1_error = difference_per_cell.l2_norm();
-    
-    const QTrapez<1>     q_trapez;
-    const QIterated<dim> q_iterated (q_trapez, 5);
-    VectorTools::integrate_difference (dof_handler,
-                                       solution,
-                                       Solution<dim>(),
-                                       difference_per_cell,
-                                       q_iterated,
-                                       VectorTools::Linfty_norm);
-    const double Linfty_error = difference_per_cell.linfty_norm();
-    
-    const unsigned int n_active_cells=triangulation.n_active_cells();
-    const unsigned int n_dofs=dof_handler.n_dofs();
-    
-    std::cout << "Cycle " << cycle << ':'
-              << std::endl
-              << "   Number of active cells:       "
-              << n_active_cells
-              << std::endl
-              << "   Number of degrees of freedom: "
-              << n_dofs
-              << std::endl;
-    
-    convergence_table.add_value("cycle", cycle);
-    convergence_table.add_value("cells", n_active_cells);
-    convergence_table.add_value("dofs", n_dofs);
-    convergence_table.add_value("L2", L2_error);
-    convergence_table.add_value("H1", H1_error);
-    convergence_table.add_value("Linfty", Linfty_error);
-    
-    for(size_t i = 0; i < solution.size(); i++)
-        std::cout << (boost::format("T[%1%] = %2%") % i % solution[i]).str() << std::endl;
-}
-
-
-template <int dim>
-void dealiiDiffusion<dim>::run ()
-{
-    unsigned int cycle;
-    for (cycle=0; cycle<5; ++cycle)
-    {
-        if (cycle == 0)
-        {
-            GridGenerator::hyper_cube (triangulation, -1, 1);
-            triangulation.refine_global (1);
-
-            typename Triangulation<dim>::cell_iterator
-                    cell = triangulation.begin (),
-                    endc = triangulation.end();
-            for (; cell!=endc; ++cell)
-                for (unsigned int face=0;
-                     face<GeometryInfo<dim>::faces_per_cell;
-                     ++face)
-                    if ((std::fabs(cell->face(face)->center()(0) - (-1)) < 1e-12)
-                            ||
-                            (std::fabs(cell->face(face)->center()(1) - (-1)) < 1e-12))
-                        cell->face(face)->set_boundary_indicator (1);
-        }
-        else
-            refine_grid ();
-    }
-
-    setup_system ();
-
-    assemble_system ();
-    solve ();
-
-    process_solution (cycle);
-
-    std::string gmv_filename;
-    switch (refinement_mode)
-    {
-    case global_refinement:
-        gmv_filename = "solution-global";
-        break;
-    case adaptive_refinement:
-        gmv_filename = "solution-adaptive";
-        break;
-    default:
-        Assert (false, ExcNotImplemented());
-    }
-
-    switch (fe->degree)
-    {
-    case 1:
-        gmv_filename += "-q1";
-        break;
-    case 2:
-        gmv_filename += "-q2";
-        break;
-
-    default:
-        Assert (false, ExcNotImplemented());
-    }
-
-    gmv_filename += ".vtk";
-    std::ofstream output (gmv_filename.c_str());
-
-    DataOut<dim> data_out;
-    data_out.attach_dof_handler (dof_handler);
-    data_out.add_data_vector (solution, "solution");
-
-    data_out.build_patches (fe->degree);
-    data_out.write_vtk(output);
-
-
-
-    convergence_table.set_precision("L2", 3);
-    convergence_table.set_precision("H1", 3);
-    convergence_table.set_precision("Linfty", 3);
-
-    convergence_table.set_scientific("L2", true);
-    convergence_table.set_scientific("H1", true);
-    convergence_table.set_scientific("Linfty", true);
-
-    convergence_table.set_tex_caption("cells", "\\# cells");
-    convergence_table.set_tex_caption("dofs", "\\# dofs");
-    convergence_table.set_tex_caption("L2", "@f$L^2@f$-error");
-    convergence_table.set_tex_caption("H1", "@f$H^1@f$-error");
-    convergence_table.set_tex_caption("Linfty", "@f$L^\\infty@f$-error");
-
-    convergence_table.set_tex_format("cells", "r");
-    convergence_table.set_tex_format("dofs", "r");
-
-    std::cout << std::endl;
-    convergence_table.write_text(std::cout);
-
-    std::string error_filename = "error";
-    switch (refinement_mode)
-    {
-    case global_refinement:
-        error_filename += "-global";
-        break;
-    case adaptive_refinement:
-        error_filename += "-adaptive";
-        break;
-    default:
-        Assert (false, ExcNotImplemented());
-    }
-
-    switch (fe->degree)
-    {
-    case 1:
-        error_filename += "-q1";
-        break;
-    case 2:
-        error_filename += "-q2";
-        break;
-    default:
-        Assert (false, ExcNotImplemented());
-    }
-
-    error_filename += ".tex";
-    std::ofstream error_table_file(error_filename.c_str());
-
-    convergence_table.write_tex(error_table_file);
-
-
-
-    if (refinement_mode==global_refinement)
-    {
-        convergence_table.add_column_to_supercolumn("cycle", "n cells");
-        convergence_table.add_column_to_supercolumn("cells", "n cells");
-
-        std::vector<std::string> new_order;
-        new_order.push_back("n cells");
-        new_order.push_back("H1");
-        new_order.push_back("L2");
-        convergence_table.set_column_order (new_order);
-
-        convergence_table
-                .evaluate_convergence_rates("L2", ConvergenceTable::reduction_rate);
-        convergence_table
-                .evaluate_convergence_rates("L2", ConvergenceTable::reduction_rate_log2);
-        convergence_table
-                .evaluate_convergence_rates("H1", ConvergenceTable::reduction_rate_log2);
-
-        std::cout << std::endl;
-        convergence_table.write_text(std::cout);
-
-        std::string conv_filename = "convergence";
-        switch (refinement_mode)
-        {
-        case global_refinement:
-            conv_filename += "-global";
-            break;
-        case adaptive_refinement:
-            conv_filename += "-adaptive";
-            break;
-        default:
-            Assert (false, ExcNotImplemented());
-        }
-        switch (fe->degree)
-        {
-        case 1:
-            conv_filename += "-q1";
-            break;
-        case 2:
-            conv_filename += "-q2";
-            break;
-        default:
-            Assert (false, ExcNotImplemented());
-        }
-        conv_filename += ".tex";
-
-        std::ofstream table_file(conv_filename.c_str());
-        convergence_table.write_tex(table_file);
-    }
-}
-}
-
-namespace diffusion
-{
-template const double SolutionBase<2>::width;
 }

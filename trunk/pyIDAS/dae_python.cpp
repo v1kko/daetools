@@ -32,7 +32,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
     class_<daeDenseMatrix, boost::noncopyable>("daeDenseMatrix", no_init)
         .add_property("N",	 &daeDenseMatrix::GetNrows)
         .add_property("M",	 &daeDenseMatrix::GetNcols)
-        .def("__getitem__",	 &daeDenseMatrix::GetItem)
+        .def("__getitem__",	 &daepython::daeDenseMatrix_GetItem)
     ;
 
 /**************************************************************

@@ -77,13 +77,21 @@ public:
 		indexing = ind;
 	}
 
-	double GetItem(size_t i, size_t j) const
+    const double& GetItem(size_t i, size_t j) const
 	{
 		daeDeclareException(exNotImplemented);
-		return 0.0;
-	}
+        static const double val_ = 0.0;
+        return val_;
+    }
 	
-	void SetItem(size_t i, size_t j, double val)
+    double& GetItem(size_t i, size_t j)
+    {
+        daeDeclareException(exNotImplemented);
+        static double val_ = 0.0;
+        return val_;
+    }
+
+    void SetItem(size_t i, size_t j, double val)
 	{
 		if(!matrix)
 			daeDeclareException(exInvalidPointer);

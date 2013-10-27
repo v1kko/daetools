@@ -44,6 +44,9 @@ class daeExpressionFormatter(object):
         self.derivativeIndexStart     = ''
         self.derivativeIndexEnd       = ''
         self.derivativeIndexDelimiter = ','
+        
+        self.feMatrixItem             = '{matrixName}({row},{column})'
+        self.feVectorItem             = '{vectorName}({row})'
 
         # Constants
         self.constant = '{value}'
@@ -411,6 +414,14 @@ class daeExpressionFormatter(object):
 
         elif isinstance(node, adRuntimeTimeDerivativeNode):
             res = self.formatTimeDerivative(node.Variable.CanonicalName, node.DomainIndexes, node.OverallIndex, node.Order)
+
+        elif isinstance(node, adFEMatrixItemNode):
+            raise RuntimeError('Finite Elements equations are not supported for code generation, node: %s' % type(node))
+            res = self.feMatrixItem.format(matrixName = node.MatrixName, row = node.Row, column = node.Column)
+
+        elif isinstance(node, adFEVectorItemNode):
+            raise RuntimeError('Finite Elements equations are not supported for code generation, node: %s' % type(node))
+            res = self.feVectorItem.format(vectorName = node.VectorName, row = node.Row)
 
         else:
             raise RuntimeError('Not supported node: %s' % type(node))

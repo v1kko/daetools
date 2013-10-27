@@ -12,7 +12,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     
     docstring_options doc_options(true, true, false);
 
-    class_<diffusion::daeDiffusion_1D, boost::noncopyable>("daeTransitionalDiffusion_1D", no_init)
+    class_<diffusion::daeDiffusion_1D, bases<daeModel>, boost::noncopyable>("daeDiffusion_1D", no_init)
         .def(init<string, optional<daeModel*, string> >(( arg("self"),
                                                           arg("name"),
                                                           arg("parentModel") = NULL,
@@ -22,7 +22,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                            ( arg("self"), arg("meshFilename"), arg("diffusivity"), arg("polynomialOrder")/*, arg("dirichletBC"), arg("neumanBC")*/ ) )
         ;
 
-    class_<diffusion::daeDiffusion_2D, boost::noncopyable>("daeTransitionalDiffusion_2D", no_init)
+    class_<diffusion::daeDiffusion_2D, bases<daeModel>, boost::noncopyable>("daeDiffusion_2D", no_init)
         .def(init<string, optional<daeModel*, string> >(( arg("self"),
                                                           arg("name"),
                                                           arg("parentModel") = NULL,
@@ -32,7 +32,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                            ( arg("self"), arg("meshFilename"), arg("diffusivity"), arg("polynomialOrder")/*, arg("dirichletBC"), arg("neumanBC")*/ ) )
         ;
     
-    class_<diffusion::daeDiffusion_3D, boost::noncopyable>("daeTransitionalDiffusion_3D", no_init)
+    class_<diffusion::daeDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeDiffusion_3D", no_init)
         .def(init<string, optional<daeModel*, string> >(( arg("self"),
                                                           arg("name"),
                                                           arg("parentModel") = NULL,

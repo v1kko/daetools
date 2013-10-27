@@ -268,7 +268,9 @@ const char* DOCSTR_daeOnConditionActions = "";
     const char* DOCSTR_daeOnConditionActions_Actions = "";  
     const char* DOCSTR_daeOnConditionActions_UserDefinedActions = "";  
     const char* DOCSTR_daeOnConditionActions_Execute = "";  
-    
+
+const char* DOCSTR_daeExecutionContext = "";
+
 const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_init = "Constructor...";
     const char* DOCSTR_daeModel_Domains = "A list of domains in the model.";
@@ -295,6 +297,7 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_CreateFiniteElementEquation = "";
     const char* DOCSTR_daeModel_DeclareEquations = "User-defined function where all model equations ans state transition networks "
                                                    "are declared. Must be always implemented in derived classes.";
+    const char* DOCSTR_daeModel_UpdateEquations = "";
     const char* DOCSTR_daeModel_ConnectPorts = "Connects two ports.";
     const char* DOCSTR_daeModel_ConnectEventPorts = "Connects two event ports.";
     const char* DOCSTR_daeModel_SetReportingOn = "Switches the reporting of the model variables/parameters to the data reporter on or off.";
