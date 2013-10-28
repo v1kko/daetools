@@ -10,7 +10,7 @@ namespace daepython
 {
 real_t daeArray_GetItem(daeArray<real_t>& self, size_t index)
 {
-    return self[index];
+    return self.GetItem(index);
 }
 
 boost::python::list daeArray_GetValues(daeArray<real_t>& self)
@@ -18,7 +18,7 @@ boost::python::list daeArray_GetValues(daeArray<real_t>& self)
     boost::python::list l;
    
     for(size_t i = 0; i < self.GetSize(); i++)
-        l.append(self[i]);
+        l.append(self.GetItem(i));
 
     return l;
 }

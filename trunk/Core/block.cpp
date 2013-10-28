@@ -69,7 +69,7 @@ void daeBlock::CalculateConditions(real_t				dTime,
 	size_t nFnCounter = 0;
 	for(iter = m_mapExpressionInfos.begin(); iter != m_mapExpressionInfos.end(); iter++)
 	{
-		arrResults[nFnCounter] = (*iter).second.m_pExpression->Evaluate(&EC).getValue();
+        arrResults.SetItem(nFnCounter, (*iter).second.m_pExpression->Evaluate(&EC).getValue());
 		nFnCounter++;
 	}
 }
@@ -366,10 +366,10 @@ void daeBlock::FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray
 	
 	for(iter = m_mapVariableIndexes.begin(); iter != m_mapVariableIndexes.end(); iter++)
 	{
-		arrValues[iter->second]                 = pBlockValues[iter->first];
-		arrTimeDerivatives[iter->second]        = pBlockInitialConditions[iter->first];
-		arrInitialConditionsTypes[iter->second] = pBlockIDs[iter->first];
-		arrAbsoluteTolerances[iter->second]     = pBlockAbsoluteTolerance[iter->first];
+        arrValues.SetItem                (iter->second, pBlockValues[iter->first]);
+        arrTimeDerivatives.SetItem       (iter->second, pBlockInitialConditions[iter->first]);
+        arrInitialConditionsTypes.SetItem(iter->second, pBlockIDs[iter->first]);
+        arrAbsoluteTolerances.SetItem    (iter->second, pBlockAbsoluteTolerance[iter->first]);
 	} 
 }
 
@@ -741,7 +741,7 @@ real_t daeBlock::GetValue(size_t nBlockIndex) const
 	if(!m_parrValues)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	return (*m_parrValues)[nBlockIndex];
+    return (*m_parrValues).GetItem(nBlockIndex);
 }
 
 void daeBlock::SetValue(size_t nBlockIndex, real_t dValue)
@@ -750,7 +750,7 @@ void daeBlock::SetValue(size_t nBlockIndex, real_t dValue)
 	if(!m_parrValues)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	(*m_parrValues)[nBlockIndex] = dValue;
+    (*m_parrValues).SetItem(nBlockIndex, dValue);
 }
 
 real_t daeBlock::GetTimeDerivative(size_t nBlockIndex) const
@@ -761,7 +761,7 @@ real_t daeBlock::GetTimeDerivative(size_t nBlockIndex) const
 	if(nBlockIndex >= m_nNumberOfEquations)
 		daeDeclareAndThrowException(exOutOfBounds);
 #endif
-	return (*m_parrTimeDerivatives)[nBlockIndex];
+    return (*m_parrTimeDerivatives).GetItem(nBlockIndex);
 }
 
 void daeBlock::SetTimeDerivative(size_t nBlockIndex, real_t dTimeDerivative)
@@ -770,7 +770,7 @@ void daeBlock::SetTimeDerivative(size_t nBlockIndex, real_t dTimeDerivative)
 	if(!m_parrTimeDerivatives)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	(*m_parrTimeDerivatives)[nBlockIndex] = dTimeDerivative;
+    (*m_parrTimeDerivatives).SetItem(nBlockIndex, dTimeDerivative);
 }
 
 real_t daeBlock::GetResidual(size_t nEquationIndex) const
@@ -779,7 +779,7 @@ real_t daeBlock::GetResidual(size_t nEquationIndex) const
 	if(!m_parrResidual)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	return (*m_parrResidual)[nEquationIndex];
+    return (*m_parrResidual).GetItem(nEquationIndex);
 }
 
 void daeBlock::SetResidual(size_t nEquationIndex, real_t dResidual)
@@ -788,7 +788,7 @@ void daeBlock::SetResidual(size_t nEquationIndex, real_t dResidual)
 	if(!m_parrResidual)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
-	(*m_parrResidual)[nEquationIndex] = dResidual;
+    (*m_parrResidual).SetItem(nEquationIndex, dResidual);
 }
 
 real_t daeBlock::GetJacobian(size_t nEquationIndex, size_t nVariableindexInBlock) const

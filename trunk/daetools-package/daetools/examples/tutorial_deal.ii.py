@@ -32,8 +32,14 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
-        self.fe = daeDiffusion_2D('fe', self, 'hp description')
-        self.fe.Initialize('step-7.msh', 100, 1)
+        self.fe = daeDiffusion_2D('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)')
+        self.fe.Initialize(meshFilename    = 'step-7.msh', 
+                           polynomialOrder = 1, 
+                           diffusivity     = 1.0, 
+                           velocity        = [],
+                           generation      = 1.0,
+                           dirichletBC     = {0 : 1.0},
+                           neumannBC       = {1 : 0.5})
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)

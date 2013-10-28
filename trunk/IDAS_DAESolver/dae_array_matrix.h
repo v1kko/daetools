@@ -16,6 +16,77 @@ namespace dae
 {
 namespace solver
 {
+template<typename REAL = real_t>
+class daeRawDataArray : public daeArray<REAL>
+{
+public:
+    daeRawDataArray(size_t n = 0, REAL* pData = NULL)
+    {
+        N    = n;
+        data = pData;
+    }
+
+    virtual ~daeRawDataArray(void)
+    {
+    }
+
+public:
+    REAL GetItem(size_t i) const
+    {
+        if(!data || i >= N)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in daeArray: " << i;
+            throw e;
+        }
+        return data[i];
+    }
+
+    void SetItem(size_t i, REAL value)
+    {
+        if(!data || i >= N)
+        {
+            daeDeclareException(exOutOfBounds);
+            e << "Invalid index in daeArray: " << i;
+            throw e;
+        }
+        data[i] = value;
+    }
+
+    size_t GetSize(void) const
+    {
+        return N;
+    }
+
+    void InitArray(size_t n, REAL* pData)
+    {
+        N    = n;
+        data = pData;
+    }
+
+    REAL* Data()
+    {
+        return data;
+    }
+
+    void Print(void) const
+    {
+        std::cout << "vector[" << N << "] = {";
+        for(size_t i = 0; i < N; i++)
+        {
+            if(i != 0)
+                std::cout << ", ";
+            std::cout << data[i];
+        }
+        std::cout << "};" << std::endl;
+        std::cout.flush();
+    }
+
+protected:
+    size_t 	N;
+    REAL* data;
+};
+
 /*********************************************************************************************
 	daeDenseMatrix
 **********************************************************************************************/
@@ -49,7 +120,7 @@ public:
 // That internally translates to :
 //      [row][col] if eRowWise
 //      [col][row] if eColumnWise
-    virtual const real_t& GetItem(size_t row, size_t col) const
+    virtual real_t GetItem(size_t row, size_t col) const
 	{
 		if(!data) 
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -61,19 +132,6 @@ public:
 		else
 			return data[col][row];
 	}
-
-    virtual real_t& GetItem(size_t row, size_t col)
-    {
-        if(!data)
-            daeDeclareAndThrowException(exInvalidPointer);
-        if(row >= Nrow || col >= Ncol)
-            daeDeclareAndThrowException(exOutOfBounds);
-
-        if(data_access == eRowWise)
-            return data[row][col];
-        else
-            return data[col][row];
-    }
 
     virtual void SetItem(size_t row, size_t col, real_t value)
 	{
@@ -275,7 +333,7 @@ public:
 // That internally translates to :
 //      [row][col] if eRowWise
 //      [col][row] if eColumnWise
-    virtual const real_t& GetItem(size_t row, size_t col) const
+    virtual real_t GetItem(size_t row, size_t col) const
 	{
 		if(!data) 
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -287,19 +345,6 @@ public:
 		else
 			return data[col*Nrow + row];
 	}
-
-    virtual real_t& GetItem(size_t row, size_t col)
-    {
-        if(!data)
-            daeDeclareAndThrowException(exInvalidPointer);
-        if(row >= Nrow || col >= Ncol)
-            daeDeclareAndThrowException(exOutOfBounds);
-
-        if(data_access == eRowWise)
-            return data[row*Ncol + col];
-        else
-            return data[col*Nrow + row];
-    }
 
 	virtual void SetItem(size_t row, size_t col, real_t value)
 	{
@@ -544,7 +589,7 @@ public:
         return A[index];
     }
 
-    const FLOAT& GetItem(size_t i, size_t j) const
+    FLOAT GetItem(size_t i, size_t j) const
 	{
         INT index = CalcIndex(i, j);
         if(index < 0)
@@ -555,18 +600,6 @@ public:
         }
         return A[index];
 	}
-
-    FLOAT& GetItem(size_t i, size_t j)
-    {
-        INT index = CalcIndex(i, j);
-        if(index < 0)
-        {
-            daeDeclareException(exOutOfBounds);
-            e << "Invalid element in CRS matrix: (" << i << ", " << j << ")";
-            throw e;
-        }
-        return A[index];
-    }
 
     void SetItem(size_t i, size_t j, FLOAT val)
 	{

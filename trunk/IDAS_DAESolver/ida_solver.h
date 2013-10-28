@@ -98,10 +98,10 @@ public:
 	real_t								m_dTargetTime;
 	real_t								m_dNextTimeAfterReinitialization;
 	
-	daeArray<real_t>					m_arrValues;
-	daeArray<real_t>					m_arrTimeDerivatives;
-	daeArray<real_t>					m_arrResiduals;
-	daeArray<real_t>					m_arrRoots;
+    daeRawDataArray<real_t>				m_arrValues;
+    daeRawDataArray<real_t>				m_arrTimeDerivatives;
+    daeRawDataArray<real_t>				m_arrResiduals;
+    daeRawDataArray<real_t>				m_arrRoots;
 	daeDenseMatrix						m_matJacobian;
 
 	daeDenseMatrix						m_matSValues;

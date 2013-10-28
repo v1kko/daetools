@@ -59,7 +59,7 @@ else:
 boost_python = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_system = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_thread = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
-deal_II      = 'libdeal_II'
+deal_II      = 'libdeal_II.so'
 
 boost_solibs = []
 

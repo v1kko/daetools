@@ -236,8 +236,8 @@ void daeIDASolver::CreateArrays(void)
 
 void daeIDASolver::SetInitialOptions(void)
 {
-	daeArray<real_t> arrAbsoluteTolerances;
-	daeArray<real_t> arrInitialConditionsTypes;
+    daeRawDataArray<real_t> arrAbsoluteTolerances;
+    daeRawDataArray<real_t> arrInitialConditionsTypes;
 	realtype *pVariableValues, *pTimeDerivatives, *pInitialConditionsTypes, *pAbsoluteTolerances;
 
 	pVariableValues         = NV_DATA_S(m_pIDASolverData->m_vectorVariables);

@@ -100,11 +100,11 @@ public:
 	daeDAESolver_t*		m_pDAESolver;
 	size_t				m_nJacobianEvaluations;
 	
-	daeArray<real_t>	m_arrValues;
-	daeArray<real_t>	m_arrTimeDerivatives;
-	daeArray<real_t>	m_arrResiduals;
-	daeSuperLUMatrix	m_matJacobian;
-	bool				m_bFactorizationDone;
+    daeRawDataArray<real_t>	m_arrValues;
+    daeRawDataArray<real_t>	m_arrTimeDerivatives;
+    daeRawDataArray<real_t>	m_arrResiduals;
+    daeSuperLUMatrix        m_matJacobian;
+    bool                    m_bFactorizationDone;
 	
 #ifdef daeSuperLU_MT
 	SuperMatrix			m_matA;

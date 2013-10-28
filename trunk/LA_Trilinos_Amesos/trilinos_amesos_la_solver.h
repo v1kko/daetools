@@ -77,18 +77,10 @@ public:
 		indexing = ind;
 	}
 
-    const double& GetItem(size_t i, size_t j) const
+    double GetItem(size_t i, size_t j) const
 	{
 		daeDeclareException(exNotImplemented);
-        static const double val_ = 0.0;
-        return val_;
-    }
-	
-    double& GetItem(size_t i, size_t j)
-    {
-        daeDeclareException(exNotImplemented);
-        static double val_ = 0.0;
-        return val_;
+        return 0.0;
     }
 
     void SetItem(size_t i, size_t j, double val)
@@ -298,9 +290,9 @@ public:
 	daeeTrilinosSolverType	m_eTrilinosSolver;
 	int						m_nNoEquations;
 	daeDAESolver_t*			m_pDAESolver;
-	daeArray<real_t>		m_arrValues;
-	daeArray<real_t>        m_arrTimeDerivatives;
-	daeArray<real_t>        m_arrResiduals;
+    daeRawDataArray<real_t>	m_arrValues;
+    daeRawDataArray<real_t> m_arrTimeDerivatives;
+    daeRawDataArray<real_t> m_arrResiduals;
 	daeEpetraCSRMatrix		m_matJacobian;	
 	size_t					m_nJacobianEvaluations;
 	bool					m_bMatrixStructureChanged;

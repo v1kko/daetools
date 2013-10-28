@@ -443,106 +443,27 @@ public:
 	}
 
 public:
-	string				m_strExceptionType;
-	string				m_strFunction;
-	string				m_strFile;
-	int					m_nLine;
-	string				m_strWhat;
+    string	m_strExceptionType;
+    string	m_strFunction;
+    string	m_strFile;
+    int		m_nLine;
+    string	m_strWhat;
 };
 
 /*********************************************************************************************
 	daeArray
 **********************************************************************************************/
-template<typename REAL = real_t> 
+template<typename REAL>
 class daeArray
 {
 public:
-	daeArray(void)
-	{
-		N    = 0;
-		data = NULL;
-	}
-	virtual ~daeArray(void)
-	{
-	}
+    virtual ~daeArray(void){}
 
 public:
-    const REAL& operator [](size_t i) const
-    {
-        if(!data || i >= N)
-        {
-            daeDeclareException(exOutOfBounds);
-            e << "Invalid index in daeArray: " << i;
-            throw e;
-        }
-        return data[i];
-    }
+    virtual REAL   GetItem(size_t i) const       = 0;
+    virtual void   SetItem(size_t i, REAL value) = 0;
+    virtual size_t GetSize(void) const           = 0;
 
-    REAL& operator [](size_t i)
-	{
-        if(!data || i >= N)
-        {
-            daeDeclareException(exOutOfBounds);
-            e << "Invalid index in daeArray: " << i;
-            throw e;
-        }
-        return data[i];
-	}
-
-    const REAL&	GetItem(size_t i) const
-    {
-        if(!data || i >= N)
-        {
-            daeDeclareException(exOutOfBounds);
-            e << "Invalid index in daeArray: " << i;
-            throw e;
-        }
-        return data[i];
-    }
-
-    REAL& GetItem(size_t i)
-    {
-        if(!data || i >= N)
-        {
-            daeDeclareException(exOutOfBounds);
-            e << "Invalid index in daeArray: " << i;
-            throw e;
-        }
-        return data[i];
-    }
-
-	size_t GetSize(void) const
-	{
-		return N;
-	}
-
-	void InitArray(size_t n, REAL* pData)
-	{
-		N    = n;
-		data = pData;
-	}
-	
-	REAL* Data()
-	{
-        return data;
-	}
-	
-	void Print(void) const
-	{
-		std::cout << "vector[" << N << "] = {";
-		for(size_t i = 0; i < N; i++)
-		{
-			if(i != 0)
-				std::cout << ", ";
-			std::cout << data[i];
-		}
-		std::cout << "};" << std::endl;
-		std::cout.flush();
-	}
-
-protected:
-	size_t 	N;
-	REAL* data;
 };
 
 /*********************************************************************************************
@@ -564,9 +485,7 @@ public:
 	virtual ~daeMatrix(void){}
 
 public:
-    virtual const REAL&	GetItem(size_t row, size_t col) const   = 0;
-    virtual REAL&	    GetItem(size_t row, size_t col)         = 0;
-
+    virtual REAL	GetItem(size_t row, size_t col) const       = 0;
     virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
 
 	virtual size_t	GetNrows(void) const                        = 0;

@@ -16,6 +16,7 @@
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
+#include "../Core/nodes.h"
 namespace vt = variable_types;
 
 using units_pool::m;
@@ -26,11 +27,121 @@ using units_pool::W;
 using units_pool::s;
 
 #include "dealii_diffusion.h"
+
+
 namespace diffusion
 {
+/*********************************************************
+ * daeFEMatrix
+ * A wrapper around deal.II SparseMatrix<double>
+ *********************************************************/
+class daeFEMatrix : public daeMatrix<double>
+{
+public:
+    daeFEMatrix(SparseMatrix<double>& matrix) : deal_ii_matrix(matrix)
+    {
+    }
+
+    virtual ~daeFEMatrix(void)
+    {
+    }
+
+public:
+    virtual double GetItem(size_t row, size_t col) const
+    {
+        return deal_ii_matrix(row, col);
+    }
+
+    virtual void SetItem(size_t row, size_t col, double value)
+    {
+        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
+        daeDeclareAndThrowException(exInvalidCall);
+    }
+
+    virtual size_t GetNrows(void) const
+    {
+        return deal_ii_matrix.n();
+    }
+
+    virtual size_t GetNcols(void) const
+    {
+        return deal_ii_matrix.m();
+    }
+
+protected:
+    SparseMatrix<double>& deal_ii_matrix;
+};
+
+/*********************************************************
+ * daeFEArray
+ * A wrapper around deal.II Vector<double>
+ *********************************************************/
+class daeFEArray : public daeArray<double>
+{
+public:
+    daeFEArray(Vector<double>& vect) : deal_ii_vector(vect)
+    {
+    }
+
+    virtual ~daeFEArray(void)
+    {
+    }
+
+public:
+    double operator [](size_t i) const
+    {
+        return deal_ii_vector[i];
+    }
+
+    double GetItem(size_t i) const
+    {
+        return deal_ii_vector[i];
+    }
+
+    void SetItem(size_t i, double value)
+    {
+        deal_ii_vector[i] = value;
+    }
+
+    size_t GetSize(void) const
+    {
+        return deal_ii_vector.size();
+    }
+
+protected:
+    Vector<double>& deal_ii_vector;
+};
+
+/*********************************************************
+ * SingleValue_Function
+ * Necessary for Diffusion/Generation/BC terms
+ *********************************************************/
+template <int dim>
+class SingleValue_Function : public Function<dim>
+{
+public:
+    SingleValue_Function(double value = 0.0) : Function<dim>()
+    {
+        m_value = value;
+    }
+
+    virtual double value(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        return m_value;
+    }
+
+public:
+    double m_value;
+};
+
+/*********************************************************
+ *     daeDiffusion
+ *********************************************************/
 template <int dim>
 class daeDiffusion : public daeModel
 {
+typedef typename boost::shared_ptr< Function<dim> > FunctionPtr;
+
 public:
     // D is diffusivity
     daeDiffusion(string strName, daeModel* pModel = NULL, string strDescription = "")
@@ -43,39 +154,57 @@ public:
     }
 
     void Initialize(string meshFilename,
+                    unsigned int polynomialOrder,
                     double diffusivity,
-                    unsigned int polynomialOrder/*,
+                    const std::vector<double>& velocity,
+                    double generation,
                     const std::map<unsigned int, double>& dirichletBC,
-                    const std::map<unsigned int, double>& neumanBC*/)
+                    const std::map<unsigned int, double>& neumannBC)
     {
-        std::map<unsigned int, double> dirichletBC;
-        std::map<unsigned int, double> neumanBC;
+        //dirichletBC[0] = 1.0;
+        //neumannBC[1]   = 0.5;
 
-        dirichletBC[0] = 0.0;
-        neumanBC[1] = 0.5;
-        //neumanBC[0] = -0.1E6;
-        //neumanBC[1] =  1.0E6;
-        //neumanBC[2] =  0.5E6;
-        //dirichletBC[0] = 310;
-        //dirichletBC[1] = 310;
-        //dirichletBC[2] = 310;
+        funDiffusivity.reset(new SingleValue_Function<dim>(diffusivity));
+        funVelocity.reset(new SingleValue_Function<dim>(0.0));
+        funGeneration.reset(new SingleValue_Function<dim>(generation));
+
+        for(std::map<unsigned int, double>::const_iterator it = dirichletBC.begin(); it != dirichletBC.end(); it++)
+        {
+            const unsigned int id    = it->first;
+            const double       value = it->second;
+
+            funsDirichletBC[id] = FunctionPtr(new SingleValue_Function<dim>(value));
+        }
+
+        for(std::map<unsigned int, double>::const_iterator it = neumannBC.begin(); it != neumannBC.end(); it++)
+        {
+            const unsigned int id    = it->first;
+            const double       value = it->second;
+
+            funsNeumannBC[id] = FunctionPtr(new SingleValue_Function<dim>(value));
+        }
 
         // 1. Create deal.II solver
-        pDealII.reset(new dealiiDiffusion<dim>(diffusivity, polynomialOrder, dirichletBC, neumanBC));
+        pDealII.reset(new dealiiDiffusion<dim>(polynomialOrder, funDiffusivity, funVelocity, funGeneration, funsDirichletBC, funsNeumannBC));
 
-        // 2. Load mesh from the supplied file
+        // 2. Initialize daetools wrapper matrices and arrays that will be used by adFEMatrixItem/VectorItem nodes
+        matK.reset(new daeFEMatrix(pDealII->system_matrix));
+        matKdt.reset(new daeFEMatrix(pDealII->system_matrix_dt));
+        vecf.reset(new daeFEArray(pDealII->system_rhs));
+
+        // 3. Load mesh from the supplied file
         GridIn<dim> gridin;
         gridin.attach_triangulation(pDealII->triangulation);
         std::ifstream f(meshFilename);
         gridin.read_msh(f);
 
-        // 3. Setup deal.II system
+        // 4. Setup deal.II system
         pDealII->setup_system();
 
-        // 4. Assemble deal.II system
+        // 5. Assemble deal.II system
         pDealII->assemble_system();
 
-        // 5. Initialize domain Omega
+        // 6. Initialize domain Omega
         std::vector<daePoint> coords;
         size_t n = pDealII->dof_handler.n_dofs();
         coords.resize(n);
@@ -114,65 +243,53 @@ public:
         omega.CreateUnstructuredGrid(coords);
     }
 
+    adouble create_adouble(adNode* n)
+    {
+        return adouble(0.0, 0.0, true, n);
+    }
+
     void DeclareEquations(void)
     {
         daeEquation* eq;
-        adouble a_diffusivity, a_accumulation, a_neumann, a_generation, a_dirichlet_f, a_dirichlet_K;
+        adouble a_K, a_Kdt, a_f;
 
-        size_t nrows = pDealII->K_diffusion.n();
+        size_t nrows = pDealII->system_matrix.n();
 
-        std::cout << "K_diffusion" << std::endl;
-        pDealII->K_diffusion.print(std::cout);
-        std::cout << "K_accumulation" << std::endl;
-        pDealII->K_accumulation.print(std::cout);
-        std::cout << "f_neuman" << std::endl;
-        pDealII->f_neuman.print(std::cout);
-        //std::cout << "f_dirichlet" << std::endl;
-        //pDealII->f_dirichlet.print(std::cout);
-        std::cout << "f_generation" << std::endl;
-        pDealII->f_generation.print(std::cout);
+        std::cout << "system_matrix" << std::endl;
+        pDealII->system_matrix.print(std::cout);
+        std::cout << "system_matrix_dt" << std::endl;
+        pDealII->system_matrix_dt.print(std::cout);
+        std::cout << "system_rhs" << std::endl;
+        pDealII->system_rhs.print(std::cout);
 
         for(size_t row = 0; row < nrows; row++)
         {
-            eq = this->CreateEquation("fe_" + toString(row));
+            eq = this->CreateEquation("eq_" + toString(row));
 
-            a_diffusivity = 0;
-            a_neumann     = 0;
-            a_dirichlet_f = 0;
-            a_dirichlet_K = 0;
-            a_generation  = 0;
+            // Reset equation's contributions
+            a_K   = 0;
+            a_Kdt = 0;
 
-            // Get data from the vectors
-            const double neumann     = pDealII->f_neuman(row);
-            const double dirichlet_f = pDealII->f_dirichlet(row);
-            const double generation  = pDealII->f_generation(row);
+            // RHS
+            a_f.node = adNodePtr(new adFEVectorItemNode("f", *vecf, row, unit()));
 
-            // Neuman BC (RHS)
-            a_neumann     = adouble(neumann,     0.0, true);
-            a_dirichlet_f = adouble(dirichlet_f, 0.0, true);
-            a_generation  = adouble(generation,  0.0, true);
-
+            // K and Kdt matrices
             for(SparsityPattern::iterator iter = pDealII->sparsity_pattern.begin(row); iter != pDealII->sparsity_pattern.end(row); iter++)
             {
                 const size_t col = (*iter).column();
 
-                // Get data from matrices
-                const double diffusivity  = pDealII->K_diffusion   (row, col);
-                const double dirichlet_K  = pDealII->K_dirichlet   (row, col);
-                const double accumulation = pDealII->K_accumulation(row, col);
+                if(!a_K.node)
+                    a_K =       create_adouble(new adFEMatrixItemNode("K", *matK, row, col, unit())) * this->T(col);
+                else
+                    a_K = a_K + create_adouble(new adFEMatrixItemNode("K", *matK, row, col, unit())) * this->T(col);
 
-                // Diffusion term (LHS)
-                if(diffusivity != 0)
-                    a_diffusivity = a_diffusivity + diffusivity * this->T(col);
-
-                if(accumulation != 0)
-                    a_accumulation = a_accumulation +  accumulation * this->T.dt(col);
-
-                if(dirichlet_K != 0)
-                    a_dirichlet_K = a_dirichlet_K + dirichlet_K * this->T(col);
+                //if(!a_Kdt.node)
+                //    a_Kdt =         create_adouble(new adFEMatrixItemNode("", *matKdt, row, col, unit())) * this->T.dt(col);
+                //else
+                //    a_Kdt = a_Kdt + create_adouble(new adFEMatrixItemNode("", *matKdt, row, col, unit())) * this->T.dt(col);
             }
 
-            eq->SetResidual(a_accumulation + a_diffusivity + a_dirichlet_K - a_neumann - a_dirichlet_f - a_generation);
+            eq->SetResidual(/*a_Kdt +*/ a_K - a_f);
             eq->SetCheckUnitsConsistency(false);
         }
 
@@ -190,6 +307,16 @@ public:
     daeVariable T;
 
     boost::shared_ptr< dealiiDiffusion<dim> > pDealII;
+
+    boost::shared_ptr<daeFEMatrix> matK;
+    boost::shared_ptr<daeFEMatrix> matKdt;
+    boost::shared_ptr<daeFEArray>  vecf;
+
+    FunctionPtr                          funDiffusivity;
+    FunctionPtr                          funVelocity;
+    FunctionPtr                          funGeneration;
+    std::map<unsigned int, FunctionPtr>  funsDirichletBC;
+    std::map<unsigned int, FunctionPtr>  funsNeumannBC;
 };
 
 typedef daeDiffusion<1> daeDiffusion_1D;

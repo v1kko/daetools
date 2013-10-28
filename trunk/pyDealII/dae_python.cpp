@@ -18,8 +18,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("Initialize", &diffusion::daeDiffusion_1D::Initialize,
-                           ( arg("self"), arg("meshFilename"), arg("diffusivity"), arg("polynomialOrder")/*, arg("dirichletBC"), arg("neumanBC")*/ ) )
+        .def("Initialize", &daepython::daeDiffusion_Initialize<1>,
+                           ( arg("self"), arg("meshFilename"), arg("polynomialOrder"), arg("diffusivity"), arg("velocity"), arg("generation"), arg("dirichletBC"), arg("neumannBC") ) )
         ;
 
     class_<diffusion::daeDiffusion_2D, bases<daeModel>, boost::noncopyable>("daeDiffusion_2D", no_init)
@@ -28,8 +28,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("Initialize", &diffusion::daeDiffusion_2D::Initialize,
-                           ( arg("self"), arg("meshFilename"), arg("diffusivity"), arg("polynomialOrder")/*, arg("dirichletBC"), arg("neumanBC")*/ ) )
+        .def("Initialize", &daepython::daeDiffusion_Initialize<2>,
+                           ( arg("self"), arg("meshFilename"), arg("polynomialOrder"), arg("diffusivity"), arg("velocity"), arg("generation"), arg("dirichletBC"), arg("neumannBC") ) )
         ;
     
     class_<diffusion::daeDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeDiffusion_3D", no_init)
@@ -38,12 +38,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("Initialize", &diffusion::daeDiffusion_3D::Initialize,
-                           ( arg("self"), arg("meshFilename"), arg("diffusivity"), arg("polynomialOrder")/*, arg("dirichletBC"), arg("neumanBC")*/ ) )
+        .def("Initialize", &daepython::daeDiffusion_Initialize<3>,
+                           ( arg("self"), arg("meshFilename"), arg("polynomialOrder"), arg("diffusivity"), arg("velocity"), arg("generation"), arg("dirichletBC"), arg("neumannBC") ) )
         ;
 }
-
-//int main(int argc, char *argv[])
-//{
-//    daeHelmholtzProblem_2D h(1, "fe");
-//}

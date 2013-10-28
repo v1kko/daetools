@@ -23,7 +23,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
 		.export_values()
 	;
     
-    class_<daeArray<real_t>, boost::noncopyable>("daeArray", no_init)  
+    class_<daeArray<real_t>, boost::noncopyable>("daeArray", no_init)
         .add_property("N",	     &daeArray<real_t>::GetSize)
         .add_property("Values",	 &daepython::daeArray_GetValues)
         .def("__getitem__",	     &daepython::daeArray_GetItem)

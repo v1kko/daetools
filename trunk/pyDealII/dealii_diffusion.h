@@ -41,35 +41,18 @@ namespace diffusion
 {
 using namespace dealii;
 
-
-template <int dim>
-class SingleValue_Function : public Function<dim>
-{
-public:
-    SingleValue_Function(double value = 0.0) : Function<dim>()
-    {
-        m_value = value;
-    }
-
-    virtual double value(const Point<dim> &p, const unsigned int component = 0) const
-    {
-        return m_value;
-    }
-
-public:
-    double m_value;
-};
-
-
 template <int dim>
 class dealiiDiffusion
 {
+typedef typename boost::shared_ptr< Function<dim> > FunctionPtr;
+
 public:
-    
-    dealiiDiffusion (double diffusivity,
-                     unsigned int polynomialOrder,
-                     const std::map<unsigned int, double>& dirichletBC,
-                     const std::map<unsigned int, double>& neumannBC);
+    dealiiDiffusion (unsigned int                               polynomialOrder,
+                     FunctionPtr                                diffusivity,
+                     FunctionPtr                                velocity,
+                     FunctionPtr                                generation,
+                     const std::map<unsigned int, FunctionPtr>& dirichletBC,
+                     const std::map<unsigned int, FunctionPtr>& neumannBC);
     
     virtual ~dealiiDiffusion ();
     
@@ -78,77 +61,43 @@ public:
     virtual void assemble_system ();
 
 public:
-    Triangulation<dim>                      triangulation;
-    DoFHandler<dim>                         dof_handler;
+    // General deal.II data
+    Triangulation<dim>                   triangulation;
+    DoFHandler<dim>                      dof_handler;
     
-    SmartPointer<FiniteElement<dim> >       fe;
+    SmartPointer< FiniteElement<dim> >   fe;
     
-    ConstraintMatrix                        hanging_node_constraints;
+    ConstraintMatrix                     hanging_node_constraints;
     
-    SparsityPattern                         sparsity_pattern;
+    SparsityPattern                      sparsity_pattern;
   
-    SparseMatrix<double>                    K_diffusion;
-    //SparseMatrix<double>                    K_convection;
-    //SparseMatrix<double>                    K_generation;
-    SparseMatrix<double>                    K_dirichlet;
-    SparseMatrix<double>                    K_accumulation;
-    Vector<double>                          f_generation;
-    Vector<double>                          f_dirichlet;
-    Vector<double>                          f_neuman;
+    SparseMatrix<double>                 system_matrix;
+    SparseMatrix<double>                 system_matrix_dt;
+    Vector<double>                       system_rhs;
 
-    Vector<double>                          solution;
-
-    ConvergenceTable                        convergence_table;
-
-    double                                  Diffusivity;
-    std::map<unsigned int, double>          DirichletBC;
-    std::map<unsigned int, double>          NeumanBC;
-
-    SingleValue_Function<dim> funDiffusivity;
-    SingleValue_Function<dim> funVelocity;
-    SingleValue_Function<dim> funGeneration;
-
-    std::map<unsigned int, SingleValue_Function<dim> > funsDirichletBC;
-    std::map<unsigned int, SingleValue_Function<dim> > funsNeumannBC;
-
-//    adoubleCSRMatrix     Kdiff;
-//    adoubleCSRMatrix     Kdt;
-//    std::vector<adouble> Kdt;
+    // Model-specific data
+    FunctionPtr                          funDiffusivity;
+    FunctionPtr                          funVelocity;
+    FunctionPtr                          funGeneration;
+    std::map<unsigned int, FunctionPtr>  funsDirichletBC;
+    std::map<unsigned int, FunctionPtr>  funsNeumannBC;
 };
 
 template <int dim>
-dealiiDiffusion<dim>::dealiiDiffusion (double diffusivity,
-                                       unsigned int polynomialOrder,
-                                       const std::map<unsigned int, double>& dirichletBC,
-                                       const std::map<unsigned int, double>& neumannBC):
+dealiiDiffusion<dim>::dealiiDiffusion (unsigned int                                 polynomialOrder,
+                                       FunctionPtr                                  diffusivity,
+                                       FunctionPtr                                  velocity,
+                                       FunctionPtr                                  generation,
+                                       const std::map<unsigned int, FunctionPtr>&   dirichletBC,
+                                       const std::map<unsigned int, FunctionPtr>&   neumannBC):
     dof_handler (triangulation),
     fe (new FE_Q<dim>(polynomialOrder))
 {
-    Diffusivity        = diffusivity;
-    DirichletBC        = dirichletBC;
-    NeumanBC           = neumannBC;
-
-
-    // New style
-    funDiffusivity.m_value = diffusivity;
-    funVelocity.m_value    = 0.0;
-    funGeneration.m_value  = 0.0;
-
-    for(std::map<unsigned int, double>::const_iterator it = dirichletBC.begin(); it != dirichletBC.end(); it++)
-    {
-        const unsigned int id    = it->first;
-        const double       value = it->second;
-
-        funsDirichletBC[id] = SingleValue_Function<dim>(value);
-    }
-
-    for(std::map<unsigned int, double>::const_iterator it = neumannBC.begin(); it != neumannBC.end(); it++)
-    {
-        const unsigned int id    = it->first;
-        const double       value = it->second;
-
-        funsNeumannBC[id] = SingleValue_Function<dim>(value);
-    }
+    funDiffusivity  = diffusivity;
+    funVelocity     = velocity;
+    funGeneration   = generation;
+    funsDirichletBC = dirichletBC;
+    funsNeumannBC   = neumannBC;
 }
 
 template <int dim>
@@ -188,39 +137,12 @@ void dealiiDiffusion<dim>::setup_system ()
     sparsity_pattern.compress();
 
     // Global matrices
-    K_diffusion.reinit (sparsity_pattern);
-    K_accumulation.reinit (sparsity_pattern);
-    K_dirichlet.reinit (sparsity_pattern);
-    f_dirichlet.reinit (dof_handler.n_dofs());
-    f_neuman.reinit (dof_handler.n_dofs());
-    f_generation.reinit (dof_handler.n_dofs());
-
-    // Global rhs arrays
-    solution.reinit (dof_handler.n_dofs());
+    system_matrix.reinit (sparsity_pattern);
+    system_matrix_dt.reinit (sparsity_pattern);
+    system_rhs.reinit (dof_handler.n_dofs());
     
     std::ofstream out ("sparsity_pattern_after");
     sparsity_pattern.print_gnuplot (out);
-
-/*
-    std::map<size_t, size_t> mapIndexes;
-    size_t nrows = system_matrix.m();
-    size_t nnz = sparsity_pattern.n_nonzero_elements();
-
-    b.resize(nrows);
-    A.Reset(nrows, nnz, CSR_C_STYLE);
-    A.ResetCounters();
-
-    for(size_t row = 0; row < nrows; row++)
-    {
-        mapIndexes.clear();
-        for(SparsityPattern::row_iterator iter = sparsity_pattern.row_begin(row); iter != sparsity_pattern.row_end(row); iter++)
-            mapIndexes.insert(std::make_pair(mapIndexes.size(), *iter));
-
-        A.AddRow(mapIndexes);
-    }
-    A.Sort();
-    //A.Print(true);
-*/
 }
 
 template <int dim>
@@ -234,12 +156,9 @@ void dealiiDiffusion<dim>::assemble_system ()
     
     const unsigned int dofs_per_cell = fe->dofs_per_cell;
     
-    FullMatrix<double>  Kel_diffusion(dofs_per_cell, dofs_per_cell);
-    FullMatrix<double>  Kel_accumulation(dofs_per_cell, dofs_per_cell);
-    FullMatrix<double>  Kel_dirichlet(dofs_per_cell, dofs_per_cell);
-    Vector<double>      fel_dirichlet(dofs_per_cell);
-    Vector<double>      fel_neuman(dofs_per_cell);
-    Vector<double>      fel_generation(dofs_per_cell);
+    FullMatrix<double>  cell_matrix(dofs_per_cell, dofs_per_cell);
+    FullMatrix<double>  cell_matrix_dt(dofs_per_cell, dofs_per_cell);
+    Vector<double>      cell_rhs(dofs_per_cell);
 
     std::vector<unsigned int> local_dof_indices (dofs_per_cell);
     
@@ -250,27 +169,27 @@ void dealiiDiffusion<dim>::assemble_system ()
     FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
                                       update_values         | update_quadrature_points  |
                                       update_normal_vectors | update_JxW_values);
-    
-    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
-                                                   endc = dof_handler.end();
 
-    // All DOFs at the boundary ID that have Dirichlet BCs imposed
-    // mapDirichlets: map< boundary_id, map<dof, value> >
-    std::map< unsigned int, std::map<unsigned int,double> > mapDirichlets;
-    for(std::map<unsigned int, double>::iterator it = DirichletBC.begin(); it != DirichletBC.end(); it++)
+    // All DOFs at the boundary ID that have Dirichlet BCs imposed.
+    // mapDirichlets: map< boundary_id, map<dof, value> > will be used to apply boundary conditions locally.
+    // We build this map here since it is common for all cells.
+    std::map< unsigned int, std::map<unsigned int, double> > mapDirichlets;
+    typename std::map< unsigned int, FunctionPtr>::iterator it;
+    for(it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
     {
-        const unsigned int id        = it->first;
-        const double dirichlet_value = it->second;
+        const unsigned int id    = it->first;
+        const Function<dim>& fun = *it->second;
 
         std::map<unsigned int,double> boundary_values;
         VectorTools::interpolate_boundary_values (dof_handler,
                                                   id,
-                                                  SingleValue_Function<dim>(dirichlet_value),
+                                                  fun,
                                                   boundary_values);
 
         mapDirichlets[id] = boundary_values;
     }
 
+    /*
     // All DOFs at the boundary ID that have Neumann BCs imposed
     // mapNeumanns: map< boundary_id, map<global_dof_index, value> >
     std::map< unsigned int, std::map<unsigned int,double> > mapNeumanns;
@@ -287,19 +206,18 @@ void dealiiDiffusion<dim>::assemble_system ()
 
         mapNeumanns[id] = boundary_values;
     }
+    */
 
-    int cellCounter = 0;
-    for (; cell!=endc; ++cell, ++cellCounter)
+    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
+                                                   endc = dof_handler.end();
+    for(int cellCounter = 0; cell != endc; ++cell, ++cellCounter)
     {
-        Kel_diffusion    = 0;
-        Kel_accumulation = 0;
-        Kel_dirichlet    = 0;
-        fel_neuman       = 0;
-        fel_generation   = 0;
+        cell_matrix    = 0;
+        cell_matrix_dt = 0;
+        cell_rhs       = 0;
         
-        fe_values.reinit (cell);
-
-        cell->get_dof_indices (local_dof_indices);
+        fe_values.reinit(cell);
+        cell->get_dof_indices(local_dof_indices);
 
         for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
         {
@@ -307,27 +225,42 @@ void dealiiDiffusion<dim>::assemble_system ()
             {
                 for(unsigned int j = 0; j < dofs_per_cell; ++j)
                 {
-                    Kel_diffusion(i,j)    += (
-                                                fe_values.shape_grad(i, q_point) *
-                                                fe_values.shape_grad(j, q_point)
+                    cell_matrix(i,j)    += (
+                                             /* Diffusion */
+                                                (
+                                                   fe_values.shape_grad(i, q_point) *
+                                                   fe_values.shape_grad(j, q_point)
+                                                )
+                                                *
+                                                funDiffusivity->value(fe_values.quadrature_point(q_point))
+
                                                 +
+                                             /* Helmholtz term (u) */
                                                 fe_values.shape_value(i, q_point) *
                                                 fe_values.shape_value(j, q_point)
-                                             )
-                                             /* * Diffusivity */
-                                             * fe_values.JxW(q_point);
 
-                    Kel_accumulation(i,j) += (
-                                               fe_values.shape_value(i, q_point) *
-                                               fe_values.shape_value(j, q_point)
-                                             )
-                                             * fe_values.JxW(q_point);
+                                             /* Convection (nothing at the moment) */
+                                                /* +
+                                                fe_values.shape_value(i, q_point) *
+                                                fe_values.shape_value(j, q_point) *
+                                                funVelocity.value(fe_values.quadrature_point(q_point)) */
+                                           )
+                                           *
+                                           fe_values.JxW(q_point);
+
+                    /* Accumulation (in a separate matrix) */
+                    cell_matrix_dt(i,j) += (
+                                              fe_values.shape_value(i, q_point) *
+                                              fe_values.shape_value(j, q_point)
+                                           )
+                                           *
+                                           fe_values.JxW(q_point);
                 }
                 
-                // No generation in the interior elements - we have only diffusion
-                fel_generation(i) +=  fe_values.shape_value(i,q_point) *
-                                      /*rhs_values [q_point] */  1 *
-                                      fe_values.JxW(q_point);
+                /* Generation */
+                cell_rhs(i) +=  fe_values.shape_value(i,q_point) *
+                                funGeneration->value(fe_values.quadrature_point(q_point)) *
+                                fe_values.JxW(q_point);
             }
         }
 
@@ -337,61 +270,41 @@ void dealiiDiffusion<dim>::assemble_system ()
             {
                 fe_face_values.reinit (cell, face);
 
-                const unsigned int face_dofs_per_cell = fe_face_values.dofs_per_cell;
-                std::cout << (boost::format("     cell=%d, face=%d, dofs_per_cell=%d, n_face_q_points=%d") % cellCounter % face % dofs_per_cell % n_face_q_points).str() << std::endl;
+                const unsigned int id = cell->face(face)->boundary_indicator();
 
-                for(std::map<unsigned int, double>::iterator it = NeumanBC.begin(); it != NeumanBC.end(); it++)
+                if(funsDirichletBC.find(id) != funsDirichletBC.end())
                 {
-                    if(cell->face(face)->boundary_indicator() == it->first)
+                    // Dirichlet BC
+                    // Do nothing now; apply boundary conditions on the final system_matrix and system_rhs only at the end of the assembling
+                }
+                else if(funsNeumannBC.find(id) != funsNeumannBC.end())
+                {
+                    // Neumann BC
+                    const Function<dim>& neumann = *(funsNeumannBC.find(id)->second);
+
+                    std::cout << (boost::format("  NeumanBC (cell=%d, face=%d, id= %d)") % cellCounter % face % id).str() << std::endl;
+
+                    for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                     {
-                        std::cout << (boost::format("  NeumanBC(cell=%d, face=%d, id= %d) = %f") % cellCounter % face % it->first % it->second).str() << std::endl;
-
-                        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
-                        {
-                            // Achtung, Achtung!
-                            // Note the sign '-' since we have the term: -integral(q * φ(i) * dΓq)
-                            const double neumann_value = (it->second);
-
-                            for (unsigned int i = 0; i < face_dofs_per_cell; ++i)
-                                fel_neuman(i) += neumann_value *
-                                                 fe_face_values.shape_value(i, q_point) *
-                                                 fe_face_values.JxW(q_point);
-                        }
+                        // Achtung, Achtung! For the Convection-Diffusion-Reaction system only:
+                        //                   the sign '-neumann' since we have the term: -integral(q * φ(i) * dΓq)
+                        for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                            cell_rhs(i) += neumann.value(fe_face_values.quadrature_point(q_point))
+                                           *
+                                           fe_face_values.shape_value(i, q_point)
+                                           *
+                                           fe_face_values.JxW(q_point);
                     }
                 }
-
-                /*
-                for(std::map<int, double>::iterator it = DirichletBC.begin(); it != DirichletBC.end(); it++)
+                else
                 {
-                    if(cell->face(face)->boundary_indicator() == it->first)
-                    {
-                        std::cout << (boost::format("  DirichletBC(cell=%d, face=%d, id= %d) = %f") % cellCounter % face % it->first % it->second).str() << std::endl;
-
-                        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
-                        {
-                            const double dirichlet_value = it->second;
-
-                            for(unsigned int i = 0; i < face_dofs_per_cell; ++i)
-                            {
-                                // RHS Dirichlet contribution
-                                fel_dirichlet(i) += DirichletBCPenalty * dirichlet_value *
-                                                    fe_face_values.shape_value(i, q_point) *
-                                                    fe_face_values.JxW(q_point);
-
-                                // LHS Dirichlet contribution
-                                for(unsigned int j = 0; j < face_dofs_per_cell; ++j)
-                                    Kel_dirichlet(i,j) += DirichletBCPenalty *
-                                                          fe_face_values.shape_value(i, q_point) *
-                                                          fe_face_values.shape_value(j, q_point) *
-                                                          fe_face_values.JxW(q_point);
-                            }
-                        }
-                    }
+                    // Not found
+                    // Do nothing or do some default action (perhaps zero gradient?)
                 }
-                */
             }
         }
 
+        /*
         bool bCellHaveDirichletBC = false;
         bool bCellHaveNeumannBC   = false;
         for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapDirichlets.begin(); it != mapDirichlets.end(); it++)
@@ -433,7 +346,7 @@ void dealiiDiffusion<dim>::assemble_system ()
             std::cout << "bCellHaveDirichletBC && bCellHaveNeumannBC" << std::endl;
             std::cout << "*******************************************" << std::endl;
         }
-
+        */
 
         // We already have a pre-calculated map<global_dof_index, bc_value> for every ID marked as having Dirichlet BCs imposed
         for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapDirichlets.begin(); it != mapDirichlets.end(); it++)
@@ -441,6 +354,7 @@ void dealiiDiffusion<dim>::assemble_system ()
             unsigned int id                                 = it->first;
             std::map<unsigned int, double>& boundary_values = it->second;
 
+            // Print some mumbo-jumbo voodoo-mojo stuf related to cell_matrix and cell_rhs...
             std::cout << "boundary_values" << std::endl;
             for(std::map<unsigned int,double>::iterator bviter = boundary_values.begin(); bviter != boundary_values.end(); bviter++)
                 std::cout << "(" << bviter->first << ", " << bviter->second << ") ";
@@ -451,54 +365,53 @@ void dealiiDiffusion<dim>::assemble_system ()
                 std::cout << *ldiiter << " ";
             std::cout << std::endl;
 
-            std::cout << "fel_neuman" << std::endl;
-            fel_neuman.print(std::cout);
+            std::cout << "cell_matrix before bc:" << std::endl;
+            cell_matrix.print_formatted(std::cout);
+            std::cout << "cell_rhs before bc:" << std::endl;
+            cell_rhs.print(std::cout);
 
-            std::cout << "Kel_diffusion pre" << std::endl;
-            Kel_diffusion.print_formatted(std::cout);
-            std::cout << "fel_generation pre" << std::endl;
-            fel_generation.print(std::cout);
+            // Apply values to the cell_matrix and cell_rhs
             MatrixTools::local_apply_boundary_values(boundary_values,
                                                      local_dof_indices,
-                                                     Kel_diffusion,
-                                                     fel_generation,
+                                                     cell_matrix,
+                                                     cell_rhs,
                                                      true);
-            std::cout << "Kel_diffusion posle" << std::endl;
-            Kel_diffusion.print_formatted(std::cout);
-            std::cout << "fel_generation posle" << std::endl;
-            fel_generation.print(std::cout);
+
+            std::cout << "cell_matrix after bc:" << std::endl;
+            cell_matrix.print_formatted(std::cout);
+            std::cout << "cell_rhs after bc:" << std::endl;
+            cell_rhs.print(std::cout);
         }
 
-
+        // Add to the system matrices/vector
+        cell->get_dof_indices (local_dof_indices);
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
         {
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
             { 
-                K_diffusion.add   (local_dof_indices[i], local_dof_indices[j], Kel_diffusion(i,j));
-                K_accumulation.add(local_dof_indices[i], local_dof_indices[j], Kel_accumulation(i,j));
-                K_dirichlet.add   (local_dof_indices[i], local_dof_indices[j], Kel_dirichlet(i,j));
+                system_matrix.add   (local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
+                system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
             }
-            
-            f_neuman    (local_dof_indices[i]) += fel_neuman(i);
-            f_dirichlet (local_dof_indices[i]) += fel_dirichlet(i);
-            f_generation(local_dof_indices[i]) += fel_generation(i);
+            system_rhs(local_dof_indices[i]) += cell_rhs(i);
         }
     }
     
-//  A part we do not need for we use the way of imposing a penalty for DirichletBC
-//    hanging_node_constraints.condense(system_matrix);
-//    hanging_node_constraints.condense(system_matrix_dt);
-//    hanging_node_constraints.condense(system_rhs);
-    
-//    std::map<unsigned int,double> boundary_values;
-//    VectorTools::interpolate_boundary_values (dof_handler,
-//                                              0,
-//                                              Solution<dim>(),
-//                                              boundary_values);
-//    MatrixTools::apply_boundary_values (boundary_values,
-//                                        system_matrix,
-//                                        solution,
-//                                        system_rhs);
+/*
+  // ACHTUNG, ACHTUNG!! We do not allow refined grids with hanging nodes
+    hanging_node_constraints.condense(system_matrix);
+    hanging_node_constraints.condense(system_matrix_dt);
+    hanging_node_constraints.condense(system_rhs);
+
+    std::map<unsigned int,double> boundary_values;
+    VectorTools::interpolate_boundary_values (dof_handler,
+                                              0,
+                                              Solution<dim>(),
+                                              boundary_values);
+    MatrixTools::apply_boundary_values (boundary_values,
+                                        system_matrix,
+                                        solution,
+                                        system_rhs);
+*/
 }
 
 }

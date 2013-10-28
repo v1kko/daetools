@@ -7,4 +7,57 @@
 
 #include "diffusion.h"
 
+namespace daepython
+{
+template<int dim>
+void daeDiffusion_Initialize(diffusion::daeDiffusion<dim>& self, string meshFilename,
+                                                                 unsigned int polynomialOrder,
+                                                                 double diffusivity,
+                                                                 boost::python::list lVelocity,
+                                                                 double generation,
+                                                                 boost::python::dict dictDirichletBC,
+                                                                 boost::python::dict dictNeumannBC)
+{
+    std::vector<double> velocity;
+    std::map<unsigned int, double> dirichletBC;
+    std::map<unsigned int, double> neumannBC;
+
+    boost::python::list keys;
+
+    for(int i = 0; i < len(lVelocity); ++i)
+    {
+        double vel = boost::python::extract<double>(lVelocity[i]);
+
+        velocity.push_back(vel);
+    }
+
+    keys = dictDirichletBC.keys();
+    for(int i = 0; i < len(keys); ++i)
+    {
+        boost::python::object key_ = keys[i];
+        boost::python::object val_ = dictDirichletBC[key_];
+
+        unsigned int key = boost::python::extract<unsigned int>(key_);
+        double value     = boost::python::extract<double>(val_);
+
+        dirichletBC[key] = value;
+    }
+
+    keys = dictNeumannBC.keys();
+    for(int i = 0; i < len(keys); ++i)
+    {
+        boost::python::object key_ = keys[i];
+        boost::python::object val_ = dictNeumannBC[key_];
+
+        unsigned int key = boost::python::extract<unsigned int>(key_);
+        double value     = boost::python::extract<double>(val_);
+
+        neumannBC[key] = value;
+    }
+
+    self.Initialize(meshFilename, polynomialOrder, diffusivity, velocity, generation, dirichletBC, neumannBC);
+}
+
+}
+
 #endif
