@@ -40,6 +40,7 @@ PROJECTS:
     bonmin          Build BONMIN minlp solver and its python extension module.
     ipopt           Build IPOPT nlp solver and its python extension module.
     nlopt           Build NLOPT nlp solver and its python extension module.
+    deal.ii         Build deal.II FEM solvers and its python extension module.
 EOF
 }
 
@@ -167,6 +168,7 @@ do
     bonmin)           ;;
     ipopt)            ;;
     nlopt)            ;; 
+    deal.ii)          ;; 
     *) echo Unrecognized project: "$project"
        exit
        ;;
@@ -313,6 +315,9 @@ do
                compile pyNLOPT         "-j1"
                ;;
 
+        deal.ii) compile pyDealII "-j1"
+                 ;;
+               
         *) echo "??????????????????????"
            echo Unrecognized project: "$project"
            echo "??????????????????????"
