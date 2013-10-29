@@ -1178,7 +1178,22 @@ public:
     {
         this->daeModel::UpdateEquations(pExecutionContext);
     }
+
+    /* If InitializeModel is called on daeModelWrapper object from c++ then daeModelWrapper::InitializeModel
+     * will be called: if there is implementation in python it will be called - otherwise the default daeModel
+     * implementation. If it is called from python on non-daeModelWrapper object (it is not python object at all)
+     * the InitializeModel call of that class will be called.
+     */
+    void InitializeModel(const std::string& jsonInit)
+    {
+        if(boost::python::override f = this->get_override("InitializeModel"))
+            f(jsonInit);
+        else
+            this->daeModel::InitializeModel(jsonInit);
+    }
 };
+
+void daeModel_def_InitializeModel(daeModel& self, const std::string& jsonInit);
 
 void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,
                                            boost::python::list switchToStates     = boost::python::list(),

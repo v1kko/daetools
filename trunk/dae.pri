@@ -492,6 +492,7 @@ win32::DAE_IPOPT_SOLVER_LIB         = cdaeIPOPT_NLPSolver.lib
 win32::DAE_NLOPT_SOLVER_LIB         = cdaeNLOPT_NLPSolver.lib
 win32::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
 win32::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
+win32::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
 
 unix::DAE_CORE_LIB                 = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
@@ -506,6 +507,7 @@ unix::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
 unix::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
 unix::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
 unix::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
+unix::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 

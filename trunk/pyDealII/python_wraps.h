@@ -5,18 +5,28 @@
 #include <python.h>
 #endif
 
-#include "diffusion.h"
+#include <string>
+#include <boost/python.hpp>
+#include <boost/python/numeric.hpp>
+#include <boost/python/slice.hpp>
+#include <boost/python/slice.hpp>
+#include <boost/smart_ptr.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
+
+#include "../FE_DealII/convection_diffusion.h"
+using namespace dae::fe_solver::convection_diffusion_dealii;
 
 namespace daepython
 {
 template<int dim>
-void daeDiffusion_Initialize(diffusion::daeDiffusion<dim>& self, string meshFilename,
-                                                                 unsigned int polynomialOrder,
-                                                                 double diffusivity,
-                                                                 boost::python::list lVelocity,
-                                                                 double generation,
-                                                                 boost::python::dict dictDirichletBC,
-                                                                 boost::python::dict dictNeumannBC)
+void daeConvectionDiffusion_Initialize(daeConvectionDiffusion<dim>& self, string meshFilename,
+                                                                          unsigned int polynomialOrder,
+                                                                          double diffusivity,
+                                                                          boost::python::list lVelocity,
+                                                                          double generation,
+                                                                          boost::python::dict dictDirichletBC,
+                                                                          boost::python::dict dictNeumannBC)
 {
     std::vector<double> velocity;
     std::map<unsigned int, double> dirichletBC;

@@ -1380,14 +1380,18 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("__str__",           &daepython::daeModel__str__)
         .def("__repr__",          &daepython::daeModel__repr__)
-            
+
         // Virtual function that must be implemented in derived classes in python
         .def("DeclareEquations", &daepython::daeModelWrapper::DeclareEquations,  &daepython::daeModelWrapper::def_DeclareEquations,
                                  ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
 
         // Virtual function that can be implemented in derived classes in python if equations need an update (useful for FE models)
-        .def("UpdateEquations", &daepython::daeModelWrapper::UpdateEquations,  &daepython::daeModelWrapper::def_UpdateEquations,
+        .def("UpdateEquations",  &daepython::daeModelWrapper::UpdateEquations,  &daepython::daeModelWrapper::def_UpdateEquations,
                                  ( arg("self"), arg("executionContext") ), DOCSTR_daeModel_UpdateEquations)
+
+         // Virtual function that can be implemented in derived classes in python to have a generic initialization method (useful for FE models)
+        .def("InitializeModel",  &daepython::daeModel_def_InitializeModel,
+                                 ( arg("self"), arg("jsonInit") ), DOCSTR_daeModel_InitializeModel)
 
         .def("CreateEquation",   &daeModel::CreateEquation, return_internal_reference<>(),
                                  ( arg("self"), arg("name"), arg("description") = "", arg("scaling") = 1.0), DOCSTR_daeModel_CreateEquation)

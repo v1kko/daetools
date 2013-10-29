@@ -19,10 +19,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 """
 
-import sys, numpy
+import sys, numpy, json
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import pyDealII
-from pyDealII import daeDiffusion_2D
 from time import localtime, strftime
 
 # Standard variable types are defined in variable_types.py
@@ -32,15 +31,23 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
-        self.fe = daeDiffusion_2D('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)')
-        self.fe.Initialize(meshFilename    = 'step-7.msh', 
-                           polynomialOrder = 1, 
-                           diffusivity     = 1.0, 
-                           velocity        = [],
-                           generation      = 1.0,
-                           dirichletBC     = {0 : 1.0},
-                           neumannBC       = {1 : 0.5})
-
+        self.fe = pyDealII.daeConvectionDiffusion_2D('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)')
+        options = {}
+        options["meshFilename"]    = "step-7.msh"
+        options["polynomialOrder"] = 1
+        options["diffusivity"]     = 1.0 
+        options["velocity"]        = []
+        options["generation"]      = 1.0
+        options["dirichletBC"]     = {0 : 1.0},
+        options["neumannBC"]       = {1 : 0.5}
+        
+        jsonInit = json.dumps(options)
+        print jsonInit
+        self.fe.InitializeModel(jsonInit)
+        
+    def InitializeModel(self, jsonInit):
+        print 'modTutorial.InitializeModel:', jsonInit
+        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
         
@@ -70,8 +77,8 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
+    datareporter = simulation.m.CreateDataReporter('uja') #daeTCPIPDataReporter()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

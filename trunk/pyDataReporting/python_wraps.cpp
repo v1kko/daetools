@@ -25,7 +25,7 @@ boost::python::list GetDataReporterDomainPoints(daeDataReporterDomain& Domain)
 	boost::python::list l;
 
 	for(size_t i = 0; i < Domain.m_nNumberOfPoints; i++)
-		l.append(Domain.m_pPoints[i]);
+        l.append(Domain.m_arrPoints[i]);
 	return l;
 }
 
@@ -51,8 +51,22 @@ boost::python::list GetDataReceiverDomainPoints(daeDataReceiverDomain& domain)
 {
 	python::list l;
 	for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
-		l.append(domain.m_pPoints[i]);
+        l.append(domain.m_arrPoints[i]);
 	return l;
+}
+
+boost::python::list GetDataReceiverDomainCoordinates(daeDataReceiverDomain& domain)
+{
+    python::list l;
+    for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
+    {
+        python::list xyz;
+        xyz.append(domain.m_arrCoordinates[i].x);
+        xyz.append(domain.m_arrCoordinates[i].y);
+        xyz.append(domain.m_arrCoordinates[i].z);
+        l.append(xyz);
+    }
+    return l;
 }
 
 /*******************************************************

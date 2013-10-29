@@ -2167,17 +2167,9 @@ void daeSimulation::Register(daeDomain* pDomain)
 		daeDeclareAndThrowException(exInvalidCall);
 	
     if(pDomain->GetType() == eUnstructuredGrid)
-    {
-        domain.m_pPoints = new real_t[domain.m_nNumberOfPoints];
-        for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
-            domain.m_pPoints[i] = real_t(i);
-    }
+        domain.m_arrCoordinates = pDomain->GetCoordinates();
     else
-    {
-        domain.m_pPoints = new real_t[domain.m_nNumberOfPoints];
-        for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
-            domain.m_pPoints[i] = *pDomain->GetPoint(i);
-    }
+        pDomain->GetPoints(domain.m_arrPoints);
 
 	if(!m_pDataReporter->RegisterDomain(&domain))
 	{

@@ -626,7 +626,7 @@ string daeFiniteElementEquation__str__(const daeFiniteElementEquation& self)
 
 string daeFiniteElementEquation__repr__(const daeFiniteElementEquation& self)
 {
-    daeEquation__repr__(self);
+    return daeEquation__repr__(self);
 }
 
 string daeSTN__str__(const daeSTN& self)
@@ -1413,9 +1413,7 @@ boost::python::list GetDomainCoordinates(daeDomain& domain)
     const std::vector<daePoint>& coords = domain.GetCoordinates();
 
     for(size_t i = 0; i < coords.size(); i++)
-        l.append(make_tuple(boost::get<0>(coords[i]),
-                            boost::get<1>(coords[i]),
-                            boost::get<2>(coords[i])));
+        l.append(make_tuple(coords[i].x, coords[i].y, coords[i].z));
 
     return l;
 }
@@ -1432,10 +1430,9 @@ void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords)
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
         point = extract<boost::python::tuple>(coords[i]);
-        x = extract<real_t>(point[0]);
-        y = extract<real_t>(point[1]);
-        z = extract<real_t>(point[2]);
-        arrCoords[i] = boost::tuple<real_t, real_t, real_t>(x, y, z);
+        arrCoords[i].x = extract<real_t>(point[0]);
+        arrCoords[i].y = extract<real_t>(point[1]);
+        arrCoords[i].z = extract<real_t>(point[2]);
     }
 
     domain.CreateUnstructuredGrid(arrCoords);
@@ -4050,6 +4047,11 @@ boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActio
 /*******************************************************
     daeModel
 *******************************************************/
+void daeModel_def_InitializeModel(daeModel& self, const std::string& jsonInit)
+{
+    self.InitializeModel(jsonInit);
+}
+
 void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,
                                            boost::python::list switchToStates,
                                            boost::python::list setVariableValues,

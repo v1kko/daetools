@@ -183,9 +183,35 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 				return;
 	
 		// Read the points
-			pDomain->m_pPoints = new real_t[pDomain->m_nNumberOfPoints];
-			memcpy(pDomain->m_pPoints, &data[curPos], sizeof(real_t)*pDomain->m_nNumberOfPoints);
-		}
+            if(pDomain->m_eType == eUnstructuredGrid)
+            {
+                std::cout << pDomain->m_strName << " points: " << std::endl;
+                daePoint point;
+                pDomain->m_arrCoordinates.resize(pDomain->m_nNumberOfPoints);
+                for(size_t i = 0; i < pDomain->m_nNumberOfPoints; i++)
+                {
+                    memcpy(&point.x, &data[curPos], sizeof(double));
+                    curPos += sizeof(double);
+
+                    memcpy(&point.y, &data[curPos], sizeof(double));
+                    curPos += sizeof(double);
+
+                    memcpy(&point.z, &data[curPos], sizeof(double));
+                    curPos += sizeof(double);
+
+                    pDomain->m_arrCoordinates[i] = point;
+
+                    std::cout << pDomain->m_arrCoordinates[i].x << ", " <<  pDomain->m_arrCoordinates[i].y << std::endl;
+                }
+            }
+            else
+            {
+                pDomain->m_arrPoints.resize(pDomain->m_nNumberOfPoints);
+                double* fdata = (double*)(void*)(&data[curPos]);
+                pDomain->m_arrPoints.assign(fdata, fdata + pDomain->m_nNumberOfPoints);
+                curPos += pDomain->m_nNumberOfPoints * sizeof(double);
+            }
+        }
 		else if(cFlag == cRegisterParameter)
 		{
 		}

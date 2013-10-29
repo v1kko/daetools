@@ -41,59 +41,68 @@ public:
 	{
 		m_eType           = eDTUnknown;
 		m_nNumberOfPoints = 0;
-		m_pPoints         = NULL;
-	}
+    }
 	
 	daeDataReporterDomain(const string& strName, daeeDomainType eType, size_t nNoPoints)
 	{
 		m_strName         = strName;
 		m_eType           = eType;
 		m_nNumberOfPoints = nNoPoints;
-		m_pPoints = new real_t[nNoPoints];
-	}
+        if(m_eType == eUnstructuredGrid)
+            m_arrCoordinates.resize(nNoPoints);
+        else
+            m_arrPoints.resize(nNoPoints);
+    }
 	
 	daeDataReporterDomain(const daeDataReporterDomain& drd) // Deep copy
 	{
 		m_strName         = drd.m_strName;
 		m_eType           = drd.m_eType;
 		m_nNumberOfPoints = drd.m_nNumberOfPoints;
-		m_pPoints = new real_t[m_nNumberOfPoints];
-		for(size_t i = 0; i < m_nNumberOfPoints; i++)
-			m_pPoints[i] = drd.m_pPoints[i];
+        if(m_eType == eUnstructuredGrid)
+            m_arrCoordinates = drd.m_arrCoordinates;
+        else
+            m_arrPoints = drd.m_arrPoints;
 	}
 	
 	~daeDataReporterDomain(void)
 	{
-		if(m_pPoints)
-			delete[] m_pPoints;
 	}
 
-	real_t GetPoint(size_t n) const
-	{
-		if(!m_pPoints)
-			daeDeclareAndThrowException(exInvalidPointer); 
-		if(n >= m_nNumberOfPoints)
-			daeDeclareAndThrowException(exInvalidCall); 
+//	real_t GetPoint(size_t n) const
+//	{
+//        if(m_arrPoints.empty())
+//			daeDeclareAndThrowException(exInvalidPointer);
+//		if(n >= m_nNumberOfPoints)
+//			daeDeclareAndThrowException(exInvalidCall);
 
-		return m_pPoints[n];
-	}
+//        return m_arrPoints[n];
+//	}
 
-	void SetPoint(size_t n, real_t value)
-	{
-		if(!m_pPoints)
-			daeDeclareAndThrowException(exInvalidPointer); 
-		if(n >= m_nNumberOfPoints)
-			daeDeclareAndThrowException(exInvalidCall); 
+//	void SetPoint(size_t n, real_t value)
+//	{
+//        if(m_arrPoints.empty())
+//			daeDeclareAndThrowException(exInvalidPointer);
+//		if(n >= m_nNumberOfPoints)
+//			daeDeclareAndThrowException(exInvalidCall);
 
-		m_pPoints[n] = value;
-	}
+//        m_arrPoints[n] = value;
+//	}
 	
 	std::iostream& operator << (std::iostream& io) const
-	{
+    {
 		io << m_strName << (int)m_eType << m_nNumberOfPoints;
-		for(size_t i = 0; i < m_nNumberOfPoints; i++)
-			io << m_pPoints[i];
-		return io;
+        if(m_eType == eUnstructuredGrid)
+        {
+            for(size_t i = 0; i < m_nNumberOfPoints; i++)
+                io << m_arrCoordinates[i];
+        }
+        else
+        {
+            for(size_t i = 0; i < m_nNumberOfPoints; i++)
+                io << m_arrPoints[i];
+        }
+        return io;
 	}
 	
 	std::iostream& operator >> (std::iostream& io)
@@ -103,17 +112,32 @@ public:
 		io >> e;
 		m_eType = (daeeDomainType)e;
 		io >> m_nNumberOfPoints;
-		m_pPoints = new real_t[m_nNumberOfPoints];
-		for(size_t i = 0; i < m_nNumberOfPoints; i++)
-			io >> m_pPoints[i];
+        if(m_eType == eUnstructuredGrid)
+        {
+            m_arrCoordinates.resize(m_nNumberOfPoints);
+            for(size_t i = 0; i < m_nNumberOfPoints; i++)
+            {
+                io >> m_arrCoordinates[i];
+//                io >> m_arrCoordinates[i].x;
+//                io >> m_arrCoordinates[i].y;
+//                io >> m_arrCoordinates[i].x;
+            }
+        }
+        else
+        {
+            m_arrPoints.resize(m_nNumberOfPoints);
+            for(size_t i = 0; i < m_nNumberOfPoints; i++)
+                io >> m_arrPoints[i];
+        }
 		return io;
 	}
 
 public:
-	string				m_strName;
-	daeeDomainType		m_eType;
-	size_t				m_nNumberOfPoints;
-	real_t*				m_pPoints;
+    string                  m_strName;
+    daeeDomainType          m_eType;
+    size_t                  m_nNumberOfPoints;
+    std::vector<real_t>     m_arrPoints;
+    std::vector<daePoint>   m_arrCoordinates;
 };
 
 /*********************************************************************
@@ -307,7 +331,6 @@ public:
 	{
 		m_eType           = eDTUnknown;
 		m_nNumberOfPoints = 0;
-		m_pPoints         = NULL;
 	}
 	
 	daeDataReceiverDomain(const string& strName, daeeDomainType eType, size_t nNoPoints)
@@ -315,7 +338,10 @@ public:
 		m_strName         = strName;
 		m_eType           = eType;
 		m_nNumberOfPoints = nNoPoints;
-		m_pPoints = new real_t[nNoPoints];
+        if(m_eType == eUnstructuredGrid)
+            m_arrCoordinates.resize(nNoPoints);
+        else
+            m_arrPoints.resize(nNoPoints);
 	}
 
 	daeDataReceiverDomain(const daeDataReceiverDomain& drd) // Deep copy
@@ -323,41 +349,41 @@ public:
 		m_strName         = drd.m_strName;
 		m_eType           = drd.m_eType;
 		m_nNumberOfPoints = drd.m_nNumberOfPoints;
-		m_pPoints = new real_t[m_nNumberOfPoints];
-		for(size_t i = 0; i < m_nNumberOfPoints; i++)
-			m_pPoints[i] = drd.m_pPoints[i];
+        if(m_eType == eUnstructuredGrid)
+            m_arrCoordinates = drd.m_arrCoordinates;
+        else
+            m_arrPoints = drd.m_arrPoints;
 	}
 	
 	~daeDataReceiverDomain(void)
 	{
-		if(m_pPoints)
-			delete[] m_pPoints;
 	}
 
-	real_t GetPoint(size_t n) const
-	{
-		if(!m_pPoints)
-			daeDeclareAndThrowException(exInvalidPointer); 
-		if(n >= m_nNumberOfPoints)
-			daeDeclareAndThrowException(exInvalidCall); 
+//	real_t GetPoint(size_t n) const
+//	{
+//        if(m_arrPoints.empty())
+//			daeDeclareAndThrowException(exInvalidPointer);
+//		if(n >= m_nNumberOfPoints)
+//			daeDeclareAndThrowException(exInvalidCall);
 
-		return m_pPoints[n];
-	}
+//        return m_arrPoints[n];
+//	}
 	
-	void SetPoint(size_t n, real_t value)
-	{
-		if(!m_pPoints)
-			daeDeclareAndThrowException(exInvalidPointer); 
-		if(n >= m_nNumberOfPoints)
-			daeDeclareAndThrowException(exInvalidCall); 
+//	void SetPoint(size_t n, real_t value)
+//	{
+//        if(m_arrPoints.empty())
+//			daeDeclareAndThrowException(exInvalidPointer);
+//		if(n >= m_nNumberOfPoints)
+//			daeDeclareAndThrowException(exInvalidCall);
 
-		m_pPoints[n] = value;
-	}
+//        m_arrPoints[n] = value;
+//	}
 
-	string				m_strName;
-	daeeDomainType		m_eType;
-	size_t				m_nNumberOfPoints;
-	real_t*				m_pPoints;
+    string                  m_strName;
+    daeeDomainType          m_eType;
+    size_t                  m_nNumberOfPoints;
+    std::vector<real_t>     m_arrPoints;
+    std::vector<daePoint>   m_arrCoordinates;
 };
 
 /*********************************************************************

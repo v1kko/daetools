@@ -96,29 +96,6 @@ inline size_t daeVersionBuild()
 	return size_t(DAE_BUILD);
 }
 
-//inline std::string daeBoostVersion()
-//{
-//	char boost__version[20];
-//	::sprintf(boost__version, "%d.%d.%d", DAE_BOOST_MAJOR, DAE_BOOST_MINOR, DAE_BOOST_BUILD);
-//	return std::string(boost__version);
-//}
-
-//inline size_t daeBoostVersionMajor()
-//{
-//	return size_t(DAE_BOOST_MAJOR);
-//}
-
-//inline size_t daeBoostVersionMinor()
-//{
-//	return size_t(DAE_BOOST_MINOR);
-//}
-
-//inline size_t daeBoostVersionBuild()
-//{
-//	return size_t(DAE_BOOST_BUILD);
-//}
-
-
 /*********************************************************************************************
 	daePtrVector
 **********************************************************************************************/
@@ -449,6 +426,29 @@ public:
     int		m_nLine;
     string	m_strWhat;
 };
+
+/*********************************************************************************************
+    daePoint
+**********************************************************************************************/
+struct daePoint
+{
+    daePoint(real_t x_ = 0, real_t y_ = 0, real_t z_ = 0)
+        : x(x_), y(y_), z(z_){}
+
+    double x, y, z;
+};
+
+inline std::ostream& operator << (std::ostream& io, const daePoint& p)
+{
+    io << p.x << p.y << p.z;
+    return io;
+}
+
+inline std::istream& operator >> (std::istream& io, daePoint& p)
+{
+    io >> p.x >> p.y >> p.z;
+    return io;
+}
 
 /*********************************************************************************************
 	daeArray

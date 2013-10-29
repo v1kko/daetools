@@ -315,7 +315,8 @@ do
                compile pyNLOPT         "-j1"
                ;;
 
-        deal.ii) compile pyDealII "-j1"
+        deal.ii) compile FE_DealII "-j1"
+                 compile pyDealII  "-j1"
                  ;;
                
         *) echo "??????????????????????"

@@ -1,3 +1,6 @@
+#ifndef DEAL_II_CONVECTION_DIFFUSION_H
+#define DEAL_II_CONVECTION_DIFFUSION_H
+
 #include <typeinfo>
 #include <fstream>
 #include <iostream>
@@ -29,6 +32,7 @@
 #include <deal.II/numerics/matrix_tools.h>
 #include <deal.II/numerics/error_estimator.h>
 #include <deal.II/numerics/data_out.h>
+#include <deal.II/grid/grid_out.h>
 #include <deal.II/grid/grid_in.h>
 
 #include <deal.II/dofs/dof_renumbering.h>
@@ -37,24 +41,29 @@
 #include <deal.II/base/convergence_table.h>
 #include <deal.II/fe/fe_values.h>
 
-namespace diffusion
+namespace dae
+{
+namespace fe_solver
+{
+namespace convection_diffusion_dealii
 {
 using namespace dealii;
 
 template <int dim>
-class dealiiDiffusion
+class dealiiConvectionDiffusion
 {
 typedef typename boost::shared_ptr< Function<dim> > FunctionPtr;
 
 public:
-    dealiiDiffusion (unsigned int                               polynomialOrder,
-                     FunctionPtr                                diffusivity,
-                     FunctionPtr                                velocity,
-                     FunctionPtr                                generation,
-                     const std::map<unsigned int, FunctionPtr>& dirichletBC,
-                     const std::map<unsigned int, FunctionPtr>& neumannBC);
+    dealiiConvectionDiffusion(const std::string&                         meshFilename,
+                              unsigned int                               polynomialOrder,
+                              FunctionPtr                                diffusivity,
+                              FunctionPtr                                velocity,
+                              FunctionPtr                                generation,
+                              const std::map<unsigned int, FunctionPtr>& dirichletBC,
+                              const std::map<unsigned int, FunctionPtr>& neumannBC);
     
-    virtual ~dealiiDiffusion ();
+    virtual ~dealiiConvectionDiffusion ();
     
 public:
     virtual void setup_system ();
@@ -64,13 +73,13 @@ public:
     // General deal.II data
     Triangulation<dim>                   triangulation;
     DoFHandler<dim>                      dof_handler;
-    
+
     SmartPointer< FiniteElement<dim> >   fe;
-    
+
     ConstraintMatrix                     hanging_node_constraints;
-    
+
     SparsityPattern                      sparsity_pattern;
-  
+
     SparseMatrix<double>                 system_matrix;
     SparseMatrix<double>                 system_matrix_dt;
     Vector<double>                       system_rhs;
@@ -84,12 +93,13 @@ public:
 };
 
 template <int dim>
-dealiiDiffusion<dim>::dealiiDiffusion (unsigned int                                 polynomialOrder,
-                                       FunctionPtr                                  diffusivity,
-                                       FunctionPtr                                  velocity,
-                                       FunctionPtr                                  generation,
-                                       const std::map<unsigned int, FunctionPtr>&   dirichletBC,
-                                       const std::map<unsigned int, FunctionPtr>&   neumannBC):
+dealiiConvectionDiffusion<dim>::dealiiConvectionDiffusion (const std::string&                           meshFilename,
+                                                           unsigned int                                 polynomialOrder,
+                                                           FunctionPtr                                  diffusivity,
+                                                           FunctionPtr                                  velocity,
+                                                           FunctionPtr                                  generation,
+                                                           const std::map<unsigned int, FunctionPtr>&   dirichletBC,
+                                                           const std::map<unsigned int, FunctionPtr>&   neumannBC):
     dof_handler (triangulation),
     fe (new FE_Q<dim>(polynomialOrder))
 {
@@ -98,16 +108,21 @@ dealiiDiffusion<dim>::dealiiDiffusion (unsigned int                             
     funGeneration   = generation;
     funsDirichletBC = dirichletBC;
     funsNeumannBC   = neumannBC;
+
+    GridIn<dim> gridin;
+    gridin.attach_triangulation(triangulation);
+    std::ifstream f(meshFilename);
+    gridin.read_msh(f);
 }
 
 template <int dim>
-dealiiDiffusion<dim>::~dealiiDiffusion ()
+dealiiConvectionDiffusion<dim>::~dealiiConvectionDiffusion ()
 {
     dof_handler.clear ();
 }
 
 template <int dim>
-void dealiiDiffusion<dim>::setup_system ()
+void dealiiConvectionDiffusion<dim>::setup_system ()
 {
     dof_handler.distribute_dofs (*fe);
     
@@ -146,7 +161,7 @@ void dealiiDiffusion<dim>::setup_system ()
 }
 
 template <int dim>
-void dealiiDiffusion<dim>::assemble_system ()
+void dealiiConvectionDiffusion<dim>::assemble_system ()
 {
     QGauss<dim>   quadrature_formula(3);
     QGauss<dim-1> face_quadrature_formula(3);
@@ -415,3 +430,7 @@ void dealiiDiffusion<dim>::assemble_system ()
 }
 
 }
+}
+}
+
+#endif

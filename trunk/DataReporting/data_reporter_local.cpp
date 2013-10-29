@@ -40,9 +40,10 @@ bool daeDataReporterLocal::RegisterDomain(const daeDataReporterDomain* pDomain)
 	pDom->m_strName			= pDomain->m_strName;
 	pDom->m_eType			= pDomain->m_eType;
 	pDom->m_nNumberOfPoints = pDomain->m_nNumberOfPoints;
-	pDom->m_pPoints			= new real_t[pDomain->m_nNumberOfPoints];
-	for(size_t i = 0; i < pDomain->m_nNumberOfPoints; i++)
-		pDom->m_pPoints[i] = pDomain->m_pPoints[i];
+    if(pDomain->m_eType == eUnstructuredGrid)
+        pDom->m_arrCoordinates = pDomain->m_arrCoordinates;
+    else
+        pDom->m_arrPoints = pDomain->m_arrPoints;
 
 	m_drProcess.m_ptrarrRegisteredDomains.push_back(pDom);
 	return true;

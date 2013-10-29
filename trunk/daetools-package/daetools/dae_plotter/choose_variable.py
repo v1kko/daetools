@@ -256,7 +256,10 @@ class daeChooseVariable(QtGui.QDialog):
                     # Remove html code marks ('&' and ';')
                     xname = names[len(names)-1]
                     xAxisLabel = xname.replace("&", "").replace(";", "")
-                    xPoints.extend(d.Points[0 : d.NumberOfPoints])
+                    if d.Type == eUnstructuredGrid:
+                        xPoints.extend([i for i in range(d.NumberOfPoints)])
+                    else:
+                        xPoints.extend(d.Points[0 : d.NumberOfPoints])
 
                 break
 
@@ -498,8 +501,14 @@ class daeChooseVariable(QtGui.QDialog):
         names = domain.Name.split(".")
         label.setText(names[len(names)-1])
         comboBox.addItem("*", QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
-        for i in range(0, domain.NumberOfPoints):
-            comboBox.addItem(str(domain[i]), QtCore.QVariant(i))
+        if domain.Type == eUnstructuredGrid:
+            coordinates = domain.Coordinates
+            for i in range(0, domain.NumberOfPoints):
+                comboBox.addItem(str(tuple(coordinates[i])), QtCore.QVariant(i))
+        else:
+            points = domain.Points
+            for i in range(0, domain.NumberOfPoints):
+                comboBox.addItem(str(points[i]), QtCore.QVariant(i))
 
     def getComboBoxAndLabel(self, index):
         if(index == 0):

@@ -294,8 +294,6 @@ public:
 /******************************************************************
 	daeDomain
 *******************************************************************/
-typedef boost::tuple<real_t,real_t,real_t> daePoint;
-
 class daePort;
 class daeArrayRange;
 class DAE_CORE_API daeDomain : virtual public daeObject,
@@ -2606,7 +2604,9 @@ public:
 	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays);
 	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays);
 
-	virtual void	InitializeStage1(void);
+    virtual void	InitializeModel(const std::string& jsonInit);
+
+    virtual void	InitializeStage1(void);
 	virtual void	InitializeStage2(void);
 	virtual void	InitializeStage3(daeLog_t* pLog);
 	virtual void	InitializeStage4(void);

@@ -27,9 +27,6 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def_readonly("NumberOfPoints",		&daeDataReporterDomain::m_nNumberOfPoints,  DOCSTR_daeDataReporterDomain_NumberOfPoints)
 		
 		.add_property("Points",				&daepython::GetDataReporterDomainPoints,    DOCSTR_daeDataReporterDomain_Points)
-
-		.def("__getitem__",					&daeDataReporterDomain::GetPoint,           ( arg("self"), arg("index") ), DOCSTR_daeDataReporterDomain_getitem)
-        .def("__setitem__",                 &daeDataReporterDomain::SetPoint,           ( arg("self"), arg("index"), arg("value") ),  DOCSTR_daeDataReporterDomain_setitem)
 		;
 
 	class_<daeDataReporterVariable, boost::noncopyable>("daeDataReporterVariable", DOCSTR_daeDataReporterVariable, no_init)
@@ -247,15 +244,13 @@ BOOST_PYTHON_MODULE(pyDataReporting)
                                                     arg("numberOfPoints") 
                                                   ), DOCSTR_daeDataReceiverDomain_init))
 		
-		.def_readonly("Name",				&daeDataReceiverDomain::m_strName,          DOCSTR_daeDataReceiverDomain_Name)
-		.def_readonly("Type",				&daeDataReceiverDomain::m_eType,            DOCSTR_daeDataReceiverDomain_Type)
-		.def_readonly("NumberOfPoints",		&daeDataReceiverDomain::m_nNumberOfPoints,  DOCSTR_daeDataReceiverDomain_NumberOfPoints)
+        .def_readonly("Name",				&daeDataReceiverDomain::m_strName,              DOCSTR_daeDataReceiverDomain_Name)
+        .def_readonly("Type",				&daeDataReceiverDomain::m_eType,                DOCSTR_daeDataReceiverDomain_Type)
+        .def_readonly("NumberOfPoints",		&daeDataReceiverDomain::m_nNumberOfPoints,      DOCSTR_daeDataReceiverDomain_NumberOfPoints)
 		
-		.add_property("Points",				&daepython::GetDataReceiverDomainPoints,    DOCSTR_daeDataReceiverDomain_Points)
-		
-		.def("__getitem__",					&daeDataReceiverDomain::GetPoint,           ( arg("self"), arg("index") ), DOCSTR_daeDataReceiverDomain_getitem)
-		.def("__setitem__",					&daeDataReceiverDomain::SetPoint,           ( arg("self"), arg("index"), arg("value") ), DOCSTR_daeDataReceiverDomain_setitem)
-		;
+        .add_property("Points",				&daepython::GetDataReceiverDomainPoints,        DOCSTR_daeDataReceiverDomain_Points)
+        .add_property("Coordinates",		&daepython::GetDataReceiverDomainCoordinates,   DOCSTR_daeDataReceiverDomain_Coordinates)
+        ;
 
 	class_<daeDataReceiverVariableValue, boost::noncopyable>("daeDataReceiverVariableValue", DOCSTR_daeDataReceiverVariableValue, no_init)  
 		.def(init<real_t, size_t>(( arg("self"), 

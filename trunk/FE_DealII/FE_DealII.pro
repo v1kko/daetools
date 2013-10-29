@@ -1,7 +1,8 @@
 include(../dae.pri)
 QT -= core gui
-TARGET = pyDealII
-TEMPLATE = lib #app
+TARGET = cdaeDealII_FESolver
+TEMPLATE = lib
+CONFIG += staticlib
 
 DEALII_DIR     = ../deal.II/build
 DEALII_INCLUDE = $${DEALII_DIR}/include
@@ -26,8 +27,7 @@ QMAKE_CFLAGS_DEBUG   += -DDEBUG
 QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                   -std=c++11 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
 
-LIBS += $${DAE_DEALII_SOLVER_LIB} \
-        $${DEALII_LIBS} \
+LIBS += $${DEALII_LIBS} \
         $${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
         $${BOOST_PYTHON_LIB} \
@@ -36,23 +36,12 @@ LIBS += $${DAE_DEALII_SOLVER_LIB} \
 
 SOURCES += stdafx.cpp \
            dllmain.cpp \
-           dae_python.cpp
+           fe_solvers.cpp \
+           dealii_datareporter.cpp
 
 HEADERS += stdafx.h \
-           docstrings.h \
-           python_wraps.h
-
-#######################################################
-#                Install files
-#######################################################
-win32{
-QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyDealII1.dll \
-    $${SOLVERS_DIR}/pyDealII.pyd
-}
-
-unix{
-QMAKE_POST_LINK = cp -f \
-        $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${SOLVERS_DIR}/$${TARGET}.so
-}
+           convection_diffusion.h \
+           convection_diffusion_dealii.h \
+           dealii_common.h \
+           fe_solvers.h \
+           dealii_datareporter.h

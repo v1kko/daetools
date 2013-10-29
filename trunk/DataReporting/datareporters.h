@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include "../config.h"
 using boost::asio::ip::tcp;
 
@@ -283,8 +284,25 @@ public:
 		s.write((const char*)(void*)&noPoints, sizeof(noPoints));
 		
 	// Send the points
-		s.write((const char*)(void*)pDomain->m_pPoints, pDomain->m_nNumberOfPoints * sizeof(real_t));
-		
+        if(pDomain->m_eType == eUnstructuredGrid)
+        {
+            for(size_t i= 0; i < pDomain->m_nNumberOfPoints; i++)
+            {
+                s.write((const char*)(void*)(&pDomain->m_arrCoordinates[i].x), sizeof(double));
+                s.write((const char*)(void*)(&pDomain->m_arrCoordinates[i].y), sizeof(double));
+                s.write((const char*)(void*)(&pDomain->m_arrCoordinates[i].z), sizeof(double));
+            }
+        }
+        else
+        {
+            double point;
+            for(size_t i= 0; i < pDomain->m_nNumberOfPoints; i++)
+            {
+                point = pDomain->m_arrPoints[i];
+                s.write((const char*)(void*)(&point), sizeof(double));
+            }
+        }
+
 	// Flush the buffer
 		s.flush();
 		
@@ -463,8 +481,31 @@ public:
 			return;
 
 	// Read the points
-		pDomain->m_pPoints = new real_t[pDomain->m_nNumberOfPoints];
-		memcpy(pDomain->m_pPoints, &data[curPos], sizeof(real_t)*pDomain->m_nNumberOfPoints);
+        if(pDomain->m_eType == eUnstructuredGrid)
+        {
+            daePoint point;
+            pDomain->m_arrCoordinates.resize(pDomain->m_nNumberOfPoints);
+            for(size_t i = 0; i < pDomain->m_nNumberOfPoints; i++)
+            {
+                memcpy(&point.x, &data[curPos], sizeof(double));
+                curPos += sizeof(double);
+
+                memcpy(&point.y, &data[curPos], sizeof(double));
+                curPos += sizeof(double);
+
+                memcpy(&point.z, &data[curPos], sizeof(double));
+                curPos += sizeof(double);
+
+                pDomain->m_arrCoordinates[i] = point;
+            }
+        }
+        else
+        {
+            pDomain->m_arrPoints.resize(pDomain->m_nNumberOfPoints);
+            double* fdata = (double*)(void*)(&data[curPos]);
+            pDomain->m_arrPoints.assign(fdata, fdata + pDomain->m_nNumberOfPoints);
+            curPos += pDomain->m_nNumberOfPoints * sizeof(double);
+        }
 	}
 	
 	void RegisterVariable(const string& strMessage, daeDataReceiverProcess& drProcess)

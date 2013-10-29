@@ -12,33 +12,43 @@ BOOST_PYTHON_MODULE(pyDealII)
     
     docstring_options doc_options(true, true, false);
 
-    class_<diffusion::daeDiffusion_1D, bases<daeModel>, boost::noncopyable>("daeDiffusion_1D", no_init)
-        .def(init<string, optional<daeModel*, string> >(( arg("self"),
-                                                          arg("name"),
-                                                          arg("parentModel") = NULL,
-                                                          arg("description") = ""
-                                                       )))
-        .def("Initialize", &daepython::daeDiffusion_Initialize<1>,
-                           ( arg("self"), arg("meshFilename"), arg("polynomialOrder"), arg("diffusivity"), arg("velocity"), arg("generation"), arg("dirichletBC"), arg("neumannBC") ) )
+    class_<daeDealIIDataReporter, boost::noncopyable>("daeDealIIDataReporter", no_init)
+        .def("Connect",				&daeDealIIDataReporter::Connect)
+        .def("Disconnect",			&daeDealIIDataReporter::Disconnect)
+        .def("IsConnected",			&daeDealIIDataReporter::IsConnected)
+        .def("StartRegistration",	&daeDealIIDataReporter::StartRegistration)
+        .def("RegisterDomain",		&daeDealIIDataReporter::RegisterDomain)
+        .def("RegisterVariable",	&daeDealIIDataReporter::RegisterVariable)
+        .def("EndRegistration",		&daeDealIIDataReporter::EndRegistration)
+        .def("StartNewResultSet",	&daeDealIIDataReporter::StartNewResultSet)
+        .def("EndOfData",	    	&daeDealIIDataReporter::EndOfData)
+        .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
         ;
 
-    class_<diffusion::daeDiffusion_2D, bases<daeModel>, boost::noncopyable>("daeDiffusion_2D", no_init)
+    class_<daeConvectionDiffusion_1D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_1D", no_init)
         .def(init<string, optional<daeModel*, string> >(( arg("self"),
                                                           arg("name"),
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("Initialize", &daepython::daeDiffusion_Initialize<2>,
-                           ( arg("self"), arg("meshFilename"), arg("polynomialOrder"), arg("diffusivity"), arg("velocity"), arg("generation"), arg("dirichletBC"), arg("neumannBC") ) )
-        ;
+        .def("CreateDataReporter", &daeConvectionDiffusion_1D::CreateDataReporter)
+    ;
+
+    class_<daeConvectionDiffusion_2D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_2D", no_init)
+        .def(init<string, optional<daeModel*, string> >(( arg("self"),
+                                                          arg("name"),
+                                                          arg("parentModel") = NULL,
+                                                          arg("description") = ""
+                                                       )))
+        .def("CreateDataReporter", &daeConvectionDiffusion_2D::CreateDataReporter)
+    ;
     
-    class_<diffusion::daeDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeDiffusion_3D", no_init)
+    class_<daeConvectionDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_3D", no_init)
         .def(init<string, optional<daeModel*, string> >(( arg("self"),
                                                           arg("name"),
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("Initialize", &daepython::daeDiffusion_Initialize<3>,
-                           ( arg("self"), arg("meshFilename"), arg("polynomialOrder"), arg("diffusivity"), arg("velocity"), arg("generation"), arg("dirichletBC"), arg("neumannBC") ) )
-        ;
+        .def("CreateDataReporter", &daeConvectionDiffusion_3D::CreateDataReporter)
+    ;
 }

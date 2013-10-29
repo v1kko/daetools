@@ -1255,6 +1255,7 @@ public:
 	daeDataReceiverDomain
 *******************************************************/
 boost::python::list GetDataReceiverDomainPoints(daeDataReceiverDomain& domain);
+boost::python::list GetDataReceiverDomainCoordinates(daeDataReceiverDomain& domain);
 
 /*******************************************************
 	daeDataReceiverVariable

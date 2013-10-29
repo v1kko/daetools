@@ -78,6 +78,13 @@ public:
 			it->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
     }
 
+    virtual void InitializeModels(const std::string& jsonInit)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->InitializeModel(jsonInit);
+    }
+
+
 protected:
 	virtual size_t GetTotalNumberOfVariables(void) const
 	{

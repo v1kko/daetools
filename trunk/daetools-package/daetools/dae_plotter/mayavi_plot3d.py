@@ -18,14 +18,22 @@ from daetools.pyDAE import *
 from choose_variable import daeChooseVariable, daeTableDialog
 try:
     from enthought.mayavi import mlab
+    from enthought.mayavi.sources.vtk_file_reader import VTKFileReader
 except ImportError:
     from mayavi import mlab
+    from mayavi.sources.vtk_file_reader import VTKFileReader
     
 class daeMayavi3DPlot:
     def __init__(self, tcpipServer):
         self.tcpipServer = tcpipServer        
                 
     def newSurface(self):
+        src = VTKFileReader()
+        src.initialize("/home/ciroki/Data/daetools/trunk/deal.II/build/examples/step-7/solution-global-q1.vtk")
+        mlab.show()
+
+        return
+        
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
 
         cv = daeChooseVariable(processes, daeChooseVariable.plot3D)

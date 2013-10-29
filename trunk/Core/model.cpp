@@ -3483,6 +3483,25 @@ bool daeModel::DetectObject(string& strShortName, vector<size_t>& narrDomains, d
 	return false;
 }
 	
+void daeModel::InitializeModel(const std::string& jsonInit)
+{
+    size_t i;
+    daeModel* pModel;
+    daeModelArray* pModelArray;
+
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->InitializeModel(jsonInit);
+    }
+
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->InitializeModels(jsonInit);
+    }
+}
+
 void daeModel::InitializeStage1(void)
 {
 // Create DataProxy and propagate it to all child models

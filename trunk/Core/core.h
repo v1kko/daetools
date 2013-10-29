@@ -766,7 +766,8 @@ public:
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3, size_t n4)			= 0;
 	virtual daeModel_t* GetModel(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5) = 0;
 	
-	virtual void CleanUpSetupData(void) = 0;
+    virtual void CleanUpSetupData(void)                        = 0;
+    virtual void InitializeModels(const std::string& jsonInit) = 0;
 };
 
 /*********************************************************************************************
@@ -969,7 +970,9 @@ public:
 	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays)								= 0;
 	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays)							= 0;
 
-	virtual void	InitializeStage1(void)																		= 0;
+    virtual void	InitializeModel(const std::string& jsonInit)                                                = 0;
+
+    virtual void	InitializeStage1(void)																		= 0;
 	virtual void	InitializeStage2(void)																		= 0;
 	virtual void	InitializeStage3(daeLog_t* pLog)															= 0;
 	virtual void	InitializeStage4(void)																		= 0;

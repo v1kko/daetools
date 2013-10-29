@@ -39,6 +39,9 @@ const char* DOCSTR_daeDataReporterVariableValue = "";
     const char* DOCSTR_daeDataReporterVariableValue_getitem = "";
     const char* DOCSTR_daeDataReporterVariableValue_setitem = "";
 
+const char* DOCSTR_daeDataReporterFunctor = "";
+    const char* DOCSTR_daeDataReporterFunctor_SendVariable = "";
+
 const char* DOCSTR_daeBlackHoleDataReporter = "";
 
 const char* DOCSTR_daeDelegateDataReporter = "";
@@ -68,6 +71,7 @@ const char* DOCSTR_daeDataReceiverDomain = "";
     const char* DOCSTR_daeDataReceiverDomain_Type = "";
     const char* DOCSTR_daeDataReceiverDomain_NumberOfPoints = "";
     const char* DOCSTR_daeDataReceiverDomain_Points = "";
+    const char* DOCSTR_daeDataReceiverDomain_Coordinates = "";
     const char* DOCSTR_daeDataReceiverDomain_getitem = "";
     const char* DOCSTR_daeDataReceiverDomain_setitem = "";
 
