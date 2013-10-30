@@ -128,38 +128,6 @@ inline adouble create_adouble(adNode* n)
     return adouble(0.0, 0.0, true, n);
 }
 
-/*********************************************************************
-   daeDealIIDataReporter
-*********************************************************************/
-typedef boost::function<void (const daeDataReporterVariableValue*, double, const std::string&)> fnDataOut;
-class daeDealIIDataReporter : public daeDataReporterLocal
-{
-public:
-    daeDealIIDataReporter(fnDataOut f, const std::string& strDirectory)
-        : fn(f), m_strDirectory(strDirectory)
-    {
-    }
-
-    virtual ~daeDealIIDataReporter(void)
-    {
-    }
-
-public:
-    virtual std::string GetName() const {return "DealIIDataReporter";}
-    virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
-    virtual bool Disconnect(void){return true;}
-    virtual bool IsConnected(void){return true;}
-    virtual bool SendVariable(const daeDataReporterVariableValue* pVariableValue)
-    {
-        fn(pVariableValue, m_dCurrentTime, m_strDirectory);
-        return true;
-    }
-
-public:
-    std::string m_strDirectory;
-    fnDataOut   fn;
-};
-
 /*
 const unsigned int dofs_per_cell = pDealII->fe->dofs_per_cell;
 std::vector<unsigned int> local_dof_indices (dofs_per_cell);

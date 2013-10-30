@@ -5,7 +5,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
 #include "Core/definitions.h"
-#define BOOST_FILESYSTEM_VERSION 2
 
 class daeConfig
 {

@@ -28,12 +28,6 @@ class daeMayavi3DPlot:
         self.tcpipServer = tcpipServer        
                 
     def newSurface(self):
-        src = VTKFileReader()
-        src.initialize("/home/ciroki/Data/daetools/trunk/deal.II/build/examples/step-7/solution-global-q1.vtk")
-        mlab.show()
-
-        return
-        
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
 
         cv = daeChooseVariable(processes, daeChooseVariable.plot3D)
@@ -61,6 +55,7 @@ class daeMayavi3DPlot:
                
         # colormap='gist_earth', 'RdBu'
         stype = 'surface'
+        mlab.figure()
         if(stype == 'surface'):
             #print "warp=", warp
             #print "[xmin, xmax, ymin, ymax, zmin, zmax]=", [xmin, xmax, ymin, ymax, zmin, zmax]
@@ -86,4 +81,12 @@ class daeMayavi3DPlot:
             
         mlab.show()
        
+    @staticmethod
+    def showVTKFile(filename):
+        mlab.figure()
+        src = VTKFileReader()
+        src.initialize(filename)
+        mlab.pipeline.surface(src)
+        mayavi.mlab.title(filename)
+        mlab.show()
 

@@ -286,12 +286,13 @@ compile_boost()
   echo "    ;"                                  >> ${BOOST_USER_CONFIG}
   
   ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
-         --with-date_time --with-system --with-regex --with-serialization --with-thread --with-python \
+         --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
          variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
   cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
+  cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/solibs
   
   echo ""
   echo "[*] Done!"

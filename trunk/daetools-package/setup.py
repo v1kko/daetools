@@ -56,10 +56,11 @@ if daetools_machine == 'x86_64':
 else:
     usrlib = '/usr/lib'
 
-boost_python = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
-boost_system = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
-boost_thread = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
-deal_II      = 'libdeal_II.so'
+boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
+deal_II          = 'libdeal_II.so'
 
 boost_solibs = []
 
@@ -67,7 +68,7 @@ if os.path.isdir(boost_solib_dir):
     boost_files = os.listdir(boost_solib_dir)
 
     for f in boost_files:
-        if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (deal_II in f):
+        if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (deal_II in f):
             boost_solibs.append(os.path.join(boost_solib_dir, f))
 
 #print 'boost_solibs = ', boost_solibs

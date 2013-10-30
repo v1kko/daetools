@@ -83,6 +83,7 @@ public:
     SparseMatrix<double>                 system_matrix;
     SparseMatrix<double>                 system_matrix_dt;
     Vector<double>                       system_rhs;
+    Vector<double>                       solution;
 
     // Model-specific data
     FunctionPtr                          funDiffusivity;
@@ -125,6 +126,27 @@ template <int dim>
 void dealiiConvectionDiffusion<dim>::setup_system ()
 {
     dof_handler.distribute_dofs (*fe);
+    DoFRenumbering::Cuthill_McKee (dof_handler);
+
+    hanging_node_constraints.clear ();
+    DoFTools::make_hanging_node_constraints (dof_handler,
+                                             hanging_node_constraints);
+    hanging_node_constraints.close ();
+
+    sparsity_pattern.reinit (dof_handler.n_dofs(),
+                             dof_handler.n_dofs(),
+                             dof_handler.max_couplings_between_dofs());
+    DoFTools::make_sparsity_pattern (dof_handler, sparsity_pattern);
+    hanging_node_constraints.condense (sparsity_pattern);
+    sparsity_pattern.compress();
+
+    system_matrix.reinit (sparsity_pattern);
+    system_matrix_dt.reinit (sparsity_pattern);
+    solution.reinit (dof_handler.n_dofs());
+    system_rhs.reinit (dof_handler.n_dofs());
+
+/* Old code
+    dof_handler.distribute_dofs (*fe);
     
     SparsityPattern sparsity_pattern_pre;
     sparsity_pattern_pre.reinit (dof_handler.n_dofs(),
@@ -155,9 +177,11 @@ void dealiiConvectionDiffusion<dim>::setup_system ()
     system_matrix.reinit (sparsity_pattern);
     system_matrix_dt.reinit (sparsity_pattern);
     system_rhs.reinit (dof_handler.n_dofs());
-    
+    solution.reinit(dof_handler.n_dofs());
+
     std::ofstream out ("sparsity_pattern_after");
     sparsity_pattern.print_gnuplot (out);
+*/
 }
 
 template <int dim>
@@ -189,8 +213,7 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
     // mapDirichlets: map< boundary_id, map<dof, value> > will be used to apply boundary conditions locally.
     // We build this map here since it is common for all cells.
     std::map< unsigned int, std::map<unsigned int, double> > mapDirichlets;
-    typename std::map< unsigned int, FunctionPtr>::iterator it;
-    for(it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
+    for(typename std::map< unsigned int, FunctionPtr>::iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
     {
         const unsigned int id    = it->first;
         const Function<dim>& fun = *it->second;
@@ -297,7 +320,7 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
                     // Neumann BC
                     const Function<dim>& neumann = *(funsNeumannBC.find(id)->second);
 
-                    std::cout << (boost::format("  NeumanBC (cell=%d, face=%d, id= %d)") % cellCounter % face % id).str() << std::endl;
+                    std::cout << (boost::format("  NeumanBC (cell=%d, face=%d, id= %d) = %f") % cellCounter % face % id % neumann.value(fe_face_values.quadrature_point(0))).str() << std::endl;
 
                     for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                     {
@@ -319,49 +342,8 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
             }
         }
 
-        /*
-        bool bCellHaveDirichletBC = false;
-        bool bCellHaveNeumannBC   = false;
-        for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapDirichlets.begin(); it != mapDirichlets.end(); it++)
-        {
-            unsigned int id                                 = it->first;
-            std::map<unsigned int, double>& boundary_values = it->second;
-
-            for(size_t m = 0; m < local_dof_indices.size(); m++)
-            {
-                unsigned int dof = local_dof_indices[m];
-                if(boundary_values.find(dof) != boundary_values.end())
-                {
-                    // Cell have one or more nodes with Dirichlet BCs
-                    bCellHaveDirichletBC = true;
-                    break;
-                }
-            }
-        }
-        for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapNeumanns.begin(); it != mapNeumanns.end(); it++)
-        {
-            unsigned int id                                 = it->first;
-            std::map<unsigned int, double>& boundary_values = it->second;
-
-            for(size_t m = 0; m < local_dof_indices.size(); m++)
-            {
-                unsigned int dof = local_dof_indices[m];
-                if(boundary_values.find(dof) != boundary_values.end())
-                {
-                    // Cell have one or more nodes with Dirichlet BCs
-                    bCellHaveNeumannBC = true;
-                    break;
-                }
-            }
-        }
-
-        if(bCellHaveDirichletBC && bCellHaveNeumannBC)
-        {
-            std::cout << "*******************************************" << std::endl;
-            std::cout << "bCellHaveDirichletBC && bCellHaveNeumannBC" << std::endl;
-            std::cout << "*******************************************" << std::endl;
-        }
-        */
+        /* ACHTUNG, ACHTUNG!!
+           Apply Dirichlet boundary conditions locally (conflicts with refined grids with hanging nodes!!)
 
         // We already have a pre-calculated map<global_dof_index, bc_value> for every ID marked as having Dirichlet BCs imposed
         for(std::map< unsigned int, std::map<unsigned int, double> >::iterator it = mapDirichlets.begin(); it != mapDirichlets.end(); it++)
@@ -397,9 +379,9 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
             std::cout << "cell_rhs after bc:" << std::endl;
             cell_rhs.print(std::cout);
         }
+        */
 
         // Add to the system matrices/vector
-        cell->get_dof_indices (local_dof_indices);
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
         {
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
@@ -411,22 +393,30 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
         }
     }
     
-/*
-  // ACHTUNG, ACHTUNG!! We do not allow refined grids with hanging nodes
+    // If using refined grids condense hanging nodes
     hanging_node_constraints.condense(system_matrix);
-    hanging_node_constraints.condense(system_matrix_dt);
     hanging_node_constraints.condense(system_rhs);
 
-    std::map<unsigned int,double> boundary_values;
-    VectorTools::interpolate_boundary_values (dof_handler,
-                                              0,
-                                              Solution<dim>(),
-                                              boundary_values);
-    MatrixTools::apply_boundary_values (boundary_values,
-                                        system_matrix,
-                                        solution,
-                                        system_rhs);
-*/
+    // What about this matrix? Should it also be condensed?
+    //hanging_node_constraints.condense(system_matrix_dt);
+
+    // Apply Dirichlet boundary conditions on the system matrix and rhs
+    for(typename std::map< unsigned int, FunctionPtr>::iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
+    {
+        const unsigned int id    = it->first;
+        const Function<dim>& fun = *it->second;
+        std::cout << "DirichletBC id = " << id << " val = " << fun.value(Point<dim>(0,0,0)) << std::endl;
+
+        std::map<types::global_dof_index, double> boundary_values;
+        VectorTools::interpolate_boundary_values (dof_handler,
+                                                  id,
+                                                  fun,
+                                                  boundary_values);
+        MatrixTools::apply_boundary_values (boundary_values,
+                                            system_matrix,
+                                            solution,
+                                            system_rhs);
+    }
 }
 
 }

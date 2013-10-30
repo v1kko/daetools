@@ -39,6 +39,9 @@ const char* DOCSTR_daeDataReporterVariableValue = "";
     const char* DOCSTR_daeDataReporterVariableValue_getitem = "";
     const char* DOCSTR_daeDataReporterVariableValue_setitem = "";
 
+const char* DOCSTR_daeDataOut = "";
+    const char* DOCSTR_daeDataOut_SendVariable = "";
+
 const char* DOCSTR_daeDataReporterFunctor = "";
     const char* DOCSTR_daeDataReporterFunctor_SendVariable = "";
 

@@ -76,6 +76,11 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D.setStatusTip('New 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)
 
+        plotVTK = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'New VTK plot', self)
+        plotVTK.setShortcut('Ctrl+4')
+        plotVTK.setStatusTip('New VTK plot')
+        self.connect(plotVTK, QtCore.SIGNAL('triggered()'), self.slotOpenVTK)
+
         openTemplate = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Open 2D template', self)
         openTemplate.setShortcut('Ctrl+T')
         openTemplate.setStatusTip('Open 2D plot emplate')
@@ -99,7 +104,10 @@ class daeMainWindow(QtGui.QMainWindow):
         plot.addAction(plot2D)
         plot.addAction(animatedPlot2D)
         plot.addAction(plot3D)
+        plot.addSeparator()
         plot.addAction(openTemplate)
+        plot.addSeparator()
+        plot.addAction(plotVTK)
 
         help = menubar.addMenu('&Help')
         help.addAction(about)
@@ -112,6 +120,8 @@ class daeMainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(plot3D)
         self.toolbar.addSeparator()
         self.toolbar.addAction(openTemplate)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(plotVTK)
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
@@ -148,6 +158,19 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D = daeMayavi3DPlot(self.tcpipServer)
         if plot3D.newSurface() == False:
             del plot3D
+
+    #@QtCore.pyqtSlot()
+    def slotOpenVTK(self):
+        filename = str(QtGui.QFileDialog.getOpenFileName(self, "Choose VTK File", '', "VTK Files (*.vtk)"))
+        if filename == '':
+            return
+        try:
+            from mayavi_plot3d import daeMayavi3DPlot
+        except Exception, e:
+            QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
+            return
+
+        daeMayavi3DPlot.showVTKFile(filename)
 
     #@QtCore.pyqtSlot()
     def slotOpenTemplate(self):

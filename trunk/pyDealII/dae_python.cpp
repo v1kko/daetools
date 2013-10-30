@@ -31,7 +31,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("CreateDataReporter", &daeConvectionDiffusion_1D::CreateDataReporter)
+        .add_property("DataOut", make_function(&daeConvectionDiffusion_1D::GetDataOut, return_internal_reference<>()) )
     ;
 
     class_<daeConvectionDiffusion_2D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_2D", no_init)
@@ -40,7 +40,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("CreateDataReporter", &daeConvectionDiffusion_2D::CreateDataReporter)
+        .add_property("DataOut", make_function(&daeConvectionDiffusion_2D::GetDataOut, return_internal_reference<>()) )
     ;
     
     class_<daeConvectionDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_3D", no_init)
@@ -49,6 +49,6 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                           arg("parentModel") = NULL,
                                                           arg("description") = ""
                                                        )))
-        .def("CreateDataReporter", &daeConvectionDiffusion_3D::CreateDataReporter)
+        .add_property("DataOut", make_function(&daeConvectionDiffusion_3D::GetDataOut, return_internal_reference<>()) )
     ;
 }

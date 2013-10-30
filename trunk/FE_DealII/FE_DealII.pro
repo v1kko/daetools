@@ -36,12 +36,10 @@ LIBS += $${DEALII_LIBS} \
 
 SOURCES += stdafx.cpp \
            dllmain.cpp \
-           fe_solvers.cpp \
-           dealii_datareporter.cpp
+           fe_solvers.cpp
 
 HEADERS += stdafx.h \
            convection_diffusion.h \
            convection_diffusion_dealii.h \
            dealii_common.h \
-           fe_solvers.h \
-           dealii_datareporter.h
+           fe_solvers.h

@@ -207,22 +207,29 @@ macx-g++::GFORTRAN  = -lgfortran
 # Starting with the version 1.2.1 daetools use manually compiled boost libraries.
 # The compilation is done in the shell script compile_libraries_linux.sh
 #####################################################################################
-win32::BOOSTDIR              = ../boost
-win32::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
-win32::BOOST_PYTHON_LIB_NAME = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_SYSTEM_LIB_NAME = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_PYTHON_LIB      = $${BOOST_PYTHON_LIB_NAME}.lib python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
-win32::BOOST_LIBS            = $${BOOST_SYSTEM_LIB_NAME}.lib $${BOOST_THREAD_LIB_NAME}.lib
+win32::BOOSTDIR                  = ../boost
+win32::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
+win32::BOOST_PYTHON_LIB_NAME     = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::BOOST_THREAD_LIB_NAME     = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32::BOOST_PYTHON_LIB          = $${BOOST_PYTHON_LIB_NAME}.lib python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
+win32::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
+                                   $${BOOST_THREAD_LIB_NAME}.lib \
+                                   $${BOOST_FILESYSTEM_LIB_NAME}.lib
 
-unix::BOOSTDIR              = ../boost
-unix::BOOSTLIBPATH          = $${BOOSTDIR}/stage/lib
-unix::BOOST_PYTHON_LIB_NAME = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_SYSTEM_LIB_NAME = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_THREAD_LIB_NAME = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::BOOST_PYTHON_LIB      = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
-                              -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} $${RT}
-unix::BOOST_LIBS            = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} -l$${BOOST_THREAD_LIB_NAME} $${RT}
+unix::BOOSTDIR                   = ../boost
+unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
+unix::BOOST_PYTHON_LIB_NAME      = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
+                                   -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} $${RT}
+unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
+                                                      -l$${BOOST_THREAD_LIB_NAME} \
+                                                      -l$${BOOST_FILESYSTEM_LIB_NAME} \
+                                                       $${RT}
 
 
 #####################################################################################
