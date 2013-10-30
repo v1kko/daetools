@@ -36,14 +36,12 @@ class modTutorial(daeModel):
         
         self.fe = pyDealII.daeConvectionDiffusion_2D('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)')
         options = {}
-        options["meshFilename"]    = "ex49fine.msh"
-        options["polynomialOrder"] = 1
-        options["outputDirectory"] = os.path.join(os.path.dirname(__file__), 'results')
-        options["dirichletBC"]     = {1 : 200.0, 2 : 250.0}
-        options["neumannBC"]       = {0 : 10}
-        
+        options['meshFilename']    = os.path.join(os.path.dirname(__file__), 'meshes', "ex49fine.msh")
+        options['polynomialOrder'] = 1
+        options['outputDirectory'] = os.path.join(os.path.dirname(__file__), 'results')
+        options['dirichletBC']     = {1 : 200.0, 2 : 250.0}
+        options['neumannBC']       = {0 : 10}
         jsonInit = json.dumps(options)
-        print jsonInit
         self.fe.InitializeModel(jsonInit)
         
     def InitializeModel(self, jsonInit):
@@ -102,6 +100,7 @@ def consoleRun():
     datareporter = daeDelegateDataReporter()
     simulation   = simTutorial()
     lasolver = pySuperLU.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
     """
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
     lasolver.NumIters  = 500

@@ -15,10 +15,10 @@ Typical usage (configure and then build all libraries/solvers):
 OPTIONS:
    -h | --help                      Show this message.
    
-   Control options (if not set default is: -c -b):
-   -c | --configure                 Configure library/solver.
-   -b | --build                     Build library/solver.
-   -e | --clean                     Clean library/solver.
+   Control options (if not set default is: --clean and --build):
+   --configure                 Configure library/solver.
+   --build                     Build library/solver.
+   --clean                     Clean library/solver.
    
    Python options (if not set use system's default python). One of the following:
         --with-python-binary        Path to python binary to use.
@@ -50,7 +50,7 @@ EOF
 # Default python binary:
 PYTHON=`python -c "import sys; print sys.executable"`
 
-args=`getopt -a -o "hcbe" -l "help,with-python-binary:,with-python-version:,configure:build:clean:" -n "compile_libraries_linux" -- $*`
+args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,configure,build,clean:" -n "compile_libraries_linux" -- $*`
 
 DO_CONFIGURE="no"
 DO_BUILD="no"
@@ -71,15 +71,15 @@ for i; do
                              shift ; shift 
                              ;;
                                     
-    -c|--configure) DO_CONFIGURE="yes"
+    --configure) DO_CONFIGURE="yes"
                     shift
                     ;;
                          
-    -b|--build) DO_BUILD="yes"
+    --build) DO_BUILD="yes"
                 shift
                 ;;
 
-    -e|--clean) DO_CLEAN="yes"
+    --clean) DO_CLEAN="yes"
                 shift
                 ;;
 

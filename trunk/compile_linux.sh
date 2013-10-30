@@ -9,7 +9,7 @@ usage: $0 [options] projects
 
 This script compiles specified daetools libraries and python extension modules.
 
-Typical use (compiles all daetools libraries and python extension modules):
+Typical use (compiles all daetools libraries, solvers and python extension modules):
     sh compile_linux.sh all
 
 OPTIONS:
@@ -21,10 +21,11 @@ OPTIONS:
 
 PROJECTS:
     all             Build all daetools c++ libraries, solvers and python extension modules.
-                    Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt
-    dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP solvers).
+                    Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+    dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
                     Equivalent to: units data_reporting idas core activity
     solvers         Build all solvers and their python extension modules.
+                    Equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
@@ -120,7 +121,7 @@ if [ ! -d release ]; then
     mkdir release
 fi
 
-args=`getopt -a -o "hp:v:" -l "help,with-python-binary:,with-python-version:" -n "compile_linux" -- $*`
+args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:" -n "compile_linux" -- $*`
 
 # Process options
 for i; do
@@ -220,6 +221,9 @@ do
                 compile NLOPT_NLPSolver    "-j1"
                 compile pyNLOPT            "-j1"
                 
+                compile FE_DealII "-j1"
+                compile pyDealII  "-j1"
+                
                 #if [ ${PLATFORM} = "Linux" ]; then
                 #  compile LA_Intel_MKL     "-j1"
                 #  compile pyIntelPardiso   "-j1"
@@ -274,6 +278,9 @@ do
                     compile NLOPT_NLPSolver    "-j1"
                     compile pyNLOPT            "-j1"
 
+#                     compile FE_DealII "-j1"
+#                     compile pyDealII  "-j1"
+#                     
                     #if [ ${PLATFORM} = "Linux" ]; then
                     #  compile LA_Intel_MKL     "-j1"
                     #  compile pyIntelPardiso   "-j1"
