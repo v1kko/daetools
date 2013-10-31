@@ -105,11 +105,19 @@ public:
 
     void DeclareEquations(void)
     {
-        daeEquation* eq;
-        adouble a_K, a_Kdt, a_f;
+        daeModel::DeclareEquations();
+    }
 
+    void AssembleSystem()
+    {
         // Assemble deal.II system
         pDealII->assemble_system();
+    }
+
+    void GenerateEquations()
+    {
+        daeEquation* eq;
+        adouble a_K, a_Kdt, a_f;
 
         /*
         std::cout << "system_matrix" << std::endl;
@@ -205,8 +213,8 @@ public:
         data_out.write_vtk (output);
     }
 
-//    static iterator begin(daeConvectionDiffusion<dim>& x) { return x.begin(); }
-//    static iterator end(daeConvectionDiffusion<dim>& x) { return x.end(); }
+    static iterator begin(daeConvectionDiffusion<dim>& x) { return x.begin(); }
+    static iterator end(daeConvectionDiffusion<dim>& x) { return x.end(); }
 
     iterator begin()
     {

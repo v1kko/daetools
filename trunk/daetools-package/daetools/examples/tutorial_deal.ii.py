@@ -108,16 +108,22 @@ class modTutorial(daeModel):
                                                      neumannBC         = self.neumannBC)
         
     def DeclareEquations(self):
-        #daeModel.DeclareEquations(self)
+        daeModel.DeclareEquations(self)
+        
+        # 1a. Default assemble
+        #self.fe.AssembleSystem()
+        
+        # 1b. User-defined assemble
         print self.fe
-        for cell in self.fe.elements():
-            print cell
+        for cell in self.fe:
             fe_values = cell.fe_values
-            for q in range(fe_values.n_q_points):
-                for i in range(fe_values.dofs_per_cell):
-                    for j in range(fe_values.dofs_per_cell):
+            for q in range(cell.n_q_points):
+                for i in range(cell.dofs_per_cell):
+                    for j in range(cell.dofs_per_cell):
                         print fe_values.shape(i, q), fe_values.shape(i, q)
         
+        # 2. Generate equations
+        self.fe.GenerateEquations()
         
 class simTutorial(daeSimulation):
     def __init__(self):

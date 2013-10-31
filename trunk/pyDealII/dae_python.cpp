@@ -388,8 +388,10 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                   )))
 
         .add_property("DataOut",        make_function(&daeConvectionDiffusion_1D::GetDataOut, return_internal_reference<>()) )
-        //.def("__iter__",        boost::python::iterator<daeConvectionDiffusion_1D>())
-        .def("elements",                range< return_value_policy<reference_existing_object> >(&daeConvectionDiffusion_1D::begin, &daeConvectionDiffusion_1D::end))
+
+        .def("__iter__",                boost::python::iterator<daeConvectionDiffusion_1D, return_value_policy<reference_existing_object> >())
+        .def("AssembleSystem",          &daeConvectionDiffusion_1D::AssembleSystem)
+        .def("GenerateEquations",       &daeConvectionDiffusion_1D::GenerateEquations)
 
 //        .add_property("DirichletBC",    &daeConvectionDiffusion_1D::GetDirichletBC)
 //        .add_property("NeumannBC",      &daeConvectionDiffusion_1D::GetNeumannBC)
@@ -422,8 +424,9 @@ BOOST_PYTHON_MODULE(pyDealII)
 
         .add_property("DataOut", make_function(&daeConvectionDiffusion_2D::GetDataOut, return_internal_reference<>()) )
 
-        //.def("__iter__",        boost::python::iterator<daeConvectionDiffusion_2D>())
-        .def("elements",         range< return_value_policy<reference_existing_object> >(&daeConvectionDiffusion_2D::begin, &daeConvectionDiffusion_2D::end))
+        .def("__iter__",            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
+        .def("AssembleSystem",      &daeConvectionDiffusion_2D::AssembleSystem)
+        .def("GenerateEquations",   &daeConvectionDiffusion_2D::GenerateEquations)
     ;
     
     class_<daeConvectionDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_3D", no_init)
@@ -444,7 +447,10 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                   )))
 
         .add_property("DataOut", make_function(&daeConvectionDiffusion_3D::GetDataOut, return_internal_reference<>()) )
-        //.def("__iter__",        boost::python::iterator<daeConvectionDiffusion_3D>())
-        .def("elements",         range< return_value_policy<reference_existing_object> >(&daeConvectionDiffusion_3D::begin, &daeConvectionDiffusion_3D::end))
+
+        .def("__iter__",            boost::python::iterator<daeConvectionDiffusion_3D, return_value_policy<reference_existing_object> >())
+        .def("AssembleSystem",      &daeConvectionDiffusion_3D::AssembleSystem)
+        .def("GenerateEquations",   &daeConvectionDiffusion_3D::GenerateEquations)
+        //.def("elements",          range< return_value_policy<reference_existing_object> >(&daeConvectionDiffusion_3D::begin, &daeConvectionDiffusion_3D::end))
     ;
 }

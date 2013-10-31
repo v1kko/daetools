@@ -236,13 +236,14 @@ public:
         m_cell.fe_values.reinit(current_cell);
         current_cell->get_dof_indices(m_cell.local_dof_indices);
 
+        ++current_cell;
+
         return tmp;
     }
 
     dealiiCell<dim>& operator*()
     {
-        std::cout << "operator*" << std::endl;
-       return m_cell;
+        return m_cell;
     }
 
     bool operator==(const dealiiCellIterator& other) const
