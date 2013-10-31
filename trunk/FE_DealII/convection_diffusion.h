@@ -15,74 +15,42 @@ namespace convection_diffusion_dealii
 using namespace dae::fe_solver;
 
 /*********************************************************
- *     daeConvectionDiffusion
+ *     daeConvectionDiffusion_(1D, 2D, 3D)
  *********************************************************/
 template <int dim>
 class daeConvectionDiffusion : public daeModel,
                                public daeDataOut
 {
-typedef typename boost::shared_ptr< Function<dim> > FunctionPtr;
 public:
-    // D is diffusivity
-    daeConvectionDiffusion(string strName, daeModel* pModel = NULL, string strDescription = "")
+    typedef typename std::map<unsigned int, const dealiiFunction<dim>*> map_Uint_FunctionPtr;
+    typedef typename dealiiCell<dim>::iterator iterator;
+
+    daeConvectionDiffusion(std::string                  strName,
+                           daeModel*                    pModel,
+                           std::string                  strDescription,
+                           std::string                  meshFilename,
+                           string                       quadratureFormula,
+                           unsigned int                 polynomialOrder,
+                           string                       outputDirectory,
+                           const dealiiFunction<dim>&   diffusivity,
+                           const dealiiFunction<dim>&   velocity,
+                           const dealiiFunction<dim>&   generation,
+                           const map_Uint_FunctionPtr&  dirichletBC,
+                           const map_Uint_FunctionPtr&  neumannBC)
         : daeModel(strName, pModel, strDescription),
-
-          m_dim("dim", this, unit(), "Number of spatial dimensions"),
-          m_omega("&Omega;", this, unit(), "Omega domain"),
-          m_diffusivity("Diffusivity", unit(), this, ""),
-          m_velocity("Velocity", unit(), this, "", &m_dim),
-          m_generation("Generation", unit(), this, ""),
-          m_T("T", vt::temperature_t, this, "Temperature, K", &m_omega)
+          // Functions:
+          m_Diffusivity(diffusivity),
+          m_Velocity(velocity),
+          m_Generation(generation),
+          m_mapDirichletBC(dirichletBC),
+          m_mapNeumannBC(neumannBC),
+          // daetools objects:
+          m_dimension("dimesnion", this,              unit(), "Number of spatial dimensions"),
+          m_omega    ("&Omega;",   this,              unit(), "Omega domain"),
+          m_T        ("T",         vt::temperature_t, this,   "Temperature", &m_omega)
     {
-        m_outputCounter = 0;
-    }
-
-    void InitializeModel(const std::string& jsonInit)
-    {
-        /* Here we have to process input arguments, create Function objects,
-         * create deal.II model and finally call daeModel_dealII_Base::InitializeModel
-         * to finalize initialization. */
-        boost::property_tree::ptree ptInit;
-        std::stringstream ss(jsonInit);
-        boost::property_tree::json_parser::read_json(ss, ptInit);
-
-        std::string meshFilename;
-        unsigned int polynomialOrder;
-        std::map<unsigned int, double> dirichletBC;
-        std::map<unsigned int, double> neumannBC;
-
-        meshFilename         = ptInit.get<string>      ("meshFilename");
-        m_strOutputDirectory = ptInit.get<string>      ("outputDirectory");
-        polynomialOrder      = ptInit.get<unsigned int>("polynomialOrder");
-
-        /*
-        diffusivity          = ptInit.get<double>      ("diffusivity", 0.0);
-        generation           = ptInit.get<double>      ("generation", 0.0);
-        BOOST_FOREACH(boost::property_tree::ptree::value_type& v, ptInit.get_child("dirichletBC"))
-        {
-            double vel  = boost::lexical_cast<double>(v.first);
-
-            velocity.push_back(vel);
-            std::cout << "velocity = " << vel << std::endl;
-        }
-        */
-        BOOST_FOREACH(boost::property_tree::ptree::value_type& bc, ptInit.get_child("dirichletBC"))
-        {
-            unsigned int id = boost::lexical_cast<unsigned int>(bc.first);
-            double      val = boost::lexical_cast<double>(bc.second.data());
-
-            dirichletBC[id] = val;
-            std::cout << "dirichletBC[" << id << "] = " << val << std::endl;
-        }
-        BOOST_FOREACH(boost::property_tree::ptree::value_type& bc, ptInit.get_child("neumannBC"))
-        {
-            unsigned int id = boost::lexical_cast<unsigned int>(bc.first);
-            double      val = boost::lexical_cast<double>(bc.second.data());
-
-            neumannBC[id] = val;
-            std::cout << "neumannBC[" << id << "] = " << val << std::endl;
-        }
-
+        m_outputCounter      = 0;
+        m_strOutputDirectory = outputDirectory;
         boost::filesystem::path folder(m_strOutputDirectory);
         if(!boost::filesystem::exists(folder))
         {
@@ -94,29 +62,17 @@ public:
             }
         }
 
-        // The values here are provisional and can (and should) be changed before assembling
-        funDiffusivity.reset(new SingleValue_Function<dim>(0.0));
-        funVelocity.reset(new SingleValue_Function<dim>(0.0));
-        funGeneration.reset(new SingleValue_Function<dim>(0.0));
-
-        for(std::map<unsigned int, double>::const_iterator it = dirichletBC.begin(); it != dirichletBC.end(); it++)
-        {
-            const unsigned int id    = it->first;
-            const double       value = it->second;
-
-            funsDirichletBC[id] = FunctionPtr(new SingleValue_Function<dim>(value));
-        }
-
-        for(std::map<unsigned int, double>::const_iterator it = neumannBC.begin(); it != neumannBC.end(); it++)
-        {
-            const unsigned int id    = it->first;
-            const double       value = it->second;
-
-            funsNeumannBC[id] = FunctionPtr(new SingleValue_Function<dim>(value));
-        }
-
         // Create deal.II solver
-        pDealII.reset(new dealiiConvectionDiffusion<dim>(meshFilename, polynomialOrder, funDiffusivity, funVelocity, funGeneration, funsDirichletBC, funsNeumannBC));
+        pDealII.reset(new dealiiConvectionDiffusion<dim>(meshFilename,
+                                                         quadratureFormula,
+                                                         polynomialOrder,
+                                                         m_Diffusivity,
+                                                         m_Velocity,
+                                                         m_Generation,
+                                                         m_mapDirichletBC,
+                                                         m_mapNeumannBC));
+
+        pdealIICell.reset(new dealiiCell<dim>((FiniteElement<dim>*)pDealII->fe, pDealII->dof_handler));
 
         // Initialize daetools wrapper matrices and arrays that will be used by adFEMatrixItem/VectorItem nodes
         matK.reset  (new daeFEMatrix<double> (pDealII->system_matrix));
@@ -144,21 +100,13 @@ public:
         */
 
         m_omega.CreateUnstructuredGrid(coords);
-        m_dim.CreateArray(dim);
-        //m_diffusivity.SetValue(0.0);
-        //m_velocity.SetValues(0.0);
-        //m_generation.SetValue(0.0);
+        m_dimension.CreateArray(dim);
     }
 
     void DeclareEquations(void)
     {
         daeEquation* eq;
         adouble a_K, a_Kdt, a_f;
-
-        // Update values with the values from parameters
-        dynamic_cast<SingleValue_Function<dim>*>(funDiffusivity.get())->m_value = m_diffusivity.GetValue();
-        dynamic_cast<SingleValue_Function<dim>*>(funVelocity.get())->m_value    = 0.0;
-        dynamic_cast<SingleValue_Function<dim>*>(funGeneration.get())->m_value  = m_generation.GetValue();
 
         // Assemble deal.II system
         pDealII->assemble_system();
@@ -227,9 +175,9 @@ public:
 
         // Prepare DataOut object
         std::string strDataSourceName = m_T.GetStrippedName();
-        boost::filesystem::path vtkFilename((boost::format("%d)%s(t=%f).vtk") % m_outputCounter
-                                                                              % daeGetStrippedRelativeName(dynamic_cast<daeObject*>(GetModel()), &m_T)
-                                                                              % time).str());
+        boost::filesystem::path vtkFilename((boost::format("%4d. %s(t=%f).vtk") % m_outputCounter
+                                                                                % daeGetStrippedRelativeName(dynamic_cast<daeObject*>(GetModel()), &m_T)
+                                                                                % time).str());
         boost::filesystem::path vtkPath(m_strOutputDirectory);
         vtkPath /= vtkFilename;
 
@@ -257,23 +205,36 @@ public:
         data_out.write_vtk (output);
     }
 
+//    static iterator begin(daeConvectionDiffusion<dim>& x) { return x.begin(); }
+//    static iterator end(daeConvectionDiffusion<dim>& x) { return x.end(); }
+
+    iterator begin()
+    {
+        std::cout << "begin" << std::endl;
+        return pdealIICell->begin();
+    }
+
+    iterator end()
+    {
+        std::cout << "end" << std::endl;
+        return pdealIICell->end();
+    }
+
 public:
-    daeDomain                                           m_dim;
+    const dealiiFunction<dim>&                          m_Diffusivity;
+    const dealiiFunction<dim>&                          m_Velocity;
+    const dealiiFunction<dim>&                          m_Generation;
+    map_Uint_FunctionPtr                                m_mapDirichletBC;
+    map_Uint_FunctionPtr                                m_mapNeumannBC;
+    daeDomain                                           m_dimension;
     daeDomain                                           m_omega;
-    daeParameter                                        m_diffusivity;
-    daeParameter                                        m_velocity;
-    daeParameter                                        m_generation;
     daeVariable                                         m_T;
     boost::shared_ptr< dealiiConvectionDiffusion<dim> > pDealII;
+    boost::shared_ptr< dealiiCell<dim> >                pdealIICell;
+
     boost::shared_ptr< daeFEMatrix<double> >            matK;
     boost::shared_ptr< daeFEMatrix<double> >            matKdt;
     boost::shared_ptr< daeFEArray<double>  >            vecf;
-    std::map<unsigned int, FunctionPtr>                 funsDirichletBC;
-    std::map<unsigned int, FunctionPtr>                 funsNeumannBC;
-    FunctionPtr                                         funDiffusivity;
-    FunctionPtr                                         funVelocity;
-    FunctionPtr                                         funGeneration;
-
     std::string                                         m_strOutputDirectory;
     int                                                 m_outputCounter;
 };
@@ -281,7 +242,6 @@ public:
 typedef daeConvectionDiffusion<1> daeConvectionDiffusion_1D;
 typedef daeConvectionDiffusion<2> daeConvectionDiffusion_2D;
 typedef daeConvectionDiffusion<3> daeConvectionDiffusion_3D;
-
 }
 }
 }

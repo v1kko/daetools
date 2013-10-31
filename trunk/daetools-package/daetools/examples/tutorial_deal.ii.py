@@ -17,6 +17,27 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
+deal.II classes provided by the python wrapper: 
+ - Tensors of rank 1 up to three dimensions (Tensor<rank,dim,double> template): 
+    * Tensor_1_1D
+    * Tensor_1_2D
+    * Tensor_1_3D
+ - Points up to three dimensions (Point<dim,double> template):
+    * Point_1D
+    * Point_2D
+    * Point_3D
+ - Functions up to three dimensions (Function<dim> template):
+    * Function_1D
+    * Function_2D
+    * Function_3D    
+ - Solvers for scalar transport equations:
+    * Convection-Diffusion Equation up to three dimensions (daeConvectionDiffusion<dim> template):
+       + daeConvectionDiffusion_1D
+       + daeConvectionDiffusion_2D
+       + daeConvectionDiffusion_3D
+    * Laplace Equation up to three dimensions
+    * Poisson Equation up to three dimensions
+    * Helmholtz Equation up to three dimensions
 """
 
 import os, sys, numpy, json
@@ -30,25 +51,73 @@ from daetools.solvers.aztecoo_options import daeAztecOptions
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+class fnConstantFunction(pyDealII.Function_2D):
+    def __init__(self, val, n_components = 1):
+        pyDealII.Function_2D.__init__(self, n_components)
+        self.m_value = float(val)
+        
+    def value(self, point, component = 1):
+        #print 'Point%s = %f' % (point, self.m_value)
+        return self.m_value
+
+class fnConstantVectorFunction(pyDealII.Function_2D):
+    def __init__(self, values, n_components = 2):
+        pyDealII.Function_2D.__init__(self, n_components)
+        
+        if len(values) != 2:
+            raise RunttimeError('The length of the values array must be two')
+        self.m_values = list(values)
+        
+    def value(self, point, component = 1):
+        return self.m_values[component]
+    
+    def vector_value(self, point):
+        return self.m_values
+
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
-        self.fe = pyDealII.daeConvectionDiffusion_2D('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)')
-        options = {}
-        options['meshFilename']    = os.path.join(os.path.dirname(__file__), 'meshes', "ex49fine.msh")
-        options['polynomialOrder'] = 1
-        options['outputDirectory'] = os.path.join(os.path.dirname(__file__), 'results')
-        options['dirichletBC']     = {1 : 200.0, 2 : 250.0}
-        options['neumannBC']       = {0 : 10}
-        jsonInit = json.dumps(options)
-        self.fe.InitializeModel(jsonInit)
+        # Achtung, Achtung!!
+        # Diffusivity, velocity, generation, dirichletBC and neumannBC must be 
+        # owned by the model for deal.II FE model keeps only references to them.
+        self.diffusivity    = fnConstantFunction(1.0)
+        self.velocity       = fnConstantVectorFunction([0.0, 0.0])
+        self.generation     = fnConstantFunction(1.0)
         
-    def InitializeModel(self, jsonInit):
-        print 'modTutorial.InitializeModel:', jsonInit
+        self.neumannBC      = {}
+        #self.neumannBC[0]   = fnConstantFunction(10)
+        
+        self.dirichletBC    = {}
+        self.dirichletBC[0] = fnConstantFunction(100)
+        self.dirichletBC[1] = fnConstantFunction(200)
+        self.dirichletBC[2] = fnConstantFunction(250)
+        
+        self.fe = pyDealII.daeConvectionDiffusion_2D('Helmholtz', 
+                                                     self, 
+                                                     'Modified deal.II step-7 example (steady-state Helmholtz equation)',
+                                                     meshFilename      = os.path.join(os.path.dirname(__file__), 'meshes', "ex49fine.msh"),
+                                                     # deal.II related arguments (all are mandatory):
+                                                     quadratureFormula = 'QGauss',
+                                                     polynomialOrder   = 1,
+                                                     outputDirectory   = os.path.join(os.path.dirname(__file__), 'results'),
+                                                     diffusivity       = self.diffusivity,
+                                                     velocity          = self.velocity,
+                                                     generation        = self.generation,
+                                                     dirichletBC       = self.dirichletBC,
+                                                     neumannBC         = self.neumannBC)
         
     def DeclareEquations(self):
-        daeModel.DeclareEquations(self)
+        #daeModel.DeclareEquations(self)
+        print self.fe
+        for cell in self.fe.elements():
+            print cell
+            fe_values = cell.fe_values
+            for q in range(fe_values.n_q_points):
+                for i in range(fe_values.dofs_per_cell):
+                    for j in range(fe_values.dofs_per_cell):
+                        print fe_values.shape(i, q), fe_values.shape(i, q)
+        
         
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -57,17 +126,7 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
-        for parameter in self.m.fe.Parameters:
-            if parameter.Name == "Diffusivity":
-                # Diffusivity is a diffision coefficient (m**2/s)
-                parameter.SetValue(1.0) 
-            elif parameter.Name == "Velocity":
-                # Velocity is an array of number of spatial dimensions (1, 2 or 3) 
-                # depending on the mesh type (m/s)
-                parameter.SetValues(0.0) 
-            elif parameter.Name == "Generation":
-                # Generation 
-                parameter.SetValue(1.0) 
+        pass
 
     def SetUpVariables(self):
         pass
@@ -152,6 +211,45 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
+    """
+    print ''
+    class fun1(pyDealII.Function_2D):
+        def __init__(self, n_components = 1):
+            pyDealII.Function_2D.__init__(self, n_components)
+            
+        def value(self, point, component = 1):
+            return 1.2
+    
+    p = pyDealII.Point_2D(1.0, 2.0)
+    f1 = fun1()
+    print f1.n_components
+    print f1.dimension
+    m = pyDealII.map_Uint_Function_2D()
+    m[0] = f1
+    print m[0]
+    print m[0].value(p)
+    return
+    
+    t = pyDealII.Tensor_1_2D()
+    print t.dimension, t.rank
+    t[0] = 5
+    print t, repr(t), t.norm()
+    print t==t
+    print t*t
+    
+    t = pyDealII.Point_3D()
+    print t.dimension, t.rank
+    t[0] = 1
+    t[1] = 2
+    t[2] = 3
+    print t.x, t.y, t.z
+    print t, repr(t)
+    print t*2
+    print t*t
+    print t.square()
+    t2 = (t*2)
+    print t.distance(t2)
+    """
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

@@ -15,31 +15,257 @@
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #include "../FE_DealII/convection_diffusion.h"
+using namespace dae::fe_solver;
 using namespace dae::fe_solver::convection_diffusion_dealii;
 
 namespace daepython
 {
-template<int dim>
-void daeConvectionDiffusion_Initialize(daeConvectionDiffusion<dim>& self, string meshFilename,
-                                                                          unsigned int polynomialOrder,
-                                                                          double diffusivity,
-                                                                          boost::python::list lVelocity,
-                                                                          double generation,
-                                                                          boost::python::dict dictDirichletBC,
-                                                                          boost::python::dict dictNeumannBC)
+unsigned int Tensor_1_1D_rank(Tensor_1_1D& self)
 {
-    std::vector<double> velocity;
-    std::map<unsigned int, double> dirichletBC;
-    std::map<unsigned int, double> neumannBC;
+    return Tensor_1_1D::rank;
+}
+unsigned int Tensor_1_1D_dimension(Tensor_1_1D& self)
+{
+    return Tensor_1_1D::dimension;
+}
+unsigned int Tensor_1_1D_n_independent_components(Tensor_1_1D& self)
+{
+    return Tensor_1_1D::n_independent_components;
+}
 
-    boost::python::list keys;
+unsigned int Tensor_1_2D_rank(Tensor_1_2D& self)
+{
+    return Tensor_1_2D::rank;
+}
+unsigned int Tensor_1_2D_dimension(Tensor_1_2D& self)
+{
+    return Tensor_1_2D::dimension;
+}
+unsigned int Tensor_1_2D_n_independent_components(Tensor_1_2D& self)
+{
+    return Tensor_1_2D::n_independent_components;
+}
 
-    for(int i = 0; i < len(lVelocity); ++i)
+unsigned int Tensor_1_3D_rank(Tensor_1_3D& self)
+{
+    return Tensor_1_3D::rank;
+}
+unsigned int Tensor_1_3D_dimension(Tensor_1_3D& self)
+{
+    return Tensor_1_3D::dimension;
+}
+unsigned int Tensor_1_3D_n_independent_components(Tensor_1_3D& self)
+{
+    return Tensor_1_3D::n_independent_components;
+}
+
+double Tensor_1_1D_getitem(Tensor_1_1D& self, size_t i)
+{
+    return self[i];
+}
+double Tensor_1_2D_getitem(Tensor_1_2D& self, size_t i)
+{
+    return self[i];
+}
+double Tensor_1_3D_getitem(Tensor_1_3D& self, size_t i)
+{
+    return self[i];
+}
+
+void Tensor_1_1D_setitem(Tensor_1_1D& self, size_t i, double value)
+{
+    self[i] = value;
+}
+void Tensor_1_2D_setitem(Tensor_1_2D& self, size_t i, double value)
+{
+    self[i] = value;
+}
+void Tensor_1_3D_setitem(Tensor_1_3D& self, size_t i, double value)
+{
+    self[i] = value;
+}
+
+
+string Tensor_1_1D_str(Tensor_1_1D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "(" << self[0] << ")";
+    return s.str();
+}
+string Tensor_1_2D_str(Tensor_1_2D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "(" << self[0] << ", " << self[1]<< ")";
+    return s.str();
+}
+string Tensor_1_3D_str(Tensor_1_3D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "(" << self[0] << ", " << self[1] << ", " << self[2] << ")";
+    return s.str();
+}
+
+string Tensor_1_1D_repr(Tensor_1_1D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "Tensor<1,1,double>(" << self[0] << ")";
+    return s.str();
+}
+string Tensor_1_2D_repr(Tensor_1_2D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "Tensor<1,2,double>(" << self[0] << ", " << self[1] << ")";
+    return s.str();
+}
+string Tensor_1_3D_repr(Tensor_1_3D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "Tensor<1,3,double>(" << self[0] << ", " << self[1] << ", " << self[2] << ")";
+    return s.str();
+}
+
+string Point_1D_repr(Point_1D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "Point<1,double>(x=" << self[0] << ")";
+    return s.str();
+}
+string Point_2D_repr(Point_2D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "Point<2,double>(x=" << self[0] << ", y=" << self[1] << ")";
+    return s.str();
+}
+string Point_3D_repr(Point_3D& self)
+{
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
+    s << "Point<3,double>(x=" << self[0] << ", y=" << self[1] << ", z=" << self[2] << ")";
+    return s.str();
+}
+
+double Point_1D_x(Point_1D& self)
+{
+    return self[0];
+}
+
+double Point_2D_x(Point_2D& self)
+{
+    return self[0];
+}
+double Point_2D_y(Point_2D& self)
+{
+    return self[1];
+}
+
+double Point_3D_x(Point_3D& self)
+{
+    return self[0];
+}
+double Point_3D_y(Point_3D& self)
+{
+    return self[1];
+}
+double Point_3D_z(Point_3D& self)
+{
+    return self[2];
+}
+
+
+template<int dim>
+class Function_wrapper : public dealiiFunction<dim>,
+                         public boost::python::wrapper< dealiiFunction<dim> >
+{
+public:
+    Function_wrapper(unsigned int n_components = 1) : dealiiFunction<dim>(n_components)
     {
-        double vel = boost::python::extract<double>(lVelocity[i]);
 
-        velocity.push_back(vel);
     }
+
+    virtual ~Function_wrapper()
+    {
+
+    }
+
+    unsigned int dimension() const
+    {
+        return dealiiFunction<dim>::dimension;
+    }
+
+    unsigned int n_components() const
+    {
+        return dealiiFunction<dim>::n_components;
+    }
+
+    double value(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        boost::python::override f = this->get_override("value");
+        return f(p, component);
+    }
+
+    void vector_value(const Point<dim> &p, Vector<double>& values) const
+    {
+        boost::python::override f = this->get_override("vector_value");
+        boost::python::list lvalues = f(p);
+
+        boost::python::ssize_t i, n;
+        n = boost::python::len(lvalues);
+        if(n != Function<dim>::n_components)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The number of items (" << n << ") returned from the Function<" << Function<dim>::dimension
+              << ">::vector_value call must be " << Function<dim>::n_components;
+            throw e;
+        }
+        for(i = 0; i < n; i++)
+            values[i] = boost::python::extract<double>(lvalues[i]);
+    }
+
+    Tensor<1,dim> gradient(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        boost::python::override f = this->get_override("gradient");
+        return f(p, component);
+    }
+
+    void vector_gradient(const Point<dim> &p, std::vector<Tensor<1,dim> > &gradients) const
+    {
+        boost::python::override f = this->get_override("vector_gradient");
+        boost::python::list lgradients = f(p);
+
+        boost::python::ssize_t i, n;
+        n = boost::python::len(lgradients);
+        if(n != Function<dim>::n_components)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The number of items (" << n << ") returned from the Function<" << Function<dim>::dimension
+              << ">::vector_gradient call must be " << Function<dim>::n_components;
+            throw e;
+        }
+        for(i = 0; i < n; i++)
+            gradients[i] = boost::python::extract< Tensor<1,dim> >(lgradients[i]);
+    }
+};
+typedef Function_wrapper<1> Function_wrapper_1D;
+typedef Function_wrapper<2> Function_wrapper_2D;
+typedef Function_wrapper<3> Function_wrapper_3D;
+
+
+template<int dim>
+daeConvectionDiffusion<dim>* daeConvectionDiffusion__init__(std::string                 strName,
+                                                            daeModel*                   pModel,
+                                                            std::string                 strDescription,
+                                                            std::string                 meshFilename,
+                                                            string                      quadratureFormula,
+                                                            unsigned int                polynomialOrder,
+                                                            string                      outputDirectory,
+                                                            const dealiiFunction<dim>&  diffusivity,
+                                                            const dealiiFunction<dim>&  velocity,
+                                                            const dealiiFunction<dim>&  generation,
+                                                            boost::python::dict         dictDirichletBC,
+                                                            boost::python::dict         dictNeumannBC)
+{
+    boost::python::list keys;
+    std::map<unsigned int, const dealiiFunction<dim>*> dirichletBC;
+    std::map<unsigned int, const dealiiFunction<dim>*> neumannBC;
 
     keys = dictDirichletBC.keys();
     for(int i = 0; i < len(keys); ++i)
@@ -47,10 +273,10 @@ void daeConvectionDiffusion_Initialize(daeConvectionDiffusion<dim>& self, string
         boost::python::object key_ = keys[i];
         boost::python::object val_ = dictDirichletBC[key_];
 
-        unsigned int key = boost::python::extract<unsigned int>(key_);
-        double value     = boost::python::extract<double>(val_);
+        unsigned int               key = boost::python::extract<unsigned int>(key_);
+        const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
 
-        dirichletBC[key] = value;
+        dirichletBC[key] = fn;
     }
 
     keys = dictNeumannBC.keys();
@@ -59,13 +285,14 @@ void daeConvectionDiffusion_Initialize(daeConvectionDiffusion<dim>& self, string
         boost::python::object key_ = keys[i];
         boost::python::object val_ = dictNeumannBC[key_];
 
-        unsigned int key = boost::python::extract<unsigned int>(key_);
-        double value     = boost::python::extract<double>(val_);
+        unsigned int               key = boost::python::extract<unsigned int>(key_);
+        const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
 
-        neumannBC[key] = value;
+        neumannBC[key] = fn;
     }
 
-    self.Initialize(meshFilename, polynomialOrder, diffusivity, velocity, generation, dirichletBC, neumannBC);
+    return new daeConvectionDiffusion<dim>(strName, pModel, strDescription, meshFilename, quadratureFormula, polynomialOrder,
+                                           outputDirectory, diffusivity, velocity, generation, dirichletBC, neumannBC);
 }
 
 }

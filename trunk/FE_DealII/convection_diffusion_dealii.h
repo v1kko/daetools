@@ -4,6 +4,7 @@
 #include <typeinfo>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 
 #include <boost/format.hpp>
 
@@ -40,6 +41,7 @@
 #include <deal.II/numerics/vector_tools.h>
 #include <deal.II/base/convergence_table.h>
 #include <deal.II/fe/fe_values.h>
+#include "dealii_common.h"
 
 namespace dae
 {
@@ -52,16 +54,17 @@ using namespace dealii;
 template <int dim>
 class dealiiConvectionDiffusion
 {
-typedef typename boost::shared_ptr< Function<dim> > FunctionPtr;
+typedef typename std::map<unsigned int, const dealiiFunction<dim>*> map_Uint_FunctionPtr;
 
 public:
-    dealiiConvectionDiffusion(const std::string&                         meshFilename,
-                              unsigned int                               polynomialOrder,
-                              FunctionPtr                                diffusivity,
-                              FunctionPtr                                velocity,
-                              FunctionPtr                                generation,
-                              const std::map<unsigned int, FunctionPtr>& dirichletBC,
-                              const std::map<unsigned int, FunctionPtr>& neumannBC);
+    dealiiConvectionDiffusion(const std::string&          meshFilename,
+                              const std::string&          quadratureFormula,
+                              unsigned int                polynomialOrder,
+                              const dealiiFunction<dim>&  diffusivity,
+                              const dealiiFunction<dim>&  velocity,
+                              const dealiiFunction<dim>&  generation,
+                              const map_Uint_FunctionPtr& dirichletBC,
+                              const map_Uint_FunctionPtr& neumannBC);
     
     virtual ~dealiiConvectionDiffusion ();
     
@@ -86,29 +89,32 @@ public:
     Vector<double>                       solution;
 
     // Model-specific data
-    FunctionPtr                          funDiffusivity;
-    FunctionPtr                          funVelocity;
-    FunctionPtr                          funGeneration;
-    std::map<unsigned int, FunctionPtr>  funsDirichletBC;
-    std::map<unsigned int, FunctionPtr>  funsNeumannBC;
+    string                        m_quadrature_formula;
+    const dealiiFunction<dim>&    funDiffusivity;
+    const dealiiFunction<dim>&    funVelocity;
+    const dealiiFunction<dim>&    funGeneration;
+    const map_Uint_FunctionPtr&   funsDirichletBC;
+    const map_Uint_FunctionPtr&   funsNeumannBC;
 };
 
 template <int dim>
-dealiiConvectionDiffusion<dim>::dealiiConvectionDiffusion (const std::string&                           meshFilename,
-                                                           unsigned int                                 polynomialOrder,
-                                                           FunctionPtr                                  diffusivity,
-                                                           FunctionPtr                                  velocity,
-                                                           FunctionPtr                                  generation,
-                                                           const std::map<unsigned int, FunctionPtr>&   dirichletBC,
-                                                           const std::map<unsigned int, FunctionPtr>&   neumannBC):
+dealiiConvectionDiffusion<dim>::dealiiConvectionDiffusion (const std::string&          meshFilename,
+                                                           const std::string&          quadratureFormula,
+                                                           unsigned int                polynomialOrder,
+                                                           const dealiiFunction<dim>&  diffusivity,
+                                                           const dealiiFunction<dim>&  velocity,
+                                                           const dealiiFunction<dim>&  generation,
+                                                           const map_Uint_FunctionPtr& dirichletBC,
+                                                           const map_Uint_FunctionPtr& neumannBC):
     dof_handler (triangulation),
-    fe (new FE_Q<dim>(polynomialOrder))
+    fe (new FE_Q<dim>(polynomialOrder)),
+    m_quadrature_formula(quadratureFormula),
+    funDiffusivity(diffusivity),
+    funVelocity(velocity),
+    funGeneration(generation),
+    funsDirichletBC(dirichletBC),
+    funsNeumannBC(neumannBC)
 {
-    funDiffusivity  = diffusivity;
-    funVelocity     = velocity;
-    funGeneration   = generation;
-    funsDirichletBC = dirichletBC;
-    funsNeumannBC   = neumannBC;
 
     GridIn<dim> gridin;
     gridin.attach_triangulation(triangulation);
@@ -184,9 +190,160 @@ void dealiiConvectionDiffusion<dim>::setup_system ()
 */
 }
 
+
+template<int dim>
+class dealiiCell;
+
+template<int dim>
+class dealiiCellIterator : public std::iterator<std::forward_iterator_tag, dealiiCell<dim> >
+{
+public:
+    typedef typename DoFHandler<dim>::active_cell_iterator active_cell_iterator;
+
+    dealiiCellIterator(dealiiCell<dim>& cell, active_cell_iterator iter):
+        m_cell(cell)
+    {
+        current_cell = iter;
+    }
+
+    // Prefix ++operator
+    dealiiCellIterator& operator++()
+    {
+        std::cout << "++operator" << std::endl;
+        ++current_cell;
+
+        m_cell.cell_matrix    = 0;
+        m_cell.cell_matrix_dt = 0;
+        m_cell.cell_rhs       = 0;
+
+        m_cell.fe_values.reinit(current_cell);
+        current_cell->get_dof_indices(m_cell.local_dof_indices);
+
+        return *this;
+    }
+
+    // Postfix iterator++
+    dealiiCellIterator operator++(int)
+    {
+        std::cout << "operator++" << std::endl;
+
+        dealiiCellIterator tmp(*this);
+
+        m_cell.cell_matrix    = 0;
+        m_cell.cell_matrix_dt = 0;
+        m_cell.cell_rhs       = 0;
+
+        m_cell.fe_values.reinit(current_cell);
+        current_cell->get_dof_indices(m_cell.local_dof_indices);
+
+        return tmp;
+    }
+
+    dealiiCell<dim>& operator*()
+    {
+        std::cout << "operator*" << std::endl;
+       return m_cell;
+    }
+
+    bool operator==(const dealiiCellIterator& other) const
+    {
+        return current_cell == other.current_cell;
+    }
+
+    bool operator!=(const dealiiCellIterator& other) const
+    {
+        return current_cell != other.current_cell;
+    }
+
+    size_t distance(const dealiiCellIterator& first, const dealiiCellIterator& last)
+    {
+        return last.current_cell - first.current_cell;
+    }
+
+public:
+    active_cell_iterator current_cell;
+    dealiiCell<dim>&     m_cell;
+};
+typedef dealiiCellIterator<1> dealiiCellIterator_1D;
+typedef dealiiCellIterator<2> dealiiCellIterator_2D;
+typedef dealiiCellIterator<3> dealiiCellIterator_3D;
+
+
+template<int dim>
+class dealiiCell
+{
+public:
+    typedef dealiiCellIterator<dim> iterator;
+
+    dealiiCell(FiniteElement<dim>* fe, DoFHandler<dim>& dof_handler_):
+        m_fe(fe),
+        dof_handler(dof_handler_),
+        quadrature_formula(3),
+        face_quadrature_formula(3),
+        dofs_per_cell(fe->dofs_per_cell),
+        n_q_points(quadrature_formula.size()),
+        n_face_q_points(face_quadrature_formula.size()),
+        cell_matrix(dofs_per_cell, dofs_per_cell),
+        cell_matrix_dt(dofs_per_cell, dofs_per_cell),
+        cell_rhs(dofs_per_cell),
+        local_dof_indices (dofs_per_cell),
+        fe_values(*fe, quadrature_formula, update_values | update_gradients | update_quadrature_points | update_JxW_values),
+        fe_face_values(*fe, face_quadrature_formula, update_values | update_quadrature_points | update_normal_vectors | update_JxW_values)
+    {
+    }
+
+    iterator begin()
+    {
+        std::cout << "dealiiCell::begin" << std::endl;
+        typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active();
+
+        // Initialize the data for the first iteration
+        // They will be re-initialized again after every call to dealiiCellIterator::operator++
+        cell_matrix    = 0;
+        cell_matrix_dt = 0;
+        cell_rhs       = 0;
+
+        fe_values.reinit(cell);
+        cell->get_dof_indices(local_dof_indices);
+
+        // Return an iteartor
+        return dealiiCellIterator<dim>(*this, cell);
+    }
+
+    iterator end()
+    {
+        std::cout << "dealiiCell::end" << std::endl;
+        return dealiiCellIterator<dim>(*this, dof_handler.end());
+    }
+
+public:
+    FiniteElement<dim>*         m_fe;
+    DoFHandler<dim>&            dof_handler;
+    QGauss<dim>                 quadrature_formula;
+    QGauss<dim-1>               face_quadrature_formula;
+    const unsigned int          dofs_per_cell;
+    const unsigned int          n_q_points;
+    const unsigned int          n_face_q_points;
+    FullMatrix<double>          cell_matrix;
+    FullMatrix<double>          cell_matrix_dt;
+    Vector<double>              cell_rhs;
+    std::vector<unsigned int>   local_dof_indices;
+    FEValues<dim>               fe_values;
+    FEFaceValues<dim>           fe_face_values;
+};
+typedef dealiiCell<1> dealiiCell_1D;
+typedef dealiiCell<2> dealiiCell_2D;
+typedef dealiiCell<3> dealiiCell_3D;
+
+
+
 template <int dim>
 void dealiiConvectionDiffusion<dim>::assemble_system ()
 {
+    if(m_quadrature_formula == "")
+    {
+    }
+
     QGauss<dim>   quadrature_formula(3);
     QGauss<dim-1> face_quadrature_formula(3);
     
@@ -212,11 +369,12 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
     // All DOFs at the boundary ID that have Dirichlet BCs imposed.
     // mapDirichlets: map< boundary_id, map<dof, value> > will be used to apply boundary conditions locally.
     // We build this map here since it is common for all cells.
+    /*
     std::map< unsigned int, std::map<unsigned int, double> > mapDirichlets;
-    for(typename std::map< unsigned int, FunctionPtr>::iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
+    for(typename std::map< unsigned int, dealiiFunction<dim> >::const_iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
     {
-        const unsigned int id    = it->first;
-        const Function<dim>& fun = *it->second;
+        const unsigned int id          = it->first;
+        const dealiiFunction<dim>& fun = it->second;
 
         std::map<unsigned int,double> boundary_values;
         VectorTools::interpolate_boundary_values (dof_handler,
@@ -226,6 +384,7 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
 
         mapDirichlets[id] = boundary_values;
     }
+    */
 
     /*
     // All DOFs at the boundary ID that have Neumann BCs imposed
@@ -270,7 +429,7 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
                                                    fe_values.shape_grad(j, q_point)
                                                 )
                                                 *
-                                                funDiffusivity->value(fe_values.quadrature_point(q_point))
+                                                funDiffusivity.value(fe_values.quadrature_point(q_point))
 
                                                 +
                                              /* Helmholtz term (u) */
@@ -297,7 +456,7 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
                 
                 /* Generation */
                 cell_rhs(i) +=  fe_values.shape_value(i,q_point) *
-                                funGeneration->value(fe_values.quadrature_point(q_point)) *
+                                funGeneration.value(fe_values.quadrature_point(q_point)) *
                                 fe_values.JxW(q_point);
             }
         }
@@ -318,7 +477,7 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
                 else if(funsNeumannBC.find(id) != funsNeumannBC.end())
                 {
                     // Neumann BC
-                    const Function<dim>& neumann = *(funsNeumannBC.find(id)->second);
+                    const dealiiFunction<dim>& neumann = *funsNeumannBC.find(id)->second;
 
                     std::cout << (boost::format("  NeumanBC (cell=%d, face=%d, id= %d) = %f") % cellCounter % face % id % neumann.value(fe_face_values.quadrature_point(0))).str() << std::endl;
 
@@ -401,10 +560,10 @@ void dealiiConvectionDiffusion<dim>::assemble_system ()
     //hanging_node_constraints.condense(system_matrix_dt);
 
     // Apply Dirichlet boundary conditions on the system matrix and rhs
-    for(typename std::map< unsigned int, FunctionPtr>::iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
+    for(typename map_Uint_FunctionPtr::const_iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
     {
-        const unsigned int id    = it->first;
-        const Function<dim>& fun = *it->second;
+        const unsigned int id          =  it->first;
+        const dealiiFunction<dim>& fun = *it->second;
         std::cout << "DirichletBC id = " << id << " val = " << fun.value(Point<dim>(0,0,0)) << std::endl;
 
         std::map<types::global_dof_index, double> boundary_values;

@@ -61,27 +61,27 @@ class daeMainWindow(QtGui.QMainWindow):
         exit.setStatusTip('Exit application')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self.close)
 
-        plot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-2d.png')), 'New 2D plot', self)
+        plot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-2d.png')), 'New 2D plot...', self)
         plot2D.setShortcut('Ctrl+2')
         plot2D.setStatusTip('New 2D plot')
         self.connect(plot2D, QtCore.SIGNAL('triggered()'), self.slotPlot2D)
 
-        animatedPlot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-ani-2d.png')), 'New animated 2D plot', self)
+        animatedPlot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-ani-2d.png')), 'New animated 2D plot...', self)
         animatedPlot2D.setShortcut('Ctrl+4')
         animatedPlot2D.setStatusTip('New animated 2D plot')
         self.connect(animatedPlot2D, QtCore.SIGNAL('triggered()'), self.slotAnimatedPlot2D)
 
-        plot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New 3D plot', self)
+        plot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New 3D plot...', self)
         plot3D.setShortcut('Ctrl+3')
         plot3D.setStatusTip('New 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)
 
-        plotVTK = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'New VTK plot', self)
+        plotVTK = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Open VTK plot...', self)
         plotVTK.setShortcut('Ctrl+4')
-        plotVTK.setStatusTip('New VTK plot')
+        plotVTK.setStatusTip('Open VTK plot from file')
         self.connect(plotVTK, QtCore.SIGNAL('triggered()'), self.slotOpenVTK)
 
-        openTemplate = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Open 2D template', self)
+        openTemplate = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Open 2D template...', self)
         openTemplate.setShortcut('Ctrl+T')
         openTemplate.setStatusTip('Open 2D plot emplate')
         self.connect(openTemplate, QtCore.SIGNAL('triggered()'), self.slotOpenTemplate)

@@ -102,25 +102,33 @@ protected:
 };
 
 /*********************************************************
- * SingleValue_Function
- * Necessary for Diffusion/Generation/BC terms
+ * deal.II related classes and typedefs
  *********************************************************/
+typedef Function<1> Function_1D;
+typedef Function<2> Function_2D;
+typedef Function<3> Function_3D;
+
+// Tensors of rank=1 are used for a gradient of scalar functions
+typedef Tensor<1, 1, double> Tensor_1_1D;
+typedef Tensor<1, 2, double> Tensor_1_2D;
+typedef Tensor<1, 3, double> Tensor_1_3D;
+
+// Points are in fact tensors with rank=1 just their coordinates mean length
+// and have some additional functions
+typedef Point<1, double> Point_1D;
+typedef Point<2, double> Point_2D;
+typedef Point<3, double> Point_3D;
+
+// This type will be held in daeModel and sent to deal.II
+// It cannot be Function<dim> for we cannot use it with map_indexing_suite
+// because it is an abstract class (the destructor is abstract function).
 template <int dim>
-class SingleValue_Function : public Function<dim>
+class dealiiFunction : public Function<dim>
 {
 public:
-    SingleValue_Function(double value = 0.0) : Function<dim>()
+    dealiiFunction(const unsigned int n_components = 1) : Function<dim>(n_components)
     {
-        m_value = value;
     }
-
-    virtual double value(const Point<dim> &p, const unsigned int component = 0) const
-    {
-        return m_value;
-    }
-
-public:
-    double m_value;
 };
 
 inline adouble create_adouble(adNode* n)
