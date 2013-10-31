@@ -171,6 +171,53 @@ double Point_3D_z(Point_3D& self)
 }
 
 
+// Indices must be int because python complains about wrong argument types:
+// it cannot convert from int to unsigned int for some reasons
+double Vector_getitem(Vector<double>& self, unsigned int i)
+{
+    return self[i];
+}
+void Vector_set(Vector<double>& self, unsigned int i, double value)
+{
+    self[i] = value;
+}
+void Vector_add(Vector<double>& self, unsigned int i, double value)
+{
+    self[i] += value;
+}
+
+
+double FullMatrix_getitem(FullMatrix<double>& self, unsigned int i, unsigned int j)
+{
+    return self(i,j);
+}
+void FullMatrix_set(FullMatrix<double>& self, unsigned int i, unsigned int j, double value)
+{
+    self(i,j) = value;
+}
+void FullMatrix_add(FullMatrix<double>& self, unsigned int i, unsigned int j, double value)
+{
+    self(i,j) += value;
+}
+
+double SparseMatrix_getitem(SparseMatrix<double>& self, unsigned int i, unsigned int j)
+{
+    return self(i,j);
+}
+double SparseMatrix_el(SparseMatrix<double>& self, unsigned int i, unsigned int j)
+{
+    return self.el(i,j);
+}
+void SparseMatrix_set(SparseMatrix<double>& self, unsigned int i, unsigned int j, double value)
+{
+    self.set(i, j, value);
+}
+void SparseMatrix_add(SparseMatrix<double>& self, unsigned int i, unsigned int j, double value)
+{
+    self.add(i, j, value);
+}
+
+
 template<int dim>
 class Function_wrapper : public dealiiFunction<dim>,
                          public boost::python::wrapper< dealiiFunction<dim> >
@@ -257,15 +304,26 @@ daeConvectionDiffusion<dim>* daeConvectionDiffusion__init__(std::string         
                                                             string                      quadratureFormula,
                                                             unsigned int                polynomialOrder,
                                                             string                      outputDirectory,
-                                                            const dealiiFunction<dim>&  diffusivity,
-                                                            const dealiiFunction<dim>&  velocity,
-                                                            const dealiiFunction<dim>&  generation,
+                                                            boost::python::dict         dictFunctions,
                                                             boost::python::dict         dictDirichletBC,
                                                             boost::python::dict         dictNeumannBC)
 {
     boost::python::list keys;
-    std::map<unsigned int, const dealiiFunction<dim>*> dirichletBC;
-    std::map<unsigned int, const dealiiFunction<dim>*> neumannBC;
+    std::map<unsigned int, const dealiiFunction<dim>*> mapDirichletBC;
+    std::map<unsigned int, const dealiiFunction<dim>*> mapNeumannBC;
+    std::map<std::string,  const dealiiFunction<dim>*> mapFunctions;
+
+    keys = dictFunctions.keys();
+    for(int i = 0; i < len(keys); ++i)
+    {
+        boost::python::object key_ = keys[i];
+        boost::python::object val_ = dictFunctions[key_];
+
+        std::string                key = boost::python::extract<std::string>(key_);
+        const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
+
+        mapFunctions[key] = fn;
+    }
 
     keys = dictDirichletBC.keys();
     for(int i = 0; i < len(keys); ++i)
@@ -276,7 +334,7 @@ daeConvectionDiffusion<dim>* daeConvectionDiffusion__init__(std::string         
         unsigned int               key = boost::python::extract<unsigned int>(key_);
         const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
 
-        dirichletBC[key] = fn;
+        mapDirichletBC[key] = fn;
     }
 
     keys = dictNeumannBC.keys();
@@ -288,11 +346,11 @@ daeConvectionDiffusion<dim>* daeConvectionDiffusion__init__(std::string         
         unsigned int               key = boost::python::extract<unsigned int>(key_);
         const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
 
-        neumannBC[key] = fn;
+        mapNeumannBC[key] = fn;
     }
 
     return new daeConvectionDiffusion<dim>(strName, pModel, strDescription, meshFilename, quadratureFormula, polynomialOrder,
-                                           outputDirectory, diffusivity, velocity, generation, dirichletBC, neumannBC);
+                                           outputDirectory, mapFunctions, mapDirichletBC, mapNeumannBC);
 }
 
 }

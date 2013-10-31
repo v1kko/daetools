@@ -81,9 +81,10 @@ class modTutorial(daeModel):
         # Achtung, Achtung!!
         # Diffusivity, velocity, generation, dirichletBC and neumannBC must be 
         # owned by the model for deal.II FE model keeps only references to them.
-        self.diffusivity    = fnConstantFunction(1.0)
-        self.velocity       = fnConstantVectorFunction([0.0, 0.0])
-        self.generation     = fnConstantFunction(1.0)
+        self.functions    = {}
+        self.functions['Diffusivity'] = fnConstantFunction(1.0)
+        self.functions['Velocity']    = fnConstantVectorFunction([0.0, 0.0])
+        self.functions['Generation']  = fnConstantFunction(1.0)
         
         self.neumannBC      = {}
         #self.neumannBC[0]   = fnConstantFunction(10)
@@ -101,9 +102,7 @@ class modTutorial(daeModel):
                                                      quadratureFormula = 'QGauss',
                                                      polynomialOrder   = 1,
                                                      outputDirectory   = os.path.join(os.path.dirname(__file__), 'results'),
-                                                     diffusivity       = self.diffusivity,
-                                                     velocity          = self.velocity,
-                                                     generation        = self.generation,
+                                                     functions         = self.functions,
                                                      dirichletBC       = self.dirichletBC,
                                                      neumannBC         = self.neumannBC)
         
@@ -113,17 +112,70 @@ class modTutorial(daeModel):
         # 1a. Default assemble
         #self.fe.AssembleSystem()
         
-        # 1b. User-defined assemble
-        print self.fe
+        # 1b. Use expressions for cell constributions
+        
+        # 1c. User-defined assemble
+        
         for cell in self.fe:
-            fe_values = cell.fe_values
+            # Get face_values and friends:
+            #  - face_values will be automatically reinitialized
+            #  - matrices/vectors will be automatically zeroed
+            #  - local_dof_indices will be automatically filled in with the cell dofs
+            fe_values         = cell.fe_values
+            cell_matrix       = cell.cell_matrix
+            cell_rhs          = cell.cell_rhs
+            system_matrix     = cell.system_matrix
+            system_rhs        = cell.system_rhs
+            local_dof_indices = cell.local_dof_indices
+            print 'local_dof_indices = %s' % str(list(local_dof_indices))
+
             for q in range(cell.n_q_points):
                 for i in range(cell.dofs_per_cell):
                     for j in range(cell.dofs_per_cell):
-                        print fe_values.shape(i, q), fe_values.shape(i, q)
+                        cell_matrix.add(i,j, (
+                                               (fe_values.shape_grad(i,q) * fe_values.shape_grad(j,q)) * 1.0 # diffusivity 
+                                               +
+                                               fe_values.shape_value(i,q) * fe_values.shape_value(j,q)                                             
+                                             )
+                                             * fe_values.JxW(q))
+                    cell_rhs.add(i, fe_values.shape_value(i,q) * 1.0 * fe_values.JxW(q))
+            
+            print '1'
+            for f, face in enumerate(cell.faces):
+                # Get the fe_face_values (will be automatically reinitialized with the current face)
+                print 'fstart = %d' % f
+                if face.at_boundary:
+                    print 'Face boundary at: ', face.boundary_id
+                print 'at'
+                if face.at_boundary and face.boundary_id in self.neumannBC:
+                    boundary_id    = face.boundary_id
+                    print 'fface_values 1'
+                    fe_face_values = face.fe_values
+                    print 'fface_values 2'
+                    for q in range(face.n_q_points):
+                        for i in range(cell.dofs_per_cell):
+                            cell_rhs.add(i, 0.0
+                                            *
+                                            fe_face_values.shape_value(i, q_point)
+                                            *
+                                            fe_face_values.JxW(q_point))
+                print 'fend'
+            print '2'
+            for i in range(cell.dofs_per_cell):
+                for j in range(cell.dofs_per_cell):
+                    system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j))
+                system_rhs.add(local_dof_indices[i], cell_rhs[i])
+            print '3'
+        
+        self.fe.CondenseHangingNodeConstraints()
+        for bid, fn in self.dirichletBC.items():
+            self.fe.InterpolateAndApplyBoundaryValues(bid, fn)
+            
+        print 'Done assembling'
         
         # 2. Generate equations
         self.fe.GenerateEquations()
+        print 'Done generating equations'
         
 class simTutorial(daeSimulation):
     def __init__(self):

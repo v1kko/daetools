@@ -123,10 +123,10 @@ typedef Point<3, double> Point_3D;
 // It cannot be Function<dim> for we cannot use it with map_indexing_suite
 // because it is an abstract class (the destructor is abstract function).
 template <int dim>
-class dealiiFunction : public Function<dim>
+class dealiiFunction : public ZeroFunction<dim>
 {
 public:
-    dealiiFunction(const unsigned int n_components = 1) : Function<dim>(n_components)
+    dealiiFunction(const unsigned int n_components = 1) : ZeroFunction<dim>(n_components)
     {
     }
 };

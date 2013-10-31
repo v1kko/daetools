@@ -23,29 +23,26 @@ class daeConvectionDiffusion : public daeModel,
 {
 public:
     typedef typename std::map<unsigned int, const dealiiFunction<dim>*> map_Uint_FunctionPtr;
+    typedef typename std::map<std::string,  const dealiiFunction<dim>*> map_String_FunctionPtr;
     typedef typename dealiiCell<dim>::iterator iterator;
 
-    daeConvectionDiffusion(std::string                  strName,
-                           daeModel*                    pModel,
-                           std::string                  strDescription,
-                           std::string                  meshFilename,
-                           string                       quadratureFormula,
-                           unsigned int                 polynomialOrder,
-                           string                       outputDirectory,
-                           const dealiiFunction<dim>&   diffusivity,
-                           const dealiiFunction<dim>&   velocity,
-                           const dealiiFunction<dim>&   generation,
-                           const map_Uint_FunctionPtr&  dirichletBC,
-                           const map_Uint_FunctionPtr&  neumannBC)
+    daeConvectionDiffusion(std::string                   strName,
+                           daeModel*                     pModel,
+                           std::string                   strDescription,
+                           std::string                   meshFilename,
+                           string                        quadratureFormula,
+                           unsigned int                  polynomialOrder,
+                           string                        outputDirectory,
+                           const map_String_FunctionPtr& functions,
+                           const map_Uint_FunctionPtr&   dirichletBC,
+                           const map_Uint_FunctionPtr&   neumannBC)
         : daeModel(strName, pModel, strDescription),
           // Functions:
-          m_Diffusivity(diffusivity),
-          m_Velocity(velocity),
-          m_Generation(generation),
+          m_mapFunctions(functions),
           m_mapDirichletBC(dirichletBC),
           m_mapNeumannBC(neumannBC),
           // daetools objects:
-          m_dimension("dimesnion", this,              unit(), "Number of spatial dimensions"),
+          m_dimension("dimension", this,              unit(), "Number of spatial dimensions"),
           m_omega    ("&Omega;",   this,              unit(), "Omega domain"),
           m_T        ("T",         vt::temperature_t, this,   "Temperature", &m_omega)
     {
@@ -66,13 +63,16 @@ public:
         pDealII.reset(new dealiiConvectionDiffusion<dim>(meshFilename,
                                                          quadratureFormula,
                                                          polynomialOrder,
-                                                         m_Diffusivity,
-                                                         m_Velocity,
-                                                         m_Generation,
+                                                         m_mapFunctions,
                                                          m_mapDirichletBC,
                                                          m_mapNeumannBC));
 
-        pdealIICell.reset(new dealiiCell<dim>((FiniteElement<dim>*)pDealII->fe, pDealII->dof_handler));
+        pdealIICell.reset(new dealiiCell<dim>((FiniteElement<dim>*)pDealII->fe,
+                                              pDealII->dof_handler,
+                                              pDealII->system_matrix,
+                                              pDealII->system_matrix_dt,
+                                              pDealII->system_rhs,
+                                              pDealII->solution));
 
         // Initialize daetools wrapper matrices and arrays that will be used by adFEMatrixItem/VectorItem nodes
         matK.reset  (new daeFEMatrix<double> (pDealII->system_matrix));
@@ -112,6 +112,25 @@ public:
     {
         // Assemble deal.II system
         pDealII->assemble_system();
+    }
+
+    void CondenseHangingNodeConstraints()
+    {
+        pDealII->hanging_node_constraints.condense(pDealII->system_matrix);
+        pDealII->hanging_node_constraints.condense(pDealII->system_rhs);
+    }
+
+    void InterpolateAndApplyBoundaryValues(unsigned int id, const dealiiFunction<dim>& fun)
+    {
+        std::map<types::global_dof_index, double> boundary_values;
+        VectorTools::interpolate_boundary_values (pDealII->dof_handler,
+                                                  id,
+                                                  fun,
+                                                  boundary_values);
+        MatrixTools::apply_boundary_values (boundary_values,
+                                            pDealII->system_matrix,
+                                            pDealII->solution,
+                                            pDealII->system_rhs);
     }
 
     void GenerateEquations()
@@ -213,25 +232,22 @@ public:
         data_out.write_vtk (output);
     }
 
-    static iterator begin(daeConvectionDiffusion<dim>& x) { return x.begin(); }
-    static iterator end(daeConvectionDiffusion<dim>& x) { return x.end(); }
-
     iterator begin()
     {
-        std::cout << "begin" << std::endl;
+        std::cout << "daeConvectionDiffusion::begin" << std::endl;
         return pdealIICell->begin();
     }
-
     iterator end()
     {
-        std::cout << "end" << std::endl;
+        std::cout << "daeConvectionDiffusion::end" << std::endl;
         return pdealIICell->end();
     }
 
 public:
-    const dealiiFunction<dim>&                          m_Diffusivity;
-    const dealiiFunction<dim>&                          m_Velocity;
-    const dealiiFunction<dim>&                          m_Generation;
+//    const dealiiFunction<dim>&                          m_Diffusivity;
+//    const dealiiFunction<dim>&                          m_Velocity;
+//    const dealiiFunction<dim>&                          m_Generation;
+    map_String_FunctionPtr                              m_mapFunctions;
     map_Uint_FunctionPtr                                m_mapDirichletBC;
     map_Uint_FunctionPtr                                m_mapNeumannBC;
     daeDomain                                           m_dimension;
