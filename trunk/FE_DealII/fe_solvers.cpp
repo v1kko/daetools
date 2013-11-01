@@ -1,5 +1,5 @@
 #include "fe_solvers.h"
-using namespace dae::fe_solver::convection_diffusion_dealii;
+using namespace dae::fe_solver;
 
 daeModel* CreateModel(const std::string& modelClass, const std::string& name, daeModel* parent, const std::string& description, const std::map<std::string, double>& modelOptions)
 {

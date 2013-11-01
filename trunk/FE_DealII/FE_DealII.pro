@@ -39,7 +39,9 @@ SOURCES += stdafx.cpp \
            fe_solvers.cpp
 
 HEADERS += stdafx.h \
-           convection_diffusion.h \
-           convection_diffusion_dealii.h \
            dealii_common.h \
+           dealii_fe_model.h \
+           dealii_model_implementation.h \
+           dealii_iterators.h \
+           daetools_dealii_fe_model.h \
            fe_solvers.h

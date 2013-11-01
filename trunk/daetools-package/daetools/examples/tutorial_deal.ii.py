@@ -94,18 +94,16 @@ class modTutorial(daeModel):
         self.dirichletBC[1] = fnConstantFunction(200)
         self.dirichletBC[2] = fnConstantFunction(250)
         
-        self.fe = pyDealII.daeConvectionDiffusion_2D('Helmholtz', 
-                                                     self, 
-                                                     'Modified deal.II step-7 example (steady-state Helmholtz equation)',
-                                                     meshFilename      = os.path.join(os.path.dirname(__file__), 'meshes', "ex49fine.msh"),
-                                                     # deal.II related arguments (all are mandatory):
-                                                     quadratureFormula = 'QGauss',
-                                                     polynomialOrder   = 1,
-                                                     outputDirectory   = os.path.join(os.path.dirname(__file__), 'results'),
-                                                     functions         = self.functions,
-                                                     dirichletBC       = self.dirichletBC,
-                                                     neumannBC         = self.neumannBC)
-        
+        self.fe_dealII = pyDealII.dealiiModel_2D(meshFilename      = os.path.join(os.path.dirname(__file__), 'meshes', "ex49fine.msh"),
+                                                 quadratureFormula = 'QGauss',
+                                                 polynomialOrder   = 1,
+                                                 functions         = self.functions,
+                                                 dirichletBC       = self.dirichletBC,
+                                                 neumannBC         = self.neumannBC)
+        self.fe = pyDealII.daeModel_dealII('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)',
+                                           self.fe_dealII,
+                                           os.path.join(os.path.dirname(__file__), 'results'))
+       
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
         
@@ -115,7 +113,7 @@ class modTutorial(daeModel):
         # 1b. Use expressions for cell constributions
         
         # 1c. User-defined assemble
-        
+        """
         for cell in self.fe:
             # Get face_values and friends:
             #  - face_values will be automatically reinitialized
@@ -176,6 +174,7 @@ class modTutorial(daeModel):
         # 2. Generate equations
         self.fe.GenerateEquations()
         print 'Done generating equations'
+        """
         
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -193,15 +192,15 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     simulation = simTutorial()
     datareporter = daeDelegateDataReporter()
-    tcpipDataReporter = daeTCPIPDataReporter()
+    #tcpipDataReporter = daeTCPIPDataReporter()
     feDataReporter    = daeDealIIDataReporter(simulation.m.fe.DataOut)
-    datareporter.AddDataReporter(tcpipDataReporter)
+    #datareporter.AddDataReporter(tcpipDataReporter)
     datareporter.AddDataReporter(feDataReporter)
 
     # Connect TCP/IP data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
+    #simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    #if(tcpipDataReporter.Connect("", simName) == False):
+    #    sys.exit()
 
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 10

@@ -1,10 +1,8 @@
 #ifndef DAE_DEALII_COMMON_H
 #define DAE_DEALII_COMMON_H
 
-#include <deal.II/base/function.h>
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/sparse_matrix.h>
-#include <deal.II/numerics/data_out.h>
 
 #include "../dae_develop.h"
 #include "../variable_types.h"
@@ -119,53 +117,10 @@ typedef Point<1, double> Point_1D;
 typedef Point<2, double> Point_2D;
 typedef Point<3, double> Point_3D;
 
-// This type will be held in daeModel and sent to deal.II
-// It cannot be Function<dim> for we cannot use it with map_indexing_suite
-// because it is an abstract class (the destructor is abstract function).
-template <int dim>
-class dealiiFunction : public ZeroFunction<dim>
-{
-public:
-    dealiiFunction(const unsigned int n_components = 1) : ZeroFunction<dim>(n_components)
-    {
-    }
-};
-
 inline adouble create_adouble(adNode* n)
 {
     return adouble(0.0, 0.0, true, n);
 }
-
-/*
-const unsigned int dofs_per_cell = pDealII->fe->dofs_per_cell;
-std::vector<unsigned int> local_dof_indices (dofs_per_cell);
-typename DoFHandler<dim>::active_cell_iterator cell = pDealII->dof_handler.begin_active(), endc = pDealII->dof_handler.end();
-for (; cell!=endc; ++cell)
-{
-    cell->get_dof_indices (local_dof_indices);
-
-    for(unsigned int v = 0; v < GeometryInfo<dim >::vertices_per_cell; ++v)
-    {
-        Point<dim> p = cell->vertex(v);
-        unsigned int dof = local_dof_indices[v];
-        //string msg = "dof[%d] - vertex[%d]: (%f, %f, %f)";
-        //std::cout << (boost::format(msg) % local_dof_indices[v] % v % p(0) % p(1) % p(2)).str() << std::endl;
-
-        if(dim == 1)
-            coords[dof] = daePoint(p(0), 0.0, 0.0);
-        else if(dim == 2)
-            coords[dof] = daePoint(p(0), p(1), 0.0);
-        else if(dim == 3)
-            coords[dof] = daePoint(p(0), p(1), p(2));
-    }
-}
-*/
-
-//std::cout << "coords = " << std::endl;
-//for(unsigned int i = 0; i < coords.size(); i++)
-//    std::cout << boost::get<0>(coords[i]) << ", " << boost::get<1>(coords[i]) << ", " << boost::get<2>(coords[i]) << std::endl;
-//std::cout << std::endl;
-
 
 }
 }

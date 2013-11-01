@@ -1,5 +1,3 @@
-#include "convection_diffusion.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

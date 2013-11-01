@@ -173,16 +173,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .add_property("z", &daepython::Point_3D_z)
     ;
 
-//    class_< std::map< unsigned int, dealiiFunction<1> > >("map_Uint_Function_1D")
-//        .def(map_indexing_suite< std::map< unsigned int, dealiiFunction<1> > >())
-//    ;
-//    class_< std::map< unsigned int, dealiiFunction<2> > >("map_Uint_Function_2D")
-//        .def(map_indexing_suite< std::map< unsigned int, dealiiFunction<2> > >())
-//    ;
-//    class_< std::map< unsigned int, dealiiFunction<3> > >("map_Uint_Function_3D")
-//        .def(map_indexing_suite< std::map< unsigned int, dealiiFunction<3> > >())
-//    ;
-
     class_<daepython::Function_wrapper<1>, boost::noncopyable>("Function_1D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
@@ -248,15 +238,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
 
-
-//    class_<dealiiCellIterator<1>, boost::noncopyable>("dealiiCellIterator_1D", no_init)
-//    ;
-//    class_<dealiiCellIterator<2>, boost::noncopyable>("dealiiCellIterator_2D", no_init)
-//    ;
-//    class_<dealiiCellIterator<3>, boost::noncopyable>("dealiiCellIterator_3D", no_init)
-//    ;
-
-
     class_< std::vector<unsigned long> >("vector_ulong")
         .def(vector_indexing_suite< std::vector<unsigned long> >())
     ;
@@ -276,16 +257,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_< std::vector< Point<3,double> > >("vector_Point_3D")
         .def(vector_indexing_suite< std::vector< Point<3,double> > >())
     ;
-
-//    class_< std::vector< const Point<1,double> > >("vector_constPoint_1D")
-//        .def(vector_indexing_suite< std::vector< const Point<1,double> > >())
-//    ;
-//    class_< std::vector< const Point<2,double> > >("vector_constPoint_2D")
-//        .def(vector_indexing_suite< std::vector< const Point<2,double> > >())
-//    ;
-//    class_< std::vector< const Point<3,double> > >("vector_constPoint_3D")
-//        .def(vector_indexing_suite< std::vector< const Point<3,double> > >())
-//    ;
 
     class_<Vector<double>, boost::noncopyable>("Vector", no_init)
         .def("__call__",    &daepython::Vector_getitem)
@@ -438,91 +409,62 @@ BOOST_PYTHON_MODULE(pyDealII)
         .add_property("faces",              range< return_value_policy<reference_existing_object> >(&dealiiCell_3D::begin_faces, &dealiiCell_3D::end_faces))
     ;
 
-//    DoFAccessor
-//    template<int structdim, class DH, bool level_dof_access>
-//    class DoFAccessor< structdim, DH, level_dof_access >
-//    ;
-
-//    class_<DoFHandler<1>, boost::noncopyable>("DoFHandler_1D", no_init)
-//    ;
-
-    class_<daeConvectionDiffusion_1D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_1D", no_init)
-        .def("__init__",         make_constructor(daepython::daeConvectionDiffusion__init__<1>,
-                                                  default_call_policies(),
-                                                  (  arg("name"),
-                                                     arg("parentModel"),
-                                                     arg("description"),
-                                                     arg("meshFilename"),
-                                                     arg("quadratureFormula"),
-                                                     arg("polynomialOrder"),
-                                                     arg("outputDirectory"),
-                                                     arg("functions"),
-                                                     arg("dirichletBC"),
-                                                     arg("neumannBC")
-                                                  )))
-
-        .add_property("DataOut",                    make_function(&daeConvectionDiffusion_1D::GetDataOut, return_internal_reference<>()) )
-        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_1D, return_value_policy<reference_existing_object> >())
-        .def("AssembleSystem",                      &daeConvectionDiffusion_1D::AssembleSystem)
-        .def("GenerateEquations",                   &daeConvectionDiffusion_1D::GenerateEquations)
-        .def("CondenseHangingNodeConstraints",      &daeConvectionDiffusion_1D::CondenseHangingNodeConstraints)
-        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_1D::InterpolateAndApplyBoundaryValues)
-
-//        .add_property("DirichletBC",    &daeConvectionDiffusion_1D::GetDirichletBC)
-//        .add_property("NeumannBC",      &daeConvectionDiffusion_1D::GetNeumannBC)
-
-//        .def_readonly("Diffusivity",    &daeConvectionDiffusion_1D::m_Diffusivity)
-//        .def_readonly("Velocity",       &daeConvectionDiffusion_1D::m_Velocity)
-//        .def_readonly("Generation",     &daeConvectionDiffusion_1D::m_Generation)
-
-//        .add_property("Diffusivity",    &daeConvectionDiffusion_1D::GetDiffusivity)
-//        .add_property("Velocity",       &daeConvectionDiffusion_1D::GetVelocity)
-//        .add_property("Generation",     &daeConvectionDiffusion_1D::GetGeneration)
+    class_<daeFiniteElementsModel_dealII, boost::noncopyable>("daeFiniteElementsModel_dealII", no_init)
     ;
 
-    class_<daeConvectionDiffusion_2D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_2D", no_init)
-        .def("__init__",         make_constructor(daepython::daeConvectionDiffusion__init__<2>,
+    class_<daeModel_dealII, bases<daeModel>, boost::noncopyable>("daeModel_dealII", no_init)
+        .def(init<string, daeModel*, string, daeFiniteElementsModel_dealII*, string >(( arg("self"),
+                                                                                        arg("name"),
+                                                                                        arg("parentModel"),
+                                                                                        arg("description"),
+                                                                                        arg("fe"),
+                                                                                        arg("outputDirectory")
+                                                                                      )))
+
+        .add_property("DataOut",  make_function(&daeModel_dealII::GetDataOut, return_internal_reference<>()) )
+    ;
+
+    class_<dealiiModel<1>, bases<daeFiniteElementsModel_dealII>, boost::noncopyable>("dealiiModel_1D", no_init)
+        .def("__init__",         make_constructor(daepython::dealiiModel__init__<1>,
                                                   default_call_policies(),
-                                                  (  arg("name"),
-                                                     arg("parentModel"),
-                                                     arg("description"),
-                                                     arg("meshFilename"),
+                                                  (  arg("meshFilename"),
                                                      arg("quadratureFormula"),
                                                      arg("polynomialOrder"),
-                                                     arg("outputDirectory"),
                                                      arg("functions"),
                                                      arg("dirichletBC"),
                                                      arg("neumannBC")
                                                   )))
 
-        .add_property("DataOut",                    make_function(&daeConvectionDiffusion_2D::GetDataOut, return_internal_reference<>()) )
-        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
-        .def("AssembleSystem",                      &daeConvectionDiffusion_2D::AssembleSystem)
-        .def("GenerateEquations",                   &daeConvectionDiffusion_2D::GenerateEquations)
-        .def("CondenseHangingNodeConstraints",      &daeConvectionDiffusion_2D::CondenseHangingNodeConstraints)
-        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_2D::InterpolateAndApplyBoundaryValues)
+//        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
+//        .def("AssembleSystem",                      &daeConvectionDiffusion_2D::AssembleSystem)
+//        .def("GenerateEquations",                   &daeConvectionDiffusion_2D::GenerateEquations)
+//        .def("CondenseHangingNodeConstraints",      &daeConvectionDiffusion_2D::CondenseHangingNodeConstraints)
+//        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_2D::InterpolateAndApplyBoundaryValues)
     ;
     
-    class_<daeConvectionDiffusion_3D, bases<daeModel>, boost::noncopyable>("daeConvectionDiffusion_3D", no_init)
-        .def("__init__",         make_constructor(daepython::daeConvectionDiffusion__init__<3>,
+    class_<dealiiModel<2>, bases<daeFiniteElementsModel_dealII>, boost::noncopyable>("dealiiModel_2D", no_init)
+        .def("__init__",         make_constructor(daepython::dealiiModel__init__<2>,
                                                   default_call_policies(),
-                                                  (  arg("name"),
-                                                     arg("parentModel"),
-                                                     arg("description"),
-                                                     arg("meshFilename"),
+                                                  (  arg("meshFilename"),
                                                      arg("quadratureFormula"),
                                                      arg("polynomialOrder"),
-                                                     arg("outputDirectory"),
                                                      arg("functions"),
                                                      arg("dirichletBC"),
                                                      arg("neumannBC")
                                                   )))
 
-        .add_property("DataOut",                    make_function(&daeConvectionDiffusion_3D::GetDataOut, return_internal_reference<>()) )
-        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_3D, return_value_policy<reference_existing_object> >())
-        .def("AssembleSystem",                      &daeConvectionDiffusion_3D::AssembleSystem)
-        .def("GenerateEquations",                   &daeConvectionDiffusion_3D::GenerateEquations)
-        .def("CondenseHangingNodeConstraints",      &daeConvectionDiffusion_3D::CondenseHangingNodeConstraints)
-        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_3D::InterpolateAndApplyBoundaryValues)
+    ;
+
+    class_<dealiiModel<3>, bases<daeFiniteElementsModel_dealII>, boost::noncopyable>("dealiiModel_3D", no_init)
+        .def("__init__",         make_constructor(daepython::dealiiModel__init__<3>,
+                                                  default_call_policies(),
+                                                  (  arg("meshFilename"),
+                                                     arg("quadratureFormula"),
+                                                     arg("polynomialOrder"),
+                                                     arg("functions"),
+                                                     arg("dirichletBC"),
+                                                     arg("neumannBC")
+                                                  )))
+
     ;
 }
