@@ -224,20 +224,6 @@ BOOST_PYTHON_MODULE(pyDealII)
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daeDealIIDataReporter, boost::noncopyable>("daeDealIIDataReporter", no_init)
-        .def("Connect",				&daeDealIIDataReporter::Connect)
-        .def("Disconnect",			&daeDealIIDataReporter::Disconnect)
-        .def("IsConnected",			&daeDealIIDataReporter::IsConnected)
-        .def("StartRegistration",	&daeDealIIDataReporter::StartRegistration)
-        .def("RegisterDomain",		&daeDealIIDataReporter::RegisterDomain)
-        .def("RegisterVariable",	&daeDealIIDataReporter::RegisterVariable)
-        .def("EndRegistration",		&daeDealIIDataReporter::EndRegistration)
-        .def("StartNewResultSet",	&daeDealIIDataReporter::StartNewResultSet)
-        .def("EndOfData",	    	&daeDealIIDataReporter::EndOfData)
-        .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
-    ;
-
-
     class_< std::vector<unsigned long> >("vector_ulong")
         .def(vector_indexing_suite< std::vector<unsigned long> >())
     ;
@@ -409,23 +395,21 @@ BOOST_PYTHON_MODULE(pyDealII)
         .add_property("faces",              range< return_value_policy<reference_existing_object> >(&dealiiCell_3D::begin_faces, &dealiiCell_3D::end_faces))
     ;
 
-    class_<daeFiniteElementsModel_dealII, boost::noncopyable>("daeFiniteElementsModel_dealII", no_init)
+    class_<daeDealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeDealIIDataReporter", no_init)
+        .def("Connect",				&daeDealIIDataReporter::Connect)
+        .def("Disconnect",			&daeDealIIDataReporter::Disconnect)
+        .def("IsConnected",			&daeDealIIDataReporter::IsConnected)
+        .def("StartRegistration",	&daeDealIIDataReporter::StartRegistration)
+        .def("RegisterDomain",		&daeDealIIDataReporter::RegisterDomain)
+        .def("RegisterVariable",	&daeDealIIDataReporter::RegisterVariable)
+        .def("EndRegistration",		&daeDealIIDataReporter::EndRegistration)
+        .def("StartNewResultSet",	&daeDealIIDataReporter::StartNewResultSet)
+        .def("EndOfData",	    	&daeDealIIDataReporter::EndOfData)
+        .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
     ;
 
-    class_<daeModel_dealII, bases<daeModel>, boost::noncopyable>("daeModel_dealII", no_init)
-        .def(init<string, daeModel*, string, daeFiniteElementsModel_dealII*, string >(( arg("self"),
-                                                                                        arg("name"),
-                                                                                        arg("parentModel"),
-                                                                                        arg("description"),
-                                                                                        arg("fe"),
-                                                                                        arg("outputDirectory")
-                                                                                      )))
-
-        .add_property("DataOut",  make_function(&daeModel_dealII::GetDataOut, return_internal_reference<>()) )
-    ;
-
-    class_<dealiiModel<1>, bases<daeFiniteElementsModel_dealII>, boost::noncopyable>("dealiiModel_1D", no_init)
-        .def("__init__",         make_constructor(daepython::dealiiModel__init__<1>,
+    class_<dealiiFiniteElementObject<1>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_1D", no_init)
+        .def("__init__",         make_constructor(daepython::dealiiFiniteElementObject__init__<1>,
                                                   default_call_policies(),
                                                   (  arg("meshFilename"),
                                                      arg("quadratureFormula"),
@@ -434,6 +418,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                      arg("dirichletBC"),
                                                      arg("neumannBC")
                                                   )))
+        .def("CreateDataReporter", &dealiiFiniteElementObject<1>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
 
 //        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
 //        .def("AssembleSystem",                      &daeConvectionDiffusion_2D::AssembleSystem)
@@ -442,8 +427,8 @@ BOOST_PYTHON_MODULE(pyDealII)
 //        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_2D::InterpolateAndApplyBoundaryValues)
     ;
     
-    class_<dealiiModel<2>, bases<daeFiniteElementsModel_dealII>, boost::noncopyable>("dealiiModel_2D", no_init)
-        .def("__init__",         make_constructor(daepython::dealiiModel__init__<2>,
+    class_<dealiiFiniteElementObject<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_2D", no_init)
+        .def("__init__",         make_constructor(daepython::dealiiFiniteElementObject__init__<2>,
                                                   default_call_policies(),
                                                   (  arg("meshFilename"),
                                                      arg("quadratureFormula"),
@@ -452,11 +437,11 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                      arg("dirichletBC"),
                                                      arg("neumannBC")
                                                   )))
-
+        .def("CreateDataReporter", &dealiiFiniteElementObject<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
     ;
 
-    class_<dealiiModel<3>, bases<daeFiniteElementsModel_dealII>, boost::noncopyable>("dealiiModel_3D", no_init)
-        .def("__init__",         make_constructor(daepython::dealiiModel__init__<3>,
+    class_<dealiiFiniteElementObject<3>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_3D", no_init)
+        .def("__init__",         make_constructor(daepython::dealiiFiniteElementObject__init__<3>,
                                                   default_call_policies(),
                                                   (  arg("meshFilename"),
                                                      arg("quadratureFormula"),
@@ -465,6 +450,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                                                      arg("dirichletBC"),
                                                      arg("neumannBC")
                                                   )))
-
+        .def("CreateDataReporter", &dealiiFiniteElementObject<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
     ;
+
 }

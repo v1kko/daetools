@@ -221,7 +221,6 @@ do
                 compile NLOPT_NLPSolver    "-j1"
                 compile pyNLOPT            "-j1"
                 
-                compile FE_DealII "-j1"
                 compile pyDealII  "-j1"
                 
                 #if [ ${PLATFORM} = "Linux" ]; then
@@ -278,9 +277,8 @@ do
                     compile NLOPT_NLPSolver    "-j1"
                     compile pyNLOPT            "-j1"
 
-#                     compile FE_DealII "-j1"
-#                     compile pyDealII  "-j1"
-#                     
+                    compile pyDealII           "-j1"
+                     
                     #if [ ${PLATFORM} = "Linux" ]; then
                     #  compile LA_Intel_MKL     "-j1"
                     #  compile pyIntelPardiso   "-j1"
@@ -322,8 +320,7 @@ do
                compile pyNLOPT         "-j1"
                ;;
 
-        deal.ii) compile FE_DealII "-j1"
-                 compile pyDealII  "-j1"
+        deal.ii) compile pyDealII  "-j1"
                  ;;
                
         *) echo "??????????????????????"

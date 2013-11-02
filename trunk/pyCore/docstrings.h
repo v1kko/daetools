@@ -318,13 +318,14 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_ExportObjects = ".";
     const char* DOCSTR_daeModel_Export = ".";
 
+const char* DOCSTR_daeSparseMatrixRowIterator = "";
+
 const char* DOCSTR_daeFiniteElementModel = "";
-    const char* DOCSTR_daeFiniteElementModel_init = "";
-    const char* DOCSTR_daeFiniteElementModel_DeclareEquations = "";
-    const char* DOCSTR_daeFiniteElementModel_AssembleEquation = "";
-    const char* DOCSTR_daeFiniteElementModel_CreateFiniteElementEquation = "";
-    const char* DOCSTR_daeFiniteElementModel_VariableRuntimeNodes = "";
-    const char* DOCSTR_daeFiniteElementModel_GetTimeDerivativeRuntimeNodes = "";
+    const char* DOCSTR_daeFiniteElementModel_UpdateEquations = "";
+
+const char* DOCSTR_daeFiniteElementObject = "";
+    const char* DOCSTR_daeFiniteElementObject_CreateDataReporter = "";
+    const char* DOCSTR_daeFiniteElementObject_AssembleSystem = "";
 
 const char* DOCSTR_daeEquationExecutionInfo = "";  
     const char* DOCSTR_daeEquationExecutionInfo_Node = "";  

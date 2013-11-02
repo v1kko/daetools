@@ -94,15 +94,14 @@ class modTutorial(daeModel):
         self.dirichletBC[1] = fnConstantFunction(200)
         self.dirichletBC[2] = fnConstantFunction(250)
         
-        self.fe_dealII = pyDealII.dealiiModel_2D(meshFilename      = os.path.join(os.path.dirname(__file__), 'meshes', "ex49fine.msh"),
-                                                 quadratureFormula = 'QGauss',
-                                                 polynomialOrder   = 1,
-                                                 functions         = self.functions,
-                                                 dirichletBC       = self.dirichletBC,
-                                                 neumannBC         = self.neumannBC)
-        self.fe = pyDealII.daeModel_dealII('Helmholtz', self, 'Modified deal.II step-7 example (steady-state Helmholtz equation)',
-                                           self.fe_dealII,
-                                           os.path.join(os.path.dirname(__file__), 'results'))
+        self.fe_dealII = pyDealII.dealiiFiniteElementObject_2D(meshFilename      = os.path.join(os.path.dirname(__file__), 'meshes', "ex49superfine.msh"),
+                                                               quadratureFormula = 'QGauss',
+                                                               polynomialOrder   = 1,
+                                                               functions         = self.functions,
+                                                               dirichletBC       = self.dirichletBC,
+                                                               neumannBC         = self.neumannBC)
+        #  
+        self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -192,15 +191,16 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     simulation = simTutorial()
     datareporter = daeDelegateDataReporter()
-    #tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = daeDealIIDataReporter(simulation.m.fe.DataOut)
-    #datareporter.AddDataReporter(tcpipDataReporter)
+    tcpipDataReporter = daeTCPIPDataReporter()
+    feDataReporter    = self.fe_dealII.CreateDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
     datareporter.AddDataReporter(feDataReporter)
 
-    # Connect TCP/IP data reporter
-    #simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    #if(tcpipDataReporter.Connect("", simName) == False):
-    #    sys.exit()
+    # Connect datareporters
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(tcpipDataReporter.Connect("", simName) == False):
+        sys.exit()
+    feDataReporter.Connect(os.path.join(os.path.dirname(__file__), 'results'), simName)
 
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 10
@@ -239,14 +239,15 @@ def consoleRun():
     
     # Create two data reporters: TCP/IP and DealII
     tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = daeDealIIDataReporter(simulation.m.fe.DataOut)
+    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
     datareporter.AddDataReporter(feDataReporter)
 
-    # Connect TCP/IP data reporter
+    # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
         sys.exit()
+    feDataReporter.Connect(os.path.join(os.path.dirname(__file__), 'results'), simName)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -257,7 +258,7 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-
+    
     # Save the model report and the runtime model report
     #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
     #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")

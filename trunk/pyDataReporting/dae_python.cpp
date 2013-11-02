@@ -159,25 +159,6 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 		.def("SendVariable",	  	&daeNoOpDataReporter::SendVariable)  
 		;
 
-    class_<daeDataOut, boost::noncopyable>("daeDataOut", DOCSTR_daeDataOut, no_init)
-        .def("SendVariable", &daepython::daeDataOut_def_SendVariable, ( arg("self"), arg("value"), arg("time") ), DOCSTR_daeDataOut_SendVariable)
-    ;
-
-    class_<daeDealIIDataReporter, bases<daeDataReporterLocal>, boost::noncopyable>("daeDealIIDataReporter", no_init)
-        .def(init<const daeDataOut*>(( arg("self"), arg("dataOut") )))
-
-        .def("Connect",				&daeDealIIDataReporter::Connect)
-        .def("Disconnect",			&daeDealIIDataReporter::Disconnect)
-        .def("IsConnected",			&daeDealIIDataReporter::IsConnected)
-        .def("StartRegistration",	&daeDealIIDataReporter::StartRegistration)
-        .def("RegisterDomain",		&daeDealIIDataReporter::RegisterDomain)
-        .def("RegisterVariable",	&daeDealIIDataReporter::RegisterVariable)
-        .def("EndRegistration",		&daeDealIIDataReporter::EndRegistration)
-        .def("StartNewResultSet",	&daeDealIIDataReporter::StartNewResultSet)
-        .def("EndOfData",	    	&daeDealIIDataReporter::EndOfData)
-        .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
-        ;
-
 	class_<daepython::daeDataReporterFileWrapper, bases<daeDataReporterLocal>, boost::noncopyable>("daeDataReporterFile", DOCSTR_daeDataReporterFile, no_init)
         .def(init<>(( arg("self") )))
             

@@ -1455,29 +1455,31 @@ BOOST_PYTHON_MODULE(pyCore)
         */
     ;
 
-    class_<daepython::daeFiniteElementModelWrapper, bases<daeModel>, boost::noncopyable>("daeFiniteElementModel", DOCSTR_daeFiniteElementModel, no_init)
-        .def(init<string, optional<daeModel*, string> >(( arg("self"),
-                                                          arg("name"),
-                                                          arg("parentModel") = NULL,
-                                                          arg("description") = ""
-                                                        ), DOCSTR_daeFiniteElementModel_init))
 
-        // Virtual function that must be implemented in derived classes in python
-        .def("DeclareEquations",            &daepython::daeFiniteElementModelWrapper::DeclareEquations,  &daepython::daeFiniteElementModelWrapper::def_DeclareEquations,
-                                            ( arg("self") ), DOCSTR_daeFiniteElementModel_DeclareEquations)
+    class_<daeSparseMatrixRowIterator, boost::noncopyable>("daeSparseMatrixRowIterator", DOCSTR_daeSparseMatrixRowIterator, no_init)
+    ;
 
-        .def("AssembleEquation",            pure_virtual(&daepython::daeFiniteElementModelWrapper::AssembleEquation),
-                                            ( arg("self"), arg("feEquation") ), DOCSTR_daeFiniteElementModel_AssembleEquation)
+    class_<daeFiniteElementModel, bases<daeModel>, boost::noncopyable>("daeFiniteElementModel", DOCSTR_daeFiniteElementModel, no_init)
+        .def(init<string, daeModel*, string, daeFiniteElementObject* >(( arg("self"),
+                                                                         arg("name"),
+                                                                         arg("parentModel"),
+                                                                         arg("description"),
+                                                                         arg("feObject")
+                                                                      ), DOCSTR_daeModel_init))
 
-        .def("CreateFiniteElementEquation", &daeFiniteElementModel::CreateFiniteElementEquation, return_internal_reference<>(),
-                                            ( arg("self"), arg("name"), arg("domain"), arg("description") = "", arg("scaling") = 1.0),
-                                            DOCSTR_daeFiniteElementModel_CreateFiniteElementEquation)
+        .def("UpdateEquations",  &daeFiniteElementModel::UpdateEquations, ( arg("self"), arg("executionContext") ), DOCSTR_daeModel_UpdateEquations)
+        .def("DeclareEquations", &daeFiniteElementModel::DeclareEquations, ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
+    ;
 
-        .def("GetVariableRuntimeNodes",     &daepython::daeFiniteElementModelWrapper_GetVariableRuntimeNodes, ( arg("self"), arg("variable") ),
-                                            DOCSTR_daeFiniteElementModel_VariableRuntimeNodes)
-
-        .def("GetTimeDerivativeRuntimeNodes", &daepython::daeFiniteElementModelWrapper_GetTimeDerivativeRuntimeNodes, ( arg("self"), arg("variable") ),
-                                              DOCSTR_daeFiniteElementModel_GetTimeDerivativeRuntimeNodes)
+    class_<daepython::daeFiniteElementObjectWrapper, boost::noncopyable>("daeFiniteElementObject", DOCSTR_daeFiniteElementObject, no_init)
+        .def("AssembleSystem", &daepython::daeFiniteElementObjectWrapper::AssembleSystem, ( arg("self") ), DOCSTR_daeFiniteElementObject_AssembleSystem)
+        //.def("RowIterator", &daeFiniteElementObject::RowIterator, ( arg("self") ), DOCSTR_daeFiniteElementObject_RowIterator)
+        //.def("SystemMatrix", &daeFiniteElementObject::SystemMatrix, ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix)
+        //.def("SystemMatrix_dt", &daeFiniteElementObject::SystemMatrix_dt, ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix_dt)
+        //.def("SystemRHS", &daeFiniteElementObject::SystemRHS, ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemRHS)
+        //.def("CreateDataReporter", &daeFiniteElementObject::CreateDataReporter, ( arg("self") ), DOCSTR_daeFiniteElementObject_CreateDataReporter)
+        .def("__str__",			&daepython::daeFiniteElementObject__str__)
+        .def("__repr__",		&daepython::daeFiniteElementObject__repr__)
     ;
 
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", DOCSTR_daeEquationExecutionInfo, no_init)
@@ -1489,10 +1491,6 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("JacobianExpressions", &daepython::daeEquationExecutionInfo_JacobianExpressions, DOCSTR_daeEquationExecutionInfo_JacobianExpressions)
         .add_property("Equation",            make_function(&daeEquationExecutionInfo::GetEquation, return_internal_reference<>()),
                                              DOCSTR_daeEquationExecutionInfo_Equation)
-    ;
-
-    class_<daeFiniteElementEquationExecutionInfo, boost::noncopyable>("daeFiniteElementEquationExecutionInfo", DOCSTR_daeFiniteElementEquationExecutionInfo, no_init)
-        .def("SetNode",   &daeFiniteElementEquationExecutionInfo::SetEvaluationNode, DOCSTR_daeFiniteElementEquationExecutionInfo_Node)
     ;
 
 	class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation", DOCSTR_daeEquation, no_init)
@@ -1512,13 +1510,6 @@ BOOST_PYTHON_MODULE(pyCore)
 		.def("DistributeOnDomain",	&daepython::daeEquation_DistributeOnDomain2, return_internal_reference<>(), 
                                     ( arg("self"), arg("domain"), arg("domainIndexes"), arg("name") = string("") ), DOCSTR_daeEquation_DistributeOnDomain1)
 	;
-
-    class_<daeFiniteElementEquation, bases<daeEquation>, boost::noncopyable>("daeFiniteElementEquation", DOCSTR_daeFiniteElementEquation, no_init)
-        .add_property("EquationExecutionInfos",	&daepython::daeFiniteElementEquation_GetEquationExecutionInfos, DOCSTR_daeFiniteElementEquation_EquationExecutionInfos)
-
-        .def("__str__",			&daepython::daeFiniteElementEquation__str__)
-        .def("__repr__",		&daepython::daeFiniteElementEquation__repr__)
-    ;
 
     class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", DOCSTR_daePortConnection, no_init)
         .add_property("PortFrom",   make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()), DOCSTR_daePortConnection_PortFrom)

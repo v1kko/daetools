@@ -34,7 +34,6 @@
 #include <deal.II/numerics/vector_tools.h>
 #include <deal.II/base/convergence_table.h>
 #include <deal.II/fe/fe_values.h>
-#include "dealii_common.h"
 
 namespace dae
 {

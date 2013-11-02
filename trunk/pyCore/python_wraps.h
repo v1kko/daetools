@@ -110,8 +110,8 @@ string daeModel__str__(const daeModel& self);
 string daeModel__repr__(const daeModel& self);
 string daeEquation__str__(const daeEquation& self);
 string daeEquation__repr__(const daeEquation& self);
-string daeFiniteElementEquation__str__(const daeFiniteElementEquation& self);
-string daeFiniteElementEquation__repr__(const daeFiniteElementEquation& self);
+string daeFiniteElementObject__str__(const daeFiniteElementObject& self);
+string daeFiniteElementObject__repr__(const daeFiniteElementObject& self);
 string daeSTN__str__(const daeSTN& self);
 string daeSTN__repr__(const daeSTN& self);
 string daeIF__str__(const daeIF& self);
@@ -1104,12 +1104,6 @@ boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self);
 boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self);
 
 /*******************************************************
-    daeFiniteElementEquation
-*******************************************************/
-void daeFiniteElementEquation_UpdateEquation(daeFiniteElementEquation& self, boost::python::tuple matK, boost::python::tuple matKdt, boost::python::list arrF);
-boost::python::list daeFiniteElementEquation_GetEquationExecutionInfos(daeFiniteElementEquation& self);
-
-/*******************************************************
 	daeEquationExecutionInfo
 *******************************************************/
 adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self);
@@ -1209,9 +1203,6 @@ void daeModel_ON_EVENT(daeModel& self, daeEventPort* pTriggerEventPort,
                                        boost::python::list userDefinedActions = boost::python::list());
 
 boost::python::dict daeModel_GetOverallIndex_BlockIndex_VariableNameMap(daeModel& self);
-
-void daeModel_DeclareEquations(daeModel& self);
-void daeModel_def_DeclareEquations(daeModel& self);
 boost::python::list daeModel_GetDomains(daeModel& self);
 boost::python::list daeModel_GetParameters(daeModel& self);
 boost::python::list daeModel_GetVariables(daeModel& self);
@@ -1228,42 +1219,21 @@ boost::python::list daeModel_GetPortConnections(daeModel& self);
 boost::python::list daeModel_GetEventPortConnections(daeModel& self);
 
 /*******************************************************
-    daeFiniteElementModel
+    daeFiniteElementObjectWrapper
 *******************************************************/
-class daeFiniteElementModelWrapper : public daeFiniteElementModel,
-                                     public boost::python::wrapper<daeFiniteElementModel>
+class daeFiniteElementObjectWrapper : public daeFiniteElementObject,
+                                      public boost::python::wrapper<daeFiniteElementObject>
 {
 public:
-    daeFiniteElementModelWrapper(void)
+    daeFiniteElementObjectWrapper(void)
     {
     }
 
-    daeFiniteElementModelWrapper(string strName, daeModel* pModel = NULL, string strDescription = "")
-         : daeFiniteElementModel(strName, pModel, strDescription)
+    void AssembleSystem(void)
     {
+        this->get_override("AssembleSystem")();
     }
-
-    void DeclareEquations(void)
-    {
-        if(boost::python::override f = this->get_override("DeclareEquations"))
-            f();
-        else
-            this->daeFiniteElementModel::DeclareEquations();
-    }
-    void def_DeclareEquations(void)
-    {
-        this->daeFiniteElementModel::DeclareEquations();
-    }
-
-    void AssembleEquation(daeFiniteElementEquation* pEquation)
-    {
-        this->get_override("AssembleEquation")(boost::ref(pEquation));
-    }
-
 };
-
-boost::python::list daeFiniteElementModelWrapper_GetVariableRuntimeNodes(daeFiniteElementModel& self, daeVariable& variable);
-boost::python::list daeFiniteElementModelWrapper_GetTimeDerivativeRuntimeNodes(daeFiniteElementModel& self, daeVariable& variable);
 
 /*******************************************************
 	daeState

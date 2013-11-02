@@ -26,8 +26,7 @@ QMAKE_CFLAGS_DEBUG   += -DDEBUG
 QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                   -std=c++11 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
 
-LIBS += $${DAE_DEALII_SOLVER_LIB} \
-        $${DEALII_LIBS} \
+LIBS += $${DEALII_LIBS} \
         $${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
         $${BOOST_PYTHON_LIB} \

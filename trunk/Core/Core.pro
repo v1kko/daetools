@@ -31,9 +31,9 @@ SOURCES += xmlreadstream.cpp \
     nodes.cpp \
     model_port_arrays.cpp \
     model.cpp \
+    finite_element_model.cpp \
     helpers.cpp \
     equation.cpp \
-    equation_fe.cpp \
     domain.cpp \
     dllmain.cpp \
     distributed_variable_array.cpp \

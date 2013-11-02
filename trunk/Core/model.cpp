@@ -4361,5 +4361,6 @@ void daeGetVariableAndIndexesFromNode(adouble& a, daeVariable** variable, std::v
 	}
 }  
 
+
 }
 }

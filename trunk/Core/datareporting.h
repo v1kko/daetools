@@ -69,26 +69,6 @@ public:
 	{
 	}
 
-//	real_t GetPoint(size_t n) const
-//	{
-//        if(m_arrPoints.empty())
-//			daeDeclareAndThrowException(exInvalidPointer);
-//		if(n >= m_nNumberOfPoints)
-//			daeDeclareAndThrowException(exInvalidCall);
-
-//        return m_arrPoints[n];
-//	}
-
-//	void SetPoint(size_t n, real_t value)
-//	{
-//        if(m_arrPoints.empty())
-//			daeDeclareAndThrowException(exInvalidPointer);
-//		if(n >= m_nNumberOfPoints)
-//			daeDeclareAndThrowException(exInvalidCall);
-
-//        m_arrPoints[n] = value;
-//	}
-	
 	std::iostream& operator << (std::iostream& io) const
     {
 		io << m_strName << (int)m_eType << m_nNumberOfPoints;
@@ -117,10 +97,9 @@ public:
             m_arrCoordinates.resize(m_nNumberOfPoints);
             for(size_t i = 0; i < m_nNumberOfPoints; i++)
             {
-                io >> m_arrCoordinates[i];
-//                io >> m_arrCoordinates[i].x;
-//                io >> m_arrCoordinates[i].y;
-//                io >> m_arrCoordinates[i].x;
+                io >> m_arrCoordinates[i].x;
+                io >> m_arrCoordinates[i].y;
+                io >> m_arrCoordinates[i].x;
             }
         }
         else
@@ -358,26 +337,6 @@ public:
 	~daeDataReceiverDomain(void)
 	{
 	}
-
-//	real_t GetPoint(size_t n) const
-//	{
-//        if(m_arrPoints.empty())
-//			daeDeclareAndThrowException(exInvalidPointer);
-//		if(n >= m_nNumberOfPoints)
-//			daeDeclareAndThrowException(exInvalidCall);
-
-//        return m_arrPoints[n];
-//	}
-	
-//	void SetPoint(size_t n, real_t value)
-//	{
-//        if(m_arrPoints.empty())
-//			daeDeclareAndThrowException(exInvalidPointer);
-//		if(n >= m_nNumberOfPoints)
-//			daeDeclareAndThrowException(exInvalidCall);
-
-//        m_arrPoints[n] = value;
-//	}
 
     string                  m_strName;
     daeeDomainType          m_eType;

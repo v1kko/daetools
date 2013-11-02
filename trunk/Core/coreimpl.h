@@ -466,31 +466,6 @@ protected:
 	friend class daeBlock;
 };
 
-/******************************************************************
-    daeFiniteElementEquationExecutionInfo
-*******************************************************************/
-class DAE_CORE_API daeFiniteElementEquationExecutionInfo : public daeEquationExecutionInfo
-{
-public:
-    daeDeclareDynamicClass(daeFiniteElementEquationExecutionInfo)
-    daeFiniteElementEquationExecutionInfo(daeEquation* pEquation);
-    virtual ~daeFiniteElementEquationExecutionInfo(void);
-
-public:
-    virtual void GatherInfo(daeExecutionContext& EC, daeModel* pModel);
-    void SetEvaluationNode(adouble a);
-
-protected:
-
-    friend class daeEquation;
-    friend class daeFiniteElementEquation;
-    friend class daeSTN;
-    friend class daeIF;
-    friend class daeModel;
-    friend class daeState;
-    friend class daeBlock;
-};
-
 /*********************************************************************************************
 	daeDomainIndex
 **********************************************************************************************/
@@ -2580,7 +2555,6 @@ class daeSTN;
 class daeModelArray;
 class daePortArray;
 class daeExternalFunction_t;
-class daeFiniteElementEquation;
 class DAE_CORE_API daeModel : virtual public daeObject,
 						      virtual public daeModel_t
 {
@@ -2858,14 +2832,37 @@ protected:
 	friend class daeVariable;
 	friend class daeParameter;
 	friend class daeEquation;
-    friend class daeFiniteElementEquation;
     friend class daeEquationExecutionInfo;
-    friend class daeFiniteElementEquationExecutionInfo;
     friend class daeDistributedEquationDomainInfo;
 	friend class daeFunctionWithGradients;
 	friend class daeOptimizationVariable;
 	friend class daeVariableWrapper;
 	friend class daeExternalFunction_t;
+};
+
+/******************************************************************
+    daeFiniteElementModel
+******************************************************************/
+class daeFiniteElementModel : public daeModel
+{
+public:
+    daeFiniteElementModel(std::string             strName,
+                          daeModel*               pModel,
+                          std::string             strDescription,
+                          daeFiniteElementObject* fe);
+
+public:
+    void DeclareEquations(void);
+    void UpdateEquations(const daeExecutionContext* pExecutionContext);
+
+protected:
+    daeFiniteElementObject*                 m_fe;
+    //daeDomain                             m_dimension;
+    daeDomain                               m_omega;
+    daeVariable                             m_T;
+    boost::shared_ptr< daeMatrix<double> >  matK;
+    boost::shared_ptr< daeMatrix<double> >  matKdt;
+    boost::shared_ptr< daeArray<double>  >  vecf;
 };
 
 /******************************************************************
@@ -3337,66 +3334,6 @@ public:
 protected:
 	daeVariable* m_pLeft;
 	daeVariable* m_pRight;
-};
-
-/******************************************************************
-    daeFiniteElementModel
-*******************************************************************/
-class daeFiniteElementEquation;
-class DAE_CORE_API daeFiniteElementModel : public daeModel
-{
-public:
-    daeDeclareDynamicClass(daeFiniteElementModel)
-    daeFiniteElementModel(void);
-    daeFiniteElementModel(string strName, daeModel* pModel = NULL, string strDescription = "");
-    virtual ~daeFiniteElementModel(void);
-
-public:
-    void Open(io::xmlTag_t* pTag);
-    void Save(io::xmlTag_t* pTag) const;
-    void OpenRuntime(io::xmlTag_t* pTag);
-    void SaveRuntime(io::xmlTag_t* pTag) const;
-    bool CheckObject(std::vector<string>& strarrErrors) const;
-
-    void GetVariableRuntimeNodes(daeVariable& variable, std::vector<adouble>& arrRuntimeNodes);
-    void GetTimeDerivativeRuntimeNodes(daeVariable& variable, std::vector<adouble>& arrRuntimeNodes);
-
-    daeFiniteElementEquation* CreateFiniteElementEquation(const string& strName, daeDomain* pDomain, string strDescription = "", real_t dScaling = 1.0);
-
-    virtual void AssembleEquation(daeFiniteElementEquation* pEquation);
-
-};
-
-/******************************************************************
-    daeFiniteElementEquation
-*******************************************************************/
-class DAE_CORE_API daeFiniteElementEquation : public daeEquation
-{
-public:
-    daeDeclareDynamicClass(daeFiniteElementEquation)
-    daeFiniteElementEquation(daeFiniteElementModel* fe);
-    virtual ~daeFiniteElementEquation(void);
-
-public:
-    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
-    void Update();
-    bool CheckObject(std::vector<string>& strarrErrors) const;
-
-    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
-    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
-    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
-
-protected:
-    void Initialize();
-
-public:
-    daeFiniteElementModel* m_pFEModel;
-
-    friend class daeSTN;
-    friend class daeModel;
-    friend class daeFiniteElementModel;
-    friend class daeState;
-    friend class daeEquationExecutionInfo;
 };
 
 /******************************************************************

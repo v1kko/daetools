@@ -9,7 +9,8 @@
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 
-#include "dealii_fe_model.h"
+#include "dealii_common.h"
+#include "dealii_datareporter.h"
 
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
@@ -49,36 +50,40 @@ namespace dae
 {
 namespace fe_solver
 {
-/******************************************************************
-    dealiiModel<dim>
-*******************************************************************/
 using namespace dealii;
 
+/******************************************************************
+    dealiiFiniteElementObject<dim>
+*******************************************************************/
 template <int dim>
-class dealiiModel : public daeFiniteElementsModel_dealII
+class dealiiFiniteElementObject : public daeFiniteElementObject
 {
 typedef typename std::map<unsigned int, const dealiiFunction<dim>*> map_Uint_FunctionPtr;
 typedef typename std::map<std::string,  const dealiiFunction<dim>*> map_String_FunctionPtr;
 
 public:
-    dealiiModel(const std::string&            meshFilename,
-                const std::string&            quadratureFormula,
-                unsigned int                  polynomialOrder,
-                const map_String_FunctionPtr& functions,
-                const map_Uint_FunctionPtr&   dirichletBC,
-                const map_Uint_FunctionPtr&   neumannBC);
+    dealiiFiniteElementObject(const std::string&            meshFilename,
+                              const std::string&            quadratureFormula,
+                              unsigned int                  polynomialOrder,
+                              const map_String_FunctionPtr& functions,
+                              const map_Uint_FunctionPtr&   dirichletBC,
+                              const map_Uint_FunctionPtr&   neumannBC);
     
-    virtual ~dealiiModel();
+    virtual ~dealiiFiniteElementObject();
     
 public:
+    virtual void AssembleSystem();
     virtual void setup_system();
-    virtual void assemble_system();
-    virtual void finalize_solution_and_save(const std::string& strOutputDirectory,
-                                            const std::string& strFormat,
-                                            const std::string& strVariableName,
-                                            const double* values,
-                                            size_t n,
-                                            double time);
+
+    virtual daeSparseMatrixRowIterator*  RowIterator(unsigned int row) const;
+    virtual dae::daeMatrix<real_t>*      SystemMatrix() const;
+    virtual dae::daeMatrix<real_t>*      SystemMatrix_dt() const;
+    virtual dae::daeArray<real_t>*       SystemRHS() const;
+    virtual std::vector<std::string>     GetVariableNames() const;
+    virtual unsigned int                 GetNumberOfPointsInDomainOmega() const;
+    virtual daeDealIIDataReporter*       CreateDataReporter();
+
+    void ProcessSolution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n);
 
 public:
     // Additional deal.II specific data
@@ -87,46 +92,50 @@ public:
     SmartPointer< FiniteElement<dim> >   fe;
     ConstraintMatrix                     hanging_node_constraints;
 
+    SparsityPattern        sparsity_pattern;
+    SparseMatrix<double>   system_matrix;
+    SparseMatrix<double>   system_matrix_dt;
+    Vector<double>         system_rhs;
+    Vector<double>         solution;
+
     // Model-specific data
     std::string             m_quadrature_formula;
     map_String_FunctionPtr  funsFunctions;
     map_Uint_FunctionPtr    funsDirichletBC;
     map_Uint_FunctionPtr    funsNeumannBC;
-    int                     m_outputCounter;
 };
 
 template <int dim>
-dealiiModel<dim>::dealiiModel (const std::string&            meshFilename,
-                               const std::string&            quadratureFormula,
-                               unsigned int                  polynomialOrder,
-                               const map_String_FunctionPtr& functions,
-                               const map_Uint_FunctionPtr&   dirichletBC,
-                               const map_Uint_FunctionPtr&   neumannBC):
+dealiiFiniteElementObject<dim>::dealiiFiniteElementObject (const std::string&            meshFilename,
+                                                           const std::string&            quadratureFormula,
+                                                           unsigned int                  polynomialOrder,
+                                                           const map_String_FunctionPtr& functions,
+                                                           const map_Uint_FunctionPtr&   dirichletBC,
+                                                           const map_Uint_FunctionPtr&   neumannBC):
     dof_handler (triangulation),
     fe (new FE_Q<dim>(polynomialOrder)),
     m_quadrature_formula(quadratureFormula),
     funsFunctions(functions),
     funsDirichletBC(dirichletBC),
-    funsNeumannBC(neumannBC),
-    m_outputCounter(0)
+    funsNeumannBC(neumannBC)
 {
 
     GridIn<dim> gridin;
     gridin.attach_triangulation(triangulation);
-    std::ifstream f(meshFilename);
-    gridin.read_msh(f);
+    std::ifstream fi(meshFilename);
+    gridin.read_msh(fi);
 
-    dealiiModel<dim>::setup_system();
+    dealiiFiniteElementObject<dim>::setup_system();
 }
 
 template <int dim>
-dealiiModel<dim>::~dealiiModel ()
+dealiiFiniteElementObject<dim>::~dealiiFiniteElementObject ()
 {
     dof_handler.clear ();
 }
 
 template <int dim>
-void dealiiModel<dim>::setup_system()
+void dealiiFiniteElementObject<dim>::setup_system()
 {
     dof_handler.distribute_dofs (*fe);
     DoFRenumbering::Cuthill_McKee (dof_handler);
@@ -188,7 +197,7 @@ void dealiiModel<dim>::setup_system()
 }
 
 template <int dim>
-void dealiiModel<dim>::assemble_system()
+void dealiiFiniteElementObject<dim>::AssembleSystem()
 {
     if(m_quadrature_formula == "")
     {
@@ -439,20 +448,8 @@ void dealiiModel<dim>::assemble_system()
 }
 
 template <int dim>
-void dealiiModel<dim>::finalize_solution_and_save(const std::string& strOutputDirectory,
-                                                  const std::string& strFormat,
-                                                  const std::string& strVariableName,
-                                                  const double* values,
-                                                  size_t n,
-                                                  double time)
+void dealiiFiniteElementObject<dim>::ProcessSolution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n)
 {
-    std::cout << "finalize_solution_and_save" << std::endl;
-    boost::filesystem::path vtkFilename((boost::format("%4d. %s(t=%f).vtk") % m_outputCounter
-                                                                            % strVariableName
-                                                                            % time).str());
-    boost::filesystem::path vtkPath(strOutputDirectory);
-    vtkPath /= vtkFilename;
-
     for(size_t i = 0; i < n; i++)
         solution[i] = values[i];
 
@@ -461,22 +458,86 @@ void dealiiModel<dim>::finalize_solution_and_save(const std::string& strOutputDi
     hanging_node_constraints.distribute(solution);
     std::cout << "solution after distribute:" << solution << std::endl;
 
-    //std::cout << "strVariableName = " << strVariableName << std::endl;
-    //std::cout << "strFileName = "     << strFileName << std::endl;
-    //std::cout << "solution:" << std::endl;
-    //for(size_t i = 0; i < value->m_nNumberOfPoints; i++)
-    //    std::cout << solution[i] << " ";
-    //std::cout << std::endl;
-    //std::cout << "Report: " << value->m_strName << " at " << time  << std::endl;
-
     DataOut<dim> data_out;
     data_out.attach_dof_handler(dof_handler);
     data_out.add_data_vector(solution, strVariableName);
     data_out.build_patches(fe->degree);
-    std::ofstream output(vtkPath.c_str());
+    std::ofstream output(strFilename);
     data_out.write_vtk(output);
 
-    m_outputCounter++;
+    /*
+        Refinement:
+
+    if(true)
+    {
+        Vector<float> estimated_error_per_cell (triangulation.n_active_cells());
+
+        typename FunctionMap<dim>::type neumann_boundary;
+        KellyErrorEstimator<dim>::estimate (dof_handler,
+                                            QGauss<dim-1>(3),
+                                            neumann_boundary,
+                                            solution,
+                                            estimated_error_per_cell);
+
+        GridRefinement::refine_and_coarsen_fixed_number (triangulation,
+                                                         estimated_error_per_cell,
+                                                         0.4, 0.1);
+
+        triangulation.execute_coarsening_and_refinement ();
+
+        GridOut grid;
+        std::ofstream fo("refined.msh");
+        GridOutFlags::Msh flags(true, true);
+        grid.set_flags(flags);
+        grid.write_msh(triangulation, fo);
+    }
+    */
+}
+
+template <int dim>
+std::vector<std::string> dealiiFiniteElementObject<dim>::GetVariableNames() const
+{
+    std::vector<std::string> strarrNames;
+    strarrNames.push_back("T");
+    return strarrNames;
+}
+
+template <int dim>
+unsigned int dealiiFiniteElementObject<dim>::GetNumberOfPointsInDomainOmega() const
+{
+    // For a scalar variable it is ok
+    return dof_handler.n_dofs();
+}
+
+template <int dim>
+daeSparseMatrixRowIterator* dealiiFiniteElementObject<dim>::RowIterator(unsigned int row) const
+{
+    return new dealiiSparsityPatternIterator(sparsity_pattern.begin(row), sparsity_pattern.end(row));
+}
+
+template <int dim>
+dae::daeMatrix<double>* dealiiFiniteElementObject<dim>::SystemMatrix() const
+{
+    return new daeFEMatrix<double>(system_matrix);
+}
+
+template <int dim>
+dae::daeMatrix<double>* dealiiFiniteElementObject<dim>::SystemMatrix_dt() const
+{
+    return new daeFEMatrix<double>(system_matrix_dt);
+}
+
+template <int dim>
+dae::daeArray<double>* dealiiFiniteElementObject<dim>::SystemRHS() const
+{
+    return new daeFEArray<double>(system_rhs);
+}
+
+template <int dim>
+daeDealIIDataReporter* dealiiFiniteElementObject<dim>::CreateDataReporter()
+{
+    fnProcessSolution callback(boost::bind(&dealiiFiniteElementObject<dim>::ProcessSolution, this, _1, _2, _3, _4));
+    return new daeDealIIDataReporter(callback);
 }
 
 }

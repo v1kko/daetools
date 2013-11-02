@@ -37,11 +37,6 @@ boost::python::list getListFromVector(std::vector<ITEM>& arrItems)
 }
 
 /*******************************************************
-    daeDataOut
-*******************************************************/
-void daeDataOut_def_SendVariable(const daeDataOut& self, const daeDataReporterVariableValue* value, double time);
-
-/*******************************************************
 	daeDataReporter
 *******************************************************/
 boost::python::list GetDataReporterDomains(daeDataReporterVariable& Variable);

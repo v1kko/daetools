@@ -44,11 +44,6 @@ python::numeric::array GetNumPyArrayDataReporterVariableValue(daeDataReporterVar
 	return numpy_array;
 }
 
-void daeDataOut_def_SendVariable(const daeDataOut& self, const daeDataReporterVariableValue* value, double time)
-{
-    self.SendVariable(value, time);
-}
-
 /*******************************************************
 	daeDataReceiverDomain
 *******************************************************/

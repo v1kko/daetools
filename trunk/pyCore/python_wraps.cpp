@@ -619,14 +619,14 @@ string daeEquation__repr__(const daeEquation& self)
                 self.GetDescription() % strDEDIs % strResidual).str();
 }
 
-string daeFiniteElementEquation__str__(const daeFiniteElementEquation& self)
+string daeFiniteElementObject__str__(const daeFiniteElementObject& self)
 {
-    return daeEquation__str__(self);
+    return "";
 }
 
-string daeFiniteElementEquation__repr__(const daeFiniteElementEquation& self)
+string daeFiniteElementObject__repr__(const daeFiniteElementObject& self)
 {
-    return daeEquation__repr__(self);
+    return "";
 }
 
 string daeSTN__str__(const daeSTN& self)
@@ -3805,106 +3805,6 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
 }
 
 /*******************************************************
-    daeFiniteElementEquation
-*******************************************************/
-boost::python::list daeFiniteElementEquation_GetEquationExecutionInfos(daeFiniteElementEquation& self)
-{
-    std::vector<daeEquationExecutionInfo*> ptrarr;
-    self.GetEquationExecutionInfos(ptrarr);
-    return getListFromVectorAndCastPointer<daeEquationExecutionInfo*, daeFiniteElementEquationExecutionInfo*>(ptrarr);
-}
-
-//#include "../IDAS_DAESolver/dae_array_matrix.h"
-void daeFiniteElementEquation_UpdateEquation(daeFiniteElementEquation& self, boost::python::tuple matK, boost::python::tuple matKdt, boost::python::list arrF)
-{
-/*
-    daeCSRMatrix<real_t, int> K, Kdt;
-    std::vector<real_t> f;
-    size_t n, nnz;
-    boost::python::list l_IA, l_JA, l_data;
-    boost::python::ssize_t i, nIA, nJA, ndata;
-
-    // K matrix
-    if(boost::python::len(matK) > 0)
-    {
-        n      = extract<size_t>(matK[0]);
-        nnz    = extract<size_t>(matK[1]);
-        l_IA   = extract<boost::python::list>(matK[2]);
-        l_JA   = extract<boost::python::list>(matK[3]);
-        l_data = extract<boost::python::list>(matK[4]);
-
-        K.Reset(n, nnz, CSR_C_STYLE);
-
-        nIA   = boost::python::len(l_IA);
-        nJA   = boost::python::len(l_JA);
-        ndata = boost::python::len(l_data);
-
-        if(nIA != n+1)
-            daeDeclareAndThrowException(exInvalidCall);
-        if(nJA != nnz)
-            daeDeclareAndThrowException(exInvalidCall);
-        if(ndata != nnz)
-            daeDeclareAndThrowException(exInvalidCall);
-
-        for(i = 0; i < nIA; i++)
-            K.IA[i] = extract<size_t>(l_IA[i]);
-
-        for(i = 0; i < nJA; i++)
-            K.JA[i] = extract<size_t>(l_JA[i]);
-
-        for(i = 0; i < ndata; i++)
-            K.A[i] = extract<real_t>(l_data[i]);
-
-        K.Print();
-    }
-
-    // Kdt matrix
-    if(boost::python::len(matKdt) > 0)
-    {
-        n      = extract<size_t>(matKdt[0]);
-        nnz    = extract<size_t>(matKdt[1]);
-        l_IA   = extract<boost::python::list>(matKdt[2]);
-        l_JA   = extract<boost::python::list>(matKdt[3]);
-        l_data = extract<boost::python::list>(matKdt[4]);
-
-        Kdt.Reset(n, nnz, CSR_C_STYLE);
-
-        nIA   = boost::python::len(l_IA);
-        nJA   = boost::python::len(l_JA);
-        ndata = boost::python::len(l_data);
-
-        if(nIA != n+1)
-            daeDeclareAndThrowException(exInvalidCall);
-        if(nJA != nnz)
-            daeDeclareAndThrowException(exInvalidCall);
-        if(ndata != nnz)
-            daeDeclareAndThrowException(exInvalidCall);
-
-        for(i = 0; i < nIA; i++)
-            Kdt.IA[i] = extract<size_t>(l_IA[i]);
-
-        for(i = 0; i < nJA; i++)
-            Kdt.JA[i] = extract<size_t>(l_JA[i]);
-
-        for(i = 0; i < ndata; i++)
-            Kdt.A[i] = extract<real_t>(l_data[i]);
-
-        Kdt.Print();
-    }
-    // F array
-    if(boost::python::len(arrF) > 0)
-    {
-        n = boost::python::len(arrF);
-        f.resize(n);
-        for(i = 0; i < n; i++)
-            f[i] = extract<real_t>(arrF[i]);
-    }
-
-    self.UpdateEquation(K, Kdt, f);
-*/
-}
-
-/*******************************************************
 	daeEquationExecutionInfo
 *******************************************************/
 adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self)
@@ -4409,23 +4309,6 @@ boost::python::list daeModel_GetEventPortConnections(daeModel& self)
     return getListFromVector(self.EventPortConnections());
 }
 
-
-/*******************************************************
-    daeFiniteElementModel
-*******************************************************/
-boost::python::list daeFiniteElementModelWrapper_GetVariableRuntimeNodes(daeFiniteElementModel& self, daeVariable& variable)
-{
-    std::vector<adouble> arrRuntimeNodes;
-    self.GetVariableRuntimeNodes(variable, arrRuntimeNodes);
-    return getListFromVectorByValue(arrRuntimeNodes);
-}
-
-boost::python::list daeFiniteElementModelWrapper_GetTimeDerivativeRuntimeNodes(daeFiniteElementModel& self, daeVariable& variable)
-{
-    std::vector<adouble> arrRuntimeNodes;
-    self.GetTimeDerivativeRuntimeNodes(variable, arrRuntimeNodes);
-    return getListFromVectorByValue(arrRuntimeNodes);
-}
 
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint

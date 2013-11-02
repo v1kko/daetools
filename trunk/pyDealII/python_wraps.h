@@ -14,9 +14,9 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
-#include "../FE_DealII/dealii_model_implementation.h"
-#include "../FE_DealII/daetools_dealii_fe_model.h"
+#include "../FE_DealII/dealii_fe_object.h"
 #include "../FE_DealII/dealii_iterators.h"
+#include "../dae_develop.h"
 using namespace dae::fe_solver;
 
 namespace daepython
@@ -298,7 +298,7 @@ typedef Function_wrapper<3> Function_wrapper_3D;
 
 
 template<int dim>
-dealiiModel<dim>* dealiiModel__init__(std::string         meshFilename,
+dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string         meshFilename,
                                       string              quadratureFormula,
                                       unsigned int        polynomialOrder,
                                       boost::python::dict dictFunctions,
@@ -346,8 +346,8 @@ dealiiModel<dim>* dealiiModel__init__(std::string         meshFilename,
         mapNeumannBC[key] = fn;
     }
 
-    return new dealiiModel<dim>(meshFilename, quadratureFormula, polynomialOrder,
-                                mapFunctions, mapDirichletBC, mapNeumannBC);
+    return new dealiiFiniteElementObject<dim>(meshFilename, quadratureFormula, polynomialOrder,
+                                              mapFunctions, mapDirichletBC, mapNeumannBC);
 }
 
 }

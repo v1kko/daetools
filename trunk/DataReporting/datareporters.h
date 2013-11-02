@@ -168,50 +168,6 @@ protected:
 	std::vector<daeDataReporter_t*> m_ptrarrDataReporters;
 };
 
-
-/*********************************************************************
-   daeDealIIDataReporter
-*********************************************************************/
-class daeDataOut
-{
-public:
-    virtual ~daeDataOut(){}
-
-    virtual void SendVariable(const daeDataReporterVariableValue* value, double time) const
-    {
-    }
-};
-
-class daeDealIIDataReporter : public daeDataReporterLocal
-{
-public:
-    daeDealIIDataReporter(const daeDataOut* pDataOut) : m_pDataOut(pDataOut)
-    {
-        if(!m_pDataOut)
-            daeDeclareAndThrowException(exInvalidPointer);
-    }
-
-    virtual ~daeDealIIDataReporter(void)
-    {
-    }
-
-public:
-    virtual std::string GetName() const {return "DealIIDataReporter";}
-    virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
-    virtual bool Disconnect(void){return true;}
-    virtual bool IsConnected(void){return true;}
-    virtual bool SendVariable(const daeDataReporterVariableValue* pVariableValue)
-    {
-        if(!m_pDataOut)
-            daeDeclareAndThrowException(exInvalidPointer);
-        m_pDataOut->SendVariable(pVariableValue, m_dCurrentTime);
-        return true;
-    }
-
-public:
-    const daeDataOut* m_pDataOut;
-};
-
 /*********************************************************************
 	daeHybridDataReporterReceiver
 *********************************************************************/

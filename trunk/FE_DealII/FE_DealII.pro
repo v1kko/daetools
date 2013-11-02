@@ -35,13 +35,10 @@ LIBS += $${DEALII_LIBS} \
         $${RT}
 
 SOURCES += stdafx.cpp \
-           dllmain.cpp \
-           fe_solvers.cpp
+           dllmain.cpp
 
 HEADERS += stdafx.h \
            dealii_common.h \
-           dealii_fe_model.h \
-           dealii_model_implementation.h \
-           dealii_iterators.h \
-           daetools_dealii_fe_model.h \
-           fe_solvers.h
+           dealii_fe_object.h \
+           dealii_datareporter.h \
+           dealii_iterators.h

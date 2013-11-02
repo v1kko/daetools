@@ -510,71 +510,39 @@ public:
 	virtual void SetIndexing(bool index) = 0;	
 };
 
-
-/*********************************************************************************************
-	daeValueReference
-**********************************************************************************************/
-/*
-class daeValueReference
+/******************************************************************
+    daeSparseMatrixRowIterator
+*******************************************************************/
+class daeSparseMatrixRowIterator
 {
 public:
-	daeValueReference(void)
-	{
-		m_pdValue                = NULL;
-		m_bOwnershipOnThePointer = true;
-	}
-	
-	daeValueReference(real_t* pdValue, bool bOwnershipOnThePointer)
-	{
-		if(!pdValue)
-			daeDeclareAndThrowException(exInvalidPointer);
-		
-		m_pdValue                = pdValue;
-		m_bOwnershipOnThePointer = bOwnershipOnThePointer;
-	}
+    virtual ~daeSparseMatrixRowIterator(){}
 
-	virtual ~daeValueReference(void)
-	{
-		if(m_bOwnershipOnThePointer)
-			delete m_pdValue;
-		m_pdValue = NULL;
-	}
-
-	real_t GetValue(void) const
-	{
-#ifdef DAE_DEBUG
-		if(!m_pdValue)
-			daeDeclareAndThrowException(exInvalidPointer);
-#endif
-		return *m_pdValue;
-	}
-
-	real_t* GetPointer(void) const
-	{
-		return m_pdValue;
-	}
-	
-	void SetValue(real_t value)
-	{
-#ifdef DAE_DEBUG
-		if(!m_pdValue)
-			daeDeclareAndThrowException(exInvalidPointer);
-#endif
-		*m_pdValue = value;
-	}
-	
-	bool GetOwnershipOnThePointer(void)
-	{
-		return m_bOwnershipOnThePointer;
-	}
-
-protected:
-	real_t* m_pdValue;
-	bool    m_bOwnershipOnThePointer;
+    virtual void first() = 0;
+    virtual void next() = 0;
+    virtual bool isDone() = 0;
+    virtual unsigned int currentItem() = 0;
 };
-*/
 
+/******************************************************************
+    daeFiniteElementObject
+*******************************************************************/
+class daeFiniteElementObject
+{
+public:
+    virtual ~daeFiniteElementObject() {}
 
+    virtual void                        AssembleSystem() = 0;
+
+    virtual daeSparseMatrixRowIterator* RowIterator(unsigned int row) const = 0;
+
+    virtual dae::daeMatrix<real_t>*     SystemMatrix() const = 0;
+    virtual dae::daeMatrix<real_t>*     SystemMatrix_dt() const = 0;
+    virtual dae::daeArray<real_t>*      SystemRHS() const = 0;
+
+    virtual std::vector<std::string>    GetVariableNames() const = 0;
+    virtual unsigned int                GetNumberOfPointsInDomainOmega() const = 0;
+};
 
 }
 
