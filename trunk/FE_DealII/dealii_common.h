@@ -33,17 +33,17 @@ typedef Point<1, double> Point_1D;
 typedef Point<2, double> Point_2D;
 typedef Point<3, double> Point_3D;
 
-/******************************************************************
-    dealiiFunction
-*******************************************************************/
-template <int dim>
-class dealiiFunction : public Function<dim>
-{
-public:
-    dealiiFunction(const unsigned int n_components = 1) : Function<dim>(n_components)
-    {
-    }
-};
+///******************************************************************
+//    dealiiFunction
+//*******************************************************************/
+//template <int dim>
+//class dealiiFunction : public Function<dim>
+//{
+//public:
+//    dealiiFunction(const unsigned int n_components = 1) : Function<dim>(n_components)
+//    {
+//    }
+//};
 
 /*********************************************************
  * daeFEMatrix

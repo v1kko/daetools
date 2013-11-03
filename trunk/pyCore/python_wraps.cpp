@@ -619,16 +619,6 @@ string daeEquation__repr__(const daeEquation& self)
                 self.GetDescription() % strDEDIs % strResidual).str();
 }
 
-string daeFiniteElementObject__str__(const daeFiniteElementObject& self)
-{
-    return "";
-}
-
-string daeFiniteElementObject__repr__(const daeFiniteElementObject& self)
-{
-    return "";
-}
-
 string daeSTN__str__(const daeSTN& self)
 {
     return daeGetStrippedRelativeName(NULL, &self);

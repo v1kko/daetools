@@ -265,6 +265,145 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("add",                         &daepython::SparseMatrix_add)
     ;
 
+    class_<Quadrature<0>, boost::noncopyable>("Quadrature_0D", no_init)
+    ;
+    class_<Quadrature<1>, boost::noncopyable>("Quadrature_1D", no_init)
+    ;
+    class_<Quadrature<2>, boost::noncopyable>("Quadrature_2D", no_init)
+    ;
+    class_<Quadrature<3>, boost::noncopyable>("Quadrature_3D", no_init)
+    ;
+
+    class_<QGauss<0>, bases< Quadrature<0> >, boost::noncopyable>("QGauss_0D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGauss<1>, bases< Quadrature<1> >, boost::noncopyable>("QGauss_1D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGauss<2>, bases< Quadrature<2> >, boost::noncopyable>("QGauss_2D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGauss<3>, bases< Quadrature<3> >, boost::noncopyable>("QGauss_3D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+
+    class_<QGaussLobatto<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLobatto_0D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussLobatto<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLobatto_1D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussLobatto<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussLobatto_2D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussLobatto<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussLobatto_3D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    /*
+    class_<QMidpoint<0>, bases< Quadrature<0> >, boost::noncopyable>("QMidpoint_0D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QMidpoint<1>, bases< Quadrature<1> >, boost::noncopyable>("QMidpoint_1D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QMidpoint<2>, bases< Quadrature<2> >, boost::noncopyable>("QMidpoint_2D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QMidpoint<3>, bases< Quadrature<3> >, boost::noncopyable>("QMidpoint_3D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+
+    class_<QSimpson<0>, bases< Quadrature<0> >, boost::noncopyable>("QSimpson_0D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QSimpson<1>, bases< Quadrature<1> >, boost::noncopyable>("QSimpson_1D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QSimpson<2>, bases< Quadrature<2> >, boost::noncopyable>("QSimpson_2D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QSimpson<3>, bases< Quadrature<3> >, boost::noncopyable>("QSimpson_3D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+
+    class_<QTrapez<0>, bases< Quadrature<0> >, boost::noncopyable>("QTrapez_0D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QTrapez<1>, bases< Quadrature<1> >, boost::noncopyable>("QTrapez_1D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QTrapez<2>, bases< Quadrature<2> >, boost::noncopyable>("QTrapez_2D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QTrapez<3>, bases< Quadrature<3> >, boost::noncopyable>("QTrapez_3D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+
+    class_<QMilne<0>, bases< Quadrature<0> >, boost::noncopyable>("QMilne_0D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QMilne<1>, bases< Quadrature<1> >, boost::noncopyable>("QMilne_1D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QMilne<2>, bases< Quadrature<2> >, boost::noncopyable>("QMilne_2D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QMilne<3>, bases< Quadrature<3> >, boost::noncopyable>("QMilne_3D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+
+    class_<QWeddle<0>, bases< Quadrature<0> >, boost::noncopyable>("QWeddle_0D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QWeddle<1>, bases< Quadrature<1> >, boost::noncopyable>("QWeddle_1D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QWeddle<2>, bases< Quadrature<2> >, boost::noncopyable>("QWeddle_2D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+    class_<QWeddle<3>, bases< Quadrature<3> >, boost::noncopyable>("QWeddle_3D", no_init)
+        .def(init<>((arg("self"))))
+    ;
+
+    class_<QGaussLog<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLog_0D", no_init)
+        .def(init<const unsigned int, optional<bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
+    ;
+    class_<QGaussLog<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLog_1D", no_init)
+        .def(init<const unsigned int, bool>((arg("self"), arg("n_quadrature_points"), arg("revert"))))
+    ;
+    class_<QGaussLog<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussLog_2D", no_init)
+        .def(init<const unsigned int, optional<bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
+    ;
+    class_<QGaussLog<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussLog_3D", no_init)
+        .def(init<const unsigned int, optional<bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
+    ;
+
+    class_<QGaussLogR<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLogR_0D", no_init)
+        .def(init<const unsigned int, optional<const Point<0>, const double, const bool> >((arg("self"), arg("n_quadrature_points"), arg("x0") = Point<0>(), arg("alpha") = 1.0, arg("factor_out_singular_weight") = false)))
+    ;
+    class_<QGaussLogR<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLogR_1D", no_init)
+        .def(init<const unsigned int, const Point<1>, const double, const bool>((arg("self"), arg("n_quadrature_points"), arg("x0"), arg("alpha"), arg("factor_out_singular_weight"))))
+    ;
+    class_<QGaussLogR<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussLogR_2D", no_init)
+        .def(init<const unsigned int, optional<const Point<2>, const double, const bool> >((arg("self"), arg("n_quadrature_points"), arg("x0") = Point<2>(), arg("alpha") = 1.0, arg("factor_out_singular_weight") = false)))
+    ;
+    class_<QGaussLogR<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussLogR_3D", no_init)
+        .def(init<const unsigned int, optional<const Point<3>, const double, const bool> >((arg("self"), arg("n_quadrature_points"), arg("x0") = Point<3>(), arg("alpha") = 1.0, arg("factor_out_singular_weight") = false)))
+    ;
+
+    class_<QGaussOneOverR<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussOneOverR_0D", no_init)
+        .def(init<const unsigned int, const Point<0>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
+    ;
+    class_<QGaussOneOverR<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussOneOverR_1D", no_init)
+        .def(init<const unsigned int, const Point<1>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
+    ;
+    class_<QGaussOneOverR<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussOneOverR_2D", no_init)
+        .def(init<const unsigned int, const Point<2>, const bool>((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight"))))
+    ;
+    class_<QGaussOneOverR<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussOneOverR_3D", no_init)
+        .def(init<const unsigned int, const Point<3>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
+    ;
+    */
 
     class_<FEValuesBase<1>, boost::noncopyable>("FEValuesBase_1D", no_init)
         .def("shape_value",             &FEValuesBase<1>::shape_value,              return_value_policy<copy_const_reference>())
@@ -408,17 +547,28 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
     ;
 
-    class_<dealiiFiniteElementObject<1>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_1D", no_init)
-        .def("__init__",         make_constructor(daepython::dealiiFiniteElementObject__init__<1>,
-                                                  default_call_policies(),
-                                                  (  arg("meshFilename"),
-                                                     arg("quadratureFormula"),
-                                                     arg("polynomialOrder"),
-                                                     arg("functions"),
-                                                     arg("dirichletBC"),
-                                                     arg("neumannBC")
-                                                  )))
-        .def("CreateDataReporter", &dealiiFiniteElementObject<1>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
+    class_<daepython::dealiiFiniteElementObjectWrapper<1>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_1D", no_init)
+        .def(init<string,
+                  unsigned int,
+                  const Quadrature<1>&,
+                  const Quadrature<0>&,
+                  boost::python::dict,
+                  boost::python::dict,
+                  boost::python::dict>(( arg("meshFilename"),
+                                         arg("polynomialOrder"),
+                                         arg("quadrature"),
+                                         arg("faceQuadrature"),
+                                         arg("functions"),
+                                         arg("dirichletBC"),
+                                         arg("neumannBC")
+                                      )))
+        .def("AssembleSystem",      &daepython::dealiiFiniteElementObjectWrapper<1>::AssembleSystem,
+                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_AssembleSystem, ( arg("self") ))
+        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementObjectWrapper<1>::ReAssembleSystem,
+                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_ReAssembleSystem, ( arg("self") ))
+        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<1>::NeedsReAssembling,
+                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_NeedsReAssembling, ( arg("self") ))
+        .def("CreateDataReporter",  &dealiiFiniteElementObject<1>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
 
 //        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
 //        .def("AssembleSystem",                      &daeConvectionDiffusion_2D::AssembleSystem)
@@ -427,30 +577,53 @@ BOOST_PYTHON_MODULE(pyDealII)
 //        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_2D::InterpolateAndApplyBoundaryValues)
     ;
     
-    class_<dealiiFiniteElementObject<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_2D", no_init)
-        .def("__init__",         make_constructor(daepython::dealiiFiniteElementObject__init__<2>,
-                                                  default_call_policies(),
-                                                  (  arg("meshFilename"),
-                                                     arg("quadratureFormula"),
-                                                     arg("polynomialOrder"),
-                                                     arg("functions"),
-                                                     arg("dirichletBC"),
-                                                     arg("neumannBC")
-                                                  )))
-        .def("CreateDataReporter", &dealiiFiniteElementObject<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
+    class_<daepython::dealiiFiniteElementObjectWrapper<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_2D", no_init)
+        .def(init<string,
+                  unsigned int,
+                  const Quadrature<2>&,
+                  const Quadrature<1>&,
+                  boost::python::dict,
+                  boost::python::dict,
+                  boost::python::dict>(( arg("meshFilename"),
+                                         arg("polynomialOrder"),
+                                         arg("quadratureFormula"),
+                                         arg("numberOfQuadraturePoints"),
+                                         arg("functions"),
+                                         arg("dirichletBC"),
+                                         arg("neumannBC")
+                                      )))
+
+        .def("AssembleSystem",      &daepython::dealiiFiniteElementObjectWrapper<2>::AssembleSystem,
+                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_AssembleSystem, ( arg("self") ))
+        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementObjectWrapper<2>::ReAssembleSystem,
+                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_ReAssembleSystem, ( arg("self") ))
+        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<2>::NeedsReAssembling,
+                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_NeedsReAssembling, ( arg("self") ))
+        .def("CreateDataReporter",  &dealiiFiniteElementObject<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
     ;
 
-    class_<dealiiFiniteElementObject<3>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_3D", no_init)
-        .def("__init__",         make_constructor(daepython::dealiiFiniteElementObject__init__<3>,
-                                                  default_call_policies(),
-                                                  (  arg("meshFilename"),
-                                                     arg("quadratureFormula"),
-                                                     arg("polynomialOrder"),
-                                                     arg("functions"),
-                                                     arg("dirichletBC"),
-                                                     arg("neumannBC")
-                                                  )))
-        .def("CreateDataReporter", &dealiiFiniteElementObject<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
+    class_<daepython::dealiiFiniteElementObjectWrapper<3>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_3D", no_init)
+        .def(init<string,
+                  unsigned int,
+                  const Quadrature<3>&,
+                  const Quadrature<2>&,
+                  boost::python::dict,
+                  boost::python::dict,
+                  boost::python::dict>(( arg("meshFilename"),
+                                         arg("polynomialOrder"),
+                                         arg("quadratureFormula"),
+                                         arg("numberOfQuadraturePoints"),
+                                         arg("functions"),
+                                         arg("dirichletBC"),
+                                         arg("neumannBC")
+                                      )))
+        .def("AssembleSystem",      &daepython::dealiiFiniteElementObjectWrapper<3>::AssembleSystem,
+                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_AssembleSystem, ( arg("self") ))
+        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementObjectWrapper<3>::ReAssembleSystem,
+                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_ReAssembleSystem, ( arg("self") ))
+        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<3>::NeedsReAssembling,
+                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_NeedsReAssembling, ( arg("self") ))
+        .def("CreateDataReporter",  &dealiiFiniteElementObject<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
     ;
 
 }

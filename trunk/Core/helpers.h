@@ -534,17 +534,17 @@ inline std::string ReplaceAll(const std::string& strSource, char cFind /*=' '*/,
 
 inline void RemoveAll(std::string& strSource, const std::string& strFind)
 {
-	std::string::size_type iFounded;
+    std::string::size_type iFound;
 	std::string::size_type n = strFind.length();
 
 // Look for the string to find
-	iFounded = strSource.find(strFind);
+    iFound = strSource.find(strFind);
 
 // Iterate through std::string and add substrings
-	while(iFounded != std::string::npos)
+    while(iFound != std::string::npos)
 	{
-		strSource.erase(iFounded, n);
-		iFounded = strSource.find(strFind, iFounded);
+        strSource.erase(iFound, n);
+        iFound = strSource.find(strFind, iFound);
 	}
 } 
 

@@ -116,10 +116,11 @@ public:
 
     superlumt_options_t	m_Options;
     Gstat_t				m_Stats;
+
+    int					m_lwork;
+    void*				m_work;
     int*				m_perm_c;
     int*				m_perm_r;
-	int					m_lwork;
-	void*				m_work;
 #endif
 	
 #ifdef daeSuperLU_CUDA
@@ -127,22 +128,23 @@ public:
 #endif
 	
 #ifdef daeSuperLU
-	SuperMatrix			m_matA;
+    SuperMatrix			m_matA;
 	SuperMatrix			m_matB;
 	SuperMatrix			m_matX;
 	SuperMatrix			m_matL;	
 	SuperMatrix			m_matU;	
+    SuperMatrix			m_matAC;
 
     superlu_options_t	m_Options;
     mem_usage_t			m_memUsage;
     SuperLUStat_t		m_Stats;
+
     int*				m_etree;
     real_t*				m_R;
     real_t*				m_C;
 	char				m_equed;
     real_t				m_ferr;
     real_t				m_berr;
-	SuperMatrix			m_matAC;
 	
 	int					m_lwork;
 	void*				m_work;

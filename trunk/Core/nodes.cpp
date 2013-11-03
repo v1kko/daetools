@@ -3807,7 +3807,6 @@ void adFEMatrixItemNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeN
 
 void adFEMatrixItemNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-    daeDeclareAndThrowException(exInvalidCall);
 }
 
 bool adFEMatrixItemNode::IsLinear(void) const
@@ -3921,7 +3920,6 @@ void adFEVectorItemNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeN
 
 void adFEVectorItemNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-    daeDeclareAndThrowException(exInvalidCall);
 }
 
 bool adFEVectorItemNode::IsLinear(void) const

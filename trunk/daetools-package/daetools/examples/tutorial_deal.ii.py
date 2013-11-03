@@ -73,7 +73,24 @@ class fnConstantVectorFunction(pyDealII.Function_2D):
     
     def vector_value(self, point):
         return self.m_values
-
+        
+class feObject(pyDealII.dealiiFiniteElementObject_2D):
+    def __init__(self, meshFilename, polynomialOrder, quadratureFormula, numberOfQuadraturePoints, functions, dirichletBC, neumannBC):
+        pyDealII.dealiiFiniteElementObject_2D.__init__(self, meshFilename,
+                                                             polynomialOrder,
+                                                             quadratureFormula,
+                                                             numberOfQuadraturePoints,
+                                                             functions,
+                                                             dirichletBC,
+                                                             neumannBC)
+    def AssembleSystem(self):
+        print 'AssembleSystem custom'
+        pyDealII.dealiiFiniteElementObject_2D.AssembleSystem(self)
+    
+    def NeedsReAssembling(self):
+        print 'NeedsReAssembling custom'
+        return True
+        
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -84,24 +101,39 @@ class modTutorial(daeModel):
         self.functions    = {}
         self.functions['Diffusivity'] = fnConstantFunction(1.0)
         self.functions['Velocity']    = fnConstantVectorFunction([0.0, 0.0])
-        self.functions['Generation']  = fnConstantFunction(1.0)
+        self.functions['Generation']  = fnConstantFunction(100.0)
         
         self.neumannBC      = {}
-        #self.neumannBC[0]   = fnConstantFunction(10)
+        self.neumannBC[0]   = fnConstantFunction(10)
+        self.neumannBC[1]   = fnConstantFunction(-20)
+        self.neumannBC[2]   = fnConstantFunction(30)
         
         self.dirichletBC    = {}
-        self.dirichletBC[0] = fnConstantFunction(100)
-        self.dirichletBC[1] = fnConstantFunction(200)
-        self.dirichletBC[2] = fnConstantFunction(250)
+        #self.dirichletBC[0] = fnConstantFunction(100)
+        #self.dirichletBC[1] = fnConstantFunction(200)
+        #self.dirichletBC[2] = fnConstantFunction(250)
         
-        self.fe_dealII = pyDealII.dealiiFiniteElementObject_2D(meshFilename      = os.path.join(os.path.dirname(__file__), 'meshes', "ex49superfine.msh"),
-                                                               quadratureFormula = 'QGauss',
-                                                               polynomialOrder   = 1,
-                                                               functions         = self.functions,
-                                                               dirichletBC       = self.dirichletBC,
-                                                               neumannBC         = self.neumannBC)
-        #  
+        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
+        meshFilename = os.path.join(meshes_dir, 'ex49.msh')
+        #self.fe_dealII = pyDealII.dealiiFiniteElementObject_2D(meshFilename             = meshFilename,
+        #                                                       polynomialOrder          = 2,
+        #                                                       quadratureFormula        = 'QGauss',
+        #                                                       numberOfQuadraturePoints = 3,
+        #                                                       functions                = self.functions,
+        #                                                       dirichletBC              = self.dirichletBC,
+        #                                                       neumannBC                = self.neumannBC)
+        self.fe_dealII = feObject(meshFilename,          # path to mesh
+                                  1,                     # polinomial order
+                                  pyDealII.QGauss_2D(3), # quadrature formula
+                                  pyDealII.QGauss_1D(3), # face quadrature formula
+                                  self.functions,        # dictionary {'Name':Function<dim>} used during assemble
+                                  self.dirichletBC,      # Neumann BC dictionary  {id:Function<dim>}
+                                  self.neumannBC)        # Dirichlet BC dictionary {id:Function<dim>}
+          
         self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)
+        
+        matrix = self.fe_dealII.SystemMatrix()
+        print matrix, matrix.n, matrix.m, matrix(0,0)
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -185,7 +217,7 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        pass
+        self.InitialConditionMode = eQuasySteadyState
     
 # Use daeSimulator class
 def guiRun(app):
@@ -259,9 +291,11 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
     
+    import pprint
+    pprint.pprint([str(eei.Node) for eei in simulation.m.fe.Equations[0].EquationExecutionInfos])
     # Save the model report and the runtime model report
-    #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

@@ -532,7 +532,9 @@ class daeFiniteElementObject
 public:
     virtual ~daeFiniteElementObject() {}
 
-    virtual void                        AssembleSystem() = 0;
+    virtual void                        AssembleSystem()   = 0;
+    virtual bool                        NeedsReAssembling() = 0;
+    virtual void                        ReAssembleSystem() = 0;
 
     virtual daeSparseMatrixRowIterator* RowIterator(unsigned int row) const = 0;
 

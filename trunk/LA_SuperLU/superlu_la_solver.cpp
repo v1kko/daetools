@@ -58,6 +58,15 @@ daeSuperLUSolver::daeSuperLUSolver(void)
     m_work		= NULL;
     m_lwork		= 0;
 
+    memset(&m_matA,     0, sizeof(SuperMatrix));
+    memset(&m_matB,     0, sizeof(SuperMatrix));
+    memset(&m_matX,     0, sizeof(SuperMatrix));
+    memset(&m_matL,     0, sizeof(SuperMatrix));
+    memset(&m_matU,     0, sizeof(SuperMatrix));
+    memset(&m_matAC,    0, sizeof(SuperMatrix));
+    memset(&m_Options,  0, sizeof(superlumt_options_t));
+    memset(&m_Stats,    0, sizeof(Gstat_t));
+
     m_Options.nprocs			= 4;
     m_Options.fact				= EQUILIBRATE;
     m_Options.trans				= NOTRANS;
@@ -96,11 +105,22 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 	m_R			= NULL;
 	m_C			= NULL;
 
-	m_perm_c	= NULL;
-	m_perm_r	= NULL;
-    m_work		= NULL;
     m_lwork		= 0;
-	
+    m_work		= NULL;
+    m_perm_c	= NULL;
+	m_perm_r	= NULL;
+
+    memset(&m_matA,  0, sizeof(SuperMatrix));
+    memset(&m_matB,  0, sizeof(SuperMatrix));
+    memset(&m_matX,  0, sizeof(SuperMatrix));
+    memset(&m_matL,  0, sizeof(SuperMatrix));
+    memset(&m_matU,  0, sizeof(SuperMatrix));
+    memset(&m_matAC, 0, sizeof(SuperMatrix));
+
+    memset(&m_Options,  0, sizeof(superlu_options_t));
+    memset(&m_memUsage, 0, sizeof(mem_usage_t));
+    memset(&m_Stats,    0, sizeof(SuperLUStat_t));
+
     set_default_options(&m_Options);
 //    printf(".. options:\n");
 //    printf("\tFact\t %8d\n", m_Options.Fact);
@@ -250,11 +270,11 @@ int daeSuperLUSolver::Reinitialize(void* ida)
 void daeSuperLUSolver::FreeMemory(void)
 {
 #ifdef daeSuperLU_MT
-    pxgstrf_finalize(&m_Options, &m_matAC);	
-	
 	if(m_bFactorizationDone)
 	{
-		if(m_lwork > 0)
+        pxgstrf_finalize(&m_Options, &m_matAC);
+
+        if(m_lwork > 0)
 		{
 			daeDeclareException(exMiscellanous);
 			e << "daeSuperLU_MT: unsupported case: m_lwork > 0";
@@ -266,14 +286,14 @@ void daeSuperLUSolver::FreeMemory(void)
 			Destroy_CompCol_NCP(&m_matU);
 		}
 	}
-	StatFree(&m_Stats);
+    StatFree(&m_Stats);
 
 	if(m_work && m_lwork > 0)
 		free(m_work);
     m_work	= NULL;
     m_lwork	= 0;
 
-	if(m_vecB)
+    if(m_vecB)
 		SUPERLU_FREE(m_vecB);
 	if(m_vecX)
 		SUPERLU_FREE(m_vecX);
@@ -282,7 +302,7 @@ void daeSuperLUSolver::FreeMemory(void)
 	if(m_perm_r)
 		SUPERLU_FREE(m_perm_r);
 	
-	m_matJacobian.Free();
+    m_matJacobian.Free();
     Destroy_SuperMatrix_Store(&m_matA);
 	Destroy_SuperMatrix_Store(&m_matB);
 	Destroy_SuperMatrix_Store(&m_matX);

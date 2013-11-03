@@ -205,6 +205,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
     
+    class_< std::vector<std::string> >("vector_string")
+        .def(vector_indexing_suite< std::vector<std::string> >())
+    ;
+
 /**************************************************************
 	Global functions
 ***************************************************************/
@@ -1455,8 +1459,32 @@ BOOST_PYTHON_MODULE(pyCore)
         */
     ;
 
+    class_<daepython::daeMatrixWrapper, boost::noncopyable>("daeMatrix", DOCSTR_daeMatrix, no_init)
+        .add_property("n",	 &daeMatrix<real_t>::GetNrows)
+        .add_property("m",	 &daeMatrix<real_t>::GetNcols)
+        .def("__call__",     &daeMatrix<real_t>::GetItem,                ( arg("self"), arg("row"), arg("column") ))
+        .def("SetItem",      pure_virtual(&daeMatrix<real_t>::SetItem),  ( arg("self"), arg("row"), arg("column"), arg("value") ))
+        .def("GetItem",      pure_virtual(&daeMatrix<real_t>::GetItem),  ( arg("self"), arg("row"), arg("column") ))
+        .def("SetItem",      pure_virtual(&daeMatrix<real_t>::SetItem),  ( arg("self"), arg("row"), arg("column"), arg("value") ))
+        .def("GetNrows",     pure_virtual(&daeMatrix<real_t>::GetNrows), ( arg("self") ))
+        .def("GetNcols",     pure_virtual(&daeMatrix<real_t>::GetNcols), ( arg("self") ))
+    ;
 
-    class_<daeSparseMatrixRowIterator, boost::noncopyable>("daeSparseMatrixRowIterator", DOCSTR_daeSparseMatrixRowIterator, no_init)
+    class_<daepython::daeArrayWrapper, boost::noncopyable>("daeArray", DOCSTR_daeArray, no_init)
+        .add_property("n",	 &daeArray<real_t>::GetSize)
+        .def("__call__",     &daeArray<real_t>::GetItem,                 ( arg("self"), arg("item") ))
+        .def("__getitem__",  &daeArray<real_t>::GetItem,                 ( arg("self"), arg("item") ))
+        .def("__setitem__",  &daeArray<real_t>::SetItem,                 ( arg("self"), arg("item"), arg("value") ))
+        .def("GetItem",      pure_virtual(&daeArray<real_t>::GetItem),   ( arg("self"), arg("item") ))
+        .def("SetItem",      pure_virtual(&daeArray<real_t>::SetItem),   ( arg("self"), arg("item"), arg("value") ))
+        .def("GetSize",      pure_virtual(&daeArray<real_t>::GetSize),   ( arg("self") ))
+    ;
+
+    class_<daepython::daeSparseMatrixRowIteratorWrapper, boost::noncopyable>("daeSparseMatrixRowIterator", DOCSTR_daeSparseMatrixRowIterator, no_init)
+        .def("first",           pure_virtual(&daeSparseMatrixRowIterator::first),       ( arg("self") ))
+        .def("next",            pure_virtual(&daeSparseMatrixRowIterator::next),        ( arg("self") ))
+        .def("isDone",          pure_virtual(&daeSparseMatrixRowIterator::isDone),      ( arg("self") ))
+        .def("currentItem",     pure_virtual(&daeSparseMatrixRowIterator::currentItem), ( arg("self") ))
     ;
 
     class_<daeFiniteElementModel, bases<daeModel>, boost::noncopyable>("daeFiniteElementModel", DOCSTR_daeFiniteElementModel, no_init)
@@ -1472,14 +1500,27 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daepython::daeFiniteElementObjectWrapper, boost::noncopyable>("daeFiniteElementObject", DOCSTR_daeFiniteElementObject, no_init)
-        .def("AssembleSystem", &daepython::daeFiniteElementObjectWrapper::AssembleSystem, ( arg("self") ), DOCSTR_daeFiniteElementObject_AssembleSystem)
-        //.def("RowIterator", &daeFiniteElementObject::RowIterator, ( arg("self") ), DOCSTR_daeFiniteElementObject_RowIterator)
-        //.def("SystemMatrix", &daeFiniteElementObject::SystemMatrix, ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix)
-        //.def("SystemMatrix_dt", &daeFiniteElementObject::SystemMatrix_dt, ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix_dt)
-        //.def("SystemRHS", &daeFiniteElementObject::SystemRHS, ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemRHS)
-        //.def("CreateDataReporter", &daeFiniteElementObject::CreateDataReporter, ( arg("self") ), DOCSTR_daeFiniteElementObject_CreateDataReporter)
-        .def("__str__",			&daepython::daeFiniteElementObject__str__)
-        .def("__repr__",		&daepython::daeFiniteElementObject__repr__)
+        .def("AssembleSystem",      pure_virtual(&daeFiniteElementObject::AssembleSystem),    ( arg("self") ), DOCSTR_daeFiniteElementObject_AssembleSystem)
+        .def("ReAssembleSystem",    pure_virtual(&daeFiniteElementObject::ReAssembleSystem),  ( arg("self") ), DOCSTR_daeFiniteElementObject_ReAssembleSystem)
+        .def("NeedsReAssembling",   pure_virtual(&daeFiniteElementObject::NeedsReAssembling), ( arg("self") ), DOCSTR_daeFiniteElementObject_NeedsReAssembling)
+
+        .def("RowIterator",         pure_virtual(&daeFiniteElementObject::RowIterator), return_value_policy<manage_new_object>(),
+                                    ( arg("self"), arg("row") ), DOCSTR_daeFiniteElementObject_RowIterator)
+
+        .def("SystemMatrix",        pure_virtual(&daeFiniteElementObject::SystemMatrix), return_value_policy<manage_new_object>(),
+                                    ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix)
+
+        .def("SystemMatrix_dt",     pure_virtual(&daeFiniteElementObject::SystemMatrix_dt), return_value_policy<manage_new_object>(),
+                                    ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix_dt)
+
+        .def("SystemRHS",           pure_virtual(&daeFiniteElementObject::SystemRHS), return_value_policy<manage_new_object>(),
+                                    ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemRHS)
+
+        .def("GetVariableNames",    pure_virtual(&daeFiniteElementObject::GetVariableNames),
+                                    ( arg("self") ), DOCSTR_daeFiniteElementObject_GetVariableNames)
+
+        .def("GetNumberOfPointsInDomainOmega", pure_virtual(&daeFiniteElementObject::GetNumberOfPointsInDomainOmega),
+                                               ( arg("self") ), DOCSTR_daeFiniteElementObject_GetNumberOfPointsInDomainOmega)
     ;
 
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", DOCSTR_daeEquationExecutionInfo, no_init)

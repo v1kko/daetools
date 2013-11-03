@@ -58,22 +58,17 @@ using namespace dealii;
 template <int dim>
 class dealiiFiniteElementObject : public daeFiniteElementObject
 {
-typedef typename std::map<unsigned int, const dealiiFunction<dim>*> map_Uint_FunctionPtr;
-typedef typename std::map<std::string,  const dealiiFunction<dim>*> map_String_FunctionPtr;
+typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
+typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
 
 public:
-    dealiiFiniteElementObject(const std::string&            meshFilename,
-                              const std::string&            quadratureFormula,
-                              unsigned int                  polynomialOrder,
-                              const map_String_FunctionPtr& functions,
-                              const map_Uint_FunctionPtr&   dirichletBC,
-                              const map_Uint_FunctionPtr&   neumannBC);
-    
+    dealiiFiniteElementObject();
     virtual ~dealiiFiniteElementObject();
     
 public:
     virtual void AssembleSystem();
-    virtual void setup_system();
+    virtual bool NeedsReAssembling();
+    virtual void ReAssembleSystem();
 
     virtual daeSparseMatrixRowIterator*  RowIterator(unsigned int row) const;
     virtual dae::daeMatrix<real_t>*      SystemMatrix() const;
@@ -83,7 +78,18 @@ public:
     virtual unsigned int                 GetNumberOfPointsInDomainOmega() const;
     virtual daeDealIIDataReporter*       CreateDataReporter();
 
-    void ProcessSolution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n);
+    void Initialize(const std::string&            meshFilename,
+                    unsigned int                  polynomialOrder,
+                    const Quadrature<dim>&        quadrature,
+                    const Quadrature<dim-1>&      faceQuadrature,
+                    const map_String_FunctionPtr& functions,
+                    const map_Uint_FunctionPtr&   dirichletBC,
+                    const map_Uint_FunctionPtr&   neumannBC);
+
+protected:
+    void setup_system();
+    void assemble_system();
+    void process_solution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n);
 
 public:
     // Additional deal.II specific data
@@ -98,32 +104,50 @@ public:
     Vector<double>         system_rhs;
     Vector<double>         solution;
 
+    SmartPointer< Quadrature<dim>   >  m_quadrature_formula;
+    SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
+
     // Model-specific data
-    std::string             m_quadrature_formula;
     map_String_FunctionPtr  funsFunctions;
     map_Uint_FunctionPtr    funsDirichletBC;
     map_Uint_FunctionPtr    funsNeumannBC;
 };
 
 template <int dim>
-dealiiFiniteElementObject<dim>::dealiiFiniteElementObject (const std::string&            meshFilename,
-                                                           const std::string&            quadratureFormula,
-                                                           unsigned int                  polynomialOrder,
-                                                           const map_String_FunctionPtr& functions,
-                                                           const map_Uint_FunctionPtr&   dirichletBC,
-                                                           const map_Uint_FunctionPtr&   neumannBC):
-    dof_handler (triangulation),
-    fe (new FE_Q<dim>(polynomialOrder)),
-    m_quadrature_formula(quadratureFormula),
-    funsFunctions(functions),
-    funsDirichletBC(dirichletBC),
-    funsNeumannBC(neumannBC)
+dealiiFiniteElementObject<dim>::dealiiFiniteElementObject():
+    dof_handler (triangulation)
 {
+}
+
+template <int dim>
+void dealiiFiniteElementObject<dim>::Initialize(const std::string&            meshFilename,
+                                                unsigned int                  polynomialOrder,
+                                                const Quadrature<dim>&        quadrature,
+                                                const Quadrature<dim-1>&      faceQuadrature,
+                                                const map_String_FunctionPtr& functions,
+                                                const map_Uint_FunctionPtr&   dirichletBC,
+                                                const map_Uint_FunctionPtr&   neumannBC)
+{
+    fe = SmartPointer< FiniteElement<dim> >(new FE_Q<dim>(polynomialOrder));
+
+    funsFunctions        = functions;
+    funsDirichletBC      = dirichletBC;
+    funsNeumannBC        = neumannBC;
 
     GridIn<dim> gridin;
     gridin.attach_triangulation(triangulation);
-    std::ifstream fi(meshFilename);
-    gridin.read_msh(fi);
+
+    std::ifstream f(meshFilename);
+    std::string extension = boost::filesystem::path(meshFilename).extension().c_str();
+    size_t iFound = extension.find('.');
+    if(iFound != std::string::npos)
+        extension.erase(iFound, 1);
+
+    typename GridIn<dim>::Format format = gridin.parse_format(extension);
+    gridin.read(f, format);
+
+    m_quadrature_formula      = SmartPointer< Quadrature<dim>   >(new Quadrature<dim>  (quadrature));
+    m_face_quadrature_formula = SmartPointer< Quadrature<dim-1> >(new Quadrature<dim-1>(faceQuadrature));
 
     dealiiFiniteElementObject<dim>::setup_system();
 }
@@ -197,15 +221,29 @@ void dealiiFiniteElementObject<dim>::setup_system()
 }
 
 template <int dim>
+bool dealiiFiniteElementObject<dim>::NeedsReAssembling()
+{
+    return false;
+}
+
+template <int dim>
+void dealiiFiniteElementObject<dim>::ReAssembleSystem()
+{
+    this->assemble_system();
+}
+
+template <int dim>
 void dealiiFiniteElementObject<dim>::AssembleSystem()
 {
-    if(m_quadrature_formula == "")
-    {
-    }
+    this->assemble_system();
+}
 
-    QGauss<dim>   quadrature_formula(3);
-    QGauss<dim-1> face_quadrature_formula(3);
-    
+template <int dim>
+void dealiiFiniteElementObject<dim>::assemble_system()
+{
+    Quadrature<dim>&   quadrature_formula      = *m_quadrature_formula;
+    Quadrature<dim-1>& face_quadrature_formula = *m_face_quadrature_formula;
+
     const unsigned int n_q_points      = quadrature_formula.size();
     const unsigned int n_face_q_points = face_quadrature_formula.size();
     
@@ -225,6 +263,9 @@ void dealiiFiniteElementObject<dim>::AssembleSystem()
                                       update_values         | update_quadrature_points  |
                                       update_normal_vectors | update_JxW_values);
 
+    std::vector<types::global_dof_index> mapGlobalDOFtoBoundary;
+    DoFTools::map_dof_to_boundary_indices(dof_handler, mapGlobalDOFtoBoundary);
+
     if(funsFunctions.find("Diffusivity") == funsFunctions.end() || !funsFunctions.find("Diffusivity")->second)
         throw std::runtime_error("Invalid function: Diffusivity");
     if(funsFunctions.find("Generation") == funsFunctions.end() || !funsFunctions.find("Generation")->second)
@@ -232,9 +273,9 @@ void dealiiFiniteElementObject<dim>::AssembleSystem()
     if(funsFunctions.find("Velocity") == funsFunctions.end() || !funsFunctions.find("Velocity")->second)
         throw std::runtime_error("Invalid function: Velocity");
 
-    const dealiiFunction<dim>* funDiffusivity = funsFunctions.find("Diffusivity")->second;
-    const dealiiFunction<dim>* funGeneration  = funsFunctions.find("Generation")->second;
-    const dealiiFunction<dim>* funVelocity    = funsFunctions.find("Velocity")->second;
+    const Function<dim>* funDiffusivity = funsFunctions.find("Diffusivity")->second;
+    const Function<dim>* funGeneration  = funsFunctions.find("Generation")->second;
+    const Function<dim>* funVelocity    = funsFunctions.find("Velocity")->second;
 
     // All DOFs at the boundary ID that have Dirichlet BCs imposed.
     // mapDirichlets: map< boundary_id, map<dof, value> > will be used to apply boundary conditions locally.
@@ -346,7 +387,7 @@ void dealiiFiniteElementObject<dim>::AssembleSystem()
                 else if(funsNeumannBC.find(id) != funsNeumannBC.end())
                 {
                     // Neumann BC
-                    const dealiiFunction<dim>& neumann = *funsNeumannBC.find(id)->second;
+                    const Function<dim>& neumann = *funsNeumannBC.find(id)->second;
 
                     std::cout << (boost::format("  Setting NeumanBC (cell=%d, face=%d, id= %d)[q0] = %f") % cellCounter % face % id % neumann.value(fe_face_values.quadrature_point(0))).str() << std::endl;
 
@@ -369,6 +410,31 @@ void dealiiFiniteElementObject<dim>::AssembleSystem()
                 }
             }
         }
+
+        std::cout << std::endl << std::endl;
+        std::cout << "cell_matrix_dt before removing boundary dofs:" << std::endl;
+        cell_matrix_dt.print_formatted(std::cout);
+
+        types::global_dof_index id;
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            id = mapGlobalDOFtoBoundary[ local_dof_indices[i] ];
+            if(id != numbers::invalid_dof_index)
+            {
+                // This dof IS on one of boundaries; therefore, remove its contributions to the cell_matrix_dt
+
+                // 1. Reset the whole row 'i'
+                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                    cell_matrix_dt(i, j) = 0;
+
+                // 2. Reset the whole column 'i'
+                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                    cell_matrix_dt(j, i) = 0;
+            }
+        }
+        std::cout << "cell_matrix_dt after removing boundary dofs:" << std::endl;
+        cell_matrix_dt.print_formatted(std::cout);
+        std::cout << std::endl << std::endl;
 
         /* ACHTUNG, ACHTUNG!!
            Apply Dirichlet boundary conditions locally (conflicts with refined grids with hanging nodes!!)
@@ -431,8 +497,8 @@ void dealiiFiniteElementObject<dim>::AssembleSystem()
     // Apply Dirichlet boundary conditions on the system matrix and rhs
     for(typename map_Uint_FunctionPtr::const_iterator it = funsDirichletBC.begin(); it != funsDirichletBC.end(); it++)
     {
-        const unsigned int id          =  it->first;
-        const dealiiFunction<dim>& fun = *it->second;
+        const unsigned int id    =  it->first;
+        const Function<dim>& fun = *it->second;
         std::cout << "Setting DirichletBC at id " << id << " with sample value " << fun.value(Point<dim>(0,0,0)) << std::endl;
 
         std::map<types::global_dof_index, double> boundary_values;
@@ -445,10 +511,14 @@ void dealiiFiniteElementObject<dim>::AssembleSystem()
                                             solution,
                                             system_rhs);
     }
+
+    std::cout << "system_matrix_dt:" << std::endl;
+    system_matrix_dt.print(std::cout);
+    std::cout << std::endl << std::endl;
 }
 
 template <int dim>
-void dealiiFiniteElementObject<dim>::ProcessSolution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n)
+void dealiiFiniteElementObject<dim>::process_solution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n)
 {
     for(size_t i = 0; i < n; i++)
         solution[i] = values[i];
@@ -536,7 +606,7 @@ dae::daeArray<double>* dealiiFiniteElementObject<dim>::SystemRHS() const
 template <int dim>
 daeDealIIDataReporter* dealiiFiniteElementObject<dim>::CreateDataReporter()
 {
-    fnProcessSolution callback(boost::bind(&dealiiFiniteElementObject<dim>::ProcessSolution, this, _1, _2, _3, _4));
+    fnProcessSolution callback(boost::bind(&dealiiFiniteElementObject<dim>::process_solution, this, _1, _2, _3, _4));
     return new daeDealIIDataReporter(callback);
 }
 

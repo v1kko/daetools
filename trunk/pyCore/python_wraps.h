@@ -110,8 +110,6 @@ string daeModel__str__(const daeModel& self);
 string daeModel__repr__(const daeModel& self);
 string daeEquation__str__(const daeEquation& self);
 string daeEquation__repr__(const daeEquation& self);
-string daeFiniteElementObject__str__(const daeFiniteElementObject& self);
-string daeFiniteElementObject__repr__(const daeFiniteElementObject& self);
 string daeSTN__str__(const daeSTN& self);
 string daeSTN__repr__(const daeSTN& self);
 string daeIF__str__(const daeIF& self);
@@ -1218,6 +1216,90 @@ boost::python::list daeModel_GetEquations(daeModel& self);
 boost::python::list daeModel_GetPortConnections(daeModel& self);
 boost::python::list daeModel_GetEventPortConnections(daeModel& self);
 
+
+class daeArrayWrapper : public daeArray<real_t>,
+                        public boost::python::wrapper< daeArray<real_t> >
+{
+public:
+    virtual ~daeArrayWrapper(void){}
+
+public:
+    real_t GetItem(size_t i) const
+    {
+        return this->get_override("GetItem")(i);
+    }
+
+    void SetItem(size_t i, real_t value)
+    {
+        this->get_override("SetItem")(i, value);
+    }
+
+    size_t GetSize(void) const
+    {
+        return this->get_override("GetSize")();
+    }
+};
+
+class daeMatrixWrapper : public daeMatrix<real_t>,
+                         public boost::python::wrapper< daeMatrix<real_t> >
+{
+public:
+    virtual ~daeMatrixWrapper(void){}
+
+public:
+    real_t GetItem(size_t row, size_t col) const
+    {
+        return this->get_override("GetItem")(row, col);
+    }
+
+    void SetItem(size_t row, size_t col, real_t value)
+    {
+        this->get_override("SetItem")(row, col, value);
+    }
+
+    size_t GetNrows(void) const
+    {
+        return this->get_override("GetNrows")();
+    }
+
+    size_t GetNcols(void) const
+    {
+        return this->get_override("GetNcols")();
+    }
+};
+
+/*******************************************************
+    daeSparseMatrixRowIteratorWrapper
+*******************************************************/
+class daeSparseMatrixRowIteratorWrapper : public daeSparseMatrixRowIterator,
+                                          public boost::python::wrapper<daeSparseMatrixRowIterator>
+{
+public:
+    daeSparseMatrixRowIteratorWrapper(void)
+    {
+    }
+
+    void first()
+    {
+        this->get_override("first")();
+    }
+
+    void next()
+    {
+        this->get_override("next")();
+    }
+
+    bool isDone()
+    {
+        return this->get_override("isDone")();
+    }
+
+    unsigned int currentItem()
+    {
+        return this->get_override("currentItem")();
+    }
+};
+
 /*******************************************************
     daeFiniteElementObjectWrapper
 *******************************************************/
@@ -1229,9 +1311,60 @@ public:
     {
     }
 
-    void AssembleSystem(void)
+    void AssembleSystem()
     {
         this->get_override("AssembleSystem")();
+    }
+
+    void ReAssembleSystem()
+    {
+        this->get_override("ReAssembleSystem")();
+    }
+
+    bool NeedsReAssembling()
+    {
+        return this->get_override("NeedsReAssembling")();
+    }
+
+    daeSparseMatrixRowIterator* RowIterator(unsigned int row) const
+    {
+        return this->get_override("RowIterator")(row);
+    }
+
+    dae::daeMatrix<real_t>* SystemMatrix() const
+    {
+        return this->get_override("SystemMatrix")();
+    }
+
+    dae::daeMatrix<real_t>* SystemMatrix_dt() const
+    {
+        return this->get_override("SystemMatrix_dt")();
+    }
+
+    dae::daeArray<real_t>* SystemRHS() const
+    {
+        return this->get_override("SystemRHS")();
+    }
+
+    std::vector<std::string> GetVariableNames() const
+    {
+        boost::python::list l = this->get_override("GetVariableNames")();
+
+        std::vector<std::string> arrNames;
+        boost::python::ssize_t n = boost::python::len(l);
+        arrNames.resize(n);
+
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            arrNames[i] = boost::python::extract<std::string>(l[i]);
+        }
+
+        return arrNames;
+    }
+
+    unsigned int GetNumberOfPointsInDomainOmega() const
+    {
+        return this->get_override("GetNumberOfPointsInDomainOmega")();
     }
 };
 

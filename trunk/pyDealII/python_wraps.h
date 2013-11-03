@@ -220,11 +220,11 @@ void SparseMatrix_add(SparseMatrix<double>& self, unsigned int i, unsigned int j
 
 
 template<int dim>
-class Function_wrapper : public dealiiFunction<dim>,
-                         public boost::python::wrapper< dealiiFunction<dim> >
+class Function_wrapper : public Function<dim>,
+                         public boost::python::wrapper< Function<dim> >
 {
 public:
-    Function_wrapper(unsigned int n_components = 1) : dealiiFunction<dim>(n_components)
+    Function_wrapper(unsigned int n_components = 1) : Function<dim>(n_components)
     {
 
     }
@@ -236,12 +236,12 @@ public:
 
     unsigned int dimension() const
     {
-        return dealiiFunction<dim>::dimension;
+        return Function<dim>::dimension;
     }
 
     unsigned int n_components() const
     {
-        return dealiiFunction<dim>::n_components;
+        return Function<dim>::n_components;
     }
 
     double value(const Point<dim> &p, const unsigned int component = 0) const
@@ -296,7 +296,106 @@ typedef Function_wrapper<1> Function_wrapper_1D;
 typedef Function_wrapper<2> Function_wrapper_2D;
 typedef Function_wrapper<3> Function_wrapper_3D;
 
+template<int dim>
+class dealiiFiniteElementObjectWrapper : public dealiiFiniteElementObject<dim>,
+                                         public boost::python::wrapper< dealiiFiniteElementObject<dim> >
+{
+public:
+    dealiiFiniteElementObjectWrapper(std::string                meshFilename,
+                                     unsigned int               polynomialOrder,
+                                     const Quadrature<dim>&     quadrature,
+                                     const Quadrature<dim-1>&   faceQuadrature,
+                                     boost::python::dict        dictFunctions,
+                                     boost::python::dict        dictDirichletBC,
+                                     boost::python::dict        dictNeumannBC)
+    {
+        boost::python::list keys;
+        std::map<unsigned int, const Function<dim>*> mapDirichletBC;
+        std::map<unsigned int, const Function<dim>*> mapNeumannBC;
+        std::map<std::string,  const Function<dim>*> mapFunctions;
 
+        keys = dictFunctions.keys();
+        for(int i = 0; i < len(keys); ++i)
+        {
+            boost::python::object key_ = keys[i];
+            boost::python::object val_ = dictFunctions[key_];
+
+            std::string          key = boost::python::extract<std::string>(key_);
+            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
+
+            mapFunctions[key] = fn;
+        }
+
+        keys = dictDirichletBC.keys();
+        for(int i = 0; i < len(keys); ++i)
+        {
+            boost::python::object key_ = keys[i];
+            boost::python::object val_ = dictDirichletBC[key_];
+
+            unsigned int         key = boost::python::extract<unsigned int>(key_);
+            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
+
+            mapDirichletBC[key] = fn;
+        }
+
+        keys = dictNeumannBC.keys();
+        for(int i = 0; i < len(keys); ++i)
+        {
+            boost::python::object key_ = keys[i];
+            boost::python::object val_ = dictNeumannBC[key_];
+
+            unsigned int         key = boost::python::extract<unsigned int>(key_);
+            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
+
+            mapNeumannBC[key] = fn;
+        }
+
+        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, mapFunctions, mapDirichletBC, mapNeumannBC);
+    }
+
+    ~dealiiFiniteElementObjectWrapper()
+    {
+    }
+
+public:
+    void AssembleSystem()
+    {
+        if(boost::python::override f = this->get_override("AssembleSystem"))
+            f();
+        else
+            this->dealiiFiniteElementObject<dim>::AssembleSystem();
+    }
+    void def_AssembleSystem()
+    {
+        this->dealiiFiniteElementObject<dim>::AssembleSystem();
+    }
+
+    void ReAssembleSystem()
+    {
+        if(boost::python::override f = this->get_override("ReAssembleSystem"))
+            f();
+        else
+            this->dealiiFiniteElementObject<dim>::ReAssembleSystem();
+    }
+    void def_ReAssembleSystem()
+    {
+        this->dealiiFiniteElementObject<dim>::ReAssembleSystem();
+    }
+
+    bool NeedsReAssembling()
+    {
+        if(boost::python::override f = this->get_override("NeedsReAssembling"))
+            return f();
+        else
+            return this->dealiiFiniteElementObject<dim>::NeedsReAssembling();
+    }
+    bool def_NeedsReAssembling()
+    {
+        return this->dealiiFiniteElementObject<dim>::NeedsReAssembling();
+    }
+};
+
+/*
 template<int dim>
 dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string         meshFilename,
                                       string              quadratureFormula,
@@ -306,9 +405,9 @@ dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string   
                                       boost::python::dict dictNeumannBC)
 {
     boost::python::list keys;
-    std::map<unsigned int, const dealiiFunction<dim>*> mapDirichletBC;
-    std::map<unsigned int, const dealiiFunction<dim>*> mapNeumannBC;
-    std::map<std::string,  const dealiiFunction<dim>*> mapFunctions;
+    std::map<unsigned int, const Function<dim>*> mapDirichletBC;
+    std::map<unsigned int, const Function<dim>*> mapNeumannBC;
+    std::map<std::string,  const Function<dim>*> mapFunctions;
 
     keys = dictFunctions.keys();
     for(int i = 0; i < len(keys); ++i)
@@ -317,7 +416,7 @@ dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string   
         boost::python::object val_ = dictFunctions[key_];
 
         std::string                key = boost::python::extract<std::string>(key_);
-        const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
+        const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
         mapFunctions[key] = fn;
     }
@@ -329,7 +428,7 @@ dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string   
         boost::python::object val_ = dictDirichletBC[key_];
 
         unsigned int               key = boost::python::extract<unsigned int>(key_);
-        const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
+        const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
         mapDirichletBC[key] = fn;
     }
@@ -341,7 +440,7 @@ dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string   
         boost::python::object val_ = dictNeumannBC[key_];
 
         unsigned int               key = boost::python::extract<unsigned int>(key_);
-        const dealiiFunction<dim>* fn  = boost::python::extract<const dealiiFunction<dim>*>(val_);
+        const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
         mapNeumannBC[key] = fn;
     }
@@ -349,6 +448,7 @@ dealiiFiniteElementObject<dim>* dealiiFiniteElementObject__init__(std::string   
     return new dealiiFiniteElementObject<dim>(meshFilename, quadratureFormula, polynomialOrder,
                                               mapFunctions, mapDirichletBC, mapNeumannBC);
 }
+*/
 
 }
 

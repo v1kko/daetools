@@ -2125,7 +2125,7 @@ protected:
 	daePort*				m_pParentPort;
 	friend class daePort;
 	friend class daeModel;
-    friend class daeFiniteElementModel;
+    friend class daeFiniteElementEquation;
     friend class daeAction;
 	friend class daePortConnection;
 	friend class daePartialDerivativeVariable;
@@ -2832,37 +2832,13 @@ protected:
 	friend class daeVariable;
 	friend class daeParameter;
 	friend class daeEquation;
+    friend class daeFiniteElementEquation;
     friend class daeEquationExecutionInfo;
     friend class daeDistributedEquationDomainInfo;
 	friend class daeFunctionWithGradients;
 	friend class daeOptimizationVariable;
 	friend class daeVariableWrapper;
 	friend class daeExternalFunction_t;
-};
-
-/******************************************************************
-    daeFiniteElementModel
-******************************************************************/
-class daeFiniteElementModel : public daeModel
-{
-public:
-    daeFiniteElementModel(std::string             strName,
-                          daeModel*               pModel,
-                          std::string             strDescription,
-                          daeFiniteElementObject* fe);
-
-public:
-    void DeclareEquations(void);
-    void UpdateEquations(const daeExecutionContext* pExecutionContext);
-
-protected:
-    daeFiniteElementObject*                 m_fe;
-    //daeDomain                             m_dimension;
-    daeDomain                               m_omega;
-    daeVariable                             m_T;
-    boost::shared_ptr< daeMatrix<double> >  matK;
-    boost::shared_ptr< daeMatrix<double> >  matKdt;
-    boost::shared_ptr< daeArray<double>  >  vecf;
 };
 
 /******************************************************************
@@ -3512,6 +3488,66 @@ public:
 						size_t nEquationIndex, 
 						const string& strDescription);
 	virtual ~daeMeasuredVariable(void);
+};
+
+/******************************************************************
+    daeFiniteElementModel
+******************************************************************/
+class daeFiniteElementEquation;
+class DAE_CORE_API daeFiniteElementModel : public daeModel
+{
+public:
+    daeFiniteElementModel(std::string             strName,
+                          daeModel*               pModel,
+                          std::string             strDescription,
+                          daeFiniteElementObject* fe);
+
+public:
+    void DeclareEquations(void);
+    void UpdateEquations(const daeExecutionContext* pExecutionContext);
+
+protected:
+    daeFiniteElementEquation* CreateFiniteElementEquation(const string& strName, daeDomain* pDomain, string strDescription = "", real_t dScaling = 1.0);
+
+protected:
+    daeFiniteElementObject*                 m_fe;
+    //daeDomain                             m_dimension;
+    daeDomain                               m_omega;
+    daeVariable                             m_T;
+    boost::shared_ptr< daeMatrix<double> >  matK;
+    boost::shared_ptr< daeMatrix<double> >  matKdt;
+    boost::shared_ptr< daeArray<double>  >  vecf;
+
+    friend class daeFiniteElementEquation;
+};
+
+/******************************************************************
+    daeFiniteElementEquation
+*******************************************************************/
+class DAE_CORE_API daeFiniteElementEquation : public daeEquation
+{
+public:
+    daeDeclareDynamicClass(daeFiniteElementEquation)
+    daeFiniteElementEquation(const daeFiniteElementModel& feModel, const daeVariable& variable, size_t startRow, size_t endRow);
+    virtual ~daeFiniteElementEquation(void);
+
+public:
+    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
+    bool CheckObject(std::vector<string>& strarrErrors) const;
+
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
+
+public:
+    const daeFiniteElementModel&  m_FEModel;
+    const daeVariable&            m_Variable;
+    const size_t                  m_startRow;
+    const size_t                  m_endRow;
+
+    friend class daeModel;
+    friend class daeFiniteElementModel;
+    friend class daeEquationExecutionInfo;
 };
 
 /******************************************************************
