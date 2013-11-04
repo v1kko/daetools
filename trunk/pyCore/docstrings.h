@@ -185,6 +185,7 @@ const char* DOCSTR_daeVariable = "";
     const char* DOCSTR_daeVariable_npyValues = "";  
     const char* DOCSTR_daeVariable_npyTimeDerivatives = "";
     const char* DOCSTR_daeVariable_npyIDs = "";
+    const char* DOCSTR_daeVariable_npyGatheredIDs = "";
     const char* DOCSTR_daeVariable_DistributeOnDomain = "";  
     const char* DOCSTR_daeVariable_GetDomainIndexesMap = "";  
 
@@ -323,6 +324,8 @@ const char* DOCSTR_daeMatrix = "";
 const char* DOCSTR_daeArray = "";
 
 const char* DOCSTR_daeSparseMatrixRowIterator = "";
+
+const char* DOCSTR_daeSparseMatrixRowIterator_python = "";
 
 const char* DOCSTR_daeFiniteElementModel = "";
     const char* DOCSTR_daeFiniteElementModel_UpdateEquations = "";

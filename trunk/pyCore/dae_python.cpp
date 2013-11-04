@@ -208,6 +208,24 @@ BOOST_PYTHON_MODULE(pyCore)
     class_< std::vector<std::string> >("vector_string")
         .def(vector_indexing_suite< std::vector<std::string> >())
     ;
+    class_< std::vector<double> >("vector_double")
+        .def(vector_indexing_suite< std::vector<double> >())
+    ;
+    class_< std::vector<float> >("vector_float")
+        .def(vector_indexing_suite< std::vector<float> >())
+    ;
+    class_< std::vector<unsigned int> >("vector_uint")
+        .def(vector_indexing_suite< std::vector<unsigned int> >())
+    ;
+    class_< std::vector<unsigned long> >("vector_ulong")
+        .def(vector_indexing_suite< std::vector<unsigned long> >())
+    ;
+    class_< std::vector<int> >("vector_int")
+        .def(vector_indexing_suite< std::vector<int> >())
+    ;
+    class_< std::vector<long> >("vector_long")
+        .def(vector_indexing_suite< std::vector<long> >())
+    ;
 
 /**************************************************************
 	Global functions
@@ -938,6 +956,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("npyValues",          &daepython::daeVariable_Values,           DOCSTR_daeVariable_npyValues)
         .add_property("npyTimeDerivatives", &daepython::daeVariable_TimeDerivatives,  DOCSTR_daeVariable_npyTimeDerivatives)
         .add_property("npyIDs",             &daepython::daeVariable_IDs,              DOCSTR_daeVariable_npyIDs)
+        .add_property("npyGatheredIDs",     &daepython::daeVariable_GatheredIDs,      DOCSTR_daeVariable_npyGatheredIDs)
 
 		.def("__str__",	  &daepython::daeVariable__str__)
         .def("__repr__",  &daepython::daeVariable__repr__)
@@ -1211,9 +1230,14 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                       ), DOCSTR_daePort_init))
 
         .add_property("Type",			&daePort::GetType,                  DOCSTR_daePort_Type)
+
         .add_property("Domains",		&daepython::daePort_GetDomains,     DOCSTR_daePort_Domains)
         .add_property("Parameters",		&daepython::daePort_GetParameters,  DOCSTR_daePort_Parameters)
         .add_property("Variables",		&daepython::daePort_GetVariables,   DOCSTR_daePort_Variables)
+
+        .add_property("dictDomains",	&daepython::daePort_dictDomains,    DOCSTR_daePort_Domains)
+        .add_property("dictParameters",	&daepython::daePort_dictParameters, DOCSTR_daePort_Parameters)
+        .add_property("dictVariables",	&daepython::daePort_dictVariables,  DOCSTR_daePort_Variables)
 
 		.def("__str__",		    		&daepython::daePort__str__)
         .def("__repr__",				&daepython::daePort__repr__)
@@ -1375,6 +1399,22 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ComponentArrays",		&daepython::daeModel_GetComponentArrays,        DOCSTR_daeModel_ComponentArrays)
         .add_property("PortConnections",		&daepython::daeModel_GetPortConnections,        DOCSTR_daeModel_PortConnections)
         .add_property("EventPortConnections",	&daepython::daeModel_GetEventPortConnections,   DOCSTR_daeModel_EventPortConnections)
+
+        .add_property("dictDomains",				&daepython::daeModel_dictDomains,                DOCSTR_daeModel_Domains)
+        .add_property("dictParameters",				&daepython::daeModel_dictParameters,             DOCSTR_daeModel_Parameters)
+        .add_property("dictVariables",				&daepython::daeModel_dictVariables,              DOCSTR_daeModel_Variables)
+        .add_property("dictEquations",				&daepython::daeModel_dictEquations,              DOCSTR_daeModel_Equations)
+        .add_property("dictPorts",					&daepython::daeModel_dictPorts,                  DOCSTR_daeModel_Ports)
+        .add_property("dictEventPorts",				&daepython::daeModel_dictEventPorts,             DOCSTR_daeModel_EventPorts)
+        .add_property("dictOnEventActions",			&daepython::daeModel_dictOnEventActions,         DOCSTR_daeModel_OnEventActions)
+        .add_property("dictOnConditionActions",		&daepython::daeModel_dictOnConditionActions,     DOCSTR_daeModel_OnConditionActions)
+        .add_property("dictSTNs",					&daepython::daeModel_dictSTNs,                   DOCSTR_daeModel_STNs)
+        .add_property("dictComponents",				&daepython::daeModel_dictComponents,             DOCSTR_daeModel_Components)
+        .add_property("dictPortArrays",				&daepython::daeModel_dictPortArrays,             DOCSTR_daeModel_PortArrays)
+        .add_property("dictComponentArrays",		&daepython::daeModel_dictComponentArrays,        DOCSTR_daeModel_ComponentArrays)
+        .add_property("dictPortConnections",		&daepython::daeModel_dictPortConnections,        DOCSTR_daeModel_PortConnections)
+        .add_property("dictEventPortConnections",	&daepython::daeModel_dictEventPortConnections,   DOCSTR_daeModel_EventPortConnections)
+
         .add_property("IsModelDynamic",			&daeModel::IsModelDynamic,                      DOCSTR_daeModel_IsModelDynamic)
         .add_property("ModelType",	   		    &daeModel::GetModelType,                        DOCSTR_daeModel_ModelType)
         .add_property("InitialConditionMode",	&daeModel::GetInitialConditionMode,
@@ -1485,6 +1525,11 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("next",            pure_virtual(&daeSparseMatrixRowIterator::next),        ( arg("self") ))
         .def("isDone",          pure_virtual(&daeSparseMatrixRowIterator::isDone),      ( arg("self") ))
         .def("currentItem",     pure_virtual(&daeSparseMatrixRowIterator::currentItem), ( arg("self") ))
+        .def("__iter__",        &daepython::daeSparseMatrixRowIterator_iter, return_value_policy<manage_new_object>(), ( arg("self") ))
+    ;
+
+    class_<daepython::daeSparseMatrixRowIterator__iter__, boost::noncopyable>("daeSparseMatrixRowIterator__iter__", DOCSTR_daeSparseMatrixRowIterator, no_init)
+        .def("next",  &daepython::daeSparseMatrixRowIterator__iter__::next, ( arg("self") ))
     ;
 
     class_<daeFiniteElementModel, bases<daeModel>, boost::noncopyable>("daeFiniteElementModel", DOCSTR_daeFiniteElementModel, no_init)
@@ -1581,7 +1626,8 @@ BOOST_PYTHON_MODULE(pyCore)
 
     class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN", DOCSTR_daeSTN, no_init)
         .add_property("ActiveState", &daeSTN::GetActiveState2, &daeSTN::SetActiveState2, DOCSTR_daeSTN_ActiveState)
-        .add_property("States",      &daepython::GetStatesSTN,                           DOCSTR_daeSTN_States)
+        .add_property("States",      &daepython::daeSTN_States,                          DOCSTR_daeSTN_States)
+        .add_property("dictStates",  &daepython::daeSTN_dictStates,                      DOCSTR_daeSTN_States)
         .add_property("Type",	     &daeSTN::GetType, &daeSTN::SetType,                 DOCSTR_daeSTN_Type)
 
         .def("__str__",				&daepython::daeSTN__str__)

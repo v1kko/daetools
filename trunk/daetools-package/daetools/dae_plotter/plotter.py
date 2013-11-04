@@ -76,10 +76,20 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D.setStatusTip('New 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)
 
-        plotVTK = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Open VTK plot...', self)
-        plotVTK.setShortcut('Ctrl+4')
-        plotVTK.setStatusTip('Open VTK plot from file')
-        self.connect(plotVTK, QtCore.SIGNAL('triggered()'), self.slotOpenVTK)
+        plotVTK_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Open 2D VTK plot from file...', self)
+        plotVTK_2D.setShortcut('Ctrl+4')
+        plotVTK_2D.setStatusTip('Open 2D VTK plot from file')
+        self.connect(plotVTK_2D, QtCore.SIGNAL('triggered()'), self.slotOpenVTK_2D)
+
+        saveVTKasImages_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Export 2D VTK files to PNG images...', self)
+        saveVTKasImages_2D.setShortcut('Ctrl+5')
+        saveVTKasImages_2D.setStatusTip('Export 2D VTK files to PNG images...')
+        self.connect(saveVTKasImages_2D, QtCore.SIGNAL('triggered()'), self.slotSaveVTKFilesAsImages_2D)
+
+        animateVTKFiles_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Animate 2D VTK plots...', self)
+        animateVTKFiles_2D.setShortcut('Ctrl+6')
+        animateVTKFiles_2D.setStatusTip('Animate 2D VTK plots...')
+        self.connect(animateVTKFiles_2D, QtCore.SIGNAL('triggered()'), self.slotAnimateVTKFiles_2D)
 
         openTemplate = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Open 2D template...', self)
         openTemplate.setShortcut('Ctrl+T')
@@ -107,7 +117,9 @@ class daeMainWindow(QtGui.QMainWindow):
         plot.addSeparator()
         plot.addAction(openTemplate)
         plot.addSeparator()
-        plot.addAction(plotVTK)
+        plot.addAction(plotVTK_2D)
+        plot.addAction(saveVTKasImages_2D)
+        plot.addAction(animateVTKFiles_2D)
 
         help = menubar.addMenu('&Help')
         help.addAction(about)
@@ -121,7 +133,7 @@ class daeMainWindow(QtGui.QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(openTemplate)
         self.toolbar.addSeparator()
-        self.toolbar.addAction(plotVTK)
+        self.toolbar.addAction(plotVTK_2D)
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
@@ -160,7 +172,7 @@ class daeMainWindow(QtGui.QMainWindow):
             del plot3D
 
     #@QtCore.pyqtSlot()
-    def slotOpenVTK(self):
+    def slotOpenVTK_2D(self):
         filename = str(QtGui.QFileDialog.getOpenFileName(self, "Choose VTK File", '', "VTK Files (*.vtk)"))
         if filename == '':
             return
@@ -170,7 +182,38 @@ class daeMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
 
-        daeMayavi3DPlot.showVTKFile(filename)
+        daeMayavi3DPlot.showVTKFile_2D(filename)
+
+    #@QtCore.pyqtSlot()
+    def slotSaveVTKFilesAsImages_2D(self):
+        sourceFolder = str(QtGui.QFileDialog.getExistingDirectory(self, "Choose the source folder with VTK files", '', QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+        if sourceFolder == '':
+            return
+            
+        destinationFolder = str(QtGui.QFileDialog.getExistingDirectory(self, "Choose the destination folder for generated PNG images", '', QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+        if destinationFolder == '':
+            return
+            
+        try:
+            from mayavi_plot3d import daeMayavi3DPlot
+        except Exception, e:
+            QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
+            return
+
+        daeMayavi3DPlot.saveVTKFilesAsImages_2D(sourceFolder, destinationFolder)
+        
+    #@QtCore.pyqtSlot()
+    def slotAnimateVTKFiles_2D(self):
+        folder = str(QtGui.QFileDialog.getExistingDirectory(self, "Choose the folder with VTK files", '', QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+        if folder == '':
+            return
+        try:
+            from mayavi_plot3d import daeMayavi3DPlot
+        except Exception, e:
+            QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
+            return
+
+        daeMayavi3DPlot.animateVTKFiles_2D(folder)
 
     #@QtCore.pyqtSlot()
     def slotOpenTemplate(self):

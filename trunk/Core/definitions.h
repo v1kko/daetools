@@ -544,6 +544,7 @@ public:
 
     virtual std::vector<std::string>    GetVariableNames() const = 0;
     virtual unsigned int                GetNumberOfPointsInDomainOmega() const = 0;
+    virtual std::vector<unsigned int>   GetDOFtoBoundaryMap() = 0;
 };
 
 }

@@ -28,6 +28,17 @@
 namespace daepython
 {
 template<typename ITEM>
+boost::python::dict getDictFromObjectArray(const std::vector<ITEM>& arrObjects)
+{
+    boost::python::dict d;
+
+    for(size_t i = 0; i < arrObjects.size(); i++)
+        d[ arrObjects[i]->GetName() ] = boost::ref(arrObjects[i]);
+
+    return d;
+}
+
+template<typename ITEM>
 boost::python::list getListFromVector(const std::vector<ITEM>& arrItems)
 {
     boost::python::list l;
@@ -808,6 +819,7 @@ quantity daeVariable_GetVariableQuantity8(daeVariable& self, size_t n1, size_t n
 boost::python::object daeVariable_Values(daeVariable& var);
 boost::python::object daeVariable_TimeDerivatives(daeVariable& var);
 boost::python::object daeVariable_IDs(daeVariable& var);
+boost::python::object daeVariable_GatheredIDs(daeVariable& var);
 boost::python::dict   daeVariable_GetDomainsIndexesMap(daeVariable& self, size_t nIndexBase);
 
 adouble VariableFunctionCall0(daeVariable& var);
@@ -1088,6 +1100,10 @@ boost::python::list daePort_GetDomains(daePort& self);
 boost::python::list daePort_GetParameters(daePort& self);
 boost::python::list daePort_GetVariables(daePort& self);
 
+boost::python::dict daePort_dictDomains(daePort& self);
+boost::python::dict daePort_dictParameters(daePort& self);
+boost::python::dict daePort_dictVariables(daePort& self);
+
 /*******************************************************
 	daeEventPort
 *******************************************************/
@@ -1124,7 +1140,8 @@ boost::python::list daePortConnection_GetEquations(daePortConnection& self);
 /*******************************************************
 	daeSTN
 *******************************************************/
-boost::python::list GetStatesSTN(daeSTN& self);
+boost::python::list daeSTN_States(daeSTN& self);
+boost::python::dict daeSTN_dictStates(daeSTN& self);
 
 /*******************************************************
 	daeOnEventActions
@@ -1216,6 +1233,21 @@ boost::python::list daeModel_GetEquations(daeModel& self);
 boost::python::list daeModel_GetPortConnections(daeModel& self);
 boost::python::list daeModel_GetEventPortConnections(daeModel& self);
 
+boost::python::dict daeModel_dictDomains(daeModel& self);
+boost::python::dict daeModel_dictParameters(daeModel& self);
+boost::python::dict daeModel_dictVariables(daeModel& self);
+boost::python::dict daeModel_dictPorts(daeModel& self);
+boost::python::dict daeModel_dictEventPorts(daeModel& self);
+boost::python::dict daeModel_dictOnEventActions(daeModel& self);
+boost::python::dict daeModel_dictOnConditionActions(daeModel& self);
+boost::python::dict daeModel_dictPortArrays(daeModel& self);
+boost::python::dict daeModel_dictComponents(daeModel& self);
+boost::python::dict daeModel_dictComponentArrays(daeModel& self);
+boost::python::dict daeModel_dictSTNs(daeModel& self);
+boost::python::dict daeModel_dictEquations(daeModel& self);
+boost::python::dict daeModel_dictPortConnections(daeModel& self);
+boost::python::dict daeModel_dictEventPortConnections(daeModel& self);
+
 
 class daeArrayWrapper : public daeArray<real_t>,
                         public boost::python::wrapper< daeArray<real_t> >
@@ -1301,6 +1333,36 @@ public:
 };
 
 /*******************************************************
+    daeSparseMatrixRowIterator_python
+*******************************************************/
+class daeSparseMatrixRowIterator__iter__
+{
+public:
+    daeSparseMatrixRowIterator__iter__(daeSparseMatrixRowIterator& iter)
+        : m_iter(iter)
+    {
+    }
+
+    unsigned int next()
+    {
+        if(m_iter.isDone())
+        {
+            PyErr_SetString(PyExc_StopIteration, "The end of the row reached.");
+            boost::python::throw_error_already_set();
+        }
+
+        unsigned int item = m_iter.currentItem();
+        m_iter.next();
+        return item;
+    }
+
+public:
+    daeSparseMatrixRowIterator& m_iter;
+};
+
+daeSparseMatrixRowIterator__iter__* daeSparseMatrixRowIterator_iter(daeSparseMatrixRowIterator& self);
+
+/*******************************************************
     daeFiniteElementObjectWrapper
 *******************************************************/
 class daeFiniteElementObjectWrapper : public daeFiniteElementObject,
@@ -1365,6 +1427,22 @@ public:
     unsigned int GetNumberOfPointsInDomainOmega() const
     {
         return this->get_override("GetNumberOfPointsInDomainOmega")();
+    }
+
+    std::vector<unsigned int> GetDOFtoBoundaryMap()
+    {
+        boost::python::list l = this->get_override("GetDOFtoBoundaryMap")();
+
+        std::vector<unsigned int> mapDOFtoBoundary;
+        boost::python::ssize_t n = boost::python::len(l);
+        mapDOFtoBoundary.resize(n);
+
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            mapDOFtoBoundary[i] = boost::python::extract<unsigned int>(l[i]);
+        }
+
+        return mapDOFtoBoundary;
     }
 };
 

@@ -2299,6 +2299,41 @@ boost::python::object daeVariable_IDs(daeVariable& var)
     }
 }
 
+boost::python::object daeVariable_GatheredIDs(daeVariable& var)
+{
+    size_t i, k, nType, nDomains, nStart, nEnd;
+    npy_intp* dimensions;
+    vector<daeDomain_t*> ptrarrDomains;
+
+    nType = NPY_INT;
+    var.GetDomains(ptrarrDomains);
+    nDomains = ptrarrDomains.size();
+    daeModel* pModel = dynamic_cast<daeModel*>(var.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+
+    if(nDomains == 0)
+    {
+        return boost::python::object(pDataProxy->GetVariableTypeGathered(var.GetOverallIndex()));
+    }
+    else
+    {
+        dimensions = new npy_intp[nDomains];
+        for(i = 0; i < nDomains; i++)
+            dimensions[i] = ptrarrDomains[i]->GetNumberOfPoints();
+        nStart = var.GetOverallIndex();
+        nEnd   = var.GetOverallIndex() + var.GetNumberOfPoints();
+
+        boost::python::numeric::array numpy_array(static_cast<boost::python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains, dimensions, nType))));
+        npy_int* values = static_cast<npy_int*>(PyArray_DATA(numpy_array.ptr()));
+
+        for(k = 0, i = nStart; i < nEnd; i++, k++)
+            values[k] = static_cast<npy_int>(pDataProxy->GetVariableTypeGathered(i));
+
+        delete[] dimensions;
+        return numpy_array;
+    }
+}
+
 boost::python::dict daeVariable_GetDomainsIndexesMap(daeVariable& self, size_t nIndexBase)
 {
    // Returns dictionary {integer : [list of integers]}
@@ -3743,6 +3778,21 @@ boost::python::list daePort_GetVariables(daePort& self)
     return getListFromVector(self.Variables());
 }
 
+boost::python::dict daePort_dictDomains(daePort& self)
+{
+    return getDictFromObjectArray(self.Domains());
+}
+
+boost::python::dict daePort_dictParameters(daePort& self)
+{
+    return getDictFromObjectArray(self.Parameters());
+}
+
+boost::python::dict daePort_dictVariables(daePort& self)
+{
+    return getDictFromObjectArray(self.Variables());
+}
+
 /*******************************************************
 	daeEventPort
 *******************************************************/
@@ -3872,11 +3922,14 @@ boost::python::list daePortConnection_GetEquations(daePortConnection& self)
 /*******************************************************
 	daeSTN
 *******************************************************/
-boost::python::list GetStatesSTN(daeSTN& self)
+boost::python::list daeSTN_States(daeSTN& self)
 {
-    std::vector<daeState_t*> ptrarrStates;
-	self.GetStates(ptrarrStates);
-    return getListFromVectorAndCastPointer<daeState_t*, daeState*>(ptrarrStates);
+    return getListFromVector(self.States());
+}
+
+boost::python::dict daeSTN_dictStates(daeSTN& self)
+{
+    return getDictFromObjectArray(self.States());
 }
 
 /*******************************************************
@@ -3933,6 +3986,14 @@ boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActio
     return getListFromVector(self.UserDefinedActions());
 }
 
+/*******************************************************
+    daeSparseMatrixRowIterator_python
+*******************************************************/
+daeSparseMatrixRowIterator__iter__* daeSparseMatrixRowIterator_iter(daeSparseMatrixRowIterator& self)
+{
+    self.first();
+    return new daeSparseMatrixRowIterator__iter__(self);
+}
 
 /*******************************************************
     daeModel
@@ -4299,6 +4360,76 @@ boost::python::list daeModel_GetEventPortConnections(daeModel& self)
     return getListFromVector(self.EventPortConnections());
 }
 
+
+boost::python::dict daeModel_dictDomains(daeModel& self)
+{
+    return getDictFromObjectArray(self.Domains());
+}
+
+boost::python::dict daeModel_dictParameters(daeModel& self)
+{
+    return getDictFromObjectArray(self.Parameters());
+}
+
+boost::python::dict daeModel_dictVariables(daeModel& self)
+{
+    return getDictFromObjectArray(self.Variables());
+}
+
+boost::python::dict daeModel_dictPorts(daeModel& self)
+{
+    return getDictFromObjectArray(self.Ports());
+}
+
+boost::python::dict daeModel_dictEventPorts(daeModel& self)
+{
+    return getDictFromObjectArray(self.EventPorts());
+}
+
+boost::python::dict daeModel_dictOnEventActions(daeModel& self)
+{
+    return getDictFromObjectArray(self.OnEventActions());
+}
+
+boost::python::dict daeModel_dictOnConditionActions(daeModel& self)
+{
+    return getDictFromObjectArray(self.OnConditionActions());
+}
+
+boost::python::dict daeModel_dictPortArrays(daeModel& self)
+{
+    return getDictFromObjectArray(self.PortArrays());
+}
+
+boost::python::dict daeModel_dictComponents(daeModel& self)
+{
+    return getDictFromObjectArray(self.Models());
+}
+
+boost::python::dict daeModel_dictComponentArrays(daeModel& self)
+{
+    return getDictFromObjectArray(self.ModelArrays());
+}
+
+boost::python::dict daeModel_dictSTNs(daeModel& self)
+{
+    return getDictFromObjectArray(self.STNs());
+}
+
+boost::python::dict daeModel_dictEquations(daeModel& self)
+{
+    return getDictFromObjectArray(self.Equations());
+}
+
+boost::python::dict daeModel_dictPortConnections(daeModel& self)
+{
+    return getDictFromObjectArray(self.PortConnections());
+}
+
+boost::python::dict daeModel_dictEventPortConnections(daeModel& self)
+{
+    return getDictFromObjectArray(self.EventPortConnections());
+}
 
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint

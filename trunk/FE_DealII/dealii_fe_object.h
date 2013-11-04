@@ -76,6 +76,7 @@ public:
     virtual dae::daeArray<real_t>*       SystemRHS() const;
     virtual std::vector<std::string>     GetVariableNames() const;
     virtual unsigned int                 GetNumberOfPointsInDomainOmega() const;
+    std::vector<unsigned int>            GetDOFtoBoundaryMap();
     virtual daeDealIIDataReporter*       CreateDataReporter();
 
     void Initialize(const std::string&            meshFilename,
@@ -341,10 +342,10 @@ void dealiiFiniteElementObject<dim>::assemble_system()
                                                 )
                                                 *
                                                 funDiffusivity->value(fe_values.quadrature_point(q_point))
-                                                +
-                                             /* Helmholtz term (u) */
-                                                fe_values.shape_value(i, q_point) *
-                                                fe_values.shape_value(j, q_point)
+//                                                +
+//                                             /* Helmholtz term (u) */
+//                                                fe_values.shape_value(i, q_point) *
+//                                                fe_values.shape_value(j, q_point)
 
                                              /* Convection (nothing at the moment) */
                                                 /* +
@@ -389,14 +390,14 @@ void dealiiFiniteElementObject<dim>::assemble_system()
                     // Neumann BC
                     const Function<dim>& neumann = *funsNeumannBC.find(id)->second;
 
-                    std::cout << (boost::format("  Setting NeumanBC (cell=%d, face=%d, id= %d)[q0] = %f") % cellCounter % face % id % neumann.value(fe_face_values.quadrature_point(0))).str() << std::endl;
+                    //std::cout << (boost::format("  Setting NeumanBC (cell=%d, face=%d, id= %d)[q0] = %f") % cellCounter % face % id % neumann.value(fe_face_values.quadrature_point(0))).str() << std::endl;
 
                     for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                     {
                         // Achtung, Achtung! For the Convection-Diffusion-Reaction system only:
                         //                   the sign '-neumann' since we have the term: -integral(q * φ(i) * dΓq)
                         for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                            cell_rhs(i) += neumann.value(fe_face_values.quadrature_point(q_point))
+                            cell_rhs(i) += -neumann.value(fe_face_values.quadrature_point(q_point))
                                            *
                                            fe_face_values.shape_value(i, q_point)
                                            *
@@ -410,10 +411,6 @@ void dealiiFiniteElementObject<dim>::assemble_system()
                 }
             }
         }
-
-        std::cout << std::endl << std::endl;
-        std::cout << "cell_matrix_dt before removing boundary dofs:" << std::endl;
-        cell_matrix_dt.print_formatted(std::cout);
 
         types::global_dof_index id;
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
@@ -432,9 +429,6 @@ void dealiiFiniteElementObject<dim>::assemble_system()
                     cell_matrix_dt(j, i) = 0;
             }
         }
-        std::cout << "cell_matrix_dt after removing boundary dofs:" << std::endl;
-        cell_matrix_dt.print_formatted(std::cout);
-        std::cout << std::endl << std::endl;
 
         /* ACHTUNG, ACHTUNG!!
            Apply Dirichlet boundary conditions locally (conflicts with refined grids with hanging nodes!!)
@@ -499,7 +493,8 @@ void dealiiFiniteElementObject<dim>::assemble_system()
     {
         const unsigned int id    =  it->first;
         const Function<dim>& fun = *it->second;
-        std::cout << "Setting DirichletBC at id " << id << " with sample value " << fun.value(Point<dim>(0,0,0)) << std::endl;
+
+        //std::cout << "Setting DirichletBC at id " << id << " with sample value " << fun.value(Point<dim>(0,0,0)) << std::endl;
 
         std::map<types::global_dof_index, double> boundary_values;
         VectorTools::interpolate_boundary_values (dof_handler,
@@ -511,10 +506,6 @@ void dealiiFiniteElementObject<dim>::assemble_system()
                                             solution,
                                             system_rhs);
     }
-
-    std::cout << "system_matrix_dt:" << std::endl;
-    system_matrix_dt.print(std::cout);
-    std::cout << std::endl << std::endl;
 }
 
 template <int dim>
@@ -523,10 +514,12 @@ void dealiiFiniteElementObject<dim>::process_solution(const std::string& strFile
     for(size_t i = 0; i < n; i++)
         solution[i] = values[i];
 
+    //std::cout << "solution after solve:" << solution << std::endl;
+
     // We may call distribute() on solution to fix hanging nodes
-    std::cout << "solution after solve:" << solution << std::endl;
     hanging_node_constraints.distribute(solution);
-    std::cout << "solution after distribute:" << solution << std::endl;
+
+    //std::cout << "solution after distribute:" << solution << std::endl;
 
     DataOut<dim> data_out;
     data_out.attach_dof_handler(dof_handler);
@@ -601,6 +594,14 @@ template <int dim>
 dae::daeArray<double>* dealiiFiniteElementObject<dim>::SystemRHS() const
 {
     return new daeFEArray<double>(system_rhs);
+}
+
+template <int dim>
+std::vector<unsigned int> dealiiFiniteElementObject<dim>::GetDOFtoBoundaryMap()
+{
+    std::vector<types::global_dof_index> mapGlobalDOFtoBoundary;
+    DoFTools::map_dof_to_boundary_indices(dof_handler, mapGlobalDOFtoBoundary);
+    return mapGlobalDOFtoBoundary;
 }
 
 template <int dim>

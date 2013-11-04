@@ -88,8 +88,7 @@ class feObject(pyDealII.dealiiFiniteElementObject_2D):
         pyDealII.dealiiFiniteElementObject_2D.AssembleSystem(self)
     
     def NeedsReAssembling(self):
-        print 'NeedsReAssembling custom'
-        return True
+        return False
         
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -99,14 +98,14 @@ class modTutorial(daeModel):
         # Diffusivity, velocity, generation, dirichletBC and neumannBC must be 
         # owned by the model for deal.II FE model keeps only references to them.
         self.functions    = {}
-        self.functions['Diffusivity'] = fnConstantFunction(1.0)
+        self.functions['Diffusivity'] = fnConstantFunction(401.0/(8960*385))
         self.functions['Velocity']    = fnConstantVectorFunction([0.0, 0.0])
-        self.functions['Generation']  = fnConstantFunction(100.0)
+        self.functions['Generation']  = fnConstantFunction(0.0)
         
         self.neumannBC      = {}
-        self.neumannBC[0]   = fnConstantFunction(10)
-        self.neumannBC[1]   = fnConstantFunction(-20)
-        self.neumannBC[2]   = fnConstantFunction(30)
+        self.neumannBC[0]   = fnConstantFunction(0.0)
+        self.neumannBC[1]   = fnConstantFunction(-2E6/(8960*385))
+        self.neumannBC[2]   = fnConstantFunction(-3E6/(8960*385))
         
         self.dirichletBC    = {}
         #self.dirichletBC[0] = fnConstantFunction(100)
@@ -131,9 +130,6 @@ class modTutorial(daeModel):
                                   self.neumannBC)        # Dirichlet BC dictionary {id:Function<dim>}
           
         self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)
-        
-        matrix = self.fe_dealII.SystemMatrix()
-        print matrix, matrix.n, matrix.m, matrix(0,0)
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -217,7 +213,23 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        self.InitialConditionMode = eQuasySteadyState
+        m_dt = self.m.fe_dealII.SystemMatrix_dt()
+        T    = self.m.fe.dictVariables['T']
+        
+        # Vector where every item marks the boundar
+        dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
+        print list(dof_to_boundary)
+        
+        for row in xrange(m_dt.n):
+            # Create an iterator on the current row columns 
+            rowiter = self.m.fe_dealII.RowIterator(row)
+            
+            # Iterate over columns and set initial conditions.
+            # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
+            for column in rowiter:
+                if m_dt(row, column) != 0:
+                    T.SetInitialCondition(column, 300)
+                    #print 'm_dt(%d,%d) = %f' % (row, column, m_dt(row, column))
     
 # Use daeSimulator class
 def guiRun(app):
@@ -291,11 +303,9 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
     
-    import pprint
-    pprint.pprint([str(eei.Node) for eei in simulation.m.fe.Equations[0].EquationExecutionInfos])
     # Save the model report and the runtime model report
-    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
+    #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

@@ -11,18 +11,26 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import sys, math
-import numpy
+import os, sys, math, time, numpy
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 from choose_variable import daeChooseVariable, daeTableDialog
 try:
+    import enthought.mayavi as mayavi
     from enthought.mayavi import mlab
     from enthought.mayavi.sources.vtk_file_reader import VTKFileReader
 except ImportError:
+    import mayavi
     from mayavi import mlab
     from mayavi.sources.vtk_file_reader import VTKFileReader
     
+@mlab.animate(delay=50, ui=True)
+def animateVTKFiles(figure, vtkSource, vtkFiles):
+    for vtk_file in vtkFiles[1:-1]:
+        vtkSource.initialize(vtk_file)                
+        figure.scene.render()
+        yield
+
 class daeMayavi3DPlot:
     def __init__(self, tcpipServer):
         self.tcpipServer = tcpipServer        
@@ -82,11 +90,113 @@ class daeMayavi3DPlot:
         mlab.show()
        
     @staticmethod
-    def showVTKFile(filename):
-        mlab.figure()
-        src = VTKFileReader()
-        src.initialize(filename)
-        mlab.pipeline.surface(src)
-        mayavi.mlab.title(filename)
+    def showVTKFile_2D(filename):
+        figure    = mlab.figure(size=(800, 600))
+        vtkSource = VTKFileReader()
+        vtkSource.initialize(filename)
+        surface   = mlab.pipeline.surface(vtkSource)
+        axes      = mlab.axes()
+        colorbar  = mlab.colorbar(object = surface, orientation='horizontal')
+        mlab.view(0, 0)
         mlab.show()
+        
+    @staticmethod
+    def saveVTKFilesAsImages_2D(sourceFolder, destinationFolder):
+        if not os.path.isdir(sourceFolder) or not os.path.isdir(destinationFolder):
+            return
+        
+        vtkFiles = []
+        for f in sorted(os.listdir(sourceFolder)):
+            if f.endswith(".vtk"):
+                vtkFiles.append(f)
 
+        if len(vtkFiles) == 0:
+            return
+        
+        figure    = mlab.figure(size=(800, 600))
+        figure.scene.disable_render = True
+        vtkSource = VTKFileReader()
+        vtk_file  = os.path.join(sourceFolder, vtkFiles[0])
+        vtkSource.initialize(vtk_file)                
+        surface   = mlab.pipeline.surface(vtkSource)
+        axes      = mlab.axes()
+        colorbar  = mlab.colorbar(object = surface, orientation='horizontal')
+        mlab.view(0, 0)
+        figure.scene.disable_render = False
+        mlab.draw()
+        png_file = os.path.join(destinationFolder, vtkFiles[0]).replace('.vtk', '.png')
+        mlab.savefig(png_file)
+        
+        for f in vtkFiles[1:-1]:
+            vtk_file = os.path.join(sourceFolder, f)
+            vtkSource.initialize(vtk_file)   
+            png_file = os.path.join(destinationFolder, f).replace('.vtk', '.png')
+            mlab.savefig(png_file)
+            app = QtCore.QCoreApplication.instance()
+            if app:
+                app.processEvents()
+        
+    @staticmethod
+    def animateVTKFiles_2D(folder):
+        if not os.path.isdir(folder):
+            return
+        
+        vtkFiles = []
+        for f in sorted(os.listdir(folder)):
+            if f.endswith(".vtk"):
+                vtkFiles.append(os.path.join(folder, f))
+
+        if len(vtkFiles) == 0:
+            return
+        
+        figure    = mlab.figure(size=(800, 600))
+        figure.scene.disable_render = True
+        vtkSource = VTKFileReader()
+        vtk_file  = vtkFiles[0]
+        vtkSource.initialize(vtk_file)                
+        surface   = mlab.pipeline.surface(vtkSource)
+        axes      = mlab.axes()
+        colorbar  = mlab.colorbar(object = surface, orientation='horizontal')
+        mlab.view(0, 0)
+        figure.scene.disable_render = False
+        mlab.draw()
+        
+        a = animateVTKFiles(figure, vtkSource, vtkFiles)
+
+                
+"""
+for f in vtkFiles[1:-1]:
+    vtk_file = os.path.join(folder, f)
+    vtkSource.initialize(vtk_file)                
+    mlab.draw()
+    time.sleep(0.5)
+    app = QtCore.QCoreApplication.instance()
+    if app:
+        app.processEvents()
+        
+#figure.render()
+#mlab.view(0, 0)
+#mlab.savefig(vtk_file + '.png', figure=figure)
+#figure.scene.disable_render = False
+#mlab.show()
+#mayavi.tools.figure.clf(figure)
+                
+if counter == 0:
+    figure = mlab.figure(size=(800, 600))
+    surface = mlab.pipeline.surface(src)
+    axes = mlab.axes()
+    colorbar = mlab.colorbar(object=surface, orientation='horizontal')
+    print colorbar
+    mlab.view(0, 0)
+else:
+    figure = mlab.gcf()
+    figure.scene.disable_render = True
+    mayavi.tools.figure.clf(figure)
+    surface = mlab.pipeline.surface(src)
+    #surface.actor.property.representation = "wireframe"
+    axes = mlab.axes()
+    colorbar = mlab.colorbar(object=surface, orientation='horizontal')
+    #surface.remove()
+    #surface = surface_new
+    figure.scene.disable_render = False
+"""

@@ -393,6 +393,32 @@ public:
     {
         return this->dealiiFiniteElementObject<dim>::NeedsReAssembling();
     }
+
+    std::vector<unsigned int> GetDOFtoBoundaryMap()
+    {
+        if(boost::python::override f = this->get_override("GetDOFtoBoundaryMap"))
+        {
+            boost::python::list l = f();
+
+            std::vector<unsigned int> mapDOFtoBoundary;
+            boost::python::ssize_t n = boost::python::len(l);
+            mapDOFtoBoundary.resize(n);
+
+            for(boost::python::ssize_t i = 0; i < n; i++)
+            {
+                mapDOFtoBoundary[i] = boost::python::extract<unsigned int>(l[i]);
+            }
+            return mapDOFtoBoundary;
+        }
+        else
+        {
+            return this->dealiiFiniteElementObject<dim>::GetDOFtoBoundaryMap();
+        }
+    }
+    std::vector<unsigned int> def_GetDOFtoBoundaryMap()
+    {
+        return this->dealiiFiniteElementObject<dim>::GetDOFtoBoundaryMap();
+    }
 };
 
 /*

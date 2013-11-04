@@ -103,9 +103,9 @@ public:
         //    return;
 
         std::string strVariableName = pVariableValue->m_strName;
-        boost::filesystem::path vtkFilename((boost::format("%4d. %s(t=%f).vtk") % m_outputCounter
+        boost::filesystem::path vtkFilename((boost::format("%05d.%s(t=%f).vtk") % m_outputCounter
                                                                                 % strVariableName
-                                                                                % time).str());
+                                                                                % m_dCurrentTime).str());
         boost::filesystem::path vtkPath(m_strOutputDirectory);
         vtkPath /= vtkFilename;
 
@@ -118,8 +118,8 @@ public:
 public:
     real_t              m_dCurrentTime;
     int                 m_outputCounter;
-    std::string         m_strOutputDirectory;
     fnProcessSolution   m_callback;
+    std::string         m_strOutputDirectory;
 };
 
 

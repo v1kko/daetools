@@ -224,16 +224,6 @@ BOOST_PYTHON_MODULE(pyDealII)
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_< std::vector<unsigned long> >("vector_ulong")
-        .def(vector_indexing_suite< std::vector<unsigned long> >())
-    ;
-    class_< std::vector<unsigned int> >("vector_uint")
-        .def(vector_indexing_suite< std::vector<unsigned int> >())
-    ;
-    class_< std::vector<double> >("vector_double")
-        .def(vector_indexing_suite< std::vector<double> >())
-    ;
-
     class_< std::vector< Point<1,double> > >("vector_Point_1D")
         .def(vector_indexing_suite< std::vector< Point<1,double> > >())
     ;
@@ -568,6 +558,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                     &daepython::dealiiFiniteElementObjectWrapper<1>::def_ReAssembleSystem, ( arg("self") ))
         .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<1>::NeedsReAssembling,
                                     &daepython::dealiiFiniteElementObjectWrapper<1>::def_NeedsReAssembling, ( arg("self") ))
+        .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<1>::GetDOFtoBoundaryMap,
+                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_GetDOFtoBoundaryMap, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementObject<1>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
 
 //        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
@@ -599,6 +591,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                     &daepython::dealiiFiniteElementObjectWrapper<2>::def_ReAssembleSystem, ( arg("self") ))
         .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<2>::NeedsReAssembling,
                                     &daepython::dealiiFiniteElementObjectWrapper<2>::def_NeedsReAssembling, ( arg("self") ))
+        .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<2>::GetDOFtoBoundaryMap,
+                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_GetDOFtoBoundaryMap, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementObject<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
     ;
 
@@ -623,6 +617,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                     &daepython::dealiiFiniteElementObjectWrapper<3>::def_ReAssembleSystem, ( arg("self") ))
         .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<3>::NeedsReAssembling,
                                     &daepython::dealiiFiniteElementObjectWrapper<3>::def_NeedsReAssembling, ( arg("self") ))
+        .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<3>::GetDOFtoBoundaryMap,
+                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_GetDOFtoBoundaryMap, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementObject<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
     ;
 
