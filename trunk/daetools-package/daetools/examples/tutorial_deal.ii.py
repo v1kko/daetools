@@ -138,6 +138,17 @@ class modTutorial(daeModel):
         #self.fe.AssembleSystem()
         
         # 1b. Use expressions for cell constributions
+        from pyDealII import fe_i, fe_j, fe_q
+        from pyDealII import feNumber_2D as feNumber
+        from pyDealII import constant_2D as constant
+        from pyDealII import phi_2D as phi, dphi_2D as dphi, JxW_2D as JxW
+        from pyDealII import xyz_2D as xyz, normal_2D as normal
+        from pyDealII import function_value_2D as fvalue, function_gradient_2D as fgrad
+        
+        x = constant(0.2) * JxW(fe_q)
+        print constant(0.2) - 1.45 * feNumber.sin(x)
+        print phi(fe_i, fe_q)*phi(fe_j, fe_q)*JxW(fe_q) + dphi(fe_i,fe_q)*dphi(fe_j,fe_q)
+        print fvalue('D', xyz(fe_q)) + normal(fe_q) * fgrad('v', xyz(fe_q))
         
         # 1c. User-defined assemble
         """
@@ -218,7 +229,7 @@ class simTutorial(daeSimulation):
         
         # Vector where every item marks the boundar
         dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
-        print list(dof_to_boundary)
+        #print list(dof_to_boundary)
         
         for row in xrange(m_dt.n):
             # Create an iterator on the current row columns 

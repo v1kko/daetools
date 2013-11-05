@@ -524,6 +524,150 @@ BOOST_PYTHON_MODULE(pyDealII)
         .add_property("faces",              range< return_value_policy<reference_existing_object> >(&dealiiCell_3D::begin_faces, &dealiiCell_3D::end_faces))
     ;
 
+    class_< feNumber<1> >("feNumber_1D", no_init)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+        .def(self / self)
+
+        .def(self + double())
+        .def(self - double())
+        .def(self * double())
+        .def(self / double())
+        .def(pow(self, double()))
+
+        .def(double() + self)
+        .def(double() - self)
+        .def(double() * self)
+        .def(double() / self)
+
+        .def("__str__",   &feNumber<1>::ToString)
+
+        .def("exp",   &fe_solver::exp<1>).staticmethod("exp")
+        .def("log",   &fe_solver::log<1>).staticmethod("log")
+        .def("log10", &fe_solver::log10<1>).staticmethod("log10")
+        .def("sqrt",  &fe_solver::sqrt<1>).staticmethod("sqrt")
+        .def("sin",   &fe_solver::sin<1>).staticmethod("sin")
+        .def("cos",   &fe_solver::cos<1>).staticmethod("cos")
+        .def("tan",   &fe_solver::tan<1>).staticmethod("tan")
+        .def("asin",  &fe_solver::asin<1>).staticmethod("asin")
+        .def("acos",  &fe_solver::acos<1>).staticmethod("acos")
+        .def("atan",  &fe_solver::atan<1>).staticmethod("atan")
+        .def("abs",   &fe_solver::abs<1>).staticmethod("abs")
+    ;
+
+    class_< feNumber<2> >("feNumber_2D", no_init)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+        .def(self / self)
+
+        .def(self + double())
+        .def(self - double())
+        .def(self * double())
+        .def(self / double())
+        .def(pow(self, double()))
+
+        .def(double() + self)
+        .def(double() - self)
+        .def(double() * self)
+        .def(double() / self)
+
+        .def("__str__",   &feNumber<2>::ToString)
+
+        .def("exp",   &fe_solver::exp<2>).staticmethod("exp")
+        .def("log",   &fe_solver::log<2>).staticmethod("log")
+        .def("log10", &fe_solver::log10<2>).staticmethod("log10")
+        .def("sqrt",  &fe_solver::sqrt<2>).staticmethod("sqrt")
+        .def("sin",   &fe_solver::sin<2>).staticmethod("sin")
+        .def("cos",   &fe_solver::cos<2>).staticmethod("cos")
+        .def("tan",   &fe_solver::tan<2>).staticmethod("tan")
+        .def("asin",  &fe_solver::asin<2>).staticmethod("asin")
+        .def("acos",  &fe_solver::acos<2>).staticmethod("acos")
+        .def("atan",  &fe_solver::atan<2>).staticmethod("atan")
+        .def("abs",   &fe_solver::abs<2>).staticmethod("abs")
+    ;
+
+    class_< feNumber<3> >("feNumber_3D", no_init)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+        .def(self / self)
+
+        .def(self + double())
+        .def(self - double())
+        .def(self * double())
+        .def(self / double())
+        .def(pow(self, double()))
+
+        .def(double() + self)
+        .def(double() - self)
+        .def(double() * self)
+        .def(double() / self)
+
+        .def("__str__",   &feNumber<3>::ToString)
+
+        .def("exp",   &fe_solver::exp<3>).staticmethod("exp")
+        .def("log",   &fe_solver::log<3>).staticmethod("log")
+        .def("log10", &fe_solver::log10<3>).staticmethod("log10")
+        .def("sqrt",  &fe_solver::sqrt<3>).staticmethod("sqrt")
+        .def("sin",   &fe_solver::sin<3>).staticmethod("sin")
+        .def("cos",   &fe_solver::cos<3>).staticmethod("cos")
+        .def("tan",   &fe_solver::tan<3>).staticmethod("tan")
+        .def("asin",  &fe_solver::asin<3>).staticmethod("asin")
+        .def("acos",  &fe_solver::acos<3>).staticmethod("acos")
+        .def("atan",  &fe_solver::atan<3>).staticmethod("atan")
+        .def("abs",   &fe_solver::abs<3>).staticmethod("abs")
+    ;
+
+    boost::python::scope().attr("fe_q") = fe_q;
+    boost::python::scope().attr("fe_i") = fe_i;
+    boost::python::scope().attr("fe_j") = fe_j;
+
+    def("constant_1D", &constant<1>);
+    def("constant_2D", &constant<2>);
+    def("constant_3D", &constant<3>);
+
+    def("phi_1D", &phi<1>);
+    def("phi_2D", &phi<2>);
+    def("phi_3D", &phi<3>);
+
+    def("dphi_1D", &dphi<1>);
+    def("dphi_2D", &dphi<2>);
+    def("dphi_3D", &dphi<3>);
+
+    def("d2phi_1D", &d2phi<1>);
+    def("d2phi_2D", &d2phi<2>);
+    def("d2phi_3D", &d2phi<3>);
+
+    def("JxW_1D", &JxW<1>);
+    def("JxW_2D", &JxW<2>);
+    def("JxW_3D", &JxW<3>);
+
+    def("xyz_1D", &xyz<1>);
+    def("xyz_2D", &xyz<2>);
+    def("xyz_3D", &xyz<3>);
+
+    def("normal_1D", &normal<1>);
+    def("normal_2D", &normal<2>);
+    def("normal_3D", &normal<3>);
+
+    def("function_value_1D", &function_value<1>);
+    def("function_value_2D", &function_value<2>);
+    def("function_value_3D", &function_value<3>);
+
+    def("function_value_1D", &function_value2<1>);
+    def("function_value_2D", &function_value2<2>);
+    def("function_value_3D", &function_value2<3>);
+
+    def("function_gradient_1D", &function_gradient<1>, ( arg("fname"), arg("xyz") ));
+    def("function_gradient_2D", &function_gradient<2>, ( arg("fname"), arg("xyz") ));
+    def("function_gradient_3D", &function_gradient<3>, ( arg("fname"), arg("xyz") ));
+
+    def("function_gradient_1D", &function_gradient2<1>, ( arg("fname"), arg("xyz"), arg("component") ));
+    def("function_gradient_2D", &function_gradient2<2>, ( arg("fname"), arg("xyz"), arg("component") ));
+    def("function_gradient_3D", &function_gradient2<3>, ( arg("fname"), arg("xyz"), arg("component") ));
+
     class_<daeDealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeDealIIDataReporter", no_init)
         .def("Connect",				&daeDealIIDataReporter::Connect)
         .def("Disconnect",			&daeDealIIDataReporter::Disconnect)
