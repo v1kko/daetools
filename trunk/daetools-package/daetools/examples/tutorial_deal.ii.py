@@ -42,7 +42,7 @@ deal.II classes provided by the python wrapper:
 
 import os, sys, numpy, json
 from daetools.pyDAE import *
-from daetools.solvers.deal_II import pyDealII
+from daetools.solvers.deal_II import *
 from time import localtime, strftime
 from daetools.solvers.superlu import pySuperLU
 from daetools.solvers.trilinos import pyTrilinos
@@ -51,18 +51,18 @@ from daetools.solvers.aztecoo_options import daeAztecOptions
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
-class fnConstantFunction(pyDealII.Function_2D):
+class fnConstantFunction(Function_2D):
     def __init__(self, val, n_components = 1):
-        pyDealII.Function_2D.__init__(self, n_components)
+        Function_2D.__init__(self, n_components)
         self.m_value = float(val)
         
     def value(self, point, component = 1):
         #print 'Point%s = %f' % (point, self.m_value)
         return self.m_value
 
-class fnConstantVectorFunction(pyDealII.Function_2D):
+class fnConstantVectorFunction(Function_2D):
     def __init__(self, values, n_components = 2):
-        pyDealII.Function_2D.__init__(self, n_components)
+        Function_2D.__init__(self, n_components)
         
         if len(values) != 2:
             raise RunttimeError('The length of the values array must be two')
@@ -74,18 +74,21 @@ class fnConstantVectorFunction(pyDealII.Function_2D):
     def vector_value(self, point):
         return self.m_values
         
-class feObject(pyDealII.dealiiFiniteElementObject_2D):
-    def __init__(self, meshFilename, polynomialOrder, quadratureFormula, numberOfQuadraturePoints, functions, dirichletBC, neumannBC):
-        pyDealII.dealiiFiniteElementObject_2D.__init__(self, meshFilename,
-                                                             polynomialOrder,
-                                                             quadratureFormula,
-                                                             numberOfQuadraturePoints,
-                                                             functions,
-                                                             dirichletBC,
-                                                             neumannBC)
+class feObject(dealiiFiniteElementObject_2D):
+    def __init__(self, meshFilename, polynomialOrder, quadratureFormula, numberOfQuadraturePoints, 
+                       functions, dirichletBC, neumannBC, equation):
+        dealiiFiniteElementObject_2D.__init__(self, meshFilename,
+                                                    polynomialOrder,
+                                                    quadratureFormula,
+                                                    numberOfQuadraturePoints,
+                                                    functions,
+                                                    dirichletBC,
+                                                    neumannBC,
+                                                    equation)
+
     def AssembleSystem(self):
         print 'AssembleSystem custom'
-        pyDealII.dealiiFiniteElementObject_2D.AssembleSystem(self)
+        dealiiFiniteElementObject_2D.AssembleSystem(self)
     
     def NeedsReAssembling(self):
         return False
@@ -114,20 +117,62 @@ class modTutorial(daeModel):
         
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         meshFilename = os.path.join(meshes_dir, 'ex49.msh')
-        #self.fe_dealII = pyDealII.dealiiFiniteElementObject_2D(meshFilename             = meshFilename,
-        #                                                       polynomialOrder          = 2,
-        #                                                       quadratureFormula        = 'QGauss',
-        #                                                       numberOfQuadraturePoints = 3,
-        #                                                       functions                = self.functions,
-        #                                                       dirichletBC              = self.dirichletBC,
-        #                                                       neumannBC                = self.neumannBC)
-        self.fe_dealII = feObject(meshFilename,          # path to mesh
-                                  1,                     # polinomial order
-                                  pyDealII.QGauss_2D(3), # quadrature formula
-                                  pyDealII.QGauss_1D(3), # face quadrature formula
-                                  self.functions,        # dictionary {'Name':Function<dim>} used during assemble
-                                  self.dirichletBC,      # Neumann BC dictionary  {id:Function<dim>}
-                                  self.neumannBC)        # Dirichlet BC dictionary {id:Function<dim>}
+        
+        """
+        Auxiliary classes, functions and objects for local contribution expressions:
+         * Constants:
+           - fe_i (represents a current 'i' index in the DOF loop)
+           - fe_j (represents a current 'j' index in the DOF loop)
+           - fe_q (represents a current 'q' index of a quadrature point)
+         
+         * Classes:
+           - feExpression_nD (class that holds contribution expressions)
+         
+         * Functions: 
+           - constant_nD
+           - phi_nD
+           - dphi_nD
+           - d2phi_nD
+           - JxW_nD
+           - xyz_nD
+           - normal_nD
+           - function_value_nD
+           - function_gradient_nD
+        
+        All above constants/classes/functions are available for 1D, 2D and 3D.
+        For instance if we are building a 2D system we would use phi_2D, JxW_2D and so on.
+        Here we create 'aliases' so that the actual expressions are generic (dimension independent).
+        """
+        expression = feExpression_2D
+        constant   = constant_2D
+        phi        = phi_2D
+        dphi       = dphi_2D
+        JxW        = JxW_2D
+        xyz        = xyz_2D
+        normal     = normal_2D
+        fvalue     = function_value_2D
+        grad       = function_gradient_2D
+        
+        # Build local contribution expressions for a Convection-Diffusion system:
+        eq = dealiiFiniteElementEquation_2D()
+        eq.matrix    = (dphi(fe_i, fe_q) * dphi(fe_j, fe_q)) * fvalue('Diffusivity', xyz(fe_q)) * JxW(fe_q)
+        eq.matrix_dt = phi(fe_i, fe_q) * phi(fe_j, fe_q) * JxW(fe_q)
+        eq.rhs       = phi(fe_i, fe_q) * fvalue('Generation', xyz(fe_q)) * JxW(fe_q)
+        print 'eq.matrix    = %s' % eq.matrix
+        print 'eq.matrix_dt = %s' % eq.matrix_dt
+        print 'eq.rhs       = %s' % eq.rhs
+        
+        equation = CreateEquation_ConvectionDiffusion_2D()
+        print equation.matrix
+        self.fe_dealII = feObject(meshFilename,     # path to mesh
+                                  1,                # polinomial order
+                                  QGauss_2D(3),     # quadrature formula
+                                  QGauss_1D(3),     # face quadrature formula
+                                  self.functions,   # dictionary {'Name':Function<dim>} used during assemble
+                                  self.dirichletBC, # Neumann BC dictionary  {id:Function<dim>}
+                                  self.neumannBC,   # Dirichlet BC dictionary {id:Function<dim>}
+                                  equation          # Equation (contributions to the cell_matrix, cell_matrix_dt and cell_rhs)
+                                  )
           
         self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)
        
@@ -138,17 +183,6 @@ class modTutorial(daeModel):
         #self.fe.AssembleSystem()
         
         # 1b. Use expressions for cell constributions
-        from pyDealII import fe_i, fe_j, fe_q
-        from pyDealII import feNumber_2D as feNumber
-        from pyDealII import constant_2D as constant
-        from pyDealII import phi_2D as phi, dphi_2D as dphi, JxW_2D as JxW
-        from pyDealII import xyz_2D as xyz, normal_2D as normal
-        from pyDealII import function_value_2D as fvalue, function_gradient_2D as fgrad
-        
-        x = constant(0.2) * JxW(fe_q)
-        print constant(0.2) - 1.45 * feNumber.sin(x)
-        print phi(fe_i, fe_q)*phi(fe_j, fe_q)*JxW(fe_q) + dphi(fe_i,fe_q)*dphi(fe_j,fe_q)
-        print fvalue('D', xyz(fe_q)) + normal(fe_q) * fgrad('v', xyz(fe_q))
         
         # 1c. User-defined assemble
         """
@@ -259,7 +293,7 @@ def guiRun(app):
 
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon       = 1000
+    simulation.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter)
     simulator.exec_()
 
@@ -291,7 +325,7 @@ def consoleRun():
     paramListAztec.Print()
     daesolver.SetLASolver(lasolver)
     """
-    
+
     # Create two data reporters: TCP/IP and DealII
     tcpipDataReporter = daeTCPIPDataReporter()
     feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
@@ -309,7 +343,7 @@ def consoleRun():
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
+    simulation.TimeHorizon = 500
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
@@ -324,45 +358,6 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
-    """
-    print ''
-    class fun1(pyDealII.Function_2D):
-        def __init__(self, n_components = 1):
-            pyDealII.Function_2D.__init__(self, n_components)
-            
-        def value(self, point, component = 1):
-            return 1.2
-    
-    p = pyDealII.Point_2D(1.0, 2.0)
-    f1 = fun1()
-    print f1.n_components
-    print f1.dimension
-    m = pyDealII.map_Uint_Function_2D()
-    m[0] = f1
-    print m[0]
-    print m[0].value(p)
-    return
-    
-    t = pyDealII.Tensor_1_2D()
-    print t.dimension, t.rank
-    t[0] = 5
-    print t, repr(t), t.norm()
-    print t==t
-    print t*t
-    
-    t = pyDealII.Point_3D()
-    print t.dimension, t.rank
-    t[0] = 1
-    t[1] = 2
-    t[2] = 3
-    print t.x, t.y, t.z
-    print t, repr(t)
-    print t*2
-    print t*t
-    print t.square()
-    t2 = (t*2)
-    print t.distance(t2)
-    """
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

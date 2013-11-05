@@ -65,25 +65,25 @@ class case_daeDomain(unittest.TestCase):
             
         # Discr. method must be eCFDM!
         with self.assertRaises(RuntimeError):
-            d.CreateDistributed(eFFDM, order, noIntervals, lb,  ub)
+            d.CreateStructuredGrid(eFFDM, order, noIntervals, lb,  ub)
 
         with self.assertRaises(RuntimeError):
-            d.CreateDistributed(eBFDM, order, noIntervals, lb,  ub)
+            d.CreateStructuredGrid(eBFDM, order, noIntervals, lb,  ub)
 
         # Discr. order must be 2!
         with self.assertRaises(RuntimeError):
-            d.CreateDistributed(discrMethod, 3, noIntervals, lb,  ub)
+            d.CreateStructuredGrid(discrMethod, 3, noIntervals, lb,  ub)
 
         # Lower bound must be less than the upper bound!
         with self.assertRaises(RuntimeError):
-            d.CreateDistributed(discrMethod, order, noIntervals, 1.0,  1.0)
+            d.CreateStructuredGrid(discrMethod, order, noIntervals, 1.0,  1.0)
 
         # The number of intervals must be greater than or equal 2!
         with self.assertRaises(RuntimeError):
-            d.CreateDistributed(discrMethod, order, 1, lb,  ub)
+            d.CreateStructuredGrid(discrMethod, order, 1, lb,  ub)
 
         # Initialize domain
-        d.CreateDistributed(discrMethod, order, noIntervals, lb,  ub)
+        d.CreateStructuredGrid(discrMethod, order, noIntervals, lb,  ub)
 
         # Out of bounds index!
         with self.assertRaises(RuntimeError):
@@ -93,7 +93,7 @@ class case_daeDomain(unittest.TestCase):
         with self.assertRaises(TypeError):
             d[0] = 0.0
 
-        self.assertEqual(d.Type,                 eDistributed)
+        self.assertEqual(d.Type,                 eStructuredGrid)
         self.assertEqual(d.DiscretizationMethod, discrMethod)
         self.assertEqual(d.DiscretizationOrder,  order)
         self.assertEqual(d.NumberOfIntervals,    noIntervals)

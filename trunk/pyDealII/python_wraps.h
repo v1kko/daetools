@@ -301,13 +301,14 @@ class dealiiFiniteElementObjectWrapper : public dealiiFiniteElementObject<dim>,
                                          public boost::python::wrapper< dealiiFiniteElementObject<dim> >
 {
 public:
-    dealiiFiniteElementObjectWrapper(std::string                meshFilename,
-                                     unsigned int               polynomialOrder,
-                                     const Quadrature<dim>&     quadrature,
-                                     const Quadrature<dim-1>&   faceQuadrature,
-                                     boost::python::dict        dictFunctions,
-                                     boost::python::dict        dictDirichletBC,
-                                     boost::python::dict        dictNeumannBC)
+    dealiiFiniteElementObjectWrapper(std::string                                meshFilename,
+                                     unsigned int                               polynomialOrder,
+                                     const Quadrature<dim>&                     quadrature,
+                                     const Quadrature<dim-1>&                   faceQuadrature,
+                                     boost::python::dict                        dictFunctions,
+                                     boost::python::dict                        dictDirichletBC,
+                                     boost::python::dict                        dictNeumannBC,
+                                     const dealiiFiniteElementEquation<dim>&    equation)
     {
         boost::python::list keys;
         std::map<unsigned int, const Function<dim>*> mapDirichletBC;
@@ -350,7 +351,8 @@ public:
             mapNeumannBC[key] = fn;
         }
 
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, mapFunctions, mapDirichletBC, mapNeumannBC);
+        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature,
+                         mapFunctions, mapDirichletBC, mapNeumannBC, equation);
     }
 
     ~dealiiFiniteElementObjectWrapper()

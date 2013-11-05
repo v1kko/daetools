@@ -53,6 +53,160 @@ namespace fe_solver
 using namespace dealii;
 
 /******************************************************************
+    feCellContextImpl<dim>
+*******************************************************************/
+template<int dim>
+class feCellContextImpl : public feCellContext<dim>
+{
+public:
+    typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
+
+    feCellContextImpl(  FiniteElement<dim>*         fe,
+                        DoFHandler<dim>&            dof_handler,
+                        Quadrature<dim>&            quadrature_formula,
+                        Quadrature<dim-1>&          face_quadrature_formula,
+                        const unsigned int          dofs_per_cell,
+                        const unsigned int          n_q_points,
+                        const unsigned int          faces_per_cell,
+                        const unsigned int          n_face_q_points,
+                        std::vector<unsigned int>&  local_dof_indices,
+                        FEValues<dim>&              fe_values,
+                        FEFaceValues<dim>&          fe_face_values,
+                        map_String_FunctionPtr&     mapFunctions):
+        m_fe(fe),
+        m_dof_handler(dof_handler),
+        m_quadrature_formula(quadrature_formula),
+        m_face_quadrature_formula(face_quadrature_formula),
+        m_dofs_per_cell(dofs_per_cell),
+        m_n_q_points(n_q_points),
+        m_faces_per_cell(faces_per_cell),
+        m_n_face_q_points(n_face_q_points),
+        m_local_dof_indices(local_dof_indices),
+        m_fe_values(fe_values),
+        m_fe_face_values(fe_face_values),
+        m_mapFunctions(mapFunctions),
+        m_i(-1),
+        m_j(-1),
+        m_q(-1)
+    {
+    }
+
+public:
+    virtual double shape_value(const unsigned int i,
+                               const unsigned int q) const
+    {
+        return m_fe_values.shape_value(i, q);
+    }
+
+    virtual double shape_value_component (const unsigned int i,
+                                          const unsigned int q,
+                                          const unsigned int component) const
+    {
+        return m_fe_values.shape_value_component(i, q, component);
+    }
+
+    virtual const Tensor<1,dim>& shape_grad (const unsigned int i,
+                                             const unsigned int q) const
+    {
+        return m_fe_values.shape_grad(i, q);
+    }
+
+    virtual Tensor<1,dim> shape_grad_component (const unsigned int i,
+                                                const unsigned int q,
+                                                const unsigned int component) const
+    {
+        return m_fe_values.shape_grad_component(i, q, component);
+    }
+
+    virtual const Tensor<2,dim>& shape_hessian (const unsigned int i,
+                                                const unsigned int q) const
+    {
+        return m_fe_values.shape_hessian(i, q);
+    }
+
+    virtual Tensor<2,dim> shape_hessian_component (const unsigned int i,
+                                                   const unsigned int q,
+                                                   const unsigned int component) const
+    {
+        return m_fe_values.shape_hessian_component(i, q, component);
+    }
+
+    virtual const Point<dim>& quadrature_point (const unsigned int q) const
+    {
+        return m_fe_values.quadrature_point(q);
+    }
+
+    virtual double JxW (const unsigned int q) const
+    {
+        return m_fe_values.JxW(q);
+    }
+
+    virtual const Point<dim>& normal_vector (const unsigned int q) const
+    {
+        return m_fe_values.normal_vector(q);
+    }
+
+    virtual const Function<dim>& function (const std::string& name) const
+    {
+        typename map_String_FunctionPtr::iterator iter = m_mapFunctions.find(name);
+        if(iter == m_mapFunctions.end())
+            throw std::runtime_error(std::string("Cannot find Function<dim> with the name ") + name);
+
+        return *(iter->second);
+    }
+
+    virtual unsigned int q() const
+    {
+        return m_q;
+    }
+
+    virtual unsigned int i() const
+    {
+        return m_i;
+    }
+
+    virtual unsigned int j() const
+    {
+        return m_j;
+    }
+
+public:
+    FiniteElement<dim>*         m_fe;
+    DoFHandler<dim>&            m_dof_handler;
+    Quadrature<dim>&            m_quadrature_formula;
+    Quadrature<dim-1>&          m_face_quadrature_formula;
+    const unsigned int          m_dofs_per_cell;
+    const unsigned int          m_n_q_points;
+    const unsigned int          m_faces_per_cell;
+    const unsigned int          m_n_face_q_points;
+    std::vector<unsigned int>&  m_local_dof_indices;
+    FEValues<dim>&              m_fe_values;
+    FEFaceValues<dim>&          m_fe_face_values;
+    map_String_FunctionPtr&     m_mapFunctions;
+    unsigned int                m_i;
+    int                         m_j;
+    int                         m_q;
+};
+
+/******************************************************************
+    dealiiFiniteElementObject<dim>
+*******************************************************************/
+template <int dim>
+class dealiiFiniteElementEquation
+{
+public:
+    dealiiFiniteElementEquation()
+    {
+    }
+
+public:
+    bool                m_bNeedsUpdate;
+    feExpression<dim>   m_matrix;
+    feExpression<dim>   m_matrix_dt;
+    feExpression<dim>   m_rhs;
+};
+
+/******************************************************************
     dealiiFiniteElementObject<dim>
 *******************************************************************/
 template <int dim>
@@ -79,13 +233,14 @@ public:
     std::vector<unsigned int>            GetDOFtoBoundaryMap();
     virtual daeDealIIDataReporter*       CreateDataReporter();
 
-    void Initialize(const std::string&            meshFilename,
-                    unsigned int                  polynomialOrder,
-                    const Quadrature<dim>&        quadrature,
-                    const Quadrature<dim-1>&      faceQuadrature,
-                    const map_String_FunctionPtr& functions,
-                    const map_Uint_FunctionPtr&   dirichletBC,
-                    const map_Uint_FunctionPtr&   neumannBC);
+    void Initialize(const std::string&                      meshFilename,
+                    unsigned int                            polynomialOrder,
+                    const Quadrature<dim>&                  quadrature,
+                    const Quadrature<dim-1>&                faceQuadrature,
+                    const map_String_FunctionPtr&           functions,
+                    const map_Uint_FunctionPtr&             dirichletBC,
+                    const map_Uint_FunctionPtr&             neumannBC,
+                    const dealiiFiniteElementEquation<dim>& equation);
 
 protected:
     void setup_system();
@@ -112,6 +267,8 @@ public:
     map_String_FunctionPtr  funsFunctions;
     map_Uint_FunctionPtr    funsDirichletBC;
     map_Uint_FunctionPtr    funsNeumannBC;
+
+    dealiiFiniteElementEquation<dim> m_equation;
 };
 
 template <int dim>
@@ -121,19 +278,21 @@ dealiiFiniteElementObject<dim>::dealiiFiniteElementObject():
 }
 
 template <int dim>
-void dealiiFiniteElementObject<dim>::Initialize(const std::string&            meshFilename,
-                                                unsigned int                  polynomialOrder,
-                                                const Quadrature<dim>&        quadrature,
-                                                const Quadrature<dim-1>&      faceQuadrature,
-                                                const map_String_FunctionPtr& functions,
-                                                const map_Uint_FunctionPtr&   dirichletBC,
-                                                const map_Uint_FunctionPtr&   neumannBC)
+void dealiiFiniteElementObject<dim>::Initialize(const std::string&                      meshFilename,
+                                                unsigned int                            polynomialOrder,
+                                                const Quadrature<dim>&                  quadrature,
+                                                const Quadrature<dim-1>&                faceQuadrature,
+                                                const map_String_FunctionPtr&           functions,
+                                                const map_Uint_FunctionPtr&             dirichletBC,
+                                                const map_Uint_FunctionPtr&             neumannBC,
+                                                const dealiiFiniteElementEquation<dim>& equation)
 {
     fe = SmartPointer< FiniteElement<dim> >(new FE_Q<dim>(polynomialOrder));
 
-    funsFunctions        = functions;
-    funsDirichletBC      = dirichletBC;
-    funsNeumannBC        = neumannBC;
+    funsFunctions   = functions;
+    funsDirichletBC = dirichletBC;
+    funsNeumannBC   = neumannBC;
+    m_equation      = equation;
 
     GridIn<dim> gridin;
     gridin.attach_triangulation(triangulation);
@@ -278,6 +437,21 @@ void dealiiFiniteElementObject<dim>::assemble_system()
     const Function<dim>* funGeneration  = funsFunctions.find("Generation")->second;
     const Function<dim>* funVelocity    = funsFunctions.find("Velocity")->second;
 
+    feCellContextImpl<dim> cellContext(fe,
+                                       dof_handler,
+                                       quadrature_formula,
+                                       face_quadrature_formula,
+                                       dofs_per_cell,
+                                       n_q_points,
+                                       GeometryInfo<dim>::faces_per_cell,
+                                       n_face_q_points,
+                                       local_dof_indices,
+                                       fe_values,
+                                       fe_face_values,
+                                       funsFunctions);
+
+    std::cout << "1" << std::endl;
+
     // All DOFs at the boundary ID that have Dirichlet BCs imposed.
     // mapDirichlets: map< boundary_id, map<dof, value> > will be used to apply boundary conditions locally.
     // We build this map here since it is common for all cells.
@@ -330,45 +504,83 @@ void dealiiFiniteElementObject<dim>::assemble_system()
 
         for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
         {
+            cellContext.m_q = q_point;
+
             for(unsigned int i = 0; i < dofs_per_cell; ++i)
             {
+                cellContext.m_i = i;
+
                 for(unsigned int j = 0; j < dofs_per_cell; ++j)
                 {
-                    cell_matrix(i,j)    += (
-                                             /* Diffusion */
-                                                (
-                                                   fe_values.shape_grad(i, q_point) *
-                                                   fe_values.shape_grad(j, q_point)
-                                                )
-                                                *
-                                                funDiffusivity->value(fe_values.quadrature_point(q_point))
-//                                                +
-//                                             /* Helmholtz term (u) */
-//                                                fe_values.shape_value(i, q_point) *
-//                                                fe_values.shape_value(j, q_point)
+                    cellContext.m_j = j;
 
-                                             /* Convection (nothing at the moment) */
-                                                /* +
-                                                fe_values.shape_value(i, q_point) *
-                                                fe_values.shape_value(j, q_point) *
-                                                funVelocity.value(fe_values.quadrature_point(q_point)) */
-                                           )
-                                           *
-                                           fe_values.JxW(q_point);
+                    std::cout << "1a" << std::endl;
+                    if(m_equation.m_matrix.m_node)
+                    {
+                        feRuntimeNumber<dim> result = m_equation.m_matrix.m_node->Evaluate(&cellContext);
+                        if(result.m_eType != eFEScalar)
+                            throw std::runtime_error("Invalid local matrix contribution expresion specified: it must be a scalar value");
 
-                    /* Accumulation (in a separate matrix) */
-                    cell_matrix_dt(i,j) += (
-                                              fe_values.shape_value(i, q_point) *
-                                              fe_values.shape_value(j, q_point)
-                                           )
-                                           *
-                                           fe_values.JxW(q_point);
+                        cell_matrix(i,j) += result.m_value;
+                        std::cout << "1aa" << std::endl;
+                    }
+                    else
+                    {
+                        cell_matrix(i,j)    += (
+                                                 /* Diffusion term */
+                                                    (
+                                                       fe_values.shape_grad(i, q_point) *
+                                                       fe_values.shape_grad(j, q_point)
+                                                    )
+                                                    *
+                                                    funDiffusivity->value(fe_values.quadrature_point(q_point))
+
+                                                 /* Convection term */
+                                                    // +
+                                                    //fe_values.shape_value(i, q_point) *
+                                                    //fe_values.shape_value(j, q_point) *
+                                                    //funVelocity.value(fe_values.quadrature_point(q_point))
+                                               )
+                                               *
+                                               fe_values.JxW(q_point);
+                    }
+
+                    std::cout << "1b" << std::endl;
+                    /* Accumulation term (in a separate matrix) */
+                    if(m_equation.m_matrix_dt.m_node)
+                    {
+                        feRuntimeNumber<dim> result = m_equation.m_matrix_dt.m_node->Evaluate(&cellContext);
+                        if(result.m_eType != eFEScalar)
+                            throw std::runtime_error("Invalid local matrix_dt contribution expresion specified: it must be a scalar value");
+
+                        cell_matrix_dt(i,j) += result.m_value;
+                    }
+                    else
+                    {
+                        cell_matrix_dt(i,j) += (
+                                                  fe_values.shape_value(i, q_point) *
+                                                  fe_values.shape_value(j, q_point)
+                                               )
+                                               *
+                                               fe_values.JxW(q_point);
+                    }
                 }
                 
+                std::cout << "1c" << std::endl;
                 /* Generation */
-                cell_rhs(i) +=  fe_values.shape_value(i,q_point) *
-                                funGeneration->value(fe_values.quadrature_point(q_point), 0) *
-                                fe_values.JxW(q_point);
+                if(m_equation.m_rhs.m_node)
+                {
+                    feRuntimeNumber<dim> result = m_equation.m_rhs.m_node->Evaluate(&cellContext);
+                    if(result.m_eType != eFEScalar)
+                        throw std::runtime_error("Invalid local RHS contribution expresion specified: it must be a scalar value");
+                    cell_rhs(i) += result.m_value;
+                }
+                else
+                {
+                    cell_rhs(i) +=  fe_values.shape_value(i,q_point) *
+                                    funGeneration->value(fe_values.quadrature_point(q_point), 0) *
+                                    fe_values.JxW(q_point);
+                }
             }
         }
 
@@ -610,6 +822,40 @@ daeDealIIDataReporter* dealiiFiniteElementObject<dim>::CreateDataReporter()
     fnProcessSolution callback(boost::bind(&dealiiFiniteElementObject<dim>::process_solution, this, _1, _2, _3, _4));
     return new daeDealIIDataReporter(callback);
 }
+
+//    constant   = constant_2D
+//    phi        = phi_2D
+//    dphi       = dphi_2D
+//    JxW        = JxW_2D
+//    xyz        = xyz_2D
+//    normal     = normal_2D
+//    fvalue     = function_value_2D
+//    grad       = function_gradient_2D
+template <int dim>
+dealiiFiniteElementEquation<dim> CreateEquation_ConvectionDiffusion()
+{
+    dealiiFiniteElementEquation<dim> equation;
+    equation.m_matrix    = (dphi<dim>(fe_i, fe_q) * dphi<dim>(fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+    equation.m_matrix_dt = phi<dim>(fe_i, fe_q) * phi<dim>(fe_j, fe_q) * JxW<dim>(fe_q);
+    equation.m_rhs       = phi<dim>(fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+    return equation;
+}
+
+template <int dim>
+dealiiFiniteElementEquation<dim> CreateEquation_Poisson()
+{
+    dealiiFiniteElementEquation<dim> equation;
+    return equation;
+}
+
+template <int dim>
+dealiiFiniteElementEquation<dim> CreateEquation_Laplace()
+{
+    dealiiFiniteElementEquation<dim> equation;
+    return equation;
+}
+
+
 
 }
 }

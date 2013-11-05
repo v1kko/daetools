@@ -169,7 +169,7 @@ public:
 
 
 /*********************************************************
- * feNumber
+ * feExpression
  *********************************************************/
 enum efeNumberType
 {
@@ -195,16 +195,16 @@ template<int dim>
 class feNode;
 
 template<int dim>
-class feNumber
+class feExpression
 {
 public:
     typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
 
-    feNumber()
+    feExpression()
     {
     }
 
-    feNumber(feNodePtr node) : m_node(node)
+    feExpression(feNodePtr node) : m_node(node)
     {
     }
 
@@ -249,6 +249,38 @@ public:
     {
         m_eType = eFEPoint;
         m_point = t;
+    }
+
+    std::string ToString() const
+    {
+        if(m_eType == eFEScalar)
+        {
+            return (boost::format("%f") % m_value).str();
+        }
+        else if(m_eType == eFETensor1)
+        {
+            if(dim == 1)
+                return (boost::format("(%f)") % m_tensor1[0]).str();
+            else if(dim == 2)
+                return (boost::format("(%f, %f)") % m_tensor1[0] % m_tensor1[1]).str();
+            else if(dim == 3)
+                return (boost::format("(%f, %f, %f)") % m_tensor1[0] % m_tensor1[1] % m_tensor1[2]).str();
+        }
+        else if(m_eType == eFETensor2)
+        {
+            return "";
+        }
+        else if(m_eType == eFEPoint)
+        {
+            if(dim == 1)
+                return (boost::format("(%f)") % m_point[0]).str();
+            else if(dim == 2)
+                return (boost::format("(%f, %f)") % m_point[0] % m_point[1]).str();
+            else if(dim == 3)
+                return (boost::format("(%f, %f, %f)") % m_point[0] % m_point[1] % m_point[2]).str();
+        }
+        else
+            throw std::runtime_error(std::string("Invalid runtime number type"));
     }
 
 public:
@@ -630,7 +662,7 @@ public:
     virtual double JxW (const unsigned int q) const = 0;
     virtual const Point<dim>& normal_vector (const unsigned int q) const = 0;
 
-    virtual Function<dim>& function (const std::string& name) const = 0;
+    virtual const Function<dim>& function (const std::string& name) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
@@ -1098,246 +1130,352 @@ public:
 };
 
 template<int dim>
-feNumber<dim> operator +(const feNumber<dim>& l, const feNumber<dim>& r)
+feExpression<dim> operator +(const feExpression<dim>& l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(ePlus, l.m_node, r.m_node) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePlus, l.m_node, r.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> operator -(const feNumber<dim>& l, const feNumber<dim>& r)
+feExpression<dim> operator -(const feExpression<dim>& l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eMinus, l.m_node, r.m_node) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMinus, l.m_node, r.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> operator *(const feNumber<dim>& l, const feNumber<dim>& r)
+feExpression<dim> operator *(const feExpression<dim>& l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eMulti, l.m_node, r.m_node) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMulti, l.m_node, r.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> operator /(const feNumber<dim>& l, const feNumber<dim>& r)
+feExpression<dim> operator /(const feExpression<dim>& l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eDivide, l.m_node, r.m_node) ));
-}
-
-
-template<int dim>
-feNumber<dim> operator +(const feNumber<dim>& l, double r)
-{
-    typename feNumber<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(ePlus, l.m_node, rnode) ));
-}
-
-template<int dim>
-feNumber<dim> operator -(const feNumber<dim>& l, double r)
-{
-    typename feNumber<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eMinus, l.m_node, rnode) ));
-}
-
-template<int dim>
-feNumber<dim> operator *(const feNumber<dim>& l, double r)
-{
-    typename feNumber<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eMulti, l.m_node, rnode) ));
-}
-
-template<int dim>
-feNumber<dim> operator /(const feNumber<dim>& l, double r)
-{
-    typename feNumber<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eDivide, l.m_node, rnode) ));
-}
-
-template<int dim>
-feNumber<dim> operator ^(const feNumber<dim>& l, double r)
-{
-    typename feNumber<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(ePower, l.m_node, rnode) ));
-}
-
-template<int dim>
-feNumber<dim> pow(const feNumber<dim>& l, double r)
-{
-    typename feNumber<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(ePower, l.m_node, rnode) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eDivide, l.m_node, r.m_node) ));
 }
 
 
 template<int dim>
-feNumber<dim> operator +(double l, const feNumber<dim>& r)
+feExpression<dim> operator +(const feExpression<dim>& l, double r)
 {
-    typename feNumber<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(ePlus, lnode, r.m_node) ));
+    typename feExpression<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePlus, l.m_node, rnode) ));
 }
 
 template<int dim>
-feNumber<dim> operator -(double l, const feNumber<dim>& r)
+feExpression<dim> operator -(const feExpression<dim>& l, double r)
 {
-    typename feNumber<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eMinus, lnode, r.m_node) ));
+    typename feExpression<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMinus, l.m_node, rnode) ));
 }
 
 template<int dim>
-feNumber<dim> operator *(double l, const feNumber<dim>& r)
+feExpression<dim> operator *(const feExpression<dim>& l, double r)
 {
-    typename feNumber<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eMulti, lnode, r.m_node) ));
+    typename feExpression<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMulti, l.m_node, rnode) ));
 }
 
 template<int dim>
-feNumber<dim> operator /(double l, const feNumber<dim>& r)
+feExpression<dim> operator /(const feExpression<dim>& l, double r)
 {
-    typename feNumber<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_binary<dim>(eDivide, lnode, r.m_node) ));
+    typename feExpression<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eDivide, l.m_node, rnode) ));
+}
+
+template<int dim>
+feExpression<dim> operator ^(const feExpression<dim>& l, double r)
+{
+    typename feExpression<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePower, l.m_node, rnode) ));
+}
+
+template<int dim>
+feExpression<dim> pow(const feExpression<dim>& l, double r)
+{
+    typename feExpression<dim>::feNodePtr rnode( new feNode_constant<dim>(r) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePower, l.m_node, rnode) ));
 }
 
 
 template<int dim>
-feNumber<dim> operator -(const feNumber<dim>& fe)
+feExpression<dim> operator +(double l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eSign, fe.m_node) ));
+    typename feExpression<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePlus, lnode, r.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> sqrt(const feNumber<dim>& fe)
+feExpression<dim> operator -(double l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eSqrt, fe.m_node) ));
+    typename feExpression<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMinus, lnode, r.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> exp(const feNumber<dim>& fe)
+feExpression<dim> operator *(double l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eExp, fe.m_node) ));
+    typename feExpression<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMulti, lnode, r.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> log(const feNumber<dim>& fe)
+feExpression<dim> operator /(double l, const feExpression<dim>& r)
 {
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eLog, fe.m_node) ));
+    typename feExpression<dim>::feNodePtr lnode( new feNode_constant<dim>(l) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eDivide, lnode, r.m_node) ));
 }
-
-template<int dim>
-feNumber<dim> log10(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eLog10, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> abs(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eAbs, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> sin(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eSin, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> cos(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eCos, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> tan(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eTan, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> asin(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eASin, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> acos(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eACos, fe.m_node) ));
-}
-
-template<int dim>
-feNumber<dim> atan(const feNumber<dim>& fe)
-{
-    return feNumber<dim>(typename feNumber<dim>::feNodePtr( new feNode_unary<dim>(eATan, fe.m_node) ));
-}
-
-
-
-
-
 
 
 template<int dim>
-feNumber<dim> constant(double value)
+feExpression<dim> operator -(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_constant<dim>(value) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eSign, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> phi(int i, int q)
+feExpression<dim> sqrt(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_phi<dim>(i, q) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eSqrt, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> dphi(int i, int q)
+feExpression<dim> exp(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_dphi<dim>(i, q) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eExp, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> d2phi(int i, int q)
+feExpression<dim> log(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_d2phi<dim>(i, q) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eLog, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> xyz(int q)
+feExpression<dim> log10(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_xyz<dim>(q) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eLog10, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> JxW(int q)
+feExpression<dim> abs(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_JxW<dim>(q) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eAbs, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> normal(int q)
+feExpression<dim> sin(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_normal<dim>(q) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eSin, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> function_value(const std::string name, const feNumber<dim>& xyz)
+feExpression<dim> cos(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, -1) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eCos, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> function_value2(const std::string name, const feNumber<dim>& xyz, unsigned int component)
+feExpression<dim> tan(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eTan, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> function_gradient(const std::string name, const feNumber<dim>& xyz)
+feExpression<dim> asin(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, -1) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eASin, fe.m_node) ));
 }
 
 template<int dim>
-feNumber<dim> function_gradient2(const std::string name, const feNumber<dim>& xyz, unsigned int component)
+feExpression<dim> acos(const feExpression<dim>& fe)
 {
-    return feNumber<dim>( typename feNumber<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eACos, fe.m_node) ));
 }
 
+template<int dim>
+feExpression<dim> atan(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eATan, fe.m_node) ));
+}
+
+
+
+
+
+
+
+template<int dim>
+feExpression<dim> constant(double value)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_constant<dim>(value) ) );
+}
+
+template<int dim>
+feExpression<dim> phi(int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_phi<dim>(i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> dphi(int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dphi<dim>(i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> d2phi(int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_d2phi<dim>(i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> xyz(int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_xyz<dim>(q) ) );
+}
+
+template<int dim>
+feExpression<dim> JxW(int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_JxW<dim>(q) ) );
+}
+
+template<int dim>
+feExpression<dim> normal(int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_normal<dim>(q) ) );
+}
+
+template<int dim>
+feExpression<dim> function_value(const std::string name, const feExpression<dim>& xyz)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, -1) ) );
+}
+
+template<int dim>
+feExpression<dim> function_value2(const std::string name, const feExpression<dim>& xyz, unsigned int component)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
+}
+
+template<int dim>
+feExpression<dim> function_gradient(const std::string name, const feExpression<dim>& xyz)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, -1) ) );
+}
+
+template<int dim>
+feExpression<dim> function_gradient2(const std::string name, const feExpression<dim>& xyz, unsigned int component)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
+}
+
+
+
+
+
+template<int dim>
+class feCellContext_dummy : public feCellContext<dim>
+{
+public:
+    feCellContext_dummy()
+    {
+    }
+
+public:
+    virtual double shape_value(const unsigned int i,
+                               const unsigned int j) const
+    {
+        return 1.5;
+    }
+
+    virtual double shape_value_component (const unsigned int i,
+                                          const unsigned int j,
+                                          const unsigned int component) const
+    {
+        return 2.5;
+    }
+
+    virtual const Tensor<1,dim>& shape_grad (const unsigned int i,
+                                             const unsigned int j) const
+    {
+        static Tensor<1,dim> tensor;
+        return tensor;
+    }
+
+    virtual Tensor<1,dim> shape_grad_component (const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int component) const
+    {
+        static Tensor<1,dim> tensor;
+        return tensor;
+    }
+
+    virtual const Tensor<2,dim>& shape_hessian (const unsigned int i,
+                                                const unsigned int j) const
+    {
+        static Tensor<2,dim> tensor;
+        return tensor;
+    }
+
+    virtual Tensor<2,dim> shape_hessian_component (const unsigned int i,
+                                                   const unsigned int j,
+                                                   const unsigned int component) const
+    {
+        static Tensor<2,dim> tensor;
+        return tensor;
+    }
+
+    virtual const Point<dim>& quadrature_point (const unsigned int q) const
+    {
+        static Point<dim> point;
+        return point;
+    }
+
+    virtual double JxW (const unsigned int q) const
+    {
+        return 123.15;
+    }
+
+    virtual const Point<dim>& normal_vector (const unsigned int q) const
+    {
+        static Point<dim> point;
+        return point;
+    }
+
+    virtual const Function<dim>& function (const std::string& name) const
+    {
+        static ConstantFunction<dim> fn(153.2);
+        return fn;
+    }
+
+    virtual unsigned int q() const
+    {
+        return 1;
+    }
+
+    virtual unsigned int i() const
+    {
+        return 2;
+    }
+
+    virtual unsigned int j() const
+    {
+        return 3;
+    }
+};
+
+template<int dim>
+feCellContext<dim>* getDummyCellContext()
+{
+    return new feCellContext_dummy<dim>();
+}
+
+template<int dim>
+feRuntimeNumber<dim> Evaluate(const feExpression<dim>& number, feCellContext<dim>* pContext)
+{
+    return number.m_node->Evaluate(pContext);
+}
 
 }
 }
