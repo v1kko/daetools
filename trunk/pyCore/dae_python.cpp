@@ -1544,13 +1544,23 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("DeclareEquations", &daeFiniteElementModel::DeclareEquations, ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
     ;
 
+    class_<daeFiniteElementVariableInfo>("daeFiniteElementVariableInfo")
+        .def_readonly("VariableName",          &daeFiniteElementVariableInfo::m_strName)
+        .def_readonly("VariableDescription",   &daeFiniteElementVariableInfo::m_strDescription)
+        .def_readonly("Multiplicity",          &daeFiniteElementVariableInfo::m_nMultiplicity)
+        .def_readonly("DOFsPerComponent",      &daeFiniteElementVariableInfo::m_narrDOFsPerComponent)
+    ;
+
+    class_<daeFiniteElementObjectInfo>("daeFiniteElementObjectInfo")
+    ;
+
     class_<daepython::daeFiniteElementObjectWrapper, boost::noncopyable>("daeFiniteElementObject", DOCSTR_daeFiniteElementObject, no_init)
         .def("AssembleSystem",      pure_virtual(&daeFiniteElementObject::AssembleSystem),    ( arg("self") ), DOCSTR_daeFiniteElementObject_AssembleSystem)
         .def("ReAssembleSystem",    pure_virtual(&daeFiniteElementObject::ReAssembleSystem),  ( arg("self") ), DOCSTR_daeFiniteElementObject_ReAssembleSystem)
         .def("NeedsReAssembling",   pure_virtual(&daeFiniteElementObject::NeedsReAssembling), ( arg("self") ), DOCSTR_daeFiniteElementObject_NeedsReAssembling)
 
-        .def("RowIterator",         pure_virtual(&daeFiniteElementObject::RowIterator), return_value_policy<manage_new_object>(),
-                                    ( arg("self"), arg("row") ), DOCSTR_daeFiniteElementObject_RowIterator)
+        .def("RowIndices",         pure_virtual(&daeFiniteElementObject::RowIndices), return_value_policy<manage_new_object>(),
+                                    ( arg("self"), arg("row") ), DOCSTR_daeFiniteElementObject_RowIndices)
 
         .def("SystemMatrix",        pure_virtual(&daeFiniteElementObject::SystemMatrix), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix)
@@ -1561,11 +1571,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("SystemRHS",           pure_virtual(&daeFiniteElementObject::SystemRHS), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemRHS)
 
-        .def("GetVariableNames",    pure_virtual(&daeFiniteElementObject::GetVariableNames),
-                                    ( arg("self") ), DOCSTR_daeFiniteElementObject_GetVariableNames)
-
-        .def("GetNumberOfPointsInDomainOmega", pure_virtual(&daeFiniteElementObject::GetNumberOfPointsInDomainOmega),
-                                               ( arg("self") ), DOCSTR_daeFiniteElementObject_GetNumberOfPointsInDomainOmega)
+        .def("GetObjectInfo",       pure_virtual(&daeFiniteElementObject::GetObjectInfo),
+                                    ( arg("self") ), DOCSTR_daeFiniteElementObject_GetObjectInfo)
     ;
 
     class_<daeEquationExecutionInfo, boost::noncopyable>("daeEquationExecutionInfo", DOCSTR_daeEquationExecutionInfo, no_init)

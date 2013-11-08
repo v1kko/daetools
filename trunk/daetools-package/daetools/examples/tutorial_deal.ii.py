@@ -74,21 +74,19 @@ class fnConstantVectorFunction(Function_2D):
     def vector_value(self, point):
         return self.m_values
         
-class feObject(dealiiFiniteElementObject_2D):
-    def __init__(self, meshFilename, polynomialOrder, quadratureFormula, numberOfQuadraturePoints, 
-                       functions, dirichletBC, neumannBC, equation):
-        dealiiFiniteElementObject_2D.__init__(self, meshFilename,
+class feObject(dealiiFiniteElementSystem_2D):
+    def __init__(self, meshFilename, polynomialOrder, quadratureFormula, 
+                       faceQuadratureFormula, functions, equation):
+        dealiiFiniteElementSystem_2D.__init__(self, meshFilename, 
                                                     polynomialOrder,
                                                     quadratureFormula,
-                                                    numberOfQuadraturePoints,
+                                                    faceQuadratureFormula,
                                                     functions,
-                                                    dirichletBC,
-                                                    neumannBC,
                                                     equation)
-
+        
     def AssembleSystem(self):
         print 'AssembleSystem custom'
-        dealiiFiniteElementObject_2D.AssembleSystem(self)
+        dealiiFiniteElementSystem_2D.AssembleSystem(self)
     
     def NeedsReAssembling(self):
         return False
@@ -118,61 +116,15 @@ class modTutorial(daeModel):
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         meshFilename = os.path.join(meshes_dir, 'ex49.msh')
         
-        """
-        Auxiliary classes, functions and objects for local contribution expressions:
-         * Constants:
-           - fe_i (represents a current 'i' index in the DOF loop)
-           - fe_j (represents a current 'j' index in the DOF loop)
-           - fe_q (represents a current 'q' index of a quadrature point)
-         
-         * Classes:
-           - feExpression_nD (class that holds contribution expressions)
-         
-         * Functions: 
-           - constant_nD
-           - phi_nD
-           - dphi_nD
-           - d2phi_nD
-           - JxW_nD
-           - xyz_nD
-           - normal_nD
-           - function_value_nD
-           - function_gradient_nD
+        equations = []
         
-        All above constants/classes/functions are available for 1D, 2D and 3D.
-        For instance if we are building a 2D system we would use phi_2D, JxW_2D and so on.
-        Here we create 'aliases' so that the actual expressions are generic (dimension independent).
-        """
-        expression = feExpression_2D
-        constant   = constant_2D
-        phi        = phi_2D
-        dphi       = dphi_2D
-        JxW        = JxW_2D
-        xyz        = xyz_2D
-        normal     = normal_2D
-        fvalue     = function_value_2D
-        grad       = function_gradient_2D
-        
-        # Build local contribution expressions for a Convection-Diffusion system:
-        eq = dealiiFiniteElementEquation_2D()
-        eq.matrix    = (dphi(fe_i, fe_q) * dphi(fe_j, fe_q)) * fvalue('Diffusivity', xyz(fe_q)) * JxW(fe_q)
-        eq.matrix_dt = phi(fe_i, fe_q) * phi(fe_j, fe_q) * JxW(fe_q)
-        eq.rhs       = phi(fe_i, fe_q) * fvalue('Generation', xyz(fe_q)) * JxW(fe_q)
-        print 'eq.matrix    = %s' % eq.matrix
-        print 'eq.matrix_dt = %s' % eq.matrix_dt
-        print 'eq.rhs       = %s' % eq.rhs
-        
-        equation = CreateEquation_ConvectionDiffusion_2D()
-        print equation.matrix
         self.fe_dealII = feObject(meshFilename,     # path to mesh
                                   1,                # polinomial order
                                   QGauss_2D(3),     # quadrature formula
                                   QGauss_1D(3),     # face quadrature formula
                                   self.functions,   # dictionary {'Name':Function<dim>} used during assemble
-                                  self.dirichletBC, # Neumann BC dictionary  {id:Function<dim>}
-                                  self.neumannBC,   # Dirichlet BC dictionary {id:Function<dim>}
-                                  equation          # Equation (contributions to the cell_matrix, cell_matrix_dt and cell_rhs)
-                                  )
+                                  equations         # Equations (contributions to the cell_matrix, cell_matrix_dt, cell_rhs, BCs etc.)
+                                 )
           
         self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)
        
@@ -260,20 +212,21 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         m_dt = self.m.fe_dealII.SystemMatrix_dt()
         T    = self.m.fe.dictVariables['T']
+        U    = self.m.fe.dictVariables['U']
         
         # Vector where every item marks the boundar
-        dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
+        #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
         #print list(dof_to_boundary)
         
         for row in xrange(m_dt.n):
             # Create an iterator on the current row columns 
-            rowiter = self.m.fe_dealII.RowIterator(row)
-            
+            rowiter = self.m.fe_dealII.RowIndices(row)            
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
-            for column in rowiter:
+            for column in self.m.fe_dealII.RowIndices(row):
                 if m_dt(row, column) != 0:
                     T.SetInitialCondition(column, 300)
+                    #U.SetInitialCondition(column, 100)
                     #print 'm_dt(%d,%d) = %f' % (row, column, m_dt(row, column))
     
 # Use daeSimulator class
@@ -336,7 +289,7 @@ def consoleRun():
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
         sys.exit()
-    feDataReporter.Connect(os.path.join(os.path.dirname(__file__), 'results'), simName)
+    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results'), simName)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

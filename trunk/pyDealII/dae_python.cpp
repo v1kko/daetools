@@ -95,6 +95,91 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor_1_3D::memory_consumption)
     ;
 
+
+    class_< Tensor<2,1,double>, boost::noncopyable>("Tensor_2_1D")
+        .add_property("dimension",                  &daepython::Tensor_2_1D_dimension)
+        .add_property("rank",                       &daepython::Tensor_2_1D_rank)
+        .add_property("n_independent_components",   &daepython::Tensor_2_1D_n_independent_components)
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= double())
+        .def(self /= double())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_2_1D_getitem)
+        .def("__setitem__",         &daepython::Tensor_2_1D_setitem)
+        .def("__str__",             &daepython::Tensor_2_1D_str)
+        .def("__repr__",            &daepython::Tensor_2_1D_repr)
+
+        .def("norm",                &Tensor_2_1D::norm)
+        .def("norm_square",         &Tensor_2_1D::norm_square)
+        .def("clear",               &Tensor_2_1D::clear)
+        .def("memory_consumption",  &Tensor_2_1D::memory_consumption)
+    ;
+
+    class_< Tensor<2,2,double>, boost::noncopyable>("Tensor_2_2D")
+        .add_property("dimension",                  &daepython::Tensor_2_2D_dimension)
+        .add_property("rank",                       &daepython::Tensor_2_2D_rank)
+        .add_property("n_independent_components",   &daepython::Tensor_2_2D_n_independent_components)
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= double())
+        .def(self /= double())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_2_2D_getitem)
+        .def("__setitem__",         &daepython::Tensor_2_2D_setitem)
+        .def("__str__",             &daepython::Tensor_2_2D_str)
+        .def("__repr__",            &daepython::Tensor_2_2D_repr)
+
+        .def("norm",                &Tensor_2_2D::norm)
+        .def("norm_square",         &Tensor_2_2D::norm_square)
+        .def("clear",               &Tensor_2_2D::clear)
+        .def("memory_consumption",  &Tensor_2_2D::memory_consumption)
+    ;
+
+    class_< Tensor<2,3,double>, boost::noncopyable>("Tensor_2_3D")
+        .add_property("dimension",                  &daepython::Tensor_2_3D_dimension)
+        .add_property("rank",                       &daepython::Tensor_2_3D_rank)
+        .add_property("n_independent_components",   &daepython::Tensor_2_3D_n_independent_components)
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= double())
+        .def(self /= double())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_2_3D_getitem)
+        .def("__setitem__",         &daepython::Tensor_2_3D_setitem)
+        .def("__str__",             &daepython::Tensor_2_3D_str)
+        .def("__repr__",            &daepython::Tensor_2_3D_repr)
+
+        .def("norm",                &Tensor_2_3D::norm)
+        .def("norm_square",         &Tensor_2_3D::norm_square)
+        .def("clear",               &Tensor_2_3D::clear)
+        .def("memory_consumption",  &Tensor_2_3D::memory_consumption)
+    ;
+
+
+
+
     class_<Point<1,double>, bases<Tensor_1_1D> >("Point_1D")
         .def(init<double>())
 
@@ -531,6 +616,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_< feCellContext<3>, boost::noncopyable>("feCellContext_3D", no_init)
     ;
 
+    /*
     def("getDummyCellContext_1D", &getDummyCellContext<1>, return_value_policy<manage_new_object>());
     def("getDummyCellContext_2D", &getDummyCellContext<2>, return_value_policy<manage_new_object>());
     def("getDummyCellContext_3D", &getDummyCellContext<3>, return_value_policy<manage_new_object>());
@@ -538,6 +624,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("Evaluate_1D", &Evaluate<1>);
     def("Evaluate_2D", &Evaluate<2>);
     def("Evaluate_3D", &Evaluate<3>);
+    */
 
     class_< feRuntimeNumber<1> >("feRuntimeNumber_1D", no_init)
         .def("__str__",   &feRuntimeNumber<1>::ToString)
@@ -698,29 +785,44 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("function_gradient_3D", &function_gradient2<3>, ( arg("fname"), arg("xyz"), arg("component") ));
 
     class_< dealiiFiniteElementEquation<1> >("dealiiFiniteElementEquation_1D")
-        .def_readwrite("matrix",           &dealiiFiniteElementEquation<1>::m_matrix)
-        .def_readwrite("matrix_dt",        &dealiiFiniteElementEquation<1>::m_matrix_dt)
-        .def_readwrite("rhs",              &dealiiFiniteElementEquation<1>::m_rhs)
-        .def_readwrite("needsUpdate",      &dealiiFiniteElementEquation<1>::m_bNeedsUpdate)
+        .def_readwrite("VariableName",          &dealiiFiniteElementEquation<1>::m_strVariableName)
+        .def_readwrite("VariableDescription",   &dealiiFiniteElementEquation<1>::m_strVariableDescription)
+        .def_readwrite("DirichletBC",           &dealiiFiniteElementEquation<1>::m_dirichletBC)
+        .def_readwrite("NeumannBC",             &dealiiFiniteElementEquation<1>::m_neumannBC)
+        .def_readwrite("Multiplicity",          &dealiiFiniteElementEquation<1>::m_nMultiplicity)
+        .def_readwrite("Matrix",                &dealiiFiniteElementEquation<1>::m_matrix)
+        .def_readwrite("Matrix_dt",             &dealiiFiniteElementEquation<1>::m_matrix_dt)
+        .def_readwrite("RHS",                   &dealiiFiniteElementEquation<1>::m_rhs)
+        .def_readwrite("NeedsUpdate",           &dealiiFiniteElementEquation<1>::m_bNeedsUpdate)
     ;
 
     class_< dealiiFiniteElementEquation<2> >("dealiiFiniteElementEquation_2D")
-        .def_readwrite("matrix",           &dealiiFiniteElementEquation<2>::m_matrix)
-        .def_readwrite("matrix_dt",        &dealiiFiniteElementEquation<2>::m_matrix_dt)
-        .def_readwrite("rhs",              &dealiiFiniteElementEquation<2>::m_rhs)
-        .def_readwrite("needsUpdate",      &dealiiFiniteElementEquation<2>::m_bNeedsUpdate)
+        .def_readwrite("VariableName",          &dealiiFiniteElementEquation<2>::m_strVariableName)
+        .def_readwrite("VariableDescription",   &dealiiFiniteElementEquation<2>::m_strVariableDescription)
+        .def_readwrite("DirichletBC",           &dealiiFiniteElementEquation<2>::m_dirichletBC)
+        .def_readwrite("NeumannBC",             &dealiiFiniteElementEquation<2>::m_neumannBC)
+        .def_readwrite("Multiplicity",          &dealiiFiniteElementEquation<2>::m_nMultiplicity)
+        .def_readwrite("Matrix",                &dealiiFiniteElementEquation<2>::m_matrix)
+        .def_readwrite("Matrix_dt",             &dealiiFiniteElementEquation<2>::m_matrix_dt)
+        .def_readwrite("RHS",                   &dealiiFiniteElementEquation<2>::m_rhs)
+        .def_readwrite("NeedsUpdate",           &dealiiFiniteElementEquation<2>::m_bNeedsUpdate)
     ;
 
     class_< dealiiFiniteElementEquation<3> >("dealiiFiniteElementEquation_3D")
-        .def_readwrite("matrix",           &dealiiFiniteElementEquation<3>::m_matrix)
-        .def_readwrite("matrix_dt",        &dealiiFiniteElementEquation<3>::m_matrix_dt)
-        .def_readwrite("rhs",              &dealiiFiniteElementEquation<3>::m_rhs)
-        .def_readwrite("needsUpdate",      &dealiiFiniteElementEquation<3>::m_bNeedsUpdate)
+        .def_readwrite("VariableName",          &dealiiFiniteElementEquation<3>::m_strVariableName)
+        .def_readwrite("VariableDescription",   &dealiiFiniteElementEquation<3>::m_strVariableDescription)
+        .def_readwrite("DirichletBC",           &dealiiFiniteElementEquation<3>::m_dirichletBC)
+        .def_readwrite("NeumannBC",             &dealiiFiniteElementEquation<3>::m_neumannBC)
+        .def_readwrite("Multiplicity",          &dealiiFiniteElementEquation<3>::m_nMultiplicity)
+        .def_readwrite("Matrix",                &dealiiFiniteElementEquation<3>::m_matrix)
+        .def_readwrite("Matrix_dt",             &dealiiFiniteElementEquation<3>::m_matrix_dt)
+        .def_readwrite("RHS",                   &dealiiFiniteElementEquation<3>::m_rhs)
+        .def_readwrite("NeedsUpdate",           &dealiiFiniteElementEquation<3>::m_bNeedsUpdate)
     ;
 
-    def("CreateEquation_ConvectionDiffusion_1D",  &CreateEquation_ConvectionDiffusion<1>);
-    def("CreateEquation_ConvectionDiffusion_2D",  &CreateEquation_ConvectionDiffusion<2>);
-    def("CreateEquation_ConvectionDiffusion_3D",  &CreateEquation_ConvectionDiffusion<3>);
+    //def("CreateEquation_ConvectionDiffusion_1D",  &CreateEquation_ConvectionDiffusion<1>, return_value_policy<manage_new_object>());
+    //def("CreateEquation_ConvectionDiffusion_2D",  &CreateEquation_ConvectionDiffusion<2>, return_value_policy<manage_new_object>());
+    //def("CreateEquation_ConvectionDiffusion_3D",  &CreateEquation_ConvectionDiffusion<3>, return_value_policy<manage_new_object>());
 
     class_<daeDealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeDealIIDataReporter", no_init)
         .def("Connect",				&daeDealIIDataReporter::Connect)
@@ -735,6 +837,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
     ;
 
+    /*
     class_<daepython::dealiiFiniteElementObjectWrapper<1>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_1D", no_init)
         .def(init<string,
                   unsigned int,
@@ -826,7 +929,33 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<3>::GetDOFtoBoundaryMap,
                                     &daepython::dealiiFiniteElementObjectWrapper<3>::def_GetDOFtoBoundaryMap, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementObject<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
+    ;
+    */
 
+
+    class_<daepython::dealiiFiniteElementSystemWrapper<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementSystem_2D", no_init)
+        .def(init<string,
+                  unsigned int,
+                  const Quadrature<2>&,
+                  const Quadrature<1>&,
+                  boost::python::dict,
+                  boost::python::list>(( arg("meshFilename"),
+                                         arg("polynomialOrder"),
+                                         arg("quadrature"),
+                                         arg("faceQuadrature"),
+                                         arg("functions"),
+                                         arg("equations")
+                                      )))
+
+        .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<2>::AssembleSystem,
+                                    &daepython::dealiiFiniteElementSystemWrapper<2>::def_AssembleSystem, ( arg("self") ))
+        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementSystemWrapper<2>::ReAssembleSystem,
+                                    &daepython::dealiiFiniteElementSystemWrapper<2>::def_ReAssembleSystem, ( arg("self") ))
+        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementSystemWrapper<2>::NeedsReAssembling,
+                                    &daepython::dealiiFiniteElementSystemWrapper<2>::def_NeedsReAssembling, ( arg("self") ))
+        .def("CreateDataReporter",  &dealiiFiniteElementSystem<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
+        .def("RowIndices",          &daepython::dealiiFiniteElementSystemWrapper<2>::GetRowIndices, ( arg("self"), arg("row") ))
+        .def("GetDOFtoBoundaryMap", &dealiiFiniteElementSystem<2>::GetDOFtoBoundaryMap, ( arg("self") ))
     ;
 
 }

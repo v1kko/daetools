@@ -4,6 +4,7 @@
 #include "../Core/datareporting.h"
 #include <boost/filesystem.hpp>
 #include <boost/function.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace dae
 {
@@ -78,6 +79,21 @@ public:
 
     bool RegisterVariable(const daeDataReporterVariable* pVariable)
     {
+        std::vector<std::string> names;
+        boost::algorithm::split(names, pVariable->m_strName, boost::algorithm::is_any_of("."));
+        std::string strVariableName = names[names.size()-1];
+
+        boost::filesystem::path vtkPath(m_strOutputDirectory);
+        boost::filesystem::path variableFolder(strVariableName);
+        vtkPath /= variableFolder;
+
+        if(!boost::filesystem::create_directories(vtkPath.c_str()))
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot create an output directory for the variable: " << strVariableName;
+            throw e;
+        }
+
         return true;
     }
 
@@ -102,11 +118,16 @@ public:
         //if(value->m_strName != "")
         //    return;
 
-        std::string strVariableName = pVariableValue->m_strName;
+        std::vector<std::string> names;
+        boost::algorithm::split(names, pVariableValue->m_strName, boost::algorithm::is_any_of("."));
+        std::string strVariableName = names[names.size()-1];
+
         boost::filesystem::path vtkFilename((boost::format("%05d.%s(t=%f).vtk") % m_outputCounter
                                                                                 % strVariableName
                                                                                 % m_dCurrentTime).str());
         boost::filesystem::path vtkPath(m_strOutputDirectory);
+        boost::filesystem::path variableFolder(strVariableName);
+        vtkPath /= variableFolder;
         vtkPath /= vtkFilename;
 
         m_callback(vtkPath.c_str(), strVariableName, pVariableValue->m_pValues, pVariableValue->m_nNumberOfPoints);

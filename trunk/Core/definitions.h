@@ -525,6 +525,27 @@ public:
 };
 
 /******************************************************************
+    daeFiniteElementVariable
+*******************************************************************/
+struct daeFiniteElementVariableInfo
+{
+    std::string         m_strName;
+    std::string         m_strDescription;
+    unsigned int        m_nMultiplicity;
+    std::vector<size_t> m_narrDOFsPerComponent;
+};
+
+/******************************************************************
+    daeFiniteElementObjectInfo
+*******************************************************************/
+struct daeFiniteElementObjectInfo
+{
+    unsigned int                                m_nNumberOfDOFsPerVariable;
+    unsigned int                                m_nTotalNumberDOFs;
+    std::vector<daeFiniteElementVariableInfo>   m_VariableInfos;
+};
+
+/******************************************************************
     daeFiniteElementObject
 *******************************************************************/
 class daeFiniteElementObject
@@ -536,15 +557,14 @@ public:
     virtual bool                        NeedsReAssembling() = 0;
     virtual void                        ReAssembleSystem() = 0;
 
-    virtual daeSparseMatrixRowIterator* RowIterator(unsigned int row) const = 0;
+    virtual void                        RowIndices(unsigned int row,
+                                                   std::vector<unsigned int>& narrIndices) const = 0;
 
     virtual dae::daeMatrix<real_t>*     SystemMatrix() const = 0;
     virtual dae::daeMatrix<real_t>*     SystemMatrix_dt() const = 0;
     virtual dae::daeArray<real_t>*      SystemRHS() const = 0;
 
-    virtual std::vector<std::string>    GetVariableNames() const = 0;
-    virtual unsigned int                GetNumberOfPointsInDomainOmega() const = 0;
-    virtual std::vector<unsigned int>   GetDOFtoBoundaryMap() = 0;
+    virtual daeFiniteElementObjectInfo  GetObjectInfo() const = 0;
 };
 
 }

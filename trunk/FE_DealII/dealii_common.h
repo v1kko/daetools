@@ -5,7 +5,9 @@
 #include <deal.II/base/tensor.h>
 #include <deal.II/base/function.h>
 #include <deal.II/lac/vector.h>
+#include <deal.II/lac/block_vector.h>
 #include <deal.II/lac/full_matrix.h>
+#include <deal.II/lac/block_sparse_matrix.h>
 #include <deal.II/lac/sparse_matrix.h>
 #include <deal.II/lac/sparsity_pattern.h>
 #include "../Core/definitions.h"
@@ -23,10 +25,20 @@ typedef Function<1> Function_1D;
 typedef Function<2> Function_2D;
 typedef Function<3> Function_3D;
 
-// Tensors of rank=1 are used for a gradient of scalar functions
+// Tensors of rank=1
 typedef Tensor<1, 1, double> Tensor_1_1D;
 typedef Tensor<1, 2, double> Tensor_1_2D;
 typedef Tensor<1, 3, double> Tensor_1_3D;
+
+// Tensors of rank=2
+typedef Tensor<2, 1, double> Tensor_2_1D;
+typedef Tensor<2, 2, double> Tensor_2_2D;
+typedef Tensor<2, 3, double> Tensor_2_3D;
+
+// Tensors of rank=3
+typedef Tensor<3, 1, double> Tensor_3_1D;
+typedef Tensor<3, 2, double> Tensor_3_2D;
+typedef Tensor<3, 3, double> Tensor_3_3D;
 
 // Points are in fact tensors with rank=1 just their coordinates mean length
 // and have some additional functions
@@ -89,6 +101,48 @@ protected:
 };
 
 /*********************************************************
+ * daeFEBlockMatrix
+ * A wrapper around deal.II BlockSparseMatrix<double>
+ *********************************************************/
+template<typename REAL = double>
+class daeFEBlockMatrix : public daeMatrix<REAL>
+{
+public:
+    daeFEBlockMatrix(const BlockSparseMatrix<REAL>& matrix) : deal_ii_matrix(matrix)
+    {
+    }
+
+    virtual ~daeFEBlockMatrix(void)
+    {
+    }
+
+public:
+    virtual REAL GetItem(size_t row, size_t col) const
+    {
+        return deal_ii_matrix(row, col);
+    }
+
+    virtual void SetItem(size_t row, size_t col, REAL value)
+    {
+        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
+        daeDeclareAndThrowException(exInvalidCall);
+    }
+
+    virtual size_t GetNrows(void) const
+    {
+        return deal_ii_matrix.n();
+    }
+
+    virtual size_t GetNcols(void) const
+    {
+        return deal_ii_matrix.m();
+    }
+
+protected:
+    const BlockSparseMatrix<REAL>& deal_ii_matrix;
+};
+
+/*********************************************************
  * daeFEArray
  * A wrapper around deal.II Vector<REAL>
  *********************************************************/
@@ -128,6 +182,48 @@ public:
 
 protected:
     const Vector<REAL>& deal_ii_vector;
+};
+
+/*********************************************************
+ * daeFEBlockArray
+ * A wrapper around deal.II Vector<REAL>
+ *********************************************************/
+template<typename REAL = double>
+class daeFEBlockArray : public daeArray<REAL>
+{
+public:
+    daeFEBlockArray(const BlockVector<REAL>& vect) : deal_ii_vector(vect)
+    {
+    }
+
+    virtual ~daeFEBlockArray(void)
+    {
+    }
+
+public:
+    REAL operator [](size_t i) const
+    {
+        return deal_ii_vector[i];
+    }
+
+    REAL GetItem(size_t i) const
+    {
+        return deal_ii_vector[i];
+    }
+
+    void SetItem(size_t i, REAL value)
+    {
+        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
+        daeDeclareAndThrowException(exInvalidCall);
+    }
+
+    size_t GetSize(void) const
+    {
+        return deal_ii_vector.size();
+    }
+
+protected:
+    const BlockVector<REAL>& deal_ii_vector;
 };
 
 /*********************************************************
@@ -176,6 +272,7 @@ enum efeNumberType
     eFEScalar = 0,
     eFETensor1,
     eFETensor2,
+    eFETensor3,
     eFEPoint,
     eFEInvalid
 };
@@ -245,6 +342,12 @@ public:
         m_tensor2 = t;
     }
 
+    feRuntimeNumber(const Tensor<3, dim, double>& t)
+    {
+        m_eType   = eFETensor3;
+        m_tensor3 = t;
+    }
+
     feRuntimeNumber(const Point<dim, double>& t)
     {
         m_eType = eFEPoint;
@@ -260,13 +363,25 @@ public:
         else if(m_eType == eFETensor1)
         {
             if(dim == 1)
-                return (boost::format("(%f)") % m_tensor1[0]).str();
+                return (boost::format("[%f]") % m_tensor1[0]).str();
             else if(dim == 2)
-                return (boost::format("(%f, %f)") % m_tensor1[0] % m_tensor1[1]).str();
+                return (boost::format("[%f, %f]") % m_tensor1[0] % m_tensor1[1]).str();
             else if(dim == 3)
-                return (boost::format("(%f, %f, %f)") % m_tensor1[0] % m_tensor1[1] % m_tensor1[2]).str();
+                return (boost::format("[%f, %f, %f]") % m_tensor1[0] % m_tensor1[1] % m_tensor1[2]).str();
         }
         else if(m_eType == eFETensor2)
+        {
+            if(dim == 1)
+                return (boost::format("[[%f], [%f]]") % m_tensor2[0][0] % m_tensor2[0][1]).str();
+            else if(dim == 2)
+                return (boost::format("[[%f, %f], [%f, %f]]")  % m_tensor2[0][0] % m_tensor2[0][1]
+                                                               % m_tensor2[1][0] % m_tensor2[1][1]).str();
+            else if(dim == 3)
+                return (boost::format("[[%f, %f, %f], [%f, %f, %f], [%f, %f, %f]]") % m_tensor2[0][0] % m_tensor2[0][1] % m_tensor2[0][2]
+                                                                                    % m_tensor2[1][0] % m_tensor2[1][1] % m_tensor2[1][2]
+                                                                                    % m_tensor2[2][0] % m_tensor2[2][1] % m_tensor2[2][2]).str();
+        }
+        else if(m_eType == eFETensor3)
         {
             return "";
         }
@@ -288,6 +403,7 @@ public:
     Point<dim, double>     m_point;
     Tensor<1, dim, double> m_tensor1;
     Tensor<2, dim, double> m_tensor2;
+    Tensor<3, dim, double> m_tensor3;
     double                 m_value;
 };
 
@@ -309,6 +425,11 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFETensor2;
         tmp.m_tensor2 = -fe.m_tensor2;
+    }
+    else if(fe.m_eType == eFETensor3)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = -fe.m_tensor3;
     }
     else if(fe.m_eType == eFEPoint)
     {
@@ -339,6 +460,11 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor2;
         tmp.m_tensor2 = l.m_tensor2 + r.m_tensor2;
     }
+    else if(l.m_eType == eFETensor3 && r.m_eType == eFETensor3)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = l.m_tensor3 + r.m_tensor3;
+    }
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -368,6 +494,11 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor2;
         tmp.m_tensor2 = l.m_tensor2 - r.m_tensor2;
     }
+    else if(l.m_eType == eFETensor3 && r.m_eType == eFETensor3)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = l.m_tensor3 - r.m_tensor3;
+    }
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -392,16 +523,25 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_tensor1 * r.m_tensor1;
     }
+    /*
     else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor2)
     {
         tmp.m_eType = eFETensor2;
         tmp.m_tensor2 = l.m_tensor2 * r.m_tensor2;
     }
+    else if(l.m_eType == eFETensor3 && r.m_eType == eFETensor3)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = l.m_tensor3 * r.m_tensor3;
+    }
+    */
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_point * r.m_point;
     }
+
+
     else if(l.m_eType == eFEScalar && r.m_eType == eFETensor1)
     {
         tmp.m_eType = eFETensor1;
@@ -412,6 +552,8 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor1;
         tmp.m_tensor1 = l.m_tensor1 * r.m_value;
     }
+
+
     else if(l.m_eType == eFEScalar && r.m_eType == eFETensor2)
     {
         tmp.m_eType = eFETensor2;
@@ -422,6 +564,20 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor2;
         tmp.m_tensor2 = l.m_tensor2 * r.m_value;
     }
+
+
+    else if(l.m_eType == eFEScalar && r.m_eType == eFETensor3)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = l.m_value * r.m_tensor3;
+    }
+    else if(l.m_eType == eFETensor3 && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = l.m_tensor3 * r.m_value;
+    }
+
+
     else if(l.m_eType == eFEScalar && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -432,6 +588,7 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEPoint;
         tmp.m_point = l.m_point * r.m_value;
     }
+
     else
         throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " * " + typeid(r).name());
     return tmp;
@@ -455,6 +612,11 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
     {
         tmp.m_eType = eFETensor2;
         tmp.m_tensor2 = l.m_tensor2 / r.m_value;
+    }
+    else if(l.m_eType == eFETensor3 && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor3;
+        tmp.m_tensor3 = l.m_tensor3 / r.m_value;
     }
     else if(l.m_eType == eFEPoint && r.m_eType == eFEScalar)
     {
@@ -643,26 +805,39 @@ public:
     ~feCellContext(){}
 
 public:
-    virtual double shape_value(const unsigned int i,
-                               const unsigned int j) const = 0;
-    virtual double shape_value_component (const unsigned int i,
-                                          const unsigned int j,
-                                          const unsigned int component) const = 0;
-    virtual const Tensor<1,dim>& shape_grad (const unsigned int i,
-                                             const unsigned int j) const = 0;
-    virtual Tensor<1,dim> shape_grad_component (const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int component) const = 0;
-    virtual const Tensor<2,dim>& shape_hessian (const unsigned int i,
-                                                const unsigned int j) const = 0;
-    virtual Tensor<2,dim> shape_hessian_component (const unsigned int i,
-                                                   const unsigned int j,
-                                                   const unsigned int component) const = 0;
+    virtual double value(const std::string& variableName,
+                         const unsigned int i,
+                         const unsigned int j) const = 0;
+    virtual Tensor<1,dim> gradient (const std::string& variableName,
+                                    const unsigned int i,
+                                    const unsigned int j) const = 0;
+    virtual Tensor<2,dim> hessian (const std::string& variableName,
+                                   const unsigned int i,
+                                   const unsigned int j) const = 0;
+
+    virtual Tensor<1,dim> vector_value(const std::string& variableName,
+                                       const unsigned int i,
+                                       const unsigned int j) const = 0;
+    virtual Tensor<2,dim> vector_gradient (const std::string& variableName,
+                                           const unsigned int i,
+                                           const unsigned int j) const = 0;
+    virtual Tensor<3,dim> vector_hessian (const std::string& variableName,
+                                          const unsigned int i,
+                                          const unsigned int j) const = 0;
+    virtual double divergence(const std::string& variableName,
+                              const unsigned int i,
+                              const unsigned int j) const = 0;
+    /*
+    virtual ??? curl(const std::string& variableName,
+                     const unsigned int i,
+                     const unsigned int j) const = 0;
+    */
+
     virtual const Point<dim>& quadrature_point (const unsigned int q) const = 0;
     virtual double JxW (const unsigned int q) const = 0;
     virtual const Point<dim>& normal_vector (const unsigned int q) const = 0;
 
-    virtual const Function<dim>& function (const std::string& name) const = 0;
+    virtual const Function<dim>& function (const std::string& functionName) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
@@ -736,8 +911,9 @@ template<int dim>
 class feNode_phi : public feNode<dim>
 {
 public:
-    feNode_phi(int i, int q, unsigned int component = 0)
+    feNode_phi(const std::string& variableName, int i, int q, unsigned int component = 0)
     {
+        m_variableName = variableName;
         m_i = i;
         m_q = q;
         m_component = component;
@@ -748,15 +924,16 @@ public:
     {
         unsigned int i = getIndex<dim>(m_i, pCellContext);
         unsigned int q = getIndex<dim>(m_q, pCellContext);
-        return feRuntimeNumber<dim>( pCellContext->shape_value(i, q) );
+        return feRuntimeNumber<dim>( pCellContext->value(m_variableName, i, q) );
     }
 
     std::string ToString() const
     {
-        return (boost::format("phi(%d, %d)") % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("phi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
+    std::string    m_variableName;
     int            m_i;
     int            m_q;
     unsigned int   m_component;
@@ -766,8 +943,9 @@ template<int dim>
 class feNode_dphi : public feNode<dim>
 {
 public:
-    feNode_dphi(int i, int q, unsigned int component = 0)
+    feNode_dphi(const std::string& variableName, int i, int q, unsigned int component = 0)
     {
+        m_variableName = variableName;
         m_i = i;
         m_q = q;
         m_component = component;
@@ -778,15 +956,16 @@ public:
     {
         unsigned int i = getIndex<dim>(m_i, pCellContext);
         unsigned int q = getIndex<dim>(m_q, pCellContext);
-        return feRuntimeNumber<dim>( pCellContext->shape_grad(i, q) );
+        return feRuntimeNumber<dim>( pCellContext->gradient(m_variableName, i, q) );
     }
 
     std::string ToString() const
     {
-        return (boost::format("dphi(%d, %d)") % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("dphi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
+    std::string    m_variableName;
     int            m_i;
     int            m_q;
     unsigned int   m_component;
@@ -796,8 +975,9 @@ template<int dim>
 class feNode_d2phi : public feNode<dim>
 {
 public:
-    feNode_d2phi(int i, int q, unsigned int component = 0)
+    feNode_d2phi(const std::string& variableName, int i, int q, unsigned int component = 0)
     {
+        m_variableName = variableName;
         m_i = i;
         m_q = q;
         m_component = component;
@@ -808,15 +988,147 @@ public:
     {
         unsigned int i = getIndex<dim>(m_i, pCellContext);
         unsigned int q = getIndex<dim>(m_q, pCellContext);
-        return feRuntimeNumber<dim>( pCellContext->shape_hessian(i, q) );
+        return feRuntimeNumber<dim>( pCellContext->hessian(m_variableName, i, q) );
     }
 
     std::string ToString() const
     {
-        return (boost::format("d2phi(%d, %d)") % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("d2phi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
+    std::string    m_variableName;
+    int            m_i;
+    int            m_q;
+    unsigned int   m_component;
+};
+
+
+
+// Vector-data nodes
+template<int dim>
+class feNode_phi_vec : public feNode<dim>
+{
+public:
+    feNode_phi_vec(const std::string& variableName, int i, int q, unsigned int component = 0)
+    {
+        m_variableName = variableName;
+        m_i = i;
+        m_q = q;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int i = getIndex<dim>(m_i, pCellContext);
+        unsigned int q = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->vector_value(m_variableName, i, q) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("phi_vec(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+    }
+
+public:
+    std::string    m_variableName;
+    int            m_i;
+    int            m_q;
+    unsigned int   m_component;
+};
+
+template<int dim>
+class feNode_dphi_vec : public feNode<dim>
+{
+public:
+    feNode_dphi_vec(const std::string& variableName, int i, int q, unsigned int component = 0)
+    {
+        m_variableName = variableName;
+        m_i = i;
+        m_q = q;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int i = getIndex<dim>(m_i, pCellContext);
+        unsigned int q = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->vector_gradient(m_variableName, i, q) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("dphi_vec(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+    }
+
+public:
+    std::string    m_variableName;
+    int            m_i;
+    int            m_q;
+    unsigned int   m_component;
+};
+
+template<int dim>
+class feNode_d2phi_vec : public feNode<dim>
+{
+public:
+    feNode_d2phi_vec(const std::string& variableName, int i, int q, unsigned int component = 0)
+    {
+        m_variableName = variableName;
+        m_i = i;
+        m_q = q;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int i = getIndex<dim>(m_i, pCellContext);
+        unsigned int q = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->vector_hessian(m_variableName, i, q) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("d2phi_vec(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+    }
+
+public:
+    std::string    m_variableName;
+    int            m_i;
+    int            m_q;
+    unsigned int   m_component;
+};
+
+template<int dim>
+class feNode_div_phi : public feNode<dim>
+{
+public:
+    feNode_div_phi(const std::string& variableName, int i, int q, unsigned int component = 0)
+    {
+        m_variableName = variableName;
+        m_i = i;
+        m_q = q;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int i = getIndex<dim>(m_i, pCellContext);
+        unsigned int q = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->divergence(m_variableName, i, q) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("div_phi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+    }
+
+public:
+    std::string    m_variableName;
     int            m_i;
     int            m_q;
     unsigned int   m_component;
@@ -1310,23 +1622,52 @@ feExpression<dim> constant(double value)
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_constant<dim>(value) ) );
 }
 
+// Scalar-data functions
 template<int dim>
-feExpression<dim> phi(int i, int q)
+feExpression<dim> phi(const std::string& variableName, int i, int q)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_phi<dim>(i, q) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_phi<dim>(variableName, i, q) ) );
 }
 
 template<int dim>
-feExpression<dim> dphi(int i, int q)
+feExpression<dim> dphi(const std::string& variableName, int i, int q)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dphi<dim>(i, q) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dphi<dim>(variableName, i, q) ) );
 }
 
 template<int dim>
-feExpression<dim> d2phi(int i, int q)
+feExpression<dim> d2phi(const std::string& variableName, int i, int q)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_d2phi<dim>(i, q) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_d2phi<dim>(variableName, i, q) ) );
 }
+
+
+// Vector-data functions
+template<int dim>
+feExpression<dim> phi_vec(const std::string& variableName, int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_phi_vec<dim>(variableName, i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> dphi_vec(const std::string& variableName, int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dphi_vec<dim>(variableName, i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> d2phi_vec(const std::string& variableName, int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_d2phi_vec<dim>(variableName, i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> div_phi(const std::string& variableName, int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_div_phi<dim>(variableName, i, q) ) );
+}
+
+
 
 template<int dim>
 feExpression<dim> xyz(int q)
@@ -1347,25 +1688,25 @@ feExpression<dim> normal(int q)
 }
 
 template<int dim>
-feExpression<dim> function_value(const std::string name, const feExpression<dim>& xyz)
+feExpression<dim> function_value(const std::string& name, const feExpression<dim>& xyz)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, -1) ) );
 }
 
 template<int dim>
-feExpression<dim> function_value2(const std::string name, const feExpression<dim>& xyz, unsigned int component)
+feExpression<dim> function_value2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
 }
 
 template<int dim>
-feExpression<dim> function_gradient(const std::string name, const feExpression<dim>& xyz)
+feExpression<dim> function_gradient(const std::string& name, const feExpression<dim>& xyz)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, -1) ) );
 }
 
 template<int dim>
-feExpression<dim> function_gradient2(const std::string name, const feExpression<dim>& xyz, unsigned int component)
+feExpression<dim> function_gradient2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
 }
@@ -1373,7 +1714,7 @@ feExpression<dim> function_gradient2(const std::string name, const feExpression<
 
 
 
-
+/*
 template<int dim>
 class feCellContext_dummy : public feCellContext<dim>
 {
@@ -1476,6 +1817,7 @@ feRuntimeNumber<dim> Evaluate(const feExpression<dim>& number, feCellContext<dim
 {
     return number.m_node->Evaluate(pContext);
 }
+*/
 
 }
 }

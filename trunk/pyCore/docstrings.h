@@ -334,11 +334,11 @@ const char* DOCSTR_daeFiniteElementObject = "";
     const char* DOCSTR_daeFiniteElementObject_AssembleSystem = "";
     const char* DOCSTR_daeFiniteElementObject_ReAssembleSystem = "";
     const char* DOCSTR_daeFiniteElementObject_NeedsReAssembling = "";
-    const char* DOCSTR_daeFiniteElementObject_RowIterator = "";
+    const char* DOCSTR_daeFiniteElementObject_RowIndices = "";
     const char* DOCSTR_daeFiniteElementObject_SystemMatrix = "";
     const char* DOCSTR_daeFiniteElementObject_SystemMatrix_dt = "";
     const char* DOCSTR_daeFiniteElementObject_SystemRHS = "";
-    const char* DOCSTR_daeFiniteElementObject_GetVariableNames = "";
+    const char* DOCSTR_daeFiniteElementObject_GetObjectInfo = "";
     const char* DOCSTR_daeFiniteElementObject_GetNumberOfPointsInDomainOmega = "";
 
 const char* DOCSTR_daeEquationExecutionInfo = "";  
