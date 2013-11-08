@@ -183,11 +183,13 @@ struct feVars
 void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel)
 {
     daeVariable* variable;
+    size_t indexes[1], counter;
     size_t nNoDomains, nIndex, column, internalVariableIndex;
+    adouble a_K, a_Kdt, a_f;
+    daeFiniteElementObject* fe ;
     daeEquationExecutionInfo* pEquationExecutionInfo;
     std::vector<unsigned int> narrRowIndices;
-    adouble a_K, a_Kdt, a_f;
-    std::map< size_t, std::pair<size_t, daeVariable*> > mapMatrixItemToVariable;
+    std::map< size_t, std::pair<size_t, daeVariable*> > mapGlobalDOFToVariablePoint;
 
     if(!pModel)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -218,33 +220,38 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     EC.m_pEquationExecutionInfo		= NULL;
     EC.m_eEquationCalculationMode	= eGatherInfo;
 
-    size_t indexes[1];
-    std::cout << "FEEquation start = " << m_startRow << " end = " << m_endRow << std::endl;
-    daeFiniteElementObject* fe = m_FEModel.m_fe;
+    bool bPrintInfo = pModel->m_pDataProxy->PrintInfo();
+
+    if(bPrintInfo)
+        std::cout << "FEEquation start = " << m_startRow << " end = " << m_endRow << std::endl;
+
+    fe = m_FEModel.m_fe;
     if(!fe)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    size_t counter = 0;
+    counter = 0;
     for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
     {
         variable = m_ptrarrVariables[i];
         for(size_t j = 0; j < variable->GetNumberOfPoints(); j++)
         {
-            mapMatrixItemToVariable[counter] = std::pair<size_t, daeVariable*>(j, variable);
-            //std::cout << (boost::format("%d : (%d : %s)") % counter % j % variable->GetName()).str() << std::endl;
+            mapGlobalDOFToVariablePoint[counter] = std::pair<size_t, daeVariable*>(j, variable);
             counter++;
+            if(bPrintInfo)
+                std::cout << (boost::format("%d : (%d : %s)") % counter % j % variable->GetName()).str() << std::endl;
         }
     }
     if(counter != m_FEModel.matK->GetNrows())
         daeDeclareAndThrowException(exInvalidCall);
 
+    counter = 0;
     for(size_t row = m_startRow; row < m_endRow; row++)
     {
         pEquationExecutionInfo = new daeEquationExecutionInfo(this);
         pEquationExecutionInfo->m_dScaling = this->m_dScaling;
 
         pEquationExecutionInfo->m_narrDomainIndexes.resize(1);
-        pEquationExecutionInfo->m_narrDomainIndexes[0] = row;
+        pEquationExecutionInfo->m_narrDomainIndexes[0] = counter++;
 
         // Reset equation's contributions
         a_K   = 0;
@@ -257,11 +264,14 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         fe->RowIndices(row, narrRowIndices);
         for(size_t i = 0; i < narrRowIndices.size(); i++)
         {
+            // This is a global DOF index (from 0 to Ndofs)
             column = narrRowIndices[i];
 
-            internalVariableIndex = mapMatrixItemToVariable[column].first;
-            variable              = mapMatrixItemToVariable[column].second;
+            // internalVariableIndex is a local index (within a variable) that matches variable's global DOF index
+            internalVariableIndex = mapGlobalDOFToVariablePoint[column].first;
+            variable              = mapGlobalDOFToVariablePoint[column].second;
 
+            // Set it to be the variable's local index (we need it to create adoubles with runtime nodes)
             indexes[0] = internalVariableIndex;
 
             if(!a_K.node)
@@ -289,12 +299,12 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         pEquationExecutionInfo->m_EquationEvaluationNode = (a_Kdt + a_K - a_f).node;
 
         /* ACHTUNG, ACHTUNG!!
-           We already set m_EquationEvaluationNode and the call to GatherInfo() seems unnecesary.
+           We already have m_EquationEvaluationNode and a call to GatherInfo() seems unnecesary.
            This way we avoided creation of setup nodes first and then evaluating them into the runtime ones
            during the GatherInfo() function. Are there some side-effects of this vodoo-mojo?
-           Update: there are side-effects
-              mapIndexes is not populated with the variable indexes during the GatherInfo call!
-              We have to build the map from scratch since the runtime node has not been formed by evaluation of the setup node.
+           Update: there are side-effects!
+              mapIndexes is not populated with indexes during the GatherInfo call.
+              We have to build the map manually since the runtime node has not been formed by evaluation of the setup node.
               Note: Here we DO NOT add fixed variables to the map.
 
         pEquationExecutionInfo->GatherInfo(EC, pModel);

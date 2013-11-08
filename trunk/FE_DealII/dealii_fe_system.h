@@ -298,6 +298,7 @@ public:
     std::vector< dealiiFiniteElementEquation<dim>* > m_equations;
     dealiiFiniteElementEquation<dim> cdr;
     dealiiFiniteElementEquation<dim> cdr2;
+    dealiiFiniteElementEquation<dim> cdr3;
 };
 
 template <int dim>
@@ -314,9 +315,10 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
                                                 const map_String_FunctionPtr&           functions,
                                                 const vector_Equations&                 equations)
 {
-    //if(equations.size() == 0)
-    //    throw std::runtime_error("At least one equation must be specified");
+    if(equations.size() == 0)
+        throw std::runtime_error("At least one equation must be specified");
 
+    /*
     static ConstantFunction<dim> bc0(0.0);
     static ConstantFunction<dim> bc1(-2E6/(8960*385));
     static ConstantFunction<dim> bc2(-3E6/(8960*385));
@@ -346,15 +348,45 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
     cdr2.m_nMultiplicity           = 1;
     cdr2.m_bNeedsUpdate            = false;
 
-    std::string T = cdr.m_strVariableName;
+    std::string T = cdr2.m_strVariableName;
     cdr2.m_matrix    = (dphi<dim>(T, fe_i, fe_q) * dphi<dim>(T, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
     cdr2.m_matrix_dt = phi<dim>(T, fe_i, fe_q) * phi<dim>(T, fe_j, fe_q) * JxW<dim>(fe_q);
     cdr2.m_rhs       = phi<dim>(T, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
 
     m_equations.push_back(&cdr2);
 
+    cdr3.m_strVariableName         = "M";
+    cdr3.m_strVariableDescription  = "description";
+    //cdr3.m_dirichletBC[]         = dirichletBC;
+    cdr3.m_neumannBC[0]            = &bc0;
+    cdr3.m_neumannBC[1]            = &bc1;
+    cdr3.m_neumannBC[2]            = &bc2;
+    cdr3.m_nMultiplicity           = 1;
+    cdr3.m_bNeedsUpdate            = false;
+
+    std::string M = cdr3.m_strVariableName;
+    cdr3.m_matrix    = (dphi<dim>(M, fe_i, fe_q) * dphi<dim>(M, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+    cdr3.m_matrix_dt = phi<dim>(M, fe_i, fe_q) * phi<dim>(M, fe_j, fe_q) * JxW<dim>(fe_q);
+    cdr3.m_rhs       = phi<dim>(M, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+
+    m_equations.push_back(&cdr3);
+
+
+    std::cout << cdr.m_matrix.ToString() << std::endl;
+    std::cout << cdr.m_matrix_dt.ToString() << std::endl;
+    std::cout << cdr.m_rhs.ToString() << std::endl;
+
+    std::cout << cdr2.m_matrix.ToString() << std::endl;
+    std::cout << cdr2.m_matrix_dt.ToString() << std::endl;
+    std::cout << cdr2.m_rhs.ToString() << std::endl;
+
+    std::cout << cdr3.m_matrix.ToString() << std::endl;
+    std::cout << cdr3.m_matrix_dt.ToString() << std::endl;
+    std::cout << cdr3.m_rhs.ToString() << std::endl;
+    */
+
     m_functions = functions;
-    //m_equations = equations;
+    m_equations = equations;
 
     // Create FESystem
     std::vector<const FiniteElement<dim>*> arrFEs;
@@ -494,6 +526,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
         if(equation.m_nMultiplicity == 1)
         {
+            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % equation.m_strVariableName % currentIndex).str() << std::endl;
             mapExtractors[equation.m_strVariableName] = FEValuesExtractors::Scalar(currentIndex);
             componentMasks[eq] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
         }
@@ -519,6 +552,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
         fe_values.reinit(cell);
         cell->get_dof_indices(local_dof_indices);
+        std::cout << (boost::format("local_dof_indices = %s") % dae::toString(local_dof_indices)).str() << std::endl;
 
         for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
         {
@@ -544,6 +578,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
 
                             cell_matrix(i,j) += result.m_value;
+
+                            //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % equation.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
                         }
 
                         /* Accumulation term (in a separate matrix) */
@@ -821,14 +857,18 @@ void dealiiFiniteElementSystem<dim>::RowIndices(unsigned int row, std::vector<un
     //std::cout << "row = " << row << std::endl;
     //std::cout << "sparsity_pattern.row_length(row) = " << sparsity_pattern.row_length(row) << std::endl;
 
+    const BlockIndices& column_indices = sparsity_pattern.get_column_indices();
     narrIndices.reserve(sparsity_pattern.row_length(row));
     for(unsigned int block_column = 0; block_column < sparsity_pattern.n_block_cols(); block_column++)
     {
-        SparsityPattern::iterator it     = sparsity_pattern.block(block_row, block_column).begin(local_row);
-        SparsityPattern::iterator it_end = sparsity_pattern.block(block_row, block_column).end(local_row);
+        const SparsityPattern& block = sparsity_pattern.block(block_row, block_column);
+        SparsityPattern::iterator it     = block.begin(local_row);
+        SparsityPattern::iterator it_end = block.end(local_row);
         for(; it != it_end; it++)
-            narrIndices.push_back(it->column());
+            narrIndices.push_back(column_indices.local_to_global(block_column, it->column()));
     }
+
+    //std::cout << "narrIndices = " << toString(narrIndices) << std::endl;
 }
 
 template <int dim>
@@ -860,51 +900,13 @@ std::vector<unsigned int> dealiiFiniteElementSystem<dim>::GetDOFtoBoundaryMap()
 template <int dim>
 daeDealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
 {
+    std::map<std::string, size_t> mapVariables;
+    unsigned int no_equations = m_equations.size();
+    for(unsigned int i = 0; i < no_equations; i++)
+        mapVariables[m_equations[i]->m_strVariableName] = i;
+
     fnProcessSolution callback(boost::bind(&dealiiFiniteElementSystem<dim>::process_solution, this, _1, _2, _3, _4));
-    return new daeDealIIDataReporter(callback);
-}
-
-//    constant   = constant_2D
-//    phi        = phi_2D
-//    dphi       = dphi_2D
-//    JxW        = JxW_2D
-//    xyz        = xyz_2D
-//    normal     = normal_2D
-//    fvalue     = function_value_2D
-//    grad       = function_gradient_2D
-template <int dim>
-dealiiFiniteElementEquation<dim>* CreateEquation_ConvectionDiffusion(const std::string& variableName,
-                                                                    const std::string& variableDescription/*,
-                                                                    const map_Uint_FunctionPtr& dirichletBC,
-                                                                    const map_Uint_FunctionPtr& neumannBC*/)
-{
-    dealiiFiniteElementEquation<dim>* equation = new dealiiFiniteElementEquation<dim>();
-//    equation->m_strVariableName         = variableName;
-//    equation->m_strVariableDescription  = variableDescription;
-//    equation->m_dirichletBC             = dirichletBC;
-//    equation->m_neumannBC               = neumannBC;
-//    equation->m_nMultiplicity           = 1;
-//    equation->m_bNeedsUpdate            = false;
-
-//    equation->m_matrix    = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-//    equation->m_matrix_dt = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
-//    equation->m_rhs       = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-
-    return equation;
-}
-
-template <int dim>
-dealiiFiniteElementEquation<dim> CreateEquation_Poisson(const std::string& variableName)
-{
-    dealiiFiniteElementEquation<dim> equation;
-    return equation;
-}
-
-template <int dim>
-dealiiFiniteElementEquation<dim> CreateEquation_Laplace(const std::string& variableName)
-{
-    dealiiFiniteElementEquation<dim> equation;
-    return equation;
+    return new daeDealIIDataReporter(callback, mapVariables);
 }
 
 

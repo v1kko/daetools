@@ -309,6 +309,27 @@ BOOST_PYTHON_MODULE(pyDealII)
                                 ( arg("self"), arg("point") ) )
     ;
 
+    class_<ConstantFunction<1>, bases< Function<1> >, boost::noncopyable>("ConstantFunction_1D", no_init)
+        .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+    ;
+    class_<ConstantFunction<2>, bases< Function<2> >, boost::noncopyable>("ConstantFunction_2D", no_init)
+        .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+    ;
+    class_<ConstantFunction<3>, bases< Function<3> >, boost::noncopyable>("ConstantFunction_3D", no_init)
+        .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+    ;
+
+    class_<ZeroFunction<1>, boost::noncopyable>("ZeroFunction_1D", no_init)
+        .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
+    ;
+    class_<ZeroFunction<2>, boost::noncopyable>("ZeroFunction_2D", no_init)
+        .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
+    ;
+    class_<ZeroFunction<3>, boost::noncopyable>("ZeroFunction_3D", no_init)
+        .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
+    ;
+
+
     class_< std::vector< Point<1,double> > >("vector_Point_1D")
         .def(vector_indexing_suite< std::vector< Point<1,double> > >())
     ;
@@ -784,45 +805,97 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("function_gradient_2D", &function_gradient2<2>, ( arg("fname"), arg("xyz"), arg("component") ));
     def("function_gradient_3D", &function_gradient2<3>, ( arg("fname"), arg("xyz"), arg("component") ));
 
-    class_< dealiiFiniteElementEquation<1> >("dealiiFiniteElementEquation_1D")
-        .def_readwrite("VariableName",          &dealiiFiniteElementEquation<1>::m_strVariableName)
-        .def_readwrite("VariableDescription",   &dealiiFiniteElementEquation<1>::m_strVariableDescription)
-        .def_readwrite("DirichletBC",           &dealiiFiniteElementEquation<1>::m_dirichletBC)
-        .def_readwrite("NeumannBC",             &dealiiFiniteElementEquation<1>::m_neumannBC)
-        .def_readwrite("Multiplicity",          &dealiiFiniteElementEquation<1>::m_nMultiplicity)
-        .def_readwrite("Matrix",                &dealiiFiniteElementEquation<1>::m_matrix)
-        .def_readwrite("Matrix_dt",             &dealiiFiniteElementEquation<1>::m_matrix_dt)
-        .def_readwrite("RHS",                   &dealiiFiniteElementEquation<1>::m_rhs)
-        .def_readwrite("NeedsUpdate",           &dealiiFiniteElementEquation<1>::m_bNeedsUpdate)
+    class_<daepython::dealiiFiniteElementEquationWrapper<1>, boost::noncopyable>("dealiiFiniteElementEquation_1D", no_init)
+        .def(init<const std::string&,
+                  const std::string&,
+                  unsigned int,
+                  const feExpression<1>&,
+                  const feExpression<1>&,
+                  const feExpression<1>&,
+                  boost::python::dict,
+                  boost::python::dict>(( arg("variableName"),
+                                         arg("variableDescription"),
+                                         arg("multiplicity"),
+                                         arg("systemMatrix"),
+                                         arg("systemMatrix_dt"),
+                                         arg("rhs"),
+                                         arg("dirichletBC"),
+                                         arg("neumannBC")
+                                      )))
+
+        .def_readonly("VariableName",          &dealiiFiniteElementEquation<1>::m_strVariableName)
+        .def_readonly("VariableDescription",   &dealiiFiniteElementEquation<1>::m_strVariableDescription)
+        .def_readonly("DirichletBC",           &dealiiFiniteElementEquation<1>::m_dirichletBC)
+        .def_readonly("NeumannBC",             &dealiiFiniteElementEquation<1>::m_neumannBC)
+        .def_readonly("Multiplicity",          &dealiiFiniteElementEquation<1>::m_nMultiplicity)
+        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<1>::m_matrix)
+        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<1>::m_matrix_dt)
+        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<1>::m_rhs)
+
+        .def("ConvectionDiffusion",             &daepython::dealiiFiniteElementEquationWrapper<1>::ConvectionDiffusion, return_value_policy<manage_new_object>())
+        .staticmethod("ConvectionDiffusion")
     ;
 
-    class_< dealiiFiniteElementEquation<2> >("dealiiFiniteElementEquation_2D")
-        .def_readwrite("VariableName",          &dealiiFiniteElementEquation<2>::m_strVariableName)
-        .def_readwrite("VariableDescription",   &dealiiFiniteElementEquation<2>::m_strVariableDescription)
-        .def_readwrite("DirichletBC",           &dealiiFiniteElementEquation<2>::m_dirichletBC)
-        .def_readwrite("NeumannBC",             &dealiiFiniteElementEquation<2>::m_neumannBC)
-        .def_readwrite("Multiplicity",          &dealiiFiniteElementEquation<2>::m_nMultiplicity)
-        .def_readwrite("Matrix",                &dealiiFiniteElementEquation<2>::m_matrix)
-        .def_readwrite("Matrix_dt",             &dealiiFiniteElementEquation<2>::m_matrix_dt)
-        .def_readwrite("RHS",                   &dealiiFiniteElementEquation<2>::m_rhs)
-        .def_readwrite("NeedsUpdate",           &dealiiFiniteElementEquation<2>::m_bNeedsUpdate)
+    class_<daepython::dealiiFiniteElementEquationWrapper<2>, boost::noncopyable>("dealiiFiniteElementEquation_2D", no_init)
+        .def(init<const std::string&,
+                  const std::string&,
+                  unsigned int,
+                  const feExpression<2>&,
+                  const feExpression<2>&,
+                  const feExpression<2>&,
+                  boost::python::dict,
+                  boost::python::dict>(( arg("variableName"),
+                                         arg("variableDescription"),
+                                         arg("multiplicity"),
+                                         arg("systemMatrix"),
+                                         arg("systemMatrix_dt"),
+                                         arg("rhs"),
+                                         arg("dirichletBC"),
+                                         arg("neumannBC")
+                                      )))
+
+        .def_readonly("VariableName",          &dealiiFiniteElementEquation<2>::m_strVariableName)
+        .def_readonly("VariableDescription",   &dealiiFiniteElementEquation<2>::m_strVariableDescription)
+        .def_readonly("DirichletBC",           &dealiiFiniteElementEquation<2>::m_dirichletBC)
+        .def_readonly("NeumannBC",             &dealiiFiniteElementEquation<2>::m_neumannBC)
+        .def_readonly("Multiplicity",          &dealiiFiniteElementEquation<2>::m_nMultiplicity)
+        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<2>::m_matrix)
+        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<2>::m_matrix_dt)
+        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<2>::m_rhs)
+
+        .def("ConvectionDiffusionEquation",    &daepython::dealiiFiniteElementEquationWrapper<2>::ConvectionDiffusionEquation, return_value_policy<manage_new_object>())
+        .staticmethod("ConvectionDiffusionEquation")
     ;
 
-    class_< dealiiFiniteElementEquation<3> >("dealiiFiniteElementEquation_3D")
-        .def_readwrite("VariableName",          &dealiiFiniteElementEquation<3>::m_strVariableName)
-        .def_readwrite("VariableDescription",   &dealiiFiniteElementEquation<3>::m_strVariableDescription)
-        .def_readwrite("DirichletBC",           &dealiiFiniteElementEquation<3>::m_dirichletBC)
-        .def_readwrite("NeumannBC",             &dealiiFiniteElementEquation<3>::m_neumannBC)
-        .def_readwrite("Multiplicity",          &dealiiFiniteElementEquation<3>::m_nMultiplicity)
-        .def_readwrite("Matrix",                &dealiiFiniteElementEquation<3>::m_matrix)
-        .def_readwrite("Matrix_dt",             &dealiiFiniteElementEquation<3>::m_matrix_dt)
-        .def_readwrite("RHS",                   &dealiiFiniteElementEquation<3>::m_rhs)
-        .def_readwrite("NeedsUpdate",           &dealiiFiniteElementEquation<3>::m_bNeedsUpdate)
-    ;
+    class_<daepython::dealiiFiniteElementEquationWrapper<3>, boost::noncopyable>("dealiiFiniteElementEquation_3D", no_init)
+        .def(init<const std::string&,
+                  const std::string&,
+                  unsigned int,
+                  const feExpression<3>&,
+                  const feExpression<3>&,
+                  const feExpression<3>&,
+                  boost::python::dict,
+                  boost::python::dict>(( arg("variableName"),
+                                         arg("variableDescription"),
+                                         arg("multiplicity"),
+                                         arg("systemMatrix"),
+                                         arg("systemMatrix_dt"),
+                                         arg("rhs"),
+                                         arg("dirichletBC"),
+                                         arg("neumannBC")
+                                      )))
+        .def_readonly("VariableName",          &dealiiFiniteElementEquation<3>::m_strVariableName)
+        .def_readonly("VariableDescription",   &dealiiFiniteElementEquation<3>::m_strVariableDescription)
+        .def_readonly("DirichletBC",           &dealiiFiniteElementEquation<3>::m_dirichletBC)
+        .def_readonly("NeumannBC",             &dealiiFiniteElementEquation<3>::m_neumannBC)
+        .def_readonly("Multiplicity",          &dealiiFiniteElementEquation<3>::m_nMultiplicity)
+        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<3>::m_matrix)
+        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<3>::m_matrix_dt)
+        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<3>::m_rhs)
 
-    //def("CreateEquation_ConvectionDiffusion_1D",  &CreateEquation_ConvectionDiffusion<1>, return_value_policy<manage_new_object>());
-    //def("CreateEquation_ConvectionDiffusion_2D",  &CreateEquation_ConvectionDiffusion<2>, return_value_policy<manage_new_object>());
-    //def("CreateEquation_ConvectionDiffusion_3D",  &CreateEquation_ConvectionDiffusion<3>, return_value_policy<manage_new_object>());
+        .def("ConvectionDiffusion",             &daepython::dealiiFiniteElementEquationWrapper<3>::ConvectionDiffusion, return_value_policy<manage_new_object>())
+        .staticmethod("ConvectionDiffusion")
+    ;
 
     class_<daeDealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeDealIIDataReporter", no_init)
         .def("Connect",				&daeDealIIDataReporter::Connect)
@@ -836,102 +909,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("EndOfData",	    	&daeDealIIDataReporter::EndOfData)
         .def("SendVariable",	  	&daeDealIIDataReporter::SendVariable)
     ;
-
-    /*
-    class_<daepython::dealiiFiniteElementObjectWrapper<1>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_1D", no_init)
-        .def(init<string,
-                  unsigned int,
-                  const Quadrature<1>&,
-                  const Quadrature<0>&,
-                  boost::python::dict,
-                  boost::python::dict,
-                  boost::python::dict,
-                  const dealiiFiniteElementEquation<1>&>((arg("meshFilename"),
-                                                          arg("polynomialOrder"),
-                                                          arg("quadrature"),
-                                                          arg("faceQuadrature"),
-                                                          arg("functions"),
-                                                          arg("dirichletBC"),
-                                                          arg("neumannBC"),
-                                                          arg("equation")
-                                                        )))
-
-        .def("AssembleSystem",      &daepython::dealiiFiniteElementObjectWrapper<1>::AssembleSystem,
-                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_AssembleSystem, ( arg("self") ))
-        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementObjectWrapper<1>::ReAssembleSystem,
-                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_ReAssembleSystem, ( arg("self") ))
-        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<1>::NeedsReAssembling,
-                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_NeedsReAssembling, ( arg("self") ))
-        .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<1>::GetDOFtoBoundaryMap,
-                                    &daepython::dealiiFiniteElementObjectWrapper<1>::def_GetDOFtoBoundaryMap, ( arg("self") ))
-        .def("CreateDataReporter",  &dealiiFiniteElementObject<1>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
-
-//        .def("__iter__",                            boost::python::iterator<daeConvectionDiffusion_2D, return_value_policy<reference_existing_object> >())
-//        .def("AssembleSystem",                      &daeConvectionDiffusion_2D::AssembleSystem)
-//        .def("GenerateEquations",                   &daeConvectionDiffusion_2D::GenerateEquations)
-//        .def("CondenseHangingNodeConstraints",      &daeConvectionDiffusion_2D::CondenseHangingNodeConstraints)
-//        .def("InterpolateAndApplyBoundaryValues",   &daeConvectionDiffusion_2D::InterpolateAndApplyBoundaryValues)
-    ;
-    
-    class_<daepython::dealiiFiniteElementObjectWrapper<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_2D", no_init)
-        .def(init<string,
-                  unsigned int,
-                  const Quadrature<2>&,
-                  const Quadrature<1>&,
-                  boost::python::dict,
-                  boost::python::dict,
-                  boost::python::dict,
-                  const dealiiFiniteElementEquation<2>&>((arg("meshFilename"),
-                                                          arg("polynomialOrder"),
-                                                          arg("quadrature"),
-                                                          arg("faceQuadrature"),
-                                                          arg("functions"),
-                                                          arg("dirichletBC"),
-                                                          arg("neumannBC"),
-                                                          arg("equation")
-                                                        )))
-
-        .def("AssembleSystem",      &daepython::dealiiFiniteElementObjectWrapper<2>::AssembleSystem,
-                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_AssembleSystem, ( arg("self") ))
-        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementObjectWrapper<2>::ReAssembleSystem,
-                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_ReAssembleSystem, ( arg("self") ))
-        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<2>::NeedsReAssembling,
-                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_NeedsReAssembling, ( arg("self") ))
-        .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<2>::GetDOFtoBoundaryMap,
-                                    &daepython::dealiiFiniteElementObjectWrapper<2>::def_GetDOFtoBoundaryMap, ( arg("self") ))
-        .def("CreateDataReporter",  &dealiiFiniteElementObject<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
-    ;
-
-    class_<daepython::dealiiFiniteElementObjectWrapper<3>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementObject_3D", no_init)
-        .def(init<string,
-                  unsigned int,
-                  const Quadrature<3>&,
-                  const Quadrature<2>&,
-                  boost::python::dict,
-                  boost::python::dict,
-                  boost::python::dict,
-                  const dealiiFiniteElementEquation<3>&>((arg("meshFilename"),
-                                                          arg("polynomialOrder"),
-                                                          arg("quadrature"),
-                                                          arg("faceQuadrature"),
-                                                          arg("functions"),
-                                                          arg("dirichletBC"),
-                                                          arg("neumannBC"),
-                                                          arg("equation")
-                                                        )))
-
-        .def("AssembleSystem",      &daepython::dealiiFiniteElementObjectWrapper<3>::AssembleSystem,
-                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_AssembleSystem, ( arg("self") ))
-        .def("ReAssembleSystem",    &daepython::dealiiFiniteElementObjectWrapper<3>::ReAssembleSystem,
-                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_ReAssembleSystem, ( arg("self") ))
-        .def("NeedsReAssembling",   &daepython::dealiiFiniteElementObjectWrapper<3>::NeedsReAssembling,
-                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_NeedsReAssembling, ( arg("self") ))
-        .def("GetDOFtoBoundaryMap", &daepython::dealiiFiniteElementObjectWrapper<3>::GetDOFtoBoundaryMap,
-                                    &daepython::dealiiFiniteElementObjectWrapper<3>::def_GetDOFtoBoundaryMap, ( arg("self") ))
-        .def("CreateDataReporter",  &dealiiFiniteElementObject<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
-    ;
-    */
-
 
     class_<daepython::dealiiFiniteElementSystemWrapper<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementSystem_2D", no_init)
         .def(init<string,

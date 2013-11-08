@@ -59,21 +59,7 @@ class fnConstantFunction(Function_2D):
     def value(self, point, component = 1):
         #print 'Point%s = %f' % (point, self.m_value)
         return self.m_value
-
-class fnConstantVectorFunction(Function_2D):
-    def __init__(self, values, n_components = 2):
-        Function_2D.__init__(self, n_components)
-        
-        if len(values) != 2:
-            raise RunttimeError('The length of the values array must be two')
-        self.m_values = list(values)
-        
-    def value(self, point, component = 1):
-        return self.m_values[component]
-    
-    def vector_value(self, point):
-        return self.m_values
-        
+       
 class feObject(dealiiFiniteElementSystem_2D):
     def __init__(self, meshFilename, polynomialOrder, quadratureFormula, 
                        faceQuadratureFormula, functions, equation):
@@ -99,9 +85,8 @@ class modTutorial(daeModel):
         # Diffusivity, velocity, generation, dirichletBC and neumannBC must be 
         # owned by the model for deal.II FE model keeps only references to them.
         self.functions    = {}
-        self.functions['Diffusivity'] = fnConstantFunction(401.0/(8960*385))
-        self.functions['Velocity']    = fnConstantVectorFunction([0.0, 0.0])
-        self.functions['Generation']  = fnConstantFunction(0.0)
+        self.functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
+        self.functions['Generation']  = ConstantFunction_2D(0.0)
         
         self.neumannBC      = {}
         self.neumannBC[0]   = fnConstantFunction(0.0)
@@ -116,7 +101,9 @@ class modTutorial(daeModel):
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         meshFilename = os.path.join(meshes_dir, 'ex49.msh')
         
-        equations = []
+        self.cdr1 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('T', 'T description', self.dirichletBC, self.neumannBC)
+        self.cdr2 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
+        equations = [self.cdr1, self.cdr2]
         
         self.fe_dealII = feObject(meshFilename,     # path to mesh
                                   1,                # polinomial order
@@ -218,16 +205,32 @@ class simTutorial(daeSimulation):
         #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
         #print list(dof_to_boundary)
         
+        # dofIndexesMap relates global DOF indexes to points within daetools variables
+        dofIndexesMap = {}
+        for variable in self.m.fe.Variables:
+            if variable.Name == 'T':
+                ic = 300
+            elif variable.Name == 'U':
+                ic = 100
+            elif variable.Name == 'M':
+                ic = 200
+            else:
+                raise RuntimeError('Unknown variable [%s] found' % variable.Name)
+            
+            for i in xrange(variable.NumberOfPoints):
+                dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
+        
+        print '***********************************'
+        print dofIndexesMap
+        print '***********************************'
         for row in xrange(m_dt.n):
-            # Create an iterator on the current row columns 
-            rowiter = self.m.fe_dealII.RowIndices(row)            
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
             for column in self.m.fe_dealII.RowIndices(row):
                 if m_dt(row, column) != 0:
-                    T.SetInitialCondition(column, 300)
-                    #U.SetInitialCondition(column, 100)
-                    #print 'm_dt(%d,%d) = %f' % (row, column, m_dt(row, column))
+                    variable, index, ic = dofIndexesMap[column]
+                    variable.SetInitialCondition(index, ic)
+                    print '%s(%d) initial condition = %f' % (variable.Name, column, ic)
     
 # Use daeSimulator class
 def guiRun(app):

@@ -418,37 +418,28 @@ typedef Function_wrapper<1> Function_wrapper_1D;
 typedef Function_wrapper<2> Function_wrapper_2D;
 typedef Function_wrapper<3> Function_wrapper_3D;
 
-/*
 template<int dim>
 class dealiiFiniteElementEquationWrapper : public dealiiFiniteElementEquation<dim>,
                                            public boost::python::wrapper< dealiiFiniteElementEquation<dim> >
 {
 public:
-    dealiiFiniteElementEquationWrapper(std::string                              meshFilename,
-                                     unsigned int                               polynomialOrder,
-                                     const Quadrature<dim>&                     quadrature,
-                                     const Quadrature<dim-1>&                   faceQuadrature,
-                                     boost::python::dict                        dictFunctions,
-                                     boost::python::dict                        dictDirichletBC,
-                                     boost::python::dict                        dictNeumannBC,
-                                     const dealiiFiniteElementEquation<dim>&    equation)
+    dealiiFiniteElementEquationWrapper(const std::string&       variableName,
+                                       const std::string&       variableDescription,
+                                       unsigned int             multiplicity,
+                                       const feExpression<dim>& systemMatrix,
+                                       const feExpression<dim>& systemMatrix_dt,
+                                       const feExpression<dim>& rhs,
+                                       boost::python::dict      dictDirichletBC,
+                                       boost::python::dict      dictNeumannBC)
     {
         boost::python::list keys;
-        std::map<unsigned int, const Function<dim>*> mapDirichletBC;
-        std::map<unsigned int, const Function<dim>*> mapNeumannBC;
-        std::map<std::string,  const Function<dim>*> mapFunctions;
 
-        keys = dictFunctions.keys();
-        for(int i = 0; i < len(keys); ++i)
-        {
-            boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFunctions[key_];
-
-            std::string          key = boost::python::extract<std::string>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
-
-            mapFunctions[key] = fn;
-        }
+        this->m_matrix                    = systemMatrix;
+        this->m_matrix_dt                 = systemMatrix_dt;
+        this->m_rhs                       = rhs;
+        this->m_strVariableName           = variableName;
+        this->m_strVariableDescription    = variableDescription;
+        this->m_nMultiplicity             = multiplicity;
 
         keys = dictDirichletBC.keys();
         for(int i = 0; i < len(keys); ++i)
@@ -459,7 +450,7 @@ public:
             unsigned int         key = boost::python::extract<unsigned int>(key_);
             const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
-            mapDirichletBC[key] = fn;
+            this->m_dirichletBC[key] = fn;
         }
 
         keys = dictNeumannBC.keys();
@@ -471,147 +462,38 @@ public:
             unsigned int         key = boost::python::extract<unsigned int>(key_);
             const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
-            mapNeumannBC[key] = fn;
+            this->m_neumannBC[key] = fn;
         }
-
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature,
-                         mapFunctions, mapDirichletBC, mapNeumannBC, equation);
     }
 
     ~dealiiFiniteElementEquationWrapper()
     {
     }
+
+    static
+    dealiiFiniteElementEquationWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
+                                                                         const std::string&  variableDescription,
+                                                                         boost::python::dict dictDirichletBC,
+                                                                         boost::python::dict dictNeumannBC)
+    {
+        /* Available functions:
+         * - feExpression
+         * - constant
+         * - phi, dphi, d2phi
+         * - phi_vec, dphi_vec, d2phi_vec
+         * - JxW, xyz, normal
+         * - fvalue, fgrad
+         * - feExpression.sqrt, feExpression.exp, feExpression.log, feExpression.log10, feExpression.abs
+         *   feExpression.sin, feExpression.cos, feExpression.tan, feExpression.asin, feExpression.acos, feExpression.atan */
+
+        feExpression<dim> matrix    = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+        feExpression<dim> matrix_dt = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
+        feExpression<dim> rhs       = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+
+        return new dealiiFiniteElementEquationWrapper<dim>(variableName, variableDescription, 1, matrix, matrix_dt, rhs, dictDirichletBC, dictNeumannBC);
+    }
+
 };
-*/
-
-/*
-template<int dim>
-class dealiiFiniteElementObjectWrapper : public dealiiFiniteElementObject<dim>,
-                                         public boost::python::wrapper< dealiiFiniteElementObject<dim> >
-{
-public:
-    dealiiFiniteElementObjectWrapper(std::string                                meshFilename,
-                                     unsigned int                               polynomialOrder,
-                                     const Quadrature<dim>&                     quadrature,
-                                     const Quadrature<dim-1>&                   faceQuadrature,
-                                     boost::python::dict                        dictFunctions,
-                                     boost::python::dict                        dictDirichletBC,
-                                     boost::python::dict                        dictNeumannBC,
-                                     const dealiiFiniteElementEquation<dim>&    equation)
-    {
-        boost::python::list keys;
-        std::map<unsigned int, const Function<dim>*> mapDirichletBC;
-        std::map<unsigned int, const Function<dim>*> mapNeumannBC;
-        std::map<std::string,  const Function<dim>*> mapFunctions;
-
-        keys = dictFunctions.keys();
-        for(int i = 0; i < len(keys); ++i)
-        {
-            boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFunctions[key_];
-
-            std::string          key = boost::python::extract<std::string>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
-
-            mapFunctions[key] = fn;
-        }
-
-        keys = dictDirichletBC.keys();
-        for(int i = 0; i < len(keys); ++i)
-        {
-            boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictDirichletBC[key_];
-
-            unsigned int         key = boost::python::extract<unsigned int>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
-
-            mapDirichletBC[key] = fn;
-        }
-
-        keys = dictNeumannBC.keys();
-        for(int i = 0; i < len(keys); ++i)
-        {
-            boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictNeumannBC[key_];
-
-            unsigned int         key = boost::python::extract<unsigned int>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
-
-            mapNeumannBC[key] = fn;
-        }
-
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature,
-                         mapFunctions, mapDirichletBC, mapNeumannBC, equation);
-    }
-
-    ~dealiiFiniteElementObjectWrapper()
-    {
-    }
-
-public:
-    void AssembleSystem()
-    {
-        if(boost::python::override f = this->get_override("AssembleSystem"))
-            f();
-        else
-            this->dealiiFiniteElementObject<dim>::AssembleSystem();
-    }
-    void def_AssembleSystem()
-    {
-        this->dealiiFiniteElementObject<dim>::AssembleSystem();
-    }
-
-    void ReAssembleSystem()
-    {
-        if(boost::python::override f = this->get_override("ReAssembleSystem"))
-            f();
-        else
-            this->dealiiFiniteElementObject<dim>::ReAssembleSystem();
-    }
-    void def_ReAssembleSystem()
-    {
-        this->dealiiFiniteElementObject<dim>::ReAssembleSystem();
-    }
-
-    bool NeedsReAssembling()
-    {
-        if(boost::python::override f = this->get_override("NeedsReAssembling"))
-            return f();
-        else
-            return this->dealiiFiniteElementObject<dim>::NeedsReAssembling();
-    }
-    bool def_NeedsReAssembling()
-    {
-        return this->dealiiFiniteElementObject<dim>::NeedsReAssembling();
-    }
-
-    std::vector<unsigned int> GetDOFtoBoundaryMap()
-    {
-        if(boost::python::override f = this->get_override("GetDOFtoBoundaryMap"))
-        {
-            boost::python::list l = f();
-
-            std::vector<unsigned int> mapDOFtoBoundary;
-            boost::python::ssize_t n = boost::python::len(l);
-            mapDOFtoBoundary.resize(n);
-
-            for(boost::python::ssize_t i = 0; i < n; i++)
-            {
-                mapDOFtoBoundary[i] = boost::python::extract<unsigned int>(l[i]);
-            }
-            return mapDOFtoBoundary;
-        }
-        else
-        {
-            return this->dealiiFiniteElementObject<dim>::GetDOFtoBoundaryMap();
-        }
-    }
-    std::vector<unsigned int> def_GetDOFtoBoundaryMap()
-    {
-        return this->dealiiFiniteElementObject<dim>::GetDOFtoBoundaryMap();
-    }
-};
-*/
 
 template<int dim>
 class dealiiFiniteElementSystemWrapper : public dealiiFiniteElementSystem<dim>,
@@ -694,10 +576,7 @@ public:
     boost::python::list GetRowIndices(unsigned int row)
     {
         std::vector<unsigned int> narrIndices;
-
         this->RowIndices(row, narrIndices);
-        std::cout << toString(narrIndices) << std::endl;
-        //return narrIndices;
         return getListFromVectorByValue(narrIndices);
     }
 };
