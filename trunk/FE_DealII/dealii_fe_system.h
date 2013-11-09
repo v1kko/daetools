@@ -229,9 +229,10 @@ public:
     feExpression<dim>                   m_elementMatrix;
     feExpression<dim>                   m_elementMatrix_dt;
     feExpression<dim>                   m_elementRHS;
-    //map_Uint_Expression               m_elementBoundary;
-    map_Uint_FunctionPtr_FunctionCall   m_neumannBC;
-    map_Uint_FunctionPtr                m_dirichletBC;
+    map_Uint_Expression                 m_elementBoundary;
+    map_Uint_Expression                 m_elementNeumann;
+    map_Uint_FunctionPtr_FunctionCall   m_functionsNeumannBC;
+    map_Uint_FunctionPtr                m_functionsDirichletBC;
     std::string                         m_strVariableName;
     std::string                         m_strVariableDescription;
     unsigned int                        m_nMultiplicity;
@@ -512,7 +513,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         {
                             feRuntimeNumber<dim> result = equation.m_elementMatrix.m_node->Evaluate(&cellContext);
                             if(result.m_eType != eFEScalar)
-                                throw std::runtime_error(std::string("Invalid local matrix contribution expression specified for equation: ") +
+                                throw std::runtime_error(std::string("Invalid element matrix contribution expression specified for equation: ") +
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
 
                             cell_matrix(i,j) += result.m_value;
@@ -525,7 +526,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         {
                             feRuntimeNumber<dim> result = equation.m_elementMatrix_dt.m_node->Evaluate(&cellContext);
                             if(result.m_eType != eFEScalar)
-                                throw std::runtime_error(std::string("Invalid local matrix_dt contribution expression specified for equation: ") +
+                                throw std::runtime_error(std::string("Invalid element matrix_dt contribution expression specified for equation: ") +
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
 
                             cell_matrix_dt(i,j) += result.m_value;
@@ -541,7 +542,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     {
                         feRuntimeNumber<dim> result = equation.m_elementRHS.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
-                            throw std::runtime_error(std::string("Invalid local rhs contribution expression specified for equation: ") +
+                            throw std::runtime_error(std::string("Invalid element rhs contribution expression specified for equation: ") +
                                                      equation.m_strVariableName + std::string(" (it must be a scalar value)"));
                         cell_rhs(i) += result.m_value;
                     }
@@ -557,16 +558,34 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
                 const unsigned int id = cell->face(face)->boundary_indicator();
 
+                // Neumann BC
                 for(unsigned int eq = 0; eq < m_equations.size(); eq++)
                 {
                     const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
-                    typename map_Uint_FunctionPtr_FunctionCall::const_iterator it = equation.m_neumannBC.find(id);
+                    typename map_Uint_FunctionPtr_FunctionCall::const_iterator itFunction   = equation.m_functionsNeumannBC.find(id);
+                    typename map_Uint_Expression::const_iterator               itExpression = equation.m_elementNeumann.find(id);
 
-                    if(it != equation.m_neumannBC.end())
+                    if(itExpression != equation.m_elementNeumann.end())
                     {
-                        // Neumann BC
+                        const feExpression<dim>& elementNeumann = itExpression->second;
+
+                        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
+                        {
+                            for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                            {
+                                feRuntimeNumber<dim> result = elementNeumann.m_node->Evaluate(&cellFaceContext);
+                                if(result.m_eType != eFEScalar)
+                                    throw std::runtime_error(std::string("Invalid element neumann boundary condition expression specified for equation: ") +
+                                                             equation.m_strVariableName + std::string(" (it must be a scalar value)"));
+
+                                cell_rhs(i) += result.m_value;
+                            }
+                        }
+                    }
+                    else if(itFunction != equation.m_functionsNeumannBC.end())
+                    {
                         double Neumann_value;
-                        std::pair<const Function<dim>*, dealiiFluxType> pairNeumann = it->second;
+                        std::pair<const Function<dim>*, dealiiFluxType> pairNeumann = itFunction->second;
                         const Function<dim>& Fneumann = *pairNeumann.first;
                         const dealiiFluxType fluxType =  pairNeumann.second;
 
@@ -575,12 +594,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
                         for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                         {
-                            //Tensor<1, dim> normal_ = fe_face_values.normal_vector(q_point);
-                            //Point<dim>     point_  = fe_face_values.quadrature_point(q_point);
-                            //std::cout << (boost::format("Point (%f, %f) normal (%f, %f)") % point_[0] % point_[1] % normal_[0] % normal_[1]).str() << std::endl;
-
-                            // Achtung, Achtung! For the Convection-Diffusion-Reaction system only:
-                            //                   the sign '-neumann' since we have the term: -integral(q * φ(i) * dΓq)
                             for (unsigned int i = 0; i < dofs_per_cell; ++i)
                             {
                                 if(extractorScalar)
@@ -686,7 +699,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     {
         const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
 
-        for(typename map_Uint_FunctionPtr::const_iterator it = equation.m_dirichletBC.begin(); it != equation.m_dirichletBC.end(); it++)
+        for(typename map_Uint_FunctionPtr::const_iterator it = equation.m_functionsDirichletBC.begin(); it != equation.m_functionsDirichletBC.end(); it++)
         {
             const unsigned int    id =  it->first;
             const Function<dim>& fun = *it->second;

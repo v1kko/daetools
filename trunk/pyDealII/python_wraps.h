@@ -372,7 +372,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'value' must be implemented in the python Function_nD-derived class";
+            e << "The function 'value' not implemented in the python Function_xD-derived class";
             throw e;
         }
         return f(p, component);
@@ -384,7 +384,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'vector_value' must be implemented in the python Function_nD-derived class";
+            e << "The function 'vector_value' not implemented in the python Function_xD-derived class";
             throw e;
         }
 
@@ -409,7 +409,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'gradient' must be implemented in the python class";
+            e << "The function 'gradient' not implemented in the python Function_xD-derived class";
             throw e;
         }
 
@@ -422,7 +422,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'vector_gradient' must be implemented in the python Function_nD-derived class";
+            e << "The function 'vector_gradient' not implemented in the python Function_xD-derived class";
             throw e;
         }
 
@@ -456,36 +456,37 @@ public:
                                        const feExpression<dim>& elementMatrix,
                                        const feExpression<dim>& elementMatrix_dt,
                                        const feExpression<dim>& elementRHS,
-                                       boost::python::dict      dictDirichletBC,
-                                       boost::python::dict      dictNeumannBC)
+                                       boost::python::dict      dictFunctionsDirichletBC,
+                                       boost::python::dict      dictFunctionsNeumannBC,
+                                       boost::python::dict      dictElementBoundary = boost::python::dict(),
+                                       boost::python::dict      dictElementNeumann  = boost::python::dict())
     {
         boost::python::list keys;
 
         this->m_elementMatrix             = elementMatrix;
         this->m_elementMatrix_dt          = elementMatrix_dt;
         this->m_elementRHS                = elementRHS;
-        //this->m_elementBoundary           = ;
         this->m_strVariableName           = variableName;
         this->m_strVariableDescription    = variableDescription;
         this->m_nMultiplicity             = multiplicity;
 
-        keys = dictDirichletBC.keys();
+        keys = dictFunctionsDirichletBC.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictDirichletBC[key_];
+            boost::python::object val_ = dictFunctionsDirichletBC[key_];
 
             unsigned int         key = boost::python::extract<unsigned int>(key_);
             const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
-            this->m_dirichletBC[key] = fn;
+            this->m_functionsDirichletBC[key] = fn;
         }
 
-        keys = dictNeumannBC.keys();
+        keys = dictFunctionsNeumannBC.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictNeumannBC[key_];
+            boost::python::object val_ = dictFunctionsNeumannBC[key_];
 
             unsigned int         key = boost::python::extract<unsigned int>(key_);
             boost::python::tuple t   = boost::python::extract<boost::python::tuple>(val_);
@@ -493,7 +494,31 @@ public:
             const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(t[0]);
             dealiiFluxType       ft  = boost::python::extract<dealiiFluxType>(t[1]);
 
-            this->m_neumannBC[key] = std::pair<const Function<dim>*, dealiiFluxType>(fn, ft);
+            this->m_functionsNeumannBC[key] = std::pair<const Function<dim>*, dealiiFluxType>(fn, ft);
+        }
+
+        keys = dictElementBoundary.keys();
+        for(int i = 0; i < len(keys); ++i)
+        {
+            boost::python::object key_ = keys[i];
+            boost::python::object val_ = dictElementBoundary[key_];
+
+            unsigned int      key  = boost::python::extract<unsigned int>(key_);
+            feExpression<dim> expr = boost::python::extract< feExpression<dim> >(val_);
+
+            this->m_elementBoundary[key] = expr;
+        }
+
+        keys = dictElementNeumann.keys();
+        for(int i = 0; i < len(keys); ++i)
+        {
+            boost::python::object key_ = keys[i];
+            boost::python::object val_ = dictElementNeumann[key_];
+
+            unsigned int      key  = boost::python::extract<unsigned int>(key_);
+            feExpression<dim> expr = boost::python::extract< feExpression<dim> >(val_);
+
+            this->m_elementBoundary[key] = expr;
         }
     }
 
@@ -504,8 +529,10 @@ public:
     static
     dealiiFiniteElementEquationWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
                                                                          const std::string&  variableDescription,
-                                                                         boost::python::dict dictDirichletBC,
-                                                                         boost::python::dict dictNeumannBC)
+                                                                         boost::python::dict dictFunctionsDirichletBC,
+                                                                         boost::python::dict dictFunctionsNeumannBC,
+                                                                         boost::python::dict dictElementBoundary = boost::python::dict(),
+                                                                         boost::python::dict dictElementNeumann  = boost::python::dict())
     {
         /* Available functions:
          * - feExpression
@@ -521,7 +548,16 @@ public:
         feExpression<dim> matrix_dt = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
         feExpression<dim> rhs       = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
 
-        return new dealiiFiniteElementEquationWrapper<dim>(variableName, variableDescription, 1, matrix, matrix_dt, rhs, dictDirichletBC, dictNeumannBC);
+        return new dealiiFiniteElementEquationWrapper<dim>(variableName,             // Name
+                                                           variableDescription,      // Description
+                                                           1,                        // Multiplicity
+                                                           matrix,                   // Contribution to the element cell_matrix
+                                                           matrix_dt,                // Contribution to the element cell_matrix_dt
+                                                           rhs,                      // Contribution to the element cell_rhs
+                                                           dictFunctionsDirichletBC, // Functions for Dirichlet boundary conditions
+                                                           dictFunctionsNeumannBC,   // Functions for Neumann boundary conditions
+                                                           dictElementBoundary,      // Contribution to the element cell_matrix (but at the boundaries)
+                                                           dictElementNeumann);      // User-defined expression for Neumann boundary conditions (overrides dictFunctionsNeumannBC)
     }
 
 };
