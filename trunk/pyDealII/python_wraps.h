@@ -369,12 +369,25 @@ public:
     double value(const Point<dim> &p, const unsigned int component = 0) const
     {
         boost::python::override f = this->get_override("value");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'value' must be implemented in the python Function_nD-derived class";
+            throw e;
+        }
         return f(p, component);
     }
 
     void vector_value(const Point<dim> &p, Vector<double>& values) const
     {
         boost::python::override f = this->get_override("vector_value");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'vector_value' must be implemented in the python Function_nD-derived class";
+            throw e;
+        }
+
         boost::python::list lvalues = f(p);
 
         boost::python::ssize_t i, n;
@@ -393,12 +406,26 @@ public:
     Tensor<1,dim> gradient(const Point<dim> &p, const unsigned int component = 0) const
     {
         boost::python::override f = this->get_override("gradient");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'gradient' must be implemented in the python class";
+            throw e;
+        }
+
         return f(p, component);
     }
 
     void vector_gradient(const Point<dim> &p, std::vector<Tensor<1,dim> > &gradients) const
     {
         boost::python::override f = this->get_override("vector_gradient");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'vector_gradient' must be implemented in the python Function_nD-derived class";
+            throw e;
+        }
+
         boost::python::list lgradients = f(p);
 
         boost::python::ssize_t i, n;
@@ -426,17 +453,18 @@ public:
     dealiiFiniteElementEquationWrapper(const std::string&       variableName,
                                        const std::string&       variableDescription,
                                        unsigned int             multiplicity,
-                                       const feExpression<dim>& systemMatrix,
-                                       const feExpression<dim>& systemMatrix_dt,
-                                       const feExpression<dim>& rhs,
+                                       const feExpression<dim>& elementMatrix,
+                                       const feExpression<dim>& elementMatrix_dt,
+                                       const feExpression<dim>& elementRHS,
                                        boost::python::dict      dictDirichletBC,
                                        boost::python::dict      dictNeumannBC)
     {
         boost::python::list keys;
 
-        this->m_matrix                    = systemMatrix;
-        this->m_matrix_dt                 = systemMatrix_dt;
-        this->m_rhs                       = rhs;
+        this->m_elementMatrix             = elementMatrix;
+        this->m_elementMatrix_dt          = elementMatrix_dt;
+        this->m_elementRHS                = elementRHS;
+        //this->m_elementBoundary           = ;
         this->m_strVariableName           = variableName;
         this->m_strVariableDescription    = variableDescription;
         this->m_nMultiplicity             = multiplicity;
@@ -460,9 +488,12 @@ public:
             boost::python::object val_ = dictNeumannBC[key_];
 
             unsigned int         key = boost::python::extract<unsigned int>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
+            boost::python::tuple t   = boost::python::extract<boost::python::tuple>(val_);
 
-            this->m_neumannBC[key] = fn;
+            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(t[0]);
+            dealiiFluxType       ft  = boost::python::extract<dealiiFluxType>(t[1]);
+
+            this->m_neumannBC[key] = std::pair<const Function<dim>*, dealiiFluxType>(fn, ft);
         }
     }
 

@@ -216,6 +216,8 @@ class dealiiFiniteElementEquation
 {
 public:
     typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
+    typedef typename std::map<unsigned int, std::pair<const Function<dim>*, dealiiFluxType> > map_Uint_FunctionPtr_FunctionCall;
+    typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
     typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
 
     dealiiFiniteElementEquation()
@@ -223,15 +225,16 @@ public:
     }
 
 public:
-    bool                        m_bNeedsUpdate;
-    feExpression<dim>           m_matrix;
-    feExpression<dim>           m_matrix_dt;
-    feExpression<dim>           m_rhs;
-    map_Uint_FunctionPtr        m_dirichletBC;
-    map_Uint_FunctionPtr        m_neumannBC;
-    std::string                 m_strVariableName;
-    std::string                 m_strVariableDescription;
-    unsigned int                m_nMultiplicity;
+    bool                                m_bNeedsUpdate;
+    feExpression<dim>                   m_elementMatrix;
+    feExpression<dim>                   m_elementMatrix_dt;
+    feExpression<dim>                   m_elementRHS;
+    //map_Uint_Expression               m_elementBoundary;
+    map_Uint_FunctionPtr_FunctionCall   m_neumannBC;
+    map_Uint_FunctionPtr                m_dirichletBC;
+    std::string                         m_strVariableName;
+    std::string                         m_strVariableDescription;
+    unsigned int                        m_nMultiplicity;
 
 // Internal data
     SmartPointer< FE_Q<dim> >   m_fe_q;
@@ -244,6 +247,8 @@ template <int dim>
 class dealiiFiniteElementSystem : public daeFiniteElementObject
 {
 typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
+typedef typename std::map<unsigned int, std::pair<const Function<dim>*, dealiiFluxType> > map_Uint_FunctionPtr_FunctionCall;
+typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
 typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
 typedef typename std::vector< dealiiFiniteElementEquation<dim>* > vector_Equations;
 typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
@@ -317,73 +322,6 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
 {
     if(equations.size() == 0)
         throw std::runtime_error("At least one equation must be specified");
-
-    /*
-    static ConstantFunction<dim> bc0(0.0);
-    static ConstantFunction<dim> bc1(-2E6/(8960*385));
-    static ConstantFunction<dim> bc2(-3E6/(8960*385));
-
-    cdr.m_strVariableName         = "U";
-    cdr.m_strVariableDescription  = "description";
-    //cdr.m_dirichletBC[]         = dirichletBC;
-    cdr.m_neumannBC[0]            = &bc0;
-    cdr.m_neumannBC[1]            = &bc1;
-    cdr.m_neumannBC[2]            = &bc2;
-    cdr.m_nMultiplicity           = 1;
-    cdr.m_bNeedsUpdate            = false;
-
-    std::string U = cdr.m_strVariableName;
-    cdr.m_matrix    = (dphi<dim>(U, fe_i, fe_q) * dphi<dim>(U, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-    cdr.m_matrix_dt = phi<dim>(U, fe_i, fe_q) * phi<dim>(U, fe_j, fe_q) * JxW<dim>(fe_q);
-    cdr.m_rhs       = phi<dim>(U, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-
-    m_equations.push_back(&cdr);
-
-    cdr2.m_strVariableName         = "T";
-    cdr2.m_strVariableDescription  = "description";
-    //cdr2.m_dirichletBC[]         = dirichletBC;
-    cdr2.m_neumannBC[0]            = &bc0;
-    cdr2.m_neumannBC[1]            = &bc1;
-    cdr2.m_neumannBC[2]            = &bc2;
-    cdr2.m_nMultiplicity           = 1;
-    cdr2.m_bNeedsUpdate            = false;
-
-    std::string T = cdr2.m_strVariableName;
-    cdr2.m_matrix    = (dphi<dim>(T, fe_i, fe_q) * dphi<dim>(T, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-    cdr2.m_matrix_dt = phi<dim>(T, fe_i, fe_q) * phi<dim>(T, fe_j, fe_q) * JxW<dim>(fe_q);
-    cdr2.m_rhs       = phi<dim>(T, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-
-    m_equations.push_back(&cdr2);
-
-    cdr3.m_strVariableName         = "M";
-    cdr3.m_strVariableDescription  = "description";
-    //cdr3.m_dirichletBC[]         = dirichletBC;
-    cdr3.m_neumannBC[0]            = &bc0;
-    cdr3.m_neumannBC[1]            = &bc1;
-    cdr3.m_neumannBC[2]            = &bc2;
-    cdr3.m_nMultiplicity           = 1;
-    cdr3.m_bNeedsUpdate            = false;
-
-    std::string M = cdr3.m_strVariableName;
-    cdr3.m_matrix    = (dphi<dim>(M, fe_i, fe_q) * dphi<dim>(M, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-    cdr3.m_matrix_dt = phi<dim>(M, fe_i, fe_q) * phi<dim>(M, fe_j, fe_q) * JxW<dim>(fe_q);
-    cdr3.m_rhs       = phi<dim>(M, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-
-    m_equations.push_back(&cdr3);
-
-
-    std::cout << cdr.m_matrix.ToString() << std::endl;
-    std::cout << cdr.m_matrix_dt.ToString() << std::endl;
-    std::cout << cdr.m_rhs.ToString() << std::endl;
-
-    std::cout << cdr2.m_matrix.ToString() << std::endl;
-    std::cout << cdr2.m_matrix_dt.ToString() << std::endl;
-    std::cout << cdr2.m_rhs.ToString() << std::endl;
-
-    std::cout << cdr3.m_matrix.ToString() << std::endl;
-    std::cout << cdr3.m_matrix_dt.ToString() << std::endl;
-    std::cout << cdr3.m_rhs.ToString() << std::endl;
-    */
 
     m_functions = functions;
     m_equations = equations;
@@ -552,7 +490,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
         fe_values.reinit(cell);
         cell->get_dof_indices(local_dof_indices);
-        std::cout << (boost::format("local_dof_indices = %s") % dae::toString(local_dof_indices)).str() << std::endl;
+        //std::cout << (boost::format("local_dof_indices = %s") % dae::toString(local_dof_indices)).str() << std::endl;
 
         for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
         {
@@ -570,9 +508,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     {
                         const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
 
-                        if(equation.m_matrix.m_node)
+                        if(equation.m_elementMatrix.m_node)
                         {
-                            feRuntimeNumber<dim> result = equation.m_matrix.m_node->Evaluate(&cellContext);
+                            feRuntimeNumber<dim> result = equation.m_elementMatrix.m_node->Evaluate(&cellContext);
                             if(result.m_eType != eFEScalar)
                                 throw std::runtime_error(std::string("Invalid local matrix contribution expression specified for equation: ") +
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
@@ -583,9 +521,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         }
 
                         /* Accumulation term (in a separate matrix) */
-                        if(equation.m_matrix_dt.m_node)
+                        if(equation.m_elementMatrix_dt.m_node)
                         {
-                            feRuntimeNumber<dim> result = equation.m_matrix_dt.m_node->Evaluate(&cellContext);
+                            feRuntimeNumber<dim> result = equation.m_elementMatrix_dt.m_node->Evaluate(&cellContext);
                             if(result.m_eType != eFEScalar)
                                 throw std::runtime_error(std::string("Invalid local matrix_dt contribution expression specified for equation: ") +
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
@@ -599,9 +537,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 for(unsigned int eq = 0; eq < m_equations.size(); eq++)
                 {
                     const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
-                    if(equation.m_rhs.m_node)
+                    if(equation.m_elementRHS.m_node)
                     {
-                        feRuntimeNumber<dim> result = equation.m_rhs.m_node->Evaluate(&cellContext);
+                        feRuntimeNumber<dim> result = equation.m_elementRHS.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
                             throw std::runtime_error(std::string("Invalid local rhs contribution expression specified for equation: ") +
                                                      equation.m_strVariableName + std::string(" (it must be a scalar value)"));
@@ -622,27 +560,52 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 for(unsigned int eq = 0; eq < m_equations.size(); eq++)
                 {
                     const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
-                    typename map_Uint_FunctionPtr::const_iterator it = equation.m_neumannBC.find(id);
+                    typename map_Uint_FunctionPtr_FunctionCall::const_iterator it = equation.m_neumannBC.find(id);
 
                     if(it != equation.m_neumannBC.end())
                     {
                         // Neumann BC
-                        const Function<dim>& Fneumann = *(it->second);
+                        double Neumann_value;
+                        std::pair<const Function<dim>*, dealiiFluxType> pairNeumann = it->second;
+                        const Function<dim>& Fneumann = *pairNeumann.first;
+                        const dealiiFluxType fluxType =  pairNeumann.second;
 
                         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&mapExtractors[equation.m_strVariableName]);
                         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&mapExtractors[equation.m_strVariableName]);
 
-                        std::cout << (boost::format("  Setting NeumanBC (cell=%d, face=%d, id= %d)[q0] = %f") % cellCounter % face % id % Fneumann.value(fe_face_values.quadrature_point(0))).str() << std::endl;
-
                         for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                         {
+                            //Tensor<1, dim> normal_ = fe_face_values.normal_vector(q_point);
+                            //Point<dim>     point_  = fe_face_values.quadrature_point(q_point);
+                            //std::cout << (boost::format("Point (%f, %f) normal (%f, %f)") % point_[0] % point_[1] % normal_[0] % normal_[1]).str() << std::endl;
+
                             // Achtung, Achtung! For the Convection-Diffusion-Reaction system only:
                             //                   the sign '-neumann' since we have the term: -integral(q * φ(i) * dΓq)
                             for (unsigned int i = 0; i < dofs_per_cell; ++i)
                             {
                                 if(extractorScalar)
                                 {
-                                    cell_rhs(i) += -Fneumann.value(fe_face_values.quadrature_point(q_point))
+                                    if(fluxType == eConstantFlux)
+                                        Neumann_value = Fneumann.value(fe_face_values.quadrature_point(q_point));
+                                    else if(fluxType == eGradientFlux)
+                                        Neumann_value = Fneumann.gradient(fe_face_values.quadrature_point(q_point)) *
+                                                        fe_face_values.normal_vector(q_point);
+                                    else
+                                        throw std::runtime_error("Invalid NeumannBC function call type");
+
+                                    /*
+                                    std::cout << (boost::format("  Setting NeumanBC (cell=%d, point=(%d, %d), id=%d)[%d] = %f")  % cellCounter
+                                                                                                                                 % fe_face_values.quadrature_point(q_point)(0)
+                                                                                                                                 % fe_face_values.quadrature_point(q_point)(1)
+                                                                                                                                 % id
+                                                                                                                                 % i
+                                                                                                                                 % (Neumann_value
+                                                                                                                                    * fe_face_values[*extractorScalar].value(i, q_point)
+                                                                                                                                    * fe_face_values.JxW(q_point))
+                                                 ).str() << std::endl;
+                                    */
+
+                                    cell_rhs(i) += Neumann_value
                                                    *
                                                    fe_face_values[*extractorScalar].value(i, q_point)
                                                    *

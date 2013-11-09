@@ -805,6 +805,12 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("function_gradient_2D", &function_gradient2<2>, ( arg("fname"), arg("xyz"), arg("component") ));
     def("function_gradient_3D", &function_gradient2<3>, ( arg("fname"), arg("xyz"), arg("component") ));
 
+    enum_<dealiiFluxType>("dealiiFluxType")
+        .value("eConstantFlux",	dae::fe_solver::eConstantFlux)
+        .value("eGradientFlux", dae::fe_solver::eGradientFlux)
+        .export_values()
+    ;
+
     class_<daepython::dealiiFiniteElementEquationWrapper<1>, boost::noncopyable>("dealiiFiniteElementEquation_1D", no_init)
         .def(init<const std::string&,
                   const std::string&,
@@ -816,9 +822,9 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict>(( arg("variableName"),
                                          arg("variableDescription"),
                                          arg("multiplicity"),
-                                         arg("systemMatrix"),
-                                         arg("systemMatrix_dt"),
-                                         arg("rhs"),
+                                         arg("elementMatrix"),
+                                         arg("elementMatrix_dt"),
+                                         arg("elementRHS"),
                                          arg("dirichletBC"),
                                          arg("neumannBC")
                                       )))
@@ -828,12 +834,12 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("DirichletBC",           &dealiiFiniteElementEquation<1>::m_dirichletBC)
         .def_readonly("NeumannBC",             &dealiiFiniteElementEquation<1>::m_neumannBC)
         .def_readonly("Multiplicity",          &dealiiFiniteElementEquation<1>::m_nMultiplicity)
-        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<1>::m_matrix)
-        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<1>::m_matrix_dt)
-        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<1>::m_rhs)
+        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<1>::m_elementMatrix)
+        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<1>::m_elementMatrix_dt)
+        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<1>::m_elementRHS)
 
-        .def("ConvectionDiffusion",             &daepython::dealiiFiniteElementEquationWrapper<1>::ConvectionDiffusion, return_value_policy<manage_new_object>())
-        .staticmethod("ConvectionDiffusion")
+        .def("ConvectionDiffusionEquation",   &daepython::dealiiFiniteElementEquationWrapper<1>::ConvectionDiffusionEquation, return_value_policy<manage_new_object>())
+        .staticmethod("ConvectionDiffusionEquation")
     ;
 
     class_<daepython::dealiiFiniteElementEquationWrapper<2>, boost::noncopyable>("dealiiFiniteElementEquation_2D", no_init)
@@ -847,9 +853,9 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict>(( arg("variableName"),
                                          arg("variableDescription"),
                                          arg("multiplicity"),
-                                         arg("systemMatrix"),
-                                         arg("systemMatrix_dt"),
-                                         arg("rhs"),
+                                         arg("elementMatrix"),
+                                         arg("elementMatrix_dt"),
+                                         arg("elementRHS"),
                                          arg("dirichletBC"),
                                          arg("neumannBC")
                                       )))
@@ -859,9 +865,9 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("DirichletBC",           &dealiiFiniteElementEquation<2>::m_dirichletBC)
         .def_readonly("NeumannBC",             &dealiiFiniteElementEquation<2>::m_neumannBC)
         .def_readonly("Multiplicity",          &dealiiFiniteElementEquation<2>::m_nMultiplicity)
-        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<2>::m_matrix)
-        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<2>::m_matrix_dt)
-        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<2>::m_rhs)
+        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<2>::m_elementMatrix)
+        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<2>::m_elementMatrix_dt)
+        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<2>::m_elementRHS)
 
         .def("ConvectionDiffusionEquation",    &daepython::dealiiFiniteElementEquationWrapper<2>::ConvectionDiffusionEquation, return_value_policy<manage_new_object>())
         .staticmethod("ConvectionDiffusionEquation")
@@ -878,9 +884,9 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict>(( arg("variableName"),
                                          arg("variableDescription"),
                                          arg("multiplicity"),
-                                         arg("systemMatrix"),
-                                         arg("systemMatrix_dt"),
-                                         arg("rhs"),
+                                         arg("elementMatrix"),
+                                         arg("elementMatrix_dt"),
+                                         arg("elementRHS"),
                                          arg("dirichletBC"),
                                          arg("neumannBC")
                                       )))
@@ -889,12 +895,12 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("DirichletBC",           &dealiiFiniteElementEquation<3>::m_dirichletBC)
         .def_readonly("NeumannBC",             &dealiiFiniteElementEquation<3>::m_neumannBC)
         .def_readonly("Multiplicity",          &dealiiFiniteElementEquation<3>::m_nMultiplicity)
-        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<3>::m_matrix)
-        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<3>::m_matrix_dt)
-        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<3>::m_rhs)
+        .def_readonly("ElementMatrix",         &dealiiFiniteElementEquation<3>::m_elementMatrix)
+        .def_readonly("ElementMatrix_dt",      &dealiiFiniteElementEquation<3>::m_elementMatrix_dt)
+        .def_readonly("ElementRHS",            &dealiiFiniteElementEquation<3>::m_elementRHS)
 
-        .def("ConvectionDiffusion",             &daepython::dealiiFiniteElementEquationWrapper<3>::ConvectionDiffusion, return_value_policy<manage_new_object>())
-        .staticmethod("ConvectionDiffusion")
+        .def("ConvectionDiffusionEquation",   &daepython::dealiiFiniteElementEquationWrapper<3>::ConvectionDiffusionEquation, return_value_policy<manage_new_object>())
+        .staticmethod("ConvectionDiffusionEquation")
     ;
 
     class_<daeDealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("daeDealIIDataReporter", no_init)

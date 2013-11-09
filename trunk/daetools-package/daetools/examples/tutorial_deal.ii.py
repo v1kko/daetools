@@ -51,6 +51,9 @@ from daetools.solvers.aztecoo_options import daeAztecOptions
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+# Neumann BC use either value or gradient
+# Dirichlet BC use vector_value with n_component = multiplicity of the equation
+# Other functions use value
 class fnConstantFunction(Function_2D):
     def __init__(self, val, n_components = 1):
         Function_2D.__init__(self, n_components)
@@ -59,6 +62,15 @@ class fnConstantFunction(Function_2D):
     def value(self, point, component = 1):
         #print 'Point%s = %f' % (point, self.m_value)
         return self.m_value
+    
+    def gradient(self, point, component = 1):
+        return 0.0
+    
+    def vector_value(self, point):
+        return [self.m_value]
+       
+    def vector_gradient(self, point):
+        return [0.0]
        
 class feObject(dealiiFiniteElementSystem_2D):
     def __init__(self, meshFilename, polynomialOrder, quadratureFormula, 
@@ -71,7 +83,6 @@ class feObject(dealiiFiniteElementSystem_2D):
                                                     equation)
         
     def AssembleSystem(self):
-        print 'AssembleSystem custom'
         dealiiFiniteElementSystem_2D.AssembleSystem(self)
     
     def NeedsReAssembling(self):
@@ -89,12 +100,12 @@ class modTutorial(daeModel):
         self.functions['Generation']  = ConstantFunction_2D(0.0)
         
         self.neumannBC      = {}
-        self.neumannBC[0]   = fnConstantFunction(0.0)
-        self.neumannBC[1]   = fnConstantFunction(-2E6/(8960*385))
-        self.neumannBC[2]   = fnConstantFunction(-3E6/(8960*385))
+        #self.neumannBC[0]   = (ConstantFunction_2D(0.0),            eConstantFlux)
+        self.neumannBC[1]   = (ConstantFunction_2D(2E6/(8960*385)), eConstantFlux)
+        self.neumannBC[2]   = (ConstantFunction_2D(3E6/(8960*385)), eConstantFlux)
         
         self.dirichletBC    = {}
-        #self.dirichletBC[0] = fnConstantFunction(100)
+        self.dirichletBC[0] = fnConstantFunction(200)
         #self.dirichletBC[1] = fnConstantFunction(200)
         #self.dirichletBC[2] = fnConstantFunction(250)
         
@@ -117,75 +128,6 @@ class modTutorial(daeModel):
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
-        
-        # 1a. Default assemble
-        #self.fe.AssembleSystem()
-        
-        # 1b. Use expressions for cell constributions
-        
-        # 1c. User-defined assemble
-        """
-        for cell in self.fe:
-            # Get face_values and friends:
-            #  - face_values will be automatically reinitialized
-            #  - matrices/vectors will be automatically zeroed
-            #  - local_dof_indices will be automatically filled in with the cell dofs
-            fe_values         = cell.fe_values
-            cell_matrix       = cell.cell_matrix
-            cell_rhs          = cell.cell_rhs
-            system_matrix     = cell.system_matrix
-            system_rhs        = cell.system_rhs
-            local_dof_indices = cell.local_dof_indices
-            print 'local_dof_indices = %s' % str(list(local_dof_indices))
-
-            for q in range(cell.n_q_points):
-                for i in range(cell.dofs_per_cell):
-                    for j in range(cell.dofs_per_cell):
-                        cell_matrix.add(i,j, (
-                                               (fe_values.shape_grad(i,q) * fe_values.shape_grad(j,q)) * 1.0 # diffusivity 
-                                               +
-                                               fe_values.shape_value(i,q) * fe_values.shape_value(j,q)                                             
-                                             )
-                                             * fe_values.JxW(q))
-                    cell_rhs.add(i, fe_values.shape_value(i,q) * 1.0 * fe_values.JxW(q))
-            
-            print '1'
-            for f, face in enumerate(cell.faces):
-                # Get the fe_face_values (will be automatically reinitialized with the current face)
-                print 'fstart = %d' % f
-                if face.at_boundary:
-                    print 'Face boundary at: ', face.boundary_id
-                print 'at'
-                if face.at_boundary and face.boundary_id in self.neumannBC:
-                    boundary_id    = face.boundary_id
-                    print 'fface_values 1'
-                    fe_face_values = face.fe_values
-                    print 'fface_values 2'
-                    for q in range(face.n_q_points):
-                        for i in range(cell.dofs_per_cell):
-                            cell_rhs.add(i, 0.0
-                                            *
-                                            fe_face_values.shape_value(i, q_point)
-                                            *
-                                            fe_face_values.JxW(q_point))
-                print 'fend'
-            print '2'
-            for i in range(cell.dofs_per_cell):
-                for j in range(cell.dofs_per_cell):
-                    system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j))
-                system_rhs.add(local_dof_indices[i], cell_rhs[i])
-            print '3'
-        
-        self.fe.CondenseHangingNodeConstraints()
-        for bid, fn in self.dirichletBC.items():
-            self.fe.InterpolateAndApplyBoundaryValues(bid, fn)
-            
-        print 'Done assembling'
-        
-        # 2. Generate equations
-        self.fe.GenerateEquations()
-        print 'Done generating equations'
-        """
         
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -220,9 +162,6 @@ class simTutorial(daeSimulation):
             for i in xrange(variable.NumberOfPoints):
                 dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
         
-        print '***********************************'
-        print dofIndexesMap
-        print '***********************************'
         for row in xrange(m_dt.n):
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).

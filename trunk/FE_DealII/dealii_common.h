@@ -46,6 +46,13 @@ typedef Point<1, double> Point_1D;
 typedef Point<2, double> Point_2D;
 typedef Point<3, double> Point_3D;
 
+// Used in NeumannBC to choose between a constant flux and gradient
+enum dealiiFluxType
+{
+    eConstantFlux = 0,
+    eGradientFlux
+};
+
 /*********************************************************
  * daeFEMatrix
  * A wrapper around deal.II SparseMatrix<double>
