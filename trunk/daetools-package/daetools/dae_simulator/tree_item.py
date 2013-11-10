@@ -96,6 +96,9 @@ class treeItem(object):
             if self.type == eArray:
                 d['Type']                 = str(self.type)
                 d['NumberOfPoints']       = int(self._value)
+            elif self.type == eUnstructuredGrid:
+                d['Type']                 = str(self.type)
+                d['NumberOfPoints']       = int(self._value)
             else:
                 d['Type']                 = str(self.type)
                 d['DiscretizationMethod'] = str(self.discrMethod)
@@ -546,6 +549,8 @@ class treeItem_Domain(treeItem):
     def getValueAsText(self):
         if self.type == eArray:
             return 'Array(%d)' % self._value
+        elif self.type == eUnstructuredGrid:
+            return 'UnstructuredGrid(%d)' % self._value
         else:
             return 'Distributed(%s, %d, %d, %s, %s)' % (self.discrMethod, self.order, self.numberOfIntervals, 
                                                         self._value, str(self.units) if str(self.units) != '' else '-')

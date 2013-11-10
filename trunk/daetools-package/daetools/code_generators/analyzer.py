@@ -423,7 +423,10 @@ class daeCodeGeneratorAnalyzer(object):
             data['NumberOfPoints']       = domain.NumberOfPoints
             data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
             data['DiscretizationOrder']  = domain.DiscretizationOrder
-            data['Points']               = domain.npyPoints
+            if domain.Type == eUnstructuredGrid:
+                data['Points']           = numpy.array([i for i in xrange(domain.NumberOfPoints)])
+            else:
+                data['Points']           = domain.npyPoints
             data['Units']                = domain.Units
 
             self.runtimeInformation['Domains'].append(data)
@@ -505,7 +508,10 @@ class daeCodeGeneratorAnalyzer(object):
             data['NumberOfPoints']       = domain.NumberOfPoints
             data['DiscretizationMethod'] = str(domain.DiscretizationMethod)
             data['DiscretizationOrder']  = domain.DiscretizationOrder
-            data['Points']               = domain.npyPoints
+            if domain.Type == eUnstructuredGrid:
+                data['Points']           = numpy.array([i for i in xrange(domain.NumberOfPoints)])
+            else:
+                data['Points']           = domain.npyPoints
             data['Units']                = domain.Units
 
             self.runtimeInformation['Domains'].append(data)

@@ -110,11 +110,11 @@ class modTutorial(daeModel):
         #self.dirichletBC[2] = fnConstantFunction(250)
         
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        meshFilename = os.path.join(meshes_dir, 'ex49.msh')
+        meshFilename = os.path.join(meshes_dir, 'step-49.msh')
         
         # Achtung, Achtung!!
         # Finite element equations must not go out of scope for deal.II FE model keeps only weak references to them.
-        self.cdr1 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('T', 'T description', self.dirichletBC, self.neumannBC)
+        self.cdr1 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
         #self.cdr2 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
         equations = [self.cdr1] #, self.cdr2]
         
@@ -142,8 +142,6 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         m_dt = self.m.fe_dealII.SystemMatrix_dt()
-        T    = self.m.fe.dictVariables['T']
-        U    = self.m.fe.dictVariables['U']
         
         # Vector where every item marks the boundar
         #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
@@ -152,12 +150,8 @@ class simTutorial(daeSimulation):
         # dofIndexesMap relates global DOF indexes to points within daetools variables
         dofIndexesMap = {}
         for variable in self.m.fe.Variables:
-            if variable.Name == 'T':
+            if variable.Name == 'U':
                 ic = 300
-            elif variable.Name == 'U':
-                ic = 100
-            elif variable.Name == 'M':
-                ic = 200
             else:
                 raise RuntimeError('Unknown variable [%s] found' % variable.Name)
             
@@ -248,6 +242,9 @@ def consoleRun():
     # Save the model report and the runtime model report
     #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
     #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    
+    from daetools.dae_simulator.simulation_explorer import simulate
+    explorer = simulate(simulation)
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

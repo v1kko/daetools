@@ -174,12 +174,6 @@ inline adouble create_adouble(adNode* n)
     return adouble(0.0, 0.0, true, n);
 }
 
-struct feVars
-{
-    size_t variableIndex;
-    daeVariable* variable;
-};
-
 void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel)
 {
     daeVariable* variable;
@@ -281,7 +275,7 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
 
             /* ACHTUNG, ACHTUNG!!
                The matrix Kdt is not going to change - wherever we have a matrix_dt item equal to zero it is going to stay zero
-               (meaning that the FiniteElement object cannot suddenly sneak in differential variables to the system AFTER initialization).
+               (meaning that the FiniteElement object cannot suddenly sneak in differential variables into the system AFTER initialization).
                Therefore, skip an item if we encounter a zero.
             */
             if(m_FEModel.matKdt->GetItem(row, column) != 0)

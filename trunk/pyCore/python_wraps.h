@@ -236,6 +236,9 @@ boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRu
 daeScalarExternalFunction* adScalarExternalFunctionNode_ExternalFunction(adScalarExternalFunctionNode& node);
 daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVectorExternalFunctionNode& node);
 
+real_t adFEMatrixItemNode_Value(adFEMatrixItemNode& self);
+real_t adFEVectorItemNode_Value(adFEVectorItemNode& self);
+
 /*******************************************************
 	adouble
 *******************************************************/

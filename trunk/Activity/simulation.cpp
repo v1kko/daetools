@@ -1505,11 +1505,25 @@ void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
                 throw e;
             }
         }
-        else if(strType == "eStructuredGrid")
+        else if(strType == "eUnstructuredGrid")
         {
-            daeDeclareException(exInvalidCall);
-            e << "Invalid domain type " << strType << " in domain " << strDomainName << " in the runtime settings";
-            throw e;
+            try
+            {
+                size_t NumberOfPoints = v_domain.second.get<size_t>("NumberOfPoints");
+                if(bPrintInfo)
+                {
+                    std::cout << "          Type           = " << strType << std::endl;
+                    std::cout << "          NumberOfPoints = " << NumberOfPoints << std::endl;
+                }
+                std::vector<daePoint> arrPoints(NumberOfPoints);
+                pDomain->CreateUnstructuredGrid(arrPoints);
+            }
+            catch(std::exception& ex)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Cannot find NumberOfPoints in domain " << strDomainName << " in the runtime settings";
+                throw e;
+            }
         }
         else
         {

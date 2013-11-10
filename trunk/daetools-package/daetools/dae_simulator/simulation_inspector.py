@@ -62,10 +62,10 @@ def _collectDomains(nodeItem, model, dictDomains):
                                                    order = order, numberOfIntervals = numberOfIntervals, 
                                                    points = points, units = units)
         elif obj.Type == eUnstructuredGrid:
-            discrMethod        = obj.DiscretizationMethod # not edited
-            order              = obj.DiscretizationOrder  # not edited
-            numberOfIntervals  = obj.NumberOfIntervals    # not edited
-            points             = obj.Points
+            discrMethod    = obj.DiscretizationMethod # not edited
+            order          = obj.DiscretizationOrder  # not edited
+            numberOfPoints = obj.NumberOfPoints       # not edited
+            points         = obj.Coordinates
             item = treeItem_Domain(nodeItem, type, name, description, numberOfPoints=numberOfPoints, units=units)
         
         dictDomains[obj.CanonicalName] = (obj, item)

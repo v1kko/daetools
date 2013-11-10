@@ -272,7 +272,7 @@ void daeDomain::CreateUnstructuredGrid(const std::vector<daePoint>& coordinates)
     m_arrCoordinates        = coordinates;
     m_dLowerBound			= 0;
     m_dUpperBound			= 0;
-    m_nNumberOfIntervals	= coordinates.size();
+    m_nNumberOfIntervals	= 0;
     m_nNumberOfPoints       = coordinates.size();
     m_eDomainType			= eUnstructuredGrid;
     m_nDiscretizationOrder  = 0;

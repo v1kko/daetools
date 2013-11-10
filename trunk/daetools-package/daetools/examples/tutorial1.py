@@ -100,7 +100,6 @@ Also, we need to write the following 5 equations:
 
       dT(x,y) / dx = 0;  for all y in: (0, Ly),
                          and x = Ln
-
 """
 
 import sys

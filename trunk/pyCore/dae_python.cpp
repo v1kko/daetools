@@ -385,11 +385,13 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("MatrixName",   &adFEMatrixItemNode::m_strMatrixName)
         .def_readonly("Row",          &adFEMatrixItemNode::m_row)
         .def_readonly("Column",       &adFEMatrixItemNode::m_column)
+        .add_property("Value",        &daepython::adFEMatrixItemNode_Value)
     ;
 
     class_<adFEVectorItemNode, bases<adNode>, boost::noncopyable>("adFEVectorItemNode", no_init)
         .def_readonly("VectorName",   &adFEVectorItemNode::m_strVectorName)
         .def_readonly("Row",          &adFEVectorItemNode::m_row)
+        .add_property("Value",        &daepython::adFEVectorItemNode_Value)
     ;
 
     class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)
