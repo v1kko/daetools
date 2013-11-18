@@ -165,9 +165,6 @@ DataReporter data-containers
 .. autoclass:: pyDataReporting.daeDataReporterDomain
     :members:
     :undoc-members:
-
-    .. automethod:: __getitem__
-    .. automethod:: __setitem__
     
 .. autoclass:: pyDataReporting.daeDataReporterVariable
     :members:
@@ -226,9 +223,6 @@ DataReceiver data-containers
 .. autoclass:: pyDataReporting.daeDataReceiverDomain
     :members:
     :undoc-members:
-
-    .. automethod:: __getitem__
-    .. automethod:: __setitem__
 
 .. autoclass:: pyDataReporting.daeDataReceiverVariable
     :members:

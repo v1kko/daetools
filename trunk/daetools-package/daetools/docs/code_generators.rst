@@ -30,7 +30,7 @@ Modelica
 ========
 .. py:module:: daetools.code_generators.modelica
 
-.. autoclass:: daetools.code_generators.modelica.daeModelicaExpressionFormatter
+.. autoclass:: daetools.code_generators.modelica.daeExpressionFormatter_Modelica
     :members:
     :undoc-members:
 
@@ -40,13 +40,13 @@ Modelica
 
 ANSI C
 =======
-.. py:module:: daetools.code_generators.ansi_c
+.. py:module:: daetools.code_generators.c99
 
-.. autoclass:: daetools.code_generators.ansi_c.daeANSICExpressionFormatter
+.. autoclass:: daetools.code_generators.c99.daeExpressionFormatter_c99
     :members:
     :undoc-members:
 
-.. autoclass:: daetools.code_generators.ansi_c.daeCodeGenerator_ANSI_C
+.. autoclass:: daetools.code_generators.c99.daeCodeGenerator_c99
     :members:
     :undoc-members:
 

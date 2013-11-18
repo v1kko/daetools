@@ -1606,6 +1606,9 @@ BOOST_PYTHON_MODULE(pyCore)
                                     ( arg("self"), arg("domain"), arg("domainIndexes"), arg("name") = string("") ), DOCSTR_daeEquation_DistributeOnDomain1)
 	;
 
+    class_<daeFiniteElementEquation, bases<daeEquation>, boost::noncopyable>("daeFiniteElementEquation", DOCSTR_daeEquation, no_init)
+    ;
+
     class_<daePortConnection, bases<daeObject>, boost::noncopyable>("daePortConnection", DOCSTR_daePortConnection, no_init)
         .add_property("PortFrom",   make_function(&daepython::daePortConnection_GetPortFrom, return_internal_reference<>()), DOCSTR_daePortConnection_PortFrom)
         .add_property("PortTo",     make_function(&daepython::daePortConnection_GetPortTo, return_internal_reference<>()), DOCSTR_daePortConnection_PortTo)

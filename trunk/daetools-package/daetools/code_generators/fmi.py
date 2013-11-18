@@ -1,6 +1,6 @@
 import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile
 from daetools.pyDAE import *
-from ansi_c import daeCodeGenerator_ANSI_C
+from c99 import daeCodeGenerator_c99
 from fmi_xml_support import *
 
 class daeCodeGenerator_FMI(fmiModelDescription):
@@ -55,8 +55,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             if not os.path.exists(folder):
                 os.makedirs(folder)
 
-            cgANSI_C = daeCodeGenerator_ANSI_C()
-            cgANSI_C.generateSimulation(simulation, projectDirectory = source_dir)
+            cgC99 = daeCodeGenerator_c99()
+            cgC99.generateSimulation(simulation, projectDirectory = source_dir)
             self.wrapperInstanceName = simulation.m.Name
 
             self.modelName                  = simulation.m.Name #*
@@ -108,7 +108,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Add model structure (inputs/outputs)
             
             # Add model variables
-            for i, (ref_type, ref_name, ref_flat_name, block_index) in enumerate(cgANSI_C.floatValuesReferences):
+            for i, (ref_type, ref_name, ref_flat_name, block_index) in enumerate(cgC99.floatValuesReferences):
                 if ref_type == 'Assigned':
                     self._addAssignedVariable(ref_name, i, '')
 

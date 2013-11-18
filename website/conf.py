@@ -13,7 +13,8 @@
 
 import sys, os, platform, numpy
 
-sys.path.insert(0, os.path.abspath('trunk/daetools-package/daetools'))
+sys.path.insert(0, os.path.abspath('../trunk/daetools-package/daetools'))
+print sys.path
 from daetools import *
 
 # If extensions (or modules to document with autodoc) are in another directory,

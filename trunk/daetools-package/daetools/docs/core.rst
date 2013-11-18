@@ -30,9 +30,11 @@ Classes
     daeParameter
     daeVariable
     daeModel
+    daeFiniteElementModel
     daeSTN
     daeIF
     daeEquation
+    daeFiniteElementEquation
     daeState
     daePort
     daeEventPort
@@ -256,6 +258,12 @@ Classes
     :undoc-members:
 
     .. automethod:: __init__
+
+.. autoclass:: pyCore.daeFiniteElementModel
+    :members:
+    :undoc-members:
+
+    .. automethod:: __init__
     
 .. autoclass:: pyCore.daeSTN
     :members:
@@ -266,6 +274,14 @@ Classes
     :undoc-members:
 
 .. autoclass:: pyCore.daeEquation
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeFiniteElementObject
+    :members:
+    :undoc-members:
+    
+.. autoclass:: pyCore.daeFiniteElementEquation
     :members:
     :undoc-members:
 

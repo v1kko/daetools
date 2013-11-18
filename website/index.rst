@@ -50,35 +50,30 @@ improvements:
 
 -  Numerical simulation of partial differential equations on adaptive
    unstructured grids using Finite Elements Method.
-   `libMesh`_ and `deal.II`_ frameworks are adapted to generate daetools equations
-   during the system matrix assembly phase. All details about the mesh,
-   basis functions, quadrature rules, refinement procedure etc. are
-   handled by the libMesh/deal.II libraries. The advantage of
-   this concept is that the generated equations (linear, nonlinear or
-   differential - depending on the class of the system) can be coupled
-   with other FE-unrelated equations in a daetools model and solved
+   `deal.II`_ library is used for low-level tasks such as mesh loading/processing
+   and the system matrices/arrays assembly. `deal.II`_ structures are then used to 
+   generate daetools equations which are solved together with the rest of the model 
+   equations. All details about the mesh, basis functions, quadrature rules, refinement 
+   etc. are handled by the `deal.II`_ library. The advantage of this concept is that the 
+   generated equations (linear, nonlinear or differential - depending on the class of the system) 
+   can be coupled with other FE-unrelated equations in a daetools model and solved
    altogether by daetools solvers; system discontinuities can be handled
    as usual in daetools; modelled processes can be optimized, etc.
 
 -  Code generators for `Modelica`_ (whole simulation or just
-   selected models/ports) and ANSI C. It is already functional
+   selected models/ports), `FMI`_ and `c99`_. They are already functional
    (available only in python) and located in the folder
    daetools/code\_generators (with some tests). Almost all features
    available in daetools can be exported to Modelica and c,
-   except event ports, user defined actions and functions and some
-   limitations on STNs (nested state transition networks are not
-   supported at the moment; might be resolved in the meantime). The
-   existing model analyzer make code generation rather simple (as long
-   as the very basic modelling concepts such as parameters, variables
+   except event ports, user defined actions, external functions and 
+   finite element objects whose equations need to be updated during 
+   a simulation. The existing model analyzer make code generation rather simple 
+   (as long as the very basic modelling concepts such as parameters, variables
    and discontinuous equations are supported in the target language).
 -  Support for Functional Mock-up Interface for Model Exchange and
    Co-Simulation (FMI) `FMI`_.
 
 A bug fix in 3D plot when detecting free domains (by Caleb Hattingh).
-
-**DAE Tools** software is used as a reference implementation simulator
-for `NineML`_ (XML-based simulator independent language for spiking
-neuron network modeling).
 
 **DAE Tools** v1.2.1 is released on 14 June 2012. It brings several new
 features and improvements (:ref:`v1.2.1 <v1_2_1>`). The most important are:
@@ -111,6 +106,7 @@ features and improvements (:ref:`v1.2.1 <v1_2_1>`). The most important are:
 .. _Modelica: http://www.modelica.org
 .. _FMI: https://www.fmi-standard.org
 .. _Simulink: http://www.mathworks.com/products/simulink
+.. _c99: https://en.wikipedia.org/wiki/C99
 
 Full list of news can be found here: :doc:`news`
 
