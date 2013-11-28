@@ -57,7 +57,7 @@ improvements:
    etc. are handled by the `deal.II`_ library. The advantage of this concept is that the 
    generated equations (linear, nonlinear or differential - depending on the class of the system) 
    can be coupled with other FE-unrelated equations in a daetools model and solved
-   altogether by daetools solvers; system discontinuities can be handled
+   together by daetools solvers; system discontinuities can be handled
    as usual in daetools; modelled processes can be optimized, etc.
 
 -  Code generators for `Modelica`_ (whole simulation or just
@@ -88,7 +88,7 @@ features and improvements (:ref:`v1.2.1 <v1_2_1>`). The most important are:
   switched off in the daetools.cfg config file); all constants in
   equations must be dimensional and assigned units
 - A basic support for external functions that can handle and evaluate
-  functions in external libraries (the goal is to support certtain software
+  functions in external libraries (the goal is to support certain software
   components such as thermodynamic property packages)
 - A new type of 2D plots: Animated2D plot
 - Equations can have an optional scaling

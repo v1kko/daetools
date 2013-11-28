@@ -560,9 +560,9 @@ public:
     virtual void                        RowIndices(unsigned int row,
                                                    std::vector<unsigned int>& narrIndices) const = 0;
 
-    virtual dae::daeMatrix<real_t>*     SystemMatrix() const = 0;
-    virtual dae::daeMatrix<real_t>*     SystemMatrix_dt() const = 0;
-    virtual dae::daeArray<real_t>*      SystemRHS() const = 0;
+    virtual dae::daeMatrix<real_t>*     Asystem() const = 0;
+    virtual dae::daeMatrix<real_t>*     Msystem() const = 0;
+    virtual dae::daeArray<real_t>*      Fload() const = 0;
 
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const = 0;
 };

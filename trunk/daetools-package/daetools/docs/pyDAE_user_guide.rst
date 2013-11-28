@@ -457,34 +457,37 @@ Domains are declared in the :py:meth:`pyCore.daeModel.__init__` function.
 Initializing domains
 ~~~~~~~~~~~~~~~~~~~~
 Domains are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
-function. To set up a domain as a simple array use the function
-:py:meth:`pyCore.daeDomain.CreateArray`:
+function. To set up a domain as a simple array the function
+:py:meth:`pyCore.daeDomain.CreateArray` can be used:
 
 .. code-block:: python
 
     # Array of 10 elements
     myDomain.CreateArray(10)
 
-while to set up a domain as distributed domain use the function
-:py:meth:`pyCore.daeDomain.CreateDistributed`:
+while to set up a domain distributed on a structured grid the function
+:py:meth:`pyCore.daeDomain.CreateStructuredGrid`:
 
 .. code-block:: python
 
     # Center finite diff of the 2nd order with 10 elements and bounds: 0.0 to 1.0
-    myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,  1.0)
+    myDomain.CreateStructuredGrid(eCFDM, 2, 10, 0.0,  1.0)
 
-Non-uniform grids
-~~~~~~~~~~~~~~~~~
+It is also possible to create an unstructured grid (for use in Finite Element models). However, creation
+and setup of such domains is an implementation detail of corresponding modules (i.e. deal.II).
+
+Non-uniform structured grids
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In certain situations it is not desired to have a uniform distribution
 of the points within the given interval, defined by the lower and upper bounds.
-In these cases, a non-uniform grid can be specified using the attribute
+In these cases, a non-uniform structured grid can be specified using the attribute
 :py:attr:`pyCore.daeDomain.Points` which contains the list of the points and that
 can be manipulated by the user:
 
 .. code-block:: python
 
-    # First create a distributed domain
-    myDomain.CreateDistributed(eCFDM, 2, 10, 0.0,  1.0)
+    # First create a distributed domain (distributed on a structured grid)
+    myDomain.CreateStructuredGrid(eCFDM, 2, 10, 0.0,  1.0)
 
     # The original 11 points are: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     # If we are have a stiff profile at the beginning of the domain,
@@ -508,7 +511,7 @@ cases:
 
    Effect of uniform and non-uniform grids on numerical solution
 
-We can clearly observe that we get much more precise results by using
+We can clearly observe that much more precise results are obtained by using
 denser grid at the beginning of the domain.
 
 Using domains
@@ -1075,6 +1078,38 @@ To do so, the following equations can be used:
     dx = rbc.DistributeOnDomain(x, eClosedClosed)
     dy = rbc.DistributeOnDomain(y, eUpperBound)
     rbc.Residal = - k() * T.d(y, dx,dy) - 1E6  # Constant flux (1E6 W/m2)
+
+    
+PDE on unstructured grids using the Finite Elements Method
+-----------------------------------------------------------
+DAE Tools support numerical simulation of partial differential equations on adaptive
+unstructured grids using Finite Elements Method. Currently, DAE Tools use `deal.II`_ library
+for low-level tasks such as mesh loading and refinement, assembly of the system
+stiffness and mass matrices and the system load vector, and the generation of the results.
+After an initial assembly phase the `deal.II`_ structures are used to
+generate daetools equations which are solved together with the rest of the model
+equations. All details about the mesh, basis functions, quadrature rules, refinement
+etc. are handled by the `deal.II`_ library and can be to some extent configured by the users.
+The advantage of this concept are:
+
+* that the generated equations (linear, nonlinear or differential -
+  depending on the class of the system) can be coupled with other FE-unrelated equations and solved
+  together by daetools solvers
+* system discontinuities can be handled as usual in daetools
+* modelled processes can be optimized
+
+Support for FE is provided by the following DAE Tools classes:
+
+* :py:class:`~pyCore.daeFiniteElementObject`
+* :py:class:`~pyCore.daeFiniteElementModel`
+* :py:class:`~pyCore.daeFiniteElementEquation`
+
+and an implementation classes (basically a thin wrappers) based on the `deal.II`_ library:
+
+* :py:class:`~pyDealII.dealiiFiniteElementSystem`
+* :py:class:`~pyDealII.dealiiFiniteElementEquation`
+* large number of auxiliary classes and functions
+
 
 State Transition Networks
 -------------------------

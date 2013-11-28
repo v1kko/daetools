@@ -21,6 +21,7 @@ pyDAE API Reference
    dae_solver
    units
    variable_types
+   finite_element
    solvers
    code_generators
    dae_plotter

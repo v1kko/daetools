@@ -453,9 +453,9 @@ public:
     dealiiFiniteElementEquationWrapper(const std::string&       variableName,
                                        const std::string&       variableDescription,
                                        unsigned int             multiplicity,
-                                       const feExpression<dim>& elementMatrix,
-                                       const feExpression<dim>& elementMatrix_dt,
-                                       const feExpression<dim>& elementRHS,
+                                       const feExpression<dim>& Alocal, // Local contribution to the stiffness matrix
+                                       const feExpression<dim>& Mlocal, // Local contribution to the mass matrix
+                                       const feExpression<dim>& Flocal, // Local contribution to the load vector
                                        boost::python::dict      dictFunctionsDirichletBC,
                                        boost::python::dict      dictFunctionsNeumannBC,
                                        boost::python::dict      dictElementBoundary = boost::python::dict(),
@@ -463,9 +463,9 @@ public:
     {
         boost::python::list keys;
 
-        this->m_elementMatrix             = elementMatrix;
-        this->m_elementMatrix_dt          = elementMatrix_dt;
-        this->m_elementRHS                = elementRHS;
+        this->m_matAlocal                 = Alocal;
+        this->m_matMlocal                 = Mlocal;
+        this->m_vecFlocal                 = Flocal;
         this->m_strVariableName           = variableName;
         this->m_strVariableDescription    = variableDescription;
         this->m_nMultiplicity             = multiplicity;
@@ -535,25 +535,26 @@ public:
                                                                          boost::python::dict dictElementNeumann  = boost::python::dict())
     {
         /* Available functions:
-         * - feExpression
-         * - constant
-         * - phi, dphi, d2phi
-         * - phi_vec, dphi_vec, d2phi_vec
-         * - JxW, xyz, normal
-         * - fvalue, fgrad
-         * - feExpression.sqrt, feExpression.exp, feExpression.log, feExpression.log10, feExpression.abs
-         *   feExpression.sin, feExpression.cos, feExpression.tan, feExpression.asin, feExpression.acos, feExpression.atan */
+           - feExpression
+           - constant
+           - phi, dphi, d2phi
+           - phi_vec, dphi_vec, d2phi_vec
+           - JxW, xyz, normal
+           - fvalue, fgrad
+           - feExpression.sqrt, feExpression.exp, feExpression.log, feExpression.log10, feExpression.abs
+             feExpression.sin, feExpression.cos, feExpression.tan, feExpression.asin, feExpression.acos, feExpression.atan
+        */
 
-        feExpression<dim> matrix    = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-        feExpression<dim> matrix_dt = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
-        feExpression<dim> rhs       = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+        feExpression<dim> Alocal = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+        feExpression<dim> Mlocal = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
+        feExpression<dim> Flocal = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
 
         return new dealiiFiniteElementEquationWrapper<dim>(variableName,             // Name
                                                            variableDescription,      // Description
                                                            1,                        // Multiplicity
-                                                           matrix,                   // Contribution to the element cell_matrix
-                                                           matrix_dt,                // Contribution to the element cell_matrix_dt
-                                                           rhs,                      // Contribution to the element cell_rhs
+                                                           Alocal,                   // Contribution to the element stiffness matrix
+                                                           Mlocal,                   // Contribution to the element mass matrix (dt)
+                                                           Flocal,                   // Contribution to the element load vector (rhs)
                                                            dictFunctionsDirichletBC, // Functions for Dirichlet boundary conditions
                                                            dictFunctionsNeumannBC,   // Functions for Neumann boundary conditions
                                                            dictElementBoundary,      // Contribution to the element cell_matrix (but at the boundaries)

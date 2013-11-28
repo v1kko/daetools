@@ -15,16 +15,15 @@ daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pMod
       m_fe(fe),
       m_omega("&Omega;", this, unit(), "Omega")
 {
-    daeDomain* pDomain;
     daeVariable* pVariable;
 
     if(!m_fe)
         daeDeclareAndThrowException(exInvalidPointer);
 
     // Initialize daetools wrapper matrices and arrays that will be used by adFEMatrixItem/VectorItem nodes
-    matK.reset  (m_fe->SystemMatrix());
-    matKdt.reset(m_fe->SystemMatrix_dt());
-    vecf.reset  (m_fe->SystemRHS());
+    m_matA.reset(m_fe->Asystem());
+    m_matM.reset(m_fe->Msystem());
+    m_vecF.reset(m_fe->Fload());
 
     daeFiniteElementObjectInfo feObjectInfo = m_fe->GetObjectInfo();
 
@@ -38,10 +37,10 @@ daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pMod
     {
         const daeFiniteElementVariableInfo& feVarInfo = feObjectInfo.m_VariableInfos[i];
 
-        std::cout << "  m_strName = " << feVarInfo.m_strName << std::endl;
-        std::cout << "  m_strDescription = " << feVarInfo.m_strDescription << std::endl;
-        std::cout << "  m_nMultiplicity = " << feVarInfo.m_nMultiplicity << std::endl;
-        std::cout << "  m_narrDOFsPerComponent = " << toString(feVarInfo.m_narrDOFsPerComponent) << std::endl;
+        //std::cout << "  m_strName = " << feVarInfo.m_strName << std::endl;
+        //std::cout << "  m_strDescription = " << feVarInfo.m_strDescription << std::endl;
+        //std::cout << "  m_nMultiplicity = " << feVarInfo.m_nMultiplicity << std::endl;
+        //std::cout << "  m_narrDOFsPerComponent = " << toString(feVarInfo.m_narrDOFsPerComponent) << std::endl;
 
         if(feVarInfo.m_nMultiplicity == 1)
         {
@@ -235,7 +234,7 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
                 std::cout << (boost::format("%d : (%d : %s)") % counter % j % variable->GetName()).str() << std::endl;
         }
     }
-    if(counter != m_FEModel.matK->GetNrows())
+    if(counter != m_FEModel.m_matA->GetNrows())
         daeDeclareAndThrowException(exInvalidCall);
 
     counter = 0;
@@ -252,7 +251,7 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         a_Kdt = 0;
 
         // RHS
-        a_f = create_adouble(new adFEVectorItemNode("f", *m_FEModel.vecf, row, unit()));
+        a_f = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_vecF, row, unit()));
 
         narrRowIndices.clear();
         fe->RowIndices(row, narrRowIndices);
@@ -269,21 +268,21 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             indexes[0] = internalVariableIndex;
 
             if(!a_K.node)
-                a_K =       create_adouble(new adFEMatrixItemNode("K", *m_FEModel.matK, row, column, unit())) * variable->Create_adouble(indexes, 1);
+                a_K =       create_adouble(new adFEMatrixItemNode("K", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
             else
-                a_K = a_K + create_adouble(new adFEMatrixItemNode("K", *m_FEModel.matK, row, column, unit())) * variable->Create_adouble(indexes, 1);
+                a_K = a_K + create_adouble(new adFEMatrixItemNode("K", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
 
             /* ACHTUNG, ACHTUNG!!
-               The matrix Kdt is not going to change - wherever we have a matrix_dt item equal to zero it is going to stay zero
+               The mass matrix M is not going to change - wherever we have an item in M equal to zero it is going to stay zero
                (meaning that the FiniteElement object cannot suddenly sneak in differential variables into the system AFTER initialization).
                Therefore, skip an item if we encounter a zero.
             */
-            if(m_FEModel.matKdt->GetItem(row, column) != 0)
+            if(m_FEModel.m_matM->GetItem(row, column) != 0)
             {
                 if(!a_Kdt.node)
-                    a_Kdt =         create_adouble(new adFEMatrixItemNode("", *m_FEModel.matKdt, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                    a_Kdt =         create_adouble(new adFEMatrixItemNode("", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
                 else
-                    a_Kdt = a_Kdt + create_adouble(new adFEMatrixItemNode("", *m_FEModel.matKdt, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                    a_Kdt = a_Kdt + create_adouble(new adFEMatrixItemNode("", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
 
                 nIndex = variable->GetOverallIndex() + internalVariableIndex;
                 m_pModel->m_pDataProxy->SetVariableTypeGathered(nIndex, cnDifferential);

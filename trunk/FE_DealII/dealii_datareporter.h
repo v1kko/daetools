@@ -23,17 +23,17 @@ using namespace dae::datareporting;
 typedef boost::function<void (const std::string&, const std::string&, double*, unsigned int)>  fnProcessSolution;
 
 /*********************************************************************
-   daeDealIIDataReporter
+   dealIIDataReporter
 *********************************************************************/
-class daeDealIIDataReporter : public daeDataReporter_t
+class dealIIDataReporter : public daeDataReporter_t
 {
 public:
-    daeDealIIDataReporter(const fnProcessSolution& callback, const std::map<std::string, size_t>& mapVariables)
+    dealIIDataReporter(const fnProcessSolution& callback, const std::map<std::string, size_t>& mapVariables)
         : m_callback(callback), m_outputCounter(0), m_mapVariables(mapVariables)
     {
     }
 
-    virtual ~daeDealIIDataReporter(void)
+    virtual ~dealIIDataReporter(void)
     {
     }
 

@@ -101,25 +101,25 @@ Use the system's package manager or install from shell:
     
   .. code-block:: bash
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 libopenblas-base lapack3gf mayavi2
+    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2
 
 * Red Hat and derivatives (Fedora, CentOS):
     
   .. code-block:: bash
 
-    sudo yum install numpy scipy python-matplotlib PyQt4 openblas lapack Mayavi
+    sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi
 
 * SUSE Linux:
 
   .. code-block:: bash
 
-    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 openblas lapack
+    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4
 
 * Arch Linux:
 
   .. code-block:: bash
 
-    sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 openblas lapack mayavi
+    sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi
 
     
 Then unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing

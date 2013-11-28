@@ -226,9 +226,9 @@ public:
 
 public:
     bool                                m_bNeedsUpdate;
-    feExpression<dim>                   m_elementMatrix;
-    feExpression<dim>                   m_elementMatrix_dt;
-    feExpression<dim>                   m_elementRHS;
+    feExpression<dim>                   m_matAlocal; // Stiffness matrix
+    feExpression<dim>                   m_matMlocal; // Mass matrix (dt)
+    feExpression<dim>                   m_vecFlocal; // Load vector (rhs)
     map_Uint_Expression                 m_elementBoundary;
     map_Uint_Expression                 m_elementNeumann;
     map_Uint_FunctionPtr_FunctionCall   m_functionsNeumannBC;
@@ -264,12 +264,12 @@ public:
     virtual void ReAssembleSystem();
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
-    virtual dae::daeMatrix<real_t>*     SystemMatrix() const;
-    virtual dae::daeMatrix<real_t>*     SystemMatrix_dt() const;
-    virtual dae::daeArray<real_t>*      SystemRHS() const;
+    virtual dae::daeMatrix<real_t>*     Asystem() const; // Stiffness matrix
+    virtual dae::daeMatrix<real_t>*     Msystem() const; // Mass matrix (dt)
+    virtual dae::daeArray<real_t>*      Fload() const;   // Load vector
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
     virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
-    virtual daeDealIIDataReporter*      CreateDataReporter();
+    virtual dealIIDataReporter*         CreateDataReporter();
 
     void Initialize(const std::string&            meshFilename,
                     unsigned int                  polynomialOrder,
@@ -509,9 +509,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     {
                         const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
 
-                        if(equation.m_elementMatrix.m_node)
+                        if(equation.m_matAlocal.m_node)
                         {
-                            feRuntimeNumber<dim> result = equation.m_elementMatrix.m_node->Evaluate(&cellContext);
+                            feRuntimeNumber<dim> result = equation.m_matAlocal.m_node->Evaluate(&cellContext);
                             if(result.m_eType != eFEScalar)
                                 throw std::runtime_error(std::string("Invalid element matrix contribution expression specified for equation: ") +
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
@@ -522,9 +522,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         }
 
                         /* Accumulation term (in a separate matrix) */
-                        if(equation.m_elementMatrix_dt.m_node)
+                        if(equation.m_matMlocal.m_node)
                         {
-                            feRuntimeNumber<dim> result = equation.m_elementMatrix_dt.m_node->Evaluate(&cellContext);
+                            feRuntimeNumber<dim> result = equation.m_matMlocal.m_node->Evaluate(&cellContext);
                             if(result.m_eType != eFEScalar)
                                 throw std::runtime_error(std::string("Invalid element matrix_dt contribution expression specified for equation: ") +
                                                          equation.m_strVariableName + std::string(" (it must be a scalar value)"));
@@ -538,9 +538,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 for(unsigned int eq = 0; eq < m_equations.size(); eq++)
                 {
                     const dealiiFiniteElementEquation<dim>& equation = *m_equations[eq];
-                    if(equation.m_elementRHS.m_node)
+                    if(equation.m_vecFlocal.m_node)
                     {
-                        feRuntimeNumber<dim> result = equation.m_elementRHS.m_node->Evaluate(&cellContext);
+                        feRuntimeNumber<dim> result = equation.m_vecFlocal.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
                             throw std::runtime_error(std::string("Invalid element rhs contribution expression specified for equation: ") +
                                                      equation.m_strVariableName + std::string(" (it must be a scalar value)"));
@@ -848,19 +848,19 @@ void dealiiFiniteElementSystem<dim>::RowIndices(unsigned int row, std::vector<un
 }
 
 template <int dim>
-dae::daeMatrix<double>* dealiiFiniteElementSystem<dim>::SystemMatrix() const
+dae::daeMatrix<double>* dealiiFiniteElementSystem<dim>::Asystem() const
 {
     return new daeFEBlockMatrix<double>(system_matrix);
 }
 
 template <int dim>
-dae::daeMatrix<double>* dealiiFiniteElementSystem<dim>::SystemMatrix_dt() const
+dae::daeMatrix<double>* dealiiFiniteElementSystem<dim>::Msystem() const
 {
     return new daeFEBlockMatrix<double>(system_matrix_dt);
 }
 
 template <int dim>
-dae::daeArray<double>* dealiiFiniteElementSystem<dim>::SystemRHS() const
+dae::daeArray<double>* dealiiFiniteElementSystem<dim>::Fload() const
 {
     return new daeFEBlockArray<double>(system_rhs);
 }
@@ -874,7 +874,7 @@ std::vector<unsigned int> dealiiFiniteElementSystem<dim>::GetDOFtoBoundaryMap()
 }
 
 template <int dim>
-daeDealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
+dealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
 {
     std::map<std::string, size_t> mapVariables;
     unsigned int no_equations = m_equations.size();
@@ -882,7 +882,7 @@ daeDealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
         mapVariables[m_equations[i]->m_strVariableName] = i;
 
     fnProcessSolution callback(boost::bind(&dealiiFiniteElementSystem<dim>::process_solution, this, _1, _2, _3, _4));
-    return new daeDealIIDataReporter(callback, mapVariables);
+    return new dealIIDataReporter(callback, mapVariables);
 }
 
 

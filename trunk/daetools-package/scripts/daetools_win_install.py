@@ -11,37 +11,45 @@ if platform.system() == 'Windows':
 
     if 'install' in sys.argv[1]:
         try:
-            os.mkdir(config_dir)
+            if not os.path.exists(config_dir):
+                os.mkdir(config_dir)
         except Exception as e:
             messages.append(str(e))
 
         try:
+            f = os.path.join(config_dir, 'daetools.cfg')
+            if os.path.exists(f):
+                os.remove(f)
             shutil.move(os.path.join(sys.prefix, 'daetools.cfg'), config_dir)
         except Exception as e:
             messages.append(str(e))
 
         try:
+            f = os.path.join(config_dir, 'bonmin.cfg')
+            if os.path.exists(f):
+                os.remove(f)
             shutil.move(os.path.join(sys.prefix, 'bonmin.cfg'), config_dir)
         except Exception as e:
             messages.append(str(e))
 
         try:
-            os.mkdir(shortcuts_dir)
+            if not os.path.exists(shortcuts_dir):
+                os.mkdir(shortcuts_dir)
         except Exception as e:
             messages.append(str(e))
 
         try:
-            #dae_plotter = os.path.join(shortcuts_dir, 'daePlotter.lnk')
-            #args = '-c \"from daetools.daePlotter import daeStartPlotter; daeStartPlotter()\"'
-            #create_shortcut('pythonw.exe', 'daePlotter', dae_plotter, args)
+            f = os.path.join(shortcuts_dir, 'daePlotter.lnk')
+            if os.path.exists(f):
+                os.remove(f)
             shutil.move(os.path.join(sys.prefix, 'daePlotter.lnk'), shortcuts_dir)
         except Exception as e:
             messages.append(str(e))
 
         try:
-            #dae_examples = os.path.join(shortcuts_dir, 'daeExamples.lnk')
-            #args = '-c \"from daetools.examples.daeRunExamples import daeRunExamples; daeRunExamples()\"'
-            #create_shortcut('pythonw.exe', 'daeExamples', dae_examples, args)
+            f = os.path.join(shortcuts_dir, 'daeExamples.lnk')
+            if os.path.exists(f):
+                os.remove(f)
             shutil.move(os.path.join(sys.prefix, 'daeExamples.lnk'), shortcuts_dir)
         except Exception as e:
             messages.append(str(e))
@@ -53,5 +61,20 @@ if platform.system() == 'Windows':
             pass
 
     elif 'remove' in sys.argv[1]:
-        shutil.rmtree(shortcuts_dir)
+        try:
+            shutil.removedirs(shortcuts_dir)
+            shutil.removedirs(config_dir)
+        except Exception as e:
+            messages.append(str(e))
 
+    """
+    try:
+        f = open('c:\daetools-install.log', 'w')
+        for line in sys.argv:
+            f.write(line)
+        for line in messages:
+            f.write(line)
+        f.close()
+    except Exception as e:
+        pass
+    """

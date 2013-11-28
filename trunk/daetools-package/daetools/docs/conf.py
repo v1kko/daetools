@@ -15,6 +15,14 @@ import sys, os, platform, numpy
 
 sys.path.insert(0, os.path.abspath('../../'))
 from daetools import *
+from daetools.solvers.superlu import *
+from daetools.solvers.superlu_mt import *
+from daetools.solvers.trilinos import *
+from daetools.solvers.intel_pardiso import *
+from daetools.solvers.ipopt import *
+from daetools.solvers.bonmin import *
+from daetools.solvers.nlopt import *
+from daetools.solvers.deal_II import *
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

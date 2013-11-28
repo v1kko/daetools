@@ -1553,7 +1553,14 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("DOFsPerComponent",      &daeFiniteElementVariableInfo::m_narrDOFsPerComponent)
     ;
 
+    //class_< std::vector<daeFiniteElementVariableInfo> >("vector_daeFiniteElementVariableInfo")
+    //    .def(vector_indexing_suite< std::vector<daeFiniteElementVariableInfo> >())
+    //;
+
     class_<daeFiniteElementObjectInfo>("daeFiniteElementObjectInfo")
+        .def_readonly("NumberOfDOFsPerVariable",    &daeFiniteElementObjectInfo::m_nNumberOfDOFsPerVariable)
+        .def_readonly("TotalNumberDOFs",            &daeFiniteElementObjectInfo::m_nTotalNumberDOFs)
+        .def_readonly("VariableInfos",              &daeFiniteElementObjectInfo::m_VariableInfos)
     ;
 
     class_<daepython::daeFiniteElementObjectWrapper, boost::noncopyable>("daeFiniteElementObject", DOCSTR_daeFiniteElementObject, no_init)
@@ -1561,16 +1568,16 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReAssembleSystem",    pure_virtual(&daeFiniteElementObject::ReAssembleSystem),  ( arg("self") ), DOCSTR_daeFiniteElementObject_ReAssembleSystem)
         .def("NeedsReAssembling",   pure_virtual(&daeFiniteElementObject::NeedsReAssembling), ( arg("self") ), DOCSTR_daeFiniteElementObject_NeedsReAssembling)
 
-        .def("RowIndices",         pure_virtual(&daeFiniteElementObject::RowIndices), return_value_policy<manage_new_object>(),
+        .def("RowIndices",          pure_virtual(&daeFiniteElementObject::RowIndices), return_value_policy<manage_new_object>(),
                                     ( arg("self"), arg("row") ), DOCSTR_daeFiniteElementObject_RowIndices)
 
-        .def("SystemMatrix",        pure_virtual(&daeFiniteElementObject::SystemMatrix), return_value_policy<manage_new_object>(),
+        .def("Asystem",             pure_virtual(&daeFiniteElementObject::Asystem), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix)
 
-        .def("SystemMatrix_dt",     pure_virtual(&daeFiniteElementObject::SystemMatrix_dt), return_value_policy<manage_new_object>(),
+        .def("Msystem",             pure_virtual(&daeFiniteElementObject::Msystem), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix_dt)
 
-        .def("SystemRHS",           pure_virtual(&daeFiniteElementObject::SystemRHS), return_value_policy<manage_new_object>(),
+        .def("Fload",               pure_virtual(&daeFiniteElementObject::Fload), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemRHS)
 
         .def("GetObjectInfo",       pure_virtual(&daeFiniteElementObject::GetObjectInfo),

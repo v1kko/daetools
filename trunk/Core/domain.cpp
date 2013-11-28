@@ -666,7 +666,7 @@ bool daeDomain::CheckObject(vector<string>& strarrErrors) const
 		bCheck = false;
 	
 // Do the basic tests of no. points
-	if(m_nNumberOfIntervals == 0 || m_nNumberOfPoints == 0)
+	if(m_nNumberOfIntervals == 0 && m_nNumberOfPoints == 0)
 	{
 		strError = "Invalid number of intervals/points in domain [" + GetCanonicalName() + "]";
 		strarrErrors.push_back(strError);

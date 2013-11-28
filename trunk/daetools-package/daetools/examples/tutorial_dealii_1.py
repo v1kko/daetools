@@ -115,8 +115,16 @@ class modTutorial(daeModel):
         # Achtung, Achtung!!
         # Finite element equations must not go out of scope for deal.II FE model keeps only weak references to them.
         self.cdr1 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
-        #self.cdr2 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
-        equations = [self.cdr1] #, self.cdr2]
+        print 'Convection-Diffusion equation:'
+        print '    VariableName         =', self.cdr1.VariableName
+        print '    VariableDescription  =', self.cdr1.VariableDescription
+        print '    Multiplicity         =', self.cdr1.Multiplicity
+        print '    ElementMatrix        =', self.cdr1.Alocal
+        print '    ElementMatrix_dt     =', self.cdr1.Mlocal
+        print '    ElementRHS           =', self.cdr1.Flocal
+        #print '    FunctionsDirichletBC =', self.cdr1.FunctionsDirichletBC
+        #print '    FunctionsNeumannBC   =', self.cdr1.FunctionsNeumannBC
+        equations = [self.cdr1]
         
         self.fe_dealII = feObject(meshFilename,     # path to mesh
                                   1,                # polinomial order
@@ -141,7 +149,7 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        m_dt = self.m.fe_dealII.SystemMatrix_dt()
+        m_dt = self.m.fe_dealII.Msystem()
         
         # Vector where every item marks the boundar
         #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()

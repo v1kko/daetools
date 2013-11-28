@@ -924,7 +924,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("phi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("phi('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -956,7 +956,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("dphi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("dphi('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -988,7 +988,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("d2phi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("d2phi('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1023,7 +1023,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("phi_vec(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("phi_vec('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1055,7 +1055,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("dphi_vec(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("dphi_vec('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1087,7 +1087,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("d2phi_vec(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("d2phi_vec('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1119,7 +1119,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("div_phi(%s, %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("div_phi('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1258,14 +1258,14 @@ public:
             if(m_component == -1)
                 return (boost::format("fvalue('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
             else
-                return (boost::format("fvalue(%s, %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+                return (boost::format("fvalue('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else if(m_call == eFunctionGradient)
         {
             if(m_component == -1)
                 return (boost::format("fgrad('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
             else
-                return (boost::format("fgrad(%s, %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+                return (boost::format("fgrad('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
