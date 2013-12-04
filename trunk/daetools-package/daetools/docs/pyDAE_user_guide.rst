@@ -1098,18 +1098,68 @@ The advantage of this concept are:
 * system discontinuities can be handled as usual in daetools
 * modelled processes can be optimized
 
-Support for FE is provided by the following DAE Tools classes:
+Support for FE is provided through the following DAE Tools classes:
 
-* :py:class:`~pyCore.daeFiniteElementObject`
+* :py:class:`~pyCore.daeFiniteElementObject` (abstract class)
 * :py:class:`~pyCore.daeFiniteElementModel`
 * :py:class:`~pyCore.daeFiniteElementEquation`
 
-and an implementation classes (basically a thin wrappers) based on the `deal.II`_ library:
+and the :py:class:`~pyCore.daeFiniteElementObject` implementation based on the `deal.II`_ library:
 
-* :py:class:`~pyDealII.dealiiFiniteElementSystem`
-* :py:class:`~pyDealII.dealiiFiniteElementEquation`
+* :py:class:`~pyDealII.dealiiFiniteElementSystem_1D`, :py:class:`~pyDealII.dealiiFiniteElementSystem_2D`,
+  :py:class:`~pyDealII.dealiiFiniteElementSystem_3D`
+* :py:class:`~pyDealII.dealiiFiniteElementEquation_1D`, :py:class:`~pyDealII.dealiiFiniteElementEquation_2D`,
+  :py:class:`~pyDealII.dealiiFiniteElementEquation_3D`
 * large number of auxiliary classes and functions
 
+:py:class:`~pyDealII.dealiiFiniteElementSystem_nD` is a generic wrapper around the `deal.II`_ library (more specifically
+around `FESystem<dim, spacedim>` class) capable to solve systems of scalar/vector FE equations. *This class
+provides an interface to group several elements together into one. To the outside world, the resulting object
+looks just like a usual finite element object, which is composed of several other finite elements that are possibly of
+different type. The result is then a vector-valued finite element.* More information can be found in `deal.II`_
+online documentation: `FESystem`_.
+
+A typical use-case scenario consists of the following steps:
+
+1. Instantiation of the :py:class:`~pyDealII.dealiiFiniteElementSystem_nD` object. The constructor accepts the following
+   arguments:
+      
+ - ``meshFilename``
+   
+   Path to the mesh file. For the list of supported formats check the `GridIn<dim, spacedim>` class
+   in `deal.II`_ online documentation: `GridIn`_
+   
+ - ``polynomialOrder``
+
+   Polynomial order. At the momnt only `FE_Q`_ finite elements are supported that represnt *implementation of a
+   scalar Lagrange finite element ``Qp`` that yields the finite element space of continuous, piecewise polynomials
+   of degree ``polynomialOrder`` in each coordinate direction. This class is realized using tensor product
+   polynomials based on equidistant or given support points*
+   
+ - ``quadrature``
+
+   Quadrature formula (`Quadrature<dim>` derived object). For the list of supported quadrature formulas
+   check the `deal.II`_ online documentation: `Quadrature`_
+   
+ - ``faceQuadrature``
+
+   Face quadrature formula (`Quadrature<dim-1>` derived object)
+ 
+ - ``functions``
+
+   Dictionary of space dependant functions ``{'Name':Function<dim>}``
+ 
+ - ``equations``
+
+   A list of :py:class:`~pyDealII.dealiiFiniteElementEquation_nD` objects that define
+   contributions to the element's stiffness and mass matrices, element's load vector etc.
+
+
+.. _deal.II: http://dealii.org
+.. _FESystem: http://www.dealii.org/developer/doxygen/deal.II/classFESystem.html
+.. _FE_Q: http://www.dealii.org/developer/doxygen/deal.II/classFE__Q.html
+.. _GridIn: http://www.dealii.org/developer/doxygen/deal.II/classGridIn.html
+.. _Quadrature: http://www.dealii.org/developer/doxygen/deal.II/group__Quadrature.html
 
 State Transition Networks
 -------------------------

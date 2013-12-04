@@ -1,6 +1,6 @@
-***********************
-Module Finite Elements
-***********************
+***************
+Finite Elements
+***************
 ..
     Copyright (C) Dragan Nikolic, 2013
     DAE Tools is free software; you can redistribute it and/or modify it under the
@@ -66,8 +66,8 @@ Base Classes
     :no-members:
     :noindex:
    
-deal.II
-=======
+deal.II Classes
+===============
 .. py:module:: solvers.deal_II.pyDealII
 .. py:currentmodule:: pyDealII
 
@@ -81,17 +81,6 @@ deal.II
     dealiiFiniteElementSystem_2D
     dealiiFiniteElementSystem_3D
     dealIIDataReporter
-
-DataReporting Classes
----------------------
-.. autoclass:: pyDealII.dealIIDataReporter
-    :no-undoc-members:
-    :no-members:
-
-Finite Element Classes
-----------------------
-.. py:module:: solvers.deal_II.pyDealII
-.. py:currentmodule:: pyDealII
 
 .. autoclass:: pyDealII.dealiiFiniteElementEquation_1D
     :no-members:
@@ -147,6 +136,10 @@ Finite Element Classes
     .. method:: ReAssembleSystem((dealiiFiniteElementSystem_3D)self) -> None
     .. method:: CreateDataReporter((dealiiFiniteElementSystem_3D)self) -> dealIIDataReporter
     .. method:: RowIndices((dealiiFiniteElementSystem_3D)self, (int)row) -> list
+
+.. autoclass:: pyDealII.dealIIDataReporter
+    :no-undoc-members:
+    :no-members:
 
 Auxiliary Classes
 -----------------
@@ -303,6 +296,21 @@ Auxiliary Functions
     function_gradient_1D
     function_gradient_2D
     function_gradient_3D
+    phi_vec_1D
+    phi_vec_2D
+    phi_vec_3D
+    dphi_vec_1D
+    dphi_vec_2D
+    dphi_vec_3D
+    d2phi_vec_1D
+    d2phi_vec_2D
+    d2phi_vec_3D
+    div_phi_1D
+    div_phi_2D
+    div_phi_3D
+..
+    curl_2D
+    curl_3D
 
 .. autofunction:: constant_1D
 .. autofunction:: constant_2D
@@ -331,6 +339,21 @@ Auxiliary Functions
 .. autofunction:: function_gradient_1D
 .. autofunction:: function_gradient_2D
 .. autofunction:: function_gradient_3D
+.. autofunction:: phi_vec_1D
+.. autofunction:: phi_vec_2D
+.. autofunction:: phi_vec_3D
+.. autofunction:: dphi_vec_1D
+.. autofunction:: dphi_vec_2D
+.. autofunction:: dphi_vec_3D
+.. autofunction:: d2phi_vec_1D
+.. autofunction:: d2phi_vec_2D
+.. autofunction:: d2phi_vec_3D
+.. autofunction:: div_phi_1D
+.. autofunction:: div_phi_2D
+.. autofunction:: div_phi_3D
+..
+    .. autofunction:: curl_2D
+    .. autofunction:: curl_3D
 
     
 Enumerations and Constants

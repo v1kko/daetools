@@ -80,7 +80,7 @@ public:
     {
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&m_mapExtractors[variableName]);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to scalar phi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call to phi() for the non-scalar variable: " + variableName);
 
         return m_fe_values[*extractorScalar].value(i, q);
     }
@@ -91,7 +91,7 @@ public:
     {
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&m_mapExtractors[variableName]);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to scalar dphi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call to dphi() for the non-scalar variable: " + variableName);
 
         return m_fe_values[*extractorScalar].gradient(i, q);
     }
@@ -102,7 +102,7 @@ public:
     {
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&m_mapExtractors[variableName]);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to scalar d2phi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call to d2phi() for the non-scalar variable: " + variableName);
 
         return m_fe_values[*extractorScalar].hessian(i, q);
     }
@@ -116,7 +116,7 @@ public:
     {
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to scalar phi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call to phi_vec() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].value(i, q);
     }
@@ -127,7 +127,7 @@ public:
     {
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to scalar dphi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call to dphi_vec() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].gradient(i, q);
     }
@@ -138,7 +138,7 @@ public:
     {
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to scalar d2phi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call to d2phi_vec() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].hessian(i, q);
     }
@@ -149,15 +149,33 @@ public:
     {
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to scalar div() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call to div() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].divergence(i, q);
     }
 
     /*
-    virtual ??? curl(const std::string& variableName,
-                     const unsigned int i,
-                     const unsigned int j) const = 0;
+    Tensor<1,1> curl_2D(const std::string& variableName,
+                        const unsigned int i,
+                        const unsigned int q) const
+    {
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call to curl() for the non-vector variable: " + variableName);
+
+        return m_fe_values[*extractorVector].curl<2,2>(i, q);
+    }
+
+    Tensor<1,3> curl_3D(const std::string& variableName,
+                        const unsigned int i,
+                        const unsigned int q) const
+    {
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call to curl() for the non-vector variable: " + variableName);
+
+        return m_fe_values[*extractorVector].curl<3,3>(i, q);
+    }
     */
 
     virtual const Point<dim>& quadrature_point(const unsigned int q) const
@@ -302,9 +320,6 @@ public:
     // Model-specific data
     map_String_FunctionPtr                           m_functions;
     std::vector< dealiiFiniteElementEquation<dim>* > m_equations;
-    dealiiFiniteElementEquation<dim> cdr;
-    dealiiFiniteElementEquation<dim> cdr2;
-    dealiiFiniteElementEquation<dim> cdr3;
 };
 
 template <int dim>

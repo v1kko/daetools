@@ -74,13 +74,13 @@ class fnConstantFunction(Function_2D):
        
 class feObject(dealiiFiniteElementSystem_2D):
     def __init__(self, meshFilename, polynomialOrder, quadratureFormula, 
-                       faceQuadratureFormula, functions, equation):
+                       faceQuadratureFormula, functions, equations):
         dealiiFiniteElementSystem_2D.__init__(self, meshFilename, 
                                                     polynomialOrder,
                                                     quadratureFormula,
                                                     faceQuadratureFormula,
                                                     functions,
-                                                    equation)
+                                                    equations)
         
     def AssembleSystem(self):
         dealiiFiniteElementSystem_2D.AssembleSystem(self)

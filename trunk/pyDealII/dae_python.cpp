@@ -765,17 +765,17 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("constant_2D", &constant<2>, ( arg("value") ));
     def("constant_3D", &constant<3>, ( arg("value") ));
 
-    def("phi_1D", &phi<1>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
-    def("phi_2D", &phi<2>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
-    def("phi_3D", &phi<3>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
+    def("phi_1D", &phi<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("phi_2D", &phi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("phi_3D", &phi<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
-    def("dphi_1D", &dphi<1>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
-    def("dphi_2D", &dphi<2>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
-    def("dphi_3D", &dphi<3>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
+    def("dphi_1D", &dphi<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_2D", &dphi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_3D", &dphi<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
-    def("d2phi_1D", &d2phi<1>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
-    def("d2phi_2D", &d2phi<2>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
-    def("d2phi_3D", &d2phi<3>, ( arg("variableName"), arg("function_no"), arg("quadraturePoint") ));
+    def("d2phi_1D", &d2phi<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_2D", &d2phi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_3D", &d2phi<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
     def("JxW_1D", &JxW<1>, ( arg("quadraturePoint") ));
     def("JxW_2D", &JxW<2>, ( arg("quadraturePoint") ));
@@ -804,6 +804,27 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("function_gradient_1D", &function_gradient2<1>, ( arg("functionName"), arg("point"), arg("component") ));
     def("function_gradient_2D", &function_gradient2<2>, ( arg("functionName"), arg("point"), arg("component") ));
     def("function_gradient_3D", &function_gradient2<3>, ( arg("functionName"), arg("point"), arg("component") ));
+
+    def("phi_vec_1D", &phi_vec<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("phi_vec_2D", &phi_vec<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("phi_vec_3D", &phi_vec<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+
+    def("dphi_vec_1D", &dphi_vec<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_vec_2D", &dphi_vec<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_vec_3D", &dphi_vec<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+
+    def("d2phi_vec_1D", &d2phi_vec<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_vec_2D", &d2phi_vec<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_vec_3D", &d2phi_vec<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+
+    def("div_phi_1D", &div_phi<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("div_phi_2D", &div_phi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("div_phi_3D", &div_phi<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+
+    /* CURL
+    def("curl_2D", &curl<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("curl_3D", &curl<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    */
 
     enum_<dealiiFluxType>("dealiiFluxType")
         .value("eConstantFlux",	dae::fe_solver::eConstantFlux)

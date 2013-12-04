@@ -265,6 +265,7 @@ public:
 enum efeNumberType
 {
     eFEScalar = 0,
+    eFECurl2D,
     eFETensor1,
     eFETensor2,
     eFETensor3,
@@ -325,6 +326,14 @@ public:
         m_value = v;
     }
 
+    /* CURL
+    feRuntimeNumber(const Tensor<1, 1, double>& t)
+    {
+        m_eType   = eFECurl2D;
+        m_curl2D  = t;
+    }
+    */
+
     feRuntimeNumber(const Tensor<1, dim, double>& t)
     {
         m_eType   = eFETensor1;
@@ -355,6 +364,15 @@ public:
         {
             return (boost::format("%f") % m_value).str();
         }
+        /* CURL
+        else if(m_eType == eFECurl2D)
+        {
+            if(dim != 2)
+                throw std::runtime_error("Invalid number of dimensions for curl() result; it must be 2D");
+
+            return (boost::format("[%f]") % m_curl2D[0]).str();
+        }
+        */
         else if(m_eType == eFETensor1)
         {
             if(dim == 1)
@@ -396,6 +414,9 @@ public:
 public:
     efeNumberType          m_eType;
     Point<dim, double>     m_point;
+    /* CURL
+    Tensor<1, 1, double>   m_curl2D;
+    */
     Tensor<1, dim, double> m_tensor1;
     Tensor<2, dim, double> m_tensor2;
     Tensor<3, dim, double> m_tensor3;
@@ -411,6 +432,13 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = -fe.m_value;
     }
+    /* CURL
+    else if(fe.m_eType == eFECurl2D)
+    {
+        tmp.m_eType  = eFECurl2D;
+        tmp.m_curl2D = -fe.m_curl2D;
+    }
+    */
     else if(fe.m_eType == eFETensor1)
     {
         tmp.m_eType = eFETensor1;
@@ -445,6 +473,13 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value + r.m_value;
     }
+    /* CURL
+    else if(l.m_eType == eFECurl2D && r.m_eType == eFECurl2D)
+    {
+        tmp.m_eType  = eFECurl2D;
+        tmp.m_curl2D = l.m_curl2D + r.m_curl2D;
+    }
+    */
     else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1)
     {
         tmp.m_eType = eFETensor1;
@@ -479,6 +514,13 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value - r.m_value;
     }
+    /* CURL
+    else if(l.m_eType == eFECurl2D && r.m_eType == eFECurl2D)
+    {
+        tmp.m_eType  = eFECurl2D;
+        tmp.m_curl2D = l.m_curl2D - r.m_curl2D;
+    }
+    */
     else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1)
     {
         tmp.m_eType = eFETensor1;
@@ -513,6 +555,13 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value * r.m_value;
     }
+    /* CURL
+    else if(l.m_eType == eFECurl2D && r.m_eType == eFECurl2D)
+    {
+        tmp.m_eType  = eFEScalar;
+        tmp.m_value = l.m_curl2D * r.m_curl2D;
+    }
+    */
     else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1)
     {
         tmp.m_eType = eFEScalar;
@@ -536,6 +585,19 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_value = l.m_point * r.m_point;
     }
 
+
+    /* CURL
+    else if(l.m_eType == eFEScalar && r.m_eType == eFECurl2D)
+    {
+        tmp.m_eType  = eFECurl2D;
+        tmp.m_curl2D = l.m_value * r.m_curl2D;
+    }
+    else if(l.m_eType == eFECurl2D && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType  = eFECurl2D;
+        tmp.m_curl2D = l.m_curl2D * r.m_value;
+    }
+    */
 
     else if(l.m_eType == eFEScalar && r.m_eType == eFETensor1)
     {
@@ -598,6 +660,13 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value + r.m_value;
     }
+    /* CURL
+    else if(l.m_eType == eFECurl2D && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType  = eFECurl2D;
+        tmp.m_curl2D = l.m_curl2D / r.m_value;
+    }
+    */
     else if(l.m_eType == eFETensor1 && r.m_eType == eFEScalar)
     {
         tmp.m_eType = eFETensor1;
@@ -822,10 +891,15 @@ public:
     virtual double divergence(const std::string& variableName,
                               const unsigned int i,
                               const unsigned int j) const = 0;
-    /*
-    virtual ??? curl(const std::string& variableName,
-                     const unsigned int i,
-                     const unsigned int j) const = 0;
+
+    /* CURL
+    virtual Tensor<1,1> curl_2D(const std::string& variableName,
+                                const unsigned int i,
+                                const unsigned int j) const = 0;
+
+    virtual Tensor<1,3> curl_3D(const std::string& variableName,
+                                const unsigned int i,
+                                const unsigned int j) const = 0;
     */
 
     virtual const Point<dim>& quadrature_point (const unsigned int q) const = 0;
@@ -1120,6 +1194,46 @@ public:
     std::string ToString() const
     {
         return (boost::format("div_phi('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+    }
+
+public:
+    std::string    m_variableName;
+    int            m_i;
+    int            m_q;
+    unsigned int   m_component;
+};
+
+template<int dim>
+class feNode_curl : public feNode<dim>
+{
+public:
+    feNode_curl(const std::string& variableName, int i, int q, unsigned int component = 0)
+    {
+        if(dim == 1)
+            throw std::runtime_error("Invalid call to curl() for the 1D system");
+
+        m_variableName = variableName;
+        m_i = i;
+        m_q = q;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int i = getIndex<dim>(m_i, pCellContext);
+        unsigned int q = getIndex<dim>(m_q, pCellContext);
+        if(dim == 2)
+            return feRuntimeNumber<dim>( pCellContext->curl_2D(m_variableName, i, q) );
+        else if(dim == 3)
+            return feRuntimeNumber<dim>( pCellContext->curl_3D(m_variableName, i, q) );
+        else
+            throw std::runtime_error("Invalid call to curl() for the 1D system");
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("curl('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1662,6 +1776,16 @@ feExpression<dim> div_phi(const std::string& variableName, int i, int q)
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_div_phi<dim>(variableName, i, q) ) );
 }
 
+/* CURL
+template<int dim>
+feExpression<dim> curl(const std::string& variableName, int i, int q)
+{
+    if(dim == 1)
+        throw std::runtime_error("Invalid call to curl() when the system is 1D");
+
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_curl<dim>(variableName, i, q) ) );
+}
+*/
 
 
 template<int dim>
@@ -1706,113 +1830,6 @@ feExpression<dim> function_gradient2(const std::string& name, const feExpression
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
 }
 
-
-
-
-/*
-template<int dim>
-class feCellContext_dummy : public feCellContext<dim>
-{
-public:
-    feCellContext_dummy()
-    {
-    }
-
-public:
-    virtual double shape_value(const unsigned int i,
-                               const unsigned int j) const
-    {
-        return 1.5;
-    }
-
-    virtual double shape_value_component (const unsigned int i,
-                                          const unsigned int j,
-                                          const unsigned int component) const
-    {
-        return 2.5;
-    }
-
-    virtual const Tensor<1,dim>& shape_grad (const unsigned int i,
-                                             const unsigned int j) const
-    {
-        static Tensor<1,dim> tensor;
-        return tensor;
-    }
-
-    virtual Tensor<1,dim> shape_grad_component (const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int component) const
-    {
-        static Tensor<1,dim> tensor;
-        return tensor;
-    }
-
-    virtual const Tensor<2,dim>& shape_hessian (const unsigned int i,
-                                                const unsigned int j) const
-    {
-        static Tensor<2,dim> tensor;
-        return tensor;
-    }
-
-    virtual Tensor<2,dim> shape_hessian_component (const unsigned int i,
-                                                   const unsigned int j,
-                                                   const unsigned int component) const
-    {
-        static Tensor<2,dim> tensor;
-        return tensor;
-    }
-
-    virtual const Point<dim>& quadrature_point (const unsigned int q) const
-    {
-        static Point<dim> point;
-        return point;
-    }
-
-    virtual double JxW (const unsigned int q) const
-    {
-        return 123.15;
-    }
-
-    virtual const Point<dim>& normal_vector (const unsigned int q) const
-    {
-        static Point<dim> point;
-        return point;
-    }
-
-    virtual const Function<dim>& function (const std::string& name) const
-    {
-        static ConstantFunction<dim> fn(153.2);
-        return fn;
-    }
-
-    virtual unsigned int q() const
-    {
-        return 1;
-    }
-
-    virtual unsigned int i() const
-    {
-        return 2;
-    }
-
-    virtual unsigned int j() const
-    {
-        return 3;
-    }
-};
-
-template<int dim>
-feCellContext<dim>* getDummyCellContext()
-{
-    return new feCellContext_dummy<dim>();
-}
-
-template<int dim>
-feRuntimeNumber<dim> Evaluate(const feExpression<dim>& number, feCellContext<dim>* pContext)
-{
-    return number.m_node->Evaluate(pContext);
-}
-*/
 
 }
 }

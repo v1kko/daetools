@@ -1,5 +1,5 @@
 """********************************************************************************
-                             daeMayavi3DPlot.py
+                             mayavi_plot3d.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
