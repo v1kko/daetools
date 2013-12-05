@@ -3,6 +3,10 @@
 
 \documentclass{beamer}
 \usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english,serbian]{babel}
+\usepackage{color}
+
 \usetheme{Luebeck}
 \usecolortheme{default}
 \usefonttheme{professionalfonts}
@@ -12,11 +16,14 @@
 %\setbeamertemplate{note page}[plain]
 \setbeamertemplate{blocks}[rounded][shadow=true]
 
+\definecolor{light_red}{RGB}{255, 100, 100}
+\definecolor{light_green}{RGB}{100, 255, 100}
+
 \begin{document}
 
 \title[\textbf{DAE Tools} - Introduction]{\textbf{DAE Tools}: An equation-oriented process\linebreak modelling and optimization software}
 \subtitle{\textbf{Introduction}}
-\author{Dragan Nikolic}
+\author{Dragan Nikolić}
 \institute
 {
   DAE Tools Project, \url{http://www.daetools.com}
@@ -259,8 +266,8 @@ Advantages:
 
 \begin{frame}
 \frametitle{Model reports (cont'd)}
-\includegraphics<1>[height=0.7\paperheight]{../images/model_report.png}
-\includegraphics<2>[height=0.7\paperheight]{../images/runtime_model_report.png}
+\includegraphics<1>[height=0.7\paperheight]{../_static/model_report.png}
+\includegraphics<2>[height=0.7\paperheight]{../_static/runtime_model_report.png}
 \end{frame}
 
 \begin{frame}
@@ -289,15 +296,15 @@ Advantages:
       \end{itemize}
     \end{center}
     \begin{center}
-      \includegraphics[width=0.35\paperwidth]{../images/daeplotter.png}
+      \includegraphics[width=0.35\paperwidth]{../_static/daeplotter.png}
     \end{center}
   \end{column}
   \begin{column}{0.5\paperwidth}
     \begin{center}
-      \includegraphics[width=0.35\paperwidth]{../images/sample_2d_plot.png}
+      \includegraphics[width=0.35\paperwidth]{../_static/sample_2d_plot.png}
     \end{center}
     \begin{center}
-      \includegraphics[width=0.3\paperwidth]{../images/sample_3d_plot.png}
+      \includegraphics[width=0.3\paperwidth]{../_static/sample_3d_plot.png}
     \end{center}
   \end{column}
 \end{columns}
@@ -418,7 +425,7 @@ A sort of the hybrid approach:
 \begin{columns}[b]
   \begin{column}{0.5\paperwidth}
     \begin{center}
-      \includegraphics[width=0.45\paperwidth]{../images/gproms_model.png}
+      \includegraphics[width=0.45\paperwidth]{../_static/gPROMS_model.png}
     \end{center}
     \begin{center}
       {\small Model developed in gPROMS\\
@@ -427,7 +434,7 @@ A sort of the hybrid approach:
   \end{column}
   \begin{column}{0.5\paperwidth}
     \begin{center}
-      \includegraphics[width=0.45\paperwidth]{../images/modelica_model.png}
+      \includegraphics[width=0.45\paperwidth]{../_static/modelica_model.png}
     \end{center}
     \begin{center}
       {\small The same model in OpenModelica\\
@@ -440,7 +447,7 @@ A sort of the hybrid approach:
 \begin{frame}
 \frametitle{DAE Tools}
   \begin{center}
-    \includegraphics[width=0.85\paperwidth]{../images/daetools_model.png}
+    \includegraphics[width=0.85\paperwidth]{../_static/daetools_model.png}
   \end{center}
   \begin{center}
     {\small The same model in daetools}
@@ -448,32 +455,280 @@ A sort of the hybrid approach:
 \end{frame}
 
 \begin{frame}
-\frametitle{DSL vs. DAE Tools}
+\frametitle{Key modelling concepts \& grammar}
+\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Domain-specific languages allow solutions to be expressed in the idiom and at the level of abstraction of the problem domain 
+        (direct support for all modelling concepts by the language syntax)
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_red}{DAE Tools}}
+\begin{itemize}
+  \item Modelling concepts cannot be expressed directly in the programming language and have to be emulated in the API or in 
+        some other way
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Verbosity}
+\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Clean, concise, ellegant and natural way of building model descriptions: the code can be self documenting
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_red}{DAE Tools}}
+\begin{itemize}
+  \item The support for modelling concepts is much more verbose and less elegant; however, DAE Tools can generate XML+MathML
+	based model reports that can be either rendered in XHTML format using XSLT transformations (representing the code documentation)
+	or used as an XML-based model exchange language
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Maintainability \& portability}
+\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Domain-specific languages could enhance quality, productivity, reliability, maintainability and portability
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_red}{DAE Tools}}
+\begin{itemize}
+  \item 
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simulators \& programming languages}
+\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
+\begin{itemize}
+  \item DSLs could be and often are simulator independent making a model exchange easier
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_red}{DAE Tools}}
+\begin{itemize}
+  \item Programming language dependent; however, a large number of scientific software libraries exposes its functionality
+        to Python via Python wrappers
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Need for a compiler/parser/interpreter}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Cost of designing, implementing, and maintaining a domain-specific language as well as the tools required to develop with it (IDE):
+        a compiler/lexical parser/interpreter must be developed with all burden that comes with it (such as error handling, grammar ambiguities,
+        hidden bugs etc)
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item A compiler/lexical parser/interpreter is an integral part of the programming language (c++, Python) with a robust error handling,
+        universal grammar and massively tested
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Need for a new language syntax}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Cost of learning a new language vs. its limited applicability: users are required to master a new language
+        (yet another language grammar)
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item No learning of a new language required (everything can get done in a favourite programming language)
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Interoperability with the $3^{rd}$ party software}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Increased difficulty of integrating the DSL with other components: calling external functions/libraries and interaction with
+        other software is limited by the existence of wrappers around a simulator engine (for instance some scripting languages like
+        Python or javascript)
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item Calling external functions/libraries is a natural and straightforward Interaction with other software is
+        natural and straightforward
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Runtime generation \& modification}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Models usually cannot be created in the runtime/on the fly (or at least not easily) 
+        and cannot be modified in the runtime
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item Models can be created in the runtime/on the fly and easily modified in the runtime
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Simulation setup}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Setting up a simulation (ie. the values of parameters values, initial conditions, initially active states)
+        is embedded in the language and it is typically difficult to do it on the fly or to obtain the values from some other software
+        (for example to chain several software calls where outputs of previous calls represent inputs to the subsequent ones) 
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item Setting up a simulation is done programmaticaly and the initial values can be obtained from some other software in a natural way
+        (chaining several software calls is easy since a large number of libraries make Python wrappers available)
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Operating procedures}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Simulation operating procedures are not flexible; manipulation of model parameters, variables, equations, simulation results
+        etc is limited to only those operations provided by the language 
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item Operating procedures are completely flexible (within the limits of a programming language itself)
+        and a manipulation of model parameters, variables, equations, simulation results etc can be done in any way which
+        a user cosiders suitable for his/her problem 
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Outputs}
+\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
+\begin{itemize}
+  \item Only the type of results provided by the language/simulator is available; custom processing is usually not possible or
+        if a simulator does provide a way to build extensions it is limited to the functionality made available to them 
+\end{itemize}
+\end{block}
+
+\begin{block}{\textcolor{light_green}{DAE Tools}}
+\begin{itemize}
+  \item The results processing can be done in any way which a user considers suitable(again within the limits
+        of a programming language itself) 
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Architecture}
+
+\subsection{Overview}
+\begin{frame}
+\frametitle{Available modules}
+\begin{block}{}
+\begin{itemize}
+  \item pyDAE:
+  \begin{itemize}
+    \item pyCore (key modelling concepts)
+    \item pyActivity (simulation, optimization)
+    \item pyDataReporting (results handling)
+    \item pyIDAS (DAE solver)
+    \item pyUnits ($unit$ and $quantity$ concepts)
+  \end{itemize}
+\end{itemize}
+\end{block}
+\begin{block}{}
+\begin{itemize}
+  \item FE Solvers: 
+  \begin{itemize}
+    \item pyDealII
+  \end{itemize}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Available modules (cont'd)}
+\begin{block}{}
+\begin{itemize}
+  \item LA Solvers: 
+  \begin{itemize}
+    \item pySuperLU
+    \item pySuperLU\_MT
+    \item pyTrilinos (Amesos, AztecOO)
+    \item pyIntelPardiso
+  \end{itemize}
+\end{itemize}
+\end{block}
+\begin{block}{}
+\begin{itemize}
+  \item NLP/MINLP Solvers: 
+  \begin{itemize}
+    \item pyIPOPT
+    \item pyBONMIN
+    \item pyNLOPT
+  \end{itemize}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Available components}
+\begin{block}{}
+\begin{itemize}
+  \item Model
+  \item Simulation
+  \item Optimization
+  \item DAE solver
+  \item LA solver
+  \item NLP solver
+  \item Log
+  \item Data reporter
+  \item Data receiver
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Available components (cont'd)}
 \begin{center}
-    \begin{tabular}{ p{0.4\paperwidth} | p{0.4\paperwidth} }
-    \hline
-    \footnotesize{DSL Approach} & \footnotesize{DAE Tools Approach} \\ \hline
-    \footnotesize{Domain-specific languages allow solutions to be expressed in the idiom and at the level of abstraction of the problem domain 
-    (direct support for all modelling concepts by the language syntax)}
-    &
-    \footnotesize{Modelling concepts cannot be expressed directly in the programming language and have to be emulated in the API or in 
-    some other way}
-    \\ \hline
-    
-    \footnotesize{Clean, concise, ellegant and natural way of building model descriptions: the code can be self documenting}
-    &
-    \footnotesize{The support for modelling concepts is much more verbose and less elegant; however, DAE Tools can generate XML+MathML 
-    based model reports that can be either rendered in XHTML format using XSLT transformations (representing the code documentation) 
-    or used as an XML-based model exchange language}
-    \\ \hline
-    
-    
-    \end{tabular}
+  \includegraphics[height=0.7\paperheight]{../_static/daetools-architecture.png}
 \end{center}
 \end{frame}
 
 \section{Use Cases} 
-\subsection{Use Case 1}
+
+\subsection{Use Case 1 - High level modelling language}
+\begin{frame}
+\frametitle{}
+\end{frame}
+
+\subsection{Use Case 2 - Low level DAE solver}
+\begin{frame}
+\frametitle{}
+\end{frame}
+
+\subsection{Use Case 3 - Embedded simulator (back end)}
 \begin{frame}
 \frametitle{}
 \end{frame}
