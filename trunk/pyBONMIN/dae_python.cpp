@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "python_wraps.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+//#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python/docstring_options.hpp>
 #include "docstrings.h"
-#include <noprefix.h>
+//#include <noprefix.h>
 using namespace boost::python;
 
 #ifdef daeBONMIN	
@@ -13,8 +13,8 @@ BOOST_PYTHON_MODULE(pyBONMIN)
 BOOST_PYTHON_MODULE(pyIPOPT)
 #endif
 {
-    import_array();
-    boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+    //import_array();
+    //boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
     
     docstring_options doc_options(true, true, false);
 

@@ -1,5 +1,5 @@
 #include "python_wraps.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+//#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 using namespace dae;
 using namespace boost::python;
 

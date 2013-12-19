@@ -2,7 +2,7 @@
 #include <python.h>
 #endif
 #include "stdafx.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+//#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include <boost/python.hpp>
 #include "docstrings.h"
 #include "../LA_SuperLU/superlu_la_solver.h"

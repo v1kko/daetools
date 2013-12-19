@@ -12,7 +12,7 @@
 #endif
 #include <string>
 #include <boost/python.hpp>
-#include <boost/python/numeric.hpp>
+//#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/smart_ptr.hpp>
@@ -43,7 +43,7 @@ boost::python::list GetDataReporterDomains(daeDataReporterVariable& Variable);
 
 boost::python::list GetDataReporterDomainPoints(daeDataReporterDomain& Domain);
 
-boost::python::numeric::array GetNumPyArrayDataReporterVariableValue(daeDataReporterVariableValue& var);
+boost::python::object GetNumPyArrayDataReporterVariableValue(daeDataReporterVariableValue& var);
 	
 class daeDataReporterWrapper : public daeDataReporter_t,
 	                           public boost::python::wrapper<daeDataReporter_t>
@@ -1260,8 +1260,8 @@ boost::python::list GetDataReceiverDomainCoordinates(daeDataReceiverDomain& doma
 /*******************************************************
 	daeDataReceiverVariable
 *******************************************************/
-boost::python::numeric::array GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable& var);
-boost::python::numeric::array GetTimeValuesDataReceiverVariable(daeDataReceiverVariable& var);
+boost::python::object GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable& var);
+boost::python::object GetTimeValuesDataReceiverVariable(daeDataReceiverVariable& var);
 
 boost::python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var);
 

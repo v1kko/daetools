@@ -15,13 +15,13 @@ pyDAE API Reference
    :maxdepth: 3
 
    core
+   finite_element
    log
    activity
    data_reporting
    dae_solver
    units
    variable_types
-   finite_element
    solvers
    code_generators
    dae_plotter

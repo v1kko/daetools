@@ -1,7 +1,7 @@
 #include "python_wraps.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
-#define NO_IMPORT_ARRAY
-#include <noprefix.h>
+//#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+//#define NO_IMPORT_ARRAY
+//#include <noprefix.h>
 using namespace std;
 using namespace boost::python;
 #include <boost/property_tree/json_parser.hpp>
@@ -1056,13 +1056,13 @@ const adouble_array adarr_Array(boost::python::list Values)
 	return Array(qarrValues);
 }
 
-const adouble_array adarr_FromNumpyArray(boost::python::numeric::array ndValues)
+const adouble_array adarr_FromNumpyArray(boost::python::object ndValues)
 {
     adouble ad;
     std::vector<adNodePtr> ptrarrValues;
 	boost::python::ssize_t i, n;
 
-    n = boost::python::len(ndValues);
+    n = boost::python::extract<boost::python::ssize_t>(ndValues.attr("size"));
     if(n == 0)
     {
         daeDeclareException(exInvalidCall);
@@ -1074,7 +1074,8 @@ const adouble_array adarr_FromNumpyArray(boost::python::numeric::array ndValues)
 
     for(i = 0; i < n; i++)
 	{
-        boost::python::extract<adouble> get_adouble(ndValues[i]);
+        boost::python::object value = ndValues.attr("__getitem__")(i);
+        boost::python::extract<adouble> get_adouble(value);
 
         if(get_adouble.check())
         {
@@ -1382,6 +1383,7 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild)
 *******************************************************/
 boost::python::object GetNumPyArrayDomain(daeDomain& domain)
 {
+/* NUMPY
 	size_t nType;
 	npy_intp dimensions;
 
@@ -1394,6 +1396,33 @@ boost::python::object GetNumPyArrayDomain(daeDomain& domain)
 		values[k] = *domain.GetPoint(k);
 
 	return numpy_array;
+*/
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    int dimensions = domain.GetNumberOfPoints();
+    boost::python::tuple shape = boost::python::make_tuple(dimensions);
+
+    // Create a flat list of values
+    boost::python::list lvalues;
+    for(size_t k = 0; k < (size_t)dimensions; k++)
+        lvalues.append(*domain.GetPoint(k));
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray
+    return ndarray.attr("reshape")(shape);
 }
 
 boost::python::list GetDomainPoints(daeDomain& domain)
@@ -1705,8 +1734,9 @@ quantity GetParameterQuantity8(daeParameter& self, size_t n1, size_t n2, size_t 
 }
 
 
-boost::python::object GetNumPyArrayParameter(daeParameter& param)
+boost::python::object GetNumPyArrayParameter(daeParameter& self)
 {
+/* NUMPY
 	size_t nType, nDomains, nTotalSize;
 	real_t* data;
 	npy_intp* dimensions;
@@ -1738,6 +1768,46 @@ boost::python::object GetNumPyArrayParameter(daeParameter& param)
     
         delete[] dimensions;
         return numpy_array;
+    }
+*/
+    const std::vector<daeDomain*>& domains = self.Domains();
+    real_t* data = self.GetValuePointer();
+    size_t nTotalSize = self.GetNumberOfPoints();
+
+    if(domains.size() == 0)
+    {
+        return boost::python::object(self.GetValue());
+    }
+    else
+    {
+        // Import numpy
+        boost::python::object main_module = import("__main__");
+        boost::python::object main_namespace = main_module.attr("__dict__");
+        exec("import numpy", main_namespace);
+        boost::python::object numpy = main_namespace["numpy"];
+
+        // Create shape
+        boost::python::list ldimensions;
+        for(size_t i = 0; i < domains.size(); i++)
+            ldimensions.append(domains[i]->GetNumberOfPoints());
+        boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+        // Create a flat list of values
+        boost::python::list lvalues;
+        for(size_t k = 0; k < nTotalSize; k++)
+            lvalues.append(data[k]);
+
+        // Create a flat ndarray
+        boost::python::dict kwargs;
+        if(typeid(real_t) == typeid(double))
+            kwargs["dtype"] = numpy.attr("float64");
+        else
+            kwargs["dtype"] = numpy.attr("float32");
+        boost::python::tuple args = boost::python::make_tuple(lvalues);
+        boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+        // Return a re-shaped ndarray
+        return ndarray.attr("reshape")(shape);
     }
 }
 
@@ -1914,8 +1984,9 @@ void qSetParameterValues(daeParameter& param, const quantity& q)
 	param.SetValues(q);
 }
 
-void lSetParameterValues(daeParameter& param, boost::python::numeric::array nd_values)
+void lSetParameterValues(daeParameter& param, boost::python::object nd_values)
 {
+/* NUMPY */
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != param.GetNumberOfDomains())
@@ -1940,10 +2011,8 @@ void lSetParameterValues(daeParameter& param, boost::python::numeric::array nd_v
 
     // The ndarray must be flattened before use (in the row-major c-style order)
     boost::python::object arg("C");
-    boost::python::object res = nd_values.attr("ravel")(arg);
-    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
-
-    boost::python::ssize_t n = boost::python::len(values);
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -1951,8 +2020,9 @@ void lSetParameterValues(daeParameter& param, boost::python::numeric::array nd_v
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>   rValue(values[i]);
-        boost::python::extract<quantity> qValue(values[i]);
+        boost::python::object value = values.attr("__getitem__")(i);
+        boost::python::extract<real_t>   rValue(value);
+        boost::python::extract<quantity> qValue(value);
 
         if(rValue.check())
             q_values[i] = quantity(rValue(), u);
@@ -2190,11 +2260,9 @@ quantity daeVariable_GetVariableQuantity8(daeVariable& self, size_t n1, size_t n
 
 
 
-
-
-
-boost::python::object daeVariable_TimeDerivatives(daeVariable& var)
+boost::python::object daeVariable_TimeDerivatives(daeVariable& self)
 {
+/* NUMPY
     size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
 	vector<daeDomain_t*> ptrarrDomains;
@@ -2237,10 +2305,63 @@ boost::python::object daeVariable_TimeDerivatives(daeVariable& var)
         delete[] dimensions;
         return numpy_array;
     }
+*/
+    const std::vector<daeDomain*>& domains = self.Domains();
+    daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    size_t nStart = self.GetOverallIndex();
+    size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
+    const std::vector<real_t*>& dtRefs = pDataProxy->GetTimeDerivativesReferences();
+
+    if(domains.size() == 0)
+    {
+        // Assigned variables do not have time derivatives mapped!!
+        if(dtRefs[self.GetOverallIndex()])
+            return boost::python::object(*dtRefs[self.GetOverallIndex()]);
+        else
+            return boost::python::object(0.0);
+    }
+    else
+    {
+        // Import numpy
+        boost::python::object main_module = import("__main__");
+        boost::python::object main_namespace = main_module.attr("__dict__");
+        exec("import numpy", main_namespace);
+        boost::python::object numpy = main_namespace["numpy"];
+
+        // Create shape
+        boost::python::list ldimensions;
+        for(size_t i = 0; i < domains.size(); i++)
+            ldimensions.append(domains[i]->GetNumberOfPoints());
+        boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+        // Create a flat list of dt values
+        boost::python::list lvalues;
+        for(size_t i = nStart; i < nEnd; i++)
+        {
+            if(dtRefs[i])
+                lvalues.append(*dtRefs[i]);
+            else
+                lvalues.append(0.0);
+        }
+
+        // Create a flat ndarray
+        boost::python::dict kwargs;
+        if(typeid(real_t) == typeid(double))
+            kwargs["dtype"] = numpy.attr("float64");
+        else
+            kwargs["dtype"] = numpy.attr("float32");
+        boost::python::tuple args = boost::python::make_tuple(lvalues);
+        boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+        // Return a re-shaped ndarray
+        return ndarray.attr("reshape")(shape);
+    }
 }
 
-boost::python::object daeVariable_Values(daeVariable& var)
+boost::python::object daeVariable_Values(daeVariable& self)
 {
+/* NUMPY
 	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
 	vector<daeDomain_t*> ptrarrDomains;
@@ -2272,10 +2393,53 @@ boost::python::object daeVariable_Values(daeVariable& var)
         delete[] dimensions;
         return numpy_array;
     }
+*/
+    const std::vector<daeDomain*>& domains = self.Domains();
+    daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    size_t nStart = self.GetOverallIndex();
+    size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
+
+    if(domains.size() == 0)
+    {
+        return boost::python::object(pDataProxy->GetValue(self.GetOverallIndex()));
+    }
+    else
+    {
+        // Import numpy
+        boost::python::object main_module = import("__main__");
+        boost::python::object main_namespace = main_module.attr("__dict__");
+        exec("import numpy", main_namespace);
+        boost::python::object numpy = main_namespace["numpy"];
+
+        // Create shape
+        boost::python::list ldimensions;
+        for(size_t i = 0; i < domains.size(); i++)
+            ldimensions.append(domains[i]->GetNumberOfPoints());
+        boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+        // Create a flat list of values
+        boost::python::list lvalues;
+        for(size_t i = nStart; i < nEnd; i++)
+            lvalues.append(pDataProxy->GetValue(i));
+
+        // Create a flat ndarray
+        boost::python::dict kwargs;
+        if(typeid(real_t) == typeid(double))
+            kwargs["dtype"] = numpy.attr("float64");
+        else
+            kwargs["dtype"] = numpy.attr("float32");
+        boost::python::tuple args = boost::python::make_tuple(lvalues);
+        boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+        // Return a re-shaped ndarray
+        return ndarray.attr("reshape")(shape);
+    }
 }
 
-boost::python::object daeVariable_IDs(daeVariable& var)
+boost::python::object daeVariable_IDs(daeVariable& self)
 {
+/* NUMPY
 	size_t i, k, nType, nDomains, nStart, nEnd;
 	npy_intp* dimensions;
 	vector<daeDomain_t*> ptrarrDomains;
@@ -2307,10 +2471,50 @@ boost::python::object daeVariable_IDs(daeVariable& var)
         delete[] dimensions;
         return numpy_array;
     }
+*/
+    const std::vector<daeDomain*>& domains = self.Domains();
+    daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    size_t nStart = self.GetOverallIndex();
+    size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
+
+    if(domains.size() == 0)
+    {
+        return boost::python::object(pDataProxy->GetVariableType(self.GetOverallIndex()));
+    }
+    else
+    {
+        // Import numpy
+        boost::python::object main_module = import("__main__");
+        boost::python::object main_namespace = main_module.attr("__dict__");
+        exec("import numpy", main_namespace);
+        boost::python::object numpy = main_namespace["numpy"];
+
+        // Create shape
+        boost::python::list ldimensions;
+        for(size_t i = 0; i < domains.size(); i++)
+            ldimensions.append(domains[i]->GetNumberOfPoints());
+        boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+        // Create a flat list of values
+        boost::python::list lvalues;
+        for(size_t i = nStart; i < nEnd; i++)
+            lvalues.append(pDataProxy->GetVariableType(i));
+
+        // Create a flat ndarray
+        boost::python::dict kwargs;
+        kwargs["dtype"] = numpy.attr("int32");
+        boost::python::tuple args = boost::python::make_tuple(lvalues);
+        boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+        // Return a re-shaped ndarray
+        return ndarray.attr("reshape")(shape);
+    }
 }
 
-boost::python::object daeVariable_GatheredIDs(daeVariable& var)
+boost::python::object daeVariable_GatheredIDs(daeVariable& self)
 {
+/* NUMPY
     size_t i, k, nType, nDomains, nStart, nEnd;
     npy_intp* dimensions;
     vector<daeDomain_t*> ptrarrDomains;
@@ -2341,6 +2545,45 @@ boost::python::object daeVariable_GatheredIDs(daeVariable& var)
 
         delete[] dimensions;
         return numpy_array;
+    }
+*/
+    const std::vector<daeDomain*>& domains = self.Domains();
+    daeModel* pModel = dynamic_cast<daeModel*>(self.GetModel());
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    size_t nStart = self.GetOverallIndex();
+    size_t nEnd   = self.GetOverallIndex() + self.GetNumberOfPoints();
+
+    if(domains.size() == 0)
+    {
+        return boost::python::object(pDataProxy->GetVariableTypeGathered(self.GetOverallIndex()));
+    }
+    else
+    {
+        // Import numpy
+        boost::python::object main_module = import("__main__");
+        boost::python::object main_namespace = main_module.attr("__dict__");
+        exec("import numpy", main_namespace);
+        boost::python::object numpy = main_namespace["numpy"];
+
+        // Create shape
+        boost::python::list ldimensions;
+        for(size_t i = 0; i < domains.size(); i++)
+            ldimensions.append(domains[i]->GetNumberOfPoints());
+        boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+        // Create a flat list of values
+        boost::python::list lvalues;
+        for(size_t i = nStart; i < nEnd; i++)
+            lvalues.append(pDataProxy->GetVariableTypeGathered(i));
+
+        // Create a flat ndarray
+        boost::python::dict kwargs;
+        kwargs["dtype"] = numpy.attr("int32");
+        boost::python::tuple args = boost::python::make_tuple(lvalues);
+        boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+        // Return a re-shaped ndarray
+        return ndarray.attr("reshape")(shape);
     }
 }
 
@@ -3411,8 +3654,9 @@ void AssignValues(daeVariable& var, real_t values)
 	var.AssignValues(values);
 }
 
-void AssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
+void AssignValues2(daeVariable& var, boost::python::object nd_values)
 {
+/* NUMPY */
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3437,10 +3681,8 @@ void AssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
 
     // The ndarray must be flattened before use (in the row-major c-style order)
     boost::python::object arg("C");
-    boost::python::object res = nd_values.attr("ravel")(arg);
-    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
-
-    boost::python::ssize_t n = boost::python::len(values);
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3449,7 +3691,7 @@ void AssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
         // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
-        boost::python::object obj = values[i];
+        boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
             q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
@@ -3484,8 +3726,9 @@ void ReAssignValues(daeVariable& var, real_t values)
 	var.ReAssignValues(values);
 }
 
-void ReAssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
+void ReAssignValues2(daeVariable& var, boost::python::object nd_values)
 {
+/* NUMPY */
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3510,10 +3753,8 @@ void ReAssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
 
     // The ndarray must be flattened before use (in the row-major c-style order)
     boost::python::object arg("C");
-    boost::python::object res = nd_values.attr("ravel")(arg);
-    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
-
-    boost::python::ssize_t n = boost::python::len(values);
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3522,7 +3763,7 @@ void ReAssignValues2(daeVariable& var, boost::python::numeric::array nd_values)
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
         // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
-        boost::python::object obj = values[i];
+        boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
             q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
@@ -3557,8 +3798,9 @@ void SetInitialConditions(daeVariable& var, real_t values)
 	var.SetInitialConditions(values);
 }
 
-void SetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_values)
+void SetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 {
+/* NUMPY */
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3583,10 +3825,8 @@ void SetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_va
 
     // The ndarray must be flattened before use (in the row-major c-style order)
     boost::python::object arg("C");
-    boost::python::object res = nd_values.attr("ravel")(arg);
-    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
-
-    boost::python::ssize_t n = boost::python::len(values);
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3595,7 +3835,7 @@ void SetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_va
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
         // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
-        boost::python::object obj = values[i];
+        boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
             q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
@@ -3630,8 +3870,9 @@ void ReSetInitialConditions(daeVariable& var, real_t values)
 	var.ReSetInitialConditions(values);
 }
 
-void ReSetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_values)
+void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 {
+/* NUMPY */
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3656,10 +3897,8 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_
 
     // The ndarray must be flattened before use (in the row-major c-style order)
     boost::python::object arg("C");
-    boost::python::object res = nd_values.attr("ravel")(arg);
-    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
-
-    boost::python::ssize_t n = boost::python::len(values);
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3668,7 +3907,7 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
         // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
-        boost::python::object obj = values[i];
+        boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
             q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
@@ -3703,8 +3942,9 @@ void SetInitialGuesses(daeVariable& var, real_t values)
 	var.SetInitialGuesses(values);
 }
 
-void SetInitialGuesses2(daeVariable& var, boost::python::numeric::array nd_values)
+void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values)
 {
+/* NUMPY */
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
     {
@@ -3728,10 +3968,8 @@ void SetInitialGuesses2(daeVariable& var, boost::python::numeric::array nd_value
 
     // The ndarray must be flattened before use (in the row-major c-style order)
     boost::python::object arg("C");
-    boost::python::object res = nd_values.attr("ravel")(arg);
-    boost::python::numeric::array values = boost::python::extract<boost::python::numeric::array>(res);
-
-    boost::python::ssize_t n = boost::python::len(values);
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
     std::vector<quantity> q_values;
     q_values.resize(n);
 
@@ -3740,7 +3978,7 @@ void SetInitialGuesses2(daeVariable& var, boost::python::numeric::array nd_value
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
         // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
-        boost::python::object obj = values[i];
+        boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
             q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
@@ -4444,8 +4682,9 @@ boost::python::dict daeModel_dictEventPortConnections(daeModel& self)
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint
 *******************************************************/
-boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction& o)
+boost::python::object GetGradientsObjectiveFunction(daeObjectiveFunction& self)
 {
+/* NUMPY
 	size_t nType;
 	npy_intp dimensions;
 
@@ -4458,10 +4697,43 @@ boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction
 	o.GetGradients(values, dimensions);
 
 	return numpy_array;
+*/
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    int nVariables = self.GetNumberOfOptimizationVariables();
+    boost::python::tuple shape = boost::python::make_tuple(nVariables);
+
+    // Fill gradient array with zeros and then get gradients
+    std::vector<real_t> gradients;
+    gradients.resize(nVariables, 0.0);
+    self.GetGradients(&gradients[0], nVariables);
+
+    // Create a flat list of values from the gradients array
+    boost::python::list lvalues;
+    for(size_t i = 0; i < nVariables; i++)
+        lvalues.append(gradients[i]);
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray
+    return ndarray.attr("reshape")(shape);
 }
 
-boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimizationConstraint& o)
+boost::python::object GetGradientsOptimizationConstraint(daeOptimizationConstraint& self)
 {
+/* NUMPY
 	size_t nType;
 	npy_intp dimensions;
 
@@ -4474,10 +4746,43 @@ boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimization
 	o.GetGradients(values, dimensions);
 
 	return numpy_array;
+*/
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    int nVariables = self.GetNumberOfOptimizationVariables();
+    boost::python::tuple shape = boost::python::make_tuple(nVariables);
+
+    // Fill gradient array with zeros and then get gradients
+    std::vector<real_t> gradients;
+    gradients.resize(nVariables, 0.0);
+    self.GetGradients(&gradients[0], nVariables);
+
+    // Create a flat list of values from the gradients array
+    boost::python::list lvalues;
+    for(size_t i = 0; i < nVariables; i++)
+        lvalues.append(gradients[i]);
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray
+    return ndarray.attr("reshape")(shape);
 }
 
-boost::python::numeric::array GetGradientsMeasuredVariable(daeMeasuredVariable& o)
+boost::python::object GetGradientsMeasuredVariable(daeMeasuredVariable& self)
 {
+/* NUMPY
 	size_t nType;
 	npy_intp dimensions;
 
@@ -4490,6 +4795,38 @@ boost::python::numeric::array GetGradientsMeasuredVariable(daeMeasuredVariable& 
 	o.GetGradients(values, dimensions);
 
 	return numpy_array;
+*/
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    int nVariables = self.GetNumberOfOptimizationVariables();
+    boost::python::tuple shape = boost::python::make_tuple(nVariables);
+
+    // Fill gradient array with zeros and then get gradients
+    std::vector<real_t> gradients;
+    gradients.resize(nVariables, 0.0);
+    self.GetGradients(&gradients[0], nVariables);
+
+    // Create a flat list of values from the gradients array
+    boost::python::list lvalues;
+    for(size_t i = 0; i < nVariables; i++)
+        lvalues.append(gradients[i]);
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray
+    return ndarray.attr("reshape")(shape);
 }
 
 }

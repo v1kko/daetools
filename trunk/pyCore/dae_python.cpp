@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "python_wraps.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
 #include "docstrings.h"
-#include <noprefix.h>
+//#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+//#include <noprefix.h>
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE(pyCore)
 {
-	import_array();
-	boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+	//import_array();
+	//boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
 
     docstring_options doc_options(true, true, false);
 

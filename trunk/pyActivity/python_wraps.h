@@ -12,7 +12,7 @@
 #endif
 #include <string>
 #include <boost/python.hpp>
-#include <boost/python/numeric.hpp>
+//#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>

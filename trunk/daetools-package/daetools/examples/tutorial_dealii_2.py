@@ -90,7 +90,7 @@ class modTutorial(daeModel):
         
         print 'Thermal diffusivity = %f' % diffusivity
         print 'Beneath source flux = %f' % flux_beneath
-        print 'Sbove source flux = %f x (1,-1)' % flux_above
+        print 'Above source flux = %f x (1,-1)' % flux_above
         # Achtung, Achtung!!
         # Diffusivity, velocity, generation, dirichletBC and neumannBC must not go out of scope
         # for deal.II FE model keeps only weak references to them.
@@ -137,7 +137,7 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        m_dt = self.m.fe_dealII.SystemMatrix_dt()
+        m_dt = self.m.fe_dealII.Msystem()
         T    = self.m.fe.dictVariables['T']
         
         # dofIndexesMap relates global DOF indexes to points within daetools variables

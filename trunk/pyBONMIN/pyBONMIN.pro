@@ -32,7 +32,7 @@ pyObject = pyBONMIN
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               $${NUMPY_INCLUDE_DIR} \
+               #$${NUMPY_INCLUDE_DIR} \
                $${BONMIN_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
@@ -64,7 +64,7 @@ pyObject = pyIPOPT
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
-               $${NUMPY_INCLUDE_DIR} \
+               #$${NUMPY_INCLUDE_DIR} \
                $${IPOPT_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \

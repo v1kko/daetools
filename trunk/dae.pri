@@ -78,7 +78,7 @@ PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\"
 PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
 
 # Numpy version
-NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
+#NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
 
 # System := {'Linux', 'Windows', 'Darwin'}
 DAE_SYSTEM   = $$system($${PYTHON} -c \"import platform; print(platform.system())\")
@@ -175,14 +175,14 @@ win32::PYTHON_LIB_DIR    = $$system($${PYTHON} -c \"import sys; print(sys.prefix
 message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR})
 }
 
-win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
-linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
-                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-                               /usr/share/pyshared/numpy/core/include/numpy
-macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+#win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+#                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+#linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+#                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
+#                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+#                               /usr/share/pyshared/numpy/core/include/numpy
+#macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+#                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 
 
 #####################################################################################
@@ -521,14 +521,15 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 #######################################################
 #            Settings for installing files
 #######################################################
-SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION}
-PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION}
+# Removed "_numpy$${NUMPY_VERSION}" to avoid compile-time dependency on numpy versions
+SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
-win32::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION})
-win32::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION})
+win32::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+win32::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION})
-unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}_numpy$${NUMPY_VERSION})
+unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
 STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
 HEADERS_DIR     = ../daetools-package/daetools/usr/local/include

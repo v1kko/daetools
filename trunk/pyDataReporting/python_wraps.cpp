@@ -1,7 +1,7 @@
 #include "python_wraps.h"
-#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
-#define NO_IMPORT_ARRAY
-#include <noprefix.h>
+//#define PY_ARRAY_UNIQUE_SYMBOL dae_extension
+//#define NO_IMPORT_ARRAY
+//#include <noprefix.h>
 using namespace std;
 using namespace boost;
 using namespace boost::python;
@@ -29,9 +29,10 @@ boost::python::list GetDataReporterDomainPoints(daeDataReporterDomain& Domain)
 	return l;
 }
 
-python::numeric::array GetNumPyArrayDataReporterVariableValue(daeDataReporterVariableValue& var)
+boost::python::object GetNumPyArrayDataReporterVariableValue(daeDataReporterVariableValue& self)
 {
-	size_t i, nType;
+/* NUMPY
+ 	size_t i, nType;
 	npy_intp dimensions;
 
 	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
@@ -42,6 +43,32 @@ python::numeric::array GetNumPyArrayDataReporterVariableValue(daeDataReporterVar
 	memcpy(values, var.m_pValues, sizeof(real_t)*var.m_nNumberOfPoints);
 
 	return numpy_array;
+*/
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    boost::python::tuple shape = boost::python::tuple(self.m_nNumberOfPoints);
+
+    // Create a flat list of values
+    boost::python::list lvalues;
+    for(size_t k = 0; k < self.m_nNumberOfPoints; k++)
+        lvalues.append(self.m_pValues[k]);
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray (not really needed here)
+    return ndarray.attr("reshape")(shape);
 }
 
 /*******************************************************
@@ -72,8 +99,9 @@ boost::python::list GetDataReceiverDomainCoordinates(daeDataReceiverDomain& doma
 /*******************************************************
 	daeDataReceiverVariable
 *******************************************************/
-python::numeric::array GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable& var)
+boost::python::object GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable& self)
 {
+/* NUMPY
 	size_t i, nType, nDomains, nTotalSize, nTimeSize;
 	npy_intp* dimensions;
 
@@ -99,10 +127,48 @@ python::numeric::array GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable
 
 	delete[] dimensions;
 	return numpy_array;
+*/
+    size_t nDomains  = self.m_ptrarrDomains.size();
+	size_t nTimeSize = self.m_ptrarrValues.size();
+
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    boost::python::list ldimensions;
+    ldimensions.append(nTimeSize); // First add time
+    for(size_t i = 0; i < nDomains; i++) // Then add all domains
+        ldimensions.append(self.m_ptrarrDomains[i]->m_nNumberOfPoints);
+    boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+    // Create a flat list of values [times * d_1 * d_2 * ... * d_n]
+    boost::python::list lvalues;
+    for(size_t i = 0; i < nTimeSize; i++) // x [times]
+    {
+        real_t* values = self.m_ptrarrValues[i]->m_pValues;
+        for(size_t k = 0; k < self.m_nNumberOfPoints; k++) // x [d_1 * d_2 * ... * d_n]
+            lvalues.append(values[k]);
+    }
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray
+    return ndarray.attr("reshape")(shape);
 }
 
-python::numeric::array GetTimeValuesDataReceiverVariable(daeDataReceiverVariable& var)
+boost::python::object GetTimeValuesDataReceiverVariable(daeDataReceiverVariable& self)
 {
+/* NUMPY
 	size_t nType;
 	npy_intp dimensions;
 
@@ -115,6 +181,32 @@ python::numeric::array GetTimeValuesDataReceiverVariable(daeDataReceiverVariable
 		values[k] = var.m_ptrarrValues[k]->m_dTime;
 
 	return numpy_array;
+*/
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    // Create shape
+    boost::python::tuple shape = boost::python::make_tuple(self.m_ptrarrValues.size());
+
+    // Create a flat list of values
+    boost::python::list lvalues;
+    for(size_t k = 0; k < self.m_ptrarrValues.size(); k++)
+        lvalues.append(self.m_ptrarrValues[k]->m_dTime);
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lvalues);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    // Return a re-shaped ndarray (not really needed here)
+    return ndarray.attr("reshape")(shape);
 }
 
 python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var)

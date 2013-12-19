@@ -266,9 +266,6 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    se = daeSimulationExplorer(simulation)
-    se.exec_()
-
     # Run
     simulation.Run()
     simulation.Finalize()

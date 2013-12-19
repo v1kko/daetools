@@ -213,8 +213,8 @@ class simTutorial(daeSimulation):
         # - UpperBound: 0.1
         # Here we use 25 intervals. In general any number of intervals can be used. However, the computational costs become
         # prohibitive at the very high number (especially if dense linear solvers are used).
-        self.m.x.CreateStructuredGrid(eCFDM, 2, 25, 0, 0.1)
-        self.m.y.CreateStructuredGrid(eCFDM, 2, 25, 0, 0.1)
+        self.m.x.CreateStructuredGrid(eCFDM, 2, 10, 0, 0.1)
+        self.m.y.CreateStructuredGrid(eCFDM, 2, 10, 0, 0.1)
 
         # Parameter values can be set by using a function SetValue.
         self.m.k.SetValue(401 * W/(m*K))

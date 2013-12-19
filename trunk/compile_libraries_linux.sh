@@ -1061,6 +1061,8 @@ configure_dealii()
   cd deal.II
   mkdir build
   cmake \
+    -DCMAKE_BUILD_TYPE:STRING=RELEASE \
+    -DDEAL_II_PACKAGE_NAME:STRING=deal.II-daetools \
     -DCMAKE_INSTALL_PREFIX="${TRUNK}/deal.II/build" \
     -DDEAL_II_WITH_THREADS=OFF \
     -DDEAL_II_WITH_MPI=OFF \
@@ -1081,7 +1083,7 @@ compile_dealii()
   echo ""
   make -j${Ncpu} install
   
-  cp -a build/lib/libdeal_II* ../daetools-package/solibs
+  cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ../daetools-package/solibs/libdeal_II-daetools.so.${vDEALII}
   
   cd "${TRUNK}"
 }

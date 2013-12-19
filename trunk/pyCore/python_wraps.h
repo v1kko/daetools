@@ -12,7 +12,7 @@
 #endif
 #include <string>
 #include <boost/python.hpp>
-#include <boost/python/numeric.hpp>
+//#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/python/call_method.hpp>
@@ -281,7 +281,7 @@ const adouble ad_d(const adouble& a, daeDomain& domain);
 const adouble ad_Constant_q(const quantity& q);
 const adouble ad_Constant_c(real_t c);
 const adouble_array adarr_Array(boost::python::list Values);
-const adouble_array adarr_FromNumpyArray(boost::python::numeric::array ndValues);
+const adouble_array adarr_FromNumpyArray(boost::python::object ndValues);
 const adouble_array adarr_FromList(boost::python::list lValues);
 
 /*******************************************************
@@ -596,7 +596,7 @@ void SetParameterQuantity8(daeParameter& param, size_t n1, size_t n2, size_t n3,
 
 void SetParameterValues(daeParameter& param, real_t values);
 void qSetParameterValues(daeParameter& param, const quantity& q);
-void lSetParameterValues(daeParameter& param, boost::python::numeric::array nd_values);
+void lSetParameterValues(daeParameter& param, boost::python::object nd_values);
 
 adouble_array ParameterArray1(daeParameter& param, boost::python::object o1);
 adouble_array ParameterArray2(daeParameter& param, boost::python::object o1, boost::python::object o2);
@@ -1032,23 +1032,23 @@ void qSetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void qSetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
 
 void AssignValues(daeVariable& var, real_t values);
-void AssignValues2(daeVariable& var, boost::python::numeric::array nd_values);
+void AssignValues2(daeVariable& var, boost::python::object nd_values);
 void qAssignValues(daeVariable& var, const quantity& q);
 
 void ReAssignValues(daeVariable& var, real_t values);
-void ReAssignValues2(daeVariable& var, boost::python::numeric::array nd_values);
+void ReAssignValues2(daeVariable& var, boost::python::object nd_values);
 void qReAssignValues(daeVariable& var, const quantity& q);
 
 void SetInitialConditions(daeVariable& var, real_t values);
-void SetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_values);
+void SetInitialConditions2(daeVariable& var, boost::python::object nd_values);
 void qSetInitialConditions(daeVariable& var, const quantity& q);
 
 void ReSetInitialConditions(daeVariable& var, real_t values);
-void ReSetInitialConditions2(daeVariable& var, boost::python::numeric::array nd_values);
+void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values);
 void qReSetInitialConditions(daeVariable& var, const quantity& q);
 
 void SetInitialGuesses(daeVariable& var, real_t values);
-void SetInitialGuesses2(daeVariable& var, boost::python::numeric::array nd_values);
+void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values);
 void qSetInitialGuesses(daeVariable& var, const quantity& q);
 
 /*******************************************************
@@ -1645,9 +1645,9 @@ boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActio
 /*******************************************************
 	daeObjectiveFunction, daeOptimizationConstraint
 *******************************************************/
-boost::python::numeric::array GetGradientsObjectiveFunction(daeObjectiveFunction& o);
-boost::python::numeric::array GetGradientsOptimizationConstraint(daeOptimizationConstraint& o);
-boost::python::numeric::array GetGradientsMeasuredVariable(daeMeasuredVariable& o);
+boost::python::object GetGradientsObjectiveFunction(daeObjectiveFunction& o);
+boost::python::object GetGradientsOptimizationConstraint(daeOptimizationConstraint& o);
+boost::python::object GetGradientsMeasuredVariable(daeMeasuredVariable& o);
 
 /*******************************************************
 	daeLog

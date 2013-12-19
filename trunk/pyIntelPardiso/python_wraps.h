@@ -13,7 +13,7 @@
 #include <string>
 #include "../LA_Intel_MKL/mkl_pardiso_sparse_la_solver.h"
 #include <boost/python.hpp>
-#include <boost/python/numeric.hpp>
+//#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/python/call_method.hpp>

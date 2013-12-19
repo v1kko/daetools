@@ -24,6 +24,11 @@ Documentation
    pyDAE_api_ref
    tutorials
 
+Presentations
+=============
+
+* `An introduction to DAE Tools <http://daetools.sourceforge.net/presentations/daetools-introduction.pdf>`_
+
 Indices and tables
 ==================
 

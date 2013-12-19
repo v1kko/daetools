@@ -7,7 +7,7 @@ CONFIG += staticlib
 DEALII_DIR     = ../deal.II/build
 DEALII_INCLUDE = $${DEALII_DIR}/include
 DEALII_LIB_DIR = $${DEALII_DIR}/lib
-DEALII_LIBS    = -ldeal_II -lz -lblas -lgfortran -lm
+DEALII_LIBS    = -ldeal_II-daetools -lz -lblas -lgfortran -lm
 
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \

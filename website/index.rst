@@ -51,7 +51,8 @@ improvements:
 -  Numerical simulation of partial differential equations on adaptive
    unstructured grids using Finite Elements Method.
    `deal.II`_ library is used for low-level tasks such as mesh loading/processing
-   and the system matrices/arrays assembly. `deal.II`_ structures are then used to 
+   and assembly of the system stiffness/mass matrices and the system load vector.
+   `deal.II`_ structures are then used to
    generate daetools equations which are solved together with the rest of the model 
    equations. All details about the mesh, basis functions, quadrature rules, refinement 
    etc. are handled by the `deal.II`_ library. The advantage of this concept is that the 
@@ -127,8 +128,8 @@ More information about the author can be found in :doc:`contact`.
 Documentation
 =============
 
-Detailed information about using **DAE Tools**, API reference and tutorials
-can be found in :doc:`docs/index`
+Detailed information about using **DAE Tools**, presentations, API reference and tutorials
+can be found in :doc:`docs/index`.
 
 SuperLU_CUDA
 ============

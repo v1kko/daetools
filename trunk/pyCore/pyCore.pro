@@ -6,7 +6,7 @@ TEMPLATE = lib
 INCLUDEPATH += $${BOOSTDIR} \
 			   $${PYTHON_INCLUDE_DIR} \
 			   $${PYTHON_SITE_PACKAGES_DIR} \
-               $${NUMPY_INCLUDE_DIR} \
+               #$${NUMPY_INCLUDE_DIR} \
 			   $${MPI_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}

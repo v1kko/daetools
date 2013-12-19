@@ -35,7 +35,8 @@ else:
     daetools_machine = str(platform.machine())
 
 # (Platform/Python)-dependent shared libraries directory
-platform_solib_dir = '{0}_{1}_py{2}{3}_numpy{4}'.format(daetools_system, daetools_machine, python_major, python_minor, numpy_version)
+# Now with removed compile-time dependency on numpy
+platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
 #print 'platform_solib_dir = ', platform_solib_dir
 
 boost_solib_dir = os.path.realpath('solibs')
@@ -60,7 +61,7 @@ boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_
 boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
-deal_II          = 'libdeal_II.so'
+deal_II          = 'deal_II-daetools'
 
 boost_solibs = []
 
@@ -166,7 +167,7 @@ setup(name = 'daetools',
                        'daetools.dae_plotter':     ['images/*.png'],
                        'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*', 'fmi/*.h', 'fmi/*.c'],
                        'daetools.dae_simulator':   ['images/*.png'],
-                       'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png']
+                       'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
                      },
       data_files = data_files,
       scripts = ['scripts/daetools_win_install.py'],
