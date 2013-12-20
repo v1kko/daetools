@@ -13,14 +13,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import sys, numpy, json
 from os.path import join, realpath, dirname
-from daetools.pyDAE import *
-from choose_variable import daeChooseVariable, daeTableDialog
-from plot_options import *
 from PyQt4 import QtCore, QtGui
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+from daetools.pyDAE import *
+
+python_major = sys.version_info[0]
+if python_major == 2:
+    from choose_variable import daeChooseVariable, daeTableDialog
+    from plot_options import *
+elif python_major == 3:
+    from .choose_variable import daeChooseVariable, daeTableDialog
+    from .plot_options import *
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -220,7 +227,7 @@ class dae2DPlot(QtGui.QDialog):
             f.close()
 
         except Exception as e:
-            print(str(e))
+            print((str(e)))
             
     #@QtCore.pyqtSlot()
     def slotProperties(self):

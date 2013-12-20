@@ -13,13 +13,13 @@ You should have received a copy of the GNU General Public License along with thi
 software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 
-from __future__ import print_function
+
 import os, sys, operator
 import ply.lex as lex
 import ply.yacc as yacc
 from math import *
-from parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, Condition
-from parser_objects import NonstandardFunctionNode, StandardFunctionNode, AssignmentNode
+from .parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, Condition
+from .parser_objects import NonstandardFunctionNode, StandardFunctionNode, AssignmentNode
 
 #logical_operator = {'and': 'and',
 #                    'or' : 'or'

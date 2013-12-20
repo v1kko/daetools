@@ -21,16 +21,16 @@ from daetools.pyDAE import *
 from daetools.pyDAE.logs import daePythonStdOutLog 
 from daetools.pyDAE.data_reporters import daePlotDataReporter, daeMatlabMATFileDataReporter 
 
-(laSundialsLU, laSuperLU, laSuperLU_MT) = range(0, 3)
-(laAmesos_Klu, laAmesos_Superlu, laAmesos_Umfpack, laAmesos_Lapack, laAztecOO) = range(3, 8)
-(laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = range(8, 15)
+(laSundialsLU, laSuperLU, laSuperLU_MT) = list(range(0, 3))
+(laAmesos_Klu, laAmesos_Superlu, laAmesos_Umfpack, laAmesos_Lapack, laAztecOO) = list(range(3, 8))
+(laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = list(range(8, 15))
 
-(nlpIPOPT, nlpNLOPT, nlpBONMIN) = range(0, 3)
+(nlpIPOPT, nlpNLOPT, nlpBONMIN) = list(range(0, 3))
 
-(TCPIPLog, PythonStdOutLog, StdOutLog, BaseLog, FileLog, DelegateLog) = range(0, 6)
+(TCPIPLog, PythonStdOutLog, StdOutLog, BaseLog, FileLog, DelegateLog) = list(range(0, 6))
 
-(TCPIPDataReporter, NoOpDataReporter, DelegateDataReporter, TEXTFileDataReporter, PlotDataReporter) = range(0, 5)
-(MatlabMATFileDataReporter, BlackHoleDataReporter) = range(5, 7)
+(TCPIPDataReporter, NoOpDataReporter, DelegateDataReporter, TEXTFileDataReporter, PlotDataReporter) = list(range(0, 5))
+(MatlabMATFileDataReporter, BlackHoleDataReporter) = list(range(5, 7))
     
 def getAvailableNLPSolvers():
     available_nlp_solvers = []

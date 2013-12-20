@@ -18,7 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 """
 
-class daeAztecOptions:
+class daeAztecOptions(object):
     # Constants for solver types
     AZ_cg               = 0 # preconditioned conjugate gradient method
     AZ_gmres            = 1 # preconditioned gmres method

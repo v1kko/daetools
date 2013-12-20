@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """********************************************************************************
-                             daeMinpackLeastSq.py
+                             minpack.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -103,18 +103,18 @@ def Calculate(p, minpack, calc_values):
                     #print 'v =', values[o, e, 0]
                     #print 'd =', derivs[:, o, e, 0]
         
-    except Exception, e:
-        print 'Exception in function Calculate, for parameters values: {0}'.format(p)
-        print str(e)
+    except Exception as e:
+        print('Exception in function Calculate, for parameters values: {0}'.format(p))
+        print(str(e))
     
     if minpack.print_residuals_and_jacobian:
-        print 'Parameters:', p
+        print('Parameters:', p)
         if calc_values:
-            print '  Residuals:'
-            print r_values
+            print('  Residuals:')
+            print(r_values)
         else:
-            print '  Derivatives:'
-            print r_derivs
+            print('  Derivatives:')
+            print(r_derivs)
         
     if calc_values:
         return r_values
@@ -250,8 +250,8 @@ class daeMinpackLeastSq:
         
         self.minpack_leastsq_arguments['full_output'] = True
         self.minpack_leastsq_arguments['col_deriv']   = True
-        print 'minpack.leastsq will proceed with the following arguments:'
-        print '   ', self.minpack_leastsq_arguments
+        print('minpack.leastsq will proceed with the following arguments:')
+        print('   ', self.minpack_leastsq_arguments)
         
         # Call scipy.optimize.leastsq (Minpack wrapper)
         self.p_estimated, self.cov_x, self.infodict, self.msg, self.ier = leastsq(Residuals, 

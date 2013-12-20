@@ -16,8 +16,8 @@ from pyDataReporting import *
 try:
     import scipy
     from scipy.io import savemat, loadmat
-except ImportError, e:
-    print 'Cannot load scipy.io.savemat module', str(e)
+except ImportError as e:
+    print(('Cannot load scipy.io.savemat module: %s' % str(e)))
 
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):
     def __init__(self):
@@ -49,8 +49,8 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
                              long_field_names=False,
                              do_compression=False,
                              oned_as='row')
-        except Exception, e:
-            print 'Cannot call scipy.io.savemat(); is SciPy installed?\n' + str(e)
+        except Exception as e:
+            print(('Cannot call scipy.io.savemat(); is SciPy installed?\n' + str(e)))
 
 
 class daePlotDataReporter(daeDataReporterLocal):
@@ -124,7 +124,7 @@ class daePlotDataReporter(daeDataReporterLocal):
             n = len(args)
 
             def kwargCheck(kw='', valueIfNone=0):
-                if kwargs.has_key(kw) and kwargs[kw]:
+                if kw in kwargs and kwargs[kw]:
                     return kwargs[kw]
                 else:
                     return valueIfNone
@@ -166,7 +166,7 @@ class daePlotDataReporter(daeDataReporterLocal):
                 is the current set of axes.  Note that the matchups between
                 the processVar and daeVar require daeVar.CanonicalName, not
                 merely Name.'''
-                if lookup.has_key(daeVar.CanonicalName):
+                if daeVar.CanonicalName in lookup:
                     processVar = lookup[daeVar.CanonicalName]
                     #import pdb; pdb.set_trace()
                     plt.plot(
@@ -198,6 +198,6 @@ class daePlotDataReporter(daeDataReporterLocal):
                 axes.set_ylim( larger_axlim( axes.get_ylim() ) )
             plt.show()
 
-        except Exception, e:
+        except Exception as e:
             import traceback
-            print 'Error: \n' + traceback.format_exc()
+            print(('Error: \n' + traceback.format_exc()))

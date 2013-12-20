@@ -21,11 +21,21 @@ from time import localtime, strftime
 from os.path import join, dirname
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
-from simulation_explorer_ui import Ui_SimulationExplorer
-from simulation_inspector import daeSimulationInspector
-from exception_dlg_ui import Ui_ExceptionDialog
-from tree_item import *
-import aux
+
+python_major = sys.version_info[0]
+if python_major == 2:
+    from simulation_explorer_ui import Ui_SimulationExplorer
+    from simulation_inspector import daeSimulationInspector
+    from exception_dlg_ui import Ui_ExceptionDialog
+    from tree_item import *
+    import aux
+
+elif python_major == 3:
+    from .simulation_explorer_ui import Ui_SimulationExplorer
+    from .simulation_inspector import daeSimulationInspector
+    from .exception_dlg_ui import Ui_ExceptionDialog
+    from .tree_item import *
+    from . import aux
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -238,15 +248,15 @@ class daeSimulationExplorer(QtGui.QDialog):
         # Update Domains
         if verbose:
             print('Update Domains...')
-        for canonicalName, (domain, item) in self._inspector.domains.items():
+        for canonicalName, (domain, item) in list(self._inspector.domains.items()):
             val_ = item.getValue()
             
             if item.type == eStructuredGrid:                
                 points = item.getValue()
                 if verbose:
-                    print('    Updating domain %s points ...' % canonicalName)
-                    print('        from: %s' % domain.Points)
-                    print('          to: %s' % points)
+                    print(('    Updating domain %s points ...' % canonicalName))
+                    print(('        from: %s' % domain.Points))
+                    print(('          to: %s' % points))
                 domain.Points = points
             
             elif item.type == eArray:
@@ -258,28 +268,28 @@ class daeSimulationExplorer(QtGui.QDialog):
         # Update Parameters
         if verbose:
             print('Update Parameters...')
-        for canonicalName, (parameter, item) in self._inspector.parameters.items():
+        for canonicalName, (parameter, item) in list(self._inspector.parameters.items()):
             val_, units_ = item.getValue()
             if isinstance(val_, list):
                 q = numpy.array(val_, dtype = object)
                 q = q * units_
                 if verbose:
-                    print('    Updating parameter %s ...' % canonicalName)
-                    print('        from: %s %s' % (parameter.npyValues, parameter.Units))
-                    print('          to: %s' % q)
+                    print(('    Updating parameter %s ...' % canonicalName))
+                    print(('        from: %s %s' % (parameter.npyValues, parameter.Units)))
+                    print(('          to: %s' % q))
                 parameter.SetValues(q)
             else:
                 q = val_ * units_
                 if verbose:
-                    print('    Updating parameter %s ...' % canonicalName)
-                    print('        from: %s' % parameter.GetQuantity())
-                    print('          to: %s' % q)
+                    print(('    Updating parameter %s ...' % canonicalName))
+                    print(('        from: %s' % parameter.GetQuantity()))
+                    print(('          to: %s' % q))
                 parameter.SetValue(q)
                 
         # Update DegreesOfFreedom
         if verbose:
             print('Update DegreesOfFreedom...')
-        for canonicalName, (variable, item) in self._inspector.dofs.items():
+        for canonicalName, (variable, item) in list(self._inspector.dofs.items()):
             val_, units_ = item.getValue()
             if isinstance(val_, list):
                 q = numpy.array(val_, dtype = object)
@@ -291,22 +301,22 @@ class daeSimulationExplorer(QtGui.QDialog):
                     if c[i] != None:
                         c[i] *= units_
                 if verbose:
-                    print('    Reassigning %s ...' % canonicalName)
-                    print('        from: %s %s' % (variable.npyValues, variable.VariableType.Units))
-                    print('          to: %s' % q)
+                    print(('    Reassigning %s ...' % canonicalName))
+                    print(('        from: %s %s' % (variable.npyValues, variable.VariableType.Units)))
+                    print(('          to: %s' % q))
                 variable.ReAssignValues(q)
             else:
                 q = val_ * units_
                 if verbose:
-                    print('    Reassigning %s ...' % canonicalName)
-                    print('        from: %s' % variable.GetQuantity())
-                    print('          to: %s' % q)
+                    print(('    Reassigning %s ...' % canonicalName))
+                    print(('        from: %s' % variable.GetQuantity()))
+                    print(('          to: %s' % q))
                 variable.ReAssignValue(q)
                 
         # Update InitialConditions
         if verbose:
             print('Update InitialConditions...')
-        for canonicalName, (variable, item) in self._inspector.initial_conditions.items():
+        for canonicalName, (variable, item) in list(self._inspector.initial_conditions.items()):
             val_, units_ = item.getValue()
             if isinstance(val_, list):
                 q = numpy.array(val_, dtype = object)
@@ -318,26 +328,26 @@ class daeSimulationExplorer(QtGui.QDialog):
                     if c[i] != None:
                         c[i] *= units_
                 if verbose:
-                    print('    Resetting initial conditions for %s ...' % canonicalName)
-                    print('        from: %s %s' % (variable.npyValues, variable.VariableType.Units))
-                    print('          to: %s' % q)
+                    print(('    Resetting initial conditions for %s ...' % canonicalName))
+                    print(('        from: %s %s' % (variable.npyValues, variable.VariableType.Units)))
+                    print(('          to: %s' % q))
                 variable.ReSetInitialConditions(q)
             else:
                 q = val_ * units_
                 if verbose:
-                    print('    Resetting initial conditions for %s ...' % canonicalName)
-                    print('        from: %s' % variable.GetQuantity())
-                    print('          to: %s' % q)
+                    print(('    Resetting initial conditions for %s ...' % canonicalName))
+                    print(('        from: %s' % variable.GetQuantity()))
+                    print(('          to: %s' % q))
                 variable.ReSetInitialCondition(q)
             
         # Update Outputs
         if verbose:
             print('Update Outputs...')
-        for canonicalName, (variable, item) in self._inspector.output_variables.items():
+        for canonicalName, (variable, item) in list(self._inspector.output_variables.items()):
             if verbose:
-                print('    Updating the ReportingOn flag for %s ...' % canonicalName)
-                print('        from: %s' % variable.ReportingOn)
-                print('          to: %s' % item.getValue())
+                print(('    Updating the ReportingOn flag for %s ...' % canonicalName))
+                print(('        from: %s' % variable.ReportingOn))
+                print(('          to: %s' % item.getValue()))
             if item.getValue():
                 variable.ReportingOn = True
             else:
@@ -346,15 +356,15 @@ class daeSimulationExplorer(QtGui.QDialog):
         # Update STNs
         if verbose:
             print('Update STNs...')
-        for canonicalName, (stn, lstates) in self._inspector.stns.items():
+        for canonicalName, (stn, lstates) in list(self._inspector.stns.items()):
             # Iterate over states and detect which of them is checked
             for state, item in lstates:
                 if item.getValue():
                     activeState = state.Name
                     if verbose:
-                        print('    Changing the active state for %s:' % canonicalName)
-                        print('        from: %s' % stn.ActiveState)
-                        print('          to: %s' % activeState)
+                        print(('    Changing the active state for %s:' % canonicalName))
+                        print(('        from: %s' % stn.ActiveState))
+                        print(('          to: %s' % activeState))
                     stn.ActiveState = activeState
                     break
         

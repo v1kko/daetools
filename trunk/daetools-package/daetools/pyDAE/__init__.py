@@ -1,3 +1,8 @@
+import sys
+
+python_major = sys.version_info[0]
+python_minor = sys.version_info[1]
+
 # Platform-dependent extension modules
 import pyCore
 import pyActivity
@@ -12,9 +17,13 @@ from pyDataReporting import *
 from pyIDAS import *
 
 # Platform-independent modules
-from logs import daePythonStdOutLog
-from variable_types import *
-
+if python_major == 2:
+    from logs import daePythonStdOutLog
+    from variable_types import *
+elif python_major == 3:
+    from .logs import daePythonStdOutLog
+    from .variable_types import *
+    
 try:
     from daetools.dae_simulator.simulator import daeSimulator
 except ImportError as e:

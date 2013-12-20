@@ -14,7 +14,13 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import os, sys, math, time, numpy
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
-from choose_variable import daeChooseVariable, daeTableDialog
+
+python_major = sys.version_info[0]
+if python_major == 2:
+    from choose_variable import daeChooseVariable, daeTableDialog
+elif python_major == 3:
+    from .choose_variable import daeChooseVariable, daeTableDialog
+
 try:
     import enthought.mayavi as mayavi
     from enthought.mayavi import mlab

@@ -956,7 +956,7 @@ class unit(object):
                               }
 
         supportedUnits = cls.getAllSupportedUnits()
-        for key, u in supportedUnits.items():
+        for key, u in list(supportedUnits.items()):
             setattr(cls, key, u)
         setattr(cls, 'tera',  1E+12)
         setattr(cls, 'giga',  1E+9)
@@ -979,7 +979,7 @@ class unit(object):
     @classmethod
     def getAllSupportedUnits(cls):
         supportedUnits = {}
-        for key, baseunit in cls.__base_units__.items():
+        for key, baseunit in list(cls.__base_units__.items()):
             supportedUnits[key] = unit.create({key : 1})
         return supportedUnits
 
@@ -988,7 +988,7 @@ class unit(object):
         #if not hasattr(unit, '__base_units__'):
         #    unit.init_base_units()
         self.units = {}
-        for key, exp in kwargs.items():
+        for key, exp in list(kwargs.items()):
             if key in unit.__base_units__:
                 self.units[key] = exp
             else:
@@ -999,7 +999,7 @@ class unit(object):
         """Returns the 'base_unit' object built by joining dimensions from all items in the dictionary 'units'.
         It multiplies base units from the dictionary (risen on the corresponding exponent)."""
         res_unit = base_unit()
-        for base_unit_name, exp in self.units.items():
+        for base_unit_name, exp in list(self.units.items()):
             if not base_unit_name in unit.__base_units__:
                 raise UnitsError('Cannot find the base_unit {0} in the __base_units__ dictionary'.format(base_unit_name))
             res_unit = res_unit * (unit.__base_units__[base_unit_name] ** exp)

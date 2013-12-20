@@ -20,11 +20,20 @@ import sys, tempfile, numpy, json
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
-from editor_quantity_ui import Ui_EditorQuantity
-from editor_quantity_array_ui import Ui_EditorQuantityArray
-from editor_state_transition_ui import Ui_EditorStateTransition
-from editor_domain_array_ui import Ui_EditorArrayDomain
-from editor_domain_distributed_ui import Ui_EditorDistributedDomain
+
+python_major = sys.version_info[0]
+if python_major == 2:
+    from editor_quantity_ui import Ui_EditorQuantity
+    from editor_quantity_array_ui import Ui_EditorQuantityArray
+    from editor_state_transition_ui import Ui_EditorStateTransition
+    from editor_domain_array_ui import Ui_EditorArrayDomain
+    from editor_domain_distributed_ui import Ui_EditorDistributedDomain
+elif python_major == 3:
+    from .editor_quantity_ui import Ui_EditorQuantity
+    from .editor_quantity_array_ui import Ui_EditorQuantityArray
+    from .editor_state_transition_ui import Ui_EditorStateTransition
+    from .editor_domain_array_ui import Ui_EditorArrayDomain
+    from .editor_domain_distributed_ui import Ui_EditorDistributedDomain
 
 class runtimeInformation(object):
     def __init__(self, model):
@@ -49,6 +58,7 @@ class treeItem(object):
         self.itemType       = itemType
         self.editor         = None
         self.treeWidgetItem = None
+
         self._value         = None
         if parent:
             parent.children.append(self)
@@ -135,7 +145,7 @@ class treeItem(object):
             dictItems[self.canonicalName] = bool(self._value)
         
         for child in self.children:
-            dictItems = dict(dictItems.items() + child.toDictionary().items())
+            dictItems = dict(list(dictItems.items()) + list(child.toDictionary().items()))
 
         return dictItems
             
@@ -215,7 +225,7 @@ class treeItem_Quantity(treeItem):
         if not isinstance(value, tuple):
             raise RuntimeError('Invalid value: %s for the tree item: %s' % (str(value), daeGetStrippedName(self.name)))
         
-        if isinstance(value[0], basestring):
+        if isinstance(value[0], (basestring, str)):
             try:
                 val = eval(value[0])
             except Exception as e:
@@ -260,7 +270,7 @@ class treeItem_Quantity(treeItem):
             raise RuntimeError('Invalid value: %s for the tree item: %s (must be a string, float or a list)' % (str(value[0]), daeGetStrippedName(self.name)))
             
         
-        if isinstance(value[1], basestring):
+        if isinstance(value[1], (basestring, str)):
             try:
                 # First try to evaluate the expression
                 unit_expr = value[1].strip()
@@ -508,7 +518,7 @@ class treeItem_Domain(treeItem):
                 return
                 
         elif self.type == eStructuredGrid:
-            if isinstance(value, basestring):
+            if isinstance(value, (basestring, str)):
                 try:
                     val = eval(value)
                 except Exception as e:

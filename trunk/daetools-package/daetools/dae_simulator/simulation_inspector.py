@@ -18,7 +18,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 import sys, tempfile, numpy
 from daetools.pyDAE import *
-from tree_item import *
+python_major = sys.version_info[0]
+if python_major == 2:
+    from tree_item import *
+elif python_major == 3:
+    from .tree_item import *
 
 def _collectParameters(nodeItem, model, dictParameters):
     """
@@ -202,7 +206,7 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
         else:
             values = numpy.array(var.npyValues, dtype=object)
             # Iterate over points and set None for the points which are *not* differential
-            for var_index, domainIndexes in domainsIndexesMap.items():
+            for var_index, domainIndexes in list(domainsIndexesMap.items()):
                 #print var_index, domainIndexes, values[tuple(domainIndexes)]
                 if IDs[var.OverallIndex + var_index] != cnDifferential:
                     values[tuple(domainIndexes)] = None
@@ -237,7 +241,7 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
         else:
             values = numpy.array(var.npyValues, dtype=object)
             # Iterate over points and set None for the points which are *not* differential
-            for var_index, domainIndexes in domainsIndexesMap.items():
+            for var_index, domainIndexes in list(domainsIndexesMap.items()):
                 if IDs[var.OverallIndex + var_index] != cnAssigned:
                     values[tuple(domainIndexes)] = None
             value = values.tolist()

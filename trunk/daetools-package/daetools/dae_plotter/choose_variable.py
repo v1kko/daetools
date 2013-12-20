@@ -17,6 +17,7 @@ October 2012 by Caleb Huttingh:
 """
 import sys
 from os.path import join, realpath, dirname
+python_major = sys.version_info[0]
 
 try:
     import numpy
@@ -30,8 +31,12 @@ except ImportError:
 
 try:
     from daetools.pyDAE import *
-    from choose_variable_ui import Ui_ChooseVariable
-    from table_widget import Ui_tableWidgetDialog
+    if python_major == 2:
+        from choose_variable_ui import Ui_ChooseVariable
+        from table_widget import Ui_tableWidgetDialog
+    elif python_major == 3:
+        from .choose_variable_ui import Ui_ChooseVariable
+        from .table_widget import Ui_tableWidgetDialog
 except ImportError:
     print('[daeChooseVariable]: Cannot load daetools modules')
 
@@ -45,7 +50,7 @@ images_dir = join(dirname(__file__), 'images')
 
 class daeChooseVariable(QtGui.QDialog):
 
-    (plot2D, plot2DAnimated, plot3D) = range(0, 3)
+    (plot2D, plot2DAnimated, plot3D) = list(range(0, 3))
     FREE_DOMAIN = -1
     LAST_TIME   = -2
 
@@ -289,8 +294,8 @@ class daeChooseVariable(QtGui.QDialog):
         yPoints = values[t] #.copy()
 
         print(noTimePoints)
-        print('Number of x points = {0}'.format(len(xPoints)))
-        print('Number of y points = {0}'.format(len(yPoints)))
+        print(('Number of x points = {0}'.format(len(xPoints))))
+        print(('Number of y points = {0}'.format(len(yPoints))))
         #print times[-1]
 
         return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times[-1]
