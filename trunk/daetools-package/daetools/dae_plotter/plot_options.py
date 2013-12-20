@@ -15,9 +15,9 @@
  ***********************************************************************************
 """
 try:
-    from formlayout import fedit
-except ImportError, e:
-    print '[daePlotOptions]: Cannot load formlayout.fedit module', str(e)
+    from .formlayout import fedit
+except ImportError as e:
+    print('[daePlotOptions]: Cannot load formlayout.fedit module', str(e))
 
 LINESTYLES = {
               '-': 'Solid',
@@ -87,8 +87,8 @@ def figure_edit(canvas, parent=None):
 
     if has_curve:
         curves = []
-        linestyles = LINESTYLES.items()
-        markers = MARKERS.items()
+        linestyles = list(LINESTYLES.items())
+        markers = list(MARKERS.items())
         lines = axes.get_lines()
         
         for line in lines:

@@ -149,7 +149,7 @@ class modTutorial(daeModel):
         #
         # Achtung: the value of Qmul must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
-        values = [2 * K for i in xrange(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
+        values = [2 * K for i in range(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
         eq.Residual = self.Qmul() + Sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
 
         # This is physically meaningles example how to setup a user-defined array of adouble objects.
@@ -163,9 +163,9 @@ class modTutorial(daeModel):
         arr1[1] = self.Qt()
         # Or simply:
         #arr1 = adouble_array.FromList([self.Qb(), self.Qt()])
-        print arr1, len(arr1)
-        for a in arr1.items():
-            print a
+        print(arr1, len(arr1))
+        for a in list(arr1.items()):
+            print(a)
 
         arr2 = adouble_array()
         arr2.Resize(2)
@@ -173,9 +173,9 @@ class modTutorial(daeModel):
         arr2[1] = self.k() * self.T.d(self.y, 1, 0)
         # Or simply:
         #arr2 = adouble_array.FromList([self.k() * self.T.d(self.y, 0, 0), self.k() * self.T.d(self.y, 1, 0)])
-        print arr2, len(arr2)
-        for a in arr2.items():
-            print a
+        print(arr2, len(arr2))
+        for a in list(arr2.items()):
+            print(a)
 
         eq = self.CreateEquation("adTest", "User-defined adouble_array")
         eq.Residual = self.adTest() - Sum(arr1 * 2 / 15 - arr2)

@@ -114,11 +114,11 @@ def ObjectiveFunction(x, *args):
     #    Objective function and constraints have Value (float) and Gradients (numpy array) properties where
     #    their values and gradients in respect to optimization variables are stored. Here, as the example,
     #    the value and gradients of the objective function are printed (since no constraints are involved).
-    print 'Objective function inputs: '
-    print '   Inputs: {0}'.format(x)
-    print '   Value     = {0}'.format(simulation.ObjectiveFunction.Value)
-    print '   Gradients = {0}'.format(simulation.ObjectiveFunction.Gradients)
-    print ''
+    print('Objective function inputs: ')
+    print('   Inputs: {0}'.format(x))
+    print('   Value     = {0}'.format(simulation.ObjectiveFunction.Value))
+    print('   Gradients = {0}'.format(simulation.ObjectiveFunction.Gradients))
+    print('')
     return simulation.ObjectiveFunction.Value
 
 def run():
@@ -154,7 +154,7 @@ def run():
           simulation.ov4.StartingPoint,
           simulation.ov5.StartingPoint]
 
-    print fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8)
+    print(fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8))
 
 if __name__ == "__main__":
     run()

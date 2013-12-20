@@ -71,7 +71,7 @@ def getAvailableLASolvers():
         if 'daetools.solvers.superlu' in sys.modules:
             del sys.modules['daetools.solvers.superlu']
     except Exception as e:
-        print str(e)
+        print((str(e)))
 
     try:
         from daetools.solvers.superlu_mt import pySuperLU_MT
@@ -105,7 +105,7 @@ def getAvailableLASolvers():
         if 'daetools.solvers.intel_pardiso' in sys.modules:
             del sys.modules['daetools.solvers.intel_pardiso']
     except Exception as e:
-        print e
+        print(e)
     
     return available_la_solvers
 

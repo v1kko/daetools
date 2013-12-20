@@ -165,10 +165,10 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
     
     for eq in simulation.m.Equations:
-        print eq.CanonicalName, ':'
+        print(eq.CanonicalName, ':')
         for eei in eq.EquationExecutionInfos:
-            print '    {0}:'.format(eei.Name)
-            print '      {0}'.format(eei.JacobianExpressions)
+            print('    {0}:'.format(eei.Name))
+            print('      {0}'.format(eei.JacobianExpressions))
             
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

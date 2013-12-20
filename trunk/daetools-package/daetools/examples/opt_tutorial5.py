@@ -107,13 +107,13 @@ def Function(p, simulation, xin, ymeas, calc_values):
         values[e]    = simulation.ObjectiveFunction.Value - ymeas[e]
         derivs[e][:] = simulation.ObjectiveFunction.Gradients
         
-    print 'A =', simulation.A.Value, ', k =', simulation.k.Value, ', theta =', simulation.theta.Value
+    print('A =', simulation.A.Value, ', k =', simulation.k.Value, ', theta =', simulation.theta.Value)
     if calc_values:
-        print '  Residuals:'
-        print values
+        print('  Residuals:')
+        print(values)
     else:
-        print '  Derivatives:'
-        print derivs
+        print('  Derivatives:')
+        print(derivs)
     
     if calc_values:
         return values
@@ -191,25 +191,25 @@ def run():
                                         full_output=True)
 
     # Print the results
-    print '------------------------------------------------------'
+    print('------------------------------------------------------')
     if ier in [1, 2, 3, 4]:
-        print 'Solution found!'
+        print('Solution found!')
     else:
-        print 'Least square method failed!'
-    print 'Status:', msg
+        print('Least square method failed!')
+    print('Status:', msg)
 
-    print 'Number of function evaluations =', infodict['nfev']
+    print('Number of function evaluations =', infodict['nfev'])
     chisq = (infodict['fvec']**2).sum()
     dof = len(x) - len(p0)
     rmse = numpy.sqrt(chisq / dof)
-    print 'Root mean square deviation =', rmse
+    print('Root mean square deviation =', rmse)
 
     A, k, theta = p
-    print 'Estimated parameters values:'
-    print '    A     =', A
-    print '    k     =', k
-    print '    theta =', theta
-    print '------------------------------------------------------'
+    print('Estimated parameters values:')
+    print('    A     =', A)
+    print('    k     =', k)
+    print('    theta =', theta)
+    print('------------------------------------------------------')
 
     # Plot the comparison between the exact values, measured and fitted data
     plt.plot(x, peval(x, p), x, y_meas, 'o', x, y_true)

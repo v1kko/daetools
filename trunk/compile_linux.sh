@@ -98,7 +98,7 @@ compile()
 }
 
 # Default python binary:
-PYTHON=`python -c "import sys; print sys.executable"`
+PYTHON=`python -c "import sys; print(sys.executable)"`
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
@@ -130,11 +130,11 @@ for i; do
                 exit 1
                 ;;
                   
-       --with-python-binary)  PYTHON=`$2 -c "import sys; print sys.executable"`
+       --with-python-binary)  PYTHON=`$2 -c "import sys; print(sys.executable)"`
                               shift ; shift 
                               ;;
                             
-       --with-python-version )  PYTHON=`python$2 -c "import sys; print sys.executable"`
+       --with-python-version )  PYTHON=`python$2 -c "import sys; print(sys.executable)"`
                                 shift ; shift 
                                 ;;
                                     

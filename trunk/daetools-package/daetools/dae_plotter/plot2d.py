@@ -198,7 +198,7 @@ class dae2DPlot(QtGui.QDialog):
             self.reformatPlot()
         
         except Exception as e:
-            print(str(e))
+            print((str(e)))
         
     #@QtCore.pyqtSlot()
     def slotExportTemplate(self):
@@ -220,7 +220,7 @@ class dae2DPlot(QtGui.QDialog):
             f.close()
 
         except Exception as e:
-            print str(e)
+            print(str(e))
             
     #@QtCore.pyqtSlot()
     def slotProperties(self):

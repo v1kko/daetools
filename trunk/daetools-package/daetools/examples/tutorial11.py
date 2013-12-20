@@ -34,7 +34,7 @@ try:
     from daetools.solvers.trilinos import pyTrilinos
     from daetools.solvers.aztecoo_options import daeAztecOptions
 except ImportError as e:
-    print('Unable to import Trilinos LA solver: {0}'.format(e))
+    print(('Unable to import Trilinos LA solver: {0}'.format(e)))
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
@@ -111,7 +111,7 @@ class simTutorial(daeSimulation):
 # Function to create the Trilinos linear equation solver.
 # AztecOO solvers do not work well yet
 def createLASolver():
-    print "Supported Trilinos solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers())
+    print("Supported Trilinos solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
     
     # Amesos SuperLU solver
     #lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")

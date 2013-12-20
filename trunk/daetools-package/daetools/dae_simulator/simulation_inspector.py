@@ -202,7 +202,7 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
         else:
             values = numpy.array(var.npyValues, dtype=object)
             # Iterate over points and set None for the points which are *not* differential
-            for var_index, domainIndexes in domainsIndexesMap.iteritems():
+            for var_index, domainIndexes in domainsIndexesMap.items():
                 #print var_index, domainIndexes, values[tuple(domainIndexes)]
                 if IDs[var.OverallIndex + var_index] != cnDifferential:
                     values[tuple(domainIndexes)] = None
@@ -237,7 +237,7 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
         else:
             values = numpy.array(var.npyValues, dtype=object)
             # Iterate over points and set None for the points which are *not* differential
-            for var_index, domainIndexes in domainsIndexesMap.iteritems():
+            for var_index, domainIndexes in domainsIndexesMap.items():
                 if IDs[var.OverallIndex + var_index] != cnAssigned:
                     values[tuple(domainIndexes)] = None
             value = values.tolist()

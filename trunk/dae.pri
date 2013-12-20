@@ -76,6 +76,7 @@ PYTHON = python
 
 PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
 PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
+PYTHON_ABI   = $$system($${PYTHON} -c \"import sysconfig; flags = sysconfig.get_config_vars(); abi = flags[\'ABIFLAGS\'] if (\'ABIFLAGS\' in flags) else \'\'; print(abi)\")
 
 # Numpy version
 #NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
@@ -172,7 +173,7 @@ unix::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix
 win32::PYTHON_LIB_DIR    = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
 
 !shellCompile {
-message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR})
+message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})
 }
 
 #win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
@@ -225,7 +226,7 @@ unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PY
 unix::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
-                                   -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR} $${RT}
+                                   -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
 unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
                                                       -l$${BOOST_THREAD_LIB_NAME} \
                                                       -l$${BOOST_FILESYSTEM_LIB_NAME} \

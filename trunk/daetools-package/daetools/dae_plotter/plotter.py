@@ -17,27 +17,27 @@ from os.path import join, realpath, dirname
 
 try:
     from PyQt4 import QtCore, QtGui
-except Exception, e:
-    print '[daePlotter]: Cannot load pyQt4 modules\n Error: ', str(e)
+except Exception as e:
+    print(('[daePlotter]: Cannot load pyQt4 modules\n Error: ', str(e)))
     sys.exit()
 
 try:
     import numpy
-except Exception, e:
-    print '[daePlotter]: Cannot load numpy module\n Error: ', str(e)
+except Exception as e:
+    print(('[daePlotter]: Cannot load numpy module\n Error: ', str(e)))
     sys.exit()
 
 try:
     from daetools.pyDAE import *
-except Exception, e:
-    print '[daePlotter]: Cannot load daetools.pyDAE module\n Error: ', str(e)
+except Exception as e:
+    print(('[daePlotter]: Cannot load daetools.pyDAE module\n Error: ', str(e)))
     sys.exit()
 
 try:
     from about import daeAboutDialog
     from daetools.pyDAE.web_view_dialog import daeWebView
-except Exception, e:
-    print '[daePlotter]: Cannot load daeAbout/daeWebView module\n Error: ', str(e)
+except Exception as e:
+    print(('[daePlotter]: Cannot load daeAbout/daeWebView module\n Error: ', str(e)))
 
 try:
     images_dir = join(dirname(__file__), 'images')
@@ -148,7 +148,7 @@ class daeMainWindow(QtGui.QMainWindow):
     def plot2D(self, updateInterval = 0):
         try:
             from plot2d import dae2DPlot
-        except Exception, e:
+        except Exception as e:
             QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
             return
             
@@ -163,7 +163,7 @@ class daeMainWindow(QtGui.QMainWindow):
     def slotPlot3D(self):
         try:
             from mayavi_plot3d import daeMayavi3DPlot
-        except Exception, e:
+        except Exception as e:
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
         
@@ -178,7 +178,7 @@ class daeMainWindow(QtGui.QMainWindow):
             return
         try:
             from mayavi_plot3d import daeMayavi3DPlot
-        except Exception, e:
+        except Exception as e:
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
 
@@ -196,7 +196,7 @@ class daeMainWindow(QtGui.QMainWindow):
             
         try:
             from mayavi_plot3d import daeMayavi3DPlot
-        except Exception, e:
+        except Exception as e:
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
 
@@ -209,7 +209,7 @@ class daeMainWindow(QtGui.QMainWindow):
             return
         try:
             from mayavi_plot3d import daeMayavi3DPlot
-        except Exception, e:
+        except Exception as e:
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
 
@@ -231,7 +231,7 @@ class daeMainWindow(QtGui.QMainWindow):
             
             try:
                 from plot2d import dae2DPlot
-            except Exception, e:
+            except Exception as e:
                 QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
                 return
 
@@ -243,7 +243,7 @@ class daeMainWindow(QtGui.QMainWindow):
                 plot2D.show()
 
         except Exception as e:
-            print str(e)
+            print((str(e)))
 
     #@QtCore.pyqtSlot()
     def slotAbout(self):

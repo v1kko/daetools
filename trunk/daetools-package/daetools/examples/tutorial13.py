@@ -56,9 +56,9 @@ class simpleUserAction(daeAction):
             if QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(None, 'tutorial13', msg)
         finally:
-            print '********************************************************'
-            print msg
-            print '********************************************************'
+            print('********************************************************')
+            print(msg)
+            print('********************************************************')
 
 class simpleUserAction2(daeAction):
     def __init__(self, msg):
@@ -73,10 +73,10 @@ class simpleUserAction2(daeAction):
             if QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(None, 'tutorial13', self.msg)
         finally:
-            print '********************************************************'
-            print 'tutorial13 simpleUserAction2 message: '
-            print self.msg
-            print '********************************************************'
+            print('********************************************************')
+            print('tutorial13 simpleUserAction2 message: ')
+            print(self.msg)
+            print('********************************************************')
             
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

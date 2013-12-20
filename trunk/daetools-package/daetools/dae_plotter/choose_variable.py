@@ -21,19 +21,19 @@ from os.path import join, realpath, dirname
 try:
     import numpy
 except ImportError:
-    print '[daeChooseVariable]: Cannot load numpy module'
+    print('[daeChooseVariable]: Cannot load numpy module')
 
 try:
     from PyQt4 import QtCore, QtGui
 except ImportError:
-    print '[daeChooseVariable]: Cannot load pyQt4 modules'
+    print('[daeChooseVariable]: Cannot load pyQt4 modules')
 
 try:
     from daetools.pyDAE import *
     from choose_variable_ui import Ui_ChooseVariable
     from table_widget import Ui_tableWidgetDialog
 except ImportError:
-    print '[daeChooseVariable]: Cannot load daetools modules'
+    print('[daeChooseVariable]: Cannot load daetools modules')
 
 class daeTableDialog(QtGui.QDialog):
     def __init__(self, parent):
@@ -288,9 +288,9 @@ class daeChooseVariable(QtGui.QDialog):
 
         yPoints = values[t] #.copy()
 
-        print noTimePoints
-        print 'Number of x points = {0}'.format(len(xPoints))
-        print 'Number of y points = {0}'.format(len(yPoints))
+        print(noTimePoints)
+        print('Number of x points = {0}'.format(len(xPoints)))
+        print('Number of y points = {0}'.format(len(yPoints)))
         #print times[-1]
 
         return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times[-1]

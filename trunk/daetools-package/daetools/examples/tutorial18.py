@@ -90,20 +90,20 @@ class modTutorial(daeModel):
         
         
         Tmatrix = numpy.matrix(Tndarray, dtype=object)
-        print 'T as Numpy matrix:'
-        print Tmatrix
+        print('T as Numpy matrix:')
+        print(Tmatrix)
 
         #print 'T matrix transposed:'
         #print Tmatrix.transpose()
         
         b = numpy.zeros(Ny)
         b[:] = [i for i in range(Ny)]
-        print b
+        print(b)
         
-        print Tndarray * b
+        print(Tndarray * b)
         
         a = numpy.eye(2)
-        print numpy.outer(Tndarray, b)
+        print(numpy.outer(Tndarray, b))
         
         #print 'Sum of all temperatures:'
         #print Tmatrix.sum()

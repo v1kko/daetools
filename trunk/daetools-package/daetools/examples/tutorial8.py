@@ -99,7 +99,7 @@ class MyDataReporter(daeDataReporterLocal):
     def Write(self):
         try:
             content = self.MakeString()
-            print content
+            print(content)
             self.f.write(content)
             self.f.close()
 

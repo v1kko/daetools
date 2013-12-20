@@ -167,7 +167,7 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    print simulation.m.extFun_.EquationExecutionInfos[0].VariableIndexes
+    print(simulation.m.extFun_.EquationExecutionInfos[0].VariableIndexes)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

@@ -180,16 +180,16 @@ def consoleRun():
     # The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, 
     # however here the system has not been solved initially (at t = 0) and the values and  
     # initial conditions will be copied automatically to DAE solver during SolveInitial call.
-    print 'T before loading:'
-    print simulation.m.T.npyValues
+    print('T before loading:')
+    print(simulation.m.T.npyValues)
     simulation.LoadInitializationValues("tutorial10.init")
-    print 'T after loading:'
-    print simulation.m.T.npyValues
+    print('T after loading:')
+    print(simulation.m.T.npyValues)
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
-    print 'T after SolveInitial:'
-    print simulation.m.T.npyValues
+    print('T after SolveInitial:')
+    print(simulation.m.T.npyValues)
     
     # Save the initialization file that can be used during later initialization
     simulation.StoreInitializationValues("tutorial10.init")

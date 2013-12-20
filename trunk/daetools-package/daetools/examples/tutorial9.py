@@ -42,7 +42,7 @@ try:
     #from daetools.solvers.superlu_mt import pySuperLU_MT
     #from daetools.solvers.intel_pardiso import pyIntelPardiso
 except ImportError as e:
-    print('Unable to import LA solver: {0}'.format(e))
+    print(('Unable to import LA solver: {0}'.format(e)))
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, J, W
@@ -146,7 +146,7 @@ def consoleRun():
     # You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).
 
     # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
-    print "Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers())
+    print("Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")

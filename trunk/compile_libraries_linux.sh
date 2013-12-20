@@ -63,11 +63,11 @@ for i; do
                 exit 1
                 ;;
                   
-    --with-python-binary)  PYTHON=`$2 -c "import sys; print sys.executable"`
+    --with-python-binary)  PYTHON=`$2 -c "import sys; print(sys.executable)"`
                            shift ; shift 
                            ;;
                             
-    --with-python-version )  PYTHON=`python$2 -c "import sys; print sys.executable"`
+    --with-python-version )  PYTHON=`python$2 -c "import sys; print(sys.executable)"`
                              shift ; shift 
                              ;;
                                     
@@ -153,7 +153,7 @@ vSUPERLU=4.1
 vSUPERLU_MT=2.0
 vNLOPT=2.4.1
 vIDAS=1.1.0
-vTRILINOS=11.4.0
+vTRILINOS=10.8.0
 vUMFPACK=5.6.2
 vAMD=2.3.1
 vMETIS=5.1.0

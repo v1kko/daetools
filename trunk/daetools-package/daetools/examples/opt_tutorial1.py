@@ -102,7 +102,7 @@ def setOptions(nlpsolver):
         # ClearOptions can clear all options:
         #nlpsolver.ClearOptions()
     except Exception as e:
-        print str(e)
+        print(str(e))
         
 # Use daeSimulator class
 def guiRun(app):

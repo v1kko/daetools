@@ -91,9 +91,9 @@ class modTutorial(daeModel):
         ##################################################################################
         # First way: use constant global stiffness matrix and load array
         ##################################################################################
-        print '***************************************************************************'
-        print '    First way'
-        print '***************************************************************************'
+        print('***************************************************************************')
+        print('    First way')
+        print('***************************************************************************')
         # Create global stiffness matrix and load vector (dtype = float):
         A = numpy.zeros((N,N))        
         F = numpy.zeros(N)
@@ -119,20 +119,20 @@ class modTutorial(daeModel):
                     A[dof_indices[i], dof_indices[j]] += Ael[i,j]
                 F[dof_indices[i]] += Fel[i]
         
-        print 'The global stiffness matrix (A) before applying boundary conditions:'
-        print A
-        print 'The global load vector (F):'
-        print F
+        print('The global stiffness matrix (A) before applying boundary conditions:')
+        print(A)
+        print('The global load vector (F):')
+        print(F)
         
         # Boundary conditions:
         # at x = 0: T(0) = 0     (Dirichlet BC)
         # at x = 1: dT(1)/dx = 0 (Neumann BC)
         A[0, 1:-1] = 0
         F[0] = 0
-        print 'The global stiffness matrix (A) after applying boundary conditions:'
-        print A
-        print 'The global load vector (F) after applying boundary conditions:'
-        print F
+        print('The global stiffness matrix (A) after applying boundary conditions:')
+        print(A)
+        print('The global load vector (F) after applying boundary conditions:')
+        print(F)
         
         # Create a vector of temperatures:
         T = numpy.empty(N, dtype=object)
@@ -148,9 +148,9 @@ class modTutorial(daeModel):
         #             model parameters/variables (not constant in a general case).
         #             Obviously, they are constant here - this is only to show the concept
         ##################################################################################
-        print '***************************************************************************'
-        print '    Second way'
-        print '***************************************************************************'
+        print('***************************************************************************')
+        print('    Second way')
+        print('***************************************************************************')
         # Create global stiffness matrix and load vector (dtype = object). This matrix and
         # load vector will be functions of model parameters/variables.  
         # In this simple example that is not a case; however, the procedure is analogous.
@@ -183,20 +183,20 @@ class modTutorial(daeModel):
                     A[dof_indices[i], dof_indices[j]] += Ael[i,j]
                 F[dof_indices[i]] += Fel[i]
         
-        print 'The global stiffness matrix (A) before applying boundary conditions:'
-        print A
-        print 'The global load vector (F):'
-        print F
+        print('The global stiffness matrix (A) before applying boundary conditions:')
+        print(A)
+        print('The global load vector (F):')
+        print(F)
         
         # Boundary conditions:
         # at x = 0: T(0) = 0     (Dirichlet BC)
         # at x = 1: dT(1)/dx = 0 (Neumann BC)
         A[0, 1:-1] = 0
         F[0] = 0
-        print 'The global stiffness matrix (A) after applying boundary conditions:'
-        print A
-        print 'The global load vector (F) after applying boundary conditions:'
-        print F
+        print('The global stiffness matrix (A) after applying boundary conditions:')
+        print(A)
+        print('The global load vector (F) after applying boundary conditions:')
+        print(F)
         
         # Create a vector of temperatures:
         T = numpy.empty(N, dtype=object)

@@ -145,8 +145,8 @@ class simTutorial(daeSimulation):
         #    The values will be converted to the units in the parameter 'k': W/(m*K) thus the value will be 401 W/(m*K).
         k = numpy.empty((Nx,Ny), dtype=object)
         k[:] = 0.401 * kW/(m*K)
-        print 'Parameter lambda values:'
-        print k
+        print('Parameter lambda values:')
+        print(k)
         self.m.k.SetValues(k)
         
         # b) Use a single float value for all points (the units are implicitly W/(m*K)):
@@ -218,8 +218,8 @@ class simTutorial(daeSimulation):
         #    thus leaving points at the boundaries to None (which by design means they will be excluded).
         ic = numpy.empty((Nx,Ny), dtype=object)
         ic[1:Nx-1, 1:Ny-1] = 300 * K
-        print 'Initial conditions for T:'
-        print ic
+        print('Initial conditions for T:')
+        print(ic)
         self.m.T.SetInitialConditions(ic)        
         
         # b) Loop over domains to set initial conditions for individual points

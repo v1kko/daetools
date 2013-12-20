@@ -26,7 +26,7 @@ import aux
 try:
     from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception as e:
-    print 'Cannot load web_view_dialog module\n Error: ', str(e)
+    print('Cannot load web_view_dialog module\n Error: ', str(e))
 
 images_dir = join(dirname(__file__), 'images')
 
