@@ -60,7 +60,7 @@ class fnConstantFunction(Function_2D):
         self.m_value = float(val)
         
     def value(self, point, component = 1):
-        #print 'Point%s = %f' % (point, self.m_value)
+        #print('Point%s = %f' % (point, self.m_value))
         return self.m_value
     
     def gradient(self, point, component = 1):
@@ -115,15 +115,15 @@ class modTutorial(daeModel):
         # Achtung, Achtung!!
         # Finite element equations must not go out of scope for deal.II FE model keeps only weak references to them.
         self.cdr1 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
-        print 'Convection-Diffusion equation:'
-        print '    VariableName         =', self.cdr1.VariableName
-        print '    VariableDescription  =', self.cdr1.VariableDescription
-        print '    Multiplicity         =', self.cdr1.Multiplicity
-        print '    ElementMatrix        =', self.cdr1.Alocal
-        print '    ElementMatrix_dt     =', self.cdr1.Mlocal
-        print '    ElementRHS           =', self.cdr1.Flocal
-        #print '    FunctionsDirichletBC =', self.cdr1.FunctionsDirichletBC
-        #print '    FunctionsNeumannBC   =', self.cdr1.FunctionsNeumannBC
+        print('Convection-Diffusion equation:')
+        print('    VariableName         =', self.cdr1.VariableName)
+        print('    VariableDescription  =', self.cdr1.VariableDescription)
+        print('    Multiplicity         =', self.cdr1.Multiplicity)
+        print('    ElementMatrix        =', self.cdr1.Alocal)
+        print('    ElementMatrix_dt     =', self.cdr1.Mlocal)
+        print('    ElementRHS           =', self.cdr1.Flocal)
+        #print('    FunctionsDirichletBC =', self.cdr1.FunctionsDirichletBC)
+        #print('    FunctionsNeumannBC   =', self.cdr1.FunctionsNeumannBC)
         equations = [self.cdr1]
         
         self.fe_dealII = feObject(meshFilename,     # path to mesh
@@ -163,17 +163,17 @@ class simTutorial(daeSimulation):
             else:
                 raise RuntimeError('Unknown variable [%s] found' % variable.Name)
             
-            for i in xrange(variable.NumberOfPoints):
+            for i in range(variable.NumberOfPoints):
                 dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
         
-        for row in xrange(m_dt.n):
+        for row in range(m_dt.n):
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
             for column in self.m.fe_dealII.RowIndices(row):
                 if m_dt(row, column) != 0:
                     variable, index, ic = dofIndexesMap[column]
                     variable.SetInitialCondition(index, ic)
-                    print '%s(%d) initial condition = %f' % (variable.Name, column, ic)
+                    print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
     
 # Use daeSimulator class
 def guiRun(app):

@@ -2,13 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os, sys, numpy, unittest, pprint
+python_major  = sys.version_info[0]
 daetools_root = os.path.abspath('../../')
 if not daetools_root in sys.path:
     sys.path.insert(0, daetools_root)
 from daetools.pyDAE import *
-import tests_object
-
 from pyDealII import *
+if python_major == 2:
+    import tests_object
+elif python_major == 3:
+    from . import tests_object
 
 """
 Tests for:

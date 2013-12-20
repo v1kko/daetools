@@ -28,12 +28,14 @@ if python_major == 2:
     from editor_state_transition_ui import Ui_EditorStateTransition
     from editor_domain_array_ui import Ui_EditorArrayDomain
     from editor_domain_distributed_ui import Ui_EditorDistributedDomain
+    _number_types = (float, int, long, list)
 elif python_major == 3:
     from .editor_quantity_ui import Ui_EditorQuantity
     from .editor_quantity_array_ui import Ui_EditorQuantityArray
     from .editor_state_transition_ui import Ui_EditorStateTransition
     from .editor_domain_array_ui import Ui_EditorArrayDomain
     from .editor_domain_distributed_ui import Ui_EditorDistributedDomain
+    _number_types = (float, int, list)
 
 class runtimeInformation(object):
     def __init__(self, model):
@@ -225,7 +227,7 @@ class treeItem_Quantity(treeItem):
         if not isinstance(value, tuple):
             raise RuntimeError('Invalid value: %s for the tree item: %s' % (str(value), daeGetStrippedName(self.name)))
         
-        if isinstance(value[0], (basestring, str)):
+        if isinstance(value[0], str):
             try:
                 val = eval(value[0])
             except Exception as e:
@@ -233,7 +235,7 @@ class treeItem_Quantity(treeItem):
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
                 return
 
-            if not isinstance(val, (float, int, long, list)):
+            if not isinstance(val, _number_types):
                 errorMsg = 'Cannot set value for the tree item: %s\nIt must be either float or a list of floats' % daeGetStrippedName(self.name)
                 QtGui.QMessageBox.critical(None, "Error", errorMsg)
                 return
@@ -251,7 +253,7 @@ class treeItem_Quantity(treeItem):
             elif isinstance(val, (float, int, long)):
                 val = float(val)
         
-        elif isinstance(value[0], (float, int, long, list)):
+        elif isinstance(value[0], _number_types):
             if isinstance(value[0], list):
                 val = value[0]
                 if self.checkIfItemsAreFloats:
@@ -270,7 +272,7 @@ class treeItem_Quantity(treeItem):
             raise RuntimeError('Invalid value: %s for the tree item: %s (must be a string, float or a list)' % (str(value[0]), daeGetStrippedName(self.name)))
             
         
-        if isinstance(value[1], (basestring, str)):
+        if isinstance(value[1], str):
             try:
                 # First try to evaluate the expression
                 unit_expr = value[1].strip()
@@ -518,7 +520,7 @@ class treeItem_Domain(treeItem):
                 return
                 
         elif self.type == eStructuredGrid:
-            if isinstance(value, (basestring, str)):
+            if isinstance(value, str):
                 try:
                     val = eval(value)
                 except Exception as e:
@@ -592,7 +594,7 @@ def addItem(treeWidget, parent, item):
     item.treeWidgetItem = widgetItem
 
     # Item's data is always the tree item object
-    widgetItem.setData(0, QtCore.Qt.UserRole, QtCore.QVariant(item))
+    widgetItem.setData(0, QtCore.Qt.UserRole, item) #QtCore.QVariant(item))
 
     # The common flags
     widgetItem.setFlags(widgetItem.flags() | Qt.ItemIsSelectable | Qt.ItemIsEnabled)

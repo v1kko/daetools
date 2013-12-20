@@ -1,5 +1,5 @@
 """********************************************************************************
-                             daeLogs.py
+                               logs.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ***********************************************************************************
@@ -26,13 +26,9 @@ class daePythonStdOutLog(daeStdOutLog):
     def Message(self, message, severity):
         if self.Enabled:
             if self.PrintProgress:
-                if python_major == 2:
-                    print '{0:30s}'.format(self.IndentString + message)
-                    print ' {0} {1}'.format(self.PercentageDone, self.ETA), "\r",
-                elif python_major == 3:
-                    sys.stdout.write('{0:30s}\n'.format(self.IndentString + message))
-                    sys.stdout.write(' {0} {1}'.format(self.PercentageDone, self.ETA))
-                    sys.stdout.write('\r')
+                sys.stdout.write('{0:30s}\n'.format(self.IndentString + message))
+                sys.stdout.write(' {0} {1}'.format(self.PercentageDone, self.ETA))
+                sys.stdout.write('\r')
             else:
                 print(self.IndentString + message)
             sys.stdout.flush()

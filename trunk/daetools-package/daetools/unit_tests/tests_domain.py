@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import os, sys, numpy, unittest
+python_major  = sys.version_info[0]
 daetools_root = os.path.abspath('../../')
 if not daetools_root in sys.path:
     sys.path.insert(0, daetools_root)
 from daetools.pyDAE import *
-import tests_object
+if python_major == 2:
+    import tests_object
+elif python_major == 3:
+    from . import tests_object
 
 """
 Tests for:
@@ -132,7 +136,7 @@ class case_daeDomain(unittest.TestCase):
 
         ir_list = [0, 5, 9]
         ir_slice = slice(1, 10, 2)
-        r = range(1, 10, 2)
+        r = list(range(1, 10, 2))
         
         ir1 = daeIndexRange(d) 
         ir2 = daeIndexRange(d, ir_list)
@@ -231,7 +235,7 @@ class case_daeDomain(unittest.TestCase):
 
         ir_list = [0, 5, 9]
         ir_slice = slice(1, 10, 2)
-        r = range(1, 10, 2)
+        r = list(range(1, 10, 2))
 
         ir1 = daeIndexRange(d)
         ir2 = daeIndexRange(d, ir_list)

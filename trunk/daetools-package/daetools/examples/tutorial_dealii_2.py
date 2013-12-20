@@ -88,9 +88,9 @@ class modTutorial(daeModel):
         flux_beneath = 2.0E3/(rho*cp)  # (W/m**2)/((kg/m**3) * (J/(kg*K))) = 
         diffusivity  = k / (rho*cp)    # m**2/s
         
-        print 'Thermal diffusivity = %f' % diffusivity
-        print 'Beneath source flux = %f' % flux_beneath
-        print 'Above source flux = %f x (1,-1)' % flux_above
+        print('Thermal diffusivity = %f' % diffusivity)
+        print('Beneath source flux = %f' % flux_beneath)
+        print('Above source flux = %f x (1,-1)' % flux_above)
         # Achtung, Achtung!!
         # Diffusivity, velocity, generation, dirichletBC and neumannBC must not go out of scope
         # for deal.II FE model keeps only weak references to them.
@@ -145,10 +145,10 @@ class simTutorial(daeSimulation):
         for variable in self.m.fe.Variables:
             if variable.Name == 'T':
                 ic = 273
-            for i in xrange(variable.NumberOfPoints):
+            for i in range(variable.NumberOfPoints):
                 dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
         
-        for row in xrange(m_dt.n):
+        for row in range(m_dt.n):
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
             for column in self.m.fe_dealII.RowIndices(row):

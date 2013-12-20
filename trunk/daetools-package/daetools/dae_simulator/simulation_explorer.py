@@ -130,13 +130,13 @@ class daeSimulationExplorer(QtGui.QDialog):
 
         self._ui.daesolverComboBox.addItem("Sundials IDAS")
         for la in self._available_la_solvers:
-            self._ui.lasolverComboBox.addItem(la[0], userData = QtCore.QVariant(la[1]))
+            self._ui.lasolverComboBox.addItem(la[0], userData = la[1])#QtCore.QVariant(la[1]))
         for nlp in self._available_nlp_solvers:
-            self._ui.minlpsolverComboBox.addItem(nlp[0], userData = QtCore.QVariant(nlp[1]))
+            self._ui.minlpsolverComboBox.addItem(nlp[0], userData = nlp[1]) #QtCore.QVariant(nlp[1]))
         for dr in self._available_data_reporters:
-            self._ui.datareporterComboBox.addItem(dr[0], userData = QtCore.QVariant(dr[1]))
+            self._ui.datareporterComboBox.addItem(dr[0], userData = dr[1]) #QtCore.QVariant(dr[1]))
         for log in self._available_logs:
-            self._ui.logComboBox.addItem(log[0], userData = QtCore.QVariant(log[1]))
+            self._ui.logComboBox.addItem(log[0], userData = log[1]) #QtCore.QVariant(log[1]))
         
         # DAE Solvers
         self._ui.daesolverComboBox.setEnabled(False)
@@ -522,7 +522,10 @@ class daeSimulationExplorer(QtGui.QDialog):
     def _slotParameterTreeItemSelectionChanged(self):
         currentItem = self._ui.treeParameters.selectedItems()[0]
         data = currentItem.data(0, QtCore.Qt.UserRole)
-        item = data.toPyObject()
+        if isinstance(data, QtCore.QVariant):
+            item = data.toPyObject()
+        else:
+            item = data
 
         if self._currentParameterItem:
             self._currentParameterItem.hide()
@@ -536,7 +539,11 @@ class daeSimulationExplorer(QtGui.QDialog):
             data = treeWidgetItem.data(0, QtCore.Qt.UserRole)
             if not data:
                 return
-            item = data.toPyObject()
+            if isinstance(data, QtCore.QVariant):
+                item = data.toPyObject()
+            else:
+                item = data
+                
             if item.itemType == treeItem.typeOutputVariable:
                 if treeWidgetItem.checkState(0) == Qt.Checked:
                     item.setValue(True)
@@ -547,7 +554,10 @@ class daeSimulationExplorer(QtGui.QDialog):
         """
         currentItem = self._ui.treeSTNs.selectedItems()[0]
         data = currentItem.data(0, QtCore.Qt.UserRole)
-        item = data.toPyObject()
+        if isinstance(data, QtCore.QVariant):
+            item = data.toPyObject()
+        else:
+            item = data
 
         if self._currentStateTransitionItem:
             self._currentStateTransitionItem.hide()
@@ -563,7 +573,10 @@ class daeSimulationExplorer(QtGui.QDialog):
             data = treeWidgetItem.data(0, QtCore.Qt.UserRole)
             if not data:
                 return
-            item = data.toPyObject()
+            if isinstance(data, QtCore.QVariant):
+                item = data.toPyObject()
+            else:
+                item = data
             if item.itemType == treeItem.typeState:
                 if treeWidgetItem.checkState(0) == Qt.Unchecked:
                     # Do not allow item to be unchecked unless the flag _allowUnchecking is set
@@ -612,7 +625,10 @@ class daeSimulationExplorer(QtGui.QDialog):
         if not parent:
             return
         data = parent.data(0, QtCore.Qt.UserRole)
-        item = data.toPyObject()
+        if isinstance(data, QtCore.QVariant):
+            item = data.toPyObject()
+        else:
+            item = data
         if item and item.itemType == treeItem.typeState:
             item.setValue(True)
             parent.setCheckState(0, Qt.Checked)
@@ -635,7 +651,10 @@ class daeSimulationExplorer(QtGui.QDialog):
             # Do not uncheck the item currently being set ()
             if child != currentTreeWidgetItem:
                 data = child.data(0, QtCore.Qt.UserRole)
-                item = data.toPyObject()
+                if isinstance(data, QtCore.QVariant):
+                    item = data.toPyObject()
+                else:
+                    item = data
                 if item and item.itemType == treeItem.typeState:
                     item.setValue(False)
                     child.setCheckState(0, Qt.Unchecked)
@@ -651,7 +670,10 @@ class daeSimulationExplorer(QtGui.QDialog):
         if parent.childCount() > 0:
             child = parent.child(0)
             data = child.data(0, QtCore.Qt.UserRole)
-            item = data.toPyObject()
+            if isinstance(data, QtCore.QVariant):
+                item = data.toPyObject()
+            else:
+                item = data
             if item and item.itemType == treeItem.typeState:
                 item.setValue(True)
                 child.setCheckState(0, Qt.Checked)
@@ -662,7 +684,10 @@ class daeSimulationExplorer(QtGui.QDialog):
     def _slotDomainsTreeItemChanged(self):
         currentItem = self._ui.treeDomains.selectedItems()[0]
         data = currentItem.data(0, QtCore.Qt.UserRole)
-        item = data.toPyObject()
+        if isinstance(data, QtCore.QVariant):
+            item = data.toPyObject()
+        else:
+            item = data
 
         if self._currentDomainItem:
             self._currentDomainItem.hide()
@@ -674,7 +699,10 @@ class daeSimulationExplorer(QtGui.QDialog):
     def _slotDOFsTreeItemChanged(self):
         currentItem = self._ui.treeDOFs.selectedItems()[0]
         data = currentItem.data(0, QtCore.Qt.UserRole)
-        item = data.toPyObject()
+        if isinstance(data, QtCore.QVariant):
+            item = data.toPyObject()
+        else:
+            item = data
 
         if self._currentDOFItem:
             self._currentDOFItem.hide()
@@ -686,8 +714,11 @@ class daeSimulationExplorer(QtGui.QDialog):
     def _slotInitialConditionsTreeItemChanged(self):
         currentItem = self._ui.treeInitialConditions.selectedItems()[0]
         data = currentItem.data(0, QtCore.Qt.UserRole)
-        item = data.toPyObject()
-
+        if isinstance(data, QtCore.QVariant):
+            item = data.toPyObject()
+        else:
+            item = data
+            
         if self._currentInitialConditionItem:
             self._currentInitialConditionItem.hide()
         
