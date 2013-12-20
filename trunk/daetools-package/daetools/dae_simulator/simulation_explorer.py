@@ -22,20 +22,11 @@ from os.path import join, dirname
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 
-python_major = sys.version_info[0]
-if python_major == 2:
-    from simulation_explorer_ui import Ui_SimulationExplorer
-    from simulation_inspector import daeSimulationInspector
-    from exception_dlg_ui import Ui_ExceptionDialog
-    from tree_item import *
-    import aux
-
-elif python_major == 3:
-    from .simulation_explorer_ui import Ui_SimulationExplorer
-    from .simulation_inspector import daeSimulationInspector
-    from .exception_dlg_ui import Ui_ExceptionDialog
-    from .tree_item import *
-    from . import aux
+from .simulation_explorer_ui import Ui_SimulationExplorer
+from .simulation_inspector import daeSimulationInspector
+from .exception_dlg_ui import Ui_ExceptionDialog
+from .tree_item import *
+from . import aux
 
 images_dir = join(dirname(__file__), 'images')
 

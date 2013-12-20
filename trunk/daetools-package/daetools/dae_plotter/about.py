@@ -16,10 +16,7 @@ from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 
 python_major = sys.version_info[0]
-if python_major == 2:
-    from about_ui import Ui_About
-elif python_major == 3:
-    from .about_ui import Ui_About
+from .about_ui import Ui_About
 
 class daeAboutDialog(QtGui.QDialog):
     def __init__(self, process):

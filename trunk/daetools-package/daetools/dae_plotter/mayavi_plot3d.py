@@ -16,10 +16,7 @@ from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 
 python_major = sys.version_info[0]
-if python_major == 2:
-    from choose_variable import daeChooseVariable, daeTableDialog
-elif python_major == 3:
-    from .choose_variable import daeChooseVariable, daeTableDialog
+from .choose_variable import daeChooseVariable, daeTableDialog
 
 try:
     import enthought.mayavi as mayavi

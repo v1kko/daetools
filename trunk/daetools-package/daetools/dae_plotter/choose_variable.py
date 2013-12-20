@@ -31,12 +31,8 @@ except ImportError:
 
 try:
     from daetools.pyDAE import *
-    if python_major == 2:
-        from choose_variable_ui import Ui_ChooseVariable
-        from table_widget import Ui_tableWidgetDialog
-    elif python_major == 3:
-        from .choose_variable_ui import Ui_ChooseVariable
-        from .table_widget import Ui_tableWidgetDialog
+    from .choose_variable_ui import Ui_ChooseVariable
+    from .table_widget import Ui_tableWidgetDialog
 except ImportError:
     print('[daeChooseVariable]: Cannot load daetools modules')
 

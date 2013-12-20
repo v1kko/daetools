@@ -1,7 +1,7 @@
 import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile
 from daetools.pyDAE import *
-from c99 import daeCodeGenerator_c99
-from fmi_xml_support import *
+from .c99 import daeCodeGenerator_c99
+from .fmi_xml_support import *
 
 class daeCodeGenerator_FMI(fmiModelDescription):
     def __init__(self):

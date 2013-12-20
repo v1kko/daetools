@@ -20,22 +20,12 @@ import sys, tempfile, numpy, json
 from daetools.pyDAE import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
-
-python_major = sys.version_info[0]
-if python_major == 2:
-    from editor_quantity_ui import Ui_EditorQuantity
-    from editor_quantity_array_ui import Ui_EditorQuantityArray
-    from editor_state_transition_ui import Ui_EditorStateTransition
-    from editor_domain_array_ui import Ui_EditorArrayDomain
-    from editor_domain_distributed_ui import Ui_EditorDistributedDomain
-    _number_types = (float, int, long, list)
-elif python_major == 3:
-    from .editor_quantity_ui import Ui_EditorQuantity
-    from .editor_quantity_array_ui import Ui_EditorQuantityArray
-    from .editor_state_transition_ui import Ui_EditorStateTransition
-    from .editor_domain_array_ui import Ui_EditorArrayDomain
-    from .editor_domain_distributed_ui import Ui_EditorDistributedDomain
-    _number_types = (float, int, list)
+from .editor_quantity_ui import Ui_EditorQuantity
+from .editor_quantity_array_ui import Ui_EditorQuantityArray
+from .editor_state_transition_ui import Ui_EditorStateTransition
+from .editor_domain_array_ui import Ui_EditorArrayDomain
+from .editor_domain_distributed_ui import Ui_EditorDistributedDomain
+_number_types = (float, int, list)
 
 class runtimeInformation(object):
     def __init__(self, model):

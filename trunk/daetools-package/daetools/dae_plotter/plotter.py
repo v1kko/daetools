@@ -38,10 +38,7 @@ except Exception as e:
     sys.exit()
 
 try:
-    if python_major == 2:
-        from about import daeAboutDialog
-    elif python_major == 3:
-        from .about import daeAboutDialog
+    from .about import daeAboutDialog
     from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception as e:
     print(('[daePlotter]: Cannot load daeAbout/daeWebView module\n Error: ', str(e)))

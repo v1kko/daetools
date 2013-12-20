@@ -1,7 +1,7 @@
 import os, shutil, sys, numpy, math, traceback
 from daetools.pyDAE import *
-from formatter import daeExpressionFormatter
-from analyzer import daeCodeGeneratorAnalyzer
+from .formatter import daeExpressionFormatter
+from .analyzer import daeCodeGeneratorAnalyzer
 
 
 """

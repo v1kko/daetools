@@ -21,13 +21,8 @@ from daetools.pyDAE import *
 from time import ctime, time, localtime, strftime, struct_time
 from PyQt4 import QtCore, QtGui
 
-python_major = sys.version_info[0]
-if python_major == 2:
-    from simulator_ui import Ui_SimulatorDialog
-    import aux
-elif python_major == 3:
-    from .simulator_ui import Ui_SimulatorDialog
-    from . import aux
+from .simulator_ui import Ui_SimulatorDialog
+from . import aux
 
 try:
     from daetools.pyDAE.web_view_dialog import daeWebView

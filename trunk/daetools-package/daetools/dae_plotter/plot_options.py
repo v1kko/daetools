@@ -18,10 +18,7 @@ import sys
 python_major = sys.version_info[0]
 
 try:
-    if python_major == 2:
-        from formlayout import fedit
-    elif python_major == 3:
-        from .formlayout import fedit
+    from .formlayout import fedit
 except ImportError as e:
     print('[daePlotOptions]: Cannot load formlayout.fedit module', str(e))
 

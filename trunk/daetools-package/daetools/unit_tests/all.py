@@ -1,17 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
-python_major = sys.version_info[0]
-
 import unittest
-if python_major == 2:
-    import tests_object, tests_domain, tests_parameter
-    import tests_jacobian_expressions, tests_numpy_ufuncs
-    import tests_dealii_feobject
-elif python_major == 3:
-    from . import tests_object, tests_domain, tests_parameter
-    from . import tests_jacobian_expressions, tests_numpy_ufuncs
-    from . import tests_dealii_feobject
+import tests_object, tests_domain, tests_parameter
+import tests_jacobian_expressions, tests_numpy_ufuncs
+import tests_dealii_feobject
 
 if __name__ == "__main__":
     alltests = []

@@ -21,13 +21,8 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 
 from daetools.pyDAE import *
 
-python_major = sys.version_info[0]
-if python_major == 2:
-    from choose_variable import daeChooseVariable, daeTableDialog
-    from plot_options import *
-elif python_major == 3:
-    from .choose_variable import daeChooseVariable, daeTableDialog
-    from .plot_options import *
+from .choose_variable import daeChooseVariable, daeTableDialog
+from .plot_options import *
 
 images_dir = join(dirname(__file__), 'images')
 
