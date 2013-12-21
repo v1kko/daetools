@@ -324,8 +324,8 @@ class daeCodeGenerator_c99(object):
         f.close()
 
         if len(self.warnings) > 0:
-            print 'CODE GENERATOR WARNINGS:'
-            print warnings
+            print('CODE GENERATOR WARNINGS:')
+            print(warnings)
         
         return (daetools_model_h_contents, daetools_model_c_contents)
 
@@ -691,7 +691,7 @@ class daeCodeGenerator_c99(object):
         blockInitValues      = Neq * [-1]
         absTolerances        = Neq * [1E-5]
         blockInitDerivatives = Neq * [0.0]
-        for oi, bi in indexMappings.items():
+        for oi, bi in list(indexMappings.items()):
             if IDs[oi] == cnAlgebraic:
                blockIDs[bi] = cnAlgebraic
             elif IDs[oi] == cnDifferential:

@@ -137,7 +137,7 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         # Format: m.kg2/s-2 meaning m * kg**2 / s**2
         positive = []
         negative = []
-        for u, exp in units.toDict().items():
+        for u, exp in list(units.toDict().items()):
             if exp >= 0:
                 if exp == 1:
                     positive.append('{0}'.format(u))
@@ -146,7 +146,7 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
                 else:
                     positive.append('{0}{1}'.format(u, exp))
 
-        for u, exp in units.toDict().items():
+        for u, exp in list(units.toDict().items()):
             if exp < 0:
                 if exp == -1:
                     negative.append('{0}'.format(u))
@@ -201,8 +201,8 @@ class daeCodeGenerator_Modelica(object):
             f.close()
 
         if len(self.warnings) > 0:
-            print 'CODE GENERATOR WARNINGS:'
-            print '\n'.join(self.warnings)
+            print('CODE GENERATOR WARNINGS:')
+            print('\n'.join(self.warnings))
 
         return result
 
@@ -230,8 +230,8 @@ class daeCodeGenerator_Modelica(object):
             f.close()
 
         if len(self.warnings) > 0:
-            print 'CODE GENERATOR WARNINGS:'
-            print '\n'.join(self.warnings)
+            print('CODE GENERATOR WARNINGS:')
+            print('\n'.join(self.warnings))
 
         return result
 
@@ -272,11 +272,11 @@ class daeCodeGenerator_Modelica(object):
         model_instance = s_indent + '{0} {1}('.format(self.topLevelModel.__class__.__name__, self.exprFormatter.formatIdentifier(self.wrapperInstanceName))
         indent = ' ' * len(model_instance)
 
-        params              = ['{0} = {1}'               .format(key, value) for key, value in self.parametersValues.items()]
-        assigned_vars       = ['{0}(fixed = true) = {1}' .format(key, value) for key, value in self.assignedVariables.items()]
-        assigned_distr_vars = ['{0}{1} = {2};'           .format(s_indent, key, value) for key, value in self.assignedDistrVariables.items()]
-        init_conds          = ['{0}{1} := {2};'          .format(s_indent, key, value) for key, value in self.initialConditions.items()]
-        init_states         = ['{0}{1} := {2};'          .format(s_indent, key, value) for key, value in self.initiallyActiveStates.items()]
+        params              = ['{0} = {1}'               .format(key, value) for key, value in list(self.parametersValues.items())]
+        assigned_vars       = ['{0}(fixed = true) = {1}' .format(key, value) for key, value in list(self.assignedVariables.items())]
+        assigned_distr_vars = ['{0}{1} = {2};'           .format(s_indent, key, value) for key, value in list(self.assignedDistrVariables.items())]
+        init_conds          = ['{0}{1} := {2};'          .format(s_indent, key, value) for key, value in list(self.initialConditions.items())]
+        init_states         = ['{0}{1} := {2};'          .format(s_indent, key, value) for key, value in list(self.initiallyActiveStates.items())]
 
         params_and_assigned_vars = params + assigned_vars
         params_and_assigned_vars.sort(key=str.lower)
@@ -319,8 +319,8 @@ class daeCodeGenerator_Modelica(object):
             f.close()
 
         if len(self.warnings) > 0:
-            print 'CODE GENERATOR WARNINGS:'
-            print warnings
+            print('CODE GENERATOR WARNINGS:')
+            print(warnings)
 
         return resultModel, resultWrapper
 

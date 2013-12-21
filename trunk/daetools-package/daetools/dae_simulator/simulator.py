@@ -80,10 +80,10 @@ class daeSimulator(QtGui.QDialog):
 
         self.ui.DAESolverComboBox.addItem("Sundials IDAS")
         for la in self.available_la_solvers:
-            self.ui.LASolverComboBox.addItem(la[0], userData = QtCore.QVariant(la[1]))
+            self.ui.LASolverComboBox.addItem(la[0], userData = la[1])
         
         for nlp in self.available_nlp_solvers:
-            self.ui.MINLPSolverComboBox.addItem(nlp[0], userData = QtCore.QVariant(nlp[1]))
+            self.ui.MINLPSolverComboBox.addItem(nlp[0], userData = nlp[1])
 
         self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)
         self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
@@ -203,11 +203,22 @@ class daeSimulator(QtGui.QDialog):
 
             # If nlpsolver is not sent then choose it from the selection
             if self.nlpsolver == None and len(self.available_nlp_solvers) > 0:
-                minlpsolverIndex = self.ui.MINLPSolverComboBox.itemData(self.ui.MINLPSolverComboBox.currentIndex()).toInt()[0]
+                _index = self.ui.MINLPSolverComboBox.itemData(self.ui.MINLPSolverComboBox.currentIndex())
+                if isinstance(_index, QtCore.QVariant):
+                    minlpsolverIndex = _index.toInt()[0]
+                else:
+                    if _index != None and _index >= 0:
+                        minlpsolverIndex = int(_index)
 
             # If lasolver is not sent then create it based on the selection
             if self.lasolver == None and len(self.available_la_solvers) > 0:
-                lasolverIndex = self.ui.LASolverComboBox.itemData(self.ui.LASolverComboBox.currentIndex()).toInt()[0]
+                _index = self.ui.LASolverComboBox.itemData(self.ui.LASolverComboBox.currentIndex())
+                if isinstance(_index, QtCore.QVariant):
+                    lasolverIndex = _index.toInt()[0]
+                    print('lasolverIndex', lasolverIndex)
+                else:
+                    if _index != None and _index >= 0:
+                        lasolverIndex = int(_index)
                 self.lasolver = aux.createLASolver(lasolverIndex)
 
             self.ui.RunButton.setEnabled(False)

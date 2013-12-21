@@ -17,91 +17,95 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, subprocess, webbrowser, traceback
 from os.path import join, realpath, dirname
-from StringIO import StringIO
 from time import localtime, strftime
 from os.path import join, realpath, dirname
-
+python_major = sys.version_info[0]
+if python_major == 2:
+    from StringIO import StringIO
+elif python_major == 3:
+    from io import StringIO
+    
 try:
     from PyQt4 import QtCore, QtGui
-except Exception, e:
-    print '[daeRunExamples]: Cannot load PyQt4 modules\n Error: ', str(e)
+except Exception as e:
+    print('[daeRunExamples]: Cannot load PyQt4 modules\n Error: ', str(e))
     sys.exit()
 
 try:
     import numpy
-except Exception, e:
-    print '[daeRunExamples]: Cannot load numpy module\n Error: ', str(e)
+except Exception as e:
+    print('[daeRunExamples]: Cannot load numpy module\n Error: ', str(e))
     sys.exit()
 
 try:
     from daetools.pyDAE import *
-except Exception, e:
-    print '[daeRunExamples]: Cannot load daetools.pyDAE module\n Error: ', str(e)
+except Exception as e:
+    print('[daeRunExamples]: Cannot load daetools.pyDAE module\n Error: ', str(e))
     sys.exit()
 
 try:
-    from RunExamples_ui import Ui_RunExamplesDialog
+    from .RunExamples_ui import Ui_RunExamplesDialog
     from daetools.pyDAE.web_view_dialog import daeWebView
-except Exception, e:
-    print '[daeRunExamples]: Cannot load UI modules\n Error: ', str(e)
+except Exception as e:
+    print('[daeRunExamples]: Cannot load UI modules\n Error: ', str(e))
 
 try:
-    import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
-    import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
-    import tutorial14, tutorial15, tutorial16, tutorial17, tutorial18, tutorial19
-except Exception, e:
+    from . import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
+    from . import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
+    from . import tutorial14, tutorial15, tutorial16, tutorial17, tutorial18, tutorial19
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e))
 
 try:
-    import opt_tutorial1
-except Exception, e:
+    from . import opt_tutorial1
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial1 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial1 module\n Error: ', str(e))
 
 try:
-    import opt_tutorial2
-except Exception, e:
+    from . import opt_tutorial2
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial2 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial2 module\n Error: ', str(e))
 
 try:
-    import opt_tutorial3
-except Exception, e:
+    from . import opt_tutorial3
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial3 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial3 module\n Error: ', str(e))
 
 try:
-    import opt_tutorial4
-except Exception, e:
+    from . import opt_tutorial4
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial4 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial4 module\n Error: ', str(e))
 
 try:
-    import opt_tutorial5
-except Exception, e:
+    from . import opt_tutorial5
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial5 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial5 module\n Error: ', str(e))
 
 try:
-    import opt_tutorial6
-except Exception, e:
+    from . import opt_tutorial6
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial6 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial6 module\n Error: ', str(e))
 
 try:
-    import opt_tutorial7
-except Exception, e:
+    from . import opt_tutorial7
+except Exception as e:
     exc_traceback = sys.exc_info()[2]
-    print '\n'.join(traceback.format_tb(exc_traceback))
-    print '[daeRunExamples]: Cannot load opt_tutorial7 module\n Error: ', str(e)
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load opt_tutorial7 module\n Error: ', str(e))
 
 try:
     _examples_dir = dirname(__file__)
@@ -143,37 +147,40 @@ class RunExamples(QtGui.QDialog):
         self.connect(self.ui.toolButtonRuntimeModelReport, QtCore.SIGNAL('clicked()'), self.slotShowRuntimeModelReport)
         self.connect(self.ui.comboBoxExample,              QtCore.SIGNAL("currentIndexChanged(int)"), self.slotTutorialChanged)
 
-        self.ui.comboBoxExample.addItem("whats_the_time", QtCore.QVariant(whats_the_time))
-        self.ui.comboBoxExample.addItem("tutorial1", QtCore.QVariant(tutorial1))
-        self.ui.comboBoxExample.addItem("tutorial2", QtCore.QVariant(tutorial2))
-        self.ui.comboBoxExample.addItem("tutorial3", QtCore.QVariant(tutorial3))
-        self.ui.comboBoxExample.addItem("tutorial4", QtCore.QVariant(tutorial4))
-        self.ui.comboBoxExample.addItem("tutorial5", QtCore.QVariant(tutorial5))
-        self.ui.comboBoxExample.addItem("tutorial6", QtCore.QVariant(tutorial6))
-        self.ui.comboBoxExample.addItem("tutorial7", QtCore.QVariant(tutorial7))
-        self.ui.comboBoxExample.addItem("tutorial8", QtCore.QVariant(tutorial8))
-        self.ui.comboBoxExample.addItem("tutorial9", QtCore.QVariant(tutorial9))
-        self.ui.comboBoxExample.addItem("tutorial10", QtCore.QVariant(tutorial10))
-        self.ui.comboBoxExample.addItem("tutorial11", QtCore.QVariant(tutorial11))
-        self.ui.comboBoxExample.addItem("tutorial12", QtCore.QVariant(tutorial12))
-        self.ui.comboBoxExample.addItem("tutorial13", QtCore.QVariant(tutorial13))
-        self.ui.comboBoxExample.addItem("tutorial14", QtCore.QVariant(tutorial14))
-        self.ui.comboBoxExample.addItem("tutorial15", QtCore.QVariant(tutorial15))
-        self.ui.comboBoxExample.addItem("tutorial16", QtCore.QVariant(tutorial16))
-        self.ui.comboBoxExample.addItem("tutorial17", QtCore.QVariant(tutorial17))
-        self.ui.comboBoxExample.addItem("tutorial18", QtCore.QVariant(tutorial18))
-        self.ui.comboBoxExample.addItem("tutorial19", QtCore.QVariant(tutorial19))
-        self.ui.comboBoxExample.addItem("opt_tutorial1", QtCore.QVariant(opt_tutorial1))
-        self.ui.comboBoxExample.addItem("opt_tutorial2", QtCore.QVariant(opt_tutorial2))
-        self.ui.comboBoxExample.addItem("opt_tutorial3", QtCore.QVariant(opt_tutorial3))
-        self.ui.comboBoxExample.addItem("opt_tutorial4", QtCore.QVariant(opt_tutorial4))
-        self.ui.comboBoxExample.addItem("opt_tutorial5", QtCore.QVariant(opt_tutorial5))
-        self.ui.comboBoxExample.addItem("opt_tutorial6", QtCore.QVariant(opt_tutorial6))
-        self.ui.comboBoxExample.addItem("opt_tutorial7", QtCore.QVariant(opt_tutorial7))
+        self.ui.comboBoxExample.addItem("whats_the_time", whats_the_time)
+        self.ui.comboBoxExample.addItem("tutorial1", tutorial1)
+        self.ui.comboBoxExample.addItem("tutorial2", tutorial2)
+        self.ui.comboBoxExample.addItem("tutorial3", tutorial3)
+        self.ui.comboBoxExample.addItem("tutorial4", tutorial4)
+        self.ui.comboBoxExample.addItem("tutorial5", tutorial5)
+        self.ui.comboBoxExample.addItem("tutorial6", tutorial6)
+        self.ui.comboBoxExample.addItem("tutorial7", tutorial7)
+        self.ui.comboBoxExample.addItem("tutorial8", tutorial8)
+        self.ui.comboBoxExample.addItem("tutorial9", tutorial9)
+        self.ui.comboBoxExample.addItem("tutorial10", tutorial10)
+        self.ui.comboBoxExample.addItem("tutorial11", tutorial11)
+        self.ui.comboBoxExample.addItem("tutorial12", tutorial12)
+        self.ui.comboBoxExample.addItem("tutorial13", tutorial13)
+        self.ui.comboBoxExample.addItem("tutorial14", tutorial14)
+        self.ui.comboBoxExample.addItem("tutorial15", tutorial15)
+        self.ui.comboBoxExample.addItem("tutorial16", tutorial16)
+        self.ui.comboBoxExample.addItem("tutorial17", tutorial17)
+        self.ui.comboBoxExample.addItem("tutorial18", tutorial18)
+        self.ui.comboBoxExample.addItem("tutorial19", tutorial19)
+        self.ui.comboBoxExample.addItem("opt_tutorial1", opt_tutorial1)
+        self.ui.comboBoxExample.addItem("opt_tutorial2", opt_tutorial2)
+        self.ui.comboBoxExample.addItem("opt_tutorial3", opt_tutorial3)
+        self.ui.comboBoxExample.addItem("opt_tutorial4", opt_tutorial4)
+        self.ui.comboBoxExample.addItem("opt_tutorial5", opt_tutorial5)
+        self.ui.comboBoxExample.addItem("opt_tutorial6", opt_tutorial6)
+        self.ui.comboBoxExample.addItem("opt_tutorial7", opt_tutorial7)
 
     def slotTutorialChanged(self, index):
-        module = self.ui.comboBoxExample.itemData(index).toPyObject()
-        self.ui.docstringEdit.setText(module.__doc__)
+        module = self.ui.comboBoxExample.itemData(index)
+        if isinstance(module, QtCore.QVariant):
+            self.ui.docstringEdit.setText(module.toPyObject().__doc__)
+        else:
+            self.ui.docstringEdit.setText(module.__doc__)
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -293,4 +300,4 @@ def daeRunExamples():
 
 if __name__ == "__main__":
     daeRunExamples()
-	
+    
