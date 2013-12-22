@@ -100,10 +100,10 @@ class modTutorial(daeModel):
         b[:] = [i for i in range(Ny)]
         print(b)
         
-        print(Tndarray * b)
+        print((Tndarray * b))
         
         a = numpy.eye(2)
-        print(numpy.outer(Tndarray, b))
+        print((numpy.outer(Tndarray, b)))
         
         #print 'Sum of all temperatures:'
         #print Tmatrix.sum()

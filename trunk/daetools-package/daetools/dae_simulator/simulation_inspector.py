@@ -18,11 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 import sys, tempfile, numpy
 from daetools.pyDAE import *
-python_major = sys.version_info[0]
-if python_major == 2:
-    from tree_item import *
-elif python_major == 3:
-    from .tree_item import *
+from .tree_item import *
 
 def _collectParameters(nodeItem, model, dictParameters):
     """

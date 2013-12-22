@@ -48,7 +48,7 @@ EOF
 }
 
 # Default python binary:
-PYTHON=`python -c "import sys; print sys.executable"`
+PYTHON=`python -c "import sys; print(sys.executable)"`
 
 args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,configure,build,clean:" -n "compile_libraries_linux" -- $*`
 
@@ -249,8 +249,8 @@ cd "${TRUNK}"
 #######################################################
 configure_boost() 
 {
-  if [ -e boost ]; then
-    rm -r boost
+  if [ -e boost${PYTHON_VERSION} ]; then
+    rm -r boost${PYTHON_VERSION}
   fi
   echo ""
   echo "[*] Setting-up boost"
@@ -259,8 +259,8 @@ configure_boost()
     wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
   fi
   tar -xzf boost_${vBOOST_}.tar.gz
-  mv boost_${vBOOST_} boost
-  cd boost
+  mv boost_${vBOOST_} boost${PYTHON_VERSION}
+  cd boost${PYTHON_VERSION}
   sh bootstrap.sh
 
   cd "${TRUNK}"
@@ -271,7 +271,7 @@ configure_boost()
 
 compile_boost() 
 {
-  cd boost
+  cd boost${PYTHON_VERSION}
   echo ""
   echo "[*] Building boost"
   echo ""
@@ -305,7 +305,7 @@ clean_boost()
   echo ""
   echo "[*] Cleaning boost..."
   echo ""
-  cd boost
+  cd boost${PYTHON_VERSION}
   ./bjam --clean
   cd "${TRUNK}"
   echo ""

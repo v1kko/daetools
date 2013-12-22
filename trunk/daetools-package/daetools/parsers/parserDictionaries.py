@@ -20,22 +20,22 @@ from daetools.pyDAE import *
 def addIdentifiers(model, parent, dictIdentifiers):
     for o in model.Parameters:
         relName = daeGetRelativeName(parent, o)
-        print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+        print('CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName))
         dictIdentifiers[relName] = o()
 
     for o in model.Variables:
         relName = daeGetRelativeName(parent, o)
-        print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+        print('CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName))
         dictIdentifiers[relName] = o()
 
     for port in model.Ports:
         for o in port.Parameters:
             relName = daeGetRelativeName(parent, o)
-            print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+            print('CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName))
             dictIdentifiers[relName] = o()
         for o in port.Variables:
             relName = daeGetRelativeName(parent, o)
-            print 'CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName)
+            print('CanonicalName: {0}, RelName: {1}'.format(o.CanonicalName, relName))
             dictIdentifiers[relName] = o()
 
     for m in model.Models:

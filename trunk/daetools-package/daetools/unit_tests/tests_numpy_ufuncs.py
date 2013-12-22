@@ -6,7 +6,7 @@ daetools_root = os.path.abspath('../../')
 if not daetools_root in sys.path:
     sys.path.insert(0, daetools_root)
 from daetools.pyDAE import *
-import tests_object
+from . import tests_object
 
 """
 Tests for:
@@ -232,13 +232,13 @@ class case_numpy_ufuncs(unittest.TestCase):
                 if isinstance(values1, numpy.float64):
                     test = (abs(val1 - val2) < 1e-7)
                     if not test:
-                        print v.Name, abs(val1 - val2), val1, val2
+                        print(v.Name, abs(val1 - val2), val1, val2)
                     self.assertTrue(test)
                 else:
                     for val1, val2 in zip(values1, values2):
                         test = (abs(val1 - val2) < 1e-7)
                         if not test:
-                            print v.Name, abs(val1 - val2), val1, val2
+                            print(v.Name, abs(val1 - val2), val1, val2)
                         self.assertTrue(test)
         
 if __name__ == "__main__":

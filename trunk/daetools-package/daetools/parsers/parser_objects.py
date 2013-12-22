@@ -15,6 +15,9 @@ software; if not, see <http://www.gnu.org/licenses/>.
 
 import os, sys, operator, math, numbers
 from copy import copy, deepcopy
+import collections
+
+_number_types = (float, int)
 
 class Node(object):
     def evaluate(self, dictIdentifiers, dictFunctions):
@@ -149,7 +152,7 @@ class NonstandardFunctionNode(Node):
     def evaluate(self, dictIdentifiers, dictFunctions):
         if self.Function in dictFunctions:
             fun = dictFunctions[self.Function]
-            if not callable(fun):
+            if not isinstance(fun, collections.Callable):
                 raise RuntimeError('The function {0} in the dictionary is not a callable object'.format(self.Function))
             argument_list = ()
             for node in self.ArgumentsNodeList:
@@ -696,7 +699,7 @@ class base_unit(object):
             tmp.N = self.N + other.N
             tmp.multiplier = self.multiplier * other.multiplier
             return tmp
-        elif isinstance(other, (float, int, long)):
+        elif isinstance(other, _number_types):
             tmp = deepcopy(self)
             tmp.multiplier *= float(other)
             return tmp
@@ -705,7 +708,7 @@ class base_unit(object):
 
     def __rmul__(self, other):
         """number * base_unit = base_unit"""
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             tmp = deepcopy(self)
             tmp.multiplier *= float(other)
             return tmp
@@ -1013,14 +1016,14 @@ class unit(object):
 
     def toString(self):
         units = []
-        for base_unit_name, exp in self.units.items():
+        for base_unit_name, exp in list(self.units.items()):
             to_string_and_append(base_unit_name, exp, units)
         res = __string_unit_delimiter__.join(units)
         return res
 
     def toLatex(self):
         units = []
-        for base_unit_name, exp in self.units.items():
+        for base_unit_name, exp in list(self.units.items()):
             to_latex_and_append(base_unit_name, exp, units)
         res = __latex_unit_delimiter__.join(units)
         return res
@@ -1033,7 +1036,7 @@ class unit(object):
 
     def __mul__(self, other):
         # unit * number = quantity
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             return quantity(other, self)
         # unit * unit = unit
         elif isinstance(other, unit):
@@ -1041,7 +1044,7 @@ class unit(object):
             # First add all units from self.units
             tmp.units = deepcopy(self.units)
             # Then iterate over other.units and either add it to the tmp.units or increase the exponent
-            for key, exp in other.units.items():
+            for key, exp in list(other.units.items()):
                 if key in tmp.units:
                     tmp.units[key] += exp
                 else:
@@ -1052,20 +1055,20 @@ class unit(object):
 
     def __rmul__(self, other):
         # number * unit = quantity
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             return quantity(other, self)
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
 
     def __div__(self, other):
         # unit / number = quantity
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             return quantity(1.0 / other, self)
         # unit / unit = unit
         elif isinstance(other, unit):
             tmp   = unit()
             tmp.units = deepcopy(self.units)
-            for key, exp in other.units.items():
+            for key, exp in list(other.units.items()):
                 if key in tmp.units:
                     tmp.units[key] -= exp
                 else:
@@ -1076,7 +1079,7 @@ class unit(object):
 
     def __rdiv__(self, other):
         # number / unit = quantity
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             return quantity(other, self.__pow__(-1))
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} / {2}'.format(type(other), other, self))
@@ -1089,7 +1092,7 @@ class unit(object):
             raise UnitsError('Invalid exponent type ({0}) for: {1} ** {2}'.format(type(exponent), self, exponent))
 
         tmp = unit()
-        for key, exp in self.units.items():
+        for key, exp in list(self.units.items()):
             tmp.units[key] = exp * n
         return tmp
 
@@ -1123,7 +1126,7 @@ class quantity(object):
             if self.units != new_value.units:
                 raise UnitsError('Cannot set a value given in: {0} to a quantity in: {1}'.format(new_value.units, self.units))
             self._value = float(new_value.scaleTo(self).value)
-        elif isinstance(new_value, (float, int, long)):
+        elif isinstance(new_value, _number_types):
             self._value = float(new_value)
         else:
             raise UnitsError('Invalid argument type ({0})'.format(type(new_value)))
@@ -1197,7 +1200,7 @@ class quantity(object):
 
     def __add__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, (float, int, long)):
+            if isinstance(other, _number_types):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} + {2}'.format(type(other), self, other))
@@ -1210,7 +1213,7 @@ class quantity(object):
 
     def __radd__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, (float, int, long)):
+            if isinstance(other, _number_types):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid left argument type ({0}) for: {1} + {2}'.format(type(other), other, self))
@@ -1218,7 +1221,7 @@ class quantity(object):
 
     def __sub__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, (float, int, long)):
+            if isinstance(other, _number_types):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} - {2}'.format(type(other), self, other))
@@ -1231,7 +1234,7 @@ class quantity(object):
 
     def __rsub__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, (float, int, long)):
+            if isinstance(other, _number_types):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid left argument type ({0}) for: {1} - {2}'.format(type(other), other, self))
@@ -1239,7 +1242,7 @@ class quantity(object):
 
     def __mul__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, (float, int, long)):
+            if isinstance(other, _number_types):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} * {2}'.format(type(other), self, other))
@@ -1249,7 +1252,7 @@ class quantity(object):
         return quantity(value, units)
 
     def __rmul__(self, other):
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             other = quantity(other)
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} * {2}'.format(type(other), other, self))
@@ -1257,7 +1260,7 @@ class quantity(object):
 
     def __div__(self, other):
         if not isinstance(other, quantity):
-            if isinstance(other, (float, int, long)):
+            if isinstance(other, _number_types):
                 other = quantity(other)
             else:
                 raise UnitsError('Invalid right argument type ({0}) for: {1} / {2}'.format(type(other), self, other))
@@ -1267,7 +1270,7 @@ class quantity(object):
         return quantity(value, units)
 
     def __rdiv__(self, other):
-        if isinstance(other, (float, int, long)):
+        if isinstance(other, _number_types):
             other = quantity(other)
         else:
             raise UnitsError('Invalid left argument type ({0}) for: {1} / {2}'.format(type(other), other, self))

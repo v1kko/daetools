@@ -423,21 +423,43 @@ class daeSimulationExplorer(QtGui.QDialog):
         
         # If in optimization mode and nlpsolver is not sent then choose it from the selection
         if self._optimization and not self._nlpsolver and len(self._available_nlp_solvers) > 0:
-            minlpsolverIndex = self._ui.minlpsolverComboBox.itemData(self._ui.minlpsolverComboBox.currentIndex()).toInt()[0]
+            _index = self._ui.minlpsolverComboBox.itemData(self._ui.minlpsolverComboBox.currentIndex())
+            if isinstance(_index, QtCore.QVariant):
+                minlpsolverIndex = _index.toInt()[0]
+            else:
+                if _index != None and _index >= 0:
+                    minlpsolverIndex = int(_index)
             self._nlpsolver  = aux.createNLPSolver(minlpsolverIndex)
 
         # If lasolver is not sent then create it based on the selection
         if self._lasolver == None and len(self._available_la_solvers) > 0:
-            lasolverIndex  = self._ui.lasolverComboBox.itemData(self._ui.lasolverComboBox.currentIndex()).toInt()[0]
+            _index = self._ui.lasolverComboBox.itemData(self._ui.lasolverComboBox.currentIndex())
+            if isinstance(_index, QtCore.QVariant):
+                lasolverIndex = _index.toInt()[0]
+            else:
+                if _index != None and _index >= 0:
+                    lasolverIndex = int(_index)
             self._lasolver = aux.createLASolver(lasolverIndex)
             self._daesolver.SetLASolver(self._lasolver)
 
         if not self._datareporter:
-            drIndex            = self._ui.datareporterComboBox.itemData(self._ui.datareporterComboBox.currentIndex()).toInt()[0]
+            _index  = self._ui.datareporterComboBox.itemData(self._ui.datareporterComboBox.currentIndex())
+            drIndex = -1
+            if isinstance(_index, QtCore.QVariant):
+                drIndex = _index.toInt()[0]
+            else:
+                if _index != None and _index >= 0:
+                    drIndex = int(_index)
             self._datareporter = aux.createDataReporter(drIndex)
             
         if not self._log:
-            logIndex  = self._ui.logComboBox.itemData(self._ui.logComboBox.currentIndex()).toInt()[0]
+            _index   = self._ui.logComboBox.itemData(self._ui.logComboBox.currentIndex())
+            logIndex = -1
+            if isinstance(_index, QtCore.QVariant):
+                logIndex = _index.toInt()[0]
+            else:
+                if _index != None and _index >= 0:
+                    logIndex = int(_index)
             self._log = aux.createLog(logIndex)
         
         self._runtimeSettings = {}

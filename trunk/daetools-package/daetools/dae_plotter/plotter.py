@@ -58,7 +58,7 @@ class daeMainWindow(QtGui.QMainWindow):
         self.move(0, 0)
         self.resize(400, 200)
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
-        self.setWindowTitle("DAE Plotter v%s [py%d.%d.%d]" % (daeVersion(True), python_major, python_minor, python_build))
+        self.setWindowTitle("DAE Plotter v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
 
         exit = QtGui.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')

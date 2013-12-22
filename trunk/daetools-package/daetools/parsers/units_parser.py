@@ -1,10 +1,10 @@
-from __future__ import print_function
+
 import os, sys, operator, math
 import ply.lex as lex
 import ply.yacc as yacc
-import parser_objects
-from parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, unit
-from expression_parser import ExpressionParser
+from . import parser_objects
+from .parser_objects import Number, BinaryNode, IdentifierNode, ConstantNode, unit
+from .expression_parser import ExpressionParser
 
 """
 Loading ALL units into the current module could be done by:

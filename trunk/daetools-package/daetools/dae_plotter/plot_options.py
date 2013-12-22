@@ -20,7 +20,7 @@ python_major = sys.version_info[0]
 try:
     from .formlayout import fedit
 except ImportError as e:
-    print('[daePlotOptions]: Cannot load formlayout.fedit module', str(e))
+    print('[daePlotOptions]: Cannot load formlayout.fedit module:', str(e))
 
 LINESTYLES = {
               '-': 'Solid',

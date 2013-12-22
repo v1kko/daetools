@@ -27,8 +27,8 @@ Here we introduce:
 
 import os, sys
 from PyQt4 import QtCore, QtGui
-from tutorial17_ui import Ui_tcpipLogServerMainWindow
 from daetools.pyDAE import *
+from .tutorial17_ui import Ui_tcpipLogServerMainWindow
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 import threading

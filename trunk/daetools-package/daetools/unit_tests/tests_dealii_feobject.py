@@ -7,7 +7,7 @@ if not daetools_root in sys.path:
     sys.path.insert(0, daetools_root)
 from daetools.pyDAE import *
 from pyDealII import *
-import tests_object
+from . import tests_object
 
 """
 Tests for:
@@ -26,16 +26,16 @@ class case_dealii_fe_object(unittest.TestCase):
         grad       = function_gradient_2D
 
         x = constant(0.2) * JxW(fe_q)
-        print constant(0.2) - 1.45 * feNumber.sin(x)
-        print phi(fe_i, fe_q)*phi(fe_j, fe_q)*JxW(fe_q) + dphi(fe_i,fe_q)*dphi(fe_j,fe_q)
-        print fvalue('D', xyz(fe_q)) + normal(fe_q) * fgrad('v', xyz(fe_q))
+        print(constant(0.2) - 1.45 * feNumber.sin(x))
+        print(phi(fe_i, fe_q)*phi(fe_j, fe_q)*JxW(fe_q) + dphi(fe_i,fe_q)*dphi(fe_j,fe_q))
+        print(fvalue('D', xyz(fe_q)) + normal(fe_q) * fgrad('v', xyz(fe_q)))
 
         context = getCellContext()
-        print Evaluate( constant(0.2), context) 
-        print Evaluate( phi(fe_i, fe_q), context) 
-        print Evaluate( dphi(fe_i, fe_q), context) 
-        print Evaluate( dphi(fe_i, fe_q)*dphi(fe_j, fe_q), context) 
-        print Evaluate( xyz(fe_q) * dphi(fe_j, fe_q), context) 
+        print(Evaluate( constant(0.2), context)) 
+        print(Evaluate( phi(fe_i, fe_q), context)) 
+        print(Evaluate( dphi(fe_i, fe_q), context)) 
+        print(Evaluate( dphi(fe_i, fe_q)*dphi(fe_j, fe_q), context)) 
+        print(Evaluate( xyz(fe_q) * dphi(fe_j, fe_q), context)) 
     
         
 if __name__ == "__main__":

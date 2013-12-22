@@ -208,7 +208,7 @@ macx-g++::GFORTRAN  = -lgfortran
 # Starting with the version 1.2.1 daetools use manually compiled boost libraries.
 # The compilation is done in the shell script compile_libraries_linux.sh
 #####################################################################################
-win32::BOOSTDIR                  = ../boost
+win32::BOOSTDIR                  = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 win32::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
 win32::BOOST_PYTHON_LIB_NAME     = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
@@ -219,7 +219,7 @@ win32::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
                                    $${BOOST_THREAD_LIB_NAME}.lib \
                                    $${BOOST_FILESYSTEM_LIB_NAME}.lib
 
-unix::BOOSTDIR                   = ../boost
+unix::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
 unix::BOOST_PYTHON_LIB_NAME      = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}

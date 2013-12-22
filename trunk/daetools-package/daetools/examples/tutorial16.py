@@ -30,7 +30,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 from PyQt4 import QtCore, QtGui
-from tutorial16_ui import Ui_InteractiveRunDialog
+from .tutorial16_ui import Ui_InteractiveRunDialog
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas

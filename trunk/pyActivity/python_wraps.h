@@ -454,7 +454,12 @@ public:
 	boost::python::object GetObjectiveFunction_(void)
 	{
 		if(m_arrObjectiveFunctions.empty())
-			daeDeclareAndThrowException(exInvalidCall);
+        {
+			daeDeclareException(exInvalidCall);
+            e << "No objective functions are defined (did you forget to enable calculateSensitivities flag in Initialize() function or "
+              << "to implement SetUpOptimization/SetUpSensitivityAnalysis functions?)";
+            throw e;
+        }
 		
 		daeObjectiveFunction* pFobj = m_arrObjectiveFunctions[0].get();
 		return boost::python::object(boost::ref(pFobj));

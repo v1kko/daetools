@@ -24,6 +24,10 @@ from PyQt4 import QtCore, QtGui
 from .simulator_ui import Ui_SimulatorDialog
 from . import aux
 
+python_major = sys.version_info[0]
+python_minor = sys.version_info[1]
+python_build = sys.version_info[2]
+
 try:
     from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception as e:
@@ -73,7 +77,7 @@ class daeSimulator(QtGui.QDialog):
             font.setPointSize(9)
 
         self.ui.textEdit.setFont(font)
-        self.setWindowTitle("DAE Tools Simulator v" + daeVersion(True))
+        self.setWindowTitle("DAE Tools Simulator v%s [py%d.%d]" + (daeVersion(True), python_major, python_minor))
 
         self.available_la_solvers  = aux.getAvailableLASolvers()
         self.available_nlp_solvers = aux.getAvailableNLPSolvers()
@@ -215,7 +219,6 @@ class daeSimulator(QtGui.QDialog):
                 _index = self.ui.LASolverComboBox.itemData(self.ui.LASolverComboBox.currentIndex())
                 if isinstance(_index, QtCore.QVariant):
                     lasolverIndex = _index.toInt()[0]
-                    print('lasolverIndex', lasolverIndex)
                 else:
                     if _index != None and _index >= 0:
                         lasolverIndex = int(_index)

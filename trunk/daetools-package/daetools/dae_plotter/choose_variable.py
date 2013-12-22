@@ -119,56 +119,92 @@ class daeChooseVariable(QtGui.QDialog):
 
             # Now we have the parrent in the currentItem, so add the new item to it with the variable data
             varItem = QtGui.QTreeWidgetItem(currentItem)
-            varData = QtCore.QVariant(var)
+            #varData = QtCore.QVariant(var)
             varItem.setText(0, var_name)
-            varItem.setData(0, QtCore.Qt.UserRole, varData)
+            varItem.setData(0, QtCore.Qt.UserRole, var) #varData)
 
     #@QtCore.pyqtSlot(int)
     def slotCurrentIndexChanged(self, index):
         self.domainIndexes = []
         if(self.ui.timeComboBox.isVisible()):
-            i                = self.ui.timeComboBox.currentIndex()
-            domain_index, ok = self.ui.timeComboBox.itemData(i).toInt()
+            i      = self.ui.timeComboBox.currentIndex()
+            _index = self.ui.timeComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain0ComboBox.isVisible()):
-            i                = self.ui.domain0ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain0ComboBox.itemData(i).toInt()
+            i      = self.ui.domain0ComboBox.currentIndex()
+            _index = self.ui.domain0ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain1ComboBox.isVisible()):
-            i                = self.ui.domain1ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain1ComboBox.itemData(i).toInt()
+            i      = self.ui.domain1ComboBox.currentIndex()
+            _index = self.ui.domain1ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain2ComboBox.isVisible()):
-            i                = self.ui.domain2ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain2ComboBox.itemData(i).toInt()
+            i      = self.ui.domain2ComboBox.currentIndex()
+            _index = self.ui.domain2ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain3ComboBox.isVisible()):
-            i                = self.ui.domain3ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain3ComboBox.itemData(i).toInt()
+            i      = self.ui.domain3ComboBox.currentIndex()
+            _index = self.ui.domain3ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain4ComboBox.isVisible()):
-            i                = self.ui.domain4ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain4ComboBox.itemData(i).toInt()
+            i      = self.ui.domain4ComboBox.currentIndex()
+            _index = self.ui.domain4ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain5ComboBox.isVisible()):
-            i                = self.ui.domain5ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain5ComboBox.itemData(i).toInt()
+            i      = self.ui.domain5ComboBox.currentIndex()
+            _index = self.ui.domain5ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain6ComboBox.isVisible()):
-            i                = self.ui.domain6ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain6ComboBox.itemData(i).toInt()
+            i      = self.ui.domain6ComboBox.currentIndex()
+            _index = self.ui.domain6ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         if(self.ui.domain7ComboBox.isVisible()):
-            i                = self.ui.domain7ComboBox.currentIndex()
-            domain_index, ok = self.ui.domain7ComboBox.itemData(i).toInt()
+            i      = self.ui.domain7ComboBox.currentIndex()
+            _index = self.ui.domain7ComboBox.itemData(i)
+            if isinstance(_index, QtCore.QVariant):
+                domain_index, ok = _index.toInt()
+            else:
+                domain_index = _index
             self.domainIndexes.append(domain_index)
 
         self.domainPoints = []
@@ -410,9 +446,12 @@ class daeChooseVariable(QtGui.QDialog):
         selItem = items[0]
 
         varData = selItem.data(0, QtCore.Qt.UserRole)
-        if varData.isNull():
-            return
-        var = varData.toPyObject()
+        if isinstance(varData, QtCore.QVariant):
+            if varData.isNull():
+                return
+            var = varData.toPyObject()
+        else:
+            var = varData
         if var == None:
             return
 
@@ -491,25 +530,25 @@ class daeChooseVariable(QtGui.QDialog):
     def insertTimeValues(self, times):
         label, comboBox = self.getComboBoxAndLabel(0)
         label.setText("Time")
-        comboBox.addItem("*", QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
+        comboBox.addItem("*", daeChooseVariable.FREE_DOMAIN) #QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
         if self.plotType == daeChooseVariable.plot2DAnimated:
-            comboBox.addItem("Current time", QtCore.QVariant(daeChooseVariable.LAST_TIME))
+            comboBox.addItem("Current time", daeChooseVariable.LAST_TIME) #QtCore.QVariant(daeChooseVariable.LAST_TIME))
         for i in range(0, len(times)):
-            comboBox.addItem(str(times[i]), QtCore.QVariant(i))
+            comboBox.addItem(str(times[i]), i) #QtCore.QVariant(i))
 
     def insertDomainValues(self, n, domain):
         label, comboBox = self.getComboBoxAndLabel(n)
         names = domain.Name.split(".")
         label.setText(names[len(names)-1])
-        comboBox.addItem("*", QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
+        comboBox.addItem("*", daeChooseVariable.FREE_DOMAIN) #QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
         if domain.Type == eUnstructuredGrid:
             coordinates = domain.Coordinates
             for i in range(0, domain.NumberOfPoints):
-                comboBox.addItem(str(tuple(coordinates[i])), QtCore.QVariant(i))
+                comboBox.addItem(str(tuple(coordinates[i])), i) #QtCore.QVariant(i))
         else:
             points = domain.Points
             for i in range(0, domain.NumberOfPoints):
-                comboBox.addItem(str(points[i]), QtCore.QVariant(i))
+                comboBox.addItem(str(points[i]), i) #QtCore.QVariant(i))
 
     def getComboBoxAndLabel(self, index):
         if(index == 0):
