@@ -26,7 +26,7 @@ from .simulation_explorer_ui import Ui_SimulationExplorer
 from .simulation_inspector import daeSimulationInspector
 from .exception_dlg_ui import Ui_ExceptionDialog
 from .tree_item import *
-from . import aux
+from . import auxiliary
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -114,10 +114,10 @@ class daeSimulationExplorer(QtGui.QDialog):
             self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Unchecked)
             self._ui.tab_InitialConditions.setEnabled(True)
 
-        self._available_la_solvers     = aux.getAvailableLASolvers()
-        self._available_nlp_solvers    = aux.getAvailableNLPSolvers()
-        self._available_data_reporters = aux.getAvailableDataReporters()
-        self._available_logs           = aux.getAvailableLogs()
+        self._available_la_solvers     = auxiliary.getAvailableLASolvers()
+        self._available_nlp_solvers    = auxiliary.getAvailableNLPSolvers()
+        self._available_data_reporters = auxiliary.getAvailableDataReporters()
+        self._available_logs           = auxiliary.getAvailableLogs()
 
         self._ui.daesolverComboBox.addItem("Sundials IDAS")
         for la in self._available_la_solvers:
@@ -429,7 +429,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             else:
                 if _index != None and _index >= 0:
                     minlpsolverIndex = int(_index)
-            self._nlpsolver  = aux.createNLPSolver(minlpsolverIndex)
+            self._nlpsolver  = auxiliary.createNLPSolver(minlpsolverIndex)
 
         # If lasolver is not sent then create it based on the selection
         if self._lasolver == None and len(self._available_la_solvers) > 0:
@@ -439,7 +439,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             else:
                 if _index != None and _index >= 0:
                     lasolverIndex = int(_index)
-            self._lasolver = aux.createLASolver(lasolverIndex)
+            self._lasolver = auxiliary.createLASolver(lasolverIndex)
             self._daesolver.SetLASolver(self._lasolver)
 
         if not self._datareporter:
@@ -450,7 +450,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             else:
                 if _index != None and _index >= 0:
                     drIndex = int(_index)
-            self._datareporter = aux.createDataReporter(drIndex)
+            self._datareporter = auxiliary.createDataReporter(drIndex)
             
         if not self._log:
             _index   = self._ui.logComboBox.itemData(self._ui.logComboBox.currentIndex())
@@ -460,7 +460,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             else:
                 if _index != None and _index >= 0:
                     logIndex = int(_index)
-            self._log = aux.createLog(logIndex)
+            self._log = auxiliary.createLog(logIndex)
         
         self._runtimeSettings = {}
         self._runtimeSettings['Name']                  = self._simulationName

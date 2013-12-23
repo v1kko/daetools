@@ -25,6 +25,7 @@ from .editor_quantity_array_ui import Ui_EditorQuantityArray
 from .editor_state_transition_ui import Ui_EditorStateTransition
 from .editor_domain_array_ui import Ui_EditorArrayDomain
 from .editor_domain_distributed_ui import Ui_EditorDistributedDomain
+
 _numbers_and_list_ = (float, int, list)
 _numbers_          = (float, int)
 
