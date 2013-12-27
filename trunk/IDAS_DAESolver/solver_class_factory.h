@@ -1,7 +1,7 @@
 #ifndef SOLVER_CLASS_FACTORY_H
 #define SOLVER_CLASS_FACTORY_H
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 
 #ifdef DAEDLL
 #ifdef DAESOLVER_EXPORTS

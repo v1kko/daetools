@@ -1,6 +1,7 @@
 #ifndef DAE_SOLVERS_STD_AFX_H
 #define DAE_SOLVERS_STD_AFX_H
 
+#ifndef __MINGW32__
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
 #ifndef _MSC_VER
@@ -34,6 +35,7 @@
 #pragma warning(disable: 4275)
 #pragma warning(disable: 4267)
 
+#endif //Win32
 #endif
 
 #include <stdio.h>

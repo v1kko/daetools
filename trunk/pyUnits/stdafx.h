@@ -1,3 +1,4 @@
+#ifndef __MINGW32__
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
 #ifndef _MSC_VER
@@ -34,3 +35,4 @@
 #pragma warning(disable: 4275)
 
 #endif // WIN32
+#endif

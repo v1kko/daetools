@@ -1,7 +1,7 @@
 #ifndef DAE_PYTHON_WRAPS_H
 #define DAE_PYTHON_WRAPS_H
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 #pragma warning(disable: 4250)
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)

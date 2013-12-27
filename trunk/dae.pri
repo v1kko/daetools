@@ -29,17 +29,20 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 # Otherwise ppc64 should be added as well
 macx-g++::CONFIG += x86 x86_64
 
-win32::SHARED_LIB_EXT     = dll
-linux-g++::SHARED_LIB_EXT = so
-macx-g++::SHARED_LIB_EXT  = dylib
+win32-msvc2008::SHARED_LIB_EXT  = dll
+win32-g++::SHARED_LIB_EXT       = dll
+linux-g++::SHARED_LIB_EXT       = so
+macx-g++::SHARED_LIB_EXT        = dylib
 
-win32::SHARED_LIB_PREFIX     =
-linux-g++::SHARED_LIB_PREFIX = lib
-macx-g++::SHARED_LIB_PREFIX  = lib
+win32-msvc2008::SHARED_LIB_PREFIX   =
+win32-g++::SHARED_LIB_PREFIX        = lib
+linux-g++::SHARED_LIB_PREFIX        = lib
+macx-g++::SHARED_LIB_PREFIX         = lib
 
-win32::SHARED_LIB_APPEND     = pyd
-linux-g++::SHARED_LIB_APPEND = so.$${VERSION}
-macx-g++::SHARED_LIB_APPEND  = $${VERSION}.dylib
+win32-msvc2008::SHARED_LIB_APPEND   = pyd
+win32-g++::SHARED_LIB_APPEND        = pyd
+linux-g++::SHARED_LIB_APPEND        = so.$${VERSION}
+macx-g++::SHARED_LIB_APPEND         = $${VERSION}.dylib
 
 # Set CONFIG += enable_mpi to use MPI libraries
 
@@ -99,9 +102,9 @@ DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
 ####################################################################################
 #                       Compiler flags
 ####################################################################################
-win32::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
-win32::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
-win32::QMAKE_CXXFLAGS += /bigobj
+win32-msvc2008::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
+win32-msvc2008::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
+win32-msvc2008::QMAKE_CXXFLAGS += /bigobj
 
 QMAKE_CXXFLAGS_DEBUG += -fno-default-inline
 
@@ -167,16 +170,16 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 #####################################################################################
 #                                PYTHON + NUMPY
 #####################################################################################
-PYTHON_INCLUDE_DIR       = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
-PYTHON_SITE_PACKAGES_DIR = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
-unix::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
-win32::PYTHON_LIB_DIR    = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
+PYTHON_INCLUDE_DIR        = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
+PYTHON_SITE_PACKAGES_DIR  = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
+unix::PYTHON_LIB_DIR      = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
+win32::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
 
 !shellCompile {
 message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})
 }
 
-#win32::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+#win32-msvc2008::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
 #                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 #linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
 #                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
@@ -192,13 +195,15 @@ message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_AB
 # librt does not exist in Windows/MacOS
 # gfortran does not exist in MacOS XCode and must be installed separately
 #####################################################################################
-win32::RT     =
-linux-g++::RT = -lrt
-macx-g++::RT  =
+win32-msvc2008::RT =
+win32-g++::RT      = -lrt
+linux-g++::RT      = -lrt
+macx-g++::RT       =
 
-win32::GFORTRAN     =
-linux-g++::GFORTRAN = -lgfortran
-macx-g++::GFORTRAN  = -lgfortran
+win32-msvc2008::GFORTRAN    =
+win32-g++::GFORTRAN         = -lgfortran
+linux-g++::GFORTRAN         = -lgfortran
+macx-g++::GFORTRAN          = -lgfortran
 
 
 #####################################################################################
@@ -208,16 +213,29 @@ macx-g++::GFORTRAN  = -lgfortran
 # Starting with the version 1.2.1 daetools use manually compiled boost libraries.
 # The compilation is done in the shell script compile_libraries_linux.sh
 #####################################################################################
-win32::BOOSTDIR                  = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
-win32::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
-win32::BOOST_PYTHON_LIB_NAME     = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_THREAD_LIB_NAME     = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32::BOOST_PYTHON_LIB          = $${BOOST_PYTHON_LIB_NAME}.lib python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
-win32::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
-                                   $${BOOST_THREAD_LIB_NAME}.lib \
-                                   $${BOOST_FILESYSTEM_LIB_NAME}.lib
+win32-msvc2008::BOOSTDIR                  = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+win32-msvc2008::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
+win32-msvc2008::BOOST_PYTHON_LIB_NAME     = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-msvc2008::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-msvc2008::BOOST_THREAD_LIB_NAME     = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-msvc2008::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-msvc2008::BOOST_PYTHON_LIB          = $${BOOST_PYTHON_LIB_NAME}.lib python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
+win32-msvc2008::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
+                                            $${BOOST_THREAD_LIB_NAME}.lib \
+                                            $${BOOST_FILESYSTEM_LIB_NAME}.lib
+
+win32-g++::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
+win32-g++::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
+win32-g++::BOOST_PYTHON_LIB_NAME      = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
+                                        -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+win32-g++::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
+                                                           -l$${BOOST_THREAD_LIB_NAME} \
+                                                           -l$${BOOST_FILESYSTEM_LIB_NAME} \
+                                                            $${RT}
 
 unix::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
@@ -236,18 +254,20 @@ unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME
 #####################################################################################
 #                                 BLAS/LAPACK
 #####################################################################################
-win32::BLAS_LAPACK_LIBDIR     = ../clapack/LIB/Win32
-linux-g++::BLAS_LAPACK_LIBDIR = ../lapack
-macx-g++::BLAS_LAPACK_LIBDIR  = ../lapack
+win32-msvc2008::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
+win32-g++::BLAS_LAPACK_LIBDIR      = ../lapack
+linux-g++::BLAS_LAPACK_LIBDIR      = ../lapack
+macx-g++::BLAS_LAPACK_LIBDIR       = ../lapack
 
 # Define DAE_USE_OPEN_BLAS if using OpenBLAS
-win32::QMAKE_CXXFLAGS     +=
-linux-g++::QMAKE_CXXFLAGS += #-DDAE_USE_OPEN_BLAS
-macx-g++::QMAKE_CXXFLAGS  +=
+win32-msvc2008::QMAKE_CXXFLAGS  +=
+win32-g++::QMAKE_CXXFLAGS       +=
+linux-g++::QMAKE_CXXFLAGS       += #-DDAE_USE_OPEN_BLAS
+macx-g++::QMAKE_CXXFLAGS        +=
 
-win32::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
-                          $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
-                          $${BLAS_LAPACK_LIBDIR}/libf2c.lib
+win32-msvc2008::BLAS_LAPACK_LIBS =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
+                                    $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
+                                    $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
@@ -263,12 +283,14 @@ macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_
 #             --enable-examples --enable-static=yes --enable-shared=no --with-pic
 #             --enable-lapack CFLAGS=-O3
 #####################################################################################
-SUNDIALS = ../idas/build
+SUNDIALS         = ../idas/build
 SUNDIALS_INCLUDE = $${SUNDIALS}/include
-SUNDIALS_LIBDIR = $${SUNDIALS}/lib
+SUNDIALS_LIBDIR  = $${SUNDIALS}/lib
 
-win32::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/sundials_idas.lib \
-                       $${SUNDIALS_LIBDIR}/sundials_nvecserial.lib
+win32-msvc2008::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/sundials_idas.lib \
+                                $${SUNDIALS_LIBDIR}/sundials_nvecserial.lib
+win32-g++::SUNDIALS_LIBS = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
+                         $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
 unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
                        $${SUNDIALS_LIBDIR}/libsundials_nvecserial.a
 
@@ -278,21 +300,22 @@ unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
 #####################################################################################
 MUMPS_DIR  = ../mumps
 
-win32::G95_LIBDIR = c:/g95/lib/gcc-lib/i686-pc-mingw32/4.1.2
+win32-msvc2008::G95_LIBDIR = c:/g95/lib/gcc-lib/i686-pc-mingw32/4.1.2
 
 MUMPS_LIBDIR   = $${MUMPS_DIR}/lib \
                  $${MUMPS_DIR}/libseq \
                  $${MUMPS_DIR}/blas \
                  $${G95_LIBDIR}
 
-win32::MUMPS_LIBS = blas.lib \
-					libmpiseq.lib \
-					libdmumps.lib \
-					libmumps_common.lib \
-					libpord.lib \
-					libf95.a \
-					libgcc.a
-unix::MUMPS_LIBS = -lcoinmumps -lpthread $${RT}
+win32-msvc2008::MUMPS_LIBS = blas.lib \
+                             libmpiseq.lib \
+                             libdmumps.lib \
+                             libmumps_common.lib \
+                             libpord.lib \
+                             libf95.a \
+                             libgcc.a
+win32-g++::MUMPS_LIBS = -lcoinmumps -lpthread $${RT}
+unix::MUMPS_LIBS      = -lcoinmumps -lpthread $${RT}
 
 
 #####################################################################################
@@ -303,8 +326,9 @@ IPOPT_DIR = ../bonmin/build
 IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
-win32::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib 
-unix::IPOPT_LIBS  = -lipopt -ldl
+win32-msvc2008::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib
+unix::IPOPT_LIBS           = -lipopt -ldl
+win32-g++::IPOPT_LIBS      = -lipopt -ldl
 
 
 #####################################################################################
@@ -315,10 +339,14 @@ BONMIN_DIR = ../bonmin/build
 BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
 BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
 
-win32::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
-                     libBonmin.lib libIpopt.lib libCbc.lib \
-                     libCgl.lib libClp.lib libCoinUtils.lib \
-                     libOsiCbc.lib libOsiClp.lib libOsi.lib
+win32-msvc2008::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
+                              libBonmin.lib libIpopt.lib libCbc.lib \
+                              libCgl.lib libClp.lib libCoinUtils.lib \
+                              libOsiCbc.lib libOsiClp.lib libOsi.lib
+win32-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
+                         -lClp -lCoinUtils -lipopt -lOsiCbc \
+                         -lOsiClp -lOsi \
+                         -ldl -lz -lbz2
 linux-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \
@@ -336,8 +364,9 @@ NLOPT_DIR     = ../nlopt/build
 NLOPT_INCLUDE = $${NLOPT_DIR}/include
 NLOPT_LIBDIR  = $${NLOPT_DIR}/lib
 
-win32::NLOPT_LIBS = nlopt.lib
-unix::NLOPT_LIBS  = -lnlopt -lm
+win32-msvc2008::NLOPT_LIBS = nlopt.lib
+win32-g++::NLOPT_LIBS      = -lnlopt -lm
+unix::NLOPT_LIBS           = -lnlopt -lm
 
 
 ######################################################################################
@@ -347,8 +376,9 @@ SUPERLU_PATH    = ../superlu
 SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
-win32::SUPERLU_LIBS  = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-unix::SUPERLU_LIBS   = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
+win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
+win32-g++x::SUPERLU_LIBS     = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
+unix::SUPERLU_LIBS           = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
 
 
 ######################################################################################
@@ -358,23 +388,26 @@ SUPERLU_MT_PATH    = ../superlu_mt
 SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
-win32::SUPERLU_MT_LIBS  = 
-unix::SUPERLU_MT_LIBS   = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread
+win32-msvc2008::SUPERLU_MT_LIBS =
+win32-g++::SUPERLU_MT_LIBS      = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread
+unix::SUPERLU_MT_LIBS           = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread
 
 
 ######################################################################################
 #                                SuperLU_CUDA
 ######################################################################################
-win32::CUDA_PATH     =
-linux-g++::CUDA_PATH = /usr/local/cuda
+win32-msvc2008::CUDA_PATH =
+win32-g++::CUDA_PATH      =
+linux-g++::CUDA_PATH      = /usr/local/cuda
 
 SUPERLU_CUDA_PATH    = ../superlu_mt-GPU
 SUPERLU_CUDA_LIBPATH = $${SUPERLU_CUDA_PATH}/lib
 SUPERLU_CUDA_INCLUDE = $${SUPERLU_CUDA_PATH} \
                        $${CUDA_PATH}/include
 
-win32::CUDA_LIBS     =
-linux-g++::CUDA_LIBS = -L$${CUDA_PATH}/lib   -lcuda -lcudart
+win32-msvc2008::CUDA_LIBS =
+win32-g++::CUDA_LIBS      =
+linux-g++::CUDA_LIBS      = -L$${CUDA_PATH}/lib -lcuda -lcudart
 
 
 ######################################################################################
@@ -382,8 +415,15 @@ linux-g++::CUDA_LIBS = -L$${CUDA_PATH}/lib   -lcuda -lcudart
 ######################################################################################
 UMFPACK_LIBPATH = ../umfpack/build/lib
 
-win32::UMFPACK_LIBS     =
+win32-msvc2008::UMFPACK_LIBS     =
 linux-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
+                          $${UMFPACK_LIBPATH}/libcholmod.a \
+                          $${UMFPACK_LIBPATH}/libamd.a \
+                          $${UMFPACK_LIBPATH}/libcamd.a \
+                          $${UMFPACK_LIBPATH}/libcolamd.a \
+                          $${UMFPACK_LIBPATH}/libccolamd.a \
+                          $${UMFPACK_LIBPATH}/libsuitesparseconfig.a
+win32-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
                           $${UMFPACK_LIBPATH}/libcholmod.a \
                           $${UMFPACK_LIBPATH}/libamd.a \
                           $${UMFPACK_LIBPATH}/libcamd.a \
@@ -398,13 +438,18 @@ macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
 #####################################################################################
 TRILINOS_DIR  = ../trilinos/build
 
-win32::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
+win32-msvc2008::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
                           $${TRILINOS_DIR}/../commonTools/WinInterface/include
 unix::TRILINOS_INCLUDE  = $${TRILINOS_DIR}/include
 
-win32::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                        $${SUPERLU_LIBS} \
-                        aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
+win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
+                                $${SUPERLU_LIBS} \
+                                aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
+
+win32-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
+                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+                            $${UMFPACK_LIBS} \
+                            $${SUPERLU_LIBS}
 
 linux-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                             -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
@@ -434,6 +479,9 @@ ARCH = $$QMAKE_HOST.arch
 
 win32-msvc2008::MKL_LIBS       = $${MKLPATH}\ia32\lib
 win32-msvc2008::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c_dll.lib mkl_core_dll.lib mkl_intel_thread_dll.lib libiomp5md.lib
+
+win32-g++::MKL_LIBS       =
+win32-g++::INTEL_MKL_LIBS =
 
 contains($$ARCH, x86) {
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
@@ -470,37 +518,52 @@ contains(ARCH, x86_64) {
 enable_mpi {
 QMAKE_CXXFLAGS += -DDAE_MPI
 
-win32::MPI = 
+win32-msvc2008::MPI =
 unix::MPI  = 
 
-win32::MPI_INCLUDE = 
+win32-msvc2008::MPI_INCLUDE =
 unix::MPI_INCLUDE  = /usr/include/mpi
 
-win32::MPI_LIBDIR = 
+win32-msvc2008::MPI_LIBDIR =
 unix::MPI_LIBDIR  = 
 
-win32::MPI_LIBS = 
-unix::MPI_LIBS  = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
+win32-msvc2008::MPI_LIBS =
+unix::MPI_LIBS           = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
 }
 
 
 #####################################################################################
 #                                  DAE Tools
 #####################################################################################
-win32::DAE_CORE_LIB                 = cdaeCore.lib
-win32::DAE_DATAREPORTING_LIB        = cdaeDataReporting.lib
-win32::DAE_ACTIVITY_LIB             = cdaeActivity.lib
-win32::DAE_IDAS_SOLVER_LIB          = cdaeIDAS_DAESolver.lib
-win32::DAE_UNITS_LIB                = cdaeUnits.lib
-win32::DAE_SUPERLU_SOLVER_LIB       = cdaeSuperLU_LASolver.lib
-win32::DAE_SUPERLU_MT_SOLVER_LIB    = cdaeSuperLU_MT_LASolver.lib
-win32::DAE_SUPERLU_CUDA_SOLVER_LIB  = cdaeSuperLU_CUDA_LASolver.lib
-win32::DAE_BONMIN_SOLVER_LIB        = cdaeBONMIN_MINLPSolver.lib
-win32::DAE_IPOPT_SOLVER_LIB         = cdaeIPOPT_NLPSolver.lib
-win32::DAE_NLOPT_SOLVER_LIB         = cdaeNLOPT_NLPSolver.lib
-win32::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
-win32::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
-win32::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
+win32-msvc2008::DAE_CORE_LIB                 = cdaeCore.lib
+win32-msvc2008::DAE_DATAREPORTING_LIB        = cdaeDataReporting.lib
+win32-msvc2008::DAE_ACTIVITY_LIB             = cdaeActivity.lib
+win32-msvc2008::DAE_IDAS_SOLVER_LIB          = cdaeIDAS_DAESolver.lib
+win32-msvc2008::DAE_UNITS_LIB                = cdaeUnits.lib
+win32-msvc2008::DAE_SUPERLU_SOLVER_LIB       = cdaeSuperLU_LASolver.lib
+win32-msvc2008::DAE_SUPERLU_MT_SOLVER_LIB    = cdaeSuperLU_MT_LASolver.lib
+win32-msvc2008::DAE_SUPERLU_CUDA_SOLVER_LIB  = cdaeSuperLU_CUDA_LASolver.lib
+win32-msvc2008::DAE_BONMIN_SOLVER_LIB        = cdaeBONMIN_MINLPSolver.lib
+win32-msvc2008::DAE_IPOPT_SOLVER_LIB         = cdaeIPOPT_NLPSolver.lib
+win32-msvc2008::DAE_NLOPT_SOLVER_LIB         = cdaeNLOPT_NLPSolver.lib
+win32-msvc2008::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
+win32-msvc2008::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
+win32-msvc2008::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
+
+win32-g++::DAE_CORE_LIB                 = -lcdaeCore
+win32-g++::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
+win32-g++::DAE_ACTIVITY_LIB             = -lcdaeActivity
+win32-g++::DAE_IDAS_SOLVER_LIB          = -lcdaeIDAS_DAESolver
+win32-g++::DAE_UNITS_LIB                = -lcdaeUnits
+win32-g++::DAE_SUPERLU_SOLVER_LIB       = -lcdaeSuperLU_LASolver
+win32-g++::DAE_SUPERLU_MT_SOLVER_LIB    = -lcdaeSuperLU_MT_LASolver
+win32-g++::DAE_SUPERLU_CUDA_SOLVER_LIB  = -lcdaeSuperLU_CUDA_LASolver
+win32-g++::DAE_BONMIN_SOLVER_LIB        = -lcdaeBONMIN_MINLPSolver
+win32-g++::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
+win32-g++::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
+win32-g++::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
+win32-g++::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
+win32-g++::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 
 unix::DAE_CORE_LIB                 = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
@@ -526,8 +589,8 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
-win32::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
-win32::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
 unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
@@ -540,7 +603,7 @@ HEADERS_DIR     = ../daetools-package/daetools/usr/local/include
 #####################################################################################
 # Python settings
 COMPILER_SETTINGS_FOLDER = .compiler_settings
-win32::COMPILER = $$system(mkdir $${COMPILER_SETTINGS_FOLDER})
+win32-msvc2008::COMPILER = $$system(mkdir $${COMPILER_SETTINGS_FOLDER})
 unix::COMPILER  = $$system(mkdir -p $${COMPILER_SETTINGS_FOLDER})
 
 COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > $${COMPILER_SETTINGS_FOLDER}/dae_major)

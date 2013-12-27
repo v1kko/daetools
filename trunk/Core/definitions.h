@@ -37,6 +37,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <typeinfo>
 
+#ifndef __MINGW32__
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 #pragma warning(disable: 4250)
 #pragma warning(disable: 4251)
@@ -53,6 +54,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #undef GetCurrentTime
 #endif
 
+#endif
 #endif
 
 namespace dae 

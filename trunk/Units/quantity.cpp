@@ -636,8 +636,8 @@ const quantity asinh(const quantity &q)
 	if(q.getUnits() != unit())	
 		throw units_error((boost::format("Invalid units in function: asinh(%1%)") % q).str());
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-	return quantity(::log(q.getValue() + ::sqrt(q.getValue()*q.getValue() + 1)), unit());
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+    return quantity(::log(q.getValue() + ::sqrt(q.getValue()*q.getValue() + 1)), unit());
 #else
 	return quantity(::asinh(q.getValue()), unit());
 #endif
@@ -648,8 +648,8 @@ const quantity acosh(const quantity &q)
 	if(q.getUnits() != unit())	
 		throw units_error((boost::format("Invalid units in function: acosh(%1%)") % q).str());
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-	return quantity(::log(q.getValue() + ::sqrt(q.getValue()*q.getValue() - 1)), unit());
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+    return quantity(::log(q.getValue() + ::sqrt(q.getValue()*q.getValue() - 1)), unit());
 #else
 	return quantity(::acosh(q.getValue()), unit());
 #endif
@@ -660,8 +660,8 @@ const quantity atanh(const quantity &q)
 	if(q.getUnits() != unit())	
 		throw units_error((boost::format("Invalid units in function: atanh(%1%)") % q).str());
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-	return quantity((::log(1 + q.getValue()) - ::log(1 - q.getValue())) / 2.0 , unit());
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+    return quantity((::log(1 + q.getValue()) - ::log(1 - q.getValue())) / 2.0 , unit());
 #else
 	return quantity(::atanh(q.getValue()), unit());
 #endif

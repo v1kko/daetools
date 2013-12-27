@@ -13,7 +13,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #if !defined(ADOLC_ADOUBLE_H)
 #define ADOLC_ADOUBLE_H
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 #ifdef DAEDLL
 #ifdef MODEL_EXPORTS
 #define DAE_CORE_API __declspec(dllexport)

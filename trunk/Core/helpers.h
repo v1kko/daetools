@@ -27,6 +27,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <mach/mach_time.h>
 #endif
 
+#ifndef __MINGW32__
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 
 #ifndef _MSC_VER
@@ -56,6 +57,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
 
+#endif
 #endif
 
 namespace dae 
@@ -738,7 +740,7 @@ inline bool ParseSingleToken(std::string& strFullName, std::string& strShortName
 
 inline double GetTimeInSeconds(void)
 {
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     DWORD time = GetTickCount();
     return (double)(time / 1.0E3);
 
@@ -761,7 +763,7 @@ inline double GetTimeInSeconds(void)
 	timeNano = time * sTimebaseInfo.numer / sTimebaseInfo.denom;
 	return (double)(timeNano / 1.0E9);
 
-#elif __linux__ == 1
+#elif __linux__ == 1 || defined(__MINGW32__)
     struct timespec time;
     clock_gettime(CLOCK_MONOTONIC, &time);
     return (double)(time.tv_sec + time.tv_nsec / 1.0E9);

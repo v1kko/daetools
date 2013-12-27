@@ -33,7 +33,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/serialization/utility.hpp>
 #endif
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 
 #ifdef DAEDLL
 #ifdef MODEL_EXPORTS

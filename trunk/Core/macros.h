@@ -41,7 +41,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #define daeRegisterDAESolver(CLASS)				static bool _bRetCreate##CLASS = g_SolverClassFactory.RegisterDAESolver(          string(#CLASS), new dae::daeCreateObjectDelegateDerived<CLASS, dae::solver::daeDAESolver_t>());
 
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 #define DAE_SYMBOL_EXPORT __declspec(dllexport)
 #else
 #define DAE_SYMBOL_EXPORT
