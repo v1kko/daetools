@@ -270,7 +270,7 @@ cd "${TRUNK}"
 #######################################################
 configure_boost() 
 {
-  if [ ${DAE_IF_CROSS_COMPILING} == 1 ]; then
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
     exit
   fi
@@ -344,7 +344,7 @@ clean_boost()
 #######################################################
 configure_openblas() 
 {
-  if [ ${DAE_IF_CROSS_COMPILING} == 1 ]; then
+  if [ "${DAE_IF_CROSS_COMPILING}" = 1 ]; then
     echo "OpenBLAS not configured for cross-compiling at the moment"
     exit
   fi
@@ -819,7 +819,11 @@ compile_superlu_mt()
   echo ""
   echo "[*] Building superlu_mt..."
   echo ""
-  PTHREAD_INCLUDE="-I${TRUNK}/pthreads_win32/include"
+  
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    PTHREAD_INCLUDE="-I${TRUNK}/pthreads_win32/include"
+  fi
+  
   make lib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} ${PTHREAD_INCLUDE}"
   echo ""
   echo "[*] Done!"
@@ -988,7 +992,7 @@ configure_trilinos()
     UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
   fi
   
-  #if [ ${DAE_IF_CROSS_COMPILING} == 1 ]; then
+  #if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
   #  PTHREAD_DIR="-DPthread_LIBRARY_DIRS=${TRUNK}/pthreads_win32 -DPthread_INCLUDE_DIRS=${TRUNK}/pthreads_win32/include"
   #fi
   
