@@ -1114,6 +1114,13 @@ clean_libmesh()
 #######################################################
 configure_dealii() 
 {
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    echo "For some reasons deal.II cannot be cross-compiled from this script; use cmake-gui with the same options as in this script +:"
+    echo "  -DDEAL_II_NATIVE = path to the native build"
+    echo "  -DCMAKE_TOOLCHAIN_FILE = path to a cross-compile cmake file (have a look in the [daetools/trunk] folder)"
+    exit
+  fi
+  
   if [ -e deal.II ]; then
     rm -r deal.II
   fi
@@ -1134,8 +1141,7 @@ configure_dealii()
     -DDEAL_II_WITH_THREADS:BOOL=OFF \
     -DDEAL_II_WITH_MPI:BOOL=OFF \
     -DDEAL_II_COMPONENT_PARAMETER_GUI:BOOL=OFF \
-    -DDEAL_II_COMPONENT_MESH_CONVERTER:BOOL=ON  \
-    ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE}
+    -DDEAL_II_COMPONENT_MESH_CONVERTER:BOOL=ON
     
   cd "${TRUNK}"
   echo ""
