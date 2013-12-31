@@ -102,6 +102,8 @@ DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
 ####################################################################################
 #                       Compiler flags
 ####################################################################################
+CONFIG += rtti
+
 win32-msvc2008::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 win32-msvc2008::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
 win32-msvc2008::QMAKE_CXXFLAGS += /bigobj
@@ -115,11 +117,20 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 # If compiling from the compile_linux.sh shell script supress all warnings
 shellCompile {
-unix::QMAKE_CXXFLAGS_WARN_ON = -w
-unix::QMAKE_CFLAGS_WARN_ON   = -w
+    unix::QMAKE_CXXFLAGS_WARN_ON = -w
+    unix::QMAKE_CFLAGS_WARN_ON   = -w
+
+    win32-g++::QMAKE_CXXFLAGS_WARN_ON = -w
+    win32-g++::QMAKE_CFLAGS_WARN_ON   = -w
 }
 # If compiling from the GUI enable warnings
 !shellCompile:message(Compiling from the GUI) {
+win32-g++::QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra \
+                                    -Wno-sign-compare \
+                                    -Wno-unused-parameter \
+                                    -Wno-unused-variable \
+                                    -Wno-unused-but-set-variable
+    
 linux-g++::QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra \
                                     -Wno-sign-compare \
                                     -Wno-unused-parameter \
@@ -281,8 +292,8 @@ win32-g++::BLAS_LAPACK_LIBS      =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
 # 2. daetools compiled reference BLAS and Lapack statically linked:
-linux-g++::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/librefblas.a -lgfortran -lm
-macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/librefblas.a -lgfortran -lm
+linux-g++::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
+macx-g++::BLAS_LAPACK_LIBS  = $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 
 #####################################################################################
@@ -336,8 +347,8 @@ IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
 win32-msvc2008::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib
+win32-g++::IPOPT_LIBS      = -lipopt -lcoinlapack -lcoinblas -ldl
 unix::IPOPT_LIBS           = -lipopt -ldl
-win32-g++::IPOPT_LIBS      = -lipopt -ldl
 
 
 #####################################################################################
@@ -355,7 +366,8 @@ win32-msvc2008::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
 win32-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \
-                         -ldl -lz -lbz2
+                         -lcoinlapack -lcoinblas
+                         #-ldl -lz -lbz2
 linux-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \

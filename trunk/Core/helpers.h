@@ -763,11 +763,16 @@ inline double GetTimeInSeconds(void)
 	timeNano = time * sTimebaseInfo.numer / sTimebaseInfo.denom;
 	return (double)(timeNano / 1.0E9);
 
-#elif __linux__ == 1 || defined(__MINGW32__)
+#elif defined(__MINGW32__)
     struct timespec time;
     clock_gettime(CLOCK_MONOTONIC, &time);
     return (double)(time.tv_sec + time.tv_nsec / 1.0E9);
-
+    
+#elif __linux__ == 1
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return (double)(time.tv_sec + time.tv_nsec / 1.0E9);
+    
 #else
     #error Unknown Platform!!
 	return 0.0;

@@ -19,6 +19,11 @@ OPTIONS:
         --with-python-version       Version of the system's python.
                                     Format: major.minor (i.e 2.7).
 
+   Cross compiling options:
+        --host      For instance: --host i686-w64-mingw32
+                    To cross-compile download mingw32-qt-qmake-4.8.5-4.fc20.x86_64.rpm package, 
+                    convert it to .deb using "alien" and install it.
+
 PROJECTS:
     all             Build all daetools c++ libraries, solvers and python extension modules.
                     Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
@@ -79,8 +84,9 @@ compile()
 
   echo ""
   echo "[*] Configuring the project with ($2, $3)..."
-
-  qmake-qt4 -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile "customPython=${PYTHON}" -spec ${SPEC} ${CONFIG}
+  echo "${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile "customPython=${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}"
+  
+  ${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile "customPython=${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}
   
   echo ""
   echo "[*] Cleaning the project..."
@@ -102,13 +108,18 @@ PYTHON=`python -c "import sys; print(sys.executable)"`
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
+QMAKE="qmake-qt4"
+QMAKE_SPEC="linux-g++"
 
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
-  SPEC=macx-g++
-else
+  QMAKE_SPEC=macx-g++
+elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
-  SPEC=linux-g++
+  QMAKE_SPEC=linux-g++
+else
+  Ncpu=4
+  QMAKE_SPEC=win32-g++
 fi
 
 if [ ${Ncpu} -gt 1 ]; then
@@ -121,7 +132,7 @@ if [ ! -d release ]; then
     mkdir release
 fi
 
-args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:" -n "compile_linux" -- $*`
+args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,host:" -n "compile_linux" -- $*`
 
 # Process options
 for i; do
@@ -137,6 +148,10 @@ for i; do
        --with-python-version )  PYTHON=`python$2 -c "import sys; print(sys.executable)"`
                                 shift ; shift 
                                 ;;
+
+       --host) QMAKE="qmake-qt4"
+               shift ; shift
+               ;;
                                     
     --) shift; break 
         ;;
@@ -179,7 +194,7 @@ done
 echo ""
 echo "###############################################################################"
 echo "Proceed with the following options:"
-echo "  - Qmake-spec:           ${SPEC}"
+echo "  - Qmake-spec:           ${QMAKE_SPEC}"
 echo "  - Python:               ${PYTHON}"
 echo "  - Platform:             $PLATFORM"
 echo "  - Architecture:         $HOST_ARCH"
