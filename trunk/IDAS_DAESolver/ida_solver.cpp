@@ -6,7 +6,7 @@ using namespace std;
 #include <idas/idas.h>
 #include <idas/idas_impl.h>
 #include <idas/idas_dense.h>
-#include <idas/idas_lapack.h>
+//#include <idas/idas_lapack.h>
 #include <idas/idas_spgmr.h>
 
 #define JACOBIAN(A) (A->cols)
@@ -488,13 +488,13 @@ void daeIDASolver::CreateLinearSolver(void)
 	else if(m_eLASolver == eSundialsLapack)
 	{
 	// Lapack dense LU LA Solver	
-		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
-		if(!CheckFlag(retval)) 
-		{
-			daeDeclareException(exRuntimeCheck);
-			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
-			throw e;
-		}
+//		retval = IDALapackDense(m_pIDA, (long)m_nNumberOfEquations);
+//		if(!CheckFlag(retval))
+//		{
+//			daeDeclareException(exRuntimeCheck);
+//			e << "Sundials IDAS solver ignobly refused to create Sundials dense linear solver; " << CreateIDAErrorMessage(retval);
+//			throw e;
+//		}
 	
 		retval = IDADlsSetDenseJacFn(m_pIDA, jacobian);
 		if(!CheckFlag(retval)) 

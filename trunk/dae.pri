@@ -173,7 +173,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 PYTHON_INCLUDE_DIR        = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
 PYTHON_SITE_PACKAGES_DIR  = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
 unix::PYTHON_LIB_DIR      = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
-win32::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
+win32::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")\libs
 
 !shellCompile {
 message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})
@@ -196,7 +196,7 @@ message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_AB
 # gfortran does not exist in MacOS XCode and must be installed separately
 #####################################################################################
 win32-msvc2008::RT =
-win32-g++::RT      = -lrt
+win32-g++::RT      =
 linux-g++::RT      = -lrt
 macx-g++::RT       =
 
@@ -212,6 +212,11 @@ macx-g++::GFORTRAN          = -lgfortran
 # Boost version installed must be 1.42+ (asio, system, python, thread, regex)
 # Starting with the version 1.2.1 daetools use manually compiled boost libraries.
 # The compilation is done in the shell script compile_libraries_linux.sh
+# For gcc-mingw32 first build bjam and then use:
+# bjam --build-dir=./build --debug-building --layout=system --buildid=daetools-py27
+#       --with-date_time --with-system --with-filesystem --with-regex --with-serialization
+#       --with-thread --with-python variant=release link=shared threading=multi
+#       runtime-link=shared toolset=gcc
 #####################################################################################
 win32-msvc2008::BOOSTDIR                  = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 win32-msvc2008::BOOSTLIBPATH              = $${BOOSTDIR}/stage/lib
@@ -226,15 +231,16 @@ win32-msvc2008::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
 
 win32-g++::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 win32-g++::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
-win32-g++::BOOST_PYTHON_LIB_NAME      = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++::BOOST_PYTHON_LIB_NAME      = boost_python-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.dll
+win32-g++::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.dll
+win32-g++::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.dll
+win32-g++::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.dll
 win32-g++::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
-                                        -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+                                        -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
 win32-g++::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
                                                            -l$${BOOST_THREAD_LIB_NAME} \
                                                            -l$${BOOST_FILESYSTEM_LIB_NAME} \
+                                                           -lws2_32 -lmswsock \
                                                             $${RT}
 
 unix::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
@@ -255,9 +261,9 @@ unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME
 #                                 BLAS/LAPACK
 #####################################################################################
 win32-msvc2008::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
-win32-g++::BLAS_LAPACK_LIBDIR      = ../lapack
-linux-g++::BLAS_LAPACK_LIBDIR      = ../lapack
-macx-g++::BLAS_LAPACK_LIBDIR       = ../lapack
+win32-g++::BLAS_LAPACK_LIBDIR      = ../clapack/lib
+linux-g++::BLAS_LAPACK_LIBDIR      = ../lapack/lib
+macx-g++::BLAS_LAPACK_LIBDIR       = ../lapack/lib
 
 # Define DAE_USE_OPEN_BLAS if using OpenBLAS
 win32-msvc2008::QMAKE_CXXFLAGS  +=
@@ -266,6 +272,9 @@ linux-g++::QMAKE_CXXFLAGS       += #-DDAE_USE_OPEN_BLAS
 macx-g++::QMAKE_CXXFLAGS        +=
 
 win32-msvc2008::BLAS_LAPACK_LIBS =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
+                                    $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
+                                    $${BLAS_LAPACK_LIBDIR}/libf2c.lib
+win32-g++::BLAS_LAPACK_LIBS      =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                                     $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                                     $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 
@@ -377,7 +386,7 @@ SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
 win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-win32-g++x::SUPERLU_LIBS     = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
+win32-g++::SUPERLU_LIBS      = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
 unix::SUPERLU_LIBS           = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
 
 

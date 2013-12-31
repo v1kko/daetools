@@ -1,6 +1,10 @@
 #if !defined(DATA_REPORTERS_H)
 #define DATA_REPORTERS_H
 
+#if defined(__MINGW32__)
+#include <winsock2.h>	// Problem with: error Winsock.h has aready been included
+#endif
+
 #include "datareporting_class_factory.h"
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>

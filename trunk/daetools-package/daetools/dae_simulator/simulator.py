@@ -22,7 +22,7 @@ from time import ctime, time, localtime, strftime, struct_time
 from PyQt4 import QtCore, QtGui
 
 from .simulator_ui import Ui_SimulatorDialog
-from . import aux
+from . import auxiliary
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -77,10 +77,10 @@ class daeSimulator(QtGui.QDialog):
             font.setPointSize(9)
 
         self.ui.textEdit.setFont(font)
-        self.setWindowTitle("DAE Tools Simulator v%s [py%d.%d]" + (daeVersion(True), python_major, python_minor))
+        self.setWindowTitle("DAE Tools Simulator v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
 
-        self.available_la_solvers  = aux.getAvailableLASolvers()
-        self.available_nlp_solvers = aux.getAvailableNLPSolvers()
+        self.available_la_solvers  = auxiliary.getAvailableLASolvers()
+        self.available_nlp_solvers = auxiliary.getAvailableNLPSolvers()
 
         self.ui.DAESolverComboBox.addItem("Sundials IDAS")
         for la in self.available_la_solvers:
@@ -222,7 +222,7 @@ class daeSimulator(QtGui.QDialog):
                 else:
                     if _index != None and _index >= 0:
                         lasolverIndex = int(_index)
-                self.lasolver = aux.createLASolver(lasolverIndex)
+                self.lasolver = auxiliary.createLASolver(lasolverIndex)
 
             self.ui.RunButton.setEnabled(False)
             self.ui.MINLPSolverComboBox.setEnabled(False)
@@ -233,15 +233,15 @@ class daeSimulator(QtGui.QDialog):
             self.ui.TimeHorizonDoubleSpinBox.setEnabled(False)
             self.ui.MatrixButton.setEnabled(False)
             self.ui.ExportButton.setEnabled(False)
-            if lasolverIndex in [aux.laAmesos_Klu,
-                                 aux.laAmesos_Superlu,
-                                 aux.laAmesos_Umfpack,
-                                 aux.laAztecOO,
-                                 aux.laIntelPardiso,
-                                 aux.laSuperLU,
-                                 aux.laSuperLU_MT,
-                                 aux.laSuperLU_CUDA,
-                                 aux.laCUSP]:
+            if lasolverIndex in [auxiliary.laAmesos_Klu,
+                                 auxiliary.laAmesos_Superlu,
+                                 auxiliary.laAmesos_Umfpack,
+                                 auxiliary.laAztecOO,
+                                 auxiliary.laIntelPardiso,
+                                 auxiliary.laSuperLU,
+                                 auxiliary.laSuperLU_MT,
+                                 auxiliary.laSuperLU_CUDA,
+                                 auxiliary.laCUSP]:
                 self.ui.MatrixButton.setEnabled(True)
                 self.ui.ExportButton.setEnabled(True)
 
@@ -260,7 +260,7 @@ class daeSimulator(QtGui.QDialog):
             else:
                 # If nlpsolver is not sent then create it based on the selection
                 if(self.nlpsolver == None):
-                    self.nlpsolver = aux.createNLPSolver(minlpsolverIndex)
+                    self.nlpsolver = auxiliary.createNLPSolver(minlpsolverIndex)
 
                 self.optimization.Initialize(self.simulation, self.nlpsolver, self.daesolver, self.datareporter, self.log)
 

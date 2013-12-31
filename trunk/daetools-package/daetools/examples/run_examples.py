@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 
-import os, sys, subprocess, webbrowser, traceback
+import os, sys, subprocess, webbrowser, traceback, importlib
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
@@ -49,9 +49,36 @@ try:
 except Exception as e:
     print('[daeRunExamples]: Cannot load UI modules\n Error: ', str(e))
 
+tutorial_modules = []
+tutorial_modules.append(('whats_the_time', []))
+for i in range(1, 20):
+    tutorial_modules.append(('tutorial%d' % i, []))
+for i in range(1, 3):
+    tutorial_modules.append(('tutorial_dealii_%d' % i, []))
+for i in range(1, 8):
+    tutorial_modules.append(('opt_tutorial%d' % i, []))
+
+for m_name, data  in tutorial_modules:
+    try:
+        module = __import__(m_name, globals(), locals(), [], -1)
+        doc    = module.__doc__
+        data.append(module)
+        data.append(doc)
+    except Exception as e:
+        exc_traceback = sys.exc_info()[2]
+        print('\n'.join(traceback.format_tb(exc_traceback)))
+        print('[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e))
+
+print(tutorial_modules)
+"""
 try:
-    from . import whats_the_time, tutorial1, tutorial2, tutorial3, tutorial4, tutorial5, tutorial6
     from . import tutorial7, tutorial8, tutorial9, tutorial10, tutorial11, tutorial12, tutorial13
+except Exception as e:
+    exc_traceback = sys.exc_info()[2]
+    print('\n'.join(traceback.format_tb(exc_traceback)))
+    print('[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e))
+
+try:
     from . import tutorial14, tutorial15, tutorial16, tutorial17, tutorial18, tutorial19
 except Exception as e:
     exc_traceback = sys.exc_info()[2]
@@ -106,6 +133,7 @@ except Exception as e:
     exc_traceback = sys.exc_info()[2]
     print('\n'.join(traceback.format_tb(exc_traceback)))
     print('[daeRunExamples]: Cannot load opt_tutorial7 module\n Error: ', str(e))
+"""
 
 try:
     _examples_dir = dirname(__file__)
@@ -147,40 +175,76 @@ class RunExamples(QtGui.QDialog):
         self.connect(self.ui.toolButtonRuntimeModelReport, QtCore.SIGNAL('clicked()'), self.slotShowRuntimeModelReport)
         self.connect(self.ui.comboBoxExample,              QtCore.SIGNAL("currentIndexChanged(int)"), self.slotTutorialChanged)
 
-        self.ui.comboBoxExample.addItem("whats_the_time", whats_the_time)
-        self.ui.comboBoxExample.addItem("tutorial1", tutorial1)
-        self.ui.comboBoxExample.addItem("tutorial2", tutorial2)
-        self.ui.comboBoxExample.addItem("tutorial3", tutorial3)
-        self.ui.comboBoxExample.addItem("tutorial4", tutorial4)
-        self.ui.comboBoxExample.addItem("tutorial5", tutorial5)
-        self.ui.comboBoxExample.addItem("tutorial6", tutorial6)
-        self.ui.comboBoxExample.addItem("tutorial7", tutorial7)
-        self.ui.comboBoxExample.addItem("tutorial8", tutorial8)
-        self.ui.comboBoxExample.addItem("tutorial9", tutorial9)
-        self.ui.comboBoxExample.addItem("tutorial10", tutorial10)
-        self.ui.comboBoxExample.addItem("tutorial11", tutorial11)
-        self.ui.comboBoxExample.addItem("tutorial12", tutorial12)
-        self.ui.comboBoxExample.addItem("tutorial13", tutorial13)
-        self.ui.comboBoxExample.addItem("tutorial14", tutorial14)
-        self.ui.comboBoxExample.addItem("tutorial15", tutorial15)
-        self.ui.comboBoxExample.addItem("tutorial16", tutorial16)
-        self.ui.comboBoxExample.addItem("tutorial17", tutorial17)
-        self.ui.comboBoxExample.addItem("tutorial18", tutorial18)
-        self.ui.comboBoxExample.addItem("tutorial19", tutorial19)
-        self.ui.comboBoxExample.addItem("opt_tutorial1", opt_tutorial1)
-        self.ui.comboBoxExample.addItem("opt_tutorial2", opt_tutorial2)
-        self.ui.comboBoxExample.addItem("opt_tutorial3", opt_tutorial3)
-        self.ui.comboBoxExample.addItem("opt_tutorial4", opt_tutorial4)
-        self.ui.comboBoxExample.addItem("opt_tutorial5", opt_tutorial5)
-        self.ui.comboBoxExample.addItem("opt_tutorial6", opt_tutorial6)
-        self.ui.comboBoxExample.addItem("opt_tutorial7", opt_tutorial7)
-
+        for m_name, data  in tutorial_modules:
+            if len(data) == 2:
+                module = data[0]
+                doc    = data[1]
+                if module:
+                    self.ui.comboBoxExample.addItem(m_name, (module, doc))
+        """
+        if 'whats_the_time' in sys.modules:
+            self.ui.comboBoxExample.addItem("whats_the_time", whats_the_time)
+        if 'tutorial1' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial1", tutorial1)
+        if 'tutorial2' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial2", tutorial2)
+        if 'tutorial3' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial3", tutorial3)
+        if 'tutorial4' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial4", tutorial4)
+        if 'tutorial5' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial5", tutorial5)
+        if 'tutorial6' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial6", tutorial6)
+        if 'tutorial7' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial7", tutorial7)
+        if 'tutorial8' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial8", tutorial8)
+        if 'tutorial9' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial9", tutorial9)
+        if 'tutorial10' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial10", tutorial10)
+        if 'tutorial11' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial11", tutorial11)
+        if 'tutorial12' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial12", tutorial12)
+        if 'tutorial13' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial13", tutorial13)
+        if 'tutorial14' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial14", tutorial14)
+        if 'tutorial15' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial15", tutorial15)
+        if 'tutorial16' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial16", tutorial16)
+        if 'tutorial17' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial17", tutorial17)
+        if 'tutorial18' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial18", tutorial18)
+        if 'tutorial19' in sys.modules:
+            self.ui.comboBoxExample.addItem("tutorial19", tutorial19)
+        if 'opt_tutorial1' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial1", opt_tutorial1)
+        if 'opt_tutorial2' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial2", opt_tutorial2)
+        if 'opt_tutorial3' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial3", opt_tutorial3)
+        if 'opt_tutorial4' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial4", opt_tutorial4)
+        if 'opt_tutorial5' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial5", opt_tutorial5)
+        if 'opt_tutorial6' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial6", opt_tutorial6)
+        if 'opt_tutorial7' in sys.modules:
+            self.ui.comboBoxExample.addItem("opt_tutorial7", opt_tutorial7)
+        """
+        
     def slotTutorialChanged(self, index):
-        module = self.ui.comboBoxExample.itemData(index)
-        if isinstance(module, QtCore.QVariant):
-            self.ui.docstringEdit.setText(module.toPyObject().__doc__)
+        data = self.ui.comboBoxExample.itemData(index)
+        if isinstance(data, QtCore.QVariant):
+            module, doc = data.toPyObject()
         else:
-            self.ui.docstringEdit.setText(module.__doc__)
+            module, doc = data
+        self.ui.docstringEdit.setText(str(doc))
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
@@ -208,9 +272,20 @@ class RunExamples(QtGui.QDialog):
 
     #@QtCore.pyqtSlot()
     def slotRunTutorial(self):
-        simName = str(self.ui.comboBoxExample.currentText())
-
+        m_name = str(self.ui.comboBoxExample.currentText())
+        data   = self.ui.comboBoxExample.itemData(self.ui.comboBoxExample.currentIndex())
+        if isinstance(data, QtCore.QVariant):
+            module, doc = data.toPyObject()
+        else:
+            module, doc = data
+        
         try:
+            if m_name in ["opt_tutorial4", "opt_tutorial5", "opt_tutorial6"]:
+                self.consoleRunAndShowResults(module)
+            else:
+                module.guiRun(self.app)
+
+            """
             if simName == "tutorial1":
                 tutorial1.guiRun(self.app)
             elif simName == "tutorial2":
@@ -267,7 +342,7 @@ class RunExamples(QtGui.QDialog):
                 opt_tutorial7.guiRun(self.app)
             else:
                 pass
-        
+            """
         except RuntimeError as e:
             QtGui.QMessageBox.warning(self, "daeRunExamples", "Exception raised: " + str(e))
 

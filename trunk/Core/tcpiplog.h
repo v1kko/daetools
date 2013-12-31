@@ -13,14 +13,18 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAE_TCPIP_LOG_H
 #define DAE_TCPIP_LOG_H
 
+#if defined(__MINGW32__)
+#include <winsock2.h>	// Problem with: error Winsock.h has aready been included
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <iomanip>
 #include <vector>
 #include "base_logging.h"
-#include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/asio.hpp>
 #include <boost/bind.hpp>
 using boost::asio::ip::tcp;
 

@@ -62,7 +62,11 @@ boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_
 boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
 deal_II          = 'deal_II-daetools'
-
+if platform.system() == 'Windows':
+    mingw_dlls   = ['libgcc', 'libstdc++', 'libwinpthread', 'libgfortran']
+else:
+    mingw_dlls   = []
+    
 boost_solibs = []
 
 if os.path.isdir(boost_solib_dir):
@@ -72,6 +76,10 @@ if os.path.isdir(boost_solib_dir):
         if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (deal_II in f):
             boost_solibs.append(os.path.join(boost_solib_dir, f))
 
+        for dll in mingw_dlls:
+            if dll in f:
+                boost_solibs.append(os.path.join(boost_solib_dir, f))
+    
 #print 'boost_solibs = ', boost_solibs
 
 if platform.system() == 'Linux':

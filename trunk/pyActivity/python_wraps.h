@@ -22,7 +22,7 @@
 #include "../Activity/simulation.h"
 #include "../IDAS_DAESolver/ida_solver.h"
 #include "../Core/base_logging.h"
-#include "../Core/tcpiplog.h"
+//#include "../Core/tcpiplog.h"
 
 namespace daepython
 {

@@ -11,9 +11,9 @@ INCLUDEPATH += $${BOOSTDIR} \
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
-LIBS += $${DAE_CORE_LIB} \
+LIBS += $${DAE_ACTIVITY_LIB} \
+        $${DAE_CORE_LIB} \
         $${DAE_DATAREPORTING_LIB} \
-        $${DAE_ACTIVITY_LIB} \
         $${DAE_IDAS_SOLVER_LIB} \
         $${DAE_NLPSOLVER_LIB} \
         $${DAE_UNITS_LIB} \

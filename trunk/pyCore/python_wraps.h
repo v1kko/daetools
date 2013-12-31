@@ -21,6 +21,7 @@
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include "../dae_develop.h"
 #include "../Core/base_logging.h"
+#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include "../Core/tcpiplog.h"
 #include "../Core/nodes.h"
 #include "../Core/nodes_array.h"
