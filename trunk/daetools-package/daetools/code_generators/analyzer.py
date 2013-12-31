@@ -62,6 +62,7 @@ class daeCodeGeneratorAnalyzer(object):
        
     def analyzePort(self, port):
         result = { 'Class'         : '',
+                   'Name'          : '',
                    'Parameters'    : [],
                    'Domains'       : [],
                    'Variables'     : [],
@@ -69,6 +70,7 @@ class daeCodeGeneratorAnalyzer(object):
                  }
                  
         result['Class'] = port.__class__.__name__
+        result['Name']  = port.Name
         
         #if len(port.Domains) > 0:
         #    raise RuntimeError('Ports cannot contain domains')
@@ -135,6 +137,7 @@ class daeCodeGeneratorAnalyzer(object):
     
     def analyzeModel(self, model):
         result = { 'Class'                : '',
+                   'Name'                 : '',
                    'CanonicalName'        : '',
                    'VariableTypes'        : {},
                    'Parameters'           : [],
@@ -154,6 +157,7 @@ class daeCodeGeneratorAnalyzer(object):
                  }
  
         result['Class']         = model.__class__.__name__
+        result['Name']          = model.Name
         result['CanonicalName'] = model.CanonicalName
         
         # Domains

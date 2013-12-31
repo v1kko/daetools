@@ -40,7 +40,7 @@ deal.II classes provided by the python wrapper:
     * Helmholtz Equation up to three dimensions
 """
 
-import os, sys, numpy, json
+import os, sys, numpy, json, tempfile
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import *
 from time import localtime, strftime
@@ -180,16 +180,22 @@ def guiRun(app):
     simulation = simTutorial()
     datareporter = daeDelegateDataReporter()
     tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = self.fe_dealII.CreateDataReporter()
+    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
     datareporter.AddDataReporter(feDataReporter)
 
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
-    feDataReporter.Connect(os.path.join(os.path.dirname(__file__), 'results'), simName)
-
+        sys.exit()        
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'daetools-deal.II-')
+    feDataReporter.Connect(results_folder, simName)
+    try:
+        from PyQt4 import QtCore, QtGui
+        QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
+    except Exception as e:
+        print(str(e))
+    
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 10
     simulation.TimeHorizon       = 500

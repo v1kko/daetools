@@ -2,7 +2,7 @@ import os, shutil, sys, numpy, math, traceback
 from daetools.pyDAE import *
 from .formatter import daeExpressionFormatter
 from .analyzer import daeCodeGeneratorAnalyzer
-
+from .code_generator import daeCodeGenerator
 
 """
 Compile with:
@@ -102,8 +102,8 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
         # Formats constants/quantities in equations that have a value and units
         return str(quantity.value)
      
-class daeCodeGenerator_c99(object):
-    def __init__(self, simulation = None):
+class daeCodeGenerator_c99(daeCodeGenerator):
+    def __init__(self):
         self.wrapperInstanceName     = ''
         self.defaultIndent           = '    '
         self.warnings                = []
@@ -112,6 +112,7 @@ class daeCodeGenerator_c99(object):
         self.equationGenerationMode  = ''
         
         self.assignedVariablesDefs   = []
+
         self.assignedVariablesInits  = []
         self.initialConditions       = []
         self.stnDefs                 = []
@@ -143,7 +144,7 @@ class daeCodeGenerator_c99(object):
 
         if not os.path.isdir(directory):
             os.makedirs(directory)
-            
+
         self.assignedVariablesDefs   = []
         self.assignedVariablesInits  = []
         self.initialConditions       = []
@@ -326,8 +327,6 @@ class daeCodeGenerator_c99(object):
         if len(self.warnings) > 0:
             print('CODE GENERATOR WARNINGS:')
             print(warnings)
-        
-        return (daetools_model_h_contents, daetools_model_c_contents)
 
     def _processEquations(self, Equations, indent):
         s_indent  = indent     * self.defaultIndent

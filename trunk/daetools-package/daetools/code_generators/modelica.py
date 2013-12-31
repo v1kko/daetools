@@ -1,7 +1,8 @@
-import sys, numpy, math, traceback
+import os, sys, numpy, math, traceback
 from daetools.pyDAE import *
 from .formatter import daeExpressionFormatter
 from .analyzer import daeCodeGeneratorAnalyzer
+from .code_generator import daeCodeGenerator
 
 
 portTemplate = """\
@@ -54,8 +55,9 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         self.IDs      = {}
         self.indexMap = {}
 
-        # Use relative names
-        self.useRelativeNames = True
+        # Use relative names and do not flatten identifiers
+        self.useRelativeNames   = True
+        self.flattenIdentifiers = False
 
         self.domain                   = '{domain}[{index}]'
 
@@ -70,6 +72,9 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         self.variableIndexDelimiter   = ','
 
         self.assignedVariable         = '{variable}'
+        
+        self.feMatrixItem             = '{value}'
+        self.feVectorItem             = '{value}'
 
         # String format for the time derivative, ie. der(variable[1,2]) in Modelica
         # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
@@ -80,6 +85,10 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
 
         # Constants
         self.constant = '{value}'
+
+        # External functions
+        self.scalarExternalFunction = '{name}()'
+        self.vectorExternalFunction = '{name}()'
 
         # Logical operators
         self.AND   = '{leftValue} and {rightValue}'
@@ -165,13 +174,13 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
 
         return sPositive + sNegative
         
-class daeCodeGenerator_Modelica(object):
-    def __init__(self, simulation = None):
-        self.wrapperInstanceName     = ''
-        self.defaultIndent           = '  '
-        self.warnings                = []
-        self.topLevelModel           = None
-        self.simulation              = None
+class daeCodeGenerator_Modelica(daeCodeGenerator):
+    def __init__(self):
+        self.wrapperInstanceName = ''
+        self.defaultIndent       = '  '
+        self.warnings            = []
+        self.topLevelModel       = None
+        self.simulation          = None
         
         self.exprFormatter = daeExpressionFormatter_Modelica()
         self.analyzer      = daeCodeGeneratorAnalyzer()
@@ -235,9 +244,11 @@ class daeCodeGenerator_Modelica(object):
 
         return result
 
-    def generateSimulation(self, simulation, filename = None):
+    def generateSimulation(self, simulation, directory):
         if not simulation:
             raise RuntimeError('Invalid simulation object')
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
 
         self.parametersValues        = {}
         self.assignedVariables       = {}
@@ -258,13 +269,22 @@ class daeCodeGenerator_Modelica(object):
 
         self.analyzer.analyzeSimulation(simulation)
 
-        resultModel = ''
+        # First generate individual ports and models used in the simulation
         for port_class, info in self.analyzer.ports:
-            resultModel += self._processPort(info['data'], indent)
+            code = self._processPort(info['data'], indent)
+            filename = os.path.join(directory, '%s.mo' % port_class)
+            f = open(filename, "w")
+            f.write(code)
+            f.close()
 
         for model_class, info in self.analyzer.models:
-            resultModel += self._processModel(info['data'], indent)
+            code = self._processModel(info['data'], indent)
+            filename = os.path.join(directory, '%s.mo' % model_class)
+            f = open(filename, "w")
+            f.write(code)
+            f.close()
 
+        # Next, generate a wrapper model where the simulation's runtime information are specified
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
         warnings = '\n'.join(self.warnings)
@@ -312,17 +332,14 @@ class daeCodeGenerator_Modelica(object):
                     }
         resultWrapper = wrapperTemplate % dictModel
 
-        if filename:
-            f = open(filename, "w")
-            f.write(resultModel)
-            f.write(resultWrapper)
-            f.close()
+        filename = os.path.join(directory, 'simulation-%s.mo' % self.topLevelModel.Name)
+        f = open(filename, "w")
+        f.write(resultWrapper)
+        f.close()
 
         if len(self.warnings) > 0:
             print('CODE GENERATOR WARNINGS:')
             print(warnings)
-
-        return resultModel, resultWrapper
 
     def _processPort(self, data, indent):
         sVariables  = []
@@ -471,7 +488,7 @@ class daeCodeGenerator_Modelica(object):
             elif port['Type'] == 'eOutletPort':
                 portType = 'outlet'
             else:
-                portType = 'unknown'
+                raise RuntimeError('Invalid port type: %s (must be either inlet or outlet)' % name)
             description = port['Description']
 
             portTemplate = s_indent + '{class_} {name} "{description}";'
