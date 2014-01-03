@@ -150,6 +150,7 @@ for i; do
                                 ;;
 
        --host) QMAKE="qmake-qt4"
+               QMAKE_SPEC="win32-g++-i686-w64-mingw32"
                shift ; shift
                ;;
                                     

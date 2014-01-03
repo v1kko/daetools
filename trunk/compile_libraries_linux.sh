@@ -26,7 +26,9 @@ OPTIONS:
                                 Format: major.minor (i.e 2.7).
 
    Cross compiling options
-    --host                      For instance: --host i686-w64-mingw32 (defines --host option for cros-compiling)
+    --host                      For win32 --host i686-w64-mingw32 (defines --host option for cros-compiling)
+                                 - the toolchain: mingw-w32-bin_x86_64-linux_20131227.tar.bz2 (gcc 4.9.0)
+                                 - installed in: /home/mingw-w64/mingw-w64/linux-x86_64-x86/build/build/root
    
 SOLVERS:
     all              All libraries and solvers.
@@ -51,7 +53,7 @@ EOF
 }
 
 # Default python binary:
-PYTHON=`python -c "import sys; print(sys.executable)"`
+PYTHON=python
 
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
@@ -99,7 +101,9 @@ for i; do
                 shift
                 ;;
 
-    --host) DAE_IF_CROSS_COMPILING=1
+    --host) PYTHON="wine python"
+            DAE_IF_CROSS_COMPILING=1
+            DAE_CROSS_COMPILER=$2
             DAE_CROSS_COMPILER_PREFIX="$2-"
             DAE_CROSS_COMPILE_FLAGS="--host=$2"
             DAE_CROSS_COMPILE_TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${TRUNK}/cross-compile-$2.cmake"
@@ -120,8 +124,8 @@ else
   Ncpu=4
 fi
 
-PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
-PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
+PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
 PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
 PYTHON_INCLUDE_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
 PYTHON_SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())"`
@@ -173,7 +177,7 @@ vSUPERLU=4.1
 vSUPERLU_MT=2.0
 vNLOPT=2.4.1
 vIDAS=1.1.0
-vTRILINOS=10.8.0
+vTRILINOS=10.12.2
 vUMFPACK=5.6.2
 vAMD=2.3.1
 vMETIS=5.1.0
@@ -247,6 +251,7 @@ echo ""
 echo "###############################################################################"
 echo "Proceed with the following options:"
 echo "  - Python:                       ${PYTHON}"
+echo "  - Python version:               ${PYTHON_MAJOR}${PYTHON_MINOR}"
 echo "  - Python include dir:           ${PYTHON_INCLUDE_DIR}"
 echo "  - Python site-packages dir:     ${PYTHON_SITE_PACKAGES_DIR}"
 echo "  - Python lib dir:               ${PYTHON_LIB_DIR}"
@@ -270,10 +275,10 @@ cd "${TRUNK}"
 #######################################################
 configure_boost() 
 {
-  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-    echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
-    exit
-  fi
+  #if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+  #  echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
+  #  exit
+  #fi
   
   if [ -e boost${PYTHON_VERSION} ]; then
     rm -r boost${PYTHON_VERSION}
@@ -306,9 +311,15 @@ compile_boost()
   echo "using python"                           >  ${BOOST_USER_CONFIG}
   echo "    : ${PYTHON_MAJOR}.${PYTHON_MINOR}"  >> ${BOOST_USER_CONFIG}
   echo "    : ${PYTHON}"                        >> ${BOOST_USER_CONFIG}
-  echo "    : ${PYTHON_INCLUDE_DIR}"            >> ${BOOST_USER_CONFIG}
-  echo "    : ${PYTHON_LIB_DIR}"                >> ${BOOST_USER_CONFIG}
-  echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    echo "    : "                               >> ${BOOST_USER_CONFIG}
+    echo "    : "                               >> ${BOOST_USER_CONFIG}
+    echo "    : <toolset>${DAE_CROSS_COMPILER}" >> ${BOOST_USER_CONFIG}
+  else
+    echo "    : ${PYTHON_INCLUDE_DIR}"          >> ${BOOST_USER_CONFIG}
+    echo "    : ${PYTHON_LIB_DIR}"              >> ${BOOST_USER_CONFIG}
+    echo "    : <toolset>gcc"                   >> ${BOOST_USER_CONFIG}
+  fi
   echo "    ;"                                  >> ${BOOST_USER_CONFIG}
   
   ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
@@ -554,7 +565,7 @@ compile_umfpack()
   echo ""
   echo "[*] Building suitesparseconfig..."
   echo ""
-  #echo "make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  echo "make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
   make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   make clean
@@ -992,9 +1003,10 @@ configure_trilinos()
     UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
   fi
   
-  #if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-  #  PTHREAD_DIR="-DPthread_LIBRARY_DIRS=${TRUNK}/pthreads_win32 -DPthread_INCLUDE_DIRS=${TRUNK}/pthreads_win32/include"
-  #fi
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 -DTeuchos_ENABLE_COMPLEX:BOOL=OFF"
+    #PTHREAD_DIR="-DPthread_LIBRARY_DIRS=${TRUNK}/pthreads_win32 -DPthread_INCLUDE_DIRS=${TRUNK}/pthreads_win32/include"
+  fi
   
   cmake \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
@@ -1005,6 +1017,7 @@ configure_trilinos()
     -DTrilinos_ENABLE_ML:BOOL=ON \
     -DTrilinos_ENABLE_Ifpack:BOOL=ON \
     -DTrilinos_ENABLE_Teuchos:BOOL=ON \
+    -DTrilinos_ENABLE_Zoltan:BOOL=OFF \
     -DAmesos_ENABLE_SuperLU:BOOL=ON \
     -DIfpack_ENABLE_SuperLU:BOOL=ON \
     -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
@@ -1020,12 +1033,9 @@ configure_trilinos()
     -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
-    -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 \
-    ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} \
-    ${PTHREAD_DIR} \
     $EXTRA_ARGS \
     ${TRILINOS_HOME}
-  
+    
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1115,10 +1125,13 @@ clean_libmesh()
 configure_dealii() 
 {
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-    echo "For some reasons deal.II cannot be cross-compiled from this script; use cmake-gui with the same options as in this script +:"
-    echo "  -DDEAL_II_NATIVE = path to the native build"
-    echo "  -DCMAKE_TOOLCHAIN_FILE = path to a cross-compile cmake file (have a look in the [daetools/trunk] folder)"
-    exit
+    echo "It will be attempted now to cross-compile deal.II from this script."
+    echo "The following options should be set (otherwise cmake-gui with the same options as below) +:"
+    echo "   -DDEAL_II_NATIVE = path to the native build"
+    echo "   -DCMAKE_TOOLCHAIN_FILE = path to a cross-compile cmake file (have a look in the [daetools/trunk] folder)"
+    echo ""
+
+    DEALII_CROSS_COMPILE_OPTIONS="${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DDEAL_II_NATIVE=${TRUNK}/../../daetools/trunk/deal.II/build"
   fi
   
   if [ -e deal.II ]; then
@@ -1141,7 +1154,8 @@ configure_dealii()
     -DDEAL_II_WITH_THREADS:BOOL=OFF \
     -DDEAL_II_WITH_MPI:BOOL=OFF \
     -DDEAL_II_COMPONENT_PARAMETER_GUI:BOOL=OFF \
-    -DDEAL_II_COMPONENT_MESH_CONVERTER:BOOL=ON
+    -DDEAL_II_COMPONENT_MESH_CONVERTER:BOOL=ON \
+    ${DEALII_CROSS_COMPILE_OPTIONS}
     
   cd "${TRUNK}"
   echo ""

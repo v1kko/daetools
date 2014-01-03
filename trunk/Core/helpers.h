@@ -764,9 +764,8 @@ inline double GetTimeInSeconds(void)
 	return (double)(timeNano / 1.0E9);
 
 #elif defined(__MINGW32__)
-    struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC, &time);
-    return (double)(time.tv_sec + time.tv_nsec / 1.0E9);
+    clock_t t1 = clock();
+    return (double)(t1 / CLOCKS_PER_SEC);
     
 #elif __linux__ == 1
     struct timespec time;
