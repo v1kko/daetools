@@ -43,7 +43,7 @@ public:
     virtual void                SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings);
     virtual std::string         GetJSONRuntimeSettings() const;
 
-	virtual real_t				GetCurrentTime(void) const;
+	virtual real_t				GetCurrentTime_() const;
 	virtual real_t				GetNextReportingTime(void) const;
 	virtual void				SetTimeHorizon(real_t dTimeHorizon);
 	virtual real_t				GetTimeHorizon(void) const;

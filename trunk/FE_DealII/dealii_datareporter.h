@@ -142,7 +142,7 @@ public:
         vtkPath /= vtkFilename;
 
         // Call function in the finite element object to perform some processing and to save values in a file
-        m_callback(vtkPath.c_str(), strVariableName, pVariableValue->m_pValues, pVariableValue->m_nNumberOfPoints);
+        m_callback(vtkPath.string().c_str(), strVariableName, pVariableValue->m_pValues, pVariableValue->m_nNumberOfPoints);
 
         return true;
     }

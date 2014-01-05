@@ -359,8 +359,8 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
     GridIn<dim> gridin;
     gridin.attach_triangulation(triangulation);
 
-    std::ifstream f(meshFilename);
-    std::string extension = boost::filesystem::path(meshFilename).extension().c_str();
+    std::ifstream f(meshFilename.c_str());
+    std::string extension = boost::filesystem::path(meshFilename).extension().string().c_str();
     size_t iFound = extension.find('.');
     if(iFound != std::string::npos)
         extension.erase(iFound, 1);
@@ -753,7 +753,7 @@ void dealiiFiniteElementSystem<dim>::process_solution(const std::string& strFile
             data_out.attach_dof_handler(dof_handler);
             data_out.add_data_vector(block_i, strVariableName);
             data_out.build_patches(fe->degree);
-            std::ofstream output(strFilename);
+            std::ofstream output(strFilename.c_str());
             data_out.write_vtk(output);
         }
     }

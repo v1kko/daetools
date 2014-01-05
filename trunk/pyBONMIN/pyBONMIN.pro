@@ -1,8 +1,8 @@
 include(../dae.pri)
-QT -= core \
-	gui
+QT -= core gui
 TARGET = pyBONMIN
 TEMPLATE = lib
+CONFIG += shared
 
 ###############################
 # Could be: BONMIN, IPOPT
@@ -85,7 +85,6 @@ LIBS += $${BOOST_PYTHON_LIB} \
         $${BLAS_LAPACK_LIBS}
 }
 
-
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp \
@@ -98,22 +97,26 @@ HEADERS += stdafx.h \
 #######################################################
 #                Install files
 #######################################################
-win32{
-BONMIN { 
-QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyBONMIN1.dll \
-	$${SOLVERS_DIR}/pyBONMIN.pyd
-}
-
-IPOPT { 
-QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyBONMIN1.dll \
-	$${SOLVERS_DIR}/pyIPOPT.pyd
-}
-}
-
-unix{
-QMAKE_POST_LINK = cp -f \
-        $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${SOLVERS_DIR}/$${pyObject}.so
-}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${SOLVERS_DIR}/$${pyObject}.$${PYTHON_EXTENSION_MODULE_EXT}
+                  
+# win32{
+# BONMIN { 
+# QMAKE_POST_LINK = move /y \
+# 	$${DAE_DEST_DIR}/pyBONMIN1.dll \
+# 	$${SOLVERS_DIR}/pyBONMIN.pyd
+# }
+# 
+# IPOPT { 
+# QMAKE_POST_LINK = move /y \
+# 	$${DAE_DEST_DIR}/pyBONMIN1.dll \
+# 	$${SOLVERS_DIR}/pyIPOPT.pyd
+# }
+# }
+# 
+# unix{
+# QMAKE_POST_LINK = cp -f \
+#         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
+#         $${SOLVERS_DIR}/$${pyObject}.so
+# }

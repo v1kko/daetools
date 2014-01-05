@@ -3,6 +3,8 @@ QT -= core \
 	gui
 TARGET = pyIDAS
 TEMPLATE = lib
+CONFIG += shared
+
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
@@ -33,14 +35,18 @@ HEADERS += stdafx.h \
 #######################################################
 #                Install files
 #######################################################
-win32{
-QMAKE_POST_LINK = move /y \
-	$${DAE_DEST_DIR}/pyIDAS1.dll \
-	$${PYDAE_DIR}/pyIDAS.pyd
-}
-
-unix{
-QMAKE_POST_LINK = cp -f \
-        $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-        $${PYDAE_DIR}/$${TARGET}.so
-}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${PYDAE_DIR}/$${TARGET}.$${PYTHON_EXTENSION_MODULE_EXT}
+                  
+# win32{
+# QMAKE_POST_LINK = move /y \
+# 	$${DAE_DEST_DIR}/pyIDAS1.dll \
+# 	$${PYDAE_DIR}/pyIDAS.pyd
+# }
+# 
+# unix{
+# QMAKE_POST_LINK = cp -f \
+#         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
+#         $${PYDAE_DIR}/$${TARGET}.so
+# }

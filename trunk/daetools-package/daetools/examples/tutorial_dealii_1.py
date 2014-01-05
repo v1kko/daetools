@@ -45,8 +45,8 @@ from daetools.pyDAE import *
 from daetools.solvers.deal_II import *
 from time import localtime, strftime
 from daetools.solvers.superlu import pySuperLU
-from daetools.solvers.trilinos import pyTrilinos
-from daetools.solvers.aztecoo_options import daeAztecOptions
+#from daetools.solvers.trilinos import pyTrilinos
+#from daetools.solvers.aztecoo_options import daeAztecOptions
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W

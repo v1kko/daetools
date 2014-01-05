@@ -32,10 +32,10 @@ OPTIONS:
    
 SOLVERS:
     all              All libraries and solvers.
-                     Equivalent to: boost ref_blas_lapack umfpack idas trilinos superlu superlu_mt bonmin nlopt
+                     Equivalent to: boost ref_blas_lapack umfpack idas trilinos superlu superlu_mt bonmin nlopt deal.ii
     
     Individual libraries/solvers:
-    boost            Boost libraries (system, thread, python)
+    boost            Boost libraries (system, filesystem, thread, python)
     ref_blas_lapack  reference BLAS and Lapack libraries
     openblas         OpenBLAS library
     umfpack          Umfpack solver
@@ -275,10 +275,10 @@ cd "${TRUNK}"
 #######################################################
 configure_boost() 
 {
-  #if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-  #  echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
-  #  exit
-  #fi
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
+    exit
+  fi
   
   if [ -e boost${PYTHON_VERSION} ]; then
     rm -r boost${PYTHON_VERSION}
@@ -302,6 +302,21 @@ configure_boost()
 
 compile_boost() 
 {
+# To compile on windows using mingw first export user-config.jam to $HOME directory:
+# using python
+#    : 2.7
+#    : c:\\Python27\\python.exe
+#    : c:\\Python27\\include
+#    : c:\\Python27\\libs
+#    : <toolset>gcc
+#    ;
+# Then compile using bjam like it is given below with toolset=gcc
+
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
+    exit
+  fi
+  
   cd boost${PYTHON_VERSION}
   echo ""
   echo "[*] Building boost"
@@ -311,16 +326,16 @@ compile_boost()
   echo "using python"                           >  ${BOOST_USER_CONFIG}
   echo "    : ${PYTHON_MAJOR}.${PYTHON_MINOR}"  >> ${BOOST_USER_CONFIG}
   echo "    : ${PYTHON}"                        >> ${BOOST_USER_CONFIG}
-  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-    echo "    : "                               >> ${BOOST_USER_CONFIG}
-    echo "    : "                               >> ${BOOST_USER_CONFIG}
-    echo "    : <toolset>${DAE_CROSS_COMPILER}" >> ${BOOST_USER_CONFIG}
-  else
-    echo "    : ${PYTHON_INCLUDE_DIR}"          >> ${BOOST_USER_CONFIG}
-    echo "    : ${PYTHON_LIB_DIR}"              >> ${BOOST_USER_CONFIG}
-    echo "    : <toolset>gcc"                   >> ${BOOST_USER_CONFIG}
-  fi
+  echo "    : ${PYTHON_INCLUDE_DIR}"            >> ${BOOST_USER_CONFIG}
+  echo "    : ${PYTHON_LIB_DIR}"                >> ${BOOST_USER_CONFIG}
+  echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
   echo "    ;"                                  >> ${BOOST_USER_CONFIG}
+  #if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+  #  echo "    : "                               >> ${BOOST_USER_CONFIG}
+  #  echo "    : "                               >> ${BOOST_USER_CONFIG}
+  #  echo "    : <toolset>${DAE_CROSS_COMPILER}" >> ${BOOST_USER_CONFIG}
+  #else
+  #fi
   
   ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
          --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
@@ -831,11 +846,7 @@ compile_superlu_mt()
   echo "[*] Building superlu_mt..."
   echo ""
   
-  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-    PTHREAD_INCLUDE="-I${TRUNK}/pthreads_win32/include"
-  fi
-  
-  make lib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} ${PTHREAD_INCLUDE}"
+  make lib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS}"
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1004,7 +1015,7 @@ configure_trilinos()
   fi
   
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-    EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 -DTeuchos_ENABLE_COMPLEX:BOOL=OFF"
+    EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0  -C tryrunresults.cmake"
     #PTHREAD_DIR="-DPthread_LIBRARY_DIRS=${TRUNK}/pthreads_win32 -DPthread_INCLUDE_DIRS=${TRUNK}/pthreads_win32/include"
   fi
   
@@ -1129,9 +1140,10 @@ configure_dealii()
     echo "The following options should be set (otherwise cmake-gui with the same options as below) +:"
     echo "   -DDEAL_II_NATIVE = path to the native build"
     echo "   -DCMAKE_TOOLCHAIN_FILE = path to a cross-compile cmake file (have a look in the [daetools/trunk] folder)"
+    echo "Threads must be disabled."
     echo ""
 
-    DEALII_CROSS_COMPILE_OPTIONS="${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DDEAL_II_NATIVE=${TRUNK}/../../daetools/trunk/deal.II/build"
+    DEALII_CROSS_COMPILE_OPTIONS="${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DDEAL_II_NATIVE=${TRUNK}/../../daetools/trunk/deal.II"
   fi
   
   if [ -e deal.II ]; then
@@ -1207,6 +1219,7 @@ do
                         configure_trilinos
                         configure_bonmin
                         configure_nlopt
+                        configure_dealii
                       fi
                       
                       if [ "${DO_BUILD}" = "yes" ]; then 
@@ -1220,6 +1233,7 @@ do
                         compile_trilinos
                         compile_bonmin
                         compile_nlopt
+                        compile_dealii
                       fi
                       
                       if [ "${DO_CLEAN}" = "yes" ]; then 
@@ -1233,6 +1247,7 @@ do
                         clean_trilinos
                         clean_bonmin
                         clean_nlopt
+                        clean_dealii
                       fi
                       ;;
     

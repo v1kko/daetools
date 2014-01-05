@@ -16,6 +16,7 @@ QT -= core \
     gui
 TARGET = Lapack
 TEMPLATE = lib
+CONFIG += shared
 
 ######################################################################################
 #                                 SOLVER SPECIFICATION
@@ -150,31 +151,35 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
     lapack_la_solver.h
 
-IntelMKL{
-win32-msvc2008::QMAKE_POST_LINK =  move /y \
-    $${DAE_DEST_DIR}/Lapack1.dll \
-    $${DAE_DEST_DIR}/pyIntelMKL.pyd
-}
-
-AmdACML{
-win32-msvc2008::QMAKE_POST_LINK =  move /y \
-    $${DAE_DEST_DIR}/Lapack1.dll \
-    $${DAE_DEST_DIR}/pyAmdACML.pyd
-}
-
-Lapack{
-win32-msvc2008::QMAKE_POST_LINK =  move /y \
-    $${DAE_DEST_DIR}/Lapack1.dll \
-    $${DAE_DEST_DIR}/pyLapack.pyd
-}
-
-Magma{
-win32-msvc2008::QMAKE_POST_LINK =  move /y \
-    $${DAE_DEST_DIR}/Lapack1.dll \
-    $${DAE_DEST_DIR}/pyMagma.pyd
-}
-
-unix::QMAKE_POST_LINK = cp \
-            -f \
-            $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
-            $${DAE_DEST_DIR}/$${pyObject}.so
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${SOLVERS_DIR}/$${TARGET}.$${PYTHON_EXTENSION_MODULE_EXT}
+                  
+# IntelMKL{
+# win32-msvc2008::QMAKE_POST_LINK =  move /y \
+#     $${DAE_DEST_DIR}/Lapack1.dll \
+#     $${DAE_DEST_DIR}/pyIntelMKL.pyd
+# }
+# 
+# AmdACML{
+# win32-msvc2008::QMAKE_POST_LINK =  move /y \
+#     $${DAE_DEST_DIR}/Lapack1.dll \
+#     $${DAE_DEST_DIR}/pyAmdACML.pyd
+# }
+# 
+# Lapack{
+# win32-msvc2008::QMAKE_POST_LINK =  move /y \
+#     $${DAE_DEST_DIR}/Lapack1.dll \
+#     $${DAE_DEST_DIR}/pyLapack.pyd
+# }
+# 
+# Magma{
+# win32-msvc2008::QMAKE_POST_LINK =  move /y \
+#     $${DAE_DEST_DIR}/Lapack1.dll \
+#     $${DAE_DEST_DIR}/pyMagma.pyd
+# }
+# 
+# unix::QMAKE_POST_LINK = cp \
+#             -f \
+#             $${DAE_DEST_DIR}/lib$${TARGET}.so.$${VERSION} \
+#             $${DAE_DEST_DIR}/$${pyObject}.so

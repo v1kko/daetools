@@ -146,7 +146,7 @@ class simTutorial(daeSimulation):
         k = numpy.empty((Nx,Ny), dtype=object)
         k[:] = 0.401 * kW/(m*K)
         print('Parameter lambda values:')
-        print(k)
+        print(str(k))
         self.m.k.SetValues(k)
         
         # b) Use a single float value for all points (the units are implicitly W/(m*K)):

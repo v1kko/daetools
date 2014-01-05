@@ -29,20 +29,34 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 # Otherwise ppc64 should be added as well
 macx-g++::CONFIG += x86 x86_64
 
-win32-msvc2008::SHARED_LIB_EXT  = dll
-win32-g++-*::SHARED_LIB_EXT     = dll
-linux-g++::SHARED_LIB_EXT       = so
-macx-g++::SHARED_LIB_EXT        = dylib
+#win32-msvc2008::SHARED_LIB_EXT  = dll
+#win32-g++-*::SHARED_LIB_EXT     = dll
+#linux-g++::SHARED_LIB_EXT       = so
+#macx-g++::SHARED_LIB_EXT        = dylib
 
 win32-msvc2008::SHARED_LIB_PREFIX   =
-win32-g++-*::SHARED_LIB_PREFIX      = lib
+win32-g++-*::SHARED_LIB_PREFIX      = 
 linux-g++::SHARED_LIB_PREFIX        = lib
 macx-g++::SHARED_LIB_PREFIX         = lib
 
-win32-msvc2008::SHARED_LIB_APPEND   = pyd
-win32-g++-*::SHARED_LIB_APPEND      = pyd
+win32-msvc2008::SHARED_LIB_POSTFIX  = $${DAE_TOOLS_MAJOR}
+win32-g++-*::SHARED_LIB_POSTFIX     = $${DAE_TOOLS_MAJOR}
+linux-g++::SHARED_LIB_POSTFIX       = 
+macx-g++::SHARED_LIB_POSTFIX        = 
+
+win32-msvc2008::SHARED_LIB_APPEND   = dll
+win32-g++-*::SHARED_LIB_APPEND      = dll
 linux-g++::SHARED_LIB_APPEND        = so.$${VERSION}
 macx-g++::SHARED_LIB_APPEND         = $${VERSION}.dylib
+
+win32-msvc2008::PYTHON_EXTENSION_MODULE_EXT = pyd
+win32-g++-*::PYTHON_EXTENSION_MODULE_EXT    = pyd
+linux-g++::PYTHON_EXTENSION_MODULE_EXT      = so
+macx-g++::PYTHON_EXTENSION_MODULE_EXT       = so
+
+win32-msvc2008::COPY_FILE = copy /y
+win32-g++-*::COPY_FILE    = cp -fa
+unix::COPY_FILE           = cp -fa
 
 # Set CONFIG += enable_mpi to use MPI libraries
 
@@ -58,38 +72,86 @@ CONFIG(release, debug|release) {
 
 DESTDIR = $${DAE_DEST_DIR}
 
-win32{
-COPY_FILES = copy /y
-}
-unix{
-COPY_FILES = cp -fa
-}
-
 #####################################################################################
 #                           System + Machine + Python info
 #####################################################################################
-# If compiling from the shell compile_linux.sh script specify the python binary
-shellCompile {
-PYTHON = $$customPython
+crossCompile{
+    # Not used
+    PYTHON = "???" 
+    
+    PYTHON_MAJOR = 2
+    PYTHON_MINOR = 7
+    PYTHON_ABI   = 
+
+    # Numpy version
+    #NUMPY_VERSION = 
+
+    # System := {'Linux', 'Windows', 'Darwin'}
+    DAE_SYSTEM   = Windows
+
+    # Machine := {'i386', ..., 'i686', 'AMD64'}
+    DAE_MACHINE = win32
+    
+    RT =
+    
+    PYTHON_INCLUDE_DIR  = ../Python27/include
+    PYTHON_LIB_DIR      = ../Python27/libs
+    PYTHON_LIB          = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
 }
-# If compiling from the GUI use system's default python version
-!shellCompile {
-PYTHON = python
+
+!crossCompile{
+    # If compiling from the shell compile_linux.sh script specify the python binary
+    shellCompile {
+        PYTHON = $$customPython
+    }
+    
+    # If compiling from the GUI use system's default python version
+    !shellCompile {
+        PYTHON = python
+    }
+    
+    PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
+    PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
+    PYTHON_ABI   = $$system($${PYTHON} -c \"import sysconfig; flags = sysconfig.get_config_vars(); abi = flags[\'ABIFLAGS\'] if (\'ABIFLAGS\' in flags) else \'\'; print(abi)\")
+
+    # Numpy version
+    #NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
+
+    # System := {'Linux', 'Windows', 'Darwin'}
+    DAE_SYSTEM   = $$system($${PYTHON} -c \"import platform; print(platform.system())\")
+
+    # Machine := {'i386', ..., 'i686', 'AMD64'}
+    MACHINE_COMMAND = "import platform; p={'Linux':platform.machine(), 'Darwin':'universal', 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
+    DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
+    
+    win32-msvc2008::RT =
+    linux-g++::RT      = -lrt
+    macx-g++::RT       =
+    
+    win32::PYTHON_INCLUDE_DIR  = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
+    unix::PYTHON_INCLUDE_DIR   = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
+
+    win32::PYTHON_LIB_DIR      = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
+    unix::PYTHON_LIB_DIR       = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
+    
+    win32::PYTHON_LIB          = python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
+    unix::PYTHON_LIB           = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+    
+    !shellCompile {
+        message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})
+    }
+
+    #PYTHON_SITE_PACKAGES_DIR  = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
+    #win32-msvc2008::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+    #                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+    #linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+    #                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
+    #                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
+    #                               /usr/share/pyshared/numpy/core/include/numpy
+    #macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
+    #                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
+
 }
-
-PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
-PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
-PYTHON_ABI   = $$system($${PYTHON} -c \"import sysconfig; flags = sysconfig.get_config_vars(); abi = flags[\'ABIFLAGS\'] if (\'ABIFLAGS\' in flags) else \'\'; print(abi)\")
-
-# Numpy version
-#NUMPY_VERSION = $$system($${PYTHON} -c \"import numpy; print(\'\'.join(numpy.__version__.split(\'.\')[0:2]))\")
-
-# System := {'Linux', 'Windows', 'Darwin'}
-DAE_SYSTEM   = $$system($${PYTHON} -c \"import platform; print(platform.system())\")
-
-# Machine := {'i386', ..., 'i686', 'AMD64'}
-MACHINE_COMMAND = "import platform; p={'Linux':platform.machine(), 'Darwin':'universal', 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
-DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -107,6 +169,8 @@ CONFIG += rtti
 win32-msvc2008::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 win32-msvc2008::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
 win32-msvc2008::QMAKE_CXXFLAGS += /bigobj
+
+win32-g++-*::QMAKE_LFLAGS += -mwindows
 
 QMAKE_CXXFLAGS_DEBUG += -fno-default-inline
 
@@ -179,42 +243,22 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 
 #####################################################################################
-#                                PYTHON + NUMPY
+#                                  FORTRAN
 #####################################################################################
-PYTHON_INCLUDE_DIR        = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
-PYTHON_SITE_PACKAGES_DIR  = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())\")
-unix::PYTHON_LIB_DIR      = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
-win32::PYTHON_LIB_DIR     = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")\libs
-
-!shellCompile {
-message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})
-}
-
-#win32-msvc2008::NUMPY_INCLUDE_DIR     = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-#                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
-#linux-g++::NUMPY_INCLUDE_DIR = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-#                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy \
-#                               /usr/include/python$${PYTHON_MAJOR}.$${PYTHON_MINOR}/numpy \
-#                               /usr/share/pyshared/numpy/core/include/numpy
-#macx-g++::NUMPY_INCLUDE_DIR  = $${PYTHON_SITE_PACKAGES_DIR}/numpy/core/include/numpy \
-#                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
-
-
-#####################################################################################
-#                                  RT/GFORTRAN
-#####################################################################################
-# librt does not exist in Windows/MacOS
 # gfortran does not exist in MacOS XCode and must be installed separately
 #####################################################################################
-win32-msvc2008::RT =
-win32-g++-*::RT    =
-linux-g++::RT      = -lrt
-macx-g++::RT       =
-
 win32-msvc2008::GFORTRAN    =
 win32-g++-*::GFORTRAN       = -lgfortran
 linux-g++::GFORTRAN         = -lgfortran
 macx-g++::GFORTRAN          = -lgfortran
+
+
+#####################################################################################
+#                                  pthreads
+#####################################################################################
+win32-msvc2008::PTHREADS_LIB = -lpthread
+unix::PTHREADS_LIB           = -lpthread
+win32-g++-*::PTHREADS_LIB    = -lwinpthread
 
 
 #####################################################################################
@@ -235,7 +279,7 @@ win32-msvc2008::BOOST_PYTHON_LIB_NAME     = boost_python-daetools-py$${PYTHON_MA
 win32-msvc2008::BOOST_SYSTEM_LIB_NAME     = boost_system-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-msvc2008::BOOST_THREAD_LIB_NAME     = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-msvc2008::BOOST_FILESYSTEM_LIB_NAME = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-msvc2008::BOOST_PYTHON_LIB          = $${BOOST_PYTHON_LIB_NAME}.lib python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
+win32-msvc2008::BOOST_PYTHON_LIB          = $${BOOST_PYTHON_LIB_NAME}.lib $${PYTHON_LIB}
 win32-msvc2008::BOOST_LIBS                = $${BOOST_SYSTEM_LIB_NAME}.lib \
                                             $${BOOST_THREAD_LIB_NAME}.lib \
                                             $${BOOST_FILESYSTEM_LIB_NAME}.lib
@@ -247,12 +291,13 @@ win32-g++-*::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJO
 win32-g++-*::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.dll
 win32-g++-*::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.dll
 win32-g++-*::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
-                                          -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+                                          -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 win32-g++-*::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
                                                              -l$${BOOST_THREAD_LIB_NAME} \
                                                              -l$${BOOST_FILESYSTEM_LIB_NAME} \
                                                              -lws2_32 -lmswsock \
-                                                              $${RT}
+                                                             $${PTHREADS_LIB} \
+                                                             $${RT}
 
 unix::BOOSTDIR                   = ../boost$${PYTHON_MAJOR}.$${PYTHON_MINOR}
 unix::BOOSTLIBPATH               = $${BOOSTDIR}/stage/lib
@@ -261,7 +306,7 @@ unix::BOOST_SYSTEM_LIB_NAME      = boost_system-daetools-py$${PYTHON_MAJOR}$${PY
 unix::BOOST_THREAD_LIB_NAME      = boost_thread-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_FILESYSTEM_LIB_NAME  = boost_filesystem-daetools-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::BOOST_PYTHON_LIB           = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} \
-                                   -L$${PYTHON_LIB_DIR} -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+                                   -L$${PYTHON_LIB_DIR} $${PYTHON_LIB}
 unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME} \
                                                       -l$${BOOST_THREAD_LIB_NAME} \
                                                       -l$${BOOST_FILESYSTEM_LIB_NAME} \
@@ -272,7 +317,7 @@ unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME
 #                                 BLAS/LAPACK
 #####################################################################################
 win32-msvc2008::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
-win32-g++-*::BLAS_LAPACK_LIBDIR      = ../clapack/lib
+win32-g++-*::BLAS_LAPACK_LIBDIR    = ../lapack/lib
 linux-g++::BLAS_LAPACK_LIBDIR      = ../lapack/lib
 macx-g++::BLAS_LAPACK_LIBDIR       = ../lapack/lib
 
@@ -285,9 +330,8 @@ macx-g++::QMAKE_CXXFLAGS        +=
 win32-msvc2008::BLAS_LAPACK_LIBS =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                                     $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                                     $${BLAS_LAPACK_LIBDIR}/libf2c.lib
-win32-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
-                                    $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
-                                    $${BLAS_LAPACK_LIBDIR}/libf2c.lib
+                                    
+win32-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 # 1. OpenBLAS dynamically linked:
 #linux-g++::BLAS_LAPACK_LIBS = -L$${BLAS_LAPACK_LIBDIR} -lopenblas_daetools -lm
@@ -334,8 +378,8 @@ win32-msvc2008::MUMPS_LIBS = blas.lib \
                              libpord.lib \
                              libf95.a \
                              libgcc.a
-win32-g++-*::MUMPS_LIBS = -lcoinmumps -lpthread $${RT}
-unix::MUMPS_LIBS        = -lcoinmumps -lpthread $${RT}
+win32-g++-*::MUMPS_LIBS = -lcoinmumps $${PTHREADS_LIB} $${RT} -lmsvcrt -lkernel32 -luser32 -lshell32 -luuid -lole32 -ladvapi32 -lws2_32
+unix::MUMPS_LIBS        = -lcoinmumps $${PTHREADS_LIB} $${RT}
 
 
 #####################################################################################
@@ -347,7 +391,7 @@ IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
 win32-msvc2008::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib
-win32-g++-*::IPOPT_LIBS    = -lipopt -lcoinlapack -lcoinblas -ldl
+win32-g++-*::IPOPT_LIBS    = -lipopt -lcoinlapack -lcoinblas $${GFORTRAN}
 unix::IPOPT_LIBS           = -lipopt -ldl
 
 
@@ -398,8 +442,8 @@ SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
 SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
 
 win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-win32-g++-*::SUPERLU_LIBS    = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
-unix::SUPERLU_LIBS           = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} -lpthread
+win32-g++-*::SUPERLU_LIBS    = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} $${PTHREADS_LIB}
+unix::SUPERLU_LIBS           = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} $${PTHREADS_LIB}
 
 
 ######################################################################################
@@ -410,8 +454,8 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32-msvc2008::SUPERLU_MT_LIBS =
-win32-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread
-unix::SUPERLU_MT_LIBS           = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} -lpthread
+win32-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
+unix::SUPERLU_MT_LIBS           = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
 
 
 ######################################################################################
@@ -613,6 +657,9 @@ PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}
 win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
+win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+
 unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
@@ -623,10 +670,10 @@ HEADERS_DIR     = ../daetools-package/daetools/usr/local/include
 #         Write compiler settings (needed to build installations packages)
 #####################################################################################
 # Python settings
-COMPILER_SETTINGS_FOLDER = .compiler_settings
-win32-msvc2008::COMPILER = $$system(mkdir $${COMPILER_SETTINGS_FOLDER})
-unix::COMPILER  = $$system(mkdir -p $${COMPILER_SETTINGS_FOLDER})
+#COMPILER_SETTINGS_FOLDER = .compiler_settings
+#win32-msvc2008::COMPILER = $$system(mkdir $${COMPILER_SETTINGS_FOLDER})
+#unix::COMPILER  = $$system(mkdir -p $${COMPILER_SETTINGS_FOLDER})
 
-COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > $${COMPILER_SETTINGS_FOLDER}/dae_major)
-COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > $${COMPILER_SETTINGS_FOLDER}/dae_minor)
-COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > $${COMPILER_SETTINGS_FOLDER}/dae_build)
+#COMPILER = $$system(echo $${DAE_TOOLS_MAJOR} > $${COMPILER_SETTINGS_FOLDER}/dae_major)
+#COMPILER = $$system(echo $${DAE_TOOLS_MINOR} > $${COMPILER_SETTINGS_FOLDER}/dae_minor)
+#COMPILER = $$system(echo $${DAE_TOOLS_BUILD} > $${COMPILER_SETTINGS_FOLDER}/dae_build)

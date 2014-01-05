@@ -37,23 +37,23 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <iomanip>
 #include <typeinfo>
 
-#ifndef __MINGW32__
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 #pragma warning(disable: 4250)
 #pragma warning(disable: 4251)
 #pragma warning(disable: 4275)
 #pragma warning(disable: 4100)
 #pragma warning(disable: 4101)
 #pragma warning(disable: 4189)
+#endif
 
+
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
 #ifdef AddPort
 #undef AddPort
 #endif
 
 #ifdef GetCurrentTime
 #undef GetCurrentTime
-#endif
-
 #endif
 #endif
 

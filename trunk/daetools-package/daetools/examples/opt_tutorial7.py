@@ -123,7 +123,10 @@ class optTutorial(daeOptimization):
             plot_no = 2*m + 1 + i
             self.c_plots.append( self.monitor.addSubplot(n, m, plot_no, c.Name) )
 
-        self.monitor.figure.tight_layout()
+        try:
+            self.monitor.figure.tight_layout()
+        except Exception as e:
+            pass
 
     def StartIterationRun(self, iteration):
         pass

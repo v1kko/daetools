@@ -6,7 +6,7 @@ Installation instructions
   python setup.py install
 
 - Windows (.exe):
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.3.0_b3" --bitmap wininst.bmp
 
 Create .tar.gz under GNU/Linux:
   python setup.py sdist --formats=gztar

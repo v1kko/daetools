@@ -1012,7 +1012,7 @@ real_t daeSimulation::GetNextReportingTime(void) const
 	return (*next);
 }
 
-real_t daeSimulation::GetCurrentTime(void) const
+real_t daeSimulation::GetCurrentTime_() const
 {
 	return m_dCurrentTime;
 }

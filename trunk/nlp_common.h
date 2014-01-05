@@ -335,7 +335,7 @@ protected:
 
             // 4. Reinitialize the system and report the results
                 m_pSimulation->Reinitialize();
-                m_pSimulation->ReportData(m_pSimulation->GetCurrentTime());
+                m_pSimulation->ReportData(m_pSimulation->GetCurrentTime_());
 
             // 5. Run the simulation
                 m_pSimulation->Run();

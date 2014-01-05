@@ -2,6 +2,7 @@ include(../dae.pri)
 QT -= core gui
 TARGET = pySuperLU
 TEMPLATE = lib
+CONFIG += shared
 
 #################################################
 # Could be: SuperLU, SuperLU_MT, SuperLU_CUDA
@@ -84,33 +85,37 @@ OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 #######################################################
 #                Install files
 #######################################################
-win32{
-SuperLU {
-QMAKE_POST_LINK = move \
-    /y \
-    $${DAE_DEST_DIR}/pySuperLU1.dll \
-    $${SOLVERS_DIR}/pySuperLU.pyd
-
-}
-
-SuperLU_MT {
-QMAKE_POST_LINK = move \
-    /y \
-    $${DAE_DEST_DIR}/pySuperLU1.dll \
-    $${SOLVERS_DIR}/pySuperLU_MT.pyd
-}
-
-SuperLU_CUDA {
-QMAKE_POST_LINK = move \
-    /y \
-    $${DAE_DEST_DIR}/pySuperLU1.dll \
-    $${SOLVERS_DIR}/pySuperLU_CUDA.pyd
-}
-}
-
-unix{
-QMAKE_POST_LINK = cp \
-    -f \
-    $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
-    $${SOLVERS_DIR}/$${pyObject}.so
-}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${SOLVERS_DIR}/$${pyObject}.$${PYTHON_EXTENSION_MODULE_EXT}
+                  
+# win32{
+# SuperLU {
+# QMAKE_POST_LINK = move \
+#     /y \
+#     $${DAE_DEST_DIR}/pySuperLU1.dll \
+#     $${SOLVERS_DIR}/pySuperLU.pyd
+# 
+# }
+# 
+# SuperLU_MT {
+# QMAKE_POST_LINK = move \
+#     /y \
+#     $${DAE_DEST_DIR}/pySuperLU1.dll \
+#     $${SOLVERS_DIR}/pySuperLU_MT.pyd
+# }
+# 
+# SuperLU_CUDA {
+# QMAKE_POST_LINK = move \
+#     /y \
+#     $${DAE_DEST_DIR}/pySuperLU1.dll \
+#     $${SOLVERS_DIR}/pySuperLU_CUDA.pyd
+# }
+# }
+# 
+# unix{
+# QMAKE_POST_LINK = cp \
+#     -f \
+#     $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \
+#     $${SOLVERS_DIR}/$${pyObject}.so
+# }

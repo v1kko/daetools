@@ -20,9 +20,13 @@ OPTIONS:
                                     Format: major.minor (i.e 2.7).
 
    Cross compiling options:
-        --host      For instance: --host i686-w64-mingw32
-                    To cross-compile download mingw32-qt-qmake-4.8.5-4.fc20.x86_64.rpm package, 
-                    convert it to .deb using "alien" and install it.
+        --host      Example: --host i686-w64-mingw32
+                    To cross-compile install mingw-w64 related packages (i686, dev, gcc, g++, gfortran, tools, binutils).
+                    Toolchains should be located in /usr/i686-w64-mingw32 and /usr/x86_64-w64-mingw32
+                    CMake uses cross-compile-i686-w64-mingw32.cmake or cross-compile-x86_64-w64-mingw32.cmake files,
+                    modify them if the toolchains are installed in a non-standard location.
+                    Copy qt-mkspecs/win32-g++-i686-w64-mingw32 or win32-g++-x86_64-w64-mingw32 to /usr/share/qt/mkspecs folder
+                    (needed by qmake based projects).
 
 PROJECTS:
     all             Build all daetools c++ libraries, solvers and python extension modules.
@@ -82,11 +86,15 @@ compile()
     cd ${DIR}
   fi
 
+  if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
+    CONFIG_CROSS_COMPILING="CONFIG+=crossCompile"
+  fi
+  
   echo ""
   echo "[*] Configuring the project with ($2, $3)..."
-  echo "${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile "customPython=${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}"
+  echo "${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile ${CONFIG_CROSS_COMPILING} customPython="${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}"
   
-  ${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile "customPython=${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}
+  ${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile ${CONFIG_CROSS_COMPILING} customPython="${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}
   
   echo ""
   echo "[*] Cleaning the project..."
@@ -110,6 +118,7 @@ PLATFORM=`uname -s`
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 QMAKE="qmake-qt4"
 QMAKE_SPEC="linux-g++"
+DAE_IF_CROSS_COMPILING=0
 
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
@@ -149,8 +158,10 @@ for i; do
                                 shift ; shift 
                                 ;;
 
-       --host) QMAKE="qmake-qt4"
+       --host) DAE_IF_CROSS_COMPILING=1
+               QMAKE="qmake-qt4"
                QMAKE_SPEC="win32-g++-i686-w64-mingw32"
+               PYTHON="wine python"
                shift ; shift
                ;;
                                     
@@ -212,7 +223,7 @@ do
                 rm -rf *
                 cd ${TRUNK}
 
-                compile dae                "-j$Ncpu"
+                compile dae                "-j$Ncpu" 
 
                 compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
                 compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
