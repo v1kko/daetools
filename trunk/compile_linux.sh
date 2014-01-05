@@ -5,30 +5,43 @@ set -e
 usage()
 {
 cat << EOF
-usage: $0 [options] projects
+usage: $0 [OPTIONS] PROJECT [PROJECT2 PROJECT3 ...]
 
 This script compiles specified daetools libraries and python extension modules.
 
-Typical use (compiles all daetools libraries, solvers and python extension modules):
+Typical usage (compiles all daetools libraries, solvers and python extension modules):
     sh compile_linux.sh all
+    
+Compiling only specified projects:
+    sh $0 trilinos superlu nlopt
 
 OPTIONS:
-   -h | --help                      Show this message.
-   One of the following:
-        --with-python-binary        Path to python binary to use.
-        --with-python-version       Version of the system's python.
-                                    Format: major.minor (i.e 2.7).
+   -h | --help                  Show this message.
+   
+   Python options (if not set use system's default python). One of the following:
+    --with-python-binary        Path to python binary to use.
+    --with-python-version       Version of the system's python in the format: major.minor (i.e 2.7).
 
    Cross compiling options:
-        --host      Example: --host i686-w64-mingw32
-                    To cross-compile install mingw-w64 related packages (i686, dev, gcc, g++, gfortran, tools, binutils).
-                    Toolchains should be located in /usr/i686-w64-mingw32 and /usr/x86_64-w64-mingw32
-                    CMake uses cross-compile-i686-w64-mingw32.cmake or cross-compile-x86_64-w64-mingw32.cmake files,
-                    modify them if the toolchains are installed in a non-standard location.
-                    Copy qt-mkspecs/win32-g++-i686-w64-mingw32 or win32-g++-x86_64-w64-mingw32 to /usr/share/qt/mkspecs folder
-                    (needed by qmake based projects).
+    --host          Example: --host i686-w64-mingw32 (defines --host option for cross-compiling with the GNU gcc toolchain).
+                    Cross-compilation is tested with rubenvb's toolchains with gcc-4.6-release:
+                     + https://sourceforge.net/projects/mingw-w64/files
+                       + Toolchains targetting Win32
+                         + Personal Builds
+                           + rubenvb
+                             + gcc-4.6-release
+                               - i686-w64-mingw32-gcc-4.6.3-2-release-win32_rubenvb   (for 32 bit windows)
+                               - i686-w64-mingw32-gcc-4.6.3-2-release-linux64_rubenvb (for 64 bit GNU/Linux)
+                
+                    Boost libraries should be compiled on windows while the other libraries can be compiled on GNU/Linux.
+                    Toolchains should be located in /home/mingw32-i686 directory. 
+                    /home/mingw32-i686/bin should be added to the PATH environment variable.
+                    CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /home/mingw32-i686 directory.
+                
+                    Important:
+                      To compile daetools using qmake-qt4 copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs.
 
-PROJECTS:
+PROJECT:
     all             Build all daetools c++ libraries, solvers and python extension modules.
                     Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
@@ -38,19 +51,19 @@ PROJECTS:
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
-    core            Build Core c++ library and its python extension module.
-    activity        Build Activity c++ library and its python extension module.
-    data_reporting  Build DataReporting c++ library and its python extension module.
-    idas            Build IDAS c++ library and its python extension module.
-    units           Build Units c++ library and its python extension module.
-    trilinos        Build Trilinos Amesos/AztecOO linear solver and its python extension module.
-    superlu         Build SuperLU linear solver and its python extension module.
-    superlu_mt      Build SuperLU_MT linear solver and its python extension module.
-    intel_pardiso   Build Intel PARDISO linear solver and its python extension module.
-    bonmin          Build BONMIN minlp solver and its python extension module.
-    ipopt           Build IPOPT nlp solver and its python extension module.
-    nlopt           Build NLOPT nlp solver and its python extension module.
-    deal.ii         Build deal.II FEM solvers and its python extension module.
+        core            Build Core c++ library and its python extension module.
+        activity        Build Activity c++ library and its python extension module.
+        data_reporting  Build DataReporting c++ library and its python extension module.
+        idas            Build IDAS c++ library and its python extension module.
+        units           Build Units c++ library and its python extension module.
+        trilinos        Build Trilinos Amesos/AztecOO linear solver and its python extension module.
+        superlu         Build SuperLU linear solver and its python extension module.
+        superlu_mt      Build SuperLU_MT linear solver and its python extension module.
+        intel_pardiso   Build Intel PARDISO linear solver and its python extension module.
+        bonmin          Build BONMIN minlp solver and its python extension module.
+        ipopt           Build IPOPT nlp solver and its python extension module.
+        nlopt           Build NLOPT nlp solver and its python extension module.
+        deal.ii         Build deal.II FEM solvers and its python extension module.
 EOF
 }
 

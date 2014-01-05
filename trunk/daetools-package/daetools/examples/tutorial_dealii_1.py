@@ -257,9 +257,6 @@ def consoleRun():
     #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
     #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
     
-    from daetools.dae_simulator.simulation_explorer import simulate
-    explorer = simulate(simulation)
-
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

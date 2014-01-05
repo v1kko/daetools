@@ -179,6 +179,9 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
+# Unresolved _gethostname problem in MinGW
+#win32-g++-*::QMAKE_LFLAGS += -Wl,--enable-stdcall-fixup 
+
 # If compiling from the compile_linux.sh shell script supress all warnings
 shellCompile {
     unix::QMAKE_CXXFLAGS_WARN_ON = -w
@@ -411,7 +414,6 @@ win32-g++-*::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                            -lClp -lCoinUtils -lipopt -lOsiCbc \
                            -lOsiClp -lOsi \
                            -lcoinlapack -lcoinblas
-                           #-ldl -lz -lbz2
 linux-g++::BONMIN_LIBS = -lbonmin -lCbc -lCbcSolver -lCgl \
                          -lClp -lCoinUtils -lipopt -lOsiCbc \
                          -lOsiClp -lOsi \
@@ -504,8 +506,9 @@ macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
 TRILINOS_DIR  = ../trilinos/build
 
 win32-msvc2008::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
-                          $${TRILINOS_DIR}/../commonTools/WinInterface/include
-unix::TRILINOS_INCLUDE  = $${TRILINOS_DIR}/include
+                                   $${TRILINOS_DIR}/../commonTools/WinInterface/include
+win32-g++-*::TRILINOS_INCLUDE    = $${TRILINOS_DIR}/include \
+unix::TRILINOS_INCLUDE           = $${TRILINOS_DIR}/include
 
 win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                                 $${SUPERLU_LIBS} \
@@ -525,7 +528,6 @@ macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/
                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
                             $${UMFPACK_LIBS} \
                             $${SUPERLU_LIBS}
-
 
 ######################################################################################
 #                                INTEL Pardiso

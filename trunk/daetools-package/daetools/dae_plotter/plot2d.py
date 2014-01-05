@@ -213,7 +213,7 @@ class dae2DPlot(QtGui.QDialog):
             
             s = json.dumps(template)
 
-            filename = QtGui.QFileDialog.getSaveFileName(self, "Open 2D plot template", "template.pt", "Templates (*.pt)")
+            filename = QtGui.QFileDialog.getSaveFileName(self, "Save 2D plot template", "template.pt", "Templates (*.pt)")
             if not filename:
                 return
 

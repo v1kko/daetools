@@ -109,7 +109,7 @@ class tcpipLogServerMainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowIcon(QtGui.QIcon(join(dirname(__file__), 'daetools-48x48.png')))
-        self.setGeometry(0, 0, 600, 150) # Position window
+        self.setGeometry(0, 50, 600, 200) # Position window
         self.resize(600, 150)  # Resize window
 
         # Create TCPIP log server

@@ -5,50 +5,62 @@ set -e
 usage()
 {
 cat << EOF
-usage: $0 [options] libs/solvers
+usage: $0 [OPTIONS] LIBRARY1 [LIBRARY2 LIBRARY3 ...]
 
 This script compiles third party libraries/solvers necessary to build daetools.
 
 Typical usage (configure and then build all libraries/solvers):
-    ./compile_libraries_linux.sh all
+    sh $0 all
+
+Compiling only specified libraries:
+    sh $0 superlu bonmin trilinos
 
 OPTIONS:
    -h | --help                  Show this message.
    
    Control options (if not set default is: --clean and --build):
-    --configure                 Configure library/solver.
-    --build                     Build library/solver.
-    --clean                     Clean library/solver.
+    --configure                 Configure the specified library(ies)/solver(s).
+    --build                     Build  the specified library(ies)/solver(s).
+    --clean                     Clean  the specified library(ies)/solver(s).
    
    Python options (if not set use system's default python). One of the following:
     --with-python-binary        Path to python binary to use.
-    --with-python-version       Version of the system's python.
-                                Format: major.minor (i.e 2.7).
+    --with-python-version       Version of the system's python in the format: major.minor (i.e 2.7).
 
-   Cross compiling options
-    --host                      For win32 --host i686-w64-mingw32 (defines --host option for cros-compiling)
-                                 - the toolchain: mingw-w32-bin_x86_64-linux_20131227.tar.bz2 (gcc 4.9.0)
-                                 - installed in: /home/mingw-w64/mingw-w64/linux-x86_64-x86/build/build/root
-   
-SOLVERS:
+   Cross compiling options:
+    --host          Example: --host i686-w64-mingw32 (defines --host option for cross-compiling with the GNU gcc toolchain).
+                    Cross-compilation is tested with rubenvb's toolchains with gcc-4.6-release:
+                     + https://sourceforge.net/projects/mingw-w64/files
+                       + Toolchains targetting Win32
+                         + Personal Builds
+                           + rubenvb
+                             + gcc-4.6-release
+                               - i686-w64-mingw32-gcc-4.6.3-2-release-win32_rubenvb   (for 32 bit windows)
+                               - i686-w64-mingw32-gcc-4.6.3-2-release-linux64_rubenvb (for 64 bit GNU/Linux)
+                
+                    Boost libraries should be compiled on windows while the other libraries can be compiled on GNU/Linux.
+                    Toolchains should be located in /home/mingw32-i686 directory. 
+                    /home/mingw32-i686/bin should be added to the PATH environment variable.
+                    CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /home/mingw32-i686 directory.
+                   
+LIBRARY:
     all              All libraries and solvers.
                      Equivalent to: boost ref_blas_lapack umfpack idas trilinos superlu superlu_mt bonmin nlopt deal.ii
     
     Individual libraries/solvers:
-    boost            Boost libraries (system, filesystem, thread, python)
-    ref_blas_lapack  reference BLAS and Lapack libraries
-    openblas         OpenBLAS library
-    umfpack          Umfpack solver
-    idas             IDAS solver
-    trilinos         Trilinos Amesos and AztecOO solvers
-    superlu          SuperLU solver
-    superlu_mt       SuperLU solver
-    
-    bonmin           Bonmin solver
-    nlopt            NLopt solver 
-
-    libmesh          libMesh FE library 
-    deal.ii          deal.II FE library
+        boost            Boost libraries (system, filesystem, thread, python)
+        ref_blas_lapack  reference BLAS and Lapack libraries
+        umfpack          Umfpack solver
+        idas             IDAS solver
+        trilinos         Trilinos Amesos and AztecOO solvers
+        superlu          SuperLU solver
+        superlu_mt       SuperLU solver
+        bonmin           Bonmin solver
+        nlopt            NLopt solver 
+        deal.ii          deal.II FE library
+        
+        libmesh          libMesh FE library 
+        openblas         OpenBLAS library
 EOF
 }
 
@@ -581,7 +593,7 @@ compile_umfpack()
   echo "[*] Building suitesparseconfig..."
   echo ""
   echo "make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   make clean
   echo ""
@@ -594,7 +606,7 @@ compile_umfpack()
   echo "[*] Building amd..."
   echo ""
   #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   echo ""
   echo "[*] Done!"
@@ -606,7 +618,7 @@ compile_umfpack()
   echo "[*] Building camd..."
   echo ""
   #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   echo "[*] Done!"
   cd "${TRUNK}"
@@ -616,7 +628,7 @@ compile_umfpack()
   echo "[*] Building colamd..."
   echo ""
   #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   echo ""
   echo "[*] Done!"
@@ -628,7 +640,7 @@ compile_umfpack()
   echo "[*] Building ccolamd..."
   echo ""
   #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   echo ""
   echo "[*] Done!"
@@ -640,7 +652,7 @@ compile_umfpack()
   echo "[*] Building cholmod..."
   echo ""
   #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   echo ""
   echo "[*] Done!"
@@ -652,7 +664,7 @@ compile_umfpack()
   echo "[*] Building umfpack..."
   echo ""
   #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
   make install
   echo ""
   echo "[*] Done!"
@@ -1015,7 +1027,7 @@ configure_trilinos()
   fi
   
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
-    EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0  -C tryrunresults.cmake"
+    EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 "
     #PTHREAD_DIR="-DPthread_LIBRARY_DIRS=${TRUNK}/pthreads_win32 -DPthread_INCLUDE_DIRS=${TRUNK}/pthreads_win32/include"
   fi
   
@@ -1031,6 +1043,7 @@ configure_trilinos()
     -DTrilinos_ENABLE_Zoltan:BOOL=OFF \
     -DAmesos_ENABLE_SuperLU:BOOL=ON \
     -DIfpack_ENABLE_SuperLU:BOOL=ON \
+    -DTeuchos_ENABLE_COMPLEX:BOOL=OFF \
     -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
     -DTPL_SuperLU_LIBRARIES:STRING=superlu_4.1 \
     -DTPL_ENABLE_UMFPACK:BOOL=ON \
@@ -1055,6 +1068,26 @@ configure_trilinos()
 
 compile_trilinos() 
 {
+cat << EOF
+Note: there may be problems while cross-compiling with the following files:
+ 1. trilinos/packages/teuchos/src/Teuchos_BLAS.cpp
+    These lines (around 96-104) should be commented out:
+     #ifdef _WIN32
+     #  ifdef HAVE_TEUCHOS_COMPLEX
+         template BLAS<long int, std::complex<float> >;
+         template BLAS<long int, std::complex<double> >;
+     #  endif
+         template BLAS<long int, float>;
+         template BLAS<long int, double>;
+     #endif
+ 2. trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp, trilinos/packages/ml/src/Utils/ml_utils.cpp
+    and trilinos/packages/ml/src/MLAPI/MLAPI_Workspace.cpp.
+    Functions gethostname and sleep do not exist
+     - Add include #include <winsock2.h> or if that does not work (unresolved _gethostname function)
+       then comment-out all gethostname occurences (not important - just for printing some info)
+     - Rename sleep() to Sleep()
+EOF
+  
   cd trilinos/build
   echo "[*] Building trilinos..."
   make -j${Ncpu}
@@ -1211,7 +1244,6 @@ do
     all)              if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_boost
                         configure_ref_blas_lapack
-                        #configure_openblas
                         configure_umfpack
                         configure_idas
                         configure_superlu
@@ -1225,7 +1257,6 @@ do
                       if [ "${DO_BUILD}" = "yes" ]; then 
                         compile_boost
                         compile_ref_blas_lapack
-                        #compile_openblas
                         compile_umfpack
                         compile_idas
                         compile_superlu
@@ -1239,7 +1270,6 @@ do
                       if [ "${DO_CLEAN}" = "yes" ]; then 
                         clean_boost
                         clean_ref_blas_lapack
-                        #clean_openblas
                         clean_umfpack
                         clean_idas
                         clean_superlu

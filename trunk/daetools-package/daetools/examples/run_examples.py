@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 
-import os, sys, subprocess, webbrowser, traceback, importlib
+import os, platform, sys, subprocess, webbrowser, traceback, importlib
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
@@ -100,6 +100,18 @@ class RunExamples(QtGui.QDialog):
         self.ui.setupUi(self)
         self.app = app
 
+        font = QtGui.QFont()
+        if platform.system() == 'Linux':
+            font.setFamily("Monospace")
+            font.setPointSize(9)
+        elif platform.system() == 'Darwin':
+            font.setFamily("Monaco")
+            font.setPointSize(10)
+        else:
+            font.setFamily("Courier New")
+            font.setPointSize(9)
+        self.ui.docstringEdit.setFont(font)
+        
         self.setWindowTitle("DAE Tools Tutorials v" + daeVersion(True))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 

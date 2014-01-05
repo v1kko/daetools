@@ -23,6 +23,7 @@ from PyQt4 import QtCore, QtGui
 
 from .simulator_ui import Ui_SimulatorDialog
 from . import auxiliary
+from daetools.dae_simulator.simulation_explorer import daeSimulationExplorer
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -106,6 +107,7 @@ class daeSimulator(QtGui.QDialog):
         self.nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
         self.lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
         self.run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
+        self.show_simulation_explorer    = kwargs.get('show_simulation_explorer',   True)
 
         if self.app == None:
             if not QtCore.QCoreApplication.instance():
@@ -176,7 +178,7 @@ class daeSimulator(QtGui.QDialog):
     def slotRun(self):
         try:
             self.ui.textEdit.clear()
-
+            
             tcpipaddress                      = str(self.ui.DataReporterTCPIPAddressLineEdit.text())
             self.simulation.ReportingInterval = float(self.ui.ReportingIntervalDoubleSpinBox.value())
             self.simulation.TimeHorizon       = float(self.ui.TimeHorizonDoubleSpinBox.value())
@@ -252,8 +254,15 @@ class daeSimulator(QtGui.QDialog):
                 self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
                 if(self.lasolver_setoptions_fn):
                     self.lasolver_setoptions_fn(self.lasolver)
+
                 self.simulation.SolveInitial()
+
+                if self.show_simulation_explorer:
+                    explorer = daeSimulationExplorer(self.app, simulation = self.simulation)
+                    explorer.exec_()
+
                 self.simulation.Run()
+
                 if self.run_after_simulation_end_fn:
                     self.run_after_simulation_end_fn(self.simulation, self.log)
 

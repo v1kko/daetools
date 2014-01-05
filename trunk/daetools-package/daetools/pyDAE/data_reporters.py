@@ -182,7 +182,10 @@ class daePlotDataReporter(daeDataReporterLocal):
                 plt.xlabel('Time (s)')
                 #plt.title('Title')
                 plt.grid(True)
-                plt.tight_layout(1.2)
+                try:
+                    plt.tight_layout(1.2)
+                except Exception as e:
+                    pass
                 if isinstance(arg, list):
                     ''' This arg is a list of variables.  These must all be
                     plotted on the same plot.'''

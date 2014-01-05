@@ -63,7 +63,7 @@ boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_
 boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
 deal_II          = 'deal_II-daetools'
 if platform.system() == 'Windows':
-    mingw_dlls   = ['libgcc', 'libstdc++', 'libwinpthread', 'libgfortran']
+    mingw_dlls   = ['libgcc', 'libstdc++', 'libgfortran']
 else:
     mingw_dlls   = []
     

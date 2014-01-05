@@ -25,10 +25,15 @@ class daePythonStdOutLog(daeStdOutLog):
 
     def Message(self, message, severity):
         if self.Enabled:
-            if self.PrintProgress:
-                sys.stdout.write('{0:30s}\n'.format(self.IndentString + message))
-                sys.stdout.write(' {0} {1}'.format(self.PercentageDone, self.ETA))
-                sys.stdout.write('\r')
-            else:
-                print(self.IndentString + message)
-            sys.stdout.flush()
+            try:
+                if self.PrintProgress:
+                    sys.stdout.write('{0:30s}\n'.format(self.IndentString + message))
+                    sys.stdout.write(' {0} {1}'.format(self.PercentageDone, self.ETA))
+                    sys.stdout.write('\r')
+                else:
+                    print(self.IndentString + message)
+                sys.stdout.flush()
+            except Exception as e:
+                # When on windows and using pythonw.exe sys.stdout is undefined
+                # and printing raises bad file descriptor exception
+                pass
