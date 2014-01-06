@@ -90,11 +90,19 @@ class daeSimulator(QtGui.QDialog):
         for nlp in self.available_nlp_solvers:
             self.ui.MINLPSolverComboBox.addItem(nlp[0], userData = nlp[1])
 
-        self.connect(self.ui.RunButton,    QtCore.SIGNAL('clicked()'), self.slotRun)
-        self.connect(self.ui.ResumeButton, QtCore.SIGNAL('clicked()'), self.slotResume)
-        self.connect(self.ui.PauseButton,  QtCore.SIGNAL('clicked()'), self.slotPause)
-        self.connect(self.ui.MatrixButton, QtCore.SIGNAL('clicked()'), self.slotOpenSparseMatrixImage)
-        self.connect(self.ui.ExportButton, QtCore.SIGNAL('clicked()'), self.slotExportSparseMatrixAsMatrixMarketFormat)
+        menuRun = QtGui.QMenu()
+        actionRun                = QtGui.QAction('Run', self)
+        actionShowExplorerAndRun = QtGui.QAction('Show simulation explorer and run', self)
+        menuRun.addAction(actionRun)
+        menuRun.addAction(actionShowExplorerAndRun)
+        self.ui.RunButton.setMenu(menuRun)
+
+        self.connect(self.ui.ResumeButton,      QtCore.SIGNAL('clicked()'),   self.slotResume)
+        self.connect(self.ui.PauseButton,       QtCore.SIGNAL('clicked()'),   self.slotPause)
+        self.connect(self.ui.MatrixButton,      QtCore.SIGNAL('clicked()'),   self.slotOpenSparseMatrixImage)
+        self.connect(self.ui.ExportButton,      QtCore.SIGNAL('clicked()'),   self.slotExportSparseMatrixAsMatrixMarketFormat)
+        self.connect(actionRun,                 QtCore.SIGNAL('triggered()'), self.slotRun)
+        self.connect(actionShowExplorerAndRun,  QtCore.SIGNAL('triggered()'), self.slotShowExplorerAndRun)
 
         self.app                         = app
         self.simulation                  = kwargs.get('simulation',                 None)
@@ -107,7 +115,6 @@ class daeSimulator(QtGui.QDialog):
         self.nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
         self.lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
         self.run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
-        self.show_simulation_explorer    = kwargs.get('show_simulation_explorer',   True)
 
         if self.app == None:
             if not QtCore.QCoreApplication.instance():
@@ -157,7 +164,8 @@ class daeSimulator(QtGui.QDialog):
             pass
         
         return QtGui.QDialog.done(self, status)
-        
+
+    """
     def __del__(self):
         # Calling Finalize is not mandatory since it will be called
         # in a simulation/optimization destructor
@@ -165,7 +173,8 @@ class daeSimulator(QtGui.QDialog):
             self.simulation.Finalize()
         elif self.optimization:
             self.optimization.Finalize()
-
+    """
+    
     #@QtCore.pyqtSlot()
     def slotResume(self):
         self.simulation.Resume()
@@ -176,6 +185,13 @@ class daeSimulator(QtGui.QDialog):
 
     #@QtCore.pyqtSlot()
     def slotRun(self):
+        self.run(False)
+        
+    #@QtCore.pyqtSlot()
+    def slotShowExplorerAndRun(self):
+        self.run(True)
+        
+    def run(self, showExplorer):
         try:
             self.ui.textEdit.clear()
             
@@ -257,7 +273,7 @@ class daeSimulator(QtGui.QDialog):
 
                 self.simulation.SolveInitial()
 
-                if self.show_simulation_explorer:
+                if showExplorer:
                     explorer = daeSimulationExplorer(self.app, simulation = self.simulation)
                     explorer.exec_()
 
@@ -265,6 +281,8 @@ class daeSimulator(QtGui.QDialog):
 
                 if self.run_after_simulation_end_fn:
                     self.run_after_simulation_end_fn(self.simulation, self.log)
+
+                self.simulation.Finalize()
 
             else:
                 # If nlpsolver is not sent then create it based on the selection
@@ -280,6 +298,8 @@ class daeSimulator(QtGui.QDialog):
 
                 if self.run_after_simulation_end_fn:
                     self.run_after_simulation_end_fn(self.simulation, self.log)
+
+                self.optimization.Finalize()
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()

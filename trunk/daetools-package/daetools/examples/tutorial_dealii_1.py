@@ -177,8 +177,8 @@ class simTutorial(daeSimulation):
     
 # Use daeSimulator class
 def guiRun(app):
-    simulation = simTutorial()
     datareporter = daeDelegateDataReporter()
+    simulation = simTutorial()
     tcpipDataReporter = daeTCPIPDataReporter()
     feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
@@ -201,7 +201,7 @@ def guiRun(app):
     simulation.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter)
     simulator.exec_()
-
+    
 # Setup everything manually and run in a console
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object

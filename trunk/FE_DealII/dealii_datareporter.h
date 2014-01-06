@@ -2,13 +2,9 @@
 #define DEAL_II_DATA_REPORTER_H
 
 #include "../Core/coreimpl.h"
-
-
-
-
-
-
 #include "../Core/datareporting.h"
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 #include <boost/function.hpp>
 #include <boost/algorithm/string.hpp>

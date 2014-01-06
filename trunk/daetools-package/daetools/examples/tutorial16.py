@@ -30,7 +30,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 from PyQt4 import QtCore, QtGui
-from .tutorial16_ui import Ui_InteractiveRunDialog
+import tutorial16_ui
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -82,7 +82,7 @@ class InteractiveOP(QtGui.QDialog):
     def __init__(self, simulation):
         QtGui.QDialog.__init__(self)
 
-        self.ui = Ui_InteractiveRunDialog()
+        self.ui = tutorial16_ui.Ui_InteractiveRunDialog()
         self.ui.setupUi(self)
 
         self.setWindowIcon(QtGui.QIcon(join(dirname(__file__), 'daetools-48x48.png')))

@@ -135,7 +135,7 @@ crossCompile{
     unix::PYTHON_LIB_DIR       = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
     
     win32::PYTHON_LIB          = python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
-    unix::PYTHON_LIB           = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+    unix::PYTHON_LIB           = -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
     
     !shellCompile {
         message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})

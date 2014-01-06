@@ -124,10 +124,11 @@ class optTutorial(daeOptimization):
             self.c_plots.append( self.monitor.addSubplot(n, m, plot_no, c.Name) )
 
         try:
+            # Some matplotlib versions do not support it
             self.monitor.figure.tight_layout()
         except Exception as e:
             pass
-
+        
     def StartIterationRun(self, iteration):
         pass
 

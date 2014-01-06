@@ -500,6 +500,12 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         # StateTransitionNetworks
         sSTNs.extend(self._processSTNs(data['STNs'], indent, sVariables))
 
+        # OnConditionActions
+        sOnConditionActions.extend(self._processOnConditionActions(data['OnConditionActions'], indent))
+
+        # OnEventActions
+        sOnEventActions.extend(self._processOnEventActions(data['OnEventActions'], indent))
+
         # Components
         for component in data['Components']:
             class_      = component['Class']
@@ -532,6 +538,13 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         result = modelTemplate % dictModel
         return result
 
+    def _processOnConditionActions(self, on_condition_actions):
+        pass
+    
+    def _processOnEventActions(self, OnEventActions):
+        if len(OnEventActions > 0):
+            raise RuntimeError()
+        
     def _processEquations(self, Equations, indent):
         sEquations = []
         s_indent = indent * self.defaultIndent
@@ -553,22 +566,44 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             nStates = len(stn['States'])
             if stn['Class'] == 'daeIF':
                 for i, state in enumerate(stn['States']):
+                    """
+                    relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
+                    relativeName    = self.exprFormatter.formatIdentifier(relativeName)
+                    stnVariableName = self.exprFormatter.flattenIdentifier(relativeName) + '_ifstn'
+                    description     = stn['Description']
+                    states          = ', '.join(st['Name'] for st in stn['States'])
+                    activeState     = stn['ActiveState']
+
+                    varTemplate = 'char* {name}; /* States: [{states}] ({description}) */'
+                    self.stnDefs.append(varTemplate.format(name = stnVariableName,
+                                                        states = states,
+                                                        description = description))
+                    varTemplate = '_m_->{name} = "{activeState}";'
+                    self.initiallyActiveStates.append(varTemplate.format(name = stnVariableName,
+                                                                        activeState = activeState))
+                    """
+                    
+                    # Not all states have state_transitions ('else' state has no state transitions)
+                    on_condition_action = None
                     if i == 0:
-                        state_transition = state['StateTransitions'][0]
-                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
+                        # There is only one OnConditionAction in IF
+                        on_condition_action = state['OnConditionActions'][0]
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
                         sSTNs.append(s_indent + 'if {0} then'.format(condition))
-                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
                     elif (i > 0) and (i < nStates - 1):
-                        state_transition = state['StateTransitions'][0]
-                        condition = self.exprFormatter.formatRuntimeConditionNode(state_transition['ConditionRuntimeNode'])
+                        # There is only one OnConditionAction in IF
+                        on_condition_action = state['OnConditionActions'][0]
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
                         sSTNs.append(s_indent + 'else if {0} then'.format(condition))
-                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
                     else:
                         sSTNs.append(s_indent + 'else')
-                        sSTNs.extend(self._processEquations(state['Equations'], indent+1))
 
+                    # Process equations
+                    sSTNs.extend(self._processEquations(state['Equations'], indent+1))
+                    
+                    # Process nested STNs (if any)
                     sSTNs.extend(self._processSTNs(state['NestedSTNs'], indent+1, sVariables))
 
                 sSTNs.append(s_indent + 'end if;')

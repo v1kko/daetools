@@ -236,6 +236,11 @@ class daeSimulationExplorer(QtGui.QDialog):
         self.connect(self._ui.treeInitialConditions,           QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
 
     def updateSimulation(self, verbose = False):
+        # Update runtime data
+        self._simulation.TimeHorizon                  = float(self._ui.timeHorizonEdit.text())
+        self._simulation.ReportingInterval            = float(self._ui.reportingIntervalEdit.text())
+        self._simulation.DAESolver.RelativeTolerance  = float(self._ui.relativeToleranceEdit.text())
+        
         # Update Domains
         if verbose:
             print('Update Domains...')

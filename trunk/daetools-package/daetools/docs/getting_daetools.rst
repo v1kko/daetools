@@ -164,8 +164,15 @@ As a starting point the following links can be used:
 * Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.win32-py2.7.exe/download>`_
 * PyQt4: `<http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4 download section>`_
 
-To be able to create 3D plots you need to install Mayavi2 package.  Alternatively you can install everything needed
-through `Python(x,y) <http://www.pythonxy.com>`_.
+To be able to create 3D plots you need to install Mayavi2 package. It can be installed using the following shell command:
+
+.. code-block:: bash
+
+    easy_install "Mayavi[app]"
+
+    
+Alternatively you can install everything needed through `Python(x,y) <http://www.pythonxy.com>`_.
+
 Finally, install **DAE Tools** by double clicking the file daetools_x.x-x-win32_py27.exe and follow the instructions.
 To uninstall use the uninstall program in ``Start`` -> ``All Programs`` -> ``DAE Tools`` -> ``Uninstall``.
 

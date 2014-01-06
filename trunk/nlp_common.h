@@ -4,6 +4,10 @@
 #include <iostream>
 #include "../Core/optimization.h"
 #include "../Core/helpers.h"
+
+#define BOOST_FILESYSTEM_NO_DEPRECATED
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/multi_array.hpp>
 
@@ -11,18 +15,6 @@ namespace dae
 {
 namespace nlpsolver
 {
-//class daePastResults
-//{
-//public:
-//	real_t				fobj;
-//	std::vector<real_t> constraints;
-//	std::vector<real_t> measured_vars;
-	
-//	std::vector<real_t>			                                 fobj_derivs;
-//	std::map<daeOptimizationConstraint_t*, std::vector<real_t> > constraints_derivs;
-//	std::map<daeMeasuredVariable_t*,       std::vector<real_t> > measured_vars_derivs;
-//};
-
 class daeNLPCommon
 {
 public:
@@ -71,14 +63,16 @@ public:
 	
         if(initializationFile.empty())
         {
-        // Ask libc to create a temporary filename
-            char buffer[L_tmpnam];
-            tmpnam(buffer);
+        // Attempt to create a temporary filename
+            boost::filesystem::path file_template = "daetools-%%%%-%%%%-%%%%-%%%%.init";
+            boost::filesystem::path init_file     = boost::filesystem::temp_directory_path();
+            boost::filesystem::path tmp_filename  = boost::filesystem::unique_path(file_template);
+            init_file /= tmp_filename;
 
             m_bInitializationFileProvided = false;
-            m_InitializationFile          = buffer;
+            m_InitializationFile          = init_file.string().c_str();
 
-        // Check if file can be opened for both for reading and writing
+        // Check if file can be opened for both reading and writing
             std::ofstream file(m_InitializationFile.c_str());
             if(!file.good())
             {

@@ -371,7 +371,6 @@ class daeCodeGenerator_c99(daeCodeGenerator):
     def _processSTNs(self, STNs, indent):
         s_indent = indent * self.defaultIndent
         for stn in STNs:
-            nStates = len(stn['States'])
             if stn['Class'] == 'daeIF':
                 relativeName    = daeGetRelativeName(self.wrapperInstanceName, stn['CanonicalName'])
                 relativeName    = self.exprFormatter.formatIdentifier(relativeName)
