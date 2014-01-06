@@ -63,24 +63,24 @@ boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_
 boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
 deal_II          = 'deal_II-daetools'
 if platform.system() == 'Windows':
-    mingw_dlls   = ['libgcc', 'libstdc++', 'libgfortran']
+    mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran']
 else:
     mingw_dlls   = []
     
-boost_solibs = []
+shared_libs = []
 
 if os.path.isdir(boost_solib_dir):
     boost_files = os.listdir(boost_solib_dir)
 
     for f in boost_files:
         if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (deal_II in f):
-            boost_solibs.append(os.path.join(boost_solib_dir, f))
+            shared_libs.append(os.path.join(boost_solib_dir, f))
 
         for dll in mingw_dlls:
             if dll in f:
-                boost_solibs.append(os.path.join(boost_solib_dir, f))
+                shared_libs.append(os.path.join(boost_solib_dir, f))
     
-#print 'boost_solibs = ', boost_solibs
+#print 'shared_libs = ', shared_libs
 
 if platform.system() == 'Linux':
     data_files = [
@@ -97,12 +97,12 @@ if platform.system() == 'Linux':
                     ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
                     ('/usr/bin',                ['usr/bin/daeexamples']),
                     ('/usr/bin',                ['usr/bin/daeplotter']),
-                    (usrlib,                    boost_solibs)
+                    (usrlib,                    shared_libs)
                  ]
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
 
 elif platform.system() == 'Windows':
-    for f in boost_solibs:
+    for f in shared_libs:
         shutil.copy(f, 'daetools/pyDAE/{0}'.format(platform_solib_dir))
         shutil.copy(f, 'daetools/solvers/{0}'.format(platform_solib_dir))
 
@@ -134,7 +134,7 @@ elif platform.system() == 'Darwin':
                     ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
                     ('/usr/bin',                ['usr/bin/daeexamples']),
                     ('/usr/bin',                ['usr/bin/daeplotter']),
-                    ('/usr/lib',                boost_solibs)
+                    ('/usr/lib',                shared_libs)
                  ]
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
