@@ -185,10 +185,10 @@ def run():
 
     # Call leastsq
     p, cov_x, infodict, msg, ier = leastsq(Residuals, 
-                                        p0, 
-                                        Dfun=Derivatives, 
-                                        args=(simulation, x, y_meas), 
-                                        full_output=True)
+                                           p0,
+                                           Dfun=Derivatives,
+                                           args=(simulation, x, y_meas),
+                                           full_output=True)
 
     # Print the results
     print('------------------------------------------------------')

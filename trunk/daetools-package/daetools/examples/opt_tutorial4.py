@@ -154,7 +154,7 @@ def run():
           simulation.ov4.StartingPoint,
           simulation.ov5.StartingPoint]
 
-    print(fmin(ObjectiveFunction, x0, args=[simulation], xtol=1e-8))
+    print(fmin(ObjectiveFunction, x0, args=(simulation,), xtol=1e-8))
 
 if __name__ == "__main__":
     run()

@@ -19,7 +19,10 @@ import os, platform, sys, subprocess, webbrowser, traceback, importlib
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
+
 python_major = sys.version_info[0]
+python_minor = sys.version_info[1]
+python_build = sys.version_info[2]
 if python_major == 2:
     from StringIO import StringIO
 elif python_major == 3:
@@ -112,7 +115,7 @@ class RunExamples(QtGui.QDialog):
             font.setPointSize(9)
         self.ui.docstringEdit.setFont(font)
         
-        self.setWindowTitle("DAE Tools Tutorials v" + daeVersion(True))
+        self.setWindowTitle("DAE Tools Tutorials v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
         self.connect(self.ui.toolButtonRun,                QtCore.SIGNAL('clicked()'), self.slotRunTutorial)
