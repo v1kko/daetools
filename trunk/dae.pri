@@ -507,7 +507,7 @@ TRILINOS_DIR  = ../trilinos/build
 
 win32-msvc2008::TRILINOS_INCLUDE = $${TRILINOS_DIR}/include \
                                    $${TRILINOS_DIR}/../commonTools/WinInterface/include
-win32-g++-*::TRILINOS_INCLUDE    = $${TRILINOS_DIR}/include \
+win32-g++-*::TRILINOS_INCLUDE    = $${TRILINOS_DIR}/include
 unix::TRILINOS_INCLUDE           = $${TRILINOS_DIR}/include
 
 win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
