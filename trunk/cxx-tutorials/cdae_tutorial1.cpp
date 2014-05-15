@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 
 	pSimulation->SetReportingInterval(10);
 	pSimulation->SetTimeHorizon(1000);
-	pSimulation->GetModel()->SetReportingOn(false);
+    pSimulation->GetModel()->SetReportingOn(true);
 	
 	pSimulation->Initialize(pDAESolver.get(), pDataReporter.get(), pLog.get());
 	pSimulation->SolveInitial();

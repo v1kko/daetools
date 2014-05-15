@@ -31,7 +31,7 @@ of the :doc:`docs/index`.
 Download
 ========
 
-The current version is 1.2.1. A new release 1.3.0 is in the beta2 state.
+The current and a very outdated version is 1.2.1. A new release 1.3.0 is in the beta 3 state.
 
 Installation files can be found on the SourceForge website 
 `download section <https://sourceforge.net/projects/daetools/files>`_,
@@ -43,7 +43,7 @@ can be found in :doc:`docs/getting_daetools`.
 
 News
 ====
-The second beta is released. It contains many important bug fixes, memory leaks fixes and new features.
+The third beta is released. It contains many important bug fixes, memory leaks fixes and new features.
 
 A new version 1.3.0 will bring the following new features and
 improvements:

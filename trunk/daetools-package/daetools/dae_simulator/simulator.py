@@ -23,7 +23,7 @@ from PyQt4 import QtCore, QtGui
 
 from .simulator_ui import Ui_SimulatorDialog
 from . import auxiliary
-from daetools.dae_simulator.simulation_explorer import daeSimulationExplorer
+from . import simulation_explorer
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -84,11 +84,13 @@ class daeSimulator(QtGui.QDialog):
         self.available_nlp_solvers = auxiliary.getAvailableNLPSolvers()
 
         self.ui.DAESolverComboBox.addItem("Sundials IDAS")
-        for la in self.available_la_solvers:
+        for i, la in enumerate(self.available_la_solvers):
             self.ui.LASolverComboBox.addItem(la[0], userData = la[1])
+            self.ui.LASolverComboBox.setItemData(i, la[2], QtCore.Qt.ToolTipRole)
         
-        for nlp in self.available_nlp_solvers:
+        for i, nlp in enumerate(self.available_nlp_solvers):
             self.ui.MINLPSolverComboBox.addItem(nlp[0], userData = nlp[1])
+            self.ui.MINLPSolverComboBox.setItemData(i, nlp[2], QtCore.Qt.ToolTipRole)
 
         menuRun = QtGui.QMenu()
         actionRun                = QtGui.QAction('Run', self)
@@ -274,7 +276,7 @@ class daeSimulator(QtGui.QDialog):
                 self.simulation.SolveInitial()
 
                 if showExplorer:
-                    explorer = daeSimulationExplorer(self.app, simulation = self.simulation)
+                    explorer = simulation_explorer.daeSimulationExplorer(self.app, simulation = self.simulation)
                     explorer.exec_()
 
                 self.simulation.Run()

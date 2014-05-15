@@ -2633,35 +2633,133 @@ void daeModel::CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, st
 	}
 }
 
-void daeModel::CollectAllSTNs(vector<daeSTN*>& ptrarrSTNs) const
+void daeModel::CollectAllSTNsAsVector(vector<daeSTN*>& ptrarrSTNs) const
 {
 	size_t i;
 	daeModel* pModel;
 	daeModelArray* pModelArray;
 
 // Fill array ptrarrSTNs with all STNs in the model
-	//ptrarrSTNs.insert(ptrarrSTNs.end(), m_ptrarrSTNs.begin(), m_ptrarrSTNs.end());
 	dae_add_vector(m_ptrarrSTNs, ptrarrSTNs);
 
 /////////////////////////////////////////////////////////////////////////////////////
-// BUG!!!???
 // What about STNs nested within states???
-// States should take care of them when asked to calculate residuals, conditions etc ..., I guess
+// States should take care of them when asked to calculate residuals, conditions etc ...,
+// I guess...
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Then, fill it with STNs in each child-model
 	for(i = 0; i < m_ptrarrComponents.size(); i++)
 	{
 		pModel = m_ptrarrComponents[i];
-		pModel->CollectAllSTNs(ptrarrSTNs);
+		pModel->CollectAllSTNsAsVector(ptrarrSTNs);
 	}
 	
 // Finally, ill it with STNs in each modelarray
 	for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
 	{
 		pModelArray = m_ptrarrComponentArrays[i];
-		pModelArray->CollectAllSTNs(ptrarrSTNs);
-	}
+		pModelArray->CollectAllSTNsAsVector(ptrarrSTNs);
+    }
+}
+
+void daeModel::CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const
+{
+    // Insert objects from the model
+    for(std::vector<daeDomain*>::const_iterator iter = Domains().begin(); iter != Domains().end(); iter++)
+        mapDomains[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the ports
+    for(std::vector<daePort*>::const_iterator piter = Ports().begin(); piter != Ports().end(); piter++)
+        for(std::vector<daeDomain*>::const_iterator citer = (*piter)->Domains().begin(); citer != (*piter)->Domains().end(); citer++)
+            mapDomains[(*citer)->GetCanonicalName()] = *citer;
+
+    // Insert objects from the model arrays
+    for(std::vector<daeModelArray*>::const_iterator maiter = ModelArrays().begin(); maiter != ModelArrays().end(); maiter++)
+        (*maiter)->CollectAllDomains(mapDomains);
+
+    // Insert objects from the port arrays
+    for(std::vector<daePortArray*>::const_iterator paiter = PortArrays().begin(); paiter != PortArrays().end(); paiter++)
+        (*paiter)->CollectAllDomains(mapDomains);
+}
+
+void daeModel::CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const
+{
+    // Insert objects from the model
+    for(std::vector<daeParameter*>::const_iterator iter = Parameters().begin(); iter != Parameters().end(); iter++)
+        mapParameters[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the ports
+    for(std::vector<daePort*>::const_iterator piter = Ports().begin(); piter != Ports().end(); piter++)
+        for(std::vector<daeParameter*>::const_iterator citer = (*piter)->Parameters().begin(); citer != (*piter)->Parameters().end(); citer++)
+            mapParameters[(*citer)->GetCanonicalName()] = *citer;
+
+    // Insert objects from the model arrays
+    for(std::vector<daeModelArray*>::const_iterator maiter = ModelArrays().begin(); maiter != ModelArrays().end(); maiter++)
+        (*maiter)->CollectAllParameters(mapParameters);
+
+    // Insert objects from the port arrays
+    for(std::vector<daePortArray*>::const_iterator paiter = PortArrays().begin(); paiter != PortArrays().end(); paiter++)
+        (*paiter)->CollectAllParameters(mapParameters);
+}
+
+void daeModel::CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const
+{
+    // Insert objects from the model
+    for(std::vector<daeVariable*>::const_iterator iter = Variables().begin(); iter != Variables().end(); iter++)
+        mapVariables[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the ports
+    for(std::vector<daePort*>::const_iterator piter = Ports().begin(); piter != Ports().end(); piter++)
+        for(std::vector<daeVariable*>::const_iterator citer = (*piter)->Variables().begin(); citer != (*piter)->Variables().end(); citer++)
+            mapVariables[(*citer)->GetCanonicalName()] = *citer;
+
+    // Insert objects from the child models (units)
+    for(std::vector<daeModel*>::const_iterator miter = Models().begin(); miter != Models().end(); miter++)
+        (*miter)->CollectAllVariables(mapVariables);
+
+    // Insert objects from the model arrays
+    for(std::vector<daeModelArray*>::const_iterator maiter = ModelArrays().begin(); maiter != ModelArrays().end(); maiter++)
+        (*maiter)->CollectAllVariables(mapVariables);
+
+    // Insert objects from the port arrays
+    for(std::vector<daePortArray*>::const_iterator paiter = PortArrays().begin(); paiter != PortArrays().end(); paiter++)
+        (*paiter)->CollectAllVariables(mapVariables);
+}
+
+void daeModel::CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const
+{
+    // Insert objects from the model
+    for(std::vector<daeSTN*>::const_iterator iter = STNs().begin(); iter != STNs().end(); iter++)
+    {
+        if((*iter)->GetType() == eSTN)
+            mapSTNs[(*iter)->GetCanonicalName()] = *iter;
+
+        (*iter)->CollectAllSTNs(mapSTNs);
+    }
+
+    // Insert objects from the child models (units)
+    for(std::vector<daeModel*>::const_iterator miter = Models().begin(); miter != Models().end(); miter++)
+        (*miter)->CollectAllSTNs(mapSTNs);
+
+    // Insert objects from the model arrays
+    for(std::vector<daeModelArray*>::const_iterator maiter = ModelArrays().begin(); maiter != ModelArrays().end(); maiter++)
+        (*maiter)->CollectAllSTNs(mapSTNs);
+}
+
+void daeModel::CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const
+{
+    // Insert objects from the model
+    for(std::vector<daePort*>::const_iterator iter = Ports().begin(); iter != Ports().end(); iter++)
+        mapPorts[(*iter)->GetCanonicalName()] = *iter;
+
+    // Insert objects from the child models (units)
+    for(std::vector<daeModel*>::const_iterator miter = Models().begin(); miter != Models().end(); miter++)
+        (*miter)->CollectAllPorts(mapPorts);
+
+    // Insert objects from the model arrays
+    for(std::vector<daeModelArray*>::const_iterator maiter = ModelArrays().begin(); maiter != ModelArrays().end(); maiter++)
+        (*maiter)->CollectAllPorts(mapPorts);
 }
 
 void daeModel::CollectEquationExecutionInfosFromSTNs(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const
@@ -2834,7 +2932,7 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 ////////////////////////////////////////////////////////////////////////
 		vector<daeSTN*> ptrarrAllSTNs;
 		
-		CollectAllSTNs(ptrarrAllSTNs);
+		CollectAllSTNsAsVector(ptrarrAllSTNs);
 		
 		map<size_t, size_t> mapVariableIndexes;
 		for(i = 0; i < ptrarrAllSTNs.size(); i++)
@@ -4094,7 +4192,7 @@ void daeModel::GetModelArrays(vector<daeModelArray_t*>& ptrarrModelArrays)
 {
 	ptrarrModelArrays.clear();
 	for(size_t i = 0; i < m_ptrarrComponentArrays.size(); i++)
-		ptrarrModelArrays.push_back(m_ptrarrComponentArrays[i]);
+        ptrarrModelArrays.push_back(m_ptrarrComponentArrays[i]);
 }
 
 void daeModel::GetEquationExecutionInfos(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)

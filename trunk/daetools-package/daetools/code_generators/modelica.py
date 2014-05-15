@@ -501,10 +501,14 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         sSTNs.extend(self._processSTNs(data['STNs'], indent, sVariables))
 
         # OnConditionActions
-        sOnConditionActions.extend(self._processOnConditionActions(data['OnConditionActions'], indent))
+        #sOnConditionActions.extend(self._processOnConditionActions(data['OnConditionActions'], indent))
+        if len(data['OnConditionActions']) > 0:
+            raise RuntimeError('OnConditionActions as a part of a model are not supported for Modelica code generator')
 
         # OnEventActions
-        sOnEventActions.extend(self._processOnEventActions(data['OnEventActions'], indent))
+        #sOnEventActions.extend(self._processOnEventActions(data['OnEventActions'], indent))
+        if len(data['OnEventActions']) > 0:
+            raise RuntimeError('OnEventActions as a part of a model are not supported for Modelica code generator')
 
         # Components
         for component in data['Components']:
@@ -539,11 +543,12 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         return result
 
     def _processOnConditionActions(self, on_condition_actions):
-        pass
+        if len(OnEventActions > 0):
+            raise RuntimeError('OnConditionActions are not supported for Modelica code generator')
     
     def _processOnEventActions(self, OnEventActions):
         if len(OnEventActions > 0):
-            raise RuntimeError()
+            raise RuntimeError('OnEventActions are not supported for Modelica code generator')
         
     def _processEquations(self, Equations, indent):
         sEquations = []

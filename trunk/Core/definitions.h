@@ -62,7 +62,7 @@ namespace dae
 using std::string;
 using std::map;
 
-const string daeAuthorInfo  =	"Dragan Nikolic, 2011 DAE Tools project, dnikolic at daetools.com";
+const string daeAuthorInfo  =	"Dragan Nikolic, 2014 DAE Tools project, dnikolic at daetools.com";
 const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute it and/or modify "
 								"it under the terms of the GNU General Public License version 3 "
 								"as published by the Free Software Foundation. \n\n"

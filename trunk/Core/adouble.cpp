@@ -688,69 +688,156 @@ const adouble atan(const adouble &a)
 
 const adouble sinh(const adouble& a) 
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eSinh,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
 
-//    if (a.getValue() < 0.0) 
-//	{
-//        adouble temp = exp(a);
-//        return  0.5*(temp - 1.0/temp);
-//    }
-//	else 
-//	{
-//        adouble temp = exp(-a);
-//        return 0.5*(1.0/temp - temp);
-//    }
+    if(a.m_dValue < 0.0)
+	{
+        tmp = exp(a);
+        return 0.5*(tmp - 1.0/tmp);
+    }
+	else
+	{
+        tmp = exp(-a);
+        return 0.5*(1.0/tmp - tmp);
+    }
 }
 
 const adouble cosh(const adouble& a) 
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eCosh,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
 
-//    adouble temp = (a.getValue() < 0.0) ? exp(a) : exp(-a);
-//    return 0.5*(temp + 1.0/temp);
+    tmp = (a.m_dValue < 0.0) ? exp(a) : exp(-a);
+    return 0.5*(tmp + 1.0/tmp);
 }
 
 const adouble tanh(const adouble& a)
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eTanh,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
 
-//    if (a.getValue() < 0.0) 
-//	{
-//        adouble temp = exp(2.0*a);
-//        return (temp - 1.0)/(temp + 1.0);
-//    }
-//	else
-//	{
-//        adouble temp = exp((-2.0)*a);
-//        return (1.0 - temp)/(temp + 1.0);
-//    }
+    if(a.m_dValue < 0.0)
+	{
+        tmp = exp(2.0*a);
+        return (tmp - 1.0)/(tmp + 1.0);
+    }
+	else
+	{
+        tmp = exp((-2.0)*a);
+        return (1.0 - tmp)/(tmp + 1.0);
+    }
 }
 
 const adouble asinh(const adouble &a)
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eArcSinh,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
+
+    tmp.m_dValue = ::asinh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / ::sqrt(a.m_dValue*a.m_dValue + 1);
+
+    return tmp;
 }
 
 const adouble acosh(const adouble &a)
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eArcCosh,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
+
+    tmp.m_dValue = ::acosh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / ::sqrt(a.m_dValue*a.m_dValue - 1);
+
+    return tmp;
 }
 
 const adouble atanh(const adouble &a)
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eArcTanh,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
+
+    tmp.m_dValue = ::atanh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / (1 - a.m_dValue*a.m_dValue);
+
+    return tmp;
 }
 
 const adouble atan2(const adouble &a, const adouble &b)
 {
-	daeDeclareAndThrowException(exNotImplemented);
-	return adouble();
+    adouble tmp;
+    if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+        tmp.node = adNodePtr(new adBinaryNode( eArcTan2,
+		                                       CLONE_NODE(a.node, a.m_dValue),
+		                                       CLONE_NODE(b.node, b.m_dValue) ));
+	    return tmp;
+	}
+
+    tmp.m_dValue = ::atan2(a.m_dValue, b.m_dValue);
+    double tmp2 = a.m_dValue*a.m_dValue;
+    double tmp3 = b.m_dValue*b.m_dValue;
+    double tmp4 = tmp3 / (tmp2 + tmp3);
+    if(tmp4 != 0)
+        tmp.m_dDeriv = (a.m_dDeriv*b.m_dValue - a.m_dValue*b.m_dDeriv) / tmp3*tmp4;
+    else
+        tmp.m_dDeriv = 0.0;
+
+    return tmp;
+}
+
+const adouble erf(const adouble &a)
+{
+    adouble tmp;
+	if(a.getGatherInfo())
+	{
+		tmp.m_bGatherInfo = true;
+		tmp.node = adNodePtr(new adUnaryNode( eErf,
+		                                      CLONE_NODE(a.node, a.m_dValue) ));
+	    return tmp;
+	}
+
+    tmp.m_dValue = ::erf(a.m_dValue);
+    double pi = ::cos(-1);
+    tmp.m_dDeriv = a.m_dDeriv * (2.0 / ::sqrt(pi)) * ::exp(-a.m_dValue*a.m_dValue);
+
+    return tmp;
 }
 
 // ceil is non-differentiable: should I remove it?

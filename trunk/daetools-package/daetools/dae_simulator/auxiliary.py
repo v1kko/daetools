@@ -21,6 +21,7 @@ from daetools.pyDAE import *
 from daetools.pyDAE.logs import daePythonStdOutLog 
 from daetools.pyDAE.data_reporters import daePlotDataReporter, daeMatlabMATFileDataReporter 
 
+# These integers are used by the simulation loader too
 (laSundialsLU, laSuperLU, laSuperLU_MT) = list(range(0, 3))
 (laAmesos_Klu, laAmesos_Superlu, laAmesos_Umfpack, laAmesos_Lapack, laAztecOO) = list(range(3, 8))
 (laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = list(range(8, 15))
@@ -37,7 +38,7 @@ def getAvailableNLPSolvers():
     
     try:
         from daetools.solvers.ipopt import pyIPOPT
-        available_nlp_solvers.append(("IPOPT NLP", nlpIPOPT))
+        available_nlp_solvers.append(("IPOPT", nlpIPOPT, "NLP"))
         if 'daetools.solvers.ipopt' in sys.modules:
             del sys.modules['daetools.solvers.ipopt']
     except Exception as e:
@@ -45,7 +46,7 @@ def getAvailableNLPSolvers():
     
     try:
         from daetools.solvers.nlopt import pyNLOPT
-        available_nlp_solvers.append(("NLOPT NLP", nlpNLOPT))
+        available_nlp_solvers.append(("NLOPT", nlpNLOPT, "NLP"))
         if 'daetools.solvers.nlopt' in sys.modules:
             del sys.modules['daetools.solvers.nlopt']
     except Exception as e:
@@ -53,7 +54,7 @@ def getAvailableNLPSolvers():
     
     try:
         from daetools.solvers.bonmin import pyBONMIN
-        available_nlp_solvers.append(("BONMIN MINLP", nlpBONMIN))
+        available_nlp_solvers.append(("BONMIN", nlpBONMIN, "MINLP"))
         if 'daetools.solvers.bonmin' in sys.modules:
             del sys.modules['daetools.solvers.bonmin']
     except Exception as e:
@@ -64,10 +65,10 @@ def getAvailableNLPSolvers():
 def getAvailableLASolvers():
     available_la_solvers = []
     
-    available_la_solvers.append(("Sundials LU (dense, sequential, direct)", laSundialsLU))
+    available_la_solvers.append(("Sundials LU", laSundialsLU, "dense, sequential, direct"))
     try:
         from daetools.solvers.superlu import pySuperLU
-        available_la_solvers.append(("SuperLU (sparse, sequential, direct)", laSuperLU))
+        available_la_solvers.append(("SuperLU", laSuperLU, "sparse, sequential, direct"))
         if 'daetools.solvers.superlu' in sys.modules:
             del sys.modules['daetools.solvers.superlu']
     except Exception as e:
@@ -75,7 +76,7 @@ def getAvailableLASolvers():
 
     try:
         from daetools.solvers.superlu_mt import pySuperLU_MT
-        available_la_solvers.append(("SuperLU_MT (sparse, pthreads, direct)", laSuperLU_MT))
+        available_la_solvers.append(("SuperLU_MT", laSuperLU_MT, "sparse, pthreads, direct"))
         if 'daetools.solvers.superlu_mt' in sys.modules:
             del sys.modules['daetools.solvers.superlu_mt']
     except Exception as e:
@@ -85,15 +86,15 @@ def getAvailableLASolvers():
         from daetools.solvers.trilinos import pyTrilinos
         suppSolvers = pyTrilinos.daeTrilinosSupportedSolvers()
         if 'Amesos_Klu' in suppSolvers:
-            available_la_solvers.append(("Trilinos Amesos - KLU (sparse, sequential, direct)", laAmesos_Klu))
+            available_la_solvers.append(("Trilinos Amesos - KLU", laAmesos_Klu, "sparse, sequential, direct"))
         if 'Amesos_Superlu' in suppSolvers:
-            available_la_solvers.append(("Trilinos Amesos - SuperLU (sparse, sequential, direct)", laAmesos_Superlu))
+            available_la_solvers.append(("Trilinos Amesos - SuperLU", laAmesos_Superlu, "sparse, sequential, direct"))
         if 'Amesos_Umfpack' in suppSolvers:
-            available_la_solvers.append(("Trilinos Amesos - Umfpack (sparse, sequential, direct)", laAmesos_Umfpack))
+            available_la_solvers.append(("Trilinos Amesos - Umfpack", laAmesos_Umfpack, "sparse, sequential, direct"))
         if 'Amesos_Lapack' in suppSolvers:
-            available_la_solvers.append(("Trilinos Amesos - Lapack (dense, sequential, direct)", laAmesos_Lapack))
+            available_la_solvers.append(("Trilinos Amesos - Lapack", laAmesos_Lapack, "dense, sequential, direct"))
         if 'AztecOO' in suppSolvers:
-            available_la_solvers.append(("Trilinos AztecOO - Krylov (sparse, sequential, iterative)", laAztecOO))
+            available_la_solvers.append(("Trilinos AztecOO - Krylov", laAztecOO, "sparse, sequential, iterative"))
         if 'daetools.solvers.trilinos' in sys.modules:
             del sys.modules['daetools.solvers.trilinos']
     except Exception as e:
@@ -101,7 +102,7 @@ def getAvailableLASolvers():
 
     try:
         from daetools.solvers.intel_pardiso import pyIntelPardiso
-        available_la_solvers.append(("Intel Pardiso (sparse, OpenMP, direct)", laIntelPardiso))
+        available_la_solvers.append(("Intel Pardiso", laIntelPardiso, "sparse, OpenMP, direct"))
         if 'daetools.solvers.intel_pardiso' in sys.modules:
             del sys.modules['daetools.solvers.intel_pardiso']
     except Exception as e:
@@ -112,37 +113,44 @@ def getAvailableLASolvers():
 def getAvailableDataReporters():
     available_datareporters = []
     
-    available_datareporters.append(("TCPIPDataReporter", TCPIPDataReporter))
-    available_datareporters.append(("NoOpDataReporter", NoOpDataReporter))
-    available_datareporters.append(("DelegateDataReporter", DelegateDataReporter))
-    available_datareporters.append(("TEXTFileDataReporter", TEXTFileDataReporter))
-    available_datareporters.append(("PlotDataReporter", PlotDataReporter))
-    available_datareporters.append(("MatlabMATFileDataReporter", MatlabMATFileDataReporter))
-    available_datareporters.append(("BlackHoleDataReporter", BlackHoleDataReporter))
+    available_datareporters.append(("TCPIPDataReporter", TCPIPDataReporter, ""))
+    available_datareporters.append(("NoOpDataReporter", NoOpDataReporter, ""))
+    available_datareporters.append(("DelegateDataReporter", DelegateDataReporter, ""))
+    available_datareporters.append(("TEXTFileDataReporter", TEXTFileDataReporter, ""))
+    available_datareporters.append(("PlotDataReporter", PlotDataReporter, ""))
+    available_datareporters.append(("MatlabMATFileDataReporter", MatlabMATFileDataReporter, ""))
+    available_datareporters.append(("BlackHoleDataReporter", BlackHoleDataReporter, ""))
     
     return available_datareporters
     
 def createDataReporter(datareporterIndex):
     datareporter = None
-    
-    if datareporterIndex == BlackHoleDataReporter:
+
+    # Send all the reported data to the TCP/IP data receiver via TCP/IP
+    if datareporterIndex == TCPIPDataReporter:
+        datareporter = daeTCPIPDataReporter()
+
+    # Does nothing and does not keep the reported data
+    elif datareporterIndex == BlackHoleDataReporter:
         datareporter = daeBlackHoleDataReporter()
 
+    # Does nothing but keeps the reported data
     elif datareporterIndex == NoOpDataReporter:
         datareporter = daeNoOpDataReporter()
 
+    # Delegate all calls to the containing data reporters
     elif datareporterIndex == DelegateDataReporter:
         datareporter = daeDelegateDataReporter()
 
+    # Saves the reported data to a plain text file
     elif datareporterIndex == TEXTFileDataReporter:
         datareporter = daeTEXTFileDataReporter()
 
-    elif datareporterIndex == TCPIPDataReporter:
-        datareporter = daeTCPIPDataReporter()
-
+    # Plots the reported data using matplotlib
     elif datareporterIndex == PlotDataReporter:
         datareporter = daePlotDataReporter()
 
+    # Saves the reported data to a .mat file
     elif datareporterIndex == MatlabMATFileDataReporter:
         datareporter = daeMatlabMATFileDataReporter()
      
@@ -154,12 +162,12 @@ def createDataReporter(datareporterIndex):
 def getAvailableLogs():
     available_logs = []
     
-    available_logs.append(("TCPIPLog", TCPIPLog))
-    available_logs.append(("PythonStdOutLog", PythonStdOutLog))
-    available_logs.append(("StdOutLog", StdOutLog))
-    available_logs.append(("BaseLog", BaseLog))
-    available_logs.append(("FileLog", FileLog))
-    available_logs.append(("DelegateLog", DelegateLog))
+    available_logs.append(("TCPIPLog", TCPIPLog, ""))
+    available_logs.append(("PythonStdOutLog", PythonStdOutLog, ""))
+    available_logs.append(("StdOutLog", StdOutLog, ""))
+    available_logs.append(("BaseLog", BaseLog, ""))
+    available_logs.append(("FileLog", FileLog, ""))
+    available_logs.append(("DelegateLog", DelegateLog, ""))
     
     return available_logs
     

@@ -667,33 +667,17 @@ const quantity atanh(const quantity &q)
 #endif
 }
 
-/*
-const quantity asinh(const quantity &q)
-{
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: asinh(%1%)") % q).str());
-	return quantity(::asinh(q.getValue()), unit());
-}
-
-const quantity acosh(const quantity &q)
-{
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: acosh(%1%)") % q).str());
-	return quantity(::acosh(q.getValue()), unit());
-}
-
-const quantity atanh(const quantity &q)
-{
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: atanh(%1%)") % q).str());
-	return quantity(::atanh(q.getValue()), unit());
-}
-*/
 const quantity atan2(const quantity &a, const quantity &b)
 {
 	if(a.getUnits() != unit() || b.getUnits() != unit())	
 		throw units_error((boost::format("Invalid units in function: atan2(%1%, %2%)") % a % b).str());
-	return quantity(::atan2(a.getValue(), b.getValue()), unit());
+
+    return quantity(::atan2(a.getValue(), b.getValue()), unit());
+}
+
+const quantity erf(const quantity &q)
+{
+    return quantity(::erf(q.getValue()), q.getUnits());
 }
 
 const quantity ceil(const quantity &q)

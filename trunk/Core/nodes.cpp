@@ -2090,6 +2090,20 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
 		return ceil(node->Evaluate(pExecutionContext));
 	case eFloor:
 		return floor(node->Evaluate(pExecutionContext));
+    case eSinh:
+		return sinh(node->Evaluate(pExecutionContext));
+    case eCosh:
+		return cosh(node->Evaluate(pExecutionContext));
+    case eTanh:
+		return tanh(node->Evaluate(pExecutionContext));
+    case eArcSinh:
+		return asinh(node->Evaluate(pExecutionContext));
+    case eArcCosh:
+		return acosh(node->Evaluate(pExecutionContext));
+    case eArcTanh:
+		return atanh(node->Evaluate(pExecutionContext));
+    case eErf:
+		return erf(node->Evaluate(pExecutionContext));
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();
@@ -2128,6 +2142,20 @@ const quantity adUnaryNode::GetQuantity(void) const
 		return ceil(node->GetQuantity());
 	case eFloor:
 		return floor(node->GetQuantity());
+    case eSinh:
+		return sinh(node->GetQuantity());
+    case eCosh:
+		return cosh(node->GetQuantity());
+    case eTanh:
+		return tanh(node->GetQuantity());
+    case eArcSinh:
+		return asinh(node->GetQuantity());
+    case eArcCosh:
+		return acosh(node->GetQuantity());
+    case eArcTanh:
+		return atanh(node->GetQuantity());
+    case eErf:
+		return erf(node->GetQuantity());
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return quantity();
@@ -2279,6 +2307,13 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		node->Export(strContent, eLanguage, c);
 		strContent += ")";
 		break;
+    case eSinh:
+    case eCosh:
+    case eTanh:
+    case eArcSinh:
+    case eArcCosh:
+    case eArcTanh:
+    case eErf:
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 	}
@@ -2458,6 +2493,13 @@ string adUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 		strResult += " \\rfloor ";
 		strResult += "} ";
 		break;
+    case eSinh:
+    case eCosh:
+    case eTanh:
+    case eArcSinh:
+    case eArcCosh:
+    case eArcTanh:
+    case eErf:
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
 	}
@@ -2537,6 +2579,13 @@ void adUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsCon
 	case eFloor:
 		strName  = "floor";
 		break;
+    case eSinh:
+    case eCosh:
+    case eTanh:
+    case eArcSinh:
+    case eArcCosh:
+    case eArcTanh:
+    case eErf:
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
 	}
@@ -2749,6 +2798,13 @@ void adUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSave
 		strValue = "&#8969;";
 		mrow->AddTag(strName, strValue);
 		break;
+    case eSinh:
+    case eCosh:
+    case eTanh:
+    case eArcSinh:
+    case eArcCosh:
+    case eArcTanh:
+    case eErf:
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
 	}
@@ -2852,6 +2908,8 @@ adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) con
 		return min(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
 	case eMax:
 		return max(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
+    case eArcTan2:
+        return atan2(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
 	default:
 		daeDeclareAndThrowException(exInvalidPointer);
 		return adouble();
@@ -2876,6 +2934,8 @@ const quantity adBinaryNode::GetQuantity(void) const
 		return min(left->GetQuantity(), right->GetQuantity());
 	case eMax:
 		return max(left->GetQuantity(), right->GetQuantity());
+    case eArcTan2:
+        return atan2(left->GetQuantity(), right->GetQuantity());
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return quantity();
@@ -2984,6 +3044,7 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 		strContent += strRight;
 		strContent += ")";
 		break;
+    case eArcTan2:
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 	}
@@ -3133,6 +3194,7 @@ string adBinaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 		strResult += strRight;
 		strResult += ")";
 		break;
+    case eArcTan2:
 	default:
 		daeDeclareAndThrowException(exInvalidPointer);
 	}
@@ -3302,11 +3364,14 @@ void adBinaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSav
 
 	case eMin:
 	case eMax:
+    case eArcTan2:
 		if(eFunction == eMin)
 			strValue = "min";
 		else if(eFunction == eMax)
 			strValue = "max";
-		
+        else if(eFunction == eArcTan2)
+			strValue = "atan2";
+
 		strName = "mi";
 		mrowout->AddTag(strName, strValue);
 
@@ -3392,7 +3457,6 @@ bool adBinaryNode::IsLinear(void) const
 				return true;
 			else 
 				return false;
-			break;
 		case eMulti:
 		// If LEFT is linear (can be a function of variables) AND RIGHT is linear and not a function of variables
 		// or if LEFT is linear and not a function of of variables AND RIGHT is linear (can be a function of variables)
@@ -3403,7 +3467,6 @@ bool adBinaryNode::IsLinear(void) const
 				return true;
 			else 
 				return false;
-			break;
 		case eDivide:
 		// If LEFT is linear function and RIGHT is linear
 		// Cases: lf / c
@@ -3411,7 +3474,8 @@ bool adBinaryNode::IsLinear(void) const
 				return true;
 			else 
 				return false;
-			break;
+        case eArcTan2:
+            return false;
 		default:
 			return false;
 		}

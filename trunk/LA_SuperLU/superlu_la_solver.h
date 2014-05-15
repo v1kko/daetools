@@ -36,6 +36,15 @@ namespace dae
 {
 namespace solver
 {
+#ifdef daeSuperLU
+namespace superlu
+{
+#endif
+#ifdef daeSuperLU_MT
+namespace superlu_mt
+{
+#endif
+
 class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeIDALASolver_t
 {
 	typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;
@@ -159,6 +168,13 @@ public:
 	
 	double m_solve, m_factorize;
 };
+
+#ifdef daeSuperLU
+}
+#endif
+#ifdef daeSuperLU_MT
+}
+#endif
 
 }
 }

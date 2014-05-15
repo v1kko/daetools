@@ -119,9 +119,9 @@ class modTutorial(daeModel):
         print('    VariableName         =', self.cdr1.VariableName)
         print('    VariableDescription  =', self.cdr1.VariableDescription)
         print('    Multiplicity         =', self.cdr1.Multiplicity)
-        print('    ElementMatrix        =', self.cdr1.Alocal)
-        print('    ElementMatrix_dt     =', self.cdr1.Mlocal)
-        print('    ElementRHS           =', self.cdr1.Flocal)
+        print('    ElementMatrix        =', str(self.cdr1.Alocal))
+        print('    ElementMatrix_dt     =', str(self.cdr1.Mlocal))
+        print('    ElementRHS           =', str(self.cdr1.Flocal))
         #print('    FunctionsDirichletBC =', self.cdr1.FunctionsDirichletBC)
         #print('    FunctionsNeumannBC   =', self.cdr1.FunctionsNeumannBC)
         equations = [self.cdr1]
@@ -156,6 +156,8 @@ class simTutorial(daeSimulation):
         #print list(dof_to_boundary)
         
         # dofIndexesMap relates global DOF indexes to points within daetools variables
+
+        # Todo: use a function from daeSimulation
         dofIndexesMap = {}
         for variable in self.m.fe.Variables:
             if variable.Name == 'U':

@@ -60,18 +60,19 @@ class daeExceptionDialog(QtGui.QDialog):
         self.setWindowTitle('Exception raised')
         
 class daeSimulationExplorer(QtGui.QDialog):
-    def __init__(self, qt_app, **kwargs):
+    def __init__(self, qt_app, simulation, **kwargs):
         QtGui.QDialog.__init__(self)
         self._ui = Ui_SimulationExplorer()
         self._ui.setupUi(self)
 
         self._qt_app                      = qt_app
-        self._simulation                  = kwargs.get('simulation',                 None)
+        self._simulation                  = simulation
+        #self._simulation                  = kwargs.get('simulation',                 None)
         self._optimization                = kwargs.get('optimization',               None)
         self._datareporter                = kwargs.get('datareporter',               None)
         self._lasolver                    = kwargs.get('lasolver',                   None)
         self._nlpsolver                   = kwargs.get('nlpsolver',                  None)
-        #self._log                         = kwargs.get('log',                        None)
+        self._log                         = kwargs.get('log',                        None)
         #self._nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
         #self._lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
         #self._run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
@@ -120,14 +121,18 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._available_logs           = auxiliary.getAvailableLogs()
 
         self._ui.daesolverComboBox.addItem("Sundials IDAS")
-        for la in self._available_la_solvers:
-            self._ui.lasolverComboBox.addItem(la[0], userData = la[1])#QtCore.QVariant(la[1]))
-        for nlp in self._available_nlp_solvers:
+        for i, la in enumerate(self._available_la_solvers):
+            self._ui.lasolverComboBox.addItem(la[0], userData = la[1]) #QtCore.QVariant(la[1]))
+            self._ui.lasolverComboBox.setItemData(i, la[2], QtCore.Qt.ToolTipRole)
+        for i, nlp in enumerate(self._available_nlp_solvers):
             self._ui.minlpsolverComboBox.addItem(nlp[0], userData = nlp[1]) #QtCore.QVariant(nlp[1]))
-        for dr in self._available_data_reporters:
+            self._ui.minlpsolverComboBox.setItemData(i, nlp[2], QtCore.Qt.ToolTipRole)
+        for i, dr in enumerate(self._available_data_reporters):
             self._ui.datareporterComboBox.addItem(dr[0], userData = dr[1]) #QtCore.QVariant(dr[1]))
-        for log in self._available_logs:
+            self._ui.datareporterComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
+        for i, log in enumerate(self._available_logs):
             self._ui.logComboBox.addItem(log[0], userData = log[1]) #QtCore.QVariant(log[1]))
+            self._ui.logComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
         
         # DAE Solvers
         self._ui.daesolverComboBox.setEnabled(False)
@@ -367,6 +372,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         if verbose:
             print('Reinitializing the simulation...')
         self._simulation.Reinitialize()
+        self._simulation.ReportData(self._simulation.CurrentTime)
         if verbose:
             print('Done!')
         

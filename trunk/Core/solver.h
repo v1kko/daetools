@@ -42,9 +42,7 @@ public:
 	virtual ~daeLASolver_t(void){}
 
 public:
-	virtual bool		Initialize(void)									= 0;
-	virtual std::string GetName(void) const									= 0;
-//	virtual void Solve(const daeMatrix& A, const daeArray& B, daeArray& x)	= 0;
+	virtual std::string GetName(void) const	= 0;
 };
 
 /*********************************************************************************************
@@ -91,7 +89,8 @@ public:
 	virtual void						Reset(void)													= 0;
 	virtual daeMatrix<real_t>&			GetSensitivities(void)										= 0;
 	virtual std::string					GetName(void) const											= 0;
-    
+    virtual void                        SetLASolver(daeLASolver_t* pLASolver)                       = 0;
+
     virtual void                        OnCalculateResiduals()                                      = 0;
     virtual void                        OnCalculateConditions()                                     = 0;
     virtual void                        OnCalculateJacobian()                                       = 0;

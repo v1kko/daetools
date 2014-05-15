@@ -260,6 +260,7 @@ const adouble ad_asinh(const adouble &a);
 const adouble ad_acosh(const adouble &a);
 const adouble ad_atanh(const adouble &a);
 const adouble ad_atan2(const adouble &a, const adouble &b);
+const adouble ad_erf(const adouble &a);
 
 const adouble ad_pow1(const adouble &a, real_t v);
 const adouble ad_pow2(const adouble &a, const adouble &b);

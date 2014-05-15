@@ -45,6 +45,24 @@ public:
 			it->CreateOverallIndex_BlockIndex_VariableNameMap(mapOverallIndex_BlockIndex_VariableName, mapOverallIndex_BlockIndex);
     }
 
+    virtual void CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->CollectAllDomains(mapDomains);
+    }
+
+    virtual void CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->CollectAllParameters(mapParameters);
+    }
+
+	virtual void CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->CollectAllVariables(mapVariables);
+    }
+
 protected:
 	virtual void InitializeParameters(void)
 	{

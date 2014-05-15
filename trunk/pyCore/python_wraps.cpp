@@ -1194,6 +1194,10 @@ const adouble ad_atan2(const adouble &a, const adouble &b)
 {
 	return atan2(a, b);
 }
+const adouble ad_erf(const adouble &a)
+{
+	return erf(a);
+}
 
 const adouble ad_pow1(const adouble &a, real_t v)
 {

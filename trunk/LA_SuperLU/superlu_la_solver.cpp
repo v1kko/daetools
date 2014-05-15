@@ -12,6 +12,29 @@ namespace dae
 {
 namespace solver
 {
+#ifdef daeSuperLU
+daeIDALASolver_t* daeCreateSuperLUSolver(void)
+{
+	return new superlu::daeSuperLUSolver;
+}
+#endif
+
+#ifdef daeSuperLU_MT
+daeIDALASolver_t* daeCreateSuperLU_MTSolver(void)
+{
+	return new superlu_mt::daeSuperLUSolver;
+}
+#endif
+
+#ifdef daeSuperLU
+namespace superlu
+{
+#endif
+#ifdef daeSuperLU_MT
+namespace superlu_mt
+{
+#endif
+
 int init_la(IDAMem ida_mem);
 int setup_la(IDAMem ida_mem,
 			  N_Vector	vectorVariables, 
@@ -28,16 +51,6 @@ int solve_la(IDAMem ida_mem,
 			  N_Vector	vectorResiduals);
 int free_la(IDAMem ida_mem);
 	
-daeIDALASolver_t* daeCreateSuperLUSolver(void)
-{
-	return new daeSuperLUSolver;
-}
-
-daeIDALASolver_t* daeCreateSuperLU_MTSolver(void)
-{
-	return new daeSuperLUSolver;
-}
-
 daeSuperLUSolver::daeSuperLUSolver(void)
 {
 // Set OpenBLAS to use only one thread (OpenBLAS can't decide based on the matrix size)
@@ -1052,6 +1065,13 @@ int free_la(IDAMem ida_mem)
 
 	return ret;
 }
+
+#ifdef daeSuperLU
+}
+#endif
+#ifdef daeSuperLU_MT
+}
+#endif
 
 
 }

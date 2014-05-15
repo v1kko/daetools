@@ -10,10 +10,12 @@ using namespace boost::python;
 using namespace dae::solver;
 
 #ifdef daeSuperLU
+using namespace dae::solver::superlu;
 BOOST_PYTHON_MODULE(pySuperLU)
 #endif
 
 #ifdef daeSuperLU_MT
+using namespace dae::solver::superlu_mt;
 BOOST_PYTHON_MODULE(pySuperLU_MT)
 #endif	
 
@@ -120,6 +122,12 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 	
 #endif
 	
+#ifdef daeSuperLU
     def("daeCreateSuperLUSolver", daeCreateSuperLUSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateSuperLUSolver);
+#endif
+
+#ifdef daeSuperLU_MT
+    def("daeCreateSuperLUSolver", daeCreateSuperLU_MTSolver, return_value_policy<manage_new_object>(), DOCSTR_daeCreateSuperLUSolver);
+#endif
 
 }

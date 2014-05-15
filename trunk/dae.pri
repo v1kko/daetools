@@ -1,6 +1,6 @@
 #************************************************************************************
 #                 DAE Tools Project: www.daetools.com
-#                 Copyright (C) Dragan Nikolic, 2010
+#                 Copyright (C) Dragan Nikolic, 2014
 #************************************************************************************
 # DAE Tools is free software; you can redistribute it and/or modify it under the 
 # terms of the GNU General Public License version 3 as published by the Free Software
@@ -11,7 +11,7 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 3
+DAE_TOOLS_MINOR = 4
 DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)

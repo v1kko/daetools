@@ -830,6 +830,27 @@ const std::vector<daeState*>& daeSTN::States() const
     return m_ptrarrStates;
 }
 
+void daeSTN::CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const
+{
+	daeSTN* pSTN;
+    daeState* pState;
+
+    for(size_t i = 0; i < m_ptrarrStates.size(); i++)
+    {
+        pState = m_ptrarrStates[i];
+
+        for(size_t k = 0; k < pState->m_ptrarrSTNs.size(); k++)
+        {
+            pSTN = pState->m_ptrarrSTNs[k];
+
+            if(pSTN->GetType() == eSTN)
+                mapSTNs[pSTN->GetCanonicalName()] = pSTN;
+
+            pSTN->CollectAllSTNs(mapSTNs);
+        }
+    }
+}
+
 void daeSTN::SetParentState(daeState* pParentState)
 {
 	if(!pParentState)

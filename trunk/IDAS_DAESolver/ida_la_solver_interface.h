@@ -16,7 +16,7 @@ enum daeeIDALASolverType
 	eThirdParty
 };
 
-class daeIDALASolver_t
+class daeIDALASolver_t : public daeLASolver_t
 {
 public:
 	virtual ~daeIDALASolver_t(){}

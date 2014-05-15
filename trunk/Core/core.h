@@ -139,7 +139,14 @@ enum daeeUnaryFunctions
 	eArcCos,
 	eArcTan, 
 	eCeil,
-	eFloor
+	eFloor,
+    eSinh,
+	eCosh,
+	eTanh,
+	eArcSinh,
+	eArcCosh,
+	eArcTanh,
+    eErf
 };
 
 enum daeeBinaryFunctions
@@ -151,7 +158,8 @@ enum daeeBinaryFunctions
 	eDivide,
 	ePower,
 	eMin,
-	eMax
+	eMax,
+    eArcTan2
 };
 
 enum daeeSpecialUnaryFunctions
@@ -366,6 +374,9 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, real_t value)							= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value)				= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value)	= 0;
+    virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, real_t value)                                                    = 0;
+    virtual void	SetValues(real_t values)                                                                                                = 0;
+    virtual void	SetValues(const std::vector<real_t>& values)                                                                            = 0;
 
 	virtual real_t	GetValue(void)																								= 0;
 	virtual real_t	GetValue(size_t nD1)																						= 0;
@@ -376,6 +387,7 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)	= 0;
+    virtual real_t  GetValue(const std::vector<size_t>& narrDomainIndexes)                                                      = 0;
 
 	virtual void	SetValue(const quantity& value)																									= 0;
 	virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
@@ -386,6 +398,9 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
+    virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, const quantity& value)                                                   = 0;
+    virtual void	SetValues(const quantity& values)                                                                                               = 0;
+    virtual void	SetValues(const std::vector<quantity>& values)                                                                                  = 0;
 
 	virtual quantity	GetQuantity(void)																							= 0;
 	virtual quantity	GetQuantity(size_t nD1)																						= 0;
@@ -396,7 +411,8 @@ public:
 	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
 	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
 	virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)	= 0;
-};	
+    virtual quantity    GetQuantity(const std::vector<size_t>& narrDomainIndexes)                                                   = 0;
+};
 
 /******************************************************************
 	daeVariable_t
@@ -626,13 +642,13 @@ public:
 	   When outlet port's SendEvent() is called it calls it's Notify() function.   
 	   Notify() function calls Update() function in the inlet port which then calls Update() in OnEventActions.
 																	  
-													  <observer> -------< Notify(data) ------------ <subject>
+													  <observer> <------- Notify(data) <----------- <subject>
 														  |                                      [EventPort: out]
 														  |
 														  | observer.Update(data) calls Notify(data)
 														  |
 														  v
-		<observer>-----------< Notify(data) ----------<subject>                         
+		<observer> <---------- Notify(data) <---------<subject>
 	 [OnEventActions]                              [EventPort: in]                     
 			|
 			| Update(data) calls Execute(data)
@@ -747,6 +763,10 @@ public:
 	virtual daePort_t* GetPort(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)	= 0;
 	
 	virtual void CleanUpSetupData(void) = 0;
+
+    virtual void    CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const          = 0;
+    virtual void    CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const = 0;
+	virtual void    CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const    = 0;
 };
 
 /******************************************************************
@@ -768,6 +788,12 @@ public:
 	
     virtual void CleanUpSetupData(void)                        = 0;
     virtual void InitializeModels(const std::string& jsonInit) = 0;
+
+    virtual void    CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains)          = 0;
+    virtual void    CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) = 0;
+	virtual void    CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables)    = 0;
+    virtual void    CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs)                   = 0;
+	virtual void    CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts)                = 0;
 };
 
 /*********************************************************************************************
@@ -957,7 +983,31 @@ struct daeModelInfo
 class daeModel_t : virtual public daeObject_t
 {
 public:
-	virtual void	GetModelInfo(daeModelInfo& mi) const														= 0;
+    virtual void	InitializeModel(const std::string& jsonInit)                                         = 0;
+
+    virtual void	InitializeStage1(void)																 = 0;
+	virtual void	InitializeStage2(void)																 = 0;
+	virtual void	InitializeStage3(daeLog_t* pLog)													 = 0;
+	virtual void	InitializeStage4(void)																 = 0;
+	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks) = 0;
+	
+	virtual void	CleanUpSetupData(void) = 0;
+
+	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
+	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;
+	
+	virtual void	StoreInitializationValues(const std::string& strFileName) const		= 0;
+	virtual void	LoadInitializationValues(const std::string& strFileName) const		= 0;
+
+	virtual void	SetReportingOn(bool bOn)								= 0;
+
+	virtual void	SaveModelReport(const string& strFileName) const		= 0;
+	virtual void	SaveRuntimeModelReport(const string& strFileName) const	= 0;
+	virtual bool	IsModelDynamic() const									= 0;
+    virtual daeeModelType GetModelType() const								= 0;
+
+    virtual void	GetModelInfo(daeModelInfo& mi) const														= 0;
+
 	virtual void	GetSTNs(std::vector<daeSTN_t*>& ptrarrSTNs)													= 0;
 	virtual void	GetPorts(std::vector<daePort_t*>& ptrarrPorts)												= 0;
 	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations)									= 0;
@@ -970,33 +1020,13 @@ public:
 	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays)								= 0;
 	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays)							= 0;
 
-    virtual void	InitializeModel(const std::string& jsonInit)                                                = 0;
+    virtual void    CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const          = 0;
+    virtual void    CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const = 0;
+	virtual void    CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const    = 0;
+    virtual void    CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const                   = 0;
+	virtual void    CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const                = 0;
 
-    virtual void	InitializeStage1(void)																		= 0;
-	virtual void	InitializeStage2(void)																		= 0;
-	virtual void	InitializeStage3(daeLog_t* pLog)															= 0;
-	virtual void	InitializeStage4(void)																		= 0;
-	virtual void	InitializeStage5(bool bDoBlockDecomposition, 
-									 std::vector<daeBlock_t*>& ptrarrBlocks) = 0;
-	
-	virtual void	CleanUpSetupData(void) = 0;
-
-	virtual daeeInitialConditionMode	GetInitialConditionMode(void) const						= 0;
-	virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode)	= 0;
-	
-//	virtual void	SetInitialConditions(real_t value)							= 0;
-
-	virtual void	StoreInitializationValues(const std::string& strFileName) const		= 0;
-	virtual void	LoadInitializationValues(const std::string& strFileName) const		= 0;
-
-	virtual void	SetReportingOn(bool bOn)								= 0;
-
-	virtual void	SaveModelReport(const string& strFileName) const		= 0;
-	virtual void	SaveRuntimeModelReport(const string& strFileName) const	= 0;
-	virtual bool	IsModelDynamic() const									= 0;
-    virtual daeeModelType GetModelType() const								= 0;
-
-	virtual daeDomain_t*		FindDomain(string& strCanonicalName)		= 0;
+    virtual daeDomain_t*		FindDomain(string& strCanonicalName)		= 0;
 	virtual daeParameter_t*		FindParameter(string& strCanonicalName)		= 0;
 	virtual daeVariable_t*		FindVariable(string& strCanonicalName)		= 0;
 	virtual daePort_t*			FindPort(string& strCanonicalName)			= 0;

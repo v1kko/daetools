@@ -249,6 +249,7 @@ const quantity asinh(const quantity &q);
 const quantity acosh(const quantity &q);
 const quantity atanh(const quantity &q);
 const quantity atan2(const quantity &a, const quantity &b);
+const quantity erf(const quantity &q);
 
 const quantity ceil(const quantity &q);
 const quantity floor(const quantity &q);

@@ -2565,19 +2565,6 @@ public:
 	virtual ~daeModel(void);
 
 public:
-	virtual void	GetModelInfo(daeModelInfo& mi) const;
-	virtual void	GetSTNs(std::vector<daeSTN_t*>& ptrarrSTNs);
-	virtual void	GetPorts(std::vector<daePort_t*>& ptrarrPorts);
-	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations);
-	virtual void	GetModels(std::vector<daeModel_t*>& ptrarrModels);
-	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
-	virtual void	GetVariables(std::vector<daeVariable_t*>& ptrarrVariables);
-	virtual void	GetParameters(std::vector<daeParameter_t*>& ptrarrParameters);
-	virtual void	GetPortConnections(std::vector<daePortConnection_t*>& ptrarrPortConnections);
-	virtual void	GetEventPortConnections(std::vector<daeEventPortConnection_t*>& ptrarrEventPortConnections);
-	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays);
-	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays);
-
     virtual void	InitializeModel(const std::string& jsonInit);
 
     virtual void	InitializeStage1(void);
@@ -2591,20 +2578,6 @@ public:
 
 	virtual void	SaveModelReport(const string& strFileName) const;
 	virtual void	SaveRuntimeModelReport(const string& strFileName) const;
-
-	virtual daeDomain_t*		FindDomain(string& strCanonicalName);
-	virtual daeParameter_t*		FindParameter(string& strCanonicalName);
-	virtual daeVariable_t*		FindVariable(string& strCanonicalName);
-	virtual daePort_t*			FindPort(string& strCanonicalName);
-	virtual daeModel_t*			FindModel(string& strCanonicalName);
-	virtual daeEventPort_t*		FindEventPort(string& strName);
-	virtual daeSTN_t*			FindSTN(string& strCanonicalName);
-	virtual daePortArray_t*		FindPortArray(string& strCanonicalName);
-	virtual daeModelArray_t*	FindModelArray(string& strCanonicalName);
-	
-	virtual daeObject_t*		FindObject(string& strName);
-	virtual daeObject_t*		FindObjectFromRelativeName(string& strRelativeName);
-	virtual daeObject_t*		FindObjectFromRelativeName(std::vector<string>& strarrNames);
 
 	virtual void	SetReportingOn(bool bOn);
 	
@@ -2620,7 +2593,41 @@ public:
 	
 	//boost::shared_ptr<daeExternalObject_t> LoadExternalObject(const string& strPath);
 
-public:	
+    virtual void	GetModelInfo(daeModelInfo& mi) const;
+
+	virtual void	GetSTNs(std::vector<daeSTN_t*>& ptrarrSTNs);
+	virtual void	GetPorts(std::vector<daePort_t*>& ptrarrPorts);
+	virtual void	GetEquations(std::vector<daeEquation_t*>& ptrarrEquations);
+	virtual void	GetModels(std::vector<daeModel_t*>& ptrarrModels);
+	virtual void	GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
+	virtual void	GetVariables(std::vector<daeVariable_t*>& ptrarrVariables);
+	virtual void	GetParameters(std::vector<daeParameter_t*>& ptrarrParameters);
+	virtual void	GetPortConnections(std::vector<daePortConnection_t*>& ptrarrPortConnections);
+	virtual void	GetEventPortConnections(std::vector<daeEventPortConnection_t*>& ptrarrEventPortConnections);
+	virtual void	GetPortArrays(std::vector<daePortArray_t*>& ptrarrPortArrays);
+	virtual void	GetModelArrays(std::vector<daeModelArray_t*>& ptrarrModelArrays);
+
+    virtual void	CollectAllDomains(std::map<dae::string, daeDomain_t*>& mapDomains) const;
+    virtual void	CollectAllParameters(std::map<dae::string, daeParameter_t*>& mapParameters) const;
+	virtual void	CollectAllVariables(std::map<dae::string, daeVariable_t*>& mapVariables) const;
+    virtual void	CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const;
+	virtual void	CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const;
+
+    virtual daeDomain_t*		FindDomain(string& strCanonicalName);
+	virtual daeParameter_t*		FindParameter(string& strCanonicalName);
+	virtual daeVariable_t*		FindVariable(string& strCanonicalName);
+	virtual daePort_t*			FindPort(string& strCanonicalName);
+	virtual daeModel_t*			FindModel(string& strCanonicalName);
+	virtual daeEventPort_t*		FindEventPort(string& strName);
+	virtual daeSTN_t*			FindSTN(string& strCanonicalName);
+	virtual daePortArray_t*		FindPortArray(string& strCanonicalName);
+	virtual daeModelArray_t*	FindModelArray(string& strCanonicalName);
+
+	virtual daeObject_t*		FindObject(string& strName);
+	virtual daeObject_t*		FindObjectFromRelativeName(string& strRelativeName);
+	virtual daeObject_t*		FindObjectFromRelativeName(std::vector<string>& strarrNames);
+
+public:
 	void Open(io::xmlTag_t* pTag);
 	void Save(io::xmlTag_t* pTag) const;
 	void OpenRuntime(io::xmlTag_t* pTag);
@@ -2680,7 +2687,7 @@ public:
     const std::vector<daeEventPortConnection*>& EventPortConnections() const;
     const std::vector<daePortArray*>& PortArrays() const;
 	const std::vector<daeModelArray*>& ModelArrays() const;
-	
+
 // Overridables		
 public:
 	virtual void DeclareEquations(void);
@@ -2780,7 +2787,7 @@ protected:
 	bool		FindObject(std::vector<string>& strarrHierarchy, daeObjectType& ObjectType);
 
 protected:
-	void		CollectAllSTNs(std::vector<daeSTN*>& ptrarrSTNs) const;
+	void		CollectAllSTNsAsVector(std::vector<daeSTN*>& ptrarrSTNs) const;
 	void		CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
 	void		CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const;
 	bool		DetectObject(string& strShortName, std::vector<size_t>& narrDomains, daeeObjectType& eType, daeObject_t** ppObject);
@@ -2892,7 +2899,7 @@ protected:
 	virtual void CreatePortConnectionEquations(void)                                                        						= 0;
 	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)                               					= 0;
 	virtual void PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext)                            				= 0;
-	virtual void CollectAllSTNs(std::vector<daeSTN*>& ptrarrSTNs) const																= 0;
+	virtual void CollectAllSTNsAsVector(std::vector<daeSTN*>& ptrarrSTNs) const         											= 0;
 	virtual void CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
 	virtual void CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
 	virtual void SetDefaultAbsoluteTolerances(void)                                                                                 = 0;
@@ -3134,7 +3141,9 @@ public:
 
 	daeState*		FindState(long nID);
 	daeState*		FindState(const string& strName);
-	
+
+    void CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const;
+
 protected:
 	virtual void	AddExpressionsToBlock(daeBlock* pBlock);
 

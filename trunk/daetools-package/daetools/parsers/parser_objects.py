@@ -868,7 +868,7 @@ class unit(object):
         us   = micro * s
         min  = 60    * s
         hour = 3600  * s
-        day  = 43200 * s
+        day  = 86400 * s
         Hz   = s**(-1)
         kHz  = kilo * Hz
         MHz  = mega * Hz

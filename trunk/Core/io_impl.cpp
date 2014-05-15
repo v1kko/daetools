@@ -188,6 +188,20 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeUnaryFun
 		pTag->AddTag(strEnumName, string("eCeil"));
 	else if(eValue == eFloor)
 		pTag->AddTag(strEnumName, string("eFloor"));
+    else if(eValue == eSinh)
+		pTag->AddTag(strEnumName, string("eSinh"));
+    else if(eValue == eCosh)
+		pTag->AddTag(strEnumName, string("eCosh"));
+    else if(eValue == eTanh)
+		pTag->AddTag(strEnumName, string("eTanh"));
+    else if(eValue == eArcSinh)
+		pTag->AddTag(strEnumName, string("eArcSinh"));
+    else if(eValue == eArcCosh)
+		pTag->AddTag(strEnumName, string("eArcCosh"));
+    else if(eValue == eArcTanh)
+		pTag->AddTag(strEnumName, string("eArcTanh"));
+    else if(eValue == eErf)
+		pTag->AddTag(strEnumName, string("eErf"));
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
@@ -208,6 +222,8 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeBinaryFu
 		pTag->AddTag(strEnumName, string("eMin"));
 	else if(eValue == eMax)
 		pTag->AddTag(strEnumName, string("eMax"));
+    else if(eValue == eArcTan2)
+        pTag->AddTag(strEnumName, string("eArcTan2"));
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
@@ -475,6 +491,20 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeUnaryFunctions
 		eValue = eCeil;
 	else if(strValue == "eFloor")
 		eValue = eFloor;
+    else if(strValue == "eSinh")
+		eValue = eSinh;
+    else if(strValue == "eCosh")
+		eValue = eCosh;
+    else if(strValue == "eTanh")
+		eValue = eTanh;
+    else if(strValue == "eArcSinh")
+		eValue = eArcSinh;
+    else if(strValue == "eArcCosh")
+		eValue = eArcCosh;
+    else if(strValue == "eArcTanh")
+		eValue = eArcTanh;
+    else if(strValue == "eErf")
+		eValue = eErf;
 	else
 		eValue = eUFUnknown;
 }
@@ -498,6 +528,8 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeBinaryFunction
 		eValue = eMin;
 	else if(strValue == "eMax")
 		eValue = eMax;
+    else if(strValue == "eArcTan2")
+		eValue = eArcTan2;
 	else
 		eValue = eBFUnknown;
 }

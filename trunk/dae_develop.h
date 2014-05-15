@@ -35,8 +35,4 @@ using namespace dae::logging;
 //#include "Core/macros.h"
 #include "Core/class_factory.h"
 
-#include "BONMIN_MINLPSolver/base_solvers.h"
-#include "LA_SuperLU/superlu_solvers.h"
-using namespace dae::nlpsolver;
-
 #endif

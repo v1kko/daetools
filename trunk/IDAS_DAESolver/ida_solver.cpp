@@ -131,10 +131,14 @@ daeIDALASolver_t* daeIDASolver::GetLASolver() const
     return m_pLASolver;
 }
 
-void daeIDASolver::SetLASolver(daeIDALASolver_t* pLASolver)
+void daeIDASolver::SetLASolver(daeLASolver_t* pLASolver)
 {
+    daeIDALASolver_t* la_solver = dynamic_cast<daeIDALASolver_t*>(pLASolver);
+    if(!la_solver)
+        daeDeclareAndThrowException(exInvalidCall);
+
 	m_eLASolver = eThirdParty;
-	m_pLASolver = pLASolver;
+	m_pLASolver = la_solver;
 }
 
 void daeIDASolver::SetLASolver(daeeIDALASolverType eLASolverType)

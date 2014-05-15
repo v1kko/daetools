@@ -60,7 +60,7 @@ public:
 
     daeIDALASolver_t* GetLASolver() const;
     void SetLASolver(daeeIDALASolverType eLASolverType);
-	void SetLASolver(daeIDALASolver_t* pLASolver);
+	void SetLASolver(daeLASolver_t* pLASolver);
 
     void SetLastIDASError(const string& strLastError);
     string CreateIDAErrorMessage(int flag);

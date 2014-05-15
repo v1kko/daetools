@@ -136,8 +136,8 @@ else
   Ncpu=4
 fi
 
-PYTHON_MAJOR=`python -c "import sys; print(sys.version_info[0])"`
-PYTHON_MINOR=`python -c "import sys; print(sys.version_info[1])"`
+PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
 PYTHON_VERSION=${PYTHON_MAJOR}.${PYTHON_MINOR}
 PYTHON_INCLUDE_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
 PYTHON_SITE_PACKAGES_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib())"`
@@ -304,7 +304,7 @@ configure_boost()
   tar -xzf boost_${vBOOST_}.tar.gz
   mv boost_${vBOOST_} boost${PYTHON_VERSION}
   cd boost${PYTHON_VERSION}
-  sh bootstrap.sh
+  sh bootstrap.sh --with-python-version=${PYTHON_VERSION}
 
   cd "${TRUNK}"
   echo ""
@@ -805,7 +805,7 @@ compile_superlu()
   echo ""
   echo "[*] Building superlu..."
   echo ""
-  make superlulib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS=${DAE_COMPILER_FLAGS}
+  make superlulib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS}"
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1201,6 +1201,8 @@ configure_dealii()
     -DDEAL_II_WITH_MPI:BOOL=OFF \
     -DDEAL_II_COMPONENT_PARAMETER_GUI:BOOL=OFF \
     -DDEAL_II_COMPONENT_MESH_CONVERTER:BOOL=ON \
+    -DCMAKE_CXX_FLAGS:STRING="${DAE_COMPILER_FLAGS}" \
+    -DCMAKE_C_FLAGS:STRING="${DAE_COMPILER_FLAGS}" \
     ${DEALII_CROSS_COMPILE_OPTIONS}
     
   cd "${TRUNK}"

@@ -201,6 +201,7 @@ public:
     friend DAE_CORE_API const adouble acosh(const adouble &a);
     friend DAE_CORE_API const adouble atanh(const adouble &a);
     friend DAE_CORE_API const adouble atan2(const adouble &a, const adouble &b);
+    friend DAE_CORE_API const adouble erf(const adouble &a);
 
     friend DAE_CORE_API const adouble pow(const adouble &a, real_t v);
     friend DAE_CORE_API const adouble pow(const adouble &a, const adouble &b);

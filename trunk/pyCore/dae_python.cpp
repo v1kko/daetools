@@ -131,6 +131,12 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eArcTan",	dae::core::eArcTan)
         .value("eCeil",     dae::core::eCeil)
         .value("eFloor",	dae::core::eFloor)
+        .value("eSinh",     dae::core::eSinh)
+        .value("eCosh",     dae::core::eCosh)
+        .value("eTanh",     dae::core::eTanh)
+        .value("eArcSinh",	dae::core::eArcSinh)
+        .value("eArcCosh",	dae::core::eArcCosh)
+        .value("eArcTanh",	dae::core::eArcTanh)
         .export_values()
     ;
     
@@ -143,6 +149,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("ePower",        dae::core::ePower)
         .value("eMin",          dae::core::eMin)
         .value("eMax",          dae::core::eMax)
+        .value("eArcTan2",      dae::core::eArcTan2)
         .export_values()
     ;
     
@@ -553,7 +560,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("arcsin",  &daepython::ad_asin)
         .def("arccos",  &daepython::ad_acos)
         .def("arctan",  &daepython::ad_atan)
-        /*
+
         .def("sinh",    &daepython::ad_sinh)
         .def("cosh",    &daepython::ad_cosh)
         .def("tanh",    &daepython::ad_tanh)
@@ -561,7 +568,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("arccosh", &daepython::ad_acosh)
         .def("arctanh", &daepython::ad_atanh)
         .def("arctan2", &daepython::ad_atan2)
-        */
+        .def("erf",     &daepython::ad_erf)
+
         .def("abs",    &daepython::ad_abs)
         .def("fabs",   &daepython::ad_abs)
         .def("ceil",   &daepython::ad_ceil)
@@ -585,6 +593,7 @@ BOOST_PYTHON_MODULE(pyCore)
 	def("ACosh", &daepython::ad_acosh);
 	def("ATanh", &daepython::ad_atanh);
 	def("ATan2", &daepython::ad_atan2);
+    def("Erf",   &daepython::ad_erf);
 
 	def("Log10", &daepython::ad_log10);
 	def("Ceil",  &daepython::ad_ceil);
