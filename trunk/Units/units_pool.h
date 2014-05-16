@@ -54,7 +54,7 @@ const base_unit ms   = milli * s;
 const base_unit us   = micro * s;
 const base_unit min  = 60    * s;
 const base_unit hour = 3600  * s;
-const base_unit day  = 43200 * s;
+const base_unit day  = 86400 * s;
 
 // Frequency
 const base_unit Hz   = s^(-1);

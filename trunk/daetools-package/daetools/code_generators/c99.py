@@ -85,9 +85,17 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
         self.FLOOR  = '_floor_({value})'
         self.CEIL   = '_ceil_({value})'
         self.ABS    = '_abs_({value})'
+        self.SINH   = '_sinh_({value})'
+        self.COSH   = '_cosh_({value})'
+        self.TANH   = '_tanh_({value})'
+        self.ASINH  = '_asinh_({value})'
+        self.ACOSH  = '_acosh_({value})'
+        self.ATANH  = '_atanh_({value})'
+        self.ERF    = '_erf_({value})'
 
         self.MIN    = '_min_({leftValue}, {rightValue})'
         self.MAX    = '_max_({leftValue}, {rightValue})'
+        self.ARCTAN2 = '_atan2_({leftValue}, {rightValue})'
 
         # Current time in simulation
         self.TIME   = '_time_'

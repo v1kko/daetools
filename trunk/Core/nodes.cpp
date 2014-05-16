@@ -2308,12 +2308,75 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
 		strContent += ")";
 		break;
     case eSinh:
+        if(eLanguage == eCDAE)
+			strContent += "sinh(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Sinh(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
     case eCosh:
+        if(eLanguage == eCDAE)
+			strContent += "cosh(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Cosh(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
     case eTanh:
+        if(eLanguage == eCDAE)
+			strContent += "tanh(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Tanh(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
     case eArcSinh:
+        if(eLanguage == eCDAE)
+			strContent += "asinh(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ASinh(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
     case eArcCosh:
+        if(eLanguage == eCDAE)
+			strContent += "acosh(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ACosh(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
     case eArcTanh:
+        if(eLanguage == eCDAE)
+			strContent += "atanh(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ATanh(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
     case eErf:
+        if(eLanguage == eCDAE)
+			strContent += "erf(";
+		else if(eLanguage == ePYDAE)
+			strContent += "Erf(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		node->Export(strContent, eLanguage, c);
+		strContent += ")";
+		break;
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 	}
@@ -2494,12 +2557,47 @@ string adUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 		strResult += "} ";
 		break;
     case eSinh:
+        strResult += "\\sinh";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
     case eCosh:
+        strResult += "\\cosh";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
     case eTanh:
+        strResult += "\\tanh";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
     case eArcSinh:
+        strResult += "\\asinh";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
     case eArcCosh:
+        strResult += "\\acosh";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
     case eArcTanh:
+        strResult += "\\atanh";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
     case eErf:
+        strResult += "\\erf";
+		strResult += " \\left( ";
+		strResult += node->SaveAsLatex(c);
+		strResult += " \\right) ";
+		break;
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
 	}
@@ -2580,12 +2678,26 @@ void adUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsCon
 		strName  = "floor";
 		break;
     case eSinh:
+        strName  = "sinh";
+		break;
     case eCosh:
+        strName  = "cosh";
+		break;
     case eTanh:
+        strName  = "tanh";
+		break;
     case eArcSinh:
+        strName  = "asinh";
+		break;
     case eArcCosh:
+        strName  = "acosh";
+		break;
     case eArcTanh:
+        strName  = "atanh";
+		break;
     case eErf:
+        strName  = "erf";
+		break;
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
 	}
@@ -2799,12 +2911,117 @@ void adUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSave
 		mrow->AddTag(strName, strValue);
 		break;
     case eSinh:
+        strName  = "mi";
+		strValue = "sinh";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
     case eCosh:
+        strName  = "mi";
+		strValue = "cosh";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
     case eTanh:
+        strName  = "mi";
+		strValue = "tanh";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
     case eArcSinh:
+        strName  = "mi";
+		strValue = "asinh";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
     case eArcCosh:
+        strName  = "mi";
+		strValue = "acosh";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
     case eArcTanh:
+        strName  = "mi";
+		strValue = "atanh";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
     case eErf:
+        strName  = "mi";
+		strValue = "erf";
+		mrow->AddTag(strName, strValue);
+		strName  = "mrow";
+		strValue = "";
+		mrowout = mrow->AddTag(strName, strValue);
+			strName  = "mo";
+			strValue = "(";
+			mrowout->AddTag(strName, strValue);
+
+			node->SaveAsPresentationMathML(mrowout, c);
+
+			strName  = "mo";
+			strValue = ")";
+			mrowout->AddTag(strName, strValue);
 	default:
 		daeDeclareAndThrowException(exXMLIOError);
 	}
@@ -3045,6 +3262,17 @@ void adBinaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, 
 		strContent += ")";
 		break;
     case eArcTan2:
+        if(eLanguage == eCDAE)
+			strContent += "atan2(";
+		else if(eLanguage == ePYDAE)
+			strContent += "ATan2(";
+		else
+			daeDeclareAndThrowException(exNotImplemented);
+		strContent += strLeft;
+		strContent += ", ";
+		strContent += strRight;
+		strContent += ")";
+		break;
 	default:
 		daeDeclareAndThrowException(exNotImplemented);
 	}
@@ -3195,6 +3423,12 @@ string adBinaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 		strResult += ")";
 		break;
     case eArcTan2:
+        strResult += "atan2(";
+		strResult += strLeft;
+		strResult += ", ";
+		strResult += strRight;
+		strResult += ")";
+		break;
 	default:
 		daeDeclareAndThrowException(exInvalidPointer);
 	}

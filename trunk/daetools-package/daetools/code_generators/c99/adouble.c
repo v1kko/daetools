@@ -260,56 +260,71 @@ adouble _atan_(const adouble a)
 adouble _sinh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = sinh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue + 1);
     return tmp;
 }
 
 adouble _cosh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = cosh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue - 1);
     return tmp;
 }
 
 adouble _tanh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = tanh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / (1 - a.m_dValue*a.m_dValue);
     return tmp;
 }
 
 adouble _asinh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = asinh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue + 1);
     return tmp;
 }
 
 adouble _acosh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = acosh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / sqrt(a.m_dValue*a.m_dValue - 1);
     return tmp;
 }
 
 adouble _atanh_(const adouble a)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = atanh(a.m_dValue);
+    tmp.m_dDeriv = a.m_dDeriv / (1 - a.m_dValue*a.m_dValue);
+    return tmp;
+}
+
+adouble _erf_(const adouble a)
+{
+    adouble tmp;
+    tmp.m_dValue = erf(a.m_dValue);
+    double pi = cos(-1);
+    tmp.m_dDeriv = a.m_dDeriv * (2.0 / sqrt(pi)) * exp(-a.m_dValue*a.m_dValue);
     return tmp;
 }
 
 adouble _atan2_(const adouble a, const adouble b)
 {
     adouble tmp;
-    tmp.m_dValue = _makeNaN_();
-    tmp.m_dDeriv = _makeNaN_();
+    tmp.m_dValue = atan2(a.m_dValue, b.m_dValue);
+    double tmp2 = a.m_dValue*a.m_dValue;
+    double tmp3 = b.m_dValue*b.m_dValue;
+    double tmp4 = tmp3 / (tmp2 + tmp3);
+    if(tmp4 != 0)
+        tmp.m_dDeriv = (a.m_dDeriv*b.m_dValue - a.m_dValue*b.m_dDeriv) / tmp3*tmp4;
+    else
+        tmp.m_dDeriv = 0.0;
     return tmp;
 }
 

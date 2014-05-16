@@ -90,9 +90,17 @@ class daeExpressionFormatter(object):
         self.FLOOR  = 'floor({value})'
         self.CEIL   = 'ceil({value})'
         self.ABS    = 'abs({value})'
+        self.SINH   = 'sinh({value})'
+        self.COSH   = 'cosh({value})'
+        self.TANH   = 'tanh({value})'
+        self.ASINH  = 'asinh({value})'
+        self.ACOSH  = 'acosh({value})'
+        self.ATANH  = 'atanh({value})'
+        self.ERF    = 'erf({value})'
 
-        self.MIN    = 'min({leftValue}, {rightValue})'
-        self.MAX    = 'max({leftValue}, {rightValue})'
+        self.MIN     = 'min({leftValue}, {rightValue})'
+        self.MAX     = 'max({leftValue}, {rightValue})'
+        self.ARCTAN2 = 'atan2({leftValue}, {rightValue})'
 
         # Current time in simulation
         self.TIME   = 'time'
@@ -364,6 +372,27 @@ class daeExpressionFormatter(object):
             elif node.Function == eFloor:
                 res = self.FLOOR.format(value = value)
 
+            elif node.Function == eSinh:
+                res = self.SINH.format(value = value)
+
+            elif node.Function == eCosh:
+                res = self.COSH.format(value = value)
+
+            elif node.Function == eTanh:
+                res = self.TANH.format(value = value)
+
+            elif node.Function == eArcSinh:
+                res = self.ASINH.format(value = value)
+
+            elif node.Function == eArcCosh:
+                res = self.ACOSH.format(value = value)
+
+            elif node.Function == eArcTanh:
+                res = self.ATANH.format(value = value)
+
+            elif node.Function == eErf:
+                res = self.ERF.format(value = value)
+                
             else:
                 raise RuntimeError('Not supported unary function: %s' % node.Function)
 
@@ -391,6 +420,9 @@ class daeExpressionFormatter(object):
 
             elif node.Function == eMax:
                 res = self.MAX.format(leftValue = leftValue, rightValue = rightValue)
+
+            elif node.Function == eArcTan2:
+                res = self.ARCTAN2.format(leftValue = leftValue, rightValue = rightValue)
 
             else:
                 raise RuntimeError('Not supported binary function: %s' % node.Function)

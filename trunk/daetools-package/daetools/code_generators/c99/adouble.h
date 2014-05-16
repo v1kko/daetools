@@ -53,7 +53,7 @@ adouble _tanh_(const adouble a) NO_INLINE;
 adouble _asinh_(const adouble a) NO_INLINE;
 adouble _acosh_(const adouble a) NO_INLINE;
 adouble _atanh_(const adouble a) NO_INLINE;
-adouble _atan2_(const adouble a, const adouble b) NO_INLINE;
+adouble _erf_(const adouble a) NO_INLINE;
 
 adouble _pow_(const adouble a, const adouble b) NO_INLINE;
 
@@ -64,6 +64,7 @@ adouble _floor_(const adouble a) NO_INLINE;
 adouble _abs_(const adouble a) NO_INLINE;
 adouble _max_(const adouble a, const adouble b) NO_INLINE;
 adouble _min_(const adouble a, const adouble b) NO_INLINE;
+adouble _atan2_(const adouble a, const adouble b) NO_INLINE;
 
 bool _neq_(const adouble a, const adouble b) NO_INLINE;
 bool _eq_(const adouble a, const adouble b) NO_INLINE;
