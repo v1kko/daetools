@@ -28,6 +28,7 @@ to support certain software components such as thermodynamic property packages e
 """
 
 import sys
+import numpy, scipy.interpolate
 from daetools.pyDAE import *
 from time import localtime, strftime
 
@@ -54,7 +55,50 @@ class extfnPower(daeScalarExternalFunction):
         
         #print('Power(m = {0}, cp = {1}, dT = {2}) = {3}'.format(m, cp, dT, res))
         return res
+        
+class extfn_interp1d(daeScalarExternalFunction):
+    def __init__(self, Name, Model, units, times, values, Time):
+        arguments = {}
+        arguments["t"]  = Time
 
+        # Instantiate interp1d object
+        self.interp = scipy.interpolate.interp1d(times, values)
+
+        # Cache the last interpolated value to speed up a simulation
+        self.cache = None
+
+        # Counters for performance
+        self.counter       = 0
+        self.cache_counter = 0
+
+        daeScalarExternalFunction.__init__(self, Name, Model, units, arguments)
+
+    def Calculate(self, values):
+        self.counter += 1
+
+        # Get the argument from the dictionary of arguments and convert it to float
+        # since daetools can't accept numpy.float64 types as arguments at the moment
+        time = float(values["t"].Value)
+
+        if self.cache:
+            if self.cache[0] == time:
+                self.cache_counter += 1
+                return adouble(self.cache[1])
+                
+        # The time received is not in the cache and has to be interpolated
+        interp_value = float(self.interp(time))
+        res = adouble(interp_value, 0)
+
+        # Save it in the cache for later use
+        self.cache = (time, res.Value)
+        
+        # Here we do not need to return a derivative
+        # In a general case if a derivative part is not equal to zero the derivative should be calculated
+        #if values["t"].Derivative != 0:
+        #    res.Derivative = ...
+
+        return res
+        
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -68,14 +112,18 @@ class modTutorial(daeModel):
         self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
         
-        self.Power     = daeVariable("Power",      power_t,       self, "Power")
-        self.Power_ext = daeVariable("Power_ext",  power_t,       self, "Power")
+        self.Power     = daeVariable("Power",     power_t, self, "Power")
+        self.Power_ext = daeVariable("Power_ext", power_t, self, "Power")
 
-        self.extFun_ = None
+        self.Value        = daeVariable("Value",        time_t, self, "")
+        self.Value_interp = daeVariable("Value_interp", time_t, self, "")
         
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        #
+        # Scalar external function #1
+        #
         # Create external function
         # It has to be created in DeclareEquations since it accesses the params/vars values
         self.Pext = extfnPower("Power", self, W, self.m(), self.cp(), self.T.dt())
@@ -88,8 +136,22 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("Power_ext", "")
         eq.Residual = self.Power_ext() - self.Pext()
-        self.extFun_ = eq
 
+        #
+        # Scalar external function #2
+        #
+        # Create scipy interp1d interpolation external function
+        times  = numpy.arange(0.0, 1000.0)
+        values = 2*times
+        self.interp1d = extfn_interp1d("interp1d", self, s, times, values, Time())
+
+        eq = self.CreateEquation("Value", "")
+        eq.Residual = self.Value() - 2*Time()
+
+        eq = self.CreateEquation("Value_interp", "")
+        eq.Residual = self.Value_interp() - self.interp1d()
+
+        ####################################################
         self.stnRegulator = self.STN("Regulator")
 
         self.STATE("Heating")
@@ -167,7 +229,6 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    print(simulation.m.extFun_.EquationExecutionInfos[0].VariableIndexes)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
@@ -179,6 +240,9 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
+
+    print('\n\nscipy.interp1d statistics:')
+    print('  interp1d called %d times (cache value used %d times)' % (simulation.m.interp1d.counter, simulation.m.interp1d.cache_counter))
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
