@@ -834,7 +834,7 @@ const adouble erf(const adouble &a)
 	}
 
     tmp.m_dValue = ::erf(a.m_dValue);
-    double pi = ::cos(-1);
+    const double pi = 3.14159265358979323846;
     tmp.m_dDeriv = a.m_dDeriv * (2.0 / ::sqrt(pi)) * ::exp(-a.m_dValue*a.m_dValue);
 
     return tmp;

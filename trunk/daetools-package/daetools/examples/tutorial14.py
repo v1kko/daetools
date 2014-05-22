@@ -64,10 +64,10 @@ class extfnPower(daeScalarExternalFunction):
         x = values["x"]
         y = values["y"]
 
-        # Always set the value (derivative part is equal zero by default):
+        # Always set the value (derivative part is equal to zero by default):
         res = adouble(x.Value**2 + y.Value**2)
 
-        # Calculate a derivative using the chain rule: (arg1)' * df/darg1
+        # Calculate a derivative using the chain rule: x' * df(x)/dx
         if x.Derivative != 0:
             res.Derivative = x.Derivative * (2 * x.Value)
         elif y.Derivative != 0:
