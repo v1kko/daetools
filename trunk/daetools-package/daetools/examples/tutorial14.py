@@ -21,7 +21,8 @@ In this example we use the same conduction problem as in the tutorial 5.
 
 Here we introduce the external functions concept that can handle and evaluate
 functions in external libraries. Here we use daeScalarExternalFunction class
-derived external function object to calculate the power.
+derived external function object to calculate the power and interpolate a set of
+values using scipy.interpolate.interp1d object.
 
 A support for external functions is still experimental and the goal is
 to support certain software components such as thermodynamic property packages etc.
@@ -46,6 +47,34 @@ class extfnPower(daeScalarExternalFunction):
     
     def Calculate(self, values):
         """
+        This function calculates a value and derivatives per given argument.
+        Here a derivative will be calculated automatically (the function just returns m*cp*dT).
+        
+        However, in a general case if a derivative part is not equal to zero the derivative should be calculated:
+        if values["arg1"].Derivative != 0:
+            res.Derivative = ... # derivative per argument arg1
+        elif values["arg2"].Derivative != 0:
+            res.Derivative = ... # derivative per argument arg2
+
+        For instance, an implementation of the following external function:
+            f(x) = x^2 + y^2
+        would look like:
+
+        # Get the arguments from the dictionary "values" as adouble objects
+        x = values["x"]
+        y = values["y"]
+
+        # Always set the value (derivative part is equal zero by default):
+        res = adouble(x.Value**2 + y.Value**2)
+
+        # Calculate a derivative using the chain rule: (arg1)' * df/darg1
+        if x.Derivative != 0:
+            res.Derivative = x.Derivative * (2 * x.Value)
+        elif y.Derivative != 0:
+            res.Derivative = y.Derivative * (2 * y.Value)
+
+        # Return the result
+        return res
         """
         m  = values["m"]
         cp = values["cp"]
@@ -76,26 +105,25 @@ class extfn_interp1d(daeScalarExternalFunction):
     def Calculate(self, values):
         self.counter += 1
 
-        # Get the argument from the dictionary of arguments and convert it to float
-        # since daetools can't accept numpy.float64 types as arguments at the moment
-        time = float(values["t"].Value)
+        # Get the argument from the dictionary of arguments' values.
+        time = values["t"].Value
 
         if self.cache:
             if self.cache[0] == time:
                 self.cache_counter += 1
                 return adouble(self.cache[1])
                 
-        # The time received is not in the cache and has to be interpolated
+        # The time received is not in the cache and has to be interpolated.
+        # Convert the result to float datatype since daetools can't accept
+        # numpy.float64 types as arguments at the moment.
         interp_value = float(self.interp(time))
         res = adouble(interp_value, 0)
 
         # Save it in the cache for later use
         self.cache = (time, res.Value)
         
-        # Here we do not need to return a derivative
-        # In a general case if a derivative part is not equal to zero the derivative should be calculated
-        #if values["t"].Derivative != 0:
-        #    res.Derivative = ...
+        # Here we do not need to return a derivative for it is not a function of variables.
+        # See the remarks above if thats not the case.
 
         return res
         
