@@ -3694,11 +3694,11 @@ void AssignValues2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
         boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
-            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+            q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
@@ -3766,11 +3766,11 @@ void ReAssignValues2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
         boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
-            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+            q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
@@ -3838,11 +3838,11 @@ void SetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
         boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
-            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+            q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
@@ -3910,11 +3910,11 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
         boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
-            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+            q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
@@ -3981,11 +3981,11 @@ void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to DOUBLE_MAX (by design: that means unset value)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
         boost::python::object obj = values.attr("__getitem__")(i);
         if(obj.is_none())
         {
-            q_values[i] = quantity(std::numeric_limits<real_t>::max(), u);
+            q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {

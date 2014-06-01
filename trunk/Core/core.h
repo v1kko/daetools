@@ -28,6 +28,11 @@ const int cnAlgebraic	 = 0;
 const int cnDifferential = 1;
 const int cnAssigned	 = 2;
 
+// When setting initial conditions for distributed variables values at certain indexes
+// do not need to be set (for they are not differential variables). To indicate that,
+// cnUnsetValue should be used at that particular index (with the value: DOUBLE_MAX).
+const real_t cnUnsetValue = cnUnsetValue;
+
 enum daeeDomainType
 {
 	eDTUnknown = 0,

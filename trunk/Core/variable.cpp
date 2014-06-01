@@ -479,8 +479,8 @@ void daeVariable::SetInitialGuesses(const std::vector<real_t>& initialGuesses)
 
     for(size_t i = 0; i < nTotalNumberOfVariables; i++)
     {
-        // Skip if it is equal to DOUBLE_MAX (by design: that means unset value)
-        if(initialGuesses[i] == std::numeric_limits<real_t>::max())
+        // Skip if it is equal to cnUnsetValue (by design: that means unset value, with value equal to DOUBLE_MAX)
+        if(initialGuesses[i] == cnUnsetValue)
             continue;
 
         m_pModel->m_pDataProxy->SetInitialGuess(m_nOverallIndex + i, initialGuesses[i]);
@@ -677,9 +677,9 @@ void daeVariable::SetInitialGuesses(const std::vector<quantity>& initialGuesses)
     r_initialGuesses.resize(initialGuesses.size());
     for(size_t i = 0; i < initialGuesses.size(); i++)
     {
-        // If the value is equal to DOUBLE_MAX set real_t value to DOUBLE_MAX as well (by design: that means unset value)
-        if(initialGuesses[i].getValue() == std::numeric_limits<real_t>::max())
-            r_initialGuesses[i] = std::numeric_limits<real_t>::max();
+        // If the value is equal to cnUnsetValue set real_t value to cnUnsetValue as well (by design: that means unset value)
+        if(initialGuesses[i].getValue() == cnUnsetValue)
+            r_initialGuesses[i] = cnUnsetValue;
         else
             r_initialGuesses[i] = initialGuesses[i].scaleTo(m_VariableType.GetUnits()).getValue();
     }
@@ -834,8 +834,8 @@ void daeVariable::AssignValues(const std::vector<real_t>& values)
 
     for(size_t i = 0; i < nTotalNumberOfVariables; i++)
     {
-        // Skip if it is equal to DOUBLE_MAX (by design: that means unset value)
-        if(values[i] == std::numeric_limits<real_t>::max())
+        // Skip if it is equal to cnUnsetValue (by design: that means unset value)
+        if(values[i] == cnUnsetValue)
             continue;
 
         m_pModel->m_pDataProxy->AssignValue(m_nOverallIndex + i, values[i]);
@@ -983,9 +983,9 @@ void daeVariable::AssignValues(const std::vector<quantity>& values)
     r_values.resize(values.size());
     for(size_t i = 0; i < values.size(); i++)
     {
-        // If the value is equal to DOUBLE_MAX set real_t value to DOUBLE_MAX as well (by design: that means unset value)
-        if(values[i].getValue() == std::numeric_limits<real_t>::max())
-            r_values[i] = std::numeric_limits<real_t>::max();
+        // If the value is equal to cnUnsetValue set real_t value to cnUnsetValue as well (by design: that means unset value)
+        if(values[i].getValue() == cnUnsetValue)
+            r_values[i] = cnUnsetValue;
         else
             r_values[i] = values[i].scaleTo(m_VariableType.GetUnits()).getValue();
     }
@@ -1085,8 +1085,8 @@ void daeVariable::ReAssignValues(const std::vector<real_t>& values)
 
     for(size_t i = 0; i < nTotalNumberOfVariables; i++)
     {
-        // Skip if it is equal to DOUBLE_MAX (by design: that means unset value)
-        if(values[i] == std::numeric_limits<real_t>::max())
+        // Skip if it is equal to cnUnsetValue (by design: that means unset value)
+        if(values[i] == cnUnsetValue)
             continue;
 
         if(m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnAssigned)
@@ -1289,9 +1289,9 @@ void daeVariable::ReAssignValues(const std::vector<quantity>& values)
     r_values.resize(values.size());
     for(size_t i = 0; i < values.size(); i++)
     {
-        // If the value is equal to DOUBLE_MAX set real_t value to DOUBLE_MAX as well (by design: that means unset value)
-        if(values[i].getValue() == std::numeric_limits<real_t>::max())
-            r_values[i] = std::numeric_limits<real_t>::max();
+        // If the value is equal to cnUnsetValue set real_t value to cnUnsetValue as well (by design: that means unset value)
+        if(values[i].getValue() == cnUnsetValue)
+            r_values[i] = cnUnsetValue;
         else
             r_values[i] = values[i].scaleTo(m_VariableType.GetUnits()).getValue();
     }
@@ -1622,8 +1622,8 @@ void daeVariable::SetInitialConditions(const std::vector<real_t>& initialConditi
 
     for(size_t i = 0; i < nTotalNumberOfVariables; i++)
     {
-        // Skip if it is equal to DOUBLE_MAX (by design: that means unset value)
-        if(initialConditions[i] == std::numeric_limits<real_t>::max())
+        // Skip if it is equal to cnUnsetValue (by design: that means unset value)
+        if(initialConditions[i] == cnUnsetValue)
             continue;
 
         m_pModel->m_pDataProxy->SetInitialCondition(m_nOverallIndex + i, initialConditions[i], m_pModel->GetInitialConditionMode());
@@ -1780,9 +1780,9 @@ void daeVariable::SetInitialConditions(const std::vector<quantity>& initialCondi
     r_initialConditions.resize(initialConditions.size());
     for(size_t i = 0; i < initialConditions.size(); i++)
     {
-        // If the value is equal to DOUBLE_MAX set real_t value to DOUBLE_MAX as well (by design: that means unset value)
-        if(initialConditions[i].getValue() == std::numeric_limits<real_t>::max())
-            r_initialConditions[i] = std::numeric_limits<real_t>::max();
+        // If the value is equal to cnUnsetValue set real_t value to cnUnsetValue as well (by design: that means unset value)
+        if(initialConditions[i].getValue() == cnUnsetValue)
+            r_initialConditions[i] = cnUnsetValue;
         else
             r_initialConditions[i] = initialConditions[i].scaleTo(m_VariableType.GetUnits()).getValue();
     }
@@ -1885,8 +1885,8 @@ void daeVariable::ReSetInitialConditions(const std::vector<real_t>& initialCondi
 
     for(size_t i = 0; i < nTotalNumberOfVariables; i++)
     {
-        // Skip if it is equal to DOUBLE_MAX (by design: that means unset value)
-        if(initialConditions[i] == std::numeric_limits<real_t>::max())
+        // Skip if it is equal to cnUnsetValue (by design: that means unset value)
+        if(initialConditions[i] == cnUnsetValue)
             continue;
 
         if(m_pModel->m_pDataProxy->GetInitialConditionMode() == eAlgebraicValuesProvided && m_pModel->m_pDataProxy->GetVariableType(m_nOverallIndex + i) != cnDifferential)
@@ -2121,9 +2121,9 @@ void daeVariable::ReSetInitialConditions(const std::vector<quantity>& initialCon
     r_initialConditions.resize(initialConditions.size());
     for(size_t i = 0; i < initialConditions.size(); i++)
     {
-        // If the value is equal to DOUBLE_MAX set real_t value to DOUBLE_MAX as well (by design: that means unset value)
-        if(initialConditions[i].getValue() == std::numeric_limits<real_t>::max())
-            r_initialConditions[i] = std::numeric_limits<real_t>::max();
+        // If the value is equal to cnUnsetValue set real_t value to cnUnsetValue as well (by design: that means unset value)
+        if(initialConditions[i].getValue() == cnUnsetValue)
+            r_initialConditions[i] = cnUnsetValue;
         else
             r_initialConditions[i] = initialConditions[i].scaleTo(m_VariableType.GetUnits()).getValue();
     }

@@ -1364,17 +1364,17 @@ void ProcessListOfValues(boost::property_tree::ptree& pt,
         {
         // If the number of children is zero we bumped into a leaf; therefore, process its value
 
-            // If the item raw data is 'null' consider it as unset by design; thus add an item with the value set to DOUBLE_MAX
+            // If the item raw data is 'null' consider it as unset by design; thus add an item with the value set to cnUnsetValue (DOUBLE_MAX)
             if(boost::lexical_cast<string>(pt_child.second.data()) == "null")
             {
-                // If null value is not allowed throw an exception, otherwise set it to DOUBLE_MAX
+                // If null value is not allowed throw an exception, otherwise set it to cnUnsetValue (DOUBLE_MAX)
                 if(!allowNULL)
                 {
                     string msg = "Invalid value found (null)";
                     throw std::runtime_error(msg);
                 }
 
-                Value = std::numeric_limits<real_t>::max();
+                Value = cnUnsetValue;
                 if(bPrintInfo)
                     std::cout << "          null data found" << std::endl;
             }

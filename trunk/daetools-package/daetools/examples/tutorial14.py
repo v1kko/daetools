@@ -36,53 +36,55 @@ from time import localtime, strftime
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
-class extfnPower(daeScalarExternalFunction):
+class extfnHeatTransferred(daeScalarExternalFunction):
     def __init__(self, Name, Model, units, m, cp, dT):
+        # Instantiate the scalar external function by specifying
+        # the arguments dictionary {'name' : adouble argument}
         arguments = {}
         arguments["m"]  = m
         arguments["cp"] = cp
         arguments["dT"] = dT
-        
+
         daeScalarExternalFunction.__init__(self, Name, Model, units, arguments)
     
     def Calculate(self, values):
-        """
-        This function calculates a value and derivatives per given argument.
-        Here a derivative will be calculated automatically (the function just returns m*cp*dT).
-        
-        However, in a general case if a derivative part is not equal to zero the derivative should be calculated:
-        if values["arg1"].Derivative != 0:
-            res.Derivative = ... # derivative per argument arg1
-        elif values["arg2"].Derivative != 0:
-            res.Derivative = ... # derivative per argument arg2
+        # Calculate function is used to calculate a value and a derivative (if requested)
+        # of the external function per given argument. Here the simple function is given by:
+        #    f(m, cp, dT/dt) = m * cp * dT/dt
 
-        For instance, an implementation of the following external function:
-            f(x) = x^2 + y^2
-        would look like:
-
-        # Get the arguments from the dictionary "values" as adouble objects
-        x = values["x"]
-        y = values["y"]
-
-        # Always set the value (derivative part is equal to zero by default):
-        res = adouble(x.Value**2 + y.Value**2)
-
-        # Calculate a derivative using the chain rule: x' * df(x)/dx
-        if x.Derivative != 0:
-            res.Derivative = x.Derivative * (2 * x.Value)
-        elif y.Derivative != 0:
-            res.Derivative = y.Derivative * (2 * y.Value)
-
-        # Return the result
-        return res
-        """
+        # Procedure:
+        # 1. Get the arguments from the dictionary values: {'arg-name' : adouble-object}.
+        #    Every adouble object has two properties: Value and Derivative that can be
+        #    used to evaluate function or its partial derivatives per its arguments
+        #    (partial derivatives are used to fill in a Jacobian matrix necessary to solve
+        #    a system of non-linear equations using the Newton method).
         m  = values["m"]
         cp = values["cp"]
         dT = values["dT"]
         
-        res = m * cp * dT
+        # 2. Always calculate the value of a function (derivative part is zero by default)
+        res = adouble(m.Value * cp.Value * dT.Value)
         
-        #print('Power(m = {0}, cp = {1}, dT = {2}) = {3}'.format(m, cp, dT, res))
+        # 3. If a function derivative per one of its arguments is requested,
+        #    a derivative part of that argument will be non-zero.
+        #    In that case, investigate which derivative is requested and calculate it
+        #    using the chain rule: f'(x) = x' * df(x)/dx
+        if m.Derivative != 0:
+            # A derivative per 'm' was requested
+            res.Derivative = m.Derivative * (cp.Value * dT.Value)
+        elif cp.Derivative != 0:
+            # A derivative per 'cp' was requested
+            res.Derivative = cp.Derivative * (m.Value * dT.Value)
+        elif dT.Derivative != 0:
+            # A derivative per 'dT' was requested
+            res.Derivative = dT.Derivative * (m.Value * cp.Value)
+        
+        #print('Heat(m=(%f,%f), cp=(%f,%f), dT=(%f,%f)) = (%f,%f)' % (m.Value,m.Derivative,
+        #                                                             cp.Value,cp.Derivative,
+        #                                                             dT.Value,dT.Derivative,
+        #                                                             res.Value,res.Derivative))
+
+        # 4. Return the result as adouble object (contains both value and derivative)
         return res
         
 class extfn_interp1d(daeScalarExternalFunction):
@@ -90,13 +92,14 @@ class extfn_interp1d(daeScalarExternalFunction):
         arguments = {}
         arguments["t"]  = Time
 
-        # Instantiate interp1d object
+        # Instantiate interp1d object and initialize interpolation using supplied (x,y) values
         self.interp = scipy.interpolate.interp1d(times, values)
 
-        # Cache the last interpolated value to speed up a simulation
+        # During the solver iterations, the function is called very often with the same arguments
+        # Therefore, cache the last interpolated value to speed up a simulation
         self.cache = None
 
-        # Counters for performance
+        # Counters for performance (just an info; not really needed)
         self.counter       = 0
         self.cache_counter = 0
 
@@ -108,6 +111,11 @@ class extfn_interp1d(daeScalarExternalFunction):
         # Get the argument from the dictionary of arguments' values.
         time = values["t"].Value
 
+        # Here we do not need to return a derivative for it is not a function of variables.
+        # See the remarks above if thats not the case.
+
+        # First check if an interpolated value was already calculated during the previous call
+        # If it was return the cached value (derivative part is always equal to zero in this case)
         if self.cache:
             if self.cache[0] == time:
                 self.cache_counter += 1
@@ -121,9 +129,6 @@ class extfn_interp1d(daeScalarExternalFunction):
 
         # Save it in the cache for later use
         self.cache = (time, res.Value)
-        
-        # Here we do not need to return a derivative for it is not a function of variables.
-        # See the remarks above if thats not the case.
 
         return res
         
@@ -140,11 +145,11 @@ class modTutorial(daeModel):
         self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
         
-        self.Power     = daeVariable("Power",     power_t, self, "Power")
-        self.Power_ext = daeVariable("Power_ext", power_t, self, "Power")
+        self.Heat     = daeVariable("Heat",     power_t, self, "Heat transferred")
+        self.Heat_ext = daeVariable("Heat_ext", power_t, self, "Heat transferred calculated using an external function")
 
-        self.Value        = daeVariable("Value",        time_t, self, "")
-        self.Value_interp = daeVariable("Value_interp", time_t, self, "")
+        self.Value        = daeVariable("Value",        time_t, self, "Simple value")
+        self.Value_interp = daeVariable("Value_interp", time_t, self, "Simple value calculated using an external function that wraps scipy.interp1d")
         
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -154,16 +159,16 @@ class modTutorial(daeModel):
         #
         # Create external function
         # It has to be created in DeclareEquations since it accesses the params/vars values
-        self.Pext = extfnPower("Power", self, W, self.m(), self.cp(), self.T.dt())
+        self.exfnHeat = extfnHeatTransferred("Heat", self, W, self.m(), self.cp(), self.T.dt())
 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
-        eq = self.CreateEquation("Power", "")
-        eq.Residual = self.Power() - self.m() * self.cp() * self.T.dt()
+        eq = self.CreateEquation("Heat", "")
+        eq.Residual = self.Heat() - self.m() * self.cp() * self.T.dt()
 
-        eq = self.CreateEquation("Power_ext", "")
-        eq.Residual = self.Power_ext() - self.Pext()
+        eq = self.CreateEquation("Heat_ext", "")
+        eq.Residual = self.Heat_ext() - self.exfnHeat()
 
         #
         # Scalar external function #2
