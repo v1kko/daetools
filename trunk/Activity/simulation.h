@@ -42,6 +42,8 @@ public:
 	virtual void				LoadInitializationValues(const std::string& strFileName) const;
     virtual void                SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings);
     virtual std::string         GetJSONRuntimeSettings() const;
+    virtual bool                GetCalculateSensitivities() const;
+    virtual void                SetCalculateSensitivities(bool bCalculateSensitivities);
 
 	virtual real_t				GetCurrentTime_() const;
 	virtual real_t				GetNextReportingTime(void) const;

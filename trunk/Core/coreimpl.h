@@ -1756,6 +1756,9 @@ public:
 	virtual bool	GetReportingOn(void) const;
 	virtual void	SetReportingOn(bool bOn);
 
+    virtual void	GetValues(std::vector<real_t>& values) const;
+    virtual void	SetValues(const std::vector<real_t>& values);
+
 	virtual void	SetValue(real_t value);
 	virtual void	SetValue(size_t nD1, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, real_t value);

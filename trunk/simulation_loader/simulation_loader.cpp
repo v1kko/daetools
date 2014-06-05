@@ -6,14 +6,12 @@
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "simulation_loader.h"
+#include "../dae.h"
 
-namespace dae
-{
-namespace activity
-{
-namespace simulation_loader
+namespace dae_simulation_loader
 {
 class daeSimulationLoaderData
 {
@@ -24,7 +22,7 @@ public:
     }
 
 public:
-    // Solver creation routines
+// Solver creation routines
     void SetupDAESolver(const std::string& strDAESolver);
     void SetupLASolver(const std::string& strLASolver);
     void SetupNLPSolver(const std::string& strNLPSolver);
@@ -32,13 +30,19 @@ public:
     void SetupLog(const std::string& strLog);
 
 public:
-// Created and owned by Python, thus the raw pointer
+// Created and owned by Python, thus the raw pointers
     daeSimulation_t*     m_pSimulation;
     daeDataReporter_t*   m_pDataReporter;
     daeDAESolver_t*	     m_pDAESolver;
     daeLASolver_t*       m_pLASolver;
     daeLog_t*	         m_pLog;
 
+// Parameters/Inputs/Outputs
+    std::vector<daeParameter_t*> m_ptrarrParameters;
+    std::vector<daeVariable_t*>  m_ptrarrInputs;
+    std::vector<daeVariable_t*>  m_ptrarrOutputs;
+
+// Python related objects
     boost::python::object m_pyMainModule;
     boost::python::object m_pySimulation;
 };
@@ -112,6 +116,28 @@ void daeSimulationLoader::Simulate(bool bShowSimulationExplorer)
     catch(std::exception& e)
     {
         std::cout << e.what() << std::endl;
+    }
+}
+
+void daeSimulationLoader::Initialize(const std::string& strJSONRuntimeSettings)
+{
+    try
+    {
+        daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+        if(!pData)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        boost::python::dict locals;
+        boost::python::object main_namespace = pData->m_pyMainModule.attr("__dict__");
+
+        boost::python::exec("from daetools.dae_simulator.auxiliary import InitializeSimulation", main_namespace);
+        locals["_json_runtime_settings_"] = strJSONRuntimeSettings;
+        std::string command = "InitializeSimulation(__daetools_simulation__, _json_runtime_settings_)";
+        boost::python::exec(command.c_str(), main_namespace, locals);
+    }
+    catch(boost::python::error_already_set const &)
+    {
+        PyErr_Print();
     }
 }
 
@@ -252,9 +278,9 @@ double daeSimulationLoader::Integrate(bool bStopAtDiscontinuity, bool bReportDat
         daeDeclareAndThrowException(exInvalidPointer);
 
     if(bStopAtDiscontinuity)
-        return pData->m_pSimulation->Integrate(eStopAtModelDiscontinuity);
+        return pData->m_pSimulation->Integrate(eStopAtModelDiscontinuity, bReportDataAroundDiscontinuities);
     else
-        return pData->m_pSimulation->Integrate(eDoNotStopAtDiscontinuity);
+        return pData->m_pSimulation->Integrate(eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
 }
 
 double daeSimulationLoader::IntegrateForTimeInterval(double timeInterval, bool bReportDataAroundDiscontinuities)
@@ -284,69 +310,189 @@ double daeSimulationLoader::IntegrateUntilTime(double time, bool bStopAtDisconti
         return pData->m_pSimulation->IntegrateUntilTime(time, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
 }
 
-void daeSimulationLoader::CollectAllDomains(std::map<std::string, daeDomain_t*>& mapDomains)
+size_t daeSimulationLoader::GetNumberOfParameters() const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    if(!pData->m_pSimulation)
-        daeDeclareAndThrowException(exInvalidPointer);
-
-    daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
-    pTopLevelModel->CollectAllDomains(mapDomains);
+    return pData->m_ptrarrParameters.size();
 }
 
-void daeSimulationLoader::CollectAllParameters(std::map<std::string, daeParameter_t*>& mapParameters)
+size_t daeSimulationLoader::GetNumberOfInputs() const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    if(!pData->m_pSimulation)
-        daeDeclareAndThrowException(exInvalidPointer);
-
-    daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
-    pTopLevelModel->CollectAllParameters(mapParameters);
+    return pData->m_ptrarrInputs.size();
 }
 
-void daeSimulationLoader::CollectAllVariables(std::map<std::string, daeVariable_t*>& mapVariables)
+size_t daeSimulationLoader::GetNumberOfOutputs() const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    if(!pData->m_pSimulation)
-        daeDeclareAndThrowException(exInvalidPointer);
-
-    daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
-    pTopLevelModel->CollectAllVariables(mapVariables);
+    return pData->m_ptrarrOutputs.size();
 }
 
-void daeSimulationLoader::CollectAllPorts(std::map<std::string, daePort_t*>& mapPorts)
+void daeSimulationLoader::GetParameterInfo(size_t index, std::string& strName, size_t& numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    if(!pData->m_pSimulation)
-        daeDeclareAndThrowException(exInvalidPointer);
+    daeParameter_t* pParameter = pData->m_ptrarrParameters[index];
 
-    daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
-    pTopLevelModel->CollectAllPorts(mapPorts);
+    numberOfPoints = pParameter->GetNumberOfPoints();
+    strName        = pParameter->GetCanonicalName();
 }
 
-void daeSimulationLoader::CollectAllSTNs(std::map<std::string, daeSTN_t*>& mapSTNs)
+void daeSimulationLoader::GetInputInfo(size_t index, std::string& strName, size_t& numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    if(!pData->m_pSimulation)
+    daeVariable_t* pVariable = pData->m_ptrarrInputs[index];
+
+    numberOfPoints = pVariable->GetNumberOfPoints();
+    strName        = pVariable->GetCanonicalName();
+}
+
+void daeSimulationLoader::GetOutputInfo(size_t index, std::string& strName, size_t& numberOfPoints) const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
-    pTopLevelModel->CollectAllSTNs(mapSTNs);
+    daeVariable_t* pVariable = pData->m_ptrarrOutputs[index];
+
+    numberOfPoints = pVariable->GetNumberOfPoints();
+    strName        = pVariable->GetCanonicalName();
+}
+
+void daeSimulationLoader::GetParameterValue(size_t index, double* value, size_t numberOfPoints) const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrParameters.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeParameter_t* pParameter = pData->m_ptrarrParameters[index];
+    if(pParameter->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    real_t* s_values = pParameter->GetValuePointer();
+    for(size_t i = 0; i < numberOfPoints; i++)
+        value[i] = static_cast<double>(s_values[i]);
+}
+
+void daeSimulationLoader::GetInputValue(size_t index, double* value, size_t numberOfPoints) const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrInputs.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeVariable_t* pVariable = pData->m_ptrarrInputs[index];
+    if(pVariable->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    std::vector<real_t> s_values;
+    s_values.resize(numberOfPoints);
+    pVariable->GetValues(s_values);
+
+    for(size_t i = 0; i < numberOfPoints; i++)
+        value[i] = static_cast<double>(s_values[i]);
+}
+
+void daeSimulationLoader::GetOutputValue(size_t index, double* value, size_t numberOfPoints) const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrOutputs.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeVariable_t* pVariable = pData->m_ptrarrOutputs[index];
+    if(pVariable->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    std::vector<real_t> s_values;
+    s_values.resize(numberOfPoints);
+    pVariable->GetValues(s_values);
+
+    for(size_t i = 0; i < numberOfPoints; i++)
+        value[i] = static_cast<double>(s_values[i]);
+}
+
+void daeSimulationLoader::SetParameterValue(size_t index, double* value, size_t numberOfPoints)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrParameters.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeParameter_t* pParameter = pData->m_ptrarrParameters[index];
+    if(pParameter->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    real_t* s_values = pParameter->GetValuePointer();
+    for(size_t i = 0; i < numberOfPoints; i++)
+        s_values[i] = static_cast<real_t>(value[i]);
+}
+
+void daeSimulationLoader::SetInputValue(size_t index, double* value, size_t numberOfPoints)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrInputs.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeVariable_t* pVariable = pData->m_ptrarrInputs[index];
+    if(pVariable->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    std::vector<real_t> s_values;
+    s_values.resize(numberOfPoints);
+
+    for(size_t i = 0; i < numberOfPoints; i++)
+        s_values[i] = static_cast<real_t>(value[i]);
+
+    pVariable->SetValues(s_values);
+}
+
+void daeSimulationLoader::SetOutputValue(size_t index, double* value, size_t numberOfPoints)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrOutputs.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeVariable_t* pVariable = pData->m_ptrarrOutputs[index];
+    if(pVariable->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    std::vector<real_t> s_values;
+    s_values.resize(numberOfPoints);
+
+    for(size_t i = 0; i < numberOfPoints; i++)
+        s_values[i] = static_cast<real_t>(value[i]);
+
+    pVariable->SetValues(s_values);
 }
 
 void daeSimulationLoader::ShowSimulationExplorer()
@@ -381,7 +527,7 @@ void daeSimulationLoader::ShowSimulationExplorer()
     }
 }
 
-void daeSimulationLoader::LoadPythonSimulation(const std::string& strPythonFile, const std::string& strSimulationClass)
+void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const std::string& strSimulationClass)
 {
     try
     {
@@ -421,6 +567,35 @@ void daeSimulationLoader::LoadPythonSimulation(const std::string& strPythonFile,
         pData->m_pSimulation = boost::python::extract<daeSimulation_t*>(main_namespace["__daetools_simulation__"]);
         if(!pData->m_pSimulation)
             daeDeclareAndThrowException(exInvalidPointer);
+
+        // Collect all parameters and ports and initialize parameters/inputs/outputs arrays
+        std::vector<daeVariable_t*> ptrarrVariables;
+        std::map<std::string, daeParameter_t*> mapParameters;
+        std::map<std::string, daePort_t*> mapPorts;
+        daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
+
+        pTopLevelModel->CollectAllParameters(mapParameters);
+        pTopLevelModel->CollectAllPorts(mapPorts);
+
+        for(std::map<std::string, daeParameter_t*>::iterator iter = mapParameters.begin(); iter != mapParameters.end(); iter++)
+            pData->m_ptrarrParameters.push_back(iter->second);
+
+        for(std::map<std::string, daePort_t*>::iterator iter = mapPorts.begin(); iter != mapPorts.end(); iter++)
+        {
+            ptrarrVariables.clear();
+            iter->second->GetVariables(ptrarrVariables);
+
+            if(iter->second->GetType() == eInletPort)
+            {
+                for(size_t i = 0; i < ptrarrVariables.size(); i++)
+                    pData->m_ptrarrInputs.push_back(ptrarrVariables[i]);
+            }
+            else if(iter->second->GetType() == eOutletPort)
+            {
+                for(size_t i = 0; i < ptrarrVariables.size(); i++)
+                    pData->m_ptrarrOutputs.push_back(ptrarrVariables[i]);
+            }
+        }
     }
     catch(boost::python::error_already_set const &)
     {
@@ -439,20 +614,20 @@ void daeSimulationLoaderData::SetupLASolver(const std::string& strLASolver)
 {
     try
     {
-        boost::python::object main_namespace = m_pyMainModule.attr("__dict__");
-        boost::python::exec("import sys", main_namespace);
-        boost::python::exec("import daetools", main_namespace);
-        boost::python::exec("import daetools.pyDAE", main_namespace);
+//        boost::python::object main_namespace = m_pyMainModule.attr("__dict__");
+//        boost::python::exec("import sys", main_namespace);
+//        boost::python::exec("import daetools", main_namespace);
+//        boost::python::exec("import daetools.pyDAE", main_namespace);
 
-    // Achtung, Achtung!!
-    // LA solver is created and owned by the Python
-        daeLASolver_t* lasolver = NULL;
-        boost::python::exec("import daetools.dae_simulator.auxiliary", main_namespace);
-        std::string command = "__la_solver__ = daetools.dae_simulator.auxiliary.createLASolverByName(" + strLASolver + ")";
-        boost::python::exec(command.c_str(), main_namespace);
-        lasolver = boost::python::extract<daeLASolver_t*>(main_namespace["__la_solver__"]);
-        if(lasolver)
-            m_pDAESolver->SetLASolver(lasolver);
+//    // Achtung, Achtung!!
+//    // LA solver is created and owned by the Python
+//        daeLASolver_t* lasolver = NULL;
+//        boost::python::exec("import daetools.dae_simulator.auxiliary", main_namespace);
+//        std::string command = "__la_solver__ = daetools.dae_simulator.auxiliary.createLASolverByName('" + strLASolver + "')";
+//        boost::python::exec(command.c_str(), main_namespace);
+//        lasolver = boost::python::extract<daeLASolver_t*>(main_namespace["__la_solver__"]);
+//        if(lasolver)
+//            m_pDAESolver->SetLASolver(lasolver);
 
         /*
         if(strLASolver == "SuperLU")
@@ -532,6 +707,8 @@ void daeSimulationLoaderData::SetupDataReporter(const std::string& strDataReport
         m_pDataReporter = NULL;
         boost::python::exec("__data_reporter__ = daetools.pyDAE.daeTCPIPDataReporter()", main_namespace);
         m_pDataReporter = boost::python::extract<daeDataReporter_t*>(main_namespace["__data_reporter__"]);
+        std::string strProcessName = m_pSimulation->GetModel()->GetName() + "-" + boost::posix_time::to_iso_string(boost::posix_time::second_clock::local_time());
+        m_pDataReporter->Connect(strConnectionString, strProcessName);
 
     }
     catch(boost::python::error_already_set const &)
@@ -563,6 +740,4 @@ void daeSimulationLoaderData::SetupLog(const std::string& strLog)
 }
 
 
-}
-}
 }

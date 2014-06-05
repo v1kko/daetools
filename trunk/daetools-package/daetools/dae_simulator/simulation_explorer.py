@@ -392,12 +392,13 @@ class daeSimulationExplorer(QtGui.QDialog):
         
         elif language == 'Modelica':
             from daetools.code_generators.modelica import daeCodeGenerator_Modelica
-            name = self._simulation.m.GetStrippedName() + ".mo"
-            filename = str(QtGui.QFileDialog.getSaveFileName(self, "Choose File", name, "Modelica Files (*.mo)"))
-            if filename == '':
+            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
+                                                                            '',
+                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+            if directory == '':
                 return
             cg = daeCodeGenerator_Modelica()
-            cg.generateSimulation(self._simulation, filename = filename)
+            cg.generateSimulation(self._simulation, directory)
         
         elif language == 'FMI':
             from daetools.code_generators.fmi import daeCodeGenerator_FMI
@@ -421,7 +422,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         return self._runtimeSettings
     
     ############################################################################
-    #                   Imlementation (private methods)
+    #                   Implementation (private methods)
     ############################################################################
     def _processInputs(self):
         self._simulationName    = str(self._ui.simulationNameEdit.text())
@@ -451,7 +452,8 @@ class daeSimulationExplorer(QtGui.QDialog):
                 if _index != None and _index >= 0:
                     lasolverIndex = int(_index)
             self._lasolver = auxiliary.createLASolver(lasolverIndex)
-            self._daesolver.SetLASolver(self._lasolver)
+            if self._lasolver: # Can be None if SundialsLU has been selected
+                self._daesolver.SetLASolver(self._lasolver)
 
         if not self._datareporter:
             _index  = self._ui.datareporterComboBox.itemData(self._ui.datareporterComboBox.currentIndex())
@@ -478,11 +480,27 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._runtimeSettings['TimeHorizon']           = self._timeHorizon
         self._runtimeSettings['ReportingInterval']     = self._reportingInterval
         self._runtimeSettings['RelativeTolerance']     = self._relativeTolerance
-        self._runtimeSettings['DAESolver']             = self._simulation.DAESolver.Name          if self._simulation.DAESolver          else ''
-        self._runtimeSettings['LASolver']              = self._simulation.DAESolver.LASolver.Name if self._simulation.DAESolver.LASolver else ''
-        self._runtimeSettings['DataReporter']          = self._simulation.DataReporter.Name       if self._simulation.DataReporter       else ''
-        self._runtimeSettings['Log']                   = self._simulation.Log.Name                if self._simulation.Log                else ''
+        self._runtimeSettings['DAESolver']             = {'Name' : None}
+        self._runtimeSettings['LASolver']              = {'Name' : None}
+        self._runtimeSettings['DataReporter']          = {'Name' : None}
+        self._runtimeSettings['Log']                   = {'Name' : None}
+        if self._simulation.DAESolver:
+            self._runtimeSettings['DAESolver']    = {'Name'    : self._simulation.DAESolver.Name,
+                                                     'Options' : {}}
+        if self._simulation.DAESolver.LASolver:
+            self._runtimeSettings['LASolver']     = {'Name'    : self._simulation.DAESolver.LASolver.Name,
+                                                     'Options' : {}}
+        if self._simulation.DataReporter:
+            self._runtimeSettings['DataReporter'] = {'Name'          : self._simulation.DataReporter.Name,
+                                                     'ConnectString' : self._simulation.DataReporter.ConnectString,
+                                                     'ProcessName'   : self._simulation.DataReporter.ProcessName,
+                                                     'Options'       : {}}
+        if self._simulation.Log:
+            self._runtimeSettings['Log']          = {'Name'    : self._simulation.Log.Name,
+                                                     'Options' : {}}
+
         self._runtimeSettings['QuazySteadyState']      = self._quazySteadyState
+        self._runtimeSettings['CalculateSensitivities']= self._simulation.CalculateSensitivities
         
         self._runtimeSettings['Parameters']            = self._inspector.treeParameters.toDictionary()
         self._runtimeSettings['Domains']               = self._inspector.treeDomains.toDictionary()

@@ -29,7 +29,7 @@ class daeCodeGeneratorAnalyzer(object):
                                   }
 
         self._collectObjects(self._simulation.m)
-        #print self.ports
+        print self.ports
         #print self.models
         
         self.models.reverse()

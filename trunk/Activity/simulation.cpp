@@ -1217,6 +1217,16 @@ real_t daeSimulation::IntegrateUntilConditionSatisfied(daeCondition rCondition, 
 	return m_dCurrentTime;
 }
 
+bool daeSimulation::GetCalculateSensitivities() const
+{
+    return m_bCalculateSensitivities;
+}
+
+void daeSimulation::SetCalculateSensitivities(bool bCalculateSensitivities)
+{
+    m_bCalculateSensitivities = bCalculateSensitivities;
+}
+
 void CollectAllDomains(daeModel* pModel, std::map<string, daeDomain*>& mapDomains);
 void CollectAllParameters(daeModel* pModel, std::map<string, daeParameter*>& mapParameters);
 void CollectAllVariables(daeModel* pModel, std::map<string, daeVariable*>& mapVariables);
@@ -1918,8 +1928,8 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
         }
     }
 
-    m_dTimeHorizon = m_ptreeRuntimeSettings.get<real_t>("TimeHorizon");
-    m_dReportingInterval = m_ptreeRuntimeSettings.get<real_t>("ReportingInterval");
+    SetTimeHorizon(m_ptreeRuntimeSettings.get<real_t>("TimeHorizon"));
+    SetReportingInterval(m_ptreeRuntimeSettings.get<real_t>("ReportingInterval"));
     if(bPrintInfo)
     {
         std::cout << "      TimeHorizon       = " << m_dTimeHorizon << std::endl;

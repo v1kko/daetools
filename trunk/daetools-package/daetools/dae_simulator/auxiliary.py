@@ -15,13 +15,16 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
-import sys
+import sys, json
+from time import localtime, strftime
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 from daetools.pyDAE.logs import daePythonStdOutLog 
 from daetools.pyDAE.data_reporters import daePlotDataReporter, daeMatlabMATFileDataReporter 
 
 # These integers are used by the simulation loader too
+daeSundialsIDAS = 0
+
 (laSundialsLU, laSuperLU, laSuperLU_MT) = list(range(0, 3))
 (laAmesos_Klu, laAmesos_Superlu, laAmesos_Umfpack, laAmesos_Lapack, laAztecOO) = list(range(3, 8))
 (laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = list(range(8, 15))
@@ -32,6 +35,24 @@ from daetools.pyDAE.data_reporters import daePlotDataReporter, daeMatlabMATFileD
 
 (TCPIPDataReporter, NoOpDataReporter, DelegateDataReporter, TEXTFileDataReporter, PlotDataReporter) = list(range(0, 5))
 (MatlabMATFileDataReporter, BlackHoleDataReporter) = list(range(5, 7))
+
+def getAvailableDAESolvers():
+    available_dae_solvers = []
+    try:
+        from daetools.pyDAE import pyIDAS
+        available_dae_solvers.append(("Sundials IDAS", daeSundialsIDAS, "DAE"))
+    except Exception as e:
+        print str(e)
+
+    return available_dae_solvers
+
+def createDAESolver(daeIndex):
+    dae_solver = None
+
+    if daeIndex == daeSundialsIDAS:
+        dae_solver = daeIDAS()
+
+    return dae_solver
     
 def getAvailableNLPSolvers():
     available_nlp_solvers = []
@@ -263,7 +284,7 @@ def createLASolver(lasolverIndex):
         raise RuntimeError("Unsupported LA Solver selected")
     
     return lasolver
-
+    
 def createNLPSolver(minlpsolverIndex):
     nlpsolver = None
     
@@ -296,3 +317,82 @@ def createNLPSolver(minlpsolverIndex):
         raise RuntimeError("Unsupported (MI)NLP Solver selected")
     
     return nlpsolver
+
+def createDAESolverByName(name):
+    available_objects = getAvailableDAESolvers()
+    for obj in available_objects:
+        # obj[0]: name
+        # obj[1]: index
+        # obj[2]: description
+        if obj[0] == name:
+            return createDAESolver(obj[1])
+    return None
+
+def createLASolverByName(name):
+    available_objects = getAvailableLASolvers()
+    for obj in available_objects:
+        # obj[0]: name
+        # obj[1]: index
+        # obj[2]: description
+        if obj[0] == name:
+            return createLASolver(obj[1])
+    return None
+
+def createNLPSolverByName(name):
+    available_objects = getAvailableNLPSolvers()
+    for obj in available_objects:
+        # obj[0]: name
+        # obj[1]: index
+        # obj[2]: description
+        if obj[0] == name:
+            return createNLPSolver(obj[1])
+    return None
+
+def createDataReporterByName(name):
+    available_objects = getAvailableDataReporters()
+    for obj in available_objects:
+        # obj[0]: name
+        # obj[1]: index
+        # obj[2]: description
+        if obj[0] == name:
+            return createDataReporter(obj[1])
+    return None
+    
+def createLogByName(name):
+    available_objects = getAvailableLogs()
+    for obj in available_objects:
+        # obj[0]: name
+        # obj[1]: index
+        # obj[2]: description
+        if obj[0] == name:
+            return createLog(obj[1])
+    return None
+
+def InitializeSimulation(simulation, jsonSettings):
+    """
+    This function reads all information needed to initialize a simulation
+    from the jsonSettings argument, including DAE solver, LA solver, DataReporter, Log etc.
+    """
+    settings = json.loads(jsonSettings)
+    
+    log          = createLogByName(settings['Log']['Name'])
+    daesolver    = createDAESolverByName(settings['DAESolver']['Name'])
+    datareporter = createDataReporterByName(settings['DataReporter']['Name'])
+    lasolver     = None
+    la_solver_name = settings['LASolver']['Name']
+    if la_solver_name:
+        lasolver = createLASolverByName(la_solver_name)
+        daesolver.SetLASolver(lasolver)
+
+    connect_string  = settings['DataReporter']['ConnectString'].encode('ascii','ignore')
+    #process_name   = settings['DataReporter']['ProcessName']
+    process_name    = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if not datareporter.Connect(connect_string, process_name):
+        raise RuntimeError("Cannot connect datareporter")
+
+    calculateSensitivities = settings['CalculateSensitivities']
+
+    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities, jsonSettings)
+    
+    # Save objects somewhere so they don't get destroyed after leaving the scope
+    simulation.__rt_objects__ = [daesolver, lasolver, datareporter, log]

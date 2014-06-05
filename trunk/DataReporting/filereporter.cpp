@@ -18,6 +18,8 @@ daeFileDataReporter::~daeFileDataReporter()
 
 bool daeFileDataReporter::Connect(const string& strConnectString, const string& strProcessName)
 {
+    m_strConnectString    = strConnectString;
+    m_strProcessName      = strProcessName;
 	m_strFilename         = strConnectString;
 	m_drProcess.m_strName = strProcessName;
 

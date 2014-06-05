@@ -15,9 +15,19 @@ daeDataReporterRemote::~daeDataReporterRemote()
 	Disconnect();
 }
 
-std::string daeDataReporterRemote::GetName() const
+string daeDataReporterRemote::GetName() const
 {
     return m_strName;
+}
+
+string daeDataReporterRemote::GetConnectString() const
+{
+    return m_strConnectString;
+}
+
+string daeDataReporterRemote::GetProcessName() const
+{
+    return m_strProcessName;
 }
 
 bool daeDataReporterRemote::SendProcessName(const string& strProcessName)
@@ -31,6 +41,8 @@ bool daeDataReporterRemote::SendProcessName(const string& strProcessName)
 
 bool daeDataReporterRemote::Connect(const string& strConnectString, const string& strProcessName)
 {
+    m_strConnectString = strConnectString;
+    m_strProcessName   = strProcessName;
 	return true;
 }
 

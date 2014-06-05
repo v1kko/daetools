@@ -1358,6 +1358,35 @@ void daeVariable::ReAssignValue(const std::vector<size_t>& narrDomainIndexes, co
     ReAssignValue(narrDomainIndexes, value);
 }
 
+void daeVariable::GetValues(std::vector<real_t>& values) const
+{
+    if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+    size_t noPoints = GetNumberOfPoints();
+    values.resize(noPoints);
+
+    for(size_t i = 0; i < noPoints; i++)
+        values[i] = m_pModel->m_pDataProxy->GetValue(m_nOverallIndex + i);
+}
+
+void daeVariable::SetValues(const std::vector<real_t>& values)
+{
+    if(!m_pModel)
+		daeDeclareAndThrowException(exInvalidPointer);
+	if(!m_pModel->m_pDataProxy)
+		daeDeclareAndThrowException(exInvalidPointer);
+
+    size_t noPoints = GetNumberOfPoints();
+    if(noPoints != values.size())
+		daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < noPoints; i++)
+        m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, values[i]);
+}
+
 real_t daeVariable::GetValue(void)
 {
 	if(!m_pModel)

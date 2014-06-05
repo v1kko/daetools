@@ -90,6 +90,9 @@ BOOST_PYTHON_MODULE(pyActivity)
                                                                                                             DOCSTR_daeSimulation_LastSatisfiedCondition)
 
 
+        .add_property("CalculateSensitivities", &daeSimulation::GetCalculateSensitivities,
+                                                &daeSimulation::SetCalculateSensitivities,                  DOCSTR_daeSimulation_CalculateSensitivities)
+
         .add_property("JSONRuntimeSettings",    &daeSimulation::GetJSONRuntimeSettings,
                                                 &daeSimulation::SetJSONRuntimeSettings,                     DOCSTR_daeSimulation_JSONRuntimeSettings)
 

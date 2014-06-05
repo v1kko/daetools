@@ -23,6 +23,16 @@ std::string daeDataReporterLocal::GetName() const
     return m_strName;
 }
 
+string daeDataReporterLocal::GetConnectString() const
+{
+    return m_strConnectString;
+}
+
+string daeDataReporterLocal::GetProcessName() const
+{
+    return m_strProcessName;
+}
+
 bool daeDataReporterLocal::StartRegistration(void)
 {
 	return true;
@@ -147,8 +157,10 @@ daeNoOpDataReporter::~daeNoOpDataReporter()
 {
 }
 
-bool daeNoOpDataReporter::Connect(const string& /*strConnectString*/, const string& /*strProcessName*/)
+bool daeNoOpDataReporter::Connect(const string& strConnectString, const string& strProcessName)
 {
+    m_strConnectString = strConnectString;
+    m_strProcessName   = strProcessName;
 	return true;
 }
 

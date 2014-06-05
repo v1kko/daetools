@@ -108,6 +108,8 @@ class treeItem(object):
                 d['DiscretizationMethod'] = str(self.discrMethod)
                 d['DiscretizationOrder']  = int(self.order)
                 d['NumberOfIntervals']    = int(self.numberOfIntervals)
+                d['LowerBound']           = float(min(self._value))
+                d['UpperBound']           = float(max(self._value))
                 d['Points']               = list(self._value)
                 d['Units']                = self.units.toDict()
             dictItems[self.canonicalName] = d

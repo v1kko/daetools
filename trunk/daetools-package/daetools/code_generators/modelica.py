@@ -332,7 +332,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                     }
         resultWrapper = wrapperTemplate % dictModel
 
-        filename = os.path.join(directory, 'simulation-%s.mo' % self.topLevelModel.Name)
+        filename = os.path.join(directory, 'simulation-%s.mo' % self.topLevelModel.GetStrippedName())
         f = open(filename, "w")
         f.write(resultWrapper)
         f.close()
@@ -419,7 +419,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             attributes  = '(unit="{units}")'.format(units = units)
             description = domain['Description']
             
-            domTemplate   = s_indent + 'parameter Integer {name}_np "Number of points in domain {name}";'
+            domTemplate   = s_indent + 'parameter Integer {name}_np = {noPoints} "Number of points in domain {name}";'
             paramTemplate = s_indent + 'parameter Real{domains} {name}{attributes} "{description}";\n'
             
             sParameters.append(domTemplate.format(name = name,
@@ -689,7 +689,8 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         for domain in runtimeInformation['Domains']:
             relativeName = daeGetRelativeName(self.wrapperInstanceName, domain['CanonicalName'])
             relativeName = self.exprFormatter.formatIdentifier(relativeName)
-            self.parametersValues[relativeName+'_np'] = str(domain['NumberOfPoints'])
+            # Achtung, Achtung! Must be set in model definition!
+            #self.parametersValues[relativeName+'_np'] = str(domain['NumberOfPoints'])
             self.parametersValues[relativeName]       = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
             
         for parameter in runtimeInformation['Parameters']:

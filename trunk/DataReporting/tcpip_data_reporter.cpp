@@ -71,8 +71,8 @@ bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string&
 		return false;
 	}
 
-	m_strConnectionString = strConnectString;
-	m_strProcessName      = strProcessName;
+	m_strConnectString = strConnectString;
+	m_strProcessName   = strProcessName;
 	
 	return SendProcessName(strProcessName);
 }

@@ -28,6 +28,8 @@ public:
 
 public:
     virtual std::string GetName() const {return "BlackHoleDataReporter";}
+    virtual std::string GetConnectString() const {return "";}
+    virtual std::string GetProcessName() const {return "";}
     virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
 	virtual bool Disconnect(void){return true;}
 	virtual bool IsConnected(void){return true;}
@@ -51,6 +53,8 @@ public:
 
 public:
     virtual std::string GetName() const;
+    virtual std::string GetConnectString() const;
+    virtual std::string GetProcessName() const;
     virtual bool StartRegistration(void);
 	virtual bool RegisterDomain(const daeDataReporterDomain* pDomain);
 	virtual bool RegisterVariable(const daeDataReporterVariable* pVariable);
@@ -63,6 +67,8 @@ public:
 
 public:
     std::string                 m_strName;
+    string                      m_strConnectString;
+    string                      m_strProcessName;
 	real_t						m_dCurrentTime;
 	daeDataReceiverProcess		m_drProcess;
 };
@@ -154,6 +160,8 @@ public:
 
 public:
     virtual std::string GetName() const;
+    virtual std::string GetConnectString() const {return "";}
+    virtual std::string GetProcessName() const {return "";}
     virtual bool Connect(const string& strConnectString, const string& strProcessName);
 	virtual bool Disconnect(void);
 	virtual bool IsConnected(void);
@@ -702,7 +710,9 @@ public:
 	virtual ~daeDataReporterRemote(void);
 
 public:
-    std::string GetName() const;
+    string GetName() const;
+    string GetConnectString() const;
+    string GetProcessName() const;
     bool Connect(const string& strConnectString, const string& strProcessName);
 	bool Disconnect(void);
 	bool IsConnected(void);
@@ -721,7 +731,7 @@ public:
 	
 protected:
     std::string              m_strName;
-    string					 m_strConnectionString;
+    string					 m_strConnectString;
 	string					 m_strProcessName;
 	real_t                   m_dCurrentTime;
 	daeMessageFormatter		 m_msgFormatter;

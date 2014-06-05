@@ -131,11 +131,12 @@ public:
 	void Initialize(daeDAESolver_t* pDAESolver, 
 					daeDataReporter_t* pDataReporter, 
 					daeLog_t* pLog,
-                    bool bCalculateSensitivities = false)
+                    bool bCalculateSensitivities = false,
+                    const std::string& strJSONRuntimeSettings = "")
 	{
-        this->get_override("Initialize")(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
+        this->get_override("Initialize")(pDAESolver, pDataReporter, pLog, bCalculateSensitivities, strJSONRuntimeSettings);
 	}
-	
+
 	void Reinitialize(void)
 	{
 		this->get_override("Reinitialize")();

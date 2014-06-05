@@ -17,6 +17,7 @@ const char* DOCSTR_daeSimulation = "";
     const char* DOCSTR_daeSimulation_AbsoluteTolerances = "";
     const char* DOCSTR_daeSimulation_LastSatisfiedCondition = "";
     const char* DOCSTR_daeSimulation_JSONRuntimeSettings = "";
+    const char* DOCSTR_daeSimulation_CalculateSensitivities = "";
     const char* DOCSTR_daeSimulation_DataReporter = "";
     const char* DOCSTR_daeSimulation_Log = "";
     const char* DOCSTR_daeSimulation_DAESolver = "";
