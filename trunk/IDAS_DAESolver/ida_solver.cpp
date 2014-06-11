@@ -133,7 +133,7 @@ daeIDALASolver_t* daeIDASolver::GetLASolver() const
 
 void daeIDASolver::SetLASolver(daeLASolver_t* pLASolver)
 {
-    daeIDALASolver_t* la_solver = dynamic_cast<daeIDALASolver_t*>(pLASolver);
+    daeIDALASolver_t* la_solver = static_cast<daeIDALASolver_t*>(pLASolver);
     if(!la_solver)
         daeDeclareAndThrowException(exInvalidCall);
 
