@@ -107,6 +107,35 @@ Trilinos
     :members:
     :undoc-members:
 
+
+Pardiso
+-------
+.. py:module:: solvers.pardiso.pyPardiso
+
+.. rubric:: Instantiation function
+.. autofunction:: pyPardiso.daeCreatePardisoSolver
+
+.. rubric:: Classes
+.. autoclass:: pyPardiso.daePardisoSolver
+    :members:
+    :undoc-members:
+    :exclude-members: SaveAsXPM, Name
+
+
+IntelPardiso
+------------
+.. py:module:: solvers.intel_pardiso.pyIntelPardiso
+
+.. rubric:: Instantiation function
+.. autofunction:: pyIntelPardiso.daeCreateIntelPardisoSolver
+
+.. rubric:: Classes
+.. autoclass:: pyIntelPardiso.daeIntelPardisoSolver
+    :members:
+    :undoc-members:
+    :exclude-members: SaveAsXPM, Name
+
+    
 Optimization solvers
 ====================
 .. py:currentmodule:: pyCore

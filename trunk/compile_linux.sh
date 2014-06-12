@@ -59,6 +59,7 @@ PROJECT:
         trilinos        Build Trilinos Amesos/AztecOO linear solver and its python extension module.
         superlu         Build SuperLU linear solver and its python extension module.
         superlu_mt      Build SuperLU_MT linear solver and its python extension module.
+        pardiso         Build PARDISO linear solver and its python extension module.
         intel_pardiso   Build Intel PARDISO linear solver and its python extension module.
         bonmin          Build BONMIN minlp solver and its python extension module.
         ipopt           Build IPOPT nlp solver and its python extension module.
@@ -205,6 +206,7 @@ do
     trilinos)         ;;
     superlu)          ;;
     superlu_mt)       ;;
+    pardiso)          ;;
     intel_pardiso)    ;;
     bonmin)           ;;
     ipopt)            ;;
@@ -344,8 +346,12 @@ do
                   compile pyTrilinos         "-j1"
                   ;;
 
-        intel_pardiso) compile LA_Intel_MKL   "-j1"
-                       compile pyIntelPardiso "-j1"
+        pardiso) compile LA_Pardiso "-j1"
+                 compile pyPardiso  "-j1"
+                 ;;
+
+        intel_pardiso) compile LA_IntelPardiso "-j1"
+                       compile pyIntelPardiso  "-j1"
                        ;;
 
         bonmin) compile BONMIN_MINLPSolver "-j1" "CONFIG+=shellBONMIN"

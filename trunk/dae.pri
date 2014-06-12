@@ -2,7 +2,7 @@
 #                 DAE Tools Project: www.daetools.com
 #                 Copyright (C) Dragan Nikolic, 2014
 #************************************************************************************
-# DAE Tools is free software; you can redistribute it and/or modify it under the 
+# DAE Tools is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License version 3 as published by the Free Software
 # Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -35,14 +35,14 @@ macx-g++::CONFIG += x86 x86_64
 #macx-g++::SHARED_LIB_EXT        = dylib
 
 win32-msvc2008::SHARED_LIB_PREFIX   =
-win32-g++-*::SHARED_LIB_PREFIX      = 
+win32-g++-*::SHARED_LIB_PREFIX      =
 linux-g++::SHARED_LIB_PREFIX        = lib
 macx-g++::SHARED_LIB_PREFIX         = lib
 
 win32-msvc2008::SHARED_LIB_POSTFIX  = $${DAE_TOOLS_MAJOR}
 win32-g++-*::SHARED_LIB_POSTFIX     = $${DAE_TOOLS_MAJOR}
-linux-g++::SHARED_LIB_POSTFIX       = 
-macx-g++::SHARED_LIB_POSTFIX        = 
+linux-g++::SHARED_LIB_POSTFIX       =
+macx-g++::SHARED_LIB_POSTFIX        =
 
 win32-msvc2008::SHARED_LIB_APPEND   = dll
 win32-g++-*::SHARED_LIB_APPEND      = dll
@@ -66,7 +66,7 @@ CONFIG(debug, debug|release) {
 }
 
 CONFIG(release, debug|release) {
-	DAE_DEST_DIR = ../release
+    DAE_DEST_DIR = ../release
     OBJECTS_DIR = release
 }
 
@@ -77,23 +77,23 @@ DESTDIR = $${DAE_DEST_DIR}
 #####################################################################################
 crossCompile{
     # Not used
-    PYTHON = "???" 
-    
+    PYTHON = "???"
+
     PYTHON_MAJOR = 2
     PYTHON_MINOR = 7
-    PYTHON_ABI   = 
+    PYTHON_ABI   =
 
     # Numpy version
-    #NUMPY_VERSION = 
+    #NUMPY_VERSION =
 
     # System := {'Linux', 'Windows', 'Darwin'}
     DAE_SYSTEM   = Windows
 
     # Machine := {'i386', ..., 'i686', 'AMD64'}
     DAE_MACHINE = win32
-    
+
     RT =
-    
+
     PYTHON_INCLUDE_DIR  = ../Python27/include
     PYTHON_LIB_DIR      = ../Python27/libs
     PYTHON_LIB          = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
@@ -104,12 +104,12 @@ crossCompile{
     shellCompile {
         PYTHON = $$customPython
     }
-    
+
     # If compiling from the GUI use system's default python version
     !shellCompile {
         PYTHON = python
     }
-    
+
     PYTHON_MAJOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[0])\")
     PYTHON_MINOR = $$system($${PYTHON} -c \"import sys; print(sys.version_info[1])\")
     PYTHON_ABI   = $$system($${PYTHON} -c \"import sysconfig; flags = sysconfig.get_config_vars(); abi = flags[\'ABIFLAGS\'] if (\'ABIFLAGS\' in flags) else \'\'; print(abi)\")
@@ -123,20 +123,20 @@ crossCompile{
     # Machine := {'i386', ..., 'i686', 'AMD64'}
     MACHINE_COMMAND = "import platform; p={'Linux':platform.machine(), 'Darwin':'universal', 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
     DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
-    
+
     win32-msvc2008::RT =
     linux-g++::RT      = -lrt
     macx-g++::RT       =
-    
+
     win32::PYTHON_INCLUDE_DIR  = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
     unix::PYTHON_INCLUDE_DIR   = $$system($${PYTHON} -c \"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())\")
 
     win32::PYTHON_LIB_DIR      = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/libs
     unix::PYTHON_LIB_DIR       = $$system($${PYTHON} -c \"import sys; print(sys.prefix)\")/lib
-    
+
     win32::PYTHON_LIB          = python$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
     unix::PYTHON_LIB           = -lpython$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
-    
+
     !shellCompile {
         message(Using python [$${PYTHON}] v$${PYTHON_MAJOR}.$${PYTHON_MINOR}$${PYTHON_ABI})
     }
@@ -155,7 +155,7 @@ crossCompile{
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
-# Necessary to pass lintian test in debian  
+# Necessary to pass lintian test in debian
 ####################################################################################
 #CONFIG(release, debug|release){
 #    unix:QMAKE_LFLAGS += -s
@@ -180,7 +180,7 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 #unix::QMAKE_CXXFLAGS += -ansi -pedantic
 
 # Unresolved _gethostname problem in MinGW
-#win32-g++-*::QMAKE_LFLAGS += -Wl,--enable-stdcall-fixup 
+#win32-g++-*::QMAKE_LFLAGS += -Wl,--enable-stdcall-fixup
 
 # If compiling from the compile_linux.sh shell script supress all warnings
 shellCompile {
@@ -197,7 +197,7 @@ win32-g++-*::QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra \
                                       -Wno-unused-parameter \
                                       -Wno-unused-variable \
                                       -Wno-unused-but-set-variable
-    
+
 linux-g++::QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra \
                                     -Wno-sign-compare \
                                     -Wno-unused-parameter \
@@ -333,7 +333,7 @@ macx-g++::QMAKE_CXXFLAGS        +=
 win32-msvc2008::BLAS_LAPACK_LIBS =  $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
                                     $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
                                     $${BLAS_LAPACK_LIBDIR}/libf2c.lib
-                                    
+
 win32-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
 # 1. OpenBLAS dynamically linked:
@@ -501,7 +501,7 @@ win32-g++-*::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
 macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
 
 #####################################################################################
-#                                  TRILINOS 
+#                                  TRILINOS
 #####################################################################################
 TRILINOS_DIR  = ../trilinos/build
 
@@ -579,6 +579,19 @@ contains(ARCH, x86_64) {
 }
 
 
+######################################################################################
+#                                Pardiso
+######################################################################################
+PARDISO_DIR = ../pardiso
+
+win32-msvc2008::PARDISO_LIBS = -L$${PARDISO_DIR}/lib libpardiso500-WIN-X86-64.lib
+linux-g++::PARDISO_LIBS      = -L$${PARDISO_DIR}/lib \
+                               -lpardiso500-GNU472-X86-64 \
+                               $${BLAS_LAPACK_LIBS} $${GFORTRAN} \
+                               -lgomp
+macx-g++::PARDISO_LIBS       =
+
+
 #####################################################################################
 #                                 MPI SUPPORT
 #####################################################################################
@@ -586,13 +599,13 @@ enable_mpi {
 QMAKE_CXXFLAGS += -DDAE_MPI
 
 win32-msvc2008::MPI =
-unix::MPI  = 
+unix::MPI  =
 
 win32-msvc2008::MPI_INCLUDE =
 unix::MPI_INCLUDE  = /usr/include/mpi
 
 win32-msvc2008::MPI_LIBDIR =
-unix::MPI_LIBDIR  = 
+unix::MPI_LIBDIR  =
 
 win32-msvc2008::MPI_LIBS =
 unix::MPI_LIBS           = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
@@ -615,6 +628,7 @@ win32-msvc2008::DAE_IPOPT_SOLVER_LIB         = cdaeIPOPT_NLPSolver.lib
 win32-msvc2008::DAE_NLOPT_SOLVER_LIB         = cdaeNLOPT_NLPSolver.lib
 win32-msvc2008::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
 win32-msvc2008::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
+win32-msvc2008::DAE_PARDISO_SOLVER_LIB       = cdaePardiso_LASolver.lib
 win32-msvc2008::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
 
 win32-g++-*::DAE_CORE_LIB                 = -lcdaeCore
@@ -630,7 +644,9 @@ win32-g++-*::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
 win32-g++-*::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
 win32-g++-*::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
 win32-g++-*::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
+win32-g++-*::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 win32-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
+
 
 unix::DAE_CORE_LIB                 = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
@@ -645,6 +661,7 @@ unix::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
 unix::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
 unix::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
 unix::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
+unix::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 unix::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}

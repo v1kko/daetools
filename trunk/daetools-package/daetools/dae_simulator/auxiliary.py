@@ -27,7 +27,7 @@ daeSundialsIDAS = 0
 
 (laSundialsLU, laSuperLU, laSuperLU_MT) = list(range(0, 3))
 (laAmesos_Klu, laAmesos_Superlu, laAmesos_Umfpack, laAmesos_Lapack, laAztecOO) = list(range(3, 8))
-(laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = list(range(8, 15))
+(laPardiso, laIntelPardiso, laIntelMKL, laAmdACML, laLapack, laMagmaLapack, laSuperLU_CUDA, laCUSP) = list(range(8, 16))
 
 (nlpIPOPT, nlpNLOPT, nlpBONMIN) = list(range(0, 3))
 
@@ -120,6 +120,14 @@ def getAvailableLASolvers():
             del sys.modules['daetools.solvers.trilinos']
     except Exception as e:
         pass
+
+    try:
+        from daetools.solvers.pardiso import pyPardiso
+        available_la_solvers.append(("Pardiso", laPardiso, "sparse, OpenMP, direct"))
+        if 'daetools.solvers.pardiso' in sys.modules:
+            del sys.modules['daetools.solvers.pardiso']
+    except Exception as e:
+        print(e)
 
     try:
         from daetools.solvers.intel_pardiso import pyIntelPardiso
@@ -251,6 +259,10 @@ def createLASolver(lasolverIndex):
     elif lasolverIndex == laAztecOO:
         from daetools.solvers.trilinos import pyTrilinos
         lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "ILUT")
+
+    elif lasolverIndex == laPardiso:
+        from daetools.solvers.pardiso import pyPardiso
+        lasolver = pyPardiso.daeCreatePardisoSolver()
 
     elif lasolverIndex == laIntelPardiso:
         from daetools.solvers.intel_pardiso import pyIntelPardiso

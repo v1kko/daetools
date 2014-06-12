@@ -11,7 +11,7 @@
 #include <python.h>
 #endif
 #include <string>
-#include "../LA_IntelPardiso/mkl_pardiso_sparse_la_solver.h"
+#include "../LA_Pardiso/pardiso_sparse_la_solver.h"
 #include <boost/python.hpp>
 //#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
@@ -22,8 +22,8 @@ using namespace dae::solver;
 
 namespace daepython
 {
-boost::python::list daeIntelPardisoSolver_get_iparm(daeIntelPardisoSolver& self);
-void daeIntelPardisoSolver_set_iparm(daeIntelPardisoSolver& self, boost::python::list l_iparm);
+boost::python::list daePardisoSolver_get_iparm(daePardisoSolver& self);
+void daePardisoSolver_set_iparm(daePardisoSolver& self, boost::python::list l_iparm);
 
 }
 

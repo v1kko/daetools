@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'about.ui'
 #
-# Created: Wed Oct 30 01:00:24 2013
+# Created: Thu Jun 12 15:59:21 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -262,14 +262,15 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - Bonmin (CPL) </span><a href=\"https://projects.coin-or.org/Bonmin\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">https://projects.coin-or.org/Bonmin</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - NLOPT (GNU LGPL 2.1+) </span><a href=\"http://ab-initio.mit.edu/wiki/index.php/NLopt\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://ab-initio.mit.edu/wiki/index.php/NLopt</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - deal.II (GNU LGPL 2.1+) </span><a href=\"http://www.dealii.org\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://www.dealii.org</span></a></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> </span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">DAE Tools can optionally use the following proprietary software libraries:</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - Intel MKL </span><a href=\"http://software.intel.com/en-us/articles/intel-mkl\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://software.intel.com/en-us/articles/intel-mkl</span></a></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - Intel Pardiso solver </span><a href=\"https://software.intel.com/en-us/intel-mkl\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">https://software.intel.com/en-us/intel-mkl</span></a></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - Pardiso solver </span><a href=\"http://www.pardiso-project.org\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://www.pardiso-project.org</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\"> - METIS </span><a href=\"http://glaros.dtc.umn.edu/gkhome/views/metis\"><span style=\" font-size:9pt; text-decoration: underline; color:#0000ff;\">http://glaros.dtc.umn.edu/gkhome/views/metis</span></a></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">NOTE:</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">It is YOUR RESPONSIBILITY to ensure that you are entitled to download and use </span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">these third party proprietary libraries.</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">these third-party proprietary libraries.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt; font-weight:600;\"><br /></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtGui.QApplication.translate("About", "DAE Tools", None, QtGui.QApplication.UnicodeUTF8))
         self.textSundials_2.setHtml(QtGui.QApplication.translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"

@@ -55,17 +55,20 @@ Mandatory packages:
 * pyQt4 (4.x): `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
 * OpenBLAS: `<http://www.openblas.net>`_
 
-Optional packages (3rd party linear solvers):
+Optional packages (proprietary):
 
-* Intel Pardiso (proprietary)
+* Pardiso linear solver: `<http://www.pardiso-project.org>`_
+* Intel Pardiso linear solver: `<https://software.intel.com/en-us/intel-mkl>`_
+* METIS graph partitioning: `<http://glaros.dtc.umn.edu/gkhome/views/metis>`_
 
 For more information on how to install packages please refer to the documentation for the specific library.
 By default all versions (GNU/Linux, Windows and MacOS) come with the Sundials dense LU and Lapack linear
-solvers, SuperLU, Trilinos Amesos (with built-in support for KLU, SuperLU and Lapack linear solvers),
+solvers, SuperLU, SuperLU_MT, Trilinos Amesos (with built-in support for KLU, SuperLU and Lapack linear solvers),
 Trilinos AztecOO (with built-in support for Ifpack and ML preconditioners), NLOPT and IPOPT/BONMIN
-(with MUMPS linear solver and  PORD ordering). Standalone SuperLU_MT is available on GNU/Linux and
-MacOS versions only. Additional linear solvers (such as Intel Pardiso) must be downloaded separately
-since they are not free software.
+(with MUMPS linear solver and PORD ordering).
+
+Additional linear solvers (such as Pardiso and IntelPardiso) must be downloaded
+separately since they are subject to different licencing conditions (not free software).
 
 Getting the packages
 ====================
