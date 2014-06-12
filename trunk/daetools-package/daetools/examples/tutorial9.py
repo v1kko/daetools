@@ -29,6 +29,7 @@ Currently there are 3rd party linear equations solvers:
 - SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)
 - Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
 - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
+- Pardiso: multi-threaded sparse direct solver defined in pyPardiso module (proprietary)
 """
 
 import sys
@@ -41,6 +42,7 @@ try:
     #from daetools.solvers.superlu import pySuperLU
     #from daetools.solvers.superlu_mt import pySuperLU_MT
     #from daetools.solvers.intel_pardiso import pyIntelPardiso
+    #from daetools.solvers.pardiso import pyPardiso
 except ImportError as e:
     print(('Unable to import LA solver: {0}'.format(e)))
 
@@ -135,35 +137,47 @@ def consoleRun():
 
     # The default linear solver is Sundials dense sequential solver (LU decomposition).
     # The following 3rd party direct linear solvers are supported:
+    #   - Pardiso (multi-threaded - OMP)
     #   - IntelPardiso (multi-threaded - OMP)
     #   - SuperLU (sequential)
     #   - SuperLU_MT (multi-threaded - pthreads, OMP)
     #   - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack
-    # If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).
-    # If you are using OMP capable solvers you should set the number of threads to the number of cores.
-    # For instance:
+    # If you are using Pardiso or IntelPardiso solvers you have to export their bin directories,
+    # using, for instance, LD_LIBRARY_PATH shell variable (for more details see their documentation).
+    # If you are using OpenMP capable solvers you should set the number of threads
+    # (typically to the number of cores), for instance:
     #    export OMP_NUM_THREADS=4
+    # or if using IntelPardiso solver:
+    #    export MKL_NUM_THREADS=24
     # You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).
 
-    # Import desired module and uncomment corresponding solver and set it by using SetLASolver function
-    print("Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
+    # Import desired solver module (uncomment it from below) and set it using SetLASolver function:
+    #print("Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()
-    #lasolver.SetOpenBLASNoThreads(4)
+    #lasolver     = pyPardiso.daeCreatePardisoSolver()
     daesolver.SetLASolver(lasolver)
-    
-    """"
-    # Intel Pardiso in/out parameters (iparm array)
+
+    """
+    # Get Pardiso/IntelPardiso parameters (iparm[64] list of integers)
     iparm = lasolver.get_iparm()
-    print iparm
-    # Set/get varios options
-    iparm[19] = 1
-    # Set it back
+    iparm_def = list(iparm) # Save it for comparison
+    # Change some options
+    # Achtung, Achtung!!
+    # The meaning of items in iparm[64] is NOT identical in Pardiso and IntelPardiso solvers!!
+    iparm[ 7] = 2 # Max. number of iterative refinement steps (common for both Pardiso and IntelPardiso)
+    #iparm[27] = 1 # in Pardiso it means:      use METIS parallel reordering
+                   # in IntelPardiso it means: use single precision (do not change it!)
+    # Set them back
     lasolver.set_iparm(iparm)    
-    print lasolver.get_iparm()
+    iparm = lasolver.get_iparm()
+    # Print the side by side comparison
+    print('iparm     default new')
+    for i in range(64):
+        print 'iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i])
     """
     
     # Enable reporting of all variables

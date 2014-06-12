@@ -421,6 +421,62 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._processInputs()
         return self._runtimeSettings
     
+    @staticmethod
+    def saveJSONSettings(filename, simulation, simulationName):
+        jsonSettings = daeSimulationExplorer.generateJSONSettings(simulation, simulationName)
+        f = open(filename, 'w')
+        f.write(jsonSettings)
+        f.close()
+        
+    @staticmethod
+    def generateJSONSettings(simulation, simulationName):
+        try:
+            # Create application in case there is not one already created
+            if not QtGui.QApplication.instance():
+                app_ = QtGui.QApplication(sys.argv)
+
+            _inspector = daeSimulationInspector(simulation)
+
+            _runtimeSettings = {}
+            _runtimeSettings['Name']                  = simulationName
+            _runtimeSettings['TimeHorizon']           = simulation.TimeHorizon
+            _runtimeSettings['ReportingInterval']     = simulation.ReportingInterval
+            _runtimeSettings['RelativeTolerance']     = simulation.DAESolver.RelativeTolerance
+            _runtimeSettings['DAESolver']             = {'Name' : None}
+            _runtimeSettings['LASolver']              = {'Name' : None}
+            _runtimeSettings['DataReporter']          = {'Name' : None}
+            _runtimeSettings['Log']                   = {'Name' : None}
+            if simulation.DAESolver:
+                _runtimeSettings['DAESolver']    = {'Name'    : simulation.DAESolver.Name,
+                                                    'Options' : {}}
+            if simulation.DAESolver.LASolver:
+                _runtimeSettings['LASolver']     = {'Name'    : simulation.DAESolver.LASolver.Name,
+                                                    'Options' : {}}
+            if simulation.DataReporter:
+                _runtimeSettings['DataReporter'] = {'Name'          : simulation.DataReporter.Name,
+                                                    'ConnectString' : simulation.DataReporter.ConnectString,
+                                                    'ProcessName'   : simulation.DataReporter.ProcessName,
+                                                    'Options'       : {}}
+            if simulation.Log:
+                _runtimeSettings['Log']          = {'Name'    : simulation.Log.Name,
+                                                    'Options' : {}}
+
+            _runtimeSettings['QuazySteadyState']       = True if simulation.InitialConditionMode == eQuasySteadyState else False
+            _runtimeSettings['CalculateSensitivities'] = simulation.CalculateSensitivities
+
+            _runtimeSettings['Parameters']             = _inspector.treeParameters.toDictionary()
+            _runtimeSettings['Domains']                = _inspector.treeDomains.toDictionary()
+            if not _runtimeSettings['QuazySteadyState']:
+                _runtimeSettings['InitialConditions']  = _inspector.treeInitialConditions.toDictionary()
+            _runtimeSettings['DOFs']                   = _inspector.treeDOFs.toDictionary()
+            _runtimeSettings['STNs']                   = _inspector.treeStates.toDictionary()
+            _runtimeSettings['Outputs']                = _inspector.treeOutputVariables.toDictionary()
+
+            return json.dumps(_runtimeSettings, indent = 4, sort_keys = True)
+
+        except Exception as e:
+            print(str(e))
+            
     ############################################################################
     #                   Implementation (private methods)
     ############################################################################
@@ -509,7 +565,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._runtimeSettings['DOFs']                  = self._inspector.treeDOFs.toDictionary()
         self._runtimeSettings['STNs']                  = self._inspector.treeStates.toDictionary()
         self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
-        
+
     def _slotCancel(self):
         self.done(QtGui.QDialog.Rejected)
 
