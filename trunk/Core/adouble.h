@@ -2,7 +2,7 @@
                  DAE Tools Project: www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
+DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -25,7 +25,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #endif // DAEDLL
 
 #else // WIN32
-#define DAE_CORE_API 
+#define DAE_CORE_API
 #endif // WIN32
 
 // Some M$ macro crap
@@ -48,16 +48,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <float.h>
 #include <stack>
 
-namespace dae 
+namespace dae
 {
-namespace core 
+namespace core
 {
 using units::base_unit;
 using units::unit;
 using units::quantity;
 
 /*********************************************************************************************
-	daeCondition
+    daeCondition
 **********************************************************************************************/
 class condNode;
 class adNode;
@@ -71,77 +71,85 @@ typedef boost::shared_ptr<adNodeArray> adNodeArrayPtr;
 typedef boost::shared_ptr<condNode>    condNodePtr;
 
 class DAE_CORE_API daeCondition : public io::daeSerializable,
-							      public daeExportable_t
+                                  public daeExportable_t
 {
 public:
-	daeDeclareDynamicClass(daeCondition)
-	daeCondition(void);
-	daeCondition(condNodePtr condition);
-	virtual ~daeCondition(void);
+    daeDeclareDynamicClass(daeCondition)
+    daeCondition(void);
+    daeCondition(condNodePtr condition, daeModel* pModel = NULL, real_t dEventTolerance = 0);
+    virtual ~daeCondition(void);
 
 public:
-	virtual void Open(io::xmlTag_t* pTag);
-	virtual void Save(io::xmlTag_t* pTag) const;
-	virtual void OpenRuntime(io::xmlTag_t* pTag);
-	virtual void SaveRuntime(io::xmlTag_t* pTag) const;
+    virtual void Open(io::xmlTag_t* pTag);
+    virtual void Save(io::xmlTag_t* pTag) const;
+    virtual void OpenRuntime(io::xmlTag_t* pTag);
+    virtual void SaveRuntime(io::xmlTag_t* pTag) const;
 
-	virtual void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
 
-	virtual bool Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual bool Evaluate(const daeExecutionContext* pExecutionContext) const;
     operator bool(void);
 
+    // Operators OR
     daeCondition operator ||(const daeCondition& rCondition) const;
+    daeCondition operator |(const daeCondition& rCondition) const; // used in python
+    // Operators AND
     daeCondition operator &&(const daeCondition& rCondition) const;
-    daeCondition operator |(const daeCondition& rCondition) const;
-    daeCondition operator &(const daeCondition& rCondition) const;
+    daeCondition operator &(const daeCondition& rCondition) const; // used in python
+    // Unary operator NOT
     daeCondition operator !(void) const;
-	
-	void   SetEventTolerance(real_t dEventTolerance);
-	real_t GetEventTolerance(void) const;
+    daeCondition operator ~(void) const; // used in python
 
-	void BuildExpressionsArray(const daeExecutionContext* pExecutionContext);
+    void   SetEventTolerance(real_t dEventTolerance);
+    real_t GetEventTolerance(void) const;
+
+    void BuildExpressionsArray(const daeExecutionContext* pExecutionContext);
     void GetExpressionsArray(std::vector<adNode*>& ptrarrExpressions);
-	string SaveNodeAsPlainText(void) const;
-    
-    condNodePtr getSetupNode() const 
-	{
-		return m_pSetupConditionNode;
-	}
-    
-    condNode* getSetupNodeRawPtr() const 
-	{
-		return m_pSetupConditionNode.get();
-	}
 
-    condNodePtr getRuntimeNode() const 
-	{
-		return m_pConditionNode;
-	}
-    
-    condNode* getRuntimeNodeRawPtr() const 
-	{
-		return m_pConditionNode.get();
-	}
-    
+    std::string SetupNodeAsPlainText(void) const;
+    std::string SetupNodeAsLatex(void) const;
+    std::string RuntimeNodeAsPlainText(void) const;
+    std::string RuntimeNodeAsLatex(void) const;
+
+    condNodePtr getSetupNode() const
+    {
+        return m_pSetupConditionNode;
+    }
+
+    condNode* getSetupNodeRawPtr() const
+    {
+        return m_pSetupConditionNode.get();
+    }
+
+    condNodePtr getRuntimeNode() const
+    {
+        return m_pConditionNode;
+    }
+
+    condNode* getRuntimeNodeRawPtr() const
+    {
+        return m_pConditionNode.get();
+    }
+
 protected:
-	void   SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
+    void   SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
 
 public:
-	daeModel*				m_pModel;
-	condNodePtr				m_pConditionNode;
-	condNodePtr				m_pSetupConditionNode;
-	std::vector<adNodePtr>	m_ptrarrExpressions;
-	real_t					m_dEventTolerance;
+    daeModel*				m_pModel;
+    condNodePtr				m_pConditionNode;
+    condNodePtr				m_pSetupConditionNode;
+    std::vector<adNodePtr>	m_ptrarrExpressions;
+    real_t					m_dEventTolerance;
 };
 
 /*********************************************************************************************
-	adouble
+    adouble
 **********************************************************************************************/
-class DAE_CORE_API adouble 
+class DAE_CORE_API adouble
 {
 public:
-    adouble(real_t value = 0.0, 
-            real_t derivative = 0.0, 
+    adouble(real_t value = 0.0,
+            real_t derivative = 0.0,
             bool gatherInfo = false, // gatherInfo must be false by default!
             adNode* node_ = NULL);
     adouble(const adouble& a);
@@ -175,12 +183,12 @@ public:
     adouble& operator -=(const adouble& a);
     adouble& operator *=(const adouble& a);
     adouble& operator /=(const adouble& a);
-    
+
     adouble& operator +=(const real_t v);
     adouble& operator -=(const real_t v);
     adouble& operator *=(const real_t v);
     adouble& operator /=(const real_t v);
-    
+
     friend DAE_CORE_API const adouble dt(const adouble& a);
     friend DAE_CORE_API const adouble d(const adouble& a, daeDomain& domain);
 
@@ -193,11 +201,11 @@ public:
     friend DAE_CORE_API const adouble asin(const adouble &a);
     friend DAE_CORE_API const adouble acos(const adouble &a);
     friend DAE_CORE_API const adouble atan(const adouble &a);
-    
-	friend DAE_CORE_API const adouble sinh(const adouble &a);
+
+    friend DAE_CORE_API const adouble sinh(const adouble &a);
     friend DAE_CORE_API const adouble cosh(const adouble &a);
     friend DAE_CORE_API const adouble tanh(const adouble &a);
-	friend DAE_CORE_API const adouble asinh(const adouble &a);
+    friend DAE_CORE_API const adouble asinh(const adouble &a);
     friend DAE_CORE_API const adouble acosh(const adouble &a);
     friend DAE_CORE_API const adouble atanh(const adouble &a);
     friend DAE_CORE_API const adouble atan2(const adouble &a, const adouble &b);
@@ -247,45 +255,48 @@ public:
     daeCondition operator <(const real_t) const;
     friend daeCondition operator <(const real_t, const adouble&);
 
-	real_t getValue() const 
-	{
-		return m_dValue;
-	}
-	
-    void setValue(const real_t v) 
-	{
-		m_dValue = v;
-	}
-	
-    real_t getDerivative() const 
-	{
-		return m_dDeriv;
-	}
-	
-    void setDerivative(real_t v) 
-	{
-		m_dDeriv = v;
-	}	   
-	
+    std::string NodeAsPlainText(void) const;
+    std::string NodeAsLatex(void) const;
+
+    real_t getValue() const
+    {
+        return m_dValue;
+    }
+
+    void setValue(const real_t v)
+    {
+        m_dValue = v;
+    }
+
+    real_t getDerivative() const
+    {
+        return m_dDeriv;
+    }
+
+    void setDerivative(real_t v)
+    {
+        m_dDeriv = v;
+    }
+
     bool getGatherInfo(void) const
-	{
-		return m_bGatherInfo;
-	}
+    {
+        return m_bGatherInfo;
+    }
 
     void setGatherInfo(bool bGatherInfo)
-	{
-		m_bGatherInfo = bGatherInfo;
-	}
+    {
+        m_bGatherInfo = bGatherInfo;
+    }
 
-    adNodePtr getNode() const 
-	{
-		return node;
-	}
-    
-    adNode* getNodeRawPtr() const 
-	{
-		return node.get();
-	}
+    adNodePtr getNode() const
+    {
+        return node;
+    }
+
+    adNode* getNodeRawPtr() const
+    {
+        return node.get();
+    }
 
 public:
     adNodePtr node;
@@ -293,24 +304,24 @@ public:
 private:
     real_t m_dValue;
     real_t m_dDeriv;
-	bool   m_bGatherInfo;
+    bool   m_bGatherInfo;
 };
 
 // Issues with daeModel::min/max
 inline const adouble __max__(const adouble &a, const adouble &b)
 {
-	return max(a, b);
+    return max(a, b);
 }
 
 inline const adouble __min__(const adouble &a, const adouble &b)
 {
-	return min(a, b);
+    return min(a, b);
 }
 
 std::ostream& operator<<(std::ostream& out, const adouble& a);
 
 /******************************************************************
-	adouble_array
+    adouble_array
 *******************************************************************/
 class daeDomainIndex;
 class DAE_CORE_API adouble_array
@@ -318,67 +329,70 @@ class DAE_CORE_API adouble_array
 public:
     adouble_array(bool gatherInfo = false,  // gatherInfo must be false by default!
                   adNodeArray* node_ = NULL);
-	adouble_array(const adouble_array& a);
-	virtual ~adouble_array(void);
+    adouble_array(const adouble_array& a);
+    virtual ~adouble_array(void);
 
 public:
-	size_t  GetSize(void) const;
-	void    Resize(size_t n);
+    size_t  GetSize(void) const;
+    void    Resize(size_t n);
     adouble GetItem(size_t n);
     void    SetItem(size_t n, adouble &a);
-	
+
     adouble&       operator[](size_t n);
-	const adouble& operator[](size_t n) const;
+    const adouble& operator[](size_t n) const;
 
     adouble operator() (const daeDomainIndex& domainIndex);
 
     std::vector<adouble>::iterator begin();
     std::vector<adouble>::iterator end();
-    
-	void operator =(const adouble_array& a);
-	
-	const adouble_array operator -(void) const;
-	
+
+    void operator =(const adouble_array& a);
+
+    const adouble_array operator -(void) const;
+
     const adouble_array operator +(const adouble_array& a) const;
     const adouble_array operator +(const real_t v) const;
     const adouble_array operator +(const adouble& a) const;
-	
+
     const adouble_array operator -(const adouble_array& a) const;
     const adouble_array operator -(const real_t v) const;
     const adouble_array operator -(const adouble& a) const;
-	
+
     const adouble_array operator *(const adouble_array& a) const;
     const adouble_array operator *(const real_t v) const;
     const adouble_array operator *(const adouble& a) const;
-	
+
     const adouble_array operator /(const adouble_array& a) const;
     const adouble_array operator /(const real_t v) const;
     const adouble_array operator /(const adouble& a) const;
-	
+
+    std::string NodeAsPlainText(void) const;
+    std::string NodeAsLatex(void) const;
+
     bool getGatherInfo(void) const
-	{
-		return m_bGatherInfo;
-	}
+    {
+        return m_bGatherInfo;
+    }
 
     void setGatherInfo(bool bGatherInfo)
-	{
-		m_bGatherInfo = bGatherInfo;
-	}
-    
-    adNodeArrayPtr getNode() const 
-	{
-		return node;
-	}
-    
-    adNodeArray* getNodeRawPtr() const 
-	{
-		return node.get();
-	}
-	
+    {
+        m_bGatherInfo = bGatherInfo;
+    }
+
+    adNodeArrayPtr getNode() const
+    {
+        return node;
+    }
+
+    adNodeArray* getNodeRawPtr() const
+    {
+        return node.get();
+    }
+
 public:
-	bool					m_bGatherInfo;
-	adNodeArrayPtr			node;
-	std::vector<adouble>	m_arrValues;
+    bool					m_bGatherInfo;
+    adNodeArrayPtr			node;
+    std::vector<adouble>	m_arrValues;
 };
 
 DAE_CORE_API const adouble_array operator +(const real_t v, const adouble_array& a);
@@ -425,58 +439,58 @@ DAE_CORE_API const adouble_array Array(const std::vector<adNodePtr>& ptrarrNodes
 
 
 /*********************************************************************************************
-	daeFPUCommand
+    daeFPUCommand
 **********************************************************************************************/
 typedef struct DAE_CORE_API daeFPUCommandInfo_t
 {
-	unsigned kind:		2;
-	unsigned opcode:	6;
-	unsigned loperand:	3;
-	unsigned roperand:	3;
-	unsigned result:	2;
+    unsigned kind:		2;
+    unsigned opcode:	6;
+    unsigned loperand:	3;
+    unsigned roperand:	3;
+    unsigned result:	2;
 } daeFPUCommandInfo;
 
 typedef struct DAE_CORE_API daeFPUCommand_t
 {
-	daeFPUCommandInfo	info;
-	real_t				lvalue;
-	real_t				rvalue;
+    daeFPUCommandInfo	info;
+    real_t				lvalue;
+    real_t				rvalue;
 } daeFPUCommand;
 
 /*********************************************************************************************
-	adNode
+    adNode
 **********************************************************************************************/
 const int Nbinaryfns = 7;
 const int Nunaryfns  = 12;
 
 enum Linearity
 {
-	LIN = 0,
-	LIN_FUN,
-	NON_LIN
+    LIN = 0,
+    LIN_FUN,
+    NON_LIN
 };
 
 static const string strarrBinaryFns[7]={"plus",
-										"minus",
-										"times",
-										"divide",
-										"power",
-										"min",
-										"max"
-									    };
+                                        "minus",
+                                        "times",
+                                        "divide",
+                                        "power",
+                                        "min",
+                                        "max"
+                                        };
 static const string strarrUnaryFns[12]={"minus",
-										"sin",
-										"cos",
-										"tan",
-										"arcsin",
-										"arccos",
-										"arctan",
-										"root",
-										"exp",
-										"ln",
-										"log",
-										"abs"
-										};
+                                        "sin",
+                                        "cos",
+                                        "tan",
+                                        "arcsin",
+                                        "arccos",
+                                        "arctan",
+                                        "root",
+                                        "exp",
+                                        "ln",
+                                        "log",
+                                        "abs"
+                                        };
 
 class DAE_CORE_API adJacobian
 {
@@ -497,37 +511,37 @@ class DAE_CORE_API adNode : public daeExportable_t
 
 {
 public:
-	virtual ~adNode(void){}
+    virtual ~adNode(void){}
 
 public:
-	virtual adNode*			Clone(void) const												= 0;
-	virtual adouble			Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
-	virtual const quantity	GetQuantity(void) const											= 0;
+    virtual adNode*			Clone(void) const												= 0;
+    virtual adouble			Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
+    virtual const quantity	GetQuantity(void) const											= 0;
 
-	virtual void	Open(io::xmlTag_t* pTag)										= 0;
-	virtual void	Save(io::xmlTag_t* pTag) const									= 0;
+    virtual void	Open(io::xmlTag_t* pTag)										= 0;
+    virtual void	Save(io::xmlTag_t* pTag) const									= 0;
 
-	virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const				= 0;
-	//virtual string  SaveAsPlainText(const daeNodeSaveAsContext* c) const		= 0;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, 
-		                                const daeNodeSaveAsContext* c) const		= 0;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
-		                                     const daeNodeSaveAsContext* c) const	= 0;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const				= 0;
+    //virtual string  SaveAsPlainText(const daeNodeSaveAsContext* c) const		= 0;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag,
+                                        const daeNodeSaveAsContext* c) const		= 0;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag,
+                                             const daeNodeSaveAsContext* c) const	= 0;
 
-	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
-											bool bAddFixed)							= 0;
-	virtual bool	IsLinear(void) const											= 0;
-	virtual bool	IsFunctionOfVariables(void) const								= 0;
+    virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
+                                            bool bAddFixed)							= 0;
+    virtual bool	IsLinear(void) const											= 0;
+    virtual bool	IsFunctionOfVariables(void) const								= 0;
     virtual bool    IsDifferential(void) const                                      = 0;
-    
-	static adNode*	CreateNode(const io::xmlTag_t* pTag);
-	static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
+
+    static adNode*	CreateNode(const io::xmlTag_t* pTag);
+    static void		SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNode* node);
     static adNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNode>* ood = NULL);
-	static void		SaveNodeAsMathML(io::xmlTag_t* pTag, 
-									 const string& strObjectName, 
-									 const adNode* node, 
-									 const daeNodeSaveAsContext* c, 
-									 bool bAppendEqualToZero = false);
+    static void		SaveNodeAsMathML(io::xmlTag_t* pTag,
+                                     const string& strObjectName,
+                                     const adNode* node,
+                                     const daeNodeSaveAsContext* c,
+                                     bool bAppendEqualToZero = false);
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
 };
 
@@ -538,80 +552,80 @@ public:
 #define UNITS(NODE) ( unit() )
 
 /*********************************************************************************************
-	adNodeArray
+    adNodeArray
 **********************************************************************************************/
 class DAE_CORE_API adNodeArray : public daeExportable_t
 {
 public:
-	virtual ~adNodeArray(void){}
+    virtual ~adNodeArray(void){}
 
 public:
-	virtual size_t			GetSize(void) const												= 0;
-	virtual adNodeArray*	Clone(void) const												= 0;
-	virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
-	virtual const quantity	GetQuantity(void) const											= 0;
+    virtual size_t			GetSize(void) const												= 0;
+    virtual adNodeArray*	Clone(void) const												= 0;
+    virtual adouble_array	Evaluate(const daeExecutionContext* pExecutionContext) const	= 0;
+    virtual const quantity	GetQuantity(void) const											= 0;
 
-	virtual void	Open(io::xmlTag_t* pTag)												= 0;
-	virtual void	Save(io::xmlTag_t* pTag) const											= 0;
+    virtual void	Open(io::xmlTag_t* pTag)												= 0;
+    virtual void	Save(io::xmlTag_t* pTag) const											= 0;
 
-	virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const						= 0;
-	//virtual string  SaveAsPlainText(const daeNodeSaveAsContext* c) const					= 0;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, 
-		                                const daeNodeSaveAsContext* c) const				= 0;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, 
-		                                     const daeNodeSaveAsContext* c) const			= 0;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const						= 0;
+    //virtual string  SaveAsPlainText(const daeNodeSaveAsContext* c) const					= 0;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag,
+                                        const daeNodeSaveAsContext* c) const				= 0;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag,
+                                             const daeNodeSaveAsContext* c) const			= 0;
 
-	virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
-											bool bAddFixed)									= 0;
-	
-	virtual bool	IsLinear(void) const													= 0;
-	virtual bool	IsFunctionOfVariables(void) const										= 0;
+    virtual void	AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes,
+                                            bool bAddFixed)									= 0;
+
+    virtual bool	IsLinear(void) const													= 0;
+    virtual bool	IsFunctionOfVariables(void) const										= 0;
     virtual bool    IsDifferential(void) const                                              = 0;
- 
-	static adNodeArray*	CreateNode(const io::xmlTag_t* pTag);
-	static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNodeArray* node);
-	static adNodeArray*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNodeArray>* ood = NULL);
-	
-	static void			SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag, 
-														         const std::vector< adNodePtr >& arrNodes, 
-														         const daeNodeSaveAsContext* c);
-	static string		SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& arrNodes, 
-											        const daeNodeSaveAsContext* c);
-//	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< adNodePtr >& arrNodes, 
+
+    static adNodeArray*	CreateNode(const io::xmlTag_t* pTag);
+    static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const adNodeArray* node);
+    static adNodeArray*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<adNodeArray>* ood = NULL);
+
+    static void			SaveRuntimeNodeArrayAsPresentationMathML(io::xmlTag_t* pTag,
+                                                                 const std::vector< adNodePtr >& arrNodes,
+                                                                 const daeNodeSaveAsContext* c);
+    static string		SaveRuntimeNodeArrayAsLatex(const std::vector< adNodePtr >& arrNodes,
+                                                    const daeNodeSaveAsContext* c);
+//	static string		SaveRuntimeNodeArrayAsPlainText(const std::vector< adNodePtr >& arrNodes,
 //												        const daeNodeSaveAsContext* c);
 };
 
 /*********************************************************************************************
-	condNode
+    condNode
 **********************************************************************************************/
 class DAE_CORE_API condNode : public daeExportable_t
 {
 public:
-	virtual ~condNode(void){}
+    virtual ~condNode(void){}
 
-public:	
-	virtual condNode*		Clone(void) const																= 0;
-	virtual bool			Evaluate(const daeExecutionContext* pExecutionContext) const					= 0;
-	virtual bool			GetQuantity(void) const															= 0;
-	virtual daeCondition	CreateRuntimeNode(const daeExecutionContext* pExecutionContext) const			= 0;
+public:
+    virtual condNode*		Clone(void) const																= 0;
+    virtual bool			Evaluate(const daeExecutionContext* pExecutionContext) const					= 0;
+    virtual bool			GetQuantity(void) const															= 0;
+    virtual daeCondition	CreateRuntimeNode(const daeExecutionContext* pExecutionContext) const			= 0;
 
-	virtual void		Open(io::xmlTag_t* pTag)															= 0;
-	virtual void		Save(io::xmlTag_t* pTag) const														= 0;
+    virtual void		Open(io::xmlTag_t* pTag)															= 0;
+    virtual void		Save(io::xmlTag_t* pTag) const														= 0;
 
-	virtual string		SaveAsLatex(const daeNodeSaveAsContext* c) const									= 0;
-	//virtual string	SaveAsPlainText(const daeNodeSaveAsContext* c) const								= 0;
-	virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const		= 0;
-	virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const = 0;
+    virtual string		SaveAsLatex(const daeNodeSaveAsContext* c) const									= 0;
+    //virtual string	SaveAsPlainText(const daeNodeSaveAsContext* c) const								= 0;
+    virtual void		SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const		= 0;
+    virtual void		SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const = 0;
 
-	virtual void		BuildExpressionsArray(std::vector<adNodePtr>& ptrarrExpressions, 
-		                                      const daeExecutionContext* pExecutionContext,
-											  real_t dEventTolerance)										= 0;
-	virtual void		AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes, bool bAddFixed)		= 0;
+    virtual void		BuildExpressionsArray(std::vector<adNodePtr>& ptrarrExpressions,
+                                              const daeExecutionContext* pExecutionContext,
+                                              real_t dEventTolerance)										= 0;
+    virtual void		AddVariableIndexToArray(std::map<size_t, size_t>& mapIndexes, bool bAddFixed)		= 0;
 
-	static condNode*	CreateNode(const io::xmlTag_t* pTag);
-	static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node);
-	static condNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<condNode>* ood = NULL);
-	static void			SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node, const daeNodeSaveAsContext* c);
+    static condNode*	CreateNode(const io::xmlTag_t* pTag);
+    static void			SaveNode(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node);
+    static condNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<condNode>* ood = NULL);
+    static void			SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node, const daeNodeSaveAsContext* c);
 };
 
 

@@ -2,7 +2,7 @@
                  DAE Tools Project: www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
+DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -29,20 +29,20 @@ namespace activity
 {
 enum daeeActivityAction
 {
-	eAAUnknown = 0,
-	eRunActivity,
-	ePauseActivity
+    eAAUnknown = 0,
+    eRunActivity,
+    ePauseActivity
 };
 
 enum daeeSimulationMode
 {
-	eSimulation = 0,
-	eOptimization,
-	eParameterEstimation
+    eSimulation = 0,
+    eOptimization,
+    eParameterEstimation
 };
 
 /*********************************************************************
-	daeSimulation_t
+    daeSimulation_t
 *********************************************************************/
 class daeSimulation_t
 {
@@ -69,57 +69,57 @@ public:
     virtual bool                GetCalculateSensitivities() const                                   = 0;
     virtual void                SetCalculateSensitivities(bool bCalculateSensitivities)             = 0;
 
-	virtual real_t				GetCurrentTime_() const 											= 0;
-	virtual void				SetTimeHorizon(real_t dTimeHorizon)									= 0;
-	virtual real_t				GetTimeHorizon(void) const											= 0;
-	virtual void				SetReportingInterval(real_t dReportingInterval)						= 0;
-	virtual real_t				GetReportingInterval(void) const									= 0;
-	virtual void				GetReportingTimes(std::vector<real_t>& darrReportingTimes) const	= 0;
-	virtual void				SetReportingTimes(const std::vector<real_t>& darrReportingTimes)	= 0;
-	virtual real_t				GetNextReportingTime(void) const									= 0;
-	
-	virtual void				Resume(void)														= 0;
-	virtual void				Pause(void)															= 0;
-	
-	virtual daeeActivityAction	GetActivityAction(void) const										= 0;
-	virtual daeeSimulationMode	GetSimulationMode(void) const										= 0;
-	virtual void				SetSimulationMode(daeeSimulationMode eMode)							= 0;
-	
-	virtual void				Initialize(daeDAESolver_t* pDAESolver, 
-										   daeDataReporter_t* pDataReporter, 
-										   daeLog_t* pLog,
+    virtual real_t				GetCurrentTime_() const 											= 0;
+    virtual void				SetTimeHorizon(real_t dTimeHorizon)									= 0;
+    virtual real_t				GetTimeHorizon(void) const											= 0;
+    virtual void				SetReportingInterval(real_t dReportingInterval)						= 0;
+    virtual real_t				GetReportingInterval(void) const									= 0;
+    virtual void				GetReportingTimes(std::vector<real_t>& darrReportingTimes) const	= 0;
+    virtual void				SetReportingTimes(const std::vector<real_t>& darrReportingTimes)	= 0;
+    virtual real_t				GetNextReportingTime(void) const									= 0;
+
+    virtual void				Resume(void)														= 0;
+    virtual void				Pause(void)															= 0;
+
+    virtual daeeActivityAction	GetActivityAction(void) const										= 0;
+    virtual daeeSimulationMode	GetSimulationMode(void) const										= 0;
+    virtual void				SetSimulationMode(daeeSimulationMode eMode)							= 0;
+
+    virtual void				Initialize(daeDAESolver_t* pDAESolver,
+                                           daeDataReporter_t* pDataReporter,
+                                           daeLog_t* pLog,
                                            bool bCalculateSensitivities = false,
                                            const std::string& strJSONRuntimeSettings = "")	= 0;
     virtual void				Reinitialize(void)                                          = 0;
     virtual void				CleanUpSetupData(void)                                      = 0;
     virtual void				SolveInitial(void)                                          = 0;
     virtual daeDAESolver_t*		GetDAESolver(void) const                                    = 0;
-	
-	virtual real_t				Integrate(daeeStopCriterion eStopCriterion,
-										  bool bReportDataAroundDiscontinuities = true)					= 0;
-	virtual real_t				IntegrateForTimeInterval(real_t time_interval,
-														 bool bReportDataAroundDiscontinuities = true)	= 0;
-	virtual real_t				IntegrateUntilTime(real_t time, 
-												   daeeStopCriterion eStopCriterion,
-												   bool bReportDataAroundDiscontinuities = true)		= 0;
-	
-	virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const	 = 0;
-	virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const	 = 0;
-	virtual void GetMeasuredVariables(std::vector<daeMeasuredVariable_t*>& ptrarrMeasuredVariables) const		 = 0;
-	virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const     = 0;	
-	virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const	                                         = 0;
-	
-	virtual size_t GetNumberOfObjectiveFunctions(void) const													 = 0;
-	virtual void   SetNumberOfObjectiveFunctions(size_t n)														 = 0;
+
+    virtual real_t				Integrate(daeeStopCriterion eStopCriterion,
+                                          bool bReportDataAroundDiscontinuities = true)					= 0;
+    virtual real_t				IntegrateForTimeInterval(real_t time_interval,
+                                                         bool bReportDataAroundDiscontinuities = true)	= 0;
+    virtual real_t				IntegrateUntilTime(real_t time,
+                                                   daeeStopCriterion eStopCriterion,
+                                                   bool bReportDataAroundDiscontinuities = true)		= 0;
+
+    virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const	 = 0;
+    virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const	 = 0;
+    virtual void GetMeasuredVariables(std::vector<daeMeasuredVariable_t*>& ptrarrMeasuredVariables) const		 = 0;
+    virtual void GetObjectiveFunctions(std::vector<daeObjectiveFunction_t*>& ptrarrObjectiveFunctions) const     = 0;
+    virtual daeObjectiveFunction_t* GetObjectiveFunction(void) const	                                         = 0;
+
+    virtual size_t GetNumberOfObjectiveFunctions(void) const													 = 0;
+    virtual void   SetNumberOfObjectiveFunctions(size_t n)														 = 0;
 };
 
 /******************************************************************
-	daeActivityClassFactory_t
+    daeActivityClassFactory_t
 *******************************************************************/
 class daeActivityClassFactory_t
 {
 public:
-	virtual ~daeActivityClassFactory_t(void){}
+    virtual ~daeActivityClassFactory_t(void){}
 
 public:
     virtual string   GetName(void) const			= 0;
@@ -128,9 +128,9 @@ public:
     virtual string   GetLicenceInfo(void) const		= 0;
     virtual string   GetVersion(void) const			= 0;
 
-	virtual daeSimulation_t*	CreateSimulation(const string& strClass)	= 0;
+    virtual daeSimulation_t*	CreateSimulation(const string& strClass)	= 0;
 
-	virtual void SupportedSimulations(std::vector<string>& strarrClasses)	= 0;
+    virtual void SupportedSimulations(std::vector<string>& strarrClasses)	= 0;
 };
 typedef daeActivityClassFactory_t* (*pfnGetActivityClassFactory)(void);
 

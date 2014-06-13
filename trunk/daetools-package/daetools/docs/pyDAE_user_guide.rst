@@ -1201,15 +1201,13 @@ and the following logical operators:
     
 - ``&`` (logical AND)
 - ``|`` (logical OR)
+- ``~`` (logical NOT)
 
 can be used.
 
-.. note:: It is not allowed to overload Python's operators ``and``, ``or`` and ``not`` and they
-          cannot be used to define logical conditions, but the operators ``&`` and ``|``.
-
-.. note:: Logical operator ``not`` is currently not implemented in **pyDAE** python extension modules
-          (that would require overloading the operator __NONZERO__ which may have some side effects).
-          However, it is implemented in **cDAE** (c++).
+.. note:: Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
+          cannot be used to define logical conditions; therefore, the custom operators ``&``, ``|`` and ``~`` are defined
+          and should be used instead.
 
 The comparison operators operate on :py:class:`pyCore.adouble` objects and ``Float`` values.
 Units consistency is strictly checked and expressions including ``Float`` values
