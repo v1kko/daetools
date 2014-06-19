@@ -65,8 +65,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._ui = Ui_SimulationExplorer()
         self._ui.setupUi(self)
 
-        self._qt_app                      = qt_app
-        self._simulation                  = simulation
+        """
         #self._simulation                  = kwargs.get('simulation',                 None)
         self._optimization                = kwargs.get('optimization',               None)
         self._datareporter                = kwargs.get('datareporter',               None)
@@ -76,156 +75,18 @@ class daeSimulationExplorer(QtGui.QDialog):
         #self._nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
         #self._lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
         #self._run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
-
-        if not self._qt_app:
-            raise RuntimeError('qt_app object must not be None')
-        if not self._simulation:
-            raise RuntimeError('simulation object must not be None')
+        """
         
-        self.setWindowTitle("DAE Tools Simulation Explorer v%s - [%s]" % (daeVersion(True), self._simulation.m.GetStrippedName()))
+        if not qt_app:
+            raise RuntimeError('qt_app object must not be None')
+        if not simulation:
+            raise RuntimeError('simulation object must not be None')
+
+        self.setWindowTitle("DAE Tools Simulation Explorer v%s - [%s]" % (daeVersion(True), simulation.m.GetStrippedName()))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
-        self._inspector          = daeSimulationInspector(self._simulation)
-        self._runtimeSettings    = None
-        self._simulationName     = daeGetStrippedName(self._simulation.m.Name) + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-        self._timeHorizon        = self._simulation.TimeHorizon
-        self._reportingInterval  = self._simulation.ReportingInterval
-        self._relativeTolerance  = self._simulation.DAESolver.RelativeTolerance
-        if self._simulation.InitialConditionMode == eQuasySteadyState:
-            self._quazySteadyState = True
-        else:
-            self._quazySteadyState = False
-        
-        self._daesolver = self._simulation.DAESolver
-        self._log       = self._simulation.Log
-        
-        d_validator = QtGui.QDoubleValidator(self)
-
-        self._ui.simulationNameEdit.setText(self._simulationName)
-        self._ui.timeHorizonEdit.setValidator(d_validator)
-        self._ui.timeHorizonEdit.setText(str(self._timeHorizon))
-        self._ui.reportingIntervalEdit.setValidator(d_validator)
-        self._ui.reportingIntervalEdit.setText(str(self._reportingInterval))
-        self._ui.relativeToleranceEdit.setValidator(d_validator)
-        self._ui.relativeToleranceEdit.setText(str(self._relativeTolerance))
-        if self._quazySteadyState:
-            self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Checked)
-            self._ui.tab_InitialConditions.setEnabled(False)
-        else:
-            self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Unchecked)
-            self._ui.tab_InitialConditions.setEnabled(True)
-
-        self._available_la_solvers     = auxiliary.getAvailableLASolvers()
-        self._available_nlp_solvers    = auxiliary.getAvailableNLPSolvers()
-        self._available_data_reporters = auxiliary.getAvailableDataReporters()
-        self._available_logs           = auxiliary.getAvailableLogs()
-
-        self._ui.daesolverComboBox.addItem("Sundials IDAS")
-        for i, la in enumerate(self._available_la_solvers):
-            self._ui.lasolverComboBox.addItem(la[0], userData = la[1]) #QtCore.QVariant(la[1]))
-            self._ui.lasolverComboBox.setItemData(i, la[2], QtCore.Qt.ToolTipRole)
-        for i, nlp in enumerate(self._available_nlp_solvers):
-            self._ui.minlpsolverComboBox.addItem(nlp[0], userData = nlp[1]) #QtCore.QVariant(nlp[1]))
-            self._ui.minlpsolverComboBox.setItemData(i, nlp[2], QtCore.Qt.ToolTipRole)
-        for i, dr in enumerate(self._available_data_reporters):
-            self._ui.datareporterComboBox.addItem(dr[0], userData = dr[1]) #QtCore.QVariant(dr[1]))
-            self._ui.datareporterComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
-        for i, log in enumerate(self._available_logs):
-            self._ui.logComboBox.addItem(log[0], userData = log[1]) #QtCore.QVariant(log[1]))
-            self._ui.logComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
-        
-        # DAE Solvers
-        self._ui.daesolverComboBox.setEnabled(False)
-
-        # LA Solvers
-        if not self._lasolver:
-            self._ui.lasolverComboBox.setEnabled(True)
-        else:
-            # If LA solver has been sent then clear and disable LASolver combo box
-            self._ui.lasolverComboBox.clear()
-            self._ui.lasolverComboBox.addItem(self._lasolver.Name)
-            self._ui.lasolverComboBox.setEnabled(False)
-
-        # MINLP Solvers
-        if not self._optimization:
-            # If we are simulating then clear and disable MINLPSolver combo box
-            #self._ui.simulationLabel.setText('Simulation')
-            self._ui.minlpsolverComboBox.clear()
-            self._ui.minlpsolverComboBox.setEnabled(False)
-        else:
-            #self._ui.simulationLabel.setText('Optimization')
-            if not self._nlpsolver:
-                self._ui.minlpsolverComboBox.setEnabled(True)
-            else:
-                # If nlpsolver has been sent then clear and disable MINLPSolver combo box
-                self._ui.minlpsolverComboBox.clear()
-                self._ui.minlpsolverComboBox.addItem(self._nlpsolver.Name)
-                self._ui.minlpsolverComboBox.setEnabled(False)
-                
-        # Logs
-        if not self._log:
-            self._ui.logComboBox.setEnabled(True)
-        else:
-            # If LA solver has been sent then clear and disable LASolver combo box
-            self._ui.logComboBox.clear()
-            self._ui.logComboBox.addItem(self._log.Name)
-            self._ui.logComboBox.setEnabled(False)
-                
-        # DataReporters
-        if not self._datareporter:
-            self._ui.datareporterComboBox.setEnabled(True)
-        else:
-            # If LA solver has been sent then clear and disable LASolver combo box
-            self._ui.datareporterComboBox.clear()
-            self._ui.datareporterComboBox.addItem(self._log.Name)
-            self._ui.datareporterComboBox.setEnabled(False)
-        
-        self._currentParameterItem        = None
-        self._currentStateTransitionItem  = None
-        self._currentDomainItem           = None
-        self._currentDOFItem              = None
-        self._currentInitialConditionItem = None
-        
-        # treeStates-related data
-        self._allowUnchecking                 = False
-        self._treeStates_itemChanged_disabled = False
-        
-        addItemsToTree(self._ui.treeParameters,        self._ui.treeParameters,        self._inspector.treeParameters)
-        addItemsToTree(self._ui.treeOutputVariables,   self._ui.treeOutputVariables,   self._inspector.treeOutputVariables)
-        addItemsToTree(self._ui.treeSTNs,              self._ui.treeSTNs,              self._inspector.treeStates)
-        addItemsToTree(self._ui.treeDomains,           self._ui.treeDomains,           self._inspector.treeDomains)
-        addItemsToTree(self._ui.treeDOFs,              self._ui.treeDOFs,              self._inspector.treeDOFs)
-        addItemsToTree(self._ui.treeInitialConditions, self._ui.treeInitialConditions, self._inspector.treeInitialConditions)
-        
-        self._ui.treeDomains.expandAll()
-        self._ui.treeDomains.resizeColumnToContents(0)
-        self._ui.treeDomains.setSortingEnabled(True)
-        self._ui.treeDomains.sortItems(0, QtCore.Qt.AscendingOrder)
-        
-        self._ui.treeParameters.expandAll()
-        self._ui.treeParameters.resizeColumnToContents(0)
-        self._ui.treeParameters.setSortingEnabled(True)
-        self._ui.treeParameters.sortItems(0, QtCore.Qt.AscendingOrder)
-        
-        self._ui.treeInitialConditions.expandAll()
-        self._ui.treeInitialConditions.resizeColumnToContents(0)
-        self._ui.treeInitialConditions.setSortingEnabled(True)
-        self._ui.treeInitialConditions.sortItems(0, QtCore.Qt.AscendingOrder)
-        
-        self._ui.treeDOFs.expandAll()
-        self._ui.treeDOFs.resizeColumnToContents(0)
-        self._ui.treeDOFs.setSortingEnabled(True)
-        self._ui.treeDOFs.sortItems(0, QtCore.Qt.AscendingOrder)
-        
-        self._ui.treeSTNs.expandAll()
-        self._ui.treeSTNs.resizeColumnToContents(0)
-        self._ui.treeSTNs.setSortingEnabled(True)
-        self._ui.treeSTNs.sortItems(0, QtCore.Qt.AscendingOrder)
-        
-        self._ui.treeOutputVariables.expandAll()
-        self._ui.treeOutputVariables.resizeColumnToContents(0)
-        self._ui.treeOutputVariables.setSortingEnabled(True)
-        self._ui.treeOutputVariables.sortItems(0, QtCore.Qt.AscendingOrder)
+        self._qt_app = qt_app
+        self._initialize(simulation)
 
         # First populate trees and set values. Only after that connect signals to slots (otherwise the event handlers might be triggered in the process)
         self.connect(self._ui.buttonCancel,                    QtCore.SIGNAL('clicked()'),                          self._slotCancel)
@@ -235,10 +96,10 @@ class daeSimulationExplorer(QtGui.QDialog):
         self.connect(self._ui.treeParameters,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotParameterTreeItemSelectionChanged)
         self.connect(self._ui.treeOutputVariables,             QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotOutputVariablesTreeItemChanged)
         self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotSTNsTreeItemChanged)
-        #self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
         self.connect(self._ui.treeDomains,                     QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDomainsTreeItemChanged)
         self.connect(self._ui.treeDOFs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
         self.connect(self._ui.treeInitialConditions,           QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
+        #self.connect(self._ui.treeSTNs,                       QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
 
     def updateSimulation(self, verbose = False):
         # Update runtime data
@@ -480,6 +341,145 @@ class daeSimulationExplorer(QtGui.QDialog):
     ############################################################################
     #                   Implementation (private methods)
     ############################################################################
+    def _initialize(self, simulation):
+        self._simulation = simulation
+        if not self._simulation:
+            raise RuntimeError('simulation object must not be None')
+
+        self._inspector          = daeSimulationInspector(self._simulation)
+        self._runtimeSettings    = None
+        self._simulationName     = daeGetStrippedName(self._simulation.m.Name) + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+        self._timeHorizon        = self._simulation.TimeHorizon
+        self._reportingInterval  = self._simulation.ReportingInterval
+        self._relativeTolerance  = self._simulation.DAESolver.RelativeTolerance
+        if self._simulation.InitialConditionMode == eQuasySteadyState:
+            self._quazySteadyState = True
+        else:
+            self._quazySteadyState = False
+
+        self._daesolver    = self._simulation.DAESolver
+        self._lasolver     = self._simulation.DAESolver.LASolver
+        self._datareporter = self._simulation.DataReporter
+        self._log          = self._simulation.Log
+
+        d_validator = QtGui.QDoubleValidator(self)
+
+        self._ui.simulationNameEdit.setText(self._simulationName)
+        self._ui.timeHorizonEdit.setValidator(d_validator)
+        self._ui.timeHorizonEdit.setText(str(self._timeHorizon))
+        self._ui.reportingIntervalEdit.setValidator(d_validator)
+        self._ui.reportingIntervalEdit.setText(str(self._reportingInterval))
+        self._ui.relativeToleranceEdit.setValidator(d_validator)
+        self._ui.relativeToleranceEdit.setText(str(self._relativeTolerance))
+        if self._quazySteadyState:
+            self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Checked)
+            self._ui.tab_InitialConditions.setEnabled(False)
+        else:
+            self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Unchecked)
+            self._ui.tab_InitialConditions.setEnabled(True)
+
+        self._available_la_solvers     = auxiliary.getAvailableLASolvers()
+        self._available_nlp_solvers    = auxiliary.getAvailableNLPSolvers()
+        self._available_data_reporters = auxiliary.getAvailableDataReporters()
+        self._available_logs           = auxiliary.getAvailableLogs()
+
+        self._ui.daesolverComboBox.addItem("Sundials IDAS")
+        for i, la in enumerate(self._available_la_solvers):
+            self._ui.lasolverComboBox.addItem(la[0], userData = la[1]) #QtCore.QVariant(la[1]))
+            self._ui.lasolverComboBox.setItemData(i, la[2], QtCore.Qt.ToolTipRole)
+        for i, dr in enumerate(self._available_data_reporters):
+            self._ui.datareporterComboBox.addItem(dr[0], userData = dr[1]) #QtCore.QVariant(dr[1]))
+            self._ui.datareporterComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
+        for i, log in enumerate(self._available_logs):
+            self._ui.logComboBox.addItem(log[0], userData = log[1]) #QtCore.QVariant(log[1]))
+            self._ui.logComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
+
+        # DAE Solvers
+        self._ui.daesolverComboBox.setEnabled(False)
+
+        # LA Solvers
+        if not self._lasolver:
+            self._ui.lasolverComboBox.setEnabled(True)
+        else:
+            # If LA solver has been sent then clear and disable LASolver combo box
+            self._ui.lasolverComboBox.clear()
+            self._ui.lasolverComboBox.addItem(self._lasolver.Name)
+            self._ui.lasolverComboBox.setEnabled(False)
+
+        # Logs
+        if not self._log:
+            self._ui.logComboBox.setEnabled(True)
+        else:
+            # If LA solver has been sent then clear and disable LASolver combo box
+            self._ui.logComboBox.clear()
+            self._ui.logComboBox.addItem(self._log.Name)
+            self._ui.logComboBox.setEnabled(False)
+
+        # DataReporters
+        if not self._datareporter:
+            self._ui.datareporterComboBox.setEnabled(True)
+        else:
+            # If data reporter has been sent then clear and disable DataReporters combo box
+            self._ui.datareporterComboBox.clear()
+            self._ui.datareporterComboBox.addItem(self._datareporter.Name)
+            self._ui.datareporterComboBox.setEnabled(False)
+
+        self._currentParameterItem        = None
+        self._currentStateTransitionItem  = None
+        self._currentDomainItem           = None
+        self._currentDOFItem              = None
+        self._currentInitialConditionItem = None
+
+        # treeStates-related data
+        self._allowUnchecking                 = False
+        self._treeStates_itemChanged_disabled = False
+
+        # Clear all trees
+        self._ui.treeParameters.clear()
+        self._ui.treeOutputVariables.clear()
+        self._ui.treeSTNs.clear()
+        self._ui.treeDomains.clear()
+        self._ui.treeDOFs.clear()
+        self._ui.treeInitialConditions.clear()
+
+        # Populate the trees
+        addItemsToTree(self._ui.treeParameters,        self._ui.treeParameters,        self._inspector.treeParameters)
+        addItemsToTree(self._ui.treeOutputVariables,   self._ui.treeOutputVariables,   self._inspector.treeOutputVariables)
+        addItemsToTree(self._ui.treeSTNs,              self._ui.treeSTNs,              self._inspector.treeStates)
+        addItemsToTree(self._ui.treeDomains,           self._ui.treeDomains,           self._inspector.treeDomains)
+        addItemsToTree(self._ui.treeDOFs,              self._ui.treeDOFs,              self._inspector.treeDOFs)
+        addItemsToTree(self._ui.treeInitialConditions, self._ui.treeInitialConditions, self._inspector.treeInitialConditions)
+
+        self._ui.treeDomains.expandAll()
+        self._ui.treeDomains.resizeColumnToContents(0)
+        self._ui.treeDomains.setSortingEnabled(True)
+        self._ui.treeDomains.sortItems(0, QtCore.Qt.AscendingOrder)
+
+        self._ui.treeParameters.expandAll()
+        self._ui.treeParameters.resizeColumnToContents(0)
+        self._ui.treeParameters.setSortingEnabled(True)
+        self._ui.treeParameters.sortItems(0, QtCore.Qt.AscendingOrder)
+
+        self._ui.treeInitialConditions.expandAll()
+        self._ui.treeInitialConditions.resizeColumnToContents(0)
+        self._ui.treeInitialConditions.setSortingEnabled(True)
+        self._ui.treeInitialConditions.sortItems(0, QtCore.Qt.AscendingOrder)
+
+        self._ui.treeDOFs.expandAll()
+        self._ui.treeDOFs.resizeColumnToContents(0)
+        self._ui.treeDOFs.setSortingEnabled(True)
+        self._ui.treeDOFs.sortItems(0, QtCore.Qt.AscendingOrder)
+
+        self._ui.treeSTNs.expandAll()
+        self._ui.treeSTNs.resizeColumnToContents(0)
+        self._ui.treeSTNs.setSortingEnabled(True)
+        self._ui.treeSTNs.sortItems(0, QtCore.Qt.AscendingOrder)
+
+        self._ui.treeOutputVariables.expandAll()
+        self._ui.treeOutputVariables.resizeColumnToContents(0)
+        self._ui.treeOutputVariables.setSortingEnabled(True)
+        self._ui.treeOutputVariables.sortItems(0, QtCore.Qt.AscendingOrder)
+
     def _processInputs(self):
         self._simulationName    = str(self._ui.simulationNameEdit.text())
         self._timeHorizon       = float(self._ui.timeHorizonEdit.text())
@@ -488,16 +488,6 @@ class daeSimulationExplorer(QtGui.QDialog):
         
         if not self._daesolver:
             self._daesolver = daeIDAS()
-        
-        # If in optimization mode and nlpsolver is not sent then choose it from the selection
-        if self._optimization and not self._nlpsolver and len(self._available_nlp_solvers) > 0:
-            _index = self._ui.minlpsolverComboBox.itemData(self._ui.minlpsolverComboBox.currentIndex())
-            if isinstance(_index, QtCore.QVariant):
-                minlpsolverIndex = _index.toInt()[0]
-            else:
-                if _index != None and _index >= 0:
-                    minlpsolverIndex = int(_index)
-            self._nlpsolver  = auxiliary.createNLPSolver(minlpsolverIndex)
 
         # If lasolver is not sent then create it based on the selection
         if self._lasolver == None and len(self._available_la_solvers) > 0:
@@ -602,7 +592,30 @@ class daeSimulationExplorer(QtGui.QDialog):
             exc_type, exc_value, exc_traceback = sys.exc_info()
             dlg = daeExceptionDialog(self, e, exc_traceback)
             dlg.exec_()
-            
+
+    """
+    def _slotLoadRuntimeSettingsAsJSON(self):
+        try:
+            jsonFilename = str(QtGui.QFileDialog.getOpenFileName(self, "Load Runtime Settings As JSON File", "", "JSON Files (*.json)"))
+            if jsonFilename == '':
+                return
+
+            f = open(jsonFilename, 'r')
+            json_str = f.read()
+            f.close()
+
+            jsonSettings = json.loads(json_str)
+            self.updateSimulation(verbose = False)
+            self._initialize(self._simulation)
+
+            QtGui.QMessageBox.information(self, "Load Runtime Settings As JSON File", 'JSON file successfuly loaded!')
+
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            dlg = daeExceptionDialog(self, e, exc_traceback)
+            dlg.exec_()
+    """
+    
     def _slotGenerateCode(self):
         try:
             languages = ['c99','Modelica','FMI']

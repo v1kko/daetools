@@ -388,6 +388,9 @@ def InitializeSimulation(simulation, jsonSettings):
     This function reads all information needed to initialize a simulation
     from the jsonSettings argument, including DAE solver, LA solver, DataReporter, Log etc.
     """
+    if not isinstance(jsonSettings, str):
+        raise RuntimeError('jsonSettings argument must be a string')
+    
     settings = json.loads(jsonSettings)
     
     log          = createLogByName(settings['Log']['Name'])

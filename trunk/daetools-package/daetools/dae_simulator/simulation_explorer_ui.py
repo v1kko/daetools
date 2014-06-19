@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created: Tue Oct 15 03:47:20 2013
+# Created: Mon Jun 16 14:59:29 2014
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -81,22 +81,16 @@ class Ui_SimulationExplorer(object):
         self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.lasolverComboBox)
         self.dataReporterLabel = QtGui.QLabel(self.tab_Runtume)
         self.dataReporterLabel.setObjectName(_fromUtf8("dataReporterLabel"))
-        self.formLayout.setWidget(7, QtGui.QFormLayout.LabelRole, self.dataReporterLabel)
+        self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.dataReporterLabel)
         self.datareporterComboBox = QtGui.QComboBox(self.tab_Runtume)
         self.datareporterComboBox.setObjectName(_fromUtf8("datareporterComboBox"))
-        self.formLayout.setWidget(7, QtGui.QFormLayout.FieldRole, self.datareporterComboBox)
+        self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.datareporterComboBox)
         self.logLabel = QtGui.QLabel(self.tab_Runtume)
         self.logLabel.setObjectName(_fromUtf8("logLabel"))
-        self.formLayout.setWidget(8, QtGui.QFormLayout.LabelRole, self.logLabel)
+        self.formLayout.setWidget(7, QtGui.QFormLayout.LabelRole, self.logLabel)
         self.logComboBox = QtGui.QComboBox(self.tab_Runtume)
         self.logComboBox.setObjectName(_fromUtf8("logComboBox"))
-        self.formLayout.setWidget(8, QtGui.QFormLayout.FieldRole, self.logComboBox)
-        self.minlpSolverLabel = QtGui.QLabel(self.tab_Runtume)
-        self.minlpSolverLabel.setObjectName(_fromUtf8("minlpSolverLabel"))
-        self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.minlpSolverLabel)
-        self.minlpsolverComboBox = QtGui.QComboBox(self.tab_Runtume)
-        self.minlpsolverComboBox.setObjectName(_fromUtf8("minlpsolverComboBox"))
-        self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.minlpsolverComboBox)
+        self.formLayout.setWidget(7, QtGui.QFormLayout.FieldRole, self.logComboBox)
         self.verticalLayout_6.addLayout(self.formLayout)
         self.tabWidget.addTab(self.tab_Runtume, _fromUtf8(""))
         self.tab_Domains = QtGui.QWidget()
@@ -313,6 +307,7 @@ class Ui_SimulationExplorer(object):
         self.horizontalLayout_2.addWidget(self.buttonGenerateCode)
         self.buttonUpdateSimulationAndClose = QtGui.QPushButton(SimulationExplorer)
         self.buttonUpdateSimulationAndClose.setAutoDefault(False)
+        self.buttonUpdateSimulationAndClose.setDefault(True)
         self.buttonUpdateSimulationAndClose.setObjectName(_fromUtf8("buttonUpdateSimulationAndClose"))
         self.horizontalLayout_2.addWidget(self.buttonUpdateSimulationAndClose)
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
@@ -333,7 +328,6 @@ class Ui_SimulationExplorer(object):
         self.lasolverLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "LA Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.dataReporterLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Data Reporter", None, QtGui.QApplication.UnicodeUTF8))
         self.logLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "Log", None, QtGui.QApplication.UnicodeUTF8))
-        self.minlpSolverLabel.setText(QtGui.QApplication.translate("SimulationExplorer", "(MI)NLP Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Runtume), QtGui.QApplication.translate("SimulationExplorer", "Runtime", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Runtume), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Set the runtime data.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.treeDomains.headerItem().setText(0, QtGui.QApplication.translate("SimulationExplorer", "Name", None, QtGui.QApplication.UnicodeUTF8))
@@ -360,7 +354,7 @@ class Ui_SimulationExplorer(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "Results", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Results), QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Select variables to appear in the output.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonCancel.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Close this form without updating the simulation.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCancel.setText(QtGui.QApplication.translate("SimulationExplorer", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonCancel.setText(QtGui.QApplication.translate("SimulationExplorer", "Close", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonSaveRuntimeSettingsAsJSON.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Save runtime settings in JSON format to the specified file.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonSaveRuntimeSettingsAsJSON.setText(QtGui.QApplication.translate("SimulationExplorer", "Save Settings as JSON...", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonGenerateCode.setToolTip(QtGui.QApplication.translate("SimulationExplorer", "<html><head/><body><p>Generate the code for a selected language (ANSI C, Modelica, FMI).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))

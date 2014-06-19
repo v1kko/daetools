@@ -6,81 +6,96 @@
 #include <sys/stat.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/detail/file_parser_error.hpp>
 #include "Core/definitions.h"
 
 class daeConfig
 {
 public:
-	daeConfig(void)
-	{
-		configfile = daeConfig::GetConfigFolder() + "daetools.cfg";
-		Reload();
-	}
-	
-	virtual ~daeConfig(void)
-	{
-	}
-	
+    daeConfig(void)
+    {
+        configfile = daeConfig::GetConfigFolder() + "daetools.cfg";
+        Reload();
+    }
+
+    virtual ~daeConfig(void)
+    {
+    }
+
 public:
-	void Reload(void)
-	{
+    void Reload(void)
+    {
         try
         {
+            // First try to read the config file in "json" format
             pt.clear();
-            boost::property_tree::info_parser::read_info(configfile, pt);
+            boost::property_tree::json_parser::read_json(configfile, pt);
         }
-        catch(boost::property_tree::file_parser_error& e)
+        catch(boost::property_tree::file_parser_error& jsone)
         {
-            std::cout << "Cannot load daetools.cfg config file (" << e.message() << "); config files are located in /etc/daetools, c:/daetools or $HOME/.daetools" << std::endl;
+            // If json fails, try to read the same file in "info" format (this is just a transitional feature)
+            try
+            {
+                boost::property_tree::info_parser::read_info(configfile, pt);
+            }
+            catch(boost::property_tree::file_parser_error& infoe)
+            {
+                std::cout << "Cannot load daetools.cfg config file in neither 'json' nor 'info' format. Error: " << jsone.message() << std::endl;
+                std::cout << "Config files are located in /etc/daetools, c:/daetools or $HOME/.daetools directory" << std::endl;
+                return;
+            }
+
+            std::cout << "Config file is in deprecated 'info' format - switch to the new 'json' format." << std::endl;
+            std::cout << "Config files are located in /etc/daetools, c:/daetools or $HOME/.daetools directory" << std::endl;
         }
-	}
-	
-	bool HasKey(const std::string& strPropertyPath) const
-	{
-		try
-		{
-			pt.get_child(strPropertyPath);
-			return true;
-		}
-		catch(boost::property_tree::ptree_bad_path& e)
-		{
-		}
-		
-		return false;
-	}
+    }
 
-	template<class T>
-	T Get(const std::string& strPropertyPath)
-	{
-		return pt.get<T>(strPropertyPath);
-	}
-	
-	template<class T>
-	T Get(const std::string& strPropertyPath, const T defValue)
-	{
-		return pt.get<T>(strPropertyPath, defValue);
-	}
+    bool HasKey(const std::string& strPropertyPath) const
+    {
+        try
+        {
+            pt.get_child(strPropertyPath);
+            return true;
+        }
+        catch(boost::property_tree::ptree_bad_path& e)
+        {
+        }
 
-	template<class T>
-	void Set(const std::string& strPropertyPath, const T value)
-	{
-		pt.put<T>(strPropertyPath, value);
-	}
+        return false;
+    }
 
-	static daeConfig& GetConfig(void)
-	{
-		static daeConfig config;
-		return config;
-	}
-	
-	static std::string GetBONMINOptionsFile()
-	{
-		return daeConfig::GetConfigFolder() + "bonmin.cfg";
-	}
+    template<class T>
+    T Get(const std::string& strPropertyPath)
+    {
+        return pt.get<T>(strPropertyPath);
+    }
 
-	static std::string GetConfigFolder()
-	{
+    template<class T>
+    T Get(const std::string& strPropertyPath, const T defValue)
+    {
+        return pt.get<T>(strPropertyPath, defValue);
+    }
+
+    template<class T>
+    void Set(const std::string& strPropertyPath, const T value)
+    {
+        pt.put<T>(strPropertyPath, value);
+    }
+
+    static daeConfig& GetConfig(void)
+    {
+        static daeConfig config;
+        return config;
+    }
+
+    static std::string GetBONMINOptionsFile()
+    {
+        return daeConfig::GetConfigFolder() + "bonmin.cfg";
+    }
+
+    static std::string GetConfigFolder()
+    {
         std::string strConfigFolder;
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
         char* szSysDrive = getenv("SYSTEMDRIVE");
@@ -122,21 +137,21 @@ public:
         return infile.good();
     }
 
-	std::string toString(void) const
-	{
-		std::stringstream ss;
-		boost::property_tree::info_parser::write_info(ss, pt);
-		return ss.str();
-	}
-	
-	const boost::property_tree::ptree& GetPropertyTree(void) const
-	{
-		return pt;
-	}
-	
+    std::string toString(void) const
+    {
+        std::stringstream ss;
+        boost::property_tree::info_parser::write_info(ss, pt);
+        return ss.str();
+    }
+
+    const boost::property_tree::ptree& GetPropertyTree(void) const
+    {
+        return pt;
+    }
+
 protected:
-	boost::property_tree::ptree pt;
-	std::string					configfile;	
+    boost::property_tree::ptree pt;
+    std::string					configfile;
 };
 
 

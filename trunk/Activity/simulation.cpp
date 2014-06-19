@@ -117,7 +117,9 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
         throw e;
     }
 
-    SetJSONRuntimeSettings(strJSONRuntimeSettings);
+    if(!strJSONRuntimeSettings.empty())
+        SetJSONRuntimeSettings(strJSONRuntimeSettings);
+
     m_bCalculateSensitivities     = bCalculateSensitivities;
     m_nNumberOfObjectiveFunctions = 0;
 
@@ -1947,14 +1949,10 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
 
 void daeSimulation::SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings)
 {
-    if(strJSONRuntimeSettings.empty())
-        return;
-
     try
     {
         std::stringstream ss(strJSONRuntimeSettings);
         boost::property_tree::json_parser::read_json(ss, m_ptreeRuntimeSettings);
-        //boost::property_tree::json_parser::write_json("runtimeSettings.json", m_ptreeRuntimeSettings);
 
         // Only at the end of parsing set the m_strJSONRuntimeSettings
         m_strJSONRuntimeSettings = strJSONRuntimeSettings;
@@ -1962,7 +1960,7 @@ void daeSimulation::SetJSONRuntimeSettings(const std::string& strJSONRuntimeSett
     catch(std::exception& ex)
     {
         daeDeclareException(exRuntimeCheck);
-        e << "Invalid JSON Runtime Settings specified; Error: " << ex.what();
+        e << "Cannot set JSON Runtime settings: " << ex.what();
         throw e;
     }
 }
