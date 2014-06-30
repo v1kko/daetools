@@ -272,13 +272,13 @@ def consoleRun():
     # Get the dictionary
     dvals = simulation.dr1.Process.dictVariableValues
     # Plot some variables
-    values,domains,times = dvals['tutorial8.T']
+    values,times,domains = dvals['tutorial8.T']
     import matplotlib
     matplotlib.pyplot.plot(times,values)
     matplotlib.pyplot.show()
 
     print simulation.dr9.data_frame
-    print simulation.dr9.data_frame['Values']['tutorial8.T']
+    print simulation.dr9.data_frame['Value']['tutorial8.T']
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
