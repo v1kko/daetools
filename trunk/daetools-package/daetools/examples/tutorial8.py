@@ -19,22 +19,25 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 In this example we use a similar problem as in the tutorial 5.
 
-Here we introduce:
+Here we introduce a data reporter concept and show how to export results to several formats:
+ - Matlab MAT file
+ - MS Excel .xls file
+ - JSON file
+ - XML file
+ - HDF5 file
+and how to write custom data reporters. Some time it is not enough to send the results
+to daePlotter but it is desirable to export them in certain format for use in other programs.
+Here we show how the custom data reporter can be created.
+In this example the data reporter simply, after the simulation is finished, save the results
+into a plain text file. Obviously, the data can be exported to any format.
 
-- Writting Matlab .MAT files (using daeMatlabMATFileDataReporter)
-- Custom data reporters
-
-Some time it is not enough to send the result to daePlotter but it is desirable to
-export them in certain format for use in other programs. Here we show how the custom
-data reporter can be created. In this example the data reporter simply, after the simulation
-is finished, save the results into a plain text file. Obviously, the data can be exported to
-any format. Also some numpy functions that operate on numpy arrays can be used as well.
 In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It
 has the same interface and the functionality like all data reporters. However, it does not do
 any data processing itself but calls the corresponding functions of data reporters which
 are added to it by using the function AddDataReporter. This way it is possible, at the same
 time, to send the results to the daePlotter and save them into a file (or process them in
-some other ways).
+some other ways). In this example we will use it to process results in eight different ways
+at the same time.
 """
 
 import sys, tempfile
@@ -47,7 +50,7 @@ from pyUnits import m, kg, s, K, J, W
 
 # The best starting point in creating custom data reporters that can export the results
 # into a file is daeDataReporterLocal class. It internally does all the processing
-# and offers a user the Process property of type daeDataReporterProcess which contains
+# and offers to users the Process property (daeDataReceiverProcess object) which contains
 # all domains and variables sent by simulation. The following functions have to be implemented:
 #  - Connect
 #    It is used to connect the data reporter. In the case when the local data reporter is used
@@ -147,15 +150,21 @@ class simTutorial(daeSimulation):
 # receive the 'pure virtual method called' error
 def setupDataReporters(simulation):
     """
-    Create daeDelegateDataReporter and add 4 data reporters:
+    Create daeDelegateDataReporter and add 9 data reporters:
      - MyDataReporterLocal
        User-defined data reporter to write data to the file 'tutorial8.out'
      - daeTCPIPDataReporter
        Standard data reporter that sends data to the daePlotter
      - daeMatlabMATFileDataReporter
-       Export the results into the Matlab .mat file format
+       Exports the results into the Matlab .mat file format
      - daePlotDataReporter
        Plots selected variables using Matplotlib
+     - daeExcelFileDataReporter
+       Exports the results into MS Excel file format
+     - daeJSONFileDataReporter
+     - daeXMLFileDataReporter
+     - daeHDF5FileDataReporter
+     - daePandasDataReporter
     """
     datareporter = daeDelegateDataReporter()
 
@@ -163,25 +172,49 @@ def setupDataReporters(simulation):
     simulation.dr2 = daeTCPIPDataReporter()
     simulation.dr3 = daeMatlabMATFileDataReporter()
     simulation.dr4 = daePlotDataReporter()
+    simulation.dr5 = daeExcelFileDataReporter()
+    simulation.dr6 = daeJSONFileDataReporter()
+    simulation.dr7 = daeXMLFileDataReporter()
+    simulation.dr8 = daeHDF5FileDataReporter()
+    simulation.dr9 = daePandasDataReporter()
 
     datareporter.AddDataReporter(simulation.dr1)
     datareporter.AddDataReporter(simulation.dr2)
     datareporter.AddDataReporter(simulation.dr3)
     datareporter.AddDataReporter(simulation.dr4)
+    datareporter.AddDataReporter(simulation.dr5)
+    datareporter.AddDataReporter(simulation.dr6)
+    datareporter.AddDataReporter(simulation.dr7)
+    datareporter.AddDataReporter(simulation.dr8)
+    datareporter.AddDataReporter(simulation.dr9)
 
     # Connect data reporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    filename = tempfile.gettempdir() + "/tutorial8.out"
-    matfilename = tempfile.gettempdir() + "/tutorial8.mat"
-    txtfilename = tempfile.gettempdir() + "/tutorial8.txt"
+    filename     = tempfile.gettempdir() + "/tutorial8.out"
+    matfilename  = tempfile.gettempdir() + "/tutorial8.mat"
+    txtfilename  = tempfile.gettempdir() + "/tutorial8.txt"
+    xlsfilename  = tempfile.gettempdir() + "/tutorial8.xls"
+    jsonfilename = tempfile.gettempdir() + "/tutorial8.json"
+    xmlfilename  = tempfile.gettempdir() + "/tutorial8.xml"
+    hdf5filename = tempfile.gettempdir() + "/tutorial8.hdf5"
 
-    if(simulation.dr1.Connect(filename, simName) == False):
+    if not simulation.dr1.Connect(filename, simName):
         sys.exit()
-    if(simulation.dr2.Connect("", simName) == False):
+    if not simulation.dr2.Connect("", simName):
         sys.exit()
-    if(simulation.dr3.Connect(matfilename, simName) == False):
+    if not simulation.dr3.Connect(matfilename, simName):
         sys.exit()
-    if(simulation.dr4.Connect(txtfilename, simName) == False):
+    if not simulation.dr4.Connect(txtfilename, simName):
+        sys.exit()
+    if not simulation.dr5.Connect(xlsfilename, simName):
+        sys.exit()
+    if not simulation.dr6.Connect(jsonfilename, simName):
+        sys.exit()
+    if not simulation.dr7.Connect(xmlfilename, simName):
+        sys.exit()
+    if not simulation.dr8.Connect(hdf5filename, simName):
+        sys.exit()
+    if not simulation.dr9.Connect("", simName):
         sys.exit()
 
     return datareporter
@@ -228,6 +261,24 @@ def consoleRun():
         simulation.m.T,                       # Subplot 1
         [simulation.m.T, simulation.m.T]      # Subplot 2 (2 sets)
         )
+
+    # All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter
+    # classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class
+    # contains dictVariableValues property which represents a dictionary 'variable_name':(ndarr_times, ndarr_values)
+    # First print the contents of the abovementioned dictionary:
+    import pprint
+    pprint.pprint(simulation.dr1.Process.dictVariableValues)
+
+    # Get the dictionary
+    dvals = simulation.dr1.Process.dictVariableValues
+    # Plot some variables
+    values,domains,times = dvals['tutorial8.T']
+    import matplotlib
+    matplotlib.pyplot.plot(times,values)
+    matplotlib.pyplot.show()
+
+    print simulation.dr9.data_frame
+    print simulation.dr9.data_frame['Values']['tutorial8.T']
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

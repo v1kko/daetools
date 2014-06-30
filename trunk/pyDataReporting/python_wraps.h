@@ -1274,6 +1274,8 @@ boost::python::list GetVariablesDataReporterProcess(daeDataReceiverProcess& proc
 boost::python::dict GetDomainsAsDictDataReporterProcess(daeDataReceiverProcess& process);
 boost::python::dict GetVariablesAsDictDataReporterProcess(daeDataReceiverProcess& process);
 
+boost::python::dict GetDictOfVariableValuesAsNumpyArraysDataReporterProcess(daeDataReceiverProcess& process);
+
 }
 
 #endif

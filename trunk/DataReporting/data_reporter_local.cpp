@@ -33,6 +33,21 @@ string daeDataReporterLocal::GetProcessName() const
     return m_strProcessName;
 }
 
+void daeDataReporterLocal::SetName(const std::string& strName)
+{
+    m_strName = strName;
+}
+
+void daeDataReporterLocal::SetConnectString(const std::string& strConnectString)
+{
+    m_strConnectString = strConnectString;
+}
+
+void daeDataReporterLocal::SetProcessName(const std::string& strProcessName)
+{
+    m_strProcessName = strProcessName;
+}
+
 bool daeDataReporterLocal::StartRegistration(void)
 {
 	return true;

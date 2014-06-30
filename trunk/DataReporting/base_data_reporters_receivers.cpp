@@ -26,11 +26,6 @@ daeDataReporter_t* daeCreateHTMLDataReporter(void)
 	return new daeHTMLFileDataReporter;
 }
 
-daeDataReporter_t* daeCreateXMLDataReporter(void)
-{
-	return new daeXMLFileDataReporter;
-}
-
 daeDataReporter_t* daeCreateTCPIPDataReporter(void)
 {
 	return new daeTCPIPDataReporter;

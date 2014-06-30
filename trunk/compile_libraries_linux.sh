@@ -45,7 +45,7 @@ OPTIONS:
                    
 LIBRARY:
     all              All libraries and solvers.
-                     Equivalent to: boost ref_blas_lapack umfpack idas trilinos superlu superlu_mt bonmin nlopt deal.ii
+                     Equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt trilinos bonmin nlopt deal.ii
     
     Individual libraries/solvers:
         boost            Boost libraries (system, filesystem, thread, python)
@@ -492,7 +492,7 @@ compile_ref_blas_lapack()
   cd "${TRUNK}"
 }
 
-clean_lapack()
+clean_ref_blas_lapack()
 {
   echo ""
   echo "[*] Cleaning reference blas & lapack..."

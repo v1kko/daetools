@@ -30,6 +30,21 @@ string daeDataReporterRemote::GetProcessName() const
     return m_strProcessName;
 }
 
+void daeDataReporterRemote::SetName(const std::string& strName)
+{
+    m_strName = strName;
+}
+
+void daeDataReporterRemote::SetConnectString(const std::string& strConnectString)
+{
+    m_strConnectString = strConnectString;
+}
+
+void daeDataReporterRemote::SetProcessName(const std::string& strProcessName)
+{
+    m_strProcessName = strProcessName;
+}
+
 bool daeDataReporterRemote::SendProcessName(const string& strProcessName)
 {
 	m_strProcessName = strProcessName;

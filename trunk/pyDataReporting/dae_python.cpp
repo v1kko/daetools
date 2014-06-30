@@ -65,9 +65,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
     daeDataReporter_xxx
 ***************************************************************/
 	class_<daepython::daeDataReporterWrapper, boost::noncopyable>("daeDataReporter_t", DOCSTR_daeDataReporter_t, no_init)
-        .add_property("Name",           &daeDataReporter_t::GetName,          DOCSTR_daeDataReporter_t_Name)
-        .add_property("ConnectString",	&daeDataReporter_t::GetConnectString, DOCSTR_daeDataReporter_t_ConnectString)
-        .add_property("ProcessName",	&daeDataReporter_t::GetProcessName,   DOCSTR_daeDataReporter_t_ProcessName)
+        .add_property("Name",           &daeDataReporter_t::GetName,          &daeDataReporter_t::SetName,          DOCSTR_daeDataReporter_t_Name)
+        .add_property("ConnectString",	&daeDataReporter_t::GetConnectString, &daeDataReporter_t::SetConnectString, DOCSTR_daeDataReporter_t_ConnectString)
+        .add_property("ProcessName",	&daeDataReporter_t::GetProcessName,   &daeDataReporter_t::SetProcessName,   DOCSTR_daeDataReporter_t_ProcessName)
 
         .def("Connect",				pure_virtual(&daeDataReporter_t::Connect),           ( arg("self"),
                                                                                            arg("connectionString"), 
@@ -201,7 +201,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
 
 	class_<daepython::daeDataReporterRemoteWrapper, bases<daeDataReporter_t>, boost::noncopyable>("daeDataReporterRemote", DOCSTR_daeDataReporterRemote, no_init)
         .def(init<>(( arg("self") )))
-            
+
 		.def("Connect",				&daeDataReporter_t::Connect,			&daepython::daeDataReporterRemoteWrapper::def_Connect)
 		.def("Disconnect",			&daeDataReporter_t::Disconnect,			&daepython::daeDataReporterRemoteWrapper::def_Disconnect)
 		.def("IsConnected",			&daeDataReporter_t::IsConnected,		&daepython::daeDataReporterRemoteWrapper::def_IsConnected)
@@ -298,7 +298,9 @@ BOOST_PYTHON_MODULE(pyDataReporting)
             
         .add_property("dictDomains",		&daepython::GetDomainsAsDictDataReporterProcess,   DOCSTR_daeDataReceiverProcess_dictDomains)
         .add_property("dictVariables",		&daepython::GetVariablesAsDictDataReporterProcess, DOCSTR_daeDataReceiverProcess_dictVariables)
-		
+
+        .add_property("dictVariableValues",	&daepython::GetDictOfVariableValuesAsNumpyArraysDataReporterProcess, DOCSTR_daeDataReceiverProcess_dictVariableValues)
+
 		.def("RegisterDomain",				&daeDataReceiverProcess::RegisterDomain, 
                                             ( arg("self"), arg("domain") ), DOCSTR_daeDataReceiverProcess_RegisterDomain)
 		.def("RegisterVariable",			&daeDataReceiverProcess::RegisterVariable, 

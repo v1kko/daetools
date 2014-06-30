@@ -19,13 +19,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 In this example we use the same conduction problem as in the tutorial 5.
 
-Here we introduce the external functions concept that can handle and evaluate
-functions in external libraries. Here we use daeScalarExternalFunction class
-derived external function object to calculate the power and interpolate a set of
+Here we introduce the external functions concept that can handle and execute
+functions in external libraries. Here we use daeScalarExternalFunction-derived
+external function object to calculate the heat transferred and interpolate a set of
 values using scipy.interpolate.interp1d object.
-
-A support for external functions is still experimental and the goal is
-to support certain software components such as thermodynamic property packages etc.
 """
 
 import sys
@@ -39,7 +36,7 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
 class extfnHeatTransferred(daeScalarExternalFunction):
     def __init__(self, Name, Model, units, m, cp, dT):
         # Instantiate the scalar external function by specifying
-        # the arguments dictionary {'name' : adouble argument}
+        # the arguments dictionary {'name' : adouble-object}
         arguments = {}
         arguments["m"]  = m
         arguments["cp"] = cp
@@ -84,7 +81,7 @@ class extfnHeatTransferred(daeScalarExternalFunction):
         #                                                             dT.Value,dT.Derivative,
         #                                                             res.Value,res.Derivative))
 
-        # 4. Return the result as adouble object (contains both value and derivative)
+        # 4. Return the result as a adouble object (contains both value and derivative)
         return res
         
 class extfn_interp1d(daeScalarExternalFunction):
@@ -106,6 +103,7 @@ class extfn_interp1d(daeScalarExternalFunction):
         daeScalarExternalFunction.__init__(self, Name, Model, units, arguments)
 
     def Calculate(self, values):
+        # Increase the call counter every time the function is called
         self.counter += 1
 
         # Get the argument from the dictionary of arguments' values.

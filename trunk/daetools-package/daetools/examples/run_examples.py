@@ -15,7 +15,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 
-import os, platform, sys, subprocess, webbrowser, traceback, importlib
+import os, platform, sys, subprocess, webbrowser, traceback
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname

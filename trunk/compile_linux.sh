@@ -266,6 +266,11 @@ do
                 compile pyDealII  "-j1"
                 
                 #if [ ${PLATFORM} = "Linux" ]; then
+                #  compile LA_Pardiso  "-j1"
+                #  compile pyPardiso   "-j1"
+                #fi
+
+                #if [ ${PLATFORM} = "Linux" ]; then
                 #  compile LA_Intel_MKL     "-j1"
                 #  compile pyIntelPardiso   "-j1"
                 #fi
@@ -320,7 +325,12 @@ do
                     compile pyNLOPT            "-j1"
 
                     compile pyDealII           "-j1"
-                     
+
+                    #if [ ${PLATFORM} = "Linux" ]; then
+                    #  compile LA_Pardiso  "-j1"
+                    #  compile pyPardiso   "-j1"
+                    #fi
+
                     #if [ ${PLATFORM} = "Linux" ]; then
                     #  compile LA_Intel_MKL     "-j1"
                     #  compile pyIntelPardiso   "-j1"

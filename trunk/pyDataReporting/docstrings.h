@@ -103,6 +103,7 @@ const char* DOCSTR_daeDataReceiverProcess = "";
     const char* DOCSTR_daeDataReceiverProcess_Variables = "";
     const char* DOCSTR_daeDataReceiverProcess_dictDomains = "";
     const char* DOCSTR_daeDataReceiverProcess_dictVariables = "";
+    const char* DOCSTR_daeDataReceiverProcess_dictVariableValues = "";
     const char* DOCSTR_daeDataReceiverProcess_RegisterDomain = "";
     const char* DOCSTR_daeDataReceiverProcess_RegisterVariable = "";
     const char* DOCSTR_daeDataReceiverProcess_FindVariable = "";

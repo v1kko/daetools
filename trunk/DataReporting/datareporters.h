@@ -28,8 +28,12 @@ public:
 
 public:
     virtual std::string GetName() const {return "BlackHoleDataReporter";}
+    virtual void SetName(const std::string& strName) {}
     virtual std::string GetConnectString() const {return "";}
+    virtual void SetConnectString(const std::string& strConnectString) {}
     virtual std::string GetProcessName() const {return "";}
+    virtual void SetProcessName(const std::string& strProcessName) {}
+
     virtual bool Connect(const string& strConnectString, const string& strProcessName){return true;}
 	virtual bool Disconnect(void){return true;}
 	virtual bool IsConnected(void){return true;}
@@ -53,8 +57,12 @@ public:
 
 public:
     virtual std::string GetName() const;
+    virtual void SetName(const std::string& strName);
     virtual std::string GetConnectString() const;
+    virtual void SetConnectString(const std::string& strConnectString);
     virtual std::string GetProcessName() const;
+    virtual void SetProcessName(const std::string& strProcessName);
+
     virtual bool StartRegistration(void);
 	virtual bool RegisterDomain(const daeDataReporterDomain* pDomain);
 	virtual bool RegisterVariable(const daeDataReporterVariable* pVariable);
@@ -137,19 +145,6 @@ public:
 };
 
 /*********************************************************************
-	daeXMLFileDataReporter
-*********************************************************************/
-class DAE_DATAREPORTERS_API daeXMLFileDataReporter : public daeFileDataReporter
-{
-public:
-	daeXMLFileDataReporter(void);
-	virtual ~daeXMLFileDataReporter(void);
-
-public:
-	virtual void WriteDataToFile(void);
-};
-
-/*********************************************************************
 	daeDelegateDataReporter
 *********************************************************************/
 class DAE_DATAREPORTERS_API daeDelegateDataReporter : public daeDataReporter_t
@@ -160,8 +155,12 @@ public:
 
 public:
     virtual std::string GetName() const;
+    virtual void SetName(const std::string& strName) {}
     virtual std::string GetConnectString() const {return "";}
+    virtual void SetConnectString(const std::string& strConnectString) {}
     virtual std::string GetProcessName() const {return "";}
+    virtual void SetProcessName(const std::string& strProcessName) {}
+
     virtual bool Connect(const string& strConnectString, const string& strProcessName);
 	virtual bool Disconnect(void);
 	virtual bool IsConnected(void);
@@ -710,9 +709,13 @@ public:
 	virtual ~daeDataReporterRemote(void);
 
 public:
-    string GetName() const;
-    string GetConnectString() const;
-    string GetProcessName() const;
+    virtual std::string GetName() const;
+    virtual void SetName(const std::string& strName);
+    virtual std::string GetConnectString() const;
+    virtual void SetConnectString(const std::string& strConnectString);
+    virtual std::string GetProcessName() const;
+    virtual void SetProcessName(const std::string& strProcessName);
+
     bool Connect(const string& strConnectString, const string& strProcessName);
 	bool Disconnect(void);
 	bool IsConnected(void);

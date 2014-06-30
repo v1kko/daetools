@@ -13,7 +13,6 @@ daeDataReporter_t* daeCreateBlackHoleDataReporter(void);
 daeDataReporter_t* daeCreateNoOpDataReporter(void);
 daeDataReporter_t* daeCreateTextDataReporter(void);
 daeDataReporter_t* daeCreateHTMLDataReporter(void);
-daeDataReporter_t* daeCreateXMLDataReporter(void);
 daeDataReporter_t* daeCreateTCPIPDataReporter(void);
 //daeDataReceiver_t* daeCreateTCPIPDataReceiverServer(int nPort);
 daeDataReporter_t* daeCreateDelegateDataReporter(const std::vector<daeDataReporter_t*>& ptrarrDataReporters);

@@ -39,9 +39,34 @@ public:
         return "DealIIDataReporter";
     }
 
+    std::string GetConnectString() const
+    {
+        return m_strOutputDirectory;
+    }
+
+    std::string GetProcessName() const
+    {
+        return m_strProcessName;
+    }
+
+    void SetName(const std::string& strName)
+    {
+    }
+
+    void SetConnectString(const std::string& strConnectString)
+    {
+        m_strOutputDirectory = strConnectString;
+    }
+
+    void SetProcessName(const std::string& strProcessName)
+    {
+        m_strProcessName = strProcessName;
+    }
+
     bool Connect(const string& strConnectString, const string& strProcessName)
     {
         m_strOutputDirectory = strConnectString;
+        m_strProcessName     = strProcessName;
 
         // Check if output directory exists
         // If not create the whole hierarchy, up to the top directory
@@ -148,6 +173,7 @@ public:
     int                             m_outputCounter;
     fnProcessSolution               m_callback;
     std::string                     m_strOutputDirectory;
+    std::string                     m_strProcessName;
     std::map<std::string, size_t>   m_mapVariables;
 };
 

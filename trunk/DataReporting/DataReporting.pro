@@ -14,7 +14,6 @@ SOURCES += text_file_reporter.cpp \
     class_factory.cpp \
     base_data_reporters_receivers.cpp \
     hybrid_data_reporter_receiver.cpp \
-    xml_file_reporter.cpp \
     delegate_data_reporter.cpp \
     tcpip_data_reporter.cpp \
     data_reporter_remote.cpp \

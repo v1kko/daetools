@@ -33,7 +33,6 @@ daeDataReportingClassFactory_t* daeCreateDataReportingClassFactory(void)
 	
 	daeRegisterDataReporter(daeTEXTFileDataReporter)
 	daeRegisterDataReporter(daeHTMLFileDataReporter)
-	daeRegisterDataReporter(daeXMLFileDataReporter)
 	
 	return &g_DataReportingClassFactory; \
 }

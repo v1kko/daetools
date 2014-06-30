@@ -45,6 +45,10 @@ class daeTextEditLog(daeBaseLog):
         self.App              = App
         self.time             = time()
 
+    @property
+    def Name(self):
+        return 'daeTextEditLog'
+        
     def SetProgress(self, progress):
         daeBaseLog.SetProgress(self, progress)
         self.ProgressBar.setValue(self.Progress)

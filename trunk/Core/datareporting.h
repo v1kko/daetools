@@ -288,8 +288,12 @@ public:
 
 public:
     virtual std::string GetName() const                                                 = 0;
+    virtual void SetName(const std::string& strName)                                    = 0;
     virtual std::string GetConnectString() const                                        = 0;
+    virtual void SetConnectString(const std::string& strConnectString)                  = 0;
     virtual std::string GetProcessName() const                                          = 0;
+    virtual void SetProcessName(const std::string& strProcessName)                      = 0;
+
 	virtual bool Connect(const string& strConnectString, const string& strProcessName)	= 0;
 	virtual bool Disconnect(void)														= 0;
 	virtual bool IsConnected(void)														= 0;

@@ -14,19 +14,19 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 from pyCore import *
 from pyDataReporting import *
 try:
-    import scipy
+    import numpy, scipy
     from scipy.io import savemat, loadmat
 except ImportError as e:
-    print(('Cannot load scipy.io.savemat module: %s' % str(e)))
+    print(('Cannot load numpy/scipy modules: %s' % str(e)))
 
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
 
-    def Connect(self, ConnectionString, ProcessName):
-        self.ProcessName      = ProcessName
-        self.ConnectionString = ConnectionString
+    def Connect(self, ConnectString, ProcessName):
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
         return True
 
     def IsConnected(self):
@@ -42,25 +42,299 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
             mdict[var.Name] = var.Values
 
         try:
-            scipy.io.savemat(self.ConnectionString,
+            scipy.io.savemat(self.ConnectString,
                              mdict,
                              appendmat=False,
                              format='5',
                              long_field_names=False,
                              do_compression=False,
                              oned_as='row')
+                             
         except Exception as e:
             print(('Cannot call scipy.io.savemat(); is SciPy installed?\n' + str(e)))
 
+
+class daeJSONFileDataReporter(daeDataReporterLocal):
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
+
+    def Connect(self, ConnectString, ProcessName):
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.WriteDataToFile()
+        return True
+
+    def WriteDataToFile(self):
+        mdict = {}
+        for variable_name, (ndarr_values, ndarr_times, l_domains) in self.Process.dictVariableValues.items():
+            mdict[daeGetStrippedName(variable_name)] = {'Value'   : ndarr_values.tolist(),
+                                                        'Times'   : ndarr_times.tolist(),
+                                                        'Domains' : l_domains
+                                                       }
+
+        try:
+            import json
+            f = open(self.ConnectString, 'w')
+            f.write(json.dumps(mdict, sort_keys=True, indent=4))
+            f.close()
+            
+        except Exception as e:
+            print(('Cannot write data in JSON format:\n' + str(e)))
+   
+class daeHDF5FileDataReporter(daeDataReporterLocal):
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
+
+    def Connect(self, ConnectString, ProcessName):
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.WriteDataToFile()
+        return True
+
+    def WriteDataToFile(self):
+        try:
+            import h5py
+            f = h5py.File(self.ConnectString, "w")
+            for variable_name, (ndarr_values, ndarr_times, l_domains) in self.Process.dictVariableValues.items():
+                grp = f.create_group(daeGetStrippedName(variable_name))
+                dsv = grp.create_dataset("Value",   data = ndarr_values)
+                dst = grp.create_dataset("Times",   data = ndarr_times)
+                dst = grp.create_dataset("Domains", data = l_domains)
+
+            f.close()
+
+        except Exception as e:
+            print(('Cannot write data in HDF5 format:\n' + str(e)))
+
+class daeXMLFileDataReporter(daeDataReporterLocal):
+    """
+    Saves data in XML format (.xml)
+    """
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
+
+    def Connect(self, ConnectString, ProcessName):
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.WriteDataToFile()
+        return True
+
+    def WriteDataToFile(self):
+        try:
+            from xml.etree import ElementTree
+
+            class XmlDictObject(dict):
+                """
+                Adds object like functionality to the standard dictionary.
+                """
+
+                def __init__(self, initdict=None):
+                    if initdict is None:
+                        initdict = {}
+                    dict.__init__(self, initdict)
+
+                def __getattr__(self, item):
+                    return self.__getitem__(item)
+
+                def __setattr__(self, item, value):
+                    self.__setitem__(item, value)
+
+                def __str__(self):
+                    if self.has_key('_text'):
+                        return self.__getitem__('_text')
+                    else:
+                        return ''
+
+                @staticmethod
+                def Wrap(x):
+                    """
+                    Static method to wrap a dictionary recursively as an XmlDictObject
+                    """
+
+                    if isinstance(x, dict):
+                        return XmlDictObject((k, XmlDictObject.Wrap(v)) for (k, v) in x.iteritems())
+                    elif isinstance(x, list):
+                        return [XmlDictObject.Wrap(v) for v in x]
+                    else:
+                        return x
+
+                @staticmethod
+                def _UnWrap(x):
+                    if isinstance(x, dict):
+                        return dict((k, XmlDictObject._UnWrap(v)) for (k, v) in x.iteritems())
+                    elif isinstance(x, list):
+                        return [XmlDictObject._UnWrap(v) for v in x]
+                    else:
+                        return x
+
+                def UnWrap(self):
+                    """
+                    Recursively converts an XmlDictObject to a standard dictionary and returns the result.
+                    """
+
+                    return XmlDictObject._UnWrap(self)
+
+            def _ConvertDictToXmlRecurse(parent, dictitem):
+                assert type(dictitem) is not type([])
+
+                if isinstance(dictitem, dict):
+                    for (tag, child) in dictitem.iteritems():
+                        if str(tag) == '_text':
+                            parent.text = str(child)
+                        elif type(child) is type([]):
+                            # iterate through the array and convert
+                            for listchild in child:
+                                elem = ElementTree.Element(tag)
+                                parent.append(elem)
+                                _ConvertDictToXmlRecurse(elem, listchild)
+                        else:
+                            elem = ElementTree.Element(tag)
+                            parent.append(elem)
+                            _ConvertDictToXmlRecurse(elem, child)
+                else:
+                    parent.text = str(dictitem)
+
+            def ConvertDictToXml(xmldict):
+                """
+                Converts a dictionary to an XML ElementTree Element
+                """
+
+                roottag = xmldict.keys()[0]
+                root = ElementTree.Element(roottag)
+                _ConvertDictToXmlRecurse(root, xmldict[roottag])
+                return root
+
+            mdict = XmlDictObject()
+            variables = {}
+            for var in self.Process.Variables:
+                variable = {}
+                variable['Times'] = var.TimeValues.tolist()
+                # ConvertDictToXml complains about multi-dimensional arrays
+                # Hence, flatten nd_array before exporting to xml
+                variable['Value'] = numpy.ravel(var.Values).tolist()
+                variables[daeGetStrippedName(var.Name)] = variable
+            mdict['Simulation'] = variables
+
+            root = ConvertDictToXml(mdict)
+            tree = ElementTree.ElementTree(root)
+            tree.write(self.ConnectString)
+            
+        except Exception as e:
+            print(('Cannot write data in XML format:\n' + str(e)))
+
+           
+class daeExcelFileDataReporter(daeDataReporterLocal):
+    """
+    Saves data in MS Excel format (.xls).
+    Does not need Excel installed (works under GNU'Linux too).
+    """
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
+
+    def Connect(self, ConnectString, ProcessName):
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.WriteDataToFile()
+        return True
+
+    def WriteDataToFile(self):
+        try:
+            import xlwt
+
+            wb = xlwt.Workbook()
+            # Uses a new property (dictVariableValues) in daeDataReporterLocal to process the data
+            for variable_name, (ndarr_values, ndarr_times, l_domains) in self.Process.dictVariableValues.items():
+                ws = wb.add_sheet(variable_name)
+
+                ws.write(0, 0, 'Times')
+                ws.write(0, 1, 'Value')
+                for (t,), time in numpy.ndenumerate(ndarr_times):
+                    ws.write(t+1, 0, time)
+                    v = 0
+                    for val_indexes, value in numpy.ndenumerate(ndarr_values[t]):
+                        ws.write(t+1, v+1, value)
+                        v += 1
+
+            wb.save(self.ConnectString)
+            
+        except Exception as e:
+            print(('Cannot save excel file; is python-xlwt package installed?\n' + str(e)))
+
+class daePandasDataReporter(daeDataReporterLocal):
+    """
+    Returns data as pandas DataSet
+    """
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName = ""
+        self.data_frame  = None
+
+    def Connect(self, ConnectString, ProcessName):
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.GenerateDataSet()
+        return True
+
+    def GenerateDataSet(self):
+        try:
+            import pandas
+            from pandas import DataFrame
+            
+            names = []
+            data  = []
+            times = []
+            for name, var in self.Process.dictVariables.items():
+                names.append(name)
+                times.append(var.TimeValues)
+                data.append(var.Values)
+
+            self.data_frame = DataFrame(data = zip(times, data), columns = ['Times', 'Value'], index = names)
+
+        except Exception as e:
+            print(('Cannot generate Pandas DataFrame; is python-pandas package installed?\n' + str(e)))
 
 class daePlotDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
 
-    def Connect(self, ConnectionString, ProcessName):
+    def Connect(self, ConnectString, ProcessName):
         self.ProcessName      = ProcessName
-        self.ConnectionString = ConnectionString
+        self.ConnectString = ConnectString
         return True
 
     def IsConnected(self):

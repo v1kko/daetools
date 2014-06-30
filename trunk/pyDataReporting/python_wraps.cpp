@@ -280,4 +280,48 @@ boost::python::dict GetVariablesAsDictDataReporterProcess(daeDataReceiverProcess
     return d;    
 }
 
+boost::python::dict GetDictOfVariableValuesAsNumpyArraysDataReporterProcess(daeDataReceiverProcess& process)
+{
+    boost::python::dict d;
+    map<string, daeDataReceiverVariable*>::const_iterator iter;
+
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
+
+    for(iter = process.m_ptrmapRegisteredVariables.begin(); iter != process.m_ptrmapRegisteredVariables.end(); iter++)
+    {
+        string strName                     = iter->first;
+        daeDataReceiverVariable* pVariable = iter->second;
+        boost::python::object ndvalues     = GetNumPyArrayDataReceiverVariable(*pVariable);
+        boost::python::object ndtimes      = GetTimeValuesDataReceiverVariable(*pVariable);
+
+        boost::python::list domains;
+        for(size_t i = 0; i < pVariable->m_ptrarrDomains.size(); i++)
+        {
+            // Get points and create shape
+            daeDataReceiverDomain* pDomain = pVariable->m_ptrarrDomains[i];
+            boost::python::list  points = GetDataReceiverDomainPoints(*pDomain);
+            boost::python::tuple shape  = boost::python::make_tuple(pDomain->m_nNumberOfPoints);
+
+            // Create a flat ndarray
+            boost::python::dict kwargs;
+            if(typeid(real_t) == typeid(double))
+                kwargs["dtype"] = numpy.attr("float64");
+            else
+                kwargs["dtype"] = numpy.attr("float32");
+            boost::python::tuple args = boost::python::make_tuple(points);
+            boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+            // No need to reshape since it is 1-dimensional
+
+            domains.append(ndarray);
+        }
+
+        d[strName] = boost::python::make_tuple(ndvalues, ndtimes, domains);
+    }
+
+    return d;
+}
+
 }
