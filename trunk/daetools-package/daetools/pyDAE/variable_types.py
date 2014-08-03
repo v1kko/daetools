@@ -14,6 +14,7 @@ volume_t                     = daeVariableType("volume_t",                     m
 velocity_t                   = daeVariableType("velocity_t",                   m/s,        -1.0e+10, 1.0e+10,   0.001, 1e-05)
 pressure_t                   = daeVariableType("pressure_t",                   Pa,          1.0e+02, 1.0e+10, 1.0e+05, 1e-05)
 temperature_t                = daeVariableType("temperature_t",                K,               0.0, 1.0e+05,     300, 1e-05)
+mass_t                       = daeVariableType("mass_t",                       kg,              0.0, 1.0e+20,       0, 1e-05)
 
 fraction_t                   = daeVariableType("fraction_t",                   dimless,        -0.1,       2,    0.25, 1e-06)
 no_t                         = daeVariableType("no_t",                         dimless,    -1.0e+20, 1.0e+20,     0.0, 1e-05)
