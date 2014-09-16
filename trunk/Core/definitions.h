@@ -2,7 +2,7 @@
                  DAE Tools Project: www.daetools.com
                  Copyright (C) Dragan Nikolic, 2010
 ************************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
+DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
 Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -14,9 +14,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define DAE_DEFINITIONS_H
 
 #ifdef DAE_SINGLE_PRECISION
-#define real_t float 
+#define real_t float
 #else
-#define real_t double 
+#define real_t double
 #endif
 
 #include <string.h>
@@ -36,6 +36,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <iomanip>
 #include <typeinfo>
+#include <limits>
 
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 #pragma warning(disable: 4250)
@@ -57,189 +58,189 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif
 
-namespace dae 
+namespace dae
 {
 using std::string;
 using std::map;
 
 const string daeAuthorInfo  =	"Dragan Nikolic, 2014 DAE Tools project, dnikolic at daetools.com";
 const string daeLicenceInfo	=	"DAE Tools is free software: you can redistribute it and/or modify "
-								"it under the terms of the GNU General Public License version 3 "
-								"as published by the Free Software Foundation. \n\n"
-								"This program is distributed in the hope that it will be useful, "
-								"but WITHOUT ANY WARRANTY; without even the implied warranty of "
-								"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
-								"GNU General Public License for more details. \n\n"
-								"You should have received a copy of the GNU General Public License "
-								"along with this program. If not, see <http://www.gnu.org/licenses/>.";
+                                "it under the terms of the GNU General Public License version 3 "
+                                "as published by the Free Software Foundation. \n\n"
+                                "This program is distributed in the hope that it will be useful, "
+                                "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+                                "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
+                                "GNU General Public License for more details. \n\n"
+                                "You should have received a copy of the GNU General Public License "
+                                "along with this program. If not, see <http://www.gnu.org/licenses/>.";
 const size_t FREE = ULONG_MAX;
 inline std::string daeVersion(bool bIncludeBuild = false)
 {
-	char dae__version[20];
-	if(bIncludeBuild)
-		::sprintf(dae__version, "%d.%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
-	else
-		::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR);
-	return std::string(dae__version);
+    char dae__version[20];
+    if(bIncludeBuild)
+        ::sprintf(dae__version, "%d.%d.%d", DAE_MAJOR, DAE_MINOR, DAE_BUILD);
+    else
+        ::sprintf(dae__version, "%d.%d", DAE_MAJOR, DAE_MINOR);
+    return std::string(dae__version);
 }
 
 inline size_t daeVersionMajor()
 {
-	return size_t(DAE_MAJOR);
+    return size_t(DAE_MAJOR);
 }
 
 inline size_t daeVersionMinor()
 {
-	return size_t(DAE_MINOR);
+    return size_t(DAE_MINOR);
 }
 
 inline size_t daeVersionBuild()
 {
-	return size_t(DAE_BUILD);
+    return size_t(DAE_BUILD);
 }
 
 /*********************************************************************************************
-	daePtrVector
+    daePtrVector
 **********************************************************************************************/
-template <class T> 
+template <class T>
 class daePtrVector : public std::vector<T>
 {
 public:
-	typedef typename daePtrVector<T>::iterator _iterator;
+    typedef typename daePtrVector<T>::iterator _iterator;
 
-	daePtrVector(void)
-	{
-		m_bOwnershipOnPointers = true;
-	}
+    daePtrVector(void)
+    {
+        m_bOwnershipOnPointers = true;
+    }
 
-	virtual ~daePtrVector(void)
-	{
-		EmptyAndFreeMemory();
-	}
+    virtual ~daePtrVector(void)
+    {
+        EmptyAndFreeMemory();
+    }
 
-	void SetOwnershipOnPointers(bool bOwnership)
-	{
-		m_bOwnershipOnPointers = bOwnership;
-	}
+    void SetOwnershipOnPointers(bool bOwnership)
+    {
+        m_bOwnershipOnPointers = bOwnership;
+    }
 
-	bool GetOwnershipOnPointers(void)
-	{
-		return m_bOwnershipOnPointers;
-	}
+    bool GetOwnershipOnPointers(void)
+    {
+        return m_bOwnershipOnPointers;
+    }
 
-	void Remove(T object)
-	{
-		_iterator iter;
-		for(iter = this->begin(); iter != this->end(); iter++)
-		{
-			if(*iter == object)
-			{
-				if(*iter && m_bOwnershipOnPointers)
-					delete *iter;
-				this->erase(iter);
-				return;
-			}
-		}
-	}
-	
-	void EmptyAndFreeMemory(void)
-	{
-		if(m_bOwnershipOnPointers)
-		{
-			for(_iterator iter = this->begin(); iter != this->end(); iter++)
-			{
-				if(*iter)
-					delete *iter;
-			}
-		}
-		this->clear();
-	}
+    void Remove(T object)
+    {
+        _iterator iter;
+        for(iter = this->begin(); iter != this->end(); iter++)
+        {
+            if(*iter == object)
+            {
+                if(*iter && m_bOwnershipOnPointers)
+                    delete *iter;
+                this->erase(iter);
+                return;
+            }
+        }
+    }
+
+    void EmptyAndFreeMemory(void)
+    {
+        if(m_bOwnershipOnPointers)
+        {
+            for(_iterator iter = this->begin(); iter != this->end(); iter++)
+            {
+                if(*iter)
+                    delete *iter;
+            }
+        }
+        this->clear();
+    }
 
 protected:
-	bool m_bOwnershipOnPointers;
+    bool m_bOwnershipOnPointers;
 };
 
-template <class T> 
+template <class T>
 void clean_vector(daePtrVector<T>& ptrarrVector)
 {
-	ptrarrVector.EmptyAndFreeMemory();
-	daePtrVector<T>().swap(ptrarrVector);
-	//std::cout << "after clean_vector capacity = " << ptrarrVector.capacity() << std::endl;
+    ptrarrVector.EmptyAndFreeMemory();
+    daePtrVector<T>().swap(ptrarrVector);
+    //std::cout << "after clean_vector capacity = " << ptrarrVector.capacity() << std::endl;
 }
 
 /*********************************************************************************************
-	daePtrMap
+    daePtrMap
 **********************************************************************************************/
 template <class KEY, class VALUE>
 class daePtrMap : public std::map<KEY,VALUE>
 {
 public:
-	typedef typename daePtrMap<KEY,VALUE>::iterator _iterator;
+    typedef typename daePtrMap<KEY,VALUE>::iterator _iterator;
 
-	daePtrMap(void)
-	{
-		m_bOwnershipOnPointers = true;
-	}
+    daePtrMap(void)
+    {
+        m_bOwnershipOnPointers = true;
+    }
 
-	virtual ~daePtrMap(void)
-	{
-		EmptyAndFreeMemory();
-	}
+    virtual ~daePtrMap(void)
+    {
+        EmptyAndFreeMemory();
+    }
 
-	void SetOwnershipOnPointers(bool bOwnership)
-	{
-		m_bOwnershipOnPointers = bOwnership;
-	}
+    void SetOwnershipOnPointers(bool bOwnership)
+    {
+        m_bOwnershipOnPointers = bOwnership;
+    }
 
-	bool GetOwnershipOnPointers(void)
-	{
-		return m_bOwnershipOnPointers;
-	}
+    bool GetOwnershipOnPointers(void)
+    {
+        return m_bOwnershipOnPointers;
+    }
 
-	void EmptyAndFreeMemory(void)
-	{
-		if(m_bOwnershipOnPointers)
-		{
-			for(_iterator iter = this->begin(); iter != this->end(); iter++)
-			{
-				if((*iter).second)
-					delete (*iter).second;
-			}
-		}
-		this->clear();
-	}
+    void EmptyAndFreeMemory(void)
+    {
+        if(m_bOwnershipOnPointers)
+        {
+            for(_iterator iter = this->begin(); iter != this->end(); iter++)
+            {
+                if((*iter).second)
+                    delete (*iter).second;
+            }
+        }
+        this->clear();
+    }
 
 protected:
-	bool m_bOwnershipOnPointers;
+    bool m_bOwnershipOnPointers;
 };
 
 /*********************************************************************************************
-	        Memory/speed aware vector operations
+            Memory/speed aware vector operations
 **********************************************************************************************
-a) dae_push_back 
-   Becaus of the logarithmic resize of a std::vector while items are added with push_back, many times 
-   we end-up with the vector of size N and the capacity of N+M (when push_back finds no room for 
+a) dae_push_back
+   Becaus of the logarithmic resize of a std::vector while items are added with push_back, many times
+   we end-up with the vector of size N and the capacity of N+M (when push_back finds no room for
    the item to add it calls reserve(2*size) - thus a lot of memory is wasted).
-   Therefore, we may use generally slower but more memory conservative function that does not 
+   Therefore, we may use generally slower but more memory conservative function that does not
    reserve memory for items that do not exist (yet).
-b) dae_add_vector, dae_set_vector 
-   They should be the fastest way to add items to the existing vector and to make two vectors 
-   equal (currently they use the built-in std::XXX functions, but if a faster way should be 
-   discovered it might be added here). 
+b) dae_add_vector, dae_set_vector
+   They should be the fastest way to add items to the existing vector and to make two vectors
+   equal (currently they use the built-in std::XXX functions, but if a faster way should be
+   discovered it might be added here).
 **********************************************************************************************/
 template<class Storage, class Item>
 void dae_push_back(std::vector<Storage>& arrVector, Item item)
 {
 // Should we turn this off - since for the large vectors reallocation takes too much time? [tamba/lamba]
-	arrVector.reserve(arrVector.size()+1);
-	arrVector.push_back(item);
+    arrVector.reserve(arrVector.size()+1);
+    arrVector.push_back(item);
 }
 
 template<class itemSource, class itemDestination>
 void dae_add_vector(const std::vector<itemSource>& arrSource, std::vector<itemDestination>& arrDestination)
 {
-	arrDestination.reserve(arrDestination.size() + arrSource.size());
-	arrDestination.insert(arrDestination.end(), arrSource.begin(), arrSource.end());
+    arrDestination.reserve(arrDestination.size() + arrSource.size());
+    arrDestination.insert(arrDestination.end(), arrSource.begin(), arrSource.end());
 }
 
 template<class itemSource, class itemDestination>
@@ -247,35 +248,35 @@ void dae_set_vector(const std::vector<itemSource>& arrSource, std::vector<itemDe
 {
 // resize(n) allocates enough memory to store n elements (if it does not already exist)
 // std::copy(where, start, end) is an optimized function for bulk insertions
-	arrDestination.resize(arrSource.size());
-	std::copy(arrSource.begin(), arrSource.end(), arrDestination.begin());
+    arrDestination.resize(arrSource.size());
+    std::copy(arrSource.begin(), arrSource.end(), arrDestination.begin());
 }
 
 #define dae_capacity_check(Vector) if(Vector.capacity() - Vector.size() != 0) \
     std::cout << std::string(__FILE__) << ":" << std::string(__FUNCTION__) << ":" <<  string(#Vector) << ": " << Vector.capacity() - Vector.size() << std::endl;
 
 /*********************************************************************************************
-	daeReferenceCountable
+    daeReferenceCountable
 **********************************************************************************************/
 class daeReferenceCountable
 {
 public:
-	daeReferenceCountable(void) : ref_count(0)
-	{
-	}
-	
-	void IncreaseRefCount(void)
-	{
-		++ref_count;		
-	}
-	
-	int DecreaseRefCount(void)
-	{
-		return (--ref_count);		
-	}
+    daeReferenceCountable(void) : ref_count(0)
+    {
+    }
+
+    void IncreaseRefCount(void)
+    {
+        ++ref_count;
+    }
+
+    int DecreaseRefCount(void)
+    {
+        return (--ref_count);
+    }
 
 protected:
-	int ref_count;
+    int ref_count;
 };
 
 template<typename T>
@@ -283,93 +284,93 @@ inline void intrusive_ptr_add_ref(T* pobj)
 {
     pobj->IncreaseRefCount();
 }
- 
+
 template<typename T>
 inline void intrusive_ptr_release(T* pobj)
 {
     if(pobj->DecreaseRefCount() == 0)
     {
-		delete pobj;
-		pobj = NULL;
-	}
+        delete pobj;
+        pobj = NULL;
+    }
 }
 
 /*********************************************************************************************
-	daeCreateObjectDelegate
+    daeCreateObjectDelegate
 **********************************************************************************************/
 template <typename OBJECT>
 class daeCreateObjectDelegate
 {
 public:
-	virtual OBJECT* Create(void) = 0;
+    virtual OBJECT* Create(void) = 0;
 };
 
 template <typename OBJECT, typename BASE = OBJECT>
 class daeCreateObjectDelegateDerived : public daeCreateObjectDelegate<BASE>
 {
 public:
-	virtual BASE* Create(void)
-	{
-		return new OBJECT;
-	}
+    virtual BASE* Create(void)
+    {
+        return new OBJECT;
+    }
 };
 
 /*********************************************************************************************
-	daeObserver
+    daeObserver
 **********************************************************************************************/
 template <typename SUBJECT> //SUBJECT is a class which is observed
 class daeObserver
 {
 public:
-	virtual ~daeObserver(void) {}
-	virtual void Update(SUBJECT *pSubject, void* data) = 0;
+    virtual ~daeObserver(void) {}
+    virtual void Update(SUBJECT *pSubject, void* data) = 0;
 };
 
 /*********************************************************************************************
-	daeSubject
+    daeSubject
 **********************************************************************************************/
 template <typename SUBJECT> //One can Attach only daeObservers which observe class SUBJECT
 class daeSubject
 {
 public:
-	virtual ~daeSubject(void) {}
+    virtual ~daeSubject(void) {}
 
-	void Attach(daeObserver<SUBJECT>* pObserver)
-	{
-		dae_push_back(m_ptrarrObservers, pObserver);
-	}
+    void Attach(daeObserver<SUBJECT>* pObserver)
+    {
+        dae_push_back(m_ptrarrObservers, pObserver);
+    }
 
-	void Detach(daeObserver<SUBJECT>* pObserver)
-	{
-		daeObserver<SUBJECT>* observer;
-		for(size_t i = 0; i < m_ptrarrObservers.size(); i++)
-		{
-			observer = m_ptrarrObservers[i];
-			if(observer == pObserver)
-			{
-				m_ptrarrObservers.erase(m_ptrarrObservers.begin()+i);
-				return;
-			}
-		}
-	}
+    void Detach(daeObserver<SUBJECT>* pObserver)
+    {
+        daeObserver<SUBJECT>* observer;
+        for(size_t i = 0; i < m_ptrarrObservers.size(); i++)
+        {
+            observer = m_ptrarrObservers[i];
+            if(observer == pObserver)
+            {
+                m_ptrarrObservers.erase(m_ptrarrObservers.begin()+i);
+                return;
+            }
+        }
+    }
 
-	virtual void Notify(void* data)
-	{
-		daeObserver<SUBJECT>* observer;
-		for(size_t i = 0; i < m_ptrarrObservers.size(); i++)
-		{
-			observer = m_ptrarrObservers[i];
-			if(observer)
-				observer->Update(dynamic_cast<SUBJECT*>(this), data);
-		}
-	}
+    virtual void Notify(void* data)
+    {
+        daeObserver<SUBJECT>* observer;
+        for(size_t i = 0; i < m_ptrarrObservers.size(); i++)
+        {
+            observer = m_ptrarrObservers[i];
+            if(observer)
+                observer->Update(dynamic_cast<SUBJECT*>(this), data);
+        }
+    }
 
 private:
-	std::vector<daeObserver<SUBJECT>*> m_ptrarrObservers;
+    std::vector<daeObserver<SUBJECT>*> m_ptrarrObservers;
 };
 
 /*********************************************************************************************
-	daeException
+    daeException
 **********************************************************************************************/
 static const string  exUnknown				= "Unknown";
 static const string  exMiscellanous			= "Miscellanous";
@@ -388,38 +389,38 @@ static const string  exNotImplemented		= "Not implemented";
 class daeException : public std::exception
 {
 public:
-	daeException(const string& strExceptionType, const string& strFunction, const string& strFile, int iLine)
-	{
-		m_strExceptionType	= strExceptionType;
-		m_strFile			= strFile;
-		m_nLine				= iLine;
-		m_strFunction		= strFunction;
+    daeException(const string& strExceptionType, const string& strFunction, const string& strFile, int iLine)
+    {
+        m_strExceptionType	= strExceptionType;
+        m_strFile			= strFile;
+        m_nLine				= iLine;
+        m_strFunction		= strFunction;
 
-		std::stringstream ss;
-		ss << m_strExceptionType << " exception in function: ";
-		ss << m_strFunction << ", source file: ";
-		ss << m_strFile << ", line: ";
-		ss << m_nLine << std::endl;
-		m_strWhat = ss.str();
-	}
+        std::stringstream ss;
+        ss << m_strExceptionType << " exception in function: ";
+        ss << m_strFunction << ", source file: ";
+        ss << m_strFile << ", line: ";
+        ss << m_nLine << std::endl;
+        m_strWhat = ss.str();
+    }
 
-	virtual ~daeException(void) throw()
-	{
-	}
+    virtual ~daeException(void) throw()
+    {
+    }
 
-	virtual const char* what(void) const throw()
-	{
-		return m_strWhat.c_str();
-	}
+    virtual const char* what(void) const throw()
+    {
+        return m_strWhat.c_str();
+    }
 
-	template<class TYPE>
-	daeException& operator << (TYPE value)
-	{
-		std::stringstream ss;
-		ss << value;
-		m_strWhat += ss.str();
-		return *this;
-	}
+    template<class TYPE>
+    daeException& operator << (TYPE value)
+    {
+        std::stringstream ss;
+        ss << value;
+        m_strWhat += ss.str();
+        return *this;
+    }
 
 public:
     string	m_strExceptionType;
@@ -453,7 +454,7 @@ inline std::istream& operator >> (std::istream& io, daePoint& p)
 }
 
 /*********************************************************************************************
-	daeArray
+    daeArray
 **********************************************************************************************/
 template<typename REAL>
 class daeArray
@@ -469,47 +470,47 @@ public:
 };
 
 /*********************************************************************************************
-	daeMatrix
+    daeMatrix
 **********************************************************************************************/
 #define CSR_FORTRAN_STYLE false
 #define CSR_C_STYLE       true
 
 enum daeeMatrixAccess
 {
-	eRowWise = 0,
-	eColumnWise
+    eRowWise = 0,
+    eColumnWise
 };
 
-template<typename REAL = real_t> 
+template<typename REAL = real_t>
 class daeMatrix
 {
 public:
-	virtual ~daeMatrix(void){}
+    virtual ~daeMatrix(void){}
 
 public:
     virtual REAL	GetItem(size_t row, size_t col) const       = 0;
     virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
 
-	virtual size_t	GetNrows(void) const                        = 0;
-	virtual size_t	GetNcols(void) const                        = 0;
+    virtual size_t	GetNrows(void) const                        = 0;
+    virtual size_t	GetNcols(void) const                        = 0;
 };
 
 /******************************************************************
-	daeSparseMatrix
+    daeSparseMatrix
 *******************************************************************/
-template<typename REAL = real_t> 
+template<typename REAL = real_t>
 class daeSparseMatrix : public daeMatrix<REAL>
 {
 public:
-	virtual ~daeSparseMatrix(void){}
-	
+    virtual ~daeSparseMatrix(void){}
+
 public:
 // Auxiliary function to build a matrix
-	virtual void AddRow(const std::map<size_t, size_t>& mapIndexes) = 0;
+    virtual void AddRow(const std::map<size_t, size_t>& mapIndexes) = 0;
 
 // If true then C type, otherwise FORTRAN indexing starting from 1
-	virtual bool GetIndexing(void)		 = 0;
-	virtual void SetIndexing(bool index) = 0;	
+    virtual bool GetIndexing(void)		 = 0;
+    virtual void SetIndexing(bool index) = 0;
 };
 
 /******************************************************************

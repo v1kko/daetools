@@ -3661,6 +3661,8 @@ void AssignValues(daeVariable& var, real_t values)
 void AssignValues2(daeVariable& var, boost::python::object nd_values)
 {
 /* NUMPY */
+    boost::python::object numpy = boost::python::import("numpy");
+
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3694,9 +3696,9 @@ void AssignValues2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none())
+        if(obj.is_none() || numpy.attr("isnan")(obj))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3733,6 +3735,8 @@ void ReAssignValues(daeVariable& var, real_t values)
 void ReAssignValues2(daeVariable& var, boost::python::object nd_values)
 {
 /* NUMPY */
+    boost::python::object numpy = boost::python::import("numpy");
+
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3766,9 +3770,9 @@ void ReAssignValues2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none())
+        if(obj.is_none() || numpy.attr("isnan")(obj))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3805,6 +3809,8 @@ void SetInitialConditions(daeVariable& var, real_t values)
 void SetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 {
 /* NUMPY */
+    boost::python::object numpy = boost::python::import("numpy");
+
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3838,9 +3844,9 @@ void SetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none())
+        if(obj.is_none() || numpy.attr("isnan")(obj))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3877,6 +3883,8 @@ void ReSetInitialConditions(daeVariable& var, real_t values)
 void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 {
 /* NUMPY */
+    boost::python::object numpy = boost::python::import("numpy");
+
     // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
@@ -3910,9 +3918,9 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none())
+        if(obj.is_none() || numpy.attr("isnan")(obj))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3949,6 +3957,9 @@ void SetInitialGuesses(daeVariable& var, real_t values)
 void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values)
 {
 /* NUMPY */
+    boost::python::object numpy = boost::python::import("numpy");
+
+    // Check the shape of ndarray
     boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
     if(len(shape) != var.GetNumberOfDomains())
     {
@@ -3981,9 +3992,9 @@ void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value; DOUBLE_MAX)
+        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none())
+        if(obj.is_none() || numpy.attr("isnan")(obj))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
