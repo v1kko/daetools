@@ -238,7 +238,12 @@ Programming language
 ====================
 
 **DAE Tools** core libraries are written in standard c++. However, `Python <http://www.python.org>`_ programming language is
-used as the main modelling language. The main reason for use of Python is (as the authors say):
+used as the main modelling language.
+
+An excellent overview of Python is given by Hoyt Koepke (University of Washington):
+`10 Reasons Python Rocks for Research <http://www.stat.washington.edu/~hoytak/blog/whypython.html>`_.
+
+The main reason for use of Python is (as the authors say):
 "*Python is an easy to learn, powerful programming language. It has efficient high-level data structures and a simple
 but effective approach to object-oriented programming. Python's elegant syntax and dynamic typing, together with its
 interpreted nature, make it an ideal language for scripting and rapid application development in many areas on
@@ -256,5 +261,6 @@ shrank from 24 cpp modules to four python modules only!
 C++ code! Anecdotal evidence suggests that one Python programmer can finish in two months what two C++ programmers can't
 complete in a year. Python shines as a glue language, used to combine components written in C++*"
 `link <http://www.python.org/doc/essays/comparisons>`_.
+
 Obviously, not everything can be developed in python; a heavy c++ artillery is still necessary for highly complex projects.
 

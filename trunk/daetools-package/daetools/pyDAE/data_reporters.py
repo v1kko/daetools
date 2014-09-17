@@ -11,13 +11,9 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
+import numpy
 from pyCore import *
 from pyDataReporting import *
-try:
-    import numpy, scipy
-    from scipy.io import savemat, loadmat
-except ImportError as e:
-    print(('Cannot load numpy/scipy modules: %s' % str(e)))
 
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):
     def __init__(self):
@@ -42,6 +38,7 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
             mdict[var.Name] = var.Values
 
         try:
+            import scipy.io
             scipy.io.savemat(self.ConnectString,
                              mdict,
                              appendmat=False,
@@ -51,7 +48,7 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
                              oned_as='row')
                              
         except Exception as e:
-            print(('Cannot call scipy.io.savemat(); is SciPy installed?\n' + str(e)))
+            print(('Cannot write results in .mat format; is scipy package installed?\n' + str(e)))
 
 
 class daeJSONFileDataReporter(daeDataReporterLocal):

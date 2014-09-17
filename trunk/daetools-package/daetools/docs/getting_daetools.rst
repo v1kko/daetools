@@ -105,24 +105,32 @@ Use the system's package manager or install from shell:
   .. code-block:: bash
 
     sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2
+    # Optional packages:
+    sudo apt-get install python-xlwt python-lxml python-h5py
 
 * Red Hat and derivatives (Fedora, CentOS):
     
   .. code-block:: bash
 
     sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi
+    # Optional packages:
+    sudo yum install python-xlwt python-lxml h5py
 
 * SUSE Linux:
 
   .. code-block:: bash
 
-    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4
-
+    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 
+    # Optional packages:
+    sudo zypper in python-xlwt python-lxml h5py
+    
 * Arch Linux:
 
   .. code-block:: bash
 
     sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi
+    # Optional packages:
+    sudo pacman -S python2-xlwt python-lxml python-h5py
 
     
 Then unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing

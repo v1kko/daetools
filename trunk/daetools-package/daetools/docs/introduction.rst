@@ -104,7 +104,8 @@ solvers are used to solve NLP/MINLP problems.
 **DAE Tools** support direct dense and sparse matrix linear solvers (sequential and multi-threaded versions)
 at the moment. In addition to the built-in Sundials linear solvers, several third party libraries are interfaced:
 `SuperLU/SuperLU_MT <http://crd.lbl.gov/~xiaoye/SuperLU/index.html>`_,
-`Intel Pardiso <http://software.intel.com/en-us/intel-mkl>`_, `AMD ACML <http://www.amd.com/acml>`_,
+`Pardiso <http://www.pardiso-project.org>`_,
+`Intel Pardiso <http://software.intel.com/en-us/intel-mkl>`_,
 `Trilinos Amesos <http://trilinos.sandia.gov/packages/amesos/>`_ (KLU, Umfpack, SuperLU, Lapack),
 and `Trilinos AztecOO <http://trilinos.sandia.gov/packages/aztecoo>`_ (with built-in, Ifpack or ML preconditioners)
 which can take advantage of multi-core/cpu computers.

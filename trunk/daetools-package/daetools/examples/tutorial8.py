@@ -20,11 +20,12 @@ __doc__ = """
 In this example we use a similar problem as in the tutorial 5.
 
 Here we introduce a data reporter concept and show how to export results to several formats:
- - Matlab MAT file
- - MS Excel .xls file
- - JSON file
- - XML file
- - HDF5 file
+ - Matlab MAT file (needs python-scipy package)
+ - MS Excel .xls file (needs python-xlwt package)
+ - JSON file (no third party dependencies)
+ - XML file (needs python-lxml package)
+ - HDF5 file (needs python-h5py package)
+ - Pandas dataset (needs python-pandas package)
 and how to write custom data reporters. Some time it is not enough to send the results
 to daePlotter but it is desirable to export them in certain format for use in other programs.
 Here we show how the custom data reporter can be created.
