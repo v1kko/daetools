@@ -182,6 +182,8 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 # Unresolved _gethostname problem in MinGW
 #win32-g++-*::QMAKE_LFLAGS += -Wl,--enable-stdcall-fixup
 
+QMAKE_CXXFLAGS += -DDAE_PYTHON_MAJOR=$${PYTHON_MAJOR} -DDAE_PYTHON_MINOR=$${PYTHON_MINOR}
+
 # If compiling from the compile_linux.sh shell script supress all warnings
 shellCompile {
     unix::QMAKE_CXXFLAGS_WARN_ON = -w
@@ -670,6 +672,7 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 #            Settings for installing files
 #######################################################
 # Removed "_numpy$${NUMPY_VERSION}" to avoid compile-time dependency on numpy versions
+SOLIBS_DIR   = ../daetools-package/solibs
 SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 

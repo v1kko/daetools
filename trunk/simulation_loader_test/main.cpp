@@ -1,14 +1,14 @@
-#include "simulation_loader.h"
+#include "../simulation_loader/simulation_loader.h"
 #include <string>
 #include <fstream>
 #include <streambuf>
-#include <boost/python.hpp>
+//#include <boost/python.hpp>
 
 int main(int argc, char *argv[])
 {
     try
     {
-        dae_simulation_loader::daeSimulationLoader loader;
+        daeSimulationLoader loader;
         loader.LoadSimulation("../daetools-package/daetools/examples/tutorial6.py", "simTutorial");
 
         //loader.Initialize("IDAS", "Sundials LU", "TCPIPDataReporter", "", "StdOutLog", false, "");
@@ -49,10 +49,10 @@ int main(int argc, char *argv[])
         loader.Run();
         loader.Finalize();
     }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+    //catch(boost::python::error_already_set const &)
+    //{
+    //    PyErr_Print();
+    //}
     catch(std::exception& e)
     {
         std::cout << e.what() << std::endl;

@@ -4,8 +4,6 @@
 #include <string>
 #include <iostream>
 
-namespace dae_simulation_loader
-{
 class daeSimulationLoader
 {
 public:
@@ -65,7 +63,5 @@ protected:
 // Internal data
     void* m_pData;
 };
-
-}
 
 #endif

@@ -9,10 +9,63 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "simulation_loader.h"
+#include "simulation_loader_c.h"
 #include "../dae.h"
 
-namespace dae_simulation_loader
+void Simulate(const char*  strPythonFile, const char* strSimulationClass, bool bShowSimulationExplorer)
 {
+    try
+    {
+        daeSimulationLoader loader;
+
+        loader.LoadSimulation(strPythonFile, strSimulationClass);
+        loader.Simulate(bShowSimulationExplorer);
+    }
+    catch(boost::python::error_already_set const &)
+    {
+        PyErr_Print();
+    }
+    catch(std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+}
+
+/*
+void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
+{
+    try
+    {
+        daeSimulationLoader* loader = new daeSimulationLoader();
+        loader->LoadSimulation(strPythonFile, strSimulationClass);
+        return loader;
+    }
+    catch(boost::python::error_already_set const &)
+    {
+        PyErr_Print();
+    }
+    catch(std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+    return NULL;
+}
+
+void Simulate(const char*  strPythonFile, const char* strSimulationClass, bool bShowSimulationExplorer)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)loader;
+    if(ptr_loader)
+        ptr_loader->Simulate(bShowSimulationExplorer);
+}
+
+void FreeLoader(void* loader)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)loader;
+    if(ptr_loader)
+        delete ptr_loader;
+}
+*/
+
 class daeSimulationLoaderData
 {
 public:
@@ -51,9 +104,10 @@ daeSimulationLoader::daeSimulationLoader()
 {
     m_pData = new daeSimulationLoaderData;
 
-    char argv[] = "daeSimulationLoader";
-    Py_SetProgramName(argv);
-    Py_Initialize();
+    // Py_Initialize() call oved to dllmain.cpp
+
+    if(!Py_IsInitialized())
+        daeDeclareAndThrowException(exInvalidCall);
 }
 
 daeSimulationLoader::~daeSimulationLoader()
@@ -65,13 +119,13 @@ daeSimulationLoader::~daeSimulationLoader()
         m_pData = NULL;
     }
 
-    Py_Finalize();
+    //Py_Finalize() call moved to dllmain.cpp
 }
 
 void daeSimulationLoader::Simulate(bool bShowSimulationExplorer)
 {
-    try
-    {
+//    try
+//    {
         daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
         if(!pData)
             daeDeclareAndThrowException(exInvalidPointer);
@@ -112,17 +166,17 @@ void daeSimulationLoader::Simulate(bool bShowSimulationExplorer)
 
         pData->m_pSimulation->Run();
         pData->m_pSimulation->Finalize();
-    }
-    catch(std::exception& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+//    }
+//    catch(std::exception& e)
+//    {
+//        std::cout << e.what() << std::endl;
+//    }
 }
 
 void daeSimulationLoader::Initialize(const std::string& strJSONRuntimeSettings)
 {
-    try
-    {
+//    try
+//    {
         daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
         if(!pData)
             daeDeclareAndThrowException(exInvalidPointer);
@@ -134,11 +188,11 @@ void daeSimulationLoader::Initialize(const std::string& strJSONRuntimeSettings)
         locals["_json_runtime_settings_"] = strJSONRuntimeSettings;
         std::string command = "InitializeSimulation(__daetools_simulation__, _json_runtime_settings_)";
         boost::python::exec(command.c_str(), main_namespace, locals);
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        PyErr_Print();
+//    }
 }
 
 void daeSimulationLoader::Initialize(const std::string& strDAESolver,
@@ -149,8 +203,8 @@ void daeSimulationLoader::Initialize(const std::string& strDAESolver,
                                      bool bCalculateSensitivities,
                                      const std::string& strJSONRuntimeSettings)
 {
-    try
-    {
+//    try
+//    {
         daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
         if(!pData)
             daeDeclareAndThrowException(exInvalidPointer);
@@ -177,11 +231,11 @@ void daeSimulationLoader::Initialize(const std::string& strDAESolver,
         pData->m_pSimulation->GetModel()->SetReportingOn(true);
 
         pData->m_pSimulation->Initialize(pData->m_pDAESolver, pData->m_pDataReporter, pData->m_pLog, bCalculateSensitivities, strJSONRuntimeSettings);
-    }
-    catch(std::exception& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
+//    }
+//    catch(std::exception& e)
+//    {
+//        std::cout << e.what() << std::endl;
+//    }
 }
 
 void daeSimulationLoader::SolveInitial()
@@ -501,15 +555,15 @@ void daeSimulationLoader::ShowSimulationExplorer()
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    try
-    {
+//    try
+//    {
         boost::python::object main_namespace = pData->m_pyMainModule.attr("__dict__");
         boost::python::exec("import sys", main_namespace);
         boost::python::exec("import daetools", main_namespace);
         boost::python::exec("import daetools.pyDAE", main_namespace);
         boost::python::exec("from daetools.dae_simulator.simulation_explorer import daeSimulationExplorer", main_namespace);
         boost::python::exec("from PyQt4 import QtCore, QtGui", main_namespace);
-        boost::python::exec("__qt_app__ = QtGui.QApplication(['no_main'])", main_namespace);
+        boost::python::exec("__qt_app__ = ( QtCore.QCoreApplication.instance() if QtCore.QCoreApplication.instance() else QtGui.QApplication(['no_main']) )", main_namespace);
 
         // Get the Qt QApplication object and daeSimulationExplorer class object
         boost::python::object qt_app       = main_namespace["__qt_app__"];
@@ -520,17 +574,17 @@ void daeSimulationLoader::ShowSimulationExplorer()
 
         // Show the explorer dialog
         se.attr("exec_")();
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        PyErr_Print();
+//    }
 }
 
 void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const std::string& strSimulationClass)
 {
-    try
-    {
+//    try
+//    {
         std::string command;
         boost::python::object result;
 
@@ -553,6 +607,7 @@ void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const
         result  = boost::python::exec(command.c_str(), main_namespace);
 
         command = (boost::format("import %s") % strSimulationModule).str();
+// Here it fails if I do call Py_Finalize()
         result  = boost::python::exec(command.c_str(), main_namespace);
 
         command = (boost::format("__daetools_simulation__ = %s.%s()") % strSimulationModule % strSimulationClass).str();
@@ -596,18 +651,22 @@ void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const
                     pData->m_ptrarrOutputs.push_back(ptrarrVariables[i]);
             }
         }
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        if(PyErr_ExceptionMatches(PyExc_ImportError))
-        {
-            PyErr_Print();
-        }
-        else
-        {
-            PyErr_Print();
-        }
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        if(PyErr_ExceptionMatches(PyExc_ImportError))
+//        {
+//            PyErr_Print();
+//        }
+//        else
+//        {
+//            PyErr_Print();
+//        }
+//    }
+//    catch(std::exception& e)
+//    {
+//        std::cout << e.what() << std::endl;
+//    }
 }
 
 void daeSimulationLoaderData::SetupLASolver(const std::string& strLASolver)
@@ -657,8 +716,8 @@ void daeSimulationLoaderData::SetupLASolver(const std::string& strLASolver)
 
 void daeSimulationLoaderData::SetupDAESolver(const std::string& strDAESolver)
 {
-    try
-    {
+//    try
+//    {
         boost::python::object main_namespace = m_pyMainModule.attr("__dict__");
         boost::python::exec("import sys", main_namespace);
         boost::python::exec("import daetools", main_namespace);
@@ -669,33 +728,33 @@ void daeSimulationLoaderData::SetupDAESolver(const std::string& strDAESolver)
         m_pDAESolver = NULL;
         boost::python::exec("__dae_solver__ = daetools.pyDAE.daeIDAS()", main_namespace);
         m_pDAESolver = boost::python::extract<daeDAESolver_t*>(main_namespace["__dae_solver__"]);
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        PyErr_Print();
+//    }
 }
 
 void daeSimulationLoaderData::SetupNLPSolver(const std::string& strNLPSolver)
 {
-    try
-    {
+//    try
+//    {
         boost::python::object main_namespace = m_pyMainModule.attr("__dict__");
         boost::python::exec("import sys", main_namespace);
         boost::python::exec("import daetools", main_namespace);
         boost::python::exec("import daetools.pyDAE", main_namespace);
 
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        PyErr_Print();
+//    }
 }
 
 void daeSimulationLoaderData::SetupDataReporter(const std::string& strDataReporter, const std::string &strConnectionString)
 {
-    try
-    {
+//    try
+//    {
         boost::python::object main_namespace = m_pyMainModule.attr("__dict__");
         boost::python::exec("import sys", main_namespace);
         boost::python::exec("import daetools", main_namespace);
@@ -709,18 +768,17 @@ void daeSimulationLoaderData::SetupDataReporter(const std::string& strDataReport
         m_pDataReporter = boost::python::extract<daeDataReporter_t*>(main_namespace["__data_reporter__"]);
         std::string strProcessName = m_pSimulation->GetModel()->GetName() + "-" + boost::posix_time::to_iso_string(boost::posix_time::second_clock::local_time());
         m_pDataReporter->Connect(strConnectionString, strProcessName);
-
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        PyErr_Print();
+//    }
 }
 
 void daeSimulationLoaderData::SetupLog(const std::string& strLog)
 {
-    try
-    {
+//    try
+//    {
         boost::python::object main_namespace = m_pyMainModule.attr("__dict__");
         boost::python::exec("import sys", main_namespace);
         boost::python::exec("import daetools", main_namespace);
@@ -732,12 +790,10 @@ void daeSimulationLoaderData::SetupLog(const std::string& strLog)
         m_pLog = NULL;
         boost::python::exec("__log__ = daetools.pyDAE.daeStdOutLog()", main_namespace);
         m_pLog = boost::python::extract<daeLog_t*>(main_namespace["__log__"]);
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        PyErr_Print();
-    }
+//    }
+//    catch(boost::python::error_already_set const &)
+//    {
+//        PyErr_Print();
+//    }
 }
 
-
-}

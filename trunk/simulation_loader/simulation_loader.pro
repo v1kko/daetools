@@ -1,25 +1,25 @@
 include(../dae.pri)
 
-QT       -= core
-QT       -= gui
+QT -= core
+QT -= gui
 
-TARGET  = simulation_loader
-#CONFIG  += console
-CONFIG   -= app_bundle
+TEMPLATE = lib
+CONFIG += shared
 
-TEMPLATE = app
+TARGET  = cdaeSimulationLoader
 
-SOURCES += main.cpp \
+SOURCES += dllmain.cpp \
            simulation_loader.cpp
 
-HEADERS += simulation_loader.h
+HEADERS += stdafx.h \
+           simulation_loader.h \
+           simulation_loader_c.h
 
-message($$system(python2.7-config --cflags))
-message($$system(python2.7-config --ldflags))
-QMAKE_CXXFLAGS += $$system(python2.7-config --cflags)
+message($$system($${PYTHON}-config --cflags))
+message($$system($${PYTHON}-config --ldflags))
 
-#win32::EMBED_BOOST_PYTHON_LIB = $${BOOST_PYTHON_LIB_NAME}.lib $$system(python2.7-config --ldflags)
-#unix::EMBED_BOOST_PYTHON_LIB  = -L$${BOOSTLIBPATH} -l$${BOOST_PYTHON_LIB_NAME} $$system(python2.7-config --ldflags)
+QMAKE_CXXFLAGS += $$system($${PYTHON}-config --cflags)
+#QMAKE_LFLAGS  += $$system($${PYTHON}-config --ldflags)
 
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR}
@@ -29,14 +29,6 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS += $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS}
 
-#$${DAE_ACTIVITY_LIB} \
-#$${DAE_DATAREPORTING_LIB} \
-#$${DAE_CORE_LIB} \
-#$${DAE_IDAS_SOLVER_LIB} \
-#$${DAE_UNITS_LIB} \
-#$${SUNDIALS_LIBS} \
-#$${BOOST_PYTHON_LIB} \
-#$${BOOST_LIBS} \
-#$${BLAS_LAPACK_LIBS}
-
-
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${SOLIBS_DIR}

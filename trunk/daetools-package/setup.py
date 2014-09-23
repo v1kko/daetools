@@ -39,8 +39,8 @@ else:
 platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
 #print 'platform_solib_dir = ', platform_solib_dir
 
-boost_solib_dir = os.path.realpath('solibs')
-#print 'boost_solib_dir = ', boost_solib_dir
+shared_libs_dir = os.path.realpath('solibs')
+#print 'shared_libs_dir = ', shared_libs_dir
 
 if daetools_machine == 'x86_64':
     if os.path.exists('/usr/lib') and os.path.exists('/usr/lib64'):
@@ -62,6 +62,7 @@ boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_
 boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
 boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
 deal_II          = 'deal_II-daetools'
+sim_loader       = 'cdaeSimulationLoader'
 if platform.system() == 'Windows':
     mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran']
 else:
@@ -69,16 +70,16 @@ else:
     
 shared_libs = []
 
-if os.path.isdir(boost_solib_dir):
-    boost_files = os.listdir(boost_solib_dir)
+if os.path.isdir(shared_libs_dir):
+    boost_files = os.listdir(shared_libs_dir)
 
     for f in boost_files:
-        if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (deal_II in f):
-            shared_libs.append(os.path.join(boost_solib_dir, f))
+        if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (deal_II in f) or (sim_loader in f):
+            shared_libs.append(os.path.join(shared_libs_dir, f))
 
         for dll in mingw_dlls:
             if dll in f:
-                shared_libs.append(os.path.join(boost_solib_dir, f))
+                shared_libs.append(os.path.join(shared_libs_dir, f))
     
 #print 'shared_libs = ', shared_libs
 

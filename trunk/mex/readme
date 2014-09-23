@@ -1,0 +1,16 @@
+GNU Octave compile:
+  cd mex
+  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader daetools_mex.cpp 
+
+Matlab compile:
+  cd mex
+  mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_mex.cpp 
+
+Scilab compile:
+  cd mx
+  # check the include flag: cflags = -I... and set the correct full path for simulation loader
+  exec('builder.sce')
+  exec('loader.sce')  
+  
+Run daetools simulation:
+daetools_mex('daetools/examples/tutorial6.py', 'simTutorial', {0}, {1})
