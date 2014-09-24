@@ -44,11 +44,12 @@ SOURCES +=  stdafx.cpp \
             config_data.cpp \
             ../mmio.c
 
-HEADERS += stdafx.h \
-    superlu_solvers.h \
-    superlu_la_solver.h \ 
-	superlu_mt_gpu.h \
-	../mmio.h 
+HEADERS +=  stdafx.h \
+            superlu_solvers.h \
+            superlu_la_solver.h \
+            superlu_mt_gpu.h \
+            config_data.h \
+            ../mmio.h
 
 ######################################################################################
 #                                   SuperLU

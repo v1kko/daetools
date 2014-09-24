@@ -45,11 +45,6 @@ namespace superlu_mt
 {
 #endif
 
-void get_from_config(bool&        bUseUserSuppliedWorkSpace,
-                     real_t&      dWorkspaceMemoryIncrement,
-                     real_t&      dWorkspaceSizeMultiplier,
-                     std::string& strReuse);
-
 class DAE_SOLVER_API daeSuperLUSolver : public dae::solver::daeIDALASolver_t
 {
 	typedef daeCSRMatrix<real_t, int> daeSuperLUMatrix;

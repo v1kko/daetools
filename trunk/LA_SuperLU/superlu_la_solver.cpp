@@ -2,6 +2,7 @@
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
 #include <stdlib.h>
+#include "config_data.h"
 
 #ifdef DAE_USE_OPEN_BLAS
 extern "C" void openblas_set_num_threads(int);
