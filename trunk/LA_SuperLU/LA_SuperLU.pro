@@ -38,10 +38,11 @@ shellSuperLU_CUDA {
 INCLUDEPATH += $${BOOSTDIR} \
                $${SUNDIALS_INCLUDE}
 
-SOURCES += stdafx.cpp \
-    dllmain.cpp \
-    superlu_la_solver.cpp \
-	../mmio.c
+SOURCES +=  stdafx.cpp \
+            dllmain.cpp \
+            superlu_la_solver.cpp \
+            config_data.cpp \
+            ../mmio.c
 
 HEADERS += stdafx.h \
     superlu_solvers.h \

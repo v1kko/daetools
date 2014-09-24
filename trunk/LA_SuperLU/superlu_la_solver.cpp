@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include <idas/idas_impl.h>
 #include "superlu_la_solver.h"
-#include "../config.h"
 #include <stdlib.h>
 
 #ifdef DAE_USE_OPEN_BLAS
@@ -103,13 +102,11 @@ daeSuperLUSolver::daeSuperLUSolver(void)
 #endif
 	
 #ifdef daeSuperLU
-    daeConfig& cfg = daeConfig::GetConfig();
-	m_bUseUserSuppliedWorkSpace	= cfg.Get<bool>  ("daetools.superlu.useUserSuppliedWorkSpace",    false);
-	m_dWorkspaceMemoryIncrement = cfg.Get<double>("daetools.superlu.workspaceMemoryIncrement",    1.5);
-    m_dWorkspaceSizeMultiplier  = cfg.Get<double>("daetools.superlu.workspaceSizeMultiplier",     2.0);
+// Some issues with daeConfig and cross compiling using mingw...
+    string strReuse;
+    get_from_config(m_bUseUserSuppliedWorkSpace, m_dWorkspaceMemoryIncrement, m_dWorkspaceSizeMultiplier, strReuse);
 
-	string strReuse = cfg.Get<string>("daetools.superlu.factorizationMethod", string("SamePattern"));
-	if(strReuse == string("SamePattern_SameRowPerm"))
+    if(strReuse == string("SamePattern_SameRowPerm"))
 		m_iFactorization = SamePattern_SameRowPerm;
 	else
 		m_iFactorization = SamePattern;
@@ -1072,7 +1069,6 @@ int free_la(IDAMem ida_mem)
 #ifdef daeSuperLU_MT
 }
 #endif
-
 
 }
 }
