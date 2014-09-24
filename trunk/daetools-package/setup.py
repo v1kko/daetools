@@ -6,13 +6,13 @@ Installation instructions
   python setup.py install
 
 - Windows (.exe):
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.3.0_b3" --bitmap wininst.bmp
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.4.0" --bitmap wininst.bmp
 
 Create .tar.gz under GNU/Linux:
   python setup.py sdist --formats=gztar
 """
 
-import os, sys, platform, shutil, numpy
+import os, sys, platform, shutil
 from distutils.core import setup
 from distutils.util import get_platform
 
@@ -20,8 +20,8 @@ from distutils.util import get_platform
 python_major = str(sys.version_info[0])
 python_minor = str(sys.version_info[1])
 
-# Numpy version
-numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
+# Numpy version (not required anymore)
+#numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
 
 # System := {'Linux', 'Windows', 'Darwin'}
 daetools_system   = str(platform.system())

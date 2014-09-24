@@ -1,10 +1,10 @@
 #!/bin/sh
-# If called with no arguments the dwfault python is used
-# Otherwise, the argument represents the python major.minor version
+# If called with no arguments the default python is used
+# Otherwise, the argument represents the user-defined python
 
 set -e
 
-PYTHON=python$1
+PYTHON=$1
 echo $PYTHON
 
 echo whats_the_time.py

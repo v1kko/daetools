@@ -21,7 +21,7 @@
 //#include <deal.II/lac/full_matrix.templates.h>
 #include <deal.II/lac/sparse_matrix.h>
 //#include <deal.II/lac/sparse_matrix.templates.h>
-#include <deal.II/lac/solver_cg.h>
+//#include <deal.II/lac/solver_cg.h>
 #include <deal.II/lac/precondition.h>
 #include <deal.II/lac/constraint_matrix.h>
 #include <deal.II/grid/tria.h>

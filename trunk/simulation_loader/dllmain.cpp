@@ -17,9 +17,10 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     return TRUE;
 }
+#endif
 
-#else
 // GNU/Linux and MacOS compiled with g++
+#if defined(__linux__) || defined(__MACH__) || defined(__APPLE__)
 
 #if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>

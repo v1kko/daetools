@@ -1,8 +1,7 @@
-#include "stdafx.h"
-#include "superlu_la_solver.h"
+#include "config_data.h"
 #include "../config.h"
 
-#include "../config.h"
+// Some issues with daeConfig and cross compiling using mingw...
 void get_from_config(bool& bUseUserSuppliedWorkSpace, real_t& dWorkspaceMemoryIncrement, real_t& dWorkspaceSizeMultiplier, std::string& strReuse)
 {
     daeConfig& cfg = daeConfig::GetConfig();
