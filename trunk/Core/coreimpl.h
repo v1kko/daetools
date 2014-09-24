@@ -1175,7 +1175,7 @@ public:
 		return m_narrOptimizationParametersIndexes;
 	}
 	
-	real_t GetCurrentTime(void) const
+    real_t GetCurrentTime_(void) const
 	{
 		return m_dCurrentTime;
 	}

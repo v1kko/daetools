@@ -32,14 +32,22 @@ OPTIONS:
                              + gcc-4.6-release
                                - i686-w64-mingw32-gcc-4.6.3-2-release-win32_rubenvb   (for 32 bit windows)
                                - i686-w64-mingw32-gcc-4.6.3-2-release-linux64_rubenvb (for 64 bit GNU/Linux)
-                
-                    Boost libraries should be compiled on windows while the other libraries can be compiled on GNU/Linux.
-                    Toolchains should be located in /home/mingw32-i686 directory. 
-                    /home/mingw32-i686/bin should be added to the PATH environment variable.
+                    Toolchains should be located in /home/mingw32-i686 directory.
+                      /home/mingw32-i686/bin should be added to the PATH environment variable.
+                    Boost libraries should be compiled on windows (instructions???) while the other libraries can be compiled on GNU/Linux.
                     CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /home/mingw32-i686 directory.
-                
-                    Important:
-                      To compile daetools using qmake-qt4 copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs.
+                      Copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs
+                    Install wine and winetricks and add i386 architecture:
+                      dpkg --add-architecture i386
+                      apt-get update
+                      apt-get install wine-bin:i386
+                    Install vc redistributable packages using winetricks:
+                      winetricks --gui
+                        [x] Select the default wine prefix
+                            [x] Install Windows dll or component
+                                Select vcrun2005, vcrun2008, vcrun2010 (depending on the python version)
+                    Install python:
+                      wine misexec \i python-2-7-6.msi
 
 PROJECT:
     all             Build all daetools c++ libraries, solvers and python extension modules.

@@ -884,7 +884,7 @@ adTimeNode::~adTimeNode()
 
 adouble adTimeNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-	adouble tmp(pExecutionContext->m_pDataProxy->GetCurrentTime(), 0);
+    adouble tmp(pExecutionContext->m_pDataProxy->GetCurrentTime_(), 0);
 	if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
 		tmp.setGatherInfo(true);

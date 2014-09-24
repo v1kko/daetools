@@ -57,7 +57,7 @@ void daeEventPort::SendEvent(real_t data)
 	
 	if(m_bRecordEvents)
 	{
-		real_t time = m_pModel->m_pDataProxy->GetCurrentTime();
+        real_t time = m_pModel->m_pDataProxy->GetCurrentTime_();
 		m_listEvents.push_back(std::make_pair(time, m_dEventData));
 	}
 	
@@ -77,7 +77,7 @@ void daeEventPort::Update(daeEventPort_t* pSubject, void* data)
 	
 	if(m_bRecordEvents)
 	{
-		real_t time = m_pModel->m_pDataProxy->GetCurrentTime();
+        real_t time = m_pModel->m_pDataProxy->GetCurrentTime_();
 		m_listEvents.push_back(std::make_pair(time, m_dEventData));
 	}
 	
@@ -96,7 +96,7 @@ void daeEventPort::ReceiveEvent(real_t data)
 	
 	if(m_bRecordEvents)
 	{
-		real_t time = m_pModel->m_pDataProxy->GetCurrentTime();
+        real_t time = m_pModel->m_pDataProxy->GetCurrentTime_();
 		m_listEvents.push_back(std::make_pair(time, m_dEventData));
 	}
 	
