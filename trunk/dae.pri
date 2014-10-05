@@ -28,6 +28,8 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 # There is a problem with ppc64 under OSX 10.6 so it is excluded
 # Otherwise ppc64 should be added as well
 macx-g++::CONFIG += x86 x86_64
+macx-g++::QMAKE_CC  += llvm-gcc
+macx-g++::QMAKE_CXX += llvm-g++
 
 #win32-msvc2008::SHARED_LIB_EXT  = dll
 #win32-g++-*::SHARED_LIB_EXT     = dll
@@ -77,7 +79,7 @@ DESTDIR = $${DAE_DEST_DIR}
 #####################################################################################
 crossCompile{
     # Not used
-    PYTHON = "???"
+    PYTHON = "wine python"
 
     PYTHON_MAJOR = 2
     PYTHON_MINOR = 7
@@ -94,9 +96,10 @@ crossCompile{
 
     RT =
 
-    PYTHON_INCLUDE_DIR  = ../Python27/include
-    PYTHON_LIB_DIR      = ../Python27/libs
-    PYTHON_LIB          = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
+    WINE_PYTHON_DIR    = $$system(echo $HOME)/.wine/drive_c/Python27
+    PYTHON_INCLUDE_DIR = $${WINE_PYTHON_DIR}/include
+    PYTHON_LIB_DIR     = $${WINE_PYTHON_DIR}/libs
+    PYTHON_LIB         = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}
 }
 
 !crossCompile{
@@ -220,7 +223,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 # On some low-RAM machines certain boost.python modules cannot compile
 # The workaround is to set the following flags:
-#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=30 --param ggc-min-heapsize=8192
+#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=0 --param ggc-min-heapsize=8192
 
 # Use SSE for x86 32 bit machines (not used by default)
 # When building for Mac-OS we build for all architectures and SSE flags should go away
@@ -499,8 +502,13 @@ win32-g++-*::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
                             $${UMFPACK_LIBPATH}/libcolamd.a \
                             $${UMFPACK_LIBPATH}/libccolamd.a \
                             $${UMFPACK_LIBPATH}/libsuitesparseconfig.a
-#linux-g++::UMFPACK_LIBS = -lumfpack -lamd
-macx-g++::UMFPACK_LIBS  = -lumfpack -lamd
+macx-g++::UMFPACK_LIBS = $${UMFPACK_LIBPATH}/libumfpack.a \
+                         $${UMFPACK_LIBPATH}/libcholmod.a \
+                         $${UMFPACK_LIBPATH}/libamd.a \
+                         $${UMFPACK_LIBPATH}/libcamd.a \
+                         $${UMFPACK_LIBPATH}/libcolamd.a \
+                         $${UMFPACK_LIBPATH}/libccolamd.a \
+                         $${UMFPACK_LIBPATH}/libsuitesparseconfig.a
 
 #####################################################################################
 #                                  TRILINOS

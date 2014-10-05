@@ -15,6 +15,13 @@ Typical usage (compiles all daetools libraries, solvers and python extension mod
 Compiling only specified projects:
     sh $0 trilinos superlu nlopt
 
+Achtung, Achtung!!
+On MACOS gcc does not work well. llvm-gcc and llvm-g++ should be used.
+Add the "llvm-gcc" compiler to the PATH variable if necessary. For instance:
+    export PATH=/Developer/usr/bin:$PATH
+Make sure there are: QMAKE_CC = llvm-gcc and QMAKE_CXX = llvm-g++ defined in dae.pri
+getopt command might be missing - that line should be commented out.
+
 OPTIONS:
    -h | --help                  Show this message.
    
@@ -148,6 +155,8 @@ DAE_IF_CROSS_COMPILING=0
 
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
+  # If there are problems with memory and speed of compilation set:
+  # Ncpu=1
   QMAKE_SPEC=macx-g++
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
@@ -167,7 +176,11 @@ if [ ! -d release ]; then
     mkdir release
 fi
 
-args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,host:" -n "compile_linux" -- $*`
+if [ ${PLATFORM} = "Darwin" ]; then
+  args= 
+else
+  args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,host:" -n "compile_linux" -- $*`
+fi
 
 # Process options
 for i; do

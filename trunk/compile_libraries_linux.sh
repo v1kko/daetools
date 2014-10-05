@@ -15,6 +15,13 @@ Typical usage (configure and then build all libraries/solvers):
 Compiling only specified libraries:
     sh $0 superlu bonmin trilinos
 
+Achtung, Achtung!!
+On MACOS gcc does not work well. llvm-gcc and llvm-g++ should be used.
+Add the "llvm-gcc" compiler to the PATH variable if necessary. For instance:
+    export PATH=/Developer/usr/bin:$PATH
+Make sure there are: QMAKE_CC = llvm-gcc and QMAKE_CXX = llvm-g++ defined in dae.pri
+getopt command might be missing - that line should be commented out.
+
 OPTIONS:
    -h | --help                  Show this message.
    
@@ -71,8 +78,11 @@ TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 
-args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,configure,build,clean:,host:" -n "compile_libraries_linux" -- $*`
-
+if [ ${PLATFORM} = "Darwin" ]; then
+  args=
+else
+  args=`getopt -a -o "h" -l "help,with-python-binary:,with-python-version:,configure,build,clean:,host:" -n "compile_libraries_linux" -- $*`
+fi
 # daetools specific compiler flags
 DAE_COMPILER_FLAGS="-fPIC"
 BOOST_MACOSX_FLAGS=
@@ -130,6 +140,8 @@ done
 
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
+  # If there are problems with memory and speed of compilation set:
+  # Ncpu=1
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 else
@@ -1021,11 +1033,7 @@ configure_trilinos()
 
   echo $TRILINOS_HOME
 
-  if [ ${PLATFORM} = "Darwin" ]; then
-    UMFPACK_INCLUDE_DIR="/opt/local/include/ufsparse"
-  else
-    UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
-  fi
+  UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
   
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 "
@@ -1219,8 +1227,12 @@ compile_dealii()
   echo ""
   make -j${Ncpu} install
   
-  cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ../daetools-package/solibs/libdeal_II-daetools.so.${vDEALII}
-  
+  if [ ${PLATFORM} = "Darwin" ]; then
+    cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ../daetools-package/solibs
+  else
+    cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ../daetools-package/solibs/libdeal_II-daetools.so.${vDEALII}
+  fi
+
   cd "${TRUNK}"
 }
 
