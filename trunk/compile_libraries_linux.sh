@@ -316,7 +316,7 @@ configure_boost()
   tar -xzf boost_${vBOOST_}.tar.gz
   mv boost_${vBOOST_} boost${PYTHON_VERSION}
   cd boost${PYTHON_VERSION}
-  sh bootstrap.sh --with-python-version=${PYTHON_VERSION}
+  sh bootstrap.sh --with-python=${PYTHON}
 
   cd "${TRUNK}"
   echo ""
