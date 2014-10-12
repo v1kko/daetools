@@ -8,11 +8,14 @@ extern "C"
 
 void  Simulate(const char*  strPythonFile, const char* strSimulationClass, bool bShowSimulationExplorer);
 
-/*
 void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass);
-void  Simulate(void* loader, bool bShowSimulationExplorer);
-void  FreeLoader(void* loader);
-*/
+void  Initialize(void* s);
+void  ReInitialize(void* s);
+
+void  IntegrateForTimeInterval(void* s, double timeInterval);
+void  IntegrateUntilTime(void* s, double time);
+
+void  FreeSimulation(void* s);
 
 #ifdef __cplusplus
 }

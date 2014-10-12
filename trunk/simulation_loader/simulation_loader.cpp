@@ -31,7 +31,6 @@ void Simulate(const char*  strPythonFile, const char* strSimulationClass, bool b
     }
 }
 
-/*
 void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
 {
     try
@@ -51,20 +50,34 @@ void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
     return NULL;
 }
 
-void Simulate(const char*  strPythonFile, const char* strSimulationClass, bool bShowSimulationExplorer)
+void Initialize(void* s)
 {
-    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)loader;
-    if(ptr_loader)
-        ptr_loader->Simulate(bShowSimulationExplorer);
 }
 
-void FreeLoader(void* loader)
+void ReInitialize(void* s)
 {
-    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)loader;
+}
+
+void IntegrateForTimeInterval(void* s, double timeInterval)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->IntegrateForTimeInterval(timeInterval, true);
+}
+
+void IntegrateUntilTime(void* s, double time)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->IntegrateUntilTime(time, false, true);
+}
+
+void FreeSimulation(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
     if(ptr_loader)
         delete ptr_loader;
 }
-*/
 
 class daeSimulationLoaderData
 {

@@ -1,3 +1,5 @@
+MEX function
+------------
 GNU Octave compile:
   cd mex
   mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader daetools_mex.cpp 
@@ -7,10 +9,21 @@ Matlab compile:
   mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_mex.cpp 
 
 Scilab compile:
-  cd mx
+  cd mex
   # check the include flag: cflags = -I... and set the correct full path for simulation loader
   exec('builder.sce')
   exec('loader.sce')  
   
 Run daetools simulation:
 daetools_mex('daetools/examples/tutorial6.py', 'simTutorial', {0}, {1})
+
+
+Simulink S-function
+-------------------
+Matlab compile:
+  cd mex
+  mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_s.c 
+  
+Open S-function block, set the first parameter to the path to python file and the second to the simulation class name
+
+
