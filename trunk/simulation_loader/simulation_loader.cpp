@@ -50,12 +50,203 @@ void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
     return NULL;
 }
 
-void Initialize(void* s)
+void Initialize(void* s,
+                const char* strDAESolver,
+                const char* strLASolver,
+                const char* strDataReporter,
+                const char* strDataReporterConnectionString,
+                const char* strLog,
+                bool bCalculateSensitivities)
 {
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->Initialize(std::string(strDAESolver),
+                               std::string(strLASolver),
+                               std::string(strDataReporter),
+                               std::string(strDataReporterConnectionString),
+                               std::string(strLog),
+                               bCalculateSensitivities);
 }
 
-void ReInitialize(void* s)
+void InitializeJSON(void* s, const char* strJSONRuntimeSettings)
 {
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->Initialize(strJSONRuntimeSettings);
+}
+
+void SetTimeHorizon(void* s, double timeHorizon)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SetTimeHorizon(timeHorizon);
+}
+
+void SetReportingInterval(void* s, double reportingInterval)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SetReportingInterval(reportingInterval);
+}
+
+void SolveInitial(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SolveInitial();
+}
+
+void Run(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->Run();
+}
+
+void Reinitialize(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->Reinitialize();
+}
+
+void Finalize(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->Finalize();
+}
+
+unsigned int GetNumberOfParameters(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        return ptr_loader->GetNumberOfParameters();
+    return 0;
+}
+
+unsigned int GetNumberOfDOFs(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        return ptr_loader->GetNumberOfDOFs();
+    return 0;
+}
+
+unsigned int GetNumberOfInputs(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        return ptr_loader->GetNumberOfInputs();
+    return 0;
+}
+
+unsigned int GetNumberOfOutputs(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->GetNumberOfOutputs();
+    return 0;
+}
+
+void GetParameterInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+    {
+        std::string name;
+        ptr_loader->GetParameterInfo(index, name, *numberOfPoints);
+        strncpy(strName, name.c_str(), 512);
+    }
+}
+
+void GetDOFInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+    {
+        std::string name;
+        ptr_loader->GetDOFInfo(index, name, *numberOfPoints);
+        strncpy(strName, name.c_str(), 512);
+    }
+}
+
+void GetInputInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+    {
+        std::string name;
+        ptr_loader->GetInputInfo(index, name, *numberOfPoints);
+        strncpy(strName, name.c_str(), 512);
+    }
+}
+
+void GetOutputInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+    {
+        std::string name;
+        ptr_loader->GetOutputInfo(index, name, *numberOfPoints);
+        strncpy(strName, name.c_str(), 512);
+    }
+}
+
+void GetParameterValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->GetParameterValue(index, value, numberOfPoints);
+}
+
+void GetDOFValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->GetDOFValue(index, value, numberOfPoints);
+}
+
+void GetInputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->GetInputValue(index, value, numberOfPoints);
+}
+
+void GetOutputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->GetOutputValue(index, value, numberOfPoints);
+}
+
+void SetParameterValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SetParameterValue(index, value, numberOfPoints);
+}
+
+void SetDOFValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SetDOFValue(index, value, numberOfPoints);
+}
+
+void SetInputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SetInputValue(index, value, numberOfPoints);
+}
+
+void SetOutputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->SetOutputValue(index, value, numberOfPoints);
 }
 
 void IntegrateForTimeInterval(void* s, double timeInterval)
@@ -105,6 +296,7 @@ public:
 
 // Parameters/Inputs/Outputs
     std::vector<daeParameter_t*> m_ptrarrParameters;
+    std::vector<daeVariable_t*>  m_ptrarrDOFs;
     std::vector<daeVariable_t*>  m_ptrarrInputs;
     std::vector<daeVariable_t*>  m_ptrarrOutputs;
 
@@ -239,8 +431,8 @@ void daeSimulationLoader::Initialize(const std::string& strDAESolver,
         if(!pData->m_pDataReporter->Connect(strDataReporterConnectionString, pData->m_pSimulation->GetModel()->GetName()))
             daeDeclareAndThrowException(exInvalidCall);
 
-        pData->m_pSimulation->SetReportingInterval(10);
-        pData->m_pSimulation->SetTimeHorizon(1000);
+        pData->m_pSimulation->SetReportingInterval(1); // only provisional, must be set by SetReportingInterval
+        pData->m_pSimulation->SetTimeHorizon(10);      // only provisional, must be set by SetTimeHorizon
         pData->m_pSimulation->GetModel()->SetReportingOn(true);
 
         pData->m_pSimulation->Initialize(pData->m_pDAESolver, pData->m_pDataReporter, pData->m_pLog, bCalculateSensitivities, strJSONRuntimeSettings);
@@ -249,6 +441,30 @@ void daeSimulationLoader::Initialize(const std::string& strDAESolver,
 //    {
 //        std::cout << e.what() << std::endl;
 //    }
+}
+
+void daeSimulationLoader::SetTimeHorizon(double timeHorizon)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(!pData->m_pSimulation)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    pData->m_pSimulation->SetTimeHorizon(timeHorizon);
+}
+
+void daeSimulationLoader::SetReportingInterval(double reportingInterval)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(!pData->m_pSimulation)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    pData->m_pSimulation->SetReportingInterval(reportingInterval);
 }
 
 void daeSimulationLoader::SolveInitial()
@@ -377,7 +593,7 @@ double daeSimulationLoader::IntegrateUntilTime(double time, bool bStopAtDisconti
         return pData->m_pSimulation->IntegrateUntilTime(time, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
 }
 
-size_t daeSimulationLoader::GetNumberOfParameters() const
+unsigned int daeSimulationLoader::GetNumberOfParameters() const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -386,7 +602,16 @@ size_t daeSimulationLoader::GetNumberOfParameters() const
     return pData->m_ptrarrParameters.size();
 }
 
-size_t daeSimulationLoader::GetNumberOfInputs() const
+unsigned int daeSimulationLoader::GetNumberOfDOFs() const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    return pData->m_ptrarrDOFs.size();
+}
+
+unsigned int daeSimulationLoader::GetNumberOfInputs() const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -395,7 +620,7 @@ size_t daeSimulationLoader::GetNumberOfInputs() const
     return pData->m_ptrarrInputs.size();
 }
 
-size_t daeSimulationLoader::GetNumberOfOutputs() const
+unsigned int daeSimulationLoader::GetNumberOfOutputs() const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -404,7 +629,7 @@ size_t daeSimulationLoader::GetNumberOfOutputs() const
     return pData->m_ptrarrOutputs.size();
 }
 
-void daeSimulationLoader::GetParameterInfo(size_t index, std::string& strName, size_t& numberOfPoints) const
+void daeSimulationLoader::GetParameterInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -416,7 +641,19 @@ void daeSimulationLoader::GetParameterInfo(size_t index, std::string& strName, s
     strName        = pParameter->GetCanonicalName();
 }
 
-void daeSimulationLoader::GetInputInfo(size_t index, std::string& strName, size_t& numberOfPoints) const
+void daeSimulationLoader::GetDOFInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    daeVariable_t* pDOF = pData->m_ptrarrDOFs[index];
+
+    numberOfPoints = pDOF->GetNumberOfPoints();
+    strName        = pDOF->GetCanonicalName();
+}
+
+void daeSimulationLoader::GetInputInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -428,7 +665,7 @@ void daeSimulationLoader::GetInputInfo(size_t index, std::string& strName, size_
     strName        = pVariable->GetCanonicalName();
 }
 
-void daeSimulationLoader::GetOutputInfo(size_t index, std::string& strName, size_t& numberOfPoints) const
+void daeSimulationLoader::GetOutputInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -440,7 +677,7 @@ void daeSimulationLoader::GetOutputInfo(size_t index, std::string& strName, size
     strName        = pVariable->GetCanonicalName();
 }
 
-void daeSimulationLoader::GetParameterValue(size_t index, double* value, size_t numberOfPoints) const
+void daeSimulationLoader::GetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -454,11 +691,32 @@ void daeSimulationLoader::GetParameterValue(size_t index, double* value, size_t 
         daeDeclareAndThrowException(exInvalidCall);
 
     real_t* s_values = pParameter->GetValuePointer();
-    for(size_t i = 0; i < numberOfPoints; i++)
+    for(unsigned int i = 0; i < numberOfPoints; i++)
         value[i] = static_cast<double>(s_values[i]);
 }
 
-void daeSimulationLoader::GetInputValue(size_t index, double* value, size_t numberOfPoints) const
+void daeSimulationLoader::GetDOFValue(unsigned int index, double* value, unsigned int numberOfPoints) const
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrDOFs.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeVariable_t* pDOF = pData->m_ptrarrDOFs[index];
+    if(pDOF->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    std::vector<real_t> s_values;
+    s_values.resize(numberOfPoints);
+    pDOF->GetValues(s_values);
+
+    for(unsigned int i = 0; i < numberOfPoints; i++)
+        value[i] = static_cast<double>(s_values[i]);
+}
+
+void daeSimulationLoader::GetInputValue(unsigned int index, double* value, unsigned int numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -475,11 +733,11 @@ void daeSimulationLoader::GetInputValue(size_t index, double* value, size_t numb
     s_values.resize(numberOfPoints);
     pVariable->GetValues(s_values);
 
-    for(size_t i = 0; i < numberOfPoints; i++)
+    for(unsigned int i = 0; i < numberOfPoints; i++)
         value[i] = static_cast<double>(s_values[i]);
 }
 
-void daeSimulationLoader::GetOutputValue(size_t index, double* value, size_t numberOfPoints) const
+void daeSimulationLoader::GetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints) const
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -496,11 +754,11 @@ void daeSimulationLoader::GetOutputValue(size_t index, double* value, size_t num
     s_values.resize(numberOfPoints);
     pVariable->GetValues(s_values);
 
-    for(size_t i = 0; i < numberOfPoints; i++)
+    for(unsigned int i = 0; i < numberOfPoints; i++)
         value[i] = static_cast<double>(s_values[i]);
 }
 
-void daeSimulationLoader::SetParameterValue(size_t index, double* value, size_t numberOfPoints)
+void daeSimulationLoader::SetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints)
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -514,11 +772,33 @@ void daeSimulationLoader::SetParameterValue(size_t index, double* value, size_t 
         daeDeclareAndThrowException(exInvalidCall);
 
     real_t* s_values = pParameter->GetValuePointer();
-    for(size_t i = 0; i < numberOfPoints; i++)
+    for(unsigned int i = 0; i < numberOfPoints; i++)
         s_values[i] = static_cast<real_t>(value[i]);
 }
 
-void daeSimulationLoader::SetInputValue(size_t index, double* value, size_t numberOfPoints)
+void daeSimulationLoader::SetDOFValue(unsigned int index, double* value, unsigned int numberOfPoints)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(index >= pData->m_ptrarrInputs.size())
+        daeDeclareAndThrowException(exOutOfBounds);
+
+    daeVariable_t* pDOF = pData->m_ptrarrDOFs[index];
+    if(pDOF->GetNumberOfPoints() != numberOfPoints)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    std::vector<real_t> s_values;
+    s_values.resize(numberOfPoints);
+
+    for(unsigned int i = 0; i < numberOfPoints; i++)
+        s_values[i] = static_cast<real_t>(value[i]);
+
+    pDOF->SetValues(s_values);
+}
+
+void daeSimulationLoader::SetInputValue(unsigned int index, double* value, unsigned int numberOfPoints)
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -534,13 +814,13 @@ void daeSimulationLoader::SetInputValue(size_t index, double* value, size_t numb
     std::vector<real_t> s_values;
     s_values.resize(numberOfPoints);
 
-    for(size_t i = 0; i < numberOfPoints; i++)
+    for(unsigned int i = 0; i < numberOfPoints; i++)
         s_values[i] = static_cast<real_t>(value[i]);
 
     pVariable->SetValues(s_values);
 }
 
-void daeSimulationLoader::SetOutputValue(size_t index, double* value, size_t numberOfPoints)
+void daeSimulationLoader::SetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints)
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -556,7 +836,7 @@ void daeSimulationLoader::SetOutputValue(size_t index, double* value, size_t num
     std::vector<real_t> s_values;
     s_values.resize(numberOfPoints);
 
-    for(size_t i = 0; i < numberOfPoints; i++)
+    for(unsigned int i = 0; i < numberOfPoints; i++)
         s_values[i] = static_cast<real_t>(value[i]);
 
     pVariable->SetValues(s_values);

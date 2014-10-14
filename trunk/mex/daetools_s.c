@@ -42,12 +42,14 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetNumSFcnParams(S, 2);  /* Number of expected parameters */
     
 #if defined(MATLAB_MEX_FILE)
-    if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S)) {
+    if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S)) 
+    {
         mdlCheckParameters(S);
-        if (ssGetErrorStatus(S) != NULL) {
+        if (ssGetErrorStatus(S) != NULL) 
             return;
-        }
-    } else {
+    }
+    else 
+    {
         return; /* Parameter mismatch will be reported by Simulink */
     }
 #endif
@@ -56,30 +58,33 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);
 
-    if (!ssSetNumInputPorts(S, 1)) return;
+    if (!ssSetNumInputPorts(S, 1)) 
+        return;
     
-    if (!ssSetNumOutputPorts(S, 1)) return;
+    if (!ssSetNumOutputPorts(S, 1)) 
+        return;
     
     ssSetInputPortWidth(S, 0, 1);  /* scalar double */
     ssSetOutputPortWidth(S, 0, 1); /* scalar double */
 
     ssSetNumSampleTimes(S, 1);
+    
     ssSetNumRWork(S, 0);
     ssSetNumIWork(S, 0);
     ssSetNumPWork(S, 1);
     ssSetNumModes(S, 0);
     ssSetNumNonsampledZCs(S, 0);
 
-    ssSetSimStateCompliance(S, USE_CUSTOM_SIM_STATE);
+    /*ssSetSimStateCompliance(S, USE_CUSTOM_SIM_STATE);*/
 
     ssSetOptions(S, 0);
 }
 
 static void mdlInitializeSampleTimes(SimStruct *S)
 {
-    ssSetSampleTime(S, 0, mxGetScalar(ssGetSFcnParam(S, 0)));
+    ssSetSampleTime(S, 0, CONTINUOUS_SAMPLE_TIME);
     ssSetOffsetTime(S, 0, 0.0);
-    ssSetModelReferenceSampleTimeDefaultInheritance(S);
+    /*ssSetModelReferenceSampleTimeDefaultInheritance(S);*/
 }
 
 #define MDL_START
@@ -92,11 +97,44 @@ static void mdlStart(SimStruct *S)
     mexPrintf("Python file: %s\n", path);
     mexPrintf("Simulation class: %s\n", className);
 
-    Simulate(path, className, false);
+    void *simulation = LoadSimulation(path, className);
+    if(!simulation)
+    {
+        ssSetErrorStatus(S, "Cannot load DAETools simulation");
+        return;
+    }
+    
+    ssGetPWork(S)[0] = simulation;
+
+    Initialize(simulation, "daeIDAS", "", "TCPIPDataReporter", "", "daeStdOutLog", false);
+    mexPrintf("# parameters: %d\n", GetNumberOfParameters(simulation));
 }
 
 static void mdlOutputs(SimStruct *S, int_T tid)
 {
+    void *simulation = (void *) ssGetPWork(S)[0];
+    
+    time_T stepTimeHorizon = ssGetT(S);
+    ssPrintf("Is first: %d\n", ssIsFirstInitCond(S));
+
+    if(stepTimeHorizon == 0)
+    {
+        ssPrintf("Solving initial at time: %f\n", stepTimeHorizon);
+        SolveInitial(simulation);
+    }
+    else
+    {
+        time_t stepStartTime = ssGetTStart(S);
+        time_t stepHorizon   = ssGetTFinal(S);
+        
+        ssPrintf("Integrating to %.6f ...\n", stepTimeHorizon);
+        
+        SetTimeHorizon(simulation, stepTimeHorizon);
+        /*SetReportingInterval(simulation, timeHorizon/10);*/
+        
+        IntegrateUntilTime(simulation, stepTimeHorizon);
+    }
+    
     real_T  *y = ssGetOutputPortRealSignal(S,0);
     y[0] = 5;
     UNUSED_ARG(tid);
@@ -104,6 +142,9 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
 static void mdlTerminate(SimStruct *S)
 {
+     void *simulation = (void *) ssGetPWork(S)[0];
+     Finalize(simulation);
+     FreeSimulation(simulation);
 }
 
 #ifdef  MATLAB_MEX_FILE    /* Is this file being compiled as a MEX-file? */

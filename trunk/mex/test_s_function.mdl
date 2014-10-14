@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.5"
+    ComputedModelVersion    "1.20"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -27,16 +27,16 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "ciroki"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Sun Oct 12 15:35:00 2014"
-  RTWModifiedTimeStamp	  335027411
-  ModelVersionFormat	  "1.%<AutoIncrement:5>"
+  LastModifiedDate	  "Tue Oct 14 19:19:48 2014"
+  RTWModifiedTimeStamp	  335215073
+  ModelVersionFormat	  "1.%<AutoIncrement:20>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
   LibraryLinkDisplay	  "disabled"
   WideLines		  off
   ShowLineDimensions	  off
-  ShowPortDataTypes	  off
+  ShowPortDataTypes	  on
   ShowDesignRanges	  off
   ShowLoopsOnError	  on
   IgnoreBidirectionalLines off
@@ -133,7 +133,7 @@ Model {
 	  $ObjectID		  3
 	  Version		  "1.12.0"
 	  StartTime		  "0.0"
-	  StopTime		  "10.0"
+	  StopTime		  "200"
 	  AbsTol		  "auto"
 	  FixedStep		  "auto"
 	  InitialStep		  "auto"
@@ -144,10 +144,10 @@ Model {
 	  MaxConsecutiveZCs	  "1000"
 	  ExtrapolationOrder	  4
 	  NumberNewtonIterations  1
-	  MaxStep		  "auto"
+	  MaxStep		  "0.2"
 	  MinStep		  "auto"
 	  MaxConsecutiveMinStep	  "1"
-	  RelTol		  "1e-3"
+	  RelTol		  "1e-5"
 	  SolverMode		  "Auto"
 	  EnableConcurrentExecution off
 	  ConcurrentTasks	  off
@@ -614,7 +614,7 @@ Model {
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition     [ 243, 69, 1123, 699 ] 
+      ConfigPrmDlgPosition     [ 178, 22, 1188, 774 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -656,6 +656,46 @@ Model {
   }
   BlockParameterDefaults {
     Block {
+      BlockType		      Clock
+      DisplayTime	      off
+      Decimation	      "10"
+    }
+    Block {
+      BlockType		      Inport
+      Port		      "1"
+      OutputFunctionCall      off
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
+      SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      LatchByDelayingOutsideSignal off
+      LatchInputForFeedbackSignals off
+      Interpolate	      on
+    }
+    Block {
+      BlockType		      Outport
+      Port		      "1"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
+      BusOutputAsStruct	      off
+      PortDimensions	      "-1"
+      VarSizeSig	      "Inherit"
+      SampleTime	      "-1"
+      SignalType	      "auto"
+      SamplingMode	      "auto"
+      SourceOfInitialOutputValue "Dialog"
+      OutputWhenDisabled      "held"
+      InitialOutput	      "[]"
+    }
+    Block {
       BlockType		      S-Function
       FunctionName	      "system"
       SFunctionModules	      "''"
@@ -680,10 +720,46 @@ Model {
       SampleInput	      off
       SampleTime	      "-1"
     }
+    Block {
+      BlockType		      Sin
+      SineType		      "Time based"
+      TimeSource	      "Use simulation time"
+      Amplitude		      "1"
+      Bias		      "0"
+      Frequency		      "1"
+      Phase		      "0"
+      Samples		      "10"
+      Offset		      "0"
+      SampleTime	      "-1"
+      VectorParams1D	      on
+    }
+    Block {
+      BlockType		      SubSystem
+      ShowPortLabels	      "FromPortIcon"
+      Permissions	      "ReadWrite"
+      PermitHierarchicalResolution "All"
+      TreatAsAtomicUnit	      off
+      CheckFcnCallInpInsideContextMsg off
+      SystemSampleTime	      "-1"
+      RTWFcnNameOpts	      "Auto"
+      RTWFileNameOpts	      "Auto"
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      SimViewingDevice	      off
+      DataTypeOverride	      "UseLocalSettings"
+      DataTypeOverrideAppliesTo	"AllNumericTypes"
+      MinMaxOverflowLogging   "UseLocalSettings"
+      SFBlockType	      "NONE"
+      Variant		      off
+      GeneratePreprocessorConditionals off
+    }
   }
   System {
     Name		    "test_s_function"
-    Location		    [631, 197, 1321, 499]
+    Location		    [676, 355, 1366, 657]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -697,17 +773,13 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "4"
+    SIDHighWatermark	    "15"
     Block {
-      BlockType		      S-Function
-      Name		      "S-Function"
-      SID		      "1"
-      Ports		      [1, 1]
-      Position		      [160, 50, 220, 80]
-      ZOrder		      -5
-      FunctionName	      "daetools_s"
-      Parameters	      "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial1.py', 'simTutorial'"
-      EnableBusSupport	      off
+      BlockType		      Clock
+      Name		      "Clock"
+      SID		      "14"
+      Position		      [305, 155, 325, 175]
+      ZOrder		      -4
     }
     Block {
       BlockType		      Scope
@@ -739,43 +811,124 @@ Model {
       SampleTime	      "0"
     }
     Block {
+      BlockType		      Sin
+      Name		      "Sine Wave"
+      SID		      "13"
+      Ports		      [0, 1]
+      Position		      [15, 50, 45, 80]
+      ZOrder		      -21
+      SampleTime	      "0"
+    }
+    Block {
+      BlockType		      SubSystem
+      Name		      "Subsystem"
+      SID		      "6"
+      Ports		      [1, 1]
+      Position		      [155, 35, 195, 95]
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
+      RTWSystemCode	      "Auto"
+      FunctionWithSeparateData off
+      Opaque		      off
+      RequestExecContextInheritance off
+      MaskHideContents	      off
+      System {
+	Name			"Subsystem"
+	Location		[724, 395, 1204, 588]
+	Open			on
+	ModelBrowserVisibility	off
+	ModelBrowserWidth	200
+	ScreenColor		"white"
+	PaperOrientation	"landscape"
+	PaperPositionMode	"auto"
+	PaperType		"usletter"
+	PaperUnits		"inches"
+	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
+	TiledPageScale		1
+	ShowPageBoundaries	off
+	ZoomFactor		"100"
+	Block {
+	  BlockType		  Inport
+	  Name			  "X"
+	  SID			  "7"
+	  Position		  [25, 33, 55, 47]
+	  ZOrder		  -1
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  S-Function
+	  Name			  "S-Function"
+	  SID			  "1"
+	  Ports			  [1, 1]
+	  Position		  [140, 25, 200, 55]
+	  ZOrder		  -5
+	  FunctionName		  "daetools_s"
+	  Parameters		  "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial1.py', 'simTutorial'"
+	  EnableBusSupport	  off
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Y"
+	  SID			  "8"
+	  Position		  [270, 33, 300, 47]
+	  IconDisplay		  "Port number"
+	}
+	Line {
+	  SrcBlock		  "X"
+	  SrcPort		  1
+	  DstBlock		  "S-Function"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "S-Function"
+	  SrcPort		  1
+	  DstBlock		  "Y"
+	  DstPort		  1
+	}
+      }
+    }
+    Block {
       BlockType		      Reference
       Name		      "XY Graph"
       SID		      "4"
       Ports		      [2]
-      Position		      [445, 145, 475, 180]
+      Position		      [475, 155, 505, 190]
       ZOrder		      -8
       LibraryVersion	      "1.260"
       SourceBlock	      "simulink/Sinks/XY Graph"
       SourceType	      "XY scope."
-      xmin		      "-1"
-      xmax		      "1"
-      ymin		      "-1"
-      ymax		      "1"
+      xmin		      "0"
+      xmax		      "10"
+      ymin		      "0"
+      ymax		      "10"
       st		      "-1"
     }
     Line {
       Labels		      [0, 0]
-      SrcBlock		      "S-Function"
+      SrcBlock		      "Subsystem"
       SrcPort		      1
-      Points		      [40, 0]
+      Points		      [65, 0]
       Branch {
-	Points			[35, 0]
-	Branch {
-	  Points		  [0, 90]
-	  DstBlock		  "XY Graph"
-	  DstPort		  1
-	}
-	Branch {
-	  DstBlock		  "Scope"
-	  DstPort		  1
-	}
-      }
-      Branch {
-	Points			[0, 105]
+	Points			[0, 115]
 	DstBlock		"XY Graph"
 	DstPort			2
       }
+      Branch {
+	DstBlock		"Scope"
+	DstPort			1
+      }
+    }
+    Line {
+      SrcBlock		      "Sine Wave"
+      SrcPort		      1
+      DstBlock		      "Subsystem"
+      DstPort		      1
+    }
+    Line {
+      SrcBlock		      "Clock"
+      SrcPort		      1
+      DstBlock		      "XY Graph"
+      DstPort		      1
     }
   }
 }
