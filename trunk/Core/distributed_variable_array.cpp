@@ -63,6 +63,61 @@ size_t daeVariable::GetOverallIndex(void) const
 	return m_nOverallIndex;
 }
 
+int daeVariable::GetType() const
+{
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    if(!pDataProxy)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(GetNumberOfPoints() == 1)
+    {
+        return pDataProxy->GetVariableType(GetOverallIndex());
+    }
+    else
+    {
+        size_t nStart = GetOverallIndex();
+        size_t nEnd   = GetOverallIndex() + GetNumberOfPoints();
+
+        // First collect types for all points
+        std::vector<int> arrVarTypes;
+        arrVarTypes.reserve(GetNumberOfPoints());
+        for(size_t k = nStart; k < nEnd; k++)
+            arrVarTypes.push_back(pDataProxy->GetVariableType(k));
+
+        bool foundAlgebraic     = false;
+        bool foundDifferrential = false;
+        bool foundAssigned      = false;
+        for(size_t k = nStart; k < nEnd; k++)
+        {
+            if(arrVarTypes[k] == cnAlgebraic)
+                foundAlgebraic = true;
+            else if(arrVarTypes[k] == cnAssigned)
+                foundAssigned = true;
+            else if(arrVarTypes[k] == cnDifferential)
+                foundDifferrential = true;
+            else
+                daeDeclareAndThrowException(exInvalidCall);
+        }
+
+        if(foundAlgebraic && !foundDifferrential && !foundAssigned)
+            return cnAlgebraic;
+        else if(!foundAlgebraic && foundDifferrential && !foundAssigned)
+            return cnDifferential;
+        else if(!foundAlgebraic && !foundDifferrential && foundAssigned)
+            return cnAssigned;
+
+        else if(foundAlgebraic && foundDifferrential && !foundAssigned)
+            return cnSomePointsDifferential;
+        else if(foundAlgebraic && !foundDifferrential && foundAssigned)
+            return cnSomePointsAssigned;
+        else
+            return cnMixedAlgebraicAssignedDifferential;
+    }
+}
+
 size_t daeVariable::CalculateIndex(const size_t* indexes, const size_t N) const
 {
 	size_t		i, j, nIndex, temp;

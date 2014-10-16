@@ -28,6 +28,10 @@ const int cnAlgebraic	 = 0;
 const int cnDifferential = 1;
 const int cnAssigned	 = 2;
 
+const int cnSomePointsAssigned     = 3;
+const int cnSomePointsDifferential = 4;
+const int cnMixedAlgebraicAssignedDifferential = 5;
+
 // When setting initial conditions for distributed variables values at certain indexes
 // do not need to be set (for they are not differential variables). To indicate that,
 // cnUnsetValue should be used at that particular index (with the value: DOUBLE_MAX).
@@ -428,7 +432,10 @@ public:
     virtual const daeVariableType_t* GetVariableType(void) const							= 0;
     virtual void					 GetDomains(std::vector<daeDomain_t*>& ptrarrDomains)	= 0;
 
+    virtual size_t	GetOverallIndex(void)	const   = 0;
     virtual size_t	GetNumberOfPoints(void)	const   = 0;
+
+    virtual int     GetType() const = 0; // Can be algebraic, assigned, differential, some-points-assigned, some-points-differential or mixed
 
     virtual bool	GetReportingOn(void) const  = 0;
     virtual void	SetReportingOn(bool bOn)    = 0;

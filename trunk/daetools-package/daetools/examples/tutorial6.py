@@ -103,18 +103,6 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         self.m.mpout.time.SetInitialCondition(0)
 
-def export(simulation, objects_to_export):
-    pydae_model = simulation.m.ExportObjects(objects_to_export, ePYDAE)
-    cdae_model  = simulation.m.ExportObjects(objects_to_export, eCDAE)
-
-    file_pydae = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.py", "w")
-    file_cdae  = open(tempfile.gettempdir() + "/" + simulation.m.Name + "_export.h",  "w")
-
-    file_pydae.write(pydae_model)
-    file_cdae.write(cdae_model)
-    file_pydae.close()
-    file_cdae.close()
-
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
@@ -150,9 +138,6 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Export models and ports
-    #export(simulation, [simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m])
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

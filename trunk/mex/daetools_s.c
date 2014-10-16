@@ -39,7 +39,7 @@ static void mdlCheckParameters(SimStruct *S)
 
 static void mdlInitializeSizes(SimStruct *S)
 {
-    ssSetNumSFcnParams(S, 2);  /* Number of expected parameters */
+    ssSetNumSFcnParams(S, 2);
     
 #if defined(MATLAB_MEX_FILE)
     if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S)) 
@@ -50,22 +50,13 @@ static void mdlInitializeSizes(SimStruct *S)
     }
     else 
     {
-        return; /* Parameter mismatch will be reported by Simulink */
+        return;
     }
 #endif
     ssSetSFcnParamTunable(S, 0, 0);
 
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);
-
-    if (!ssSetNumInputPorts(S, 1)) 
-        return;
-    
-    if (!ssSetNumOutputPorts(S, 1)) 
-        return;
-    
-    ssSetInputPortWidth(S, 0, 1);  /* scalar double */
-    ssSetOutputPortWidth(S, 0, 1); /* scalar double */
 
     ssSetNumSampleTimes(S, 1);
     
@@ -94,8 +85,8 @@ static void mdlStart(SimStruct *S)
     char* path      = mxArrayToString(ssGetSFcnParam(S, 0));
     char* className = mxArrayToString(ssGetSFcnParam(S, 1));
     
-    mexPrintf("Python file: %s\n", path);
-    mexPrintf("Simulation class: %s\n", className);
+    ssPrintf("Python file: %s\n", path);
+    ssPrintf("Simulation class: %s\n", className);
 
     void *simulation = LoadSimulation(path, className);
     if(!simulation)
@@ -107,7 +98,41 @@ static void mdlStart(SimStruct *S)
     ssGetPWork(S)[0] = simulation;
 
     Initialize(simulation, "daeIDAS", "", "TCPIPDataReporter", "", "daeStdOutLog", false);
-    mexPrintf("# parameters: %d\n", GetNumberOfParameters(simulation));
+    
+    int i;
+    ssPrintf("00\n");
+    int nParameters = GetNumberOfParameters(simulation);
+    mexPrintf("Number of parameters: %d\n", nParameters);
+
+    ssPrintf("1\n");
+    int nInletPorts = GetNumberOfInputs(simulation);
+    if (!ssSetNumInputPorts(S, nInletPorts)) 
+        return;
+    
+    ssPrintf("2\n");
+    int nOutletPorts = GetNumberOfOutputs(simulation);
+    if (!ssSetNumOutputPorts(S, nOutletPorts)) 
+        return;
+    
+    ssPrintf("3\n");
+    for(i = 0; i < nInletPorts; i++)
+    {
+        unsigned int noPoints = 0;
+        char name[512];
+        GetInputInfo(simulation, i, name, &noPoints);
+        ssPrintf("Inlet port: %s\n", name);
+        ssSetInputPortWidth(S, i, noPoints);
+    }
+    
+    ssPrintf("4\n");
+    for(i = 0; i < nOutletPorts; i++)
+    {
+        unsigned int noPoints = 0;
+        char name[512];
+        GetOutputInfo(simulation, i, name, &noPoints);
+        ssPrintf("Inlet port: %s\n", name);
+        ssSetOutputPortWidth(S, i, noPoints);
+    }
 }
 
 static void mdlOutputs(SimStruct *S, int_T tid)

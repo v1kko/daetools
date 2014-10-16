@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
         for(size_t i = 0; i < loader.GetNumberOfParameters(); i++)
         {
             std::string strName;
-            size_t numberOfPoints;
+            unsigned int numberOfPoints;
             loader.GetParameterInfo(i, strName, numberOfPoints);
             std::cout << "  parameter [" << i <<  "]: " << strName << " with " << numberOfPoints << " points" << std::endl;
         }
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
         for(size_t i = 0; i < loader.GetNumberOfInputs(); i++)
         {
             std::string strName;
-            size_t numberOfPoints;
+            unsigned int numberOfPoints;
             loader.GetInputInfo(i, strName, numberOfPoints);
             std::cout << "  input [" << i <<  "]: " << strName << " with " << numberOfPoints << " points" << std::endl;
         }
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
         for(size_t i = 0; i < loader.GetNumberOfOutputs(); i++)
         {
             std::string strName;
-            size_t numberOfPoints;
+            unsigned int numberOfPoints;
             loader.GetOutputInfo(i, strName, numberOfPoints);
             std::cout << "  output [" << i <<  "]: " << strName << " with " << numberOfPoints << " points" << std::endl;
         }

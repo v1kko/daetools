@@ -250,6 +250,10 @@ BOOST_PYTHON_MODULE(pyCore)
     boost::python::scope().attr("cnDifferential") = cnDifferential;
     boost::python::scope().attr("cnAssigned")     = cnAssigned;
 
+    boost::python::scope().attr("cnSomePointsAssigned")                 = cnSomePointsAssigned;
+    boost::python::scope().attr("cnSomePointsDifferential")             = cnSomePointsDifferential;
+    boost::python::scope().attr("cnMixedAlgebraicAssignedDifferential") = cnMixedAlgebraicAssignedDifferential;
+
 /**************************************************************
     Classes
 ***************************************************************/
@@ -969,8 +973,9 @@ BOOST_PYTHON_MODULE(pyCore)
                                                                                                   ) ), DOCSTR_daeVariable_init2)
 
         .add_property("Domains",            &daepython::daeVariable_GetDomains, DOCSTR_daeVariable_Domains)
+        .add_property("Type",               &daeVariable::GetType, DOCSTR_daeVariable_Type)
         .add_property("VariableType",       make_function(&daepython::daeVariable_GetVariableType, return_internal_reference<>()),
-                                            DOCSTR_daeVariable_VariabeType)
+                                            DOCSTR_daeVariable_VariableType)
         .add_property("ReportingOn",        &daeVariable::GetReportingOn,
                                             &daeVariable::SetReportingOn,             DOCSTR_daeVariable_ReportingOn)
         .add_property("OverallIndex",       &daeVariable::GetOverallIndex,            DOCSTR_daeVariable_OverallIndex)

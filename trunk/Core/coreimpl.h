@@ -1751,7 +1751,10 @@ public:
 	virtual const daeVariableType_t* GetVariableType(void) const;
 	virtual void                     GetDomains(std::vector<daeDomain_t*>& ptrarrDomains);
 
-	virtual size_t	GetNumberOfPoints(void) const;
+    virtual size_t	GetOverallIndex(void)	const;
+    virtual size_t	GetNumberOfPoints(void) const;
+
+    virtual int     GetType() const; // Can be algebraic, assigned, differential, some-points-assigned or some-points-differential
 
 	virtual bool	GetReportingOn(void) const;
 	virtual void	SetReportingOn(bool bOn);
@@ -1950,7 +1953,6 @@ public:
     size_t GetNumberOfDomains() const;
     void DistributeOnDomain(daeDomain& rDomain);
 	
-	size_t GetOverallIndex(void) const;
 	daeDomain* GetDomain(size_t nIndex) const;
 
     void GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapDomainsIndexes, size_t nIndexBase) const;

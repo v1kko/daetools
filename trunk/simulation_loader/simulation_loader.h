@@ -46,24 +46,23 @@ public:
 
 // Info functions
     unsigned int GetNumberOfParameters() const;
-    unsigned int GetNumberOfDOFs() const;
     unsigned int GetNumberOfInputs() const;
     unsigned int GetNumberOfOutputs() const;
 
     void GetParameterInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
-    void GetDOFInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
     void GetInputInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
     void GetOutputInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
 
     void GetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
-    void GetDOFValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
     void GetInputValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
     void GetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
 
     void SetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints);
-    void SetDOFValue(unsigned int index, double* value, unsigned int numberOfPoints);
     void SetInputValue(unsigned int index, double* value, unsigned int numberOfPoints);
     void SetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints);
+
+protected:
+    void SetupInputsAndOutputs();
 
 protected:
 // Internal data

@@ -26,22 +26,18 @@ void Finalize(void* s);
 void FreeSimulation(void* s);
 
 unsigned int GetNumberOfParameters(void* s);
-unsigned int GetNumberOfDOFs(void* s);
 unsigned int GetNumberOfInputs(void* s);
 unsigned int GetNumberOfOutputs(void* s);
 
 void GetParameterInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
-void GetDOFInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
 void GetInputInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
 void GetOutputInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
 
 void GetParameterValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
-void GetDOFValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 void GetInputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 void GetOutputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 
 void SetParameterValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
-void SetDOFValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 void SetInputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 void SetOutputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 
