@@ -66,6 +66,8 @@ void Initialize(void* s,
                                std::string(strDataReporterConnectionString),
                                std::string(strLog),
                                bCalculateSensitivities);
+    else
+        daeDeclareAndThrowException(exInvalidCall);
 }
 
 void InitializeJSON(void* s, const char* strJSONRuntimeSettings)
@@ -138,15 +140,15 @@ unsigned int GetNumberOfInputs(void* s)
     daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
     if(ptr_loader)
         return ptr_loader->GetNumberOfInputs();
-    return 0;
+    return -1;
 }
 
 unsigned int GetNumberOfOutputs(void* s)
 {
     daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
     if(ptr_loader)
-        ptr_loader->GetNumberOfOutputs();
-    return 0;
+        return ptr_loader->GetNumberOfOutputs();
+    return -1;
 }
 
 void GetParameterInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints)
@@ -261,6 +263,13 @@ void IntegrateUntilTime(void* s, double time)
     daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
     if(ptr_loader)
         ptr_loader->IntegrateUntilTime(time, false, true);
+}
+
+void ReportData(void* s)
+{
+    daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+    if(ptr_loader)
+        ptr_loader->ReportData();
 }
 
 void FreeSimulation(void* s)
@@ -458,22 +467,31 @@ void daeSimulationLoader::SetupInputsAndOutputs()
     std::vector<daeVariable_t*> ptrarrVariables;
     std::map<std::string, daeParameter_t*> mapParameters;
     std::map<std::string, daeVariable_t*> mapVariables;
-    std::map<std::string, daePort_t*> mapPorts;
+    std::vector<daePort_t*> arrPorts;
     daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
 
     pTopLevelModel->CollectAllParameters(mapParameters);
-    pTopLevelModel->CollectAllPorts(mapPorts);
+    pTopLevelModel->GetPorts(arrPorts);
     pTopLevelModel->CollectAllVariables(mapVariables);
 
     for(std::map<std::string, daeParameter_t*>::iterator iter = mapParameters.begin(); iter != mapParameters.end(); iter++)
         pData->m_ptrarrParameters.push_back(iter->second);
 
-    for(std::map<std::string, daePort_t*>::iterator iter = mapPorts.begin(); iter != mapPorts.end(); iter++)
-    {
-        ptrarrVariables.clear();
-        iter->second->GetVariables(ptrarrVariables);
+    // Only ports from the top-level model (not internal models!)
+    std::ofstream out("daetools_s_fun.txt");
+    if(!out.is_open())
+        daeDeclareAndThrowException(exInvalidCall);
 
-        if(iter->second->GetType() == eInletPort)
+    for(size_t i = 0; i < arrPorts.size(); i++)
+    {
+        daePort_t* port = arrPorts[i];
+
+        out << "Found port: " << port->GetCanonicalName() << std::endl;
+
+        ptrarrVariables.clear();
+        port->GetVariables(ptrarrVariables);
+
+        if(port->GetType() == eInletPort)
         {
             for(size_t i = 0; i < ptrarrVariables.size(); i++)
             {
@@ -488,7 +506,7 @@ void daeSimulationLoader::SetupInputsAndOutputs()
                 pData->m_ptrarrInputs.push_back(pVariable);
             }
         }
-        else if(iter->second->GetType() == eOutletPort)
+        else if(port->GetType() == eOutletPort)
         {
             for(size_t i = 0; i < ptrarrVariables.size(); i++)
             {
@@ -496,15 +514,23 @@ void daeSimulationLoader::SetupInputsAndOutputs()
                 if(pVariable->GetType() == cnAssigned || pVariable->GetType() == cnSomePointsAssigned)
                 {
                     daeDeclareException(exInvalidCall);
-                    e << "Outlet oort variables [" << pVariable->GetCanonicalName() << "] cannot have assigned values (can't be DOFs)";
+                    e << "Outlet port variables [" << pVariable->GetCanonicalName() << "] cannot have assigned values (can't be DOFs)";
                     throw e;
                 }
 
                 pData->m_ptrarrOutputs.push_back(pVariable);
             }
         }
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Ports can be either inlet or outlet; inlet/outlet ports are not supported [" << port->GetCanonicalName() << "]";
+            throw e;
+        }
     }
-
+    out.flush();
+    out.close();
+    
     // DOFs
     for(std::map<std::string, daeVariable_t*>::iterator iter = mapVariables.begin(); iter != mapVariables.end(); iter++)
     {

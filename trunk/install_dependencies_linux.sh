@@ -55,7 +55,7 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
                        python-xlwt python-lxml python-h5py python-pandas \
-                       libblas3gf liblapack3gf libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
+                       libblas3gf liblapack3gf libqt4-dev qtcreator \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
 
@@ -63,7 +63,7 @@ elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
                        python-xlwt python-lxml python-h5py python-pandas \
-                       libblas3gf liblapack3gf libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
+                       libblas3gf liblapack3gf libqt4-dev qtcreator \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
 
@@ -71,7 +71,7 @@ elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
                        python-xlwt python-lxml python-h5py python-pandas \
-                       libblas3gf liblapack3gf libqt4-dev qtcreator libamd2.2.0 libumfpack5.4.0 \
+                       libblas3gf liblapack3gf libqt4-dev qtcreator \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
 

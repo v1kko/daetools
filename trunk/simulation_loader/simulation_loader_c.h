@@ -43,6 +43,7 @@ void SetOutputValue(void* s, unsigned int index, double* value, unsigned int num
 
 void  IntegrateForTimeInterval(void* s, double timeInterval);
 void  IntegrateUntilTime(void* s, double time);
+void  ReportData(void* s);
 
 #ifdef __cplusplus
 }
