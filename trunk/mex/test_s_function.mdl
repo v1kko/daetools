@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.20"
+    ComputedModelVersion    "1.47"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -27,9 +27,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "ciroki"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 14 19:19:48 2014"
-  RTWModifiedTimeStamp	  335215073
-  ModelVersionFormat	  "1.%<AutoIncrement:20>"
+  LastModifiedDate	  "Mon Oct 27 18:10:04 2014"
+  RTWModifiedTimeStamp	  336334058
+  ModelVersionFormat	  "1.%<AutoIncrement:47>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -67,7 +67,6 @@ Model {
     $ObjectID		    1
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
     model_		    "test_s_function"
-    signals_		    []
     overrideMode_	    [0.0]
     Array {
       Type		      "Cell"
@@ -133,7 +132,7 @@ Model {
 	  $ObjectID		  3
 	  Version		  "1.12.0"
 	  StartTime		  "0.0"
-	  StopTime		  "200"
+	  StopTime		  "100"
 	  AbsTol		  "auto"
 	  FixedStep		  "auto"
 	  InitialStep		  "auto"
@@ -144,7 +143,7 @@ Model {
 	  MaxConsecutiveZCs	  "1000"
 	  ExtrapolationOrder	  4
 	  NumberNewtonIterations  1
-	  MaxStep		  "0.2"
+	  MaxStep		  "1"
 	  MinStep		  "auto"
 	  MaxConsecutiveMinStep	  "1"
 	  RelTol		  "1e-5"
@@ -614,7 +613,7 @@ Model {
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition     [ 178, 22, 1188, 774 ] 
+      ConfigPrmDlgPosition     [ 210, 94, 1140, 654 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -656,9 +655,17 @@ Model {
   }
   BlockParameterDefaults {
     Block {
-      BlockType		      Clock
-      DisplayTime	      off
-      Decimation	      "10"
+      BlockType		      Constant
+      Value		      "1"
+      VectorParams1D	      on
+      SamplingMode	      "Sample based"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: Inherit from 'Constant value'"
+      LockScale		      off
+      SampleTime	      "inf"
+      FramePeriod	      "inf"
+      PreserveConstantTs      off
     }
     Block {
       BlockType		      Inport
@@ -759,7 +766,7 @@ Model {
   }
   System {
     Name		    "test_s_function"
-    Location		    [676, 355, 1366, 657]
+    Location		    [571, 377, 1020, 619]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -773,24 +780,26 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "15"
+    SIDHighWatermark	    "22"
     Block {
-      BlockType		      Clock
-      Name		      "Clock"
-      SID		      "14"
-      Position		      [305, 155, 325, 175]
+      BlockType		      Constant
+      Name		      "Constant"
+      SID		      "21"
+      Position		      [55, 135, 85, 165]
       ZOrder		      -4
+      Value		      "3"
+      OutDataTypeStr	      "double"
     }
     Block {
       BlockType		      Scope
-      Name		      "Scope"
+      Name		      "Scope 1"
       SID		      "3"
       Ports		      [1]
-      Position		      [425, 49, 455, 81]
+      Position		      [360, 64, 390, 96]
       ZOrder		      -3
       Floating		      off
-      Location		      [934, 160, 1258, 399]
-      Open		      off
+      Location		      [884, 110, 1208, 349]
+      Open		      on
       NumInputPorts	      "1"
       List {
 	ListType		AxesTitles
@@ -798,7 +807,39 @@ Model {
       }
       List {
 	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
+	FigureColor		"[0.501960784313725 0.501960784313725 0.501960784313725]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[0 1 1;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      SaveToWorkspace	      on
+      SaveName		      "ScopeData1"
+      DataFormat	      "StructureWithTime"
+      LimitDataPoints	      off
+      SampleTime	      "0"
+    }
+    Block {
+      BlockType		      Scope
+      Name		      "Scope 2"
+      SID		      "22"
+      Ports		      [1]
+      Position		      [360, 134, 390, 166]
+      ZOrder		      -3
+      Floating		      off
+      Location		      [940, 362, 1264, 601]
+      Open		      on
+      NumInputPorts	      "1"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.501960784313725 0.501960784313725 0.501960784313725]"
 	AxesColor		"[0 0 0]"
 	AxesTickColor		"[1 1 1]"
 	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
@@ -807,7 +848,10 @@ Model {
 	MarkerStyles		"none|none|none|none|none|none"
       }
       ShowLegends	      off
+      SaveToWorkspace	      on
+      SaveName		      "ScopeData2"
       DataFormat	      "StructureWithTime"
+      LimitDataPoints	      off
       SampleTime	      "0"
     }
     Block {
@@ -815,16 +859,16 @@ Model {
       Name		      "Sine Wave"
       SID		      "13"
       Ports		      [0, 1]
-      Position		      [15, 50, 45, 80]
+      Position		      [55, 65, 85, 95]
       ZOrder		      -21
       SampleTime	      "0"
     }
     Block {
       BlockType		      SubSystem
-      Name		      "Subsystem"
+      Name		      "tutorial 20"
       SID		      "6"
-      Ports		      [1, 1]
-      Position		      [155, 35, 195, 95]
+      Ports		      [2, 2]
+      Position		      [195, 43, 250, 187]
       MinAlgLoopOccurrences   off
       PropExecContextOutsideSubsystem off
       RTWSystemCode	      "Auto"
@@ -833,9 +877,9 @@ Model {
       RequestExecContextInheritance off
       MaskHideContents	      off
       System {
-	Name			"Subsystem"
-	Location		[724, 395, 1204, 588]
-	Open			on
+	Name			"tutorial 20"
+	Location		[719, 566, 1199, 759]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -849,32 +893,50 @@ Model {
 	ZoomFactor		"100"
 	Block {
 	  BlockType		  Inport
-	  Name			  "X"
+	  Name			  "X1"
 	  SID			  "7"
-	  Position		  [25, 33, 55, 47]
+	  Position		  [25, 38, 55, 52]
 	  ZOrder		  -1
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Inport
+	  Name			  "X2"
+	  SID			  "17"
+	  Position		  [25, 73, 55, 87]
+	  ZOrder		  -1
+	  Port			  "2"
 	  IconDisplay		  "Port number"
 	}
 	Block {
 	  BlockType		  S-Function
 	  Name			  "S-Function"
 	  SID			  "1"
-	  Ports			  [1, 1]
-	  Position		  [140, 25, 200, 55]
+	  Ports			  [2, 2]
+	  Position		  [140, 27, 220, 98]
 	  ZOrder		  -5
 	  FunctionName		  "daetools_s"
-	  Parameters		  "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial1.py', 'simTutorial'"
+	  Parameters		  "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial20.py', 'simTutorial', 2, 2,"
+	  " ' '"
 	  EnableBusSupport	  off
 	}
 	Block {
 	  BlockType		  Outport
-	  Name			  "Y"
+	  Name			  "Y1"
 	  SID			  "8"
-	  Position		  [270, 33, 300, 47]
+	  Position		  [310, 38, 340, 52]
+	  IconDisplay		  "Port number"
+	}
+	Block {
+	  BlockType		  Outport
+	  Name			  "Y2"
+	  SID			  "16"
+	  Position		  [310, 73, 340, 87]
+	  Port			  "2"
 	  IconDisplay		  "Port number"
 	}
 	Line {
-	  SrcBlock		  "X"
+	  SrcBlock		  "X1"
 	  SrcPort		  1
 	  DstBlock		  "S-Function"
 	  DstPort		  1
@@ -882,52 +944,46 @@ Model {
 	Line {
 	  SrcBlock		  "S-Function"
 	  SrcPort		  1
-	  DstBlock		  "Y"
+	  DstBlock		  "Y1"
+	  DstPort		  1
+	}
+	Line {
+	  SrcBlock		  "X2"
+	  SrcPort		  1
+	  DstBlock		  "S-Function"
+	  DstPort		  2
+	}
+	Line {
+	  SrcBlock		  "S-Function"
+	  SrcPort		  2
+	  DstBlock		  "Y2"
 	  DstPort		  1
 	}
       }
     }
-    Block {
-      BlockType		      Reference
-      Name		      "XY Graph"
-      SID		      "4"
-      Ports		      [2]
-      Position		      [475, 155, 505, 190]
-      ZOrder		      -8
-      LibraryVersion	      "1.260"
-      SourceBlock	      "simulink/Sinks/XY Graph"
-      SourceType	      "XY scope."
-      xmin		      "0"
-      xmax		      "10"
-      ymin		      "0"
-      ymax		      "10"
-      st		      "-1"
-    }
     Line {
       Labels		      [0, 0]
-      SrcBlock		      "Subsystem"
+      SrcBlock		      "tutorial 20"
       SrcPort		      1
-      Points		      [65, 0]
-      Branch {
-	Points			[0, 115]
-	DstBlock		"XY Graph"
-	DstPort			2
-      }
-      Branch {
-	DstBlock		"Scope"
-	DstPort			1
-      }
+      DstBlock		      "Scope 1"
+      DstPort		      1
     }
     Line {
       SrcBlock		      "Sine Wave"
       SrcPort		      1
-      DstBlock		      "Subsystem"
+      DstBlock		      "tutorial 20"
       DstPort		      1
     }
     Line {
-      SrcBlock		      "Clock"
+      SrcBlock		      "Constant"
       SrcPort		      1
-      DstBlock		      "XY Graph"
+      DstBlock		      "tutorial 20"
+      DstPort		      2
+    }
+    Line {
+      SrcBlock		      "tutorial 20"
+      SrcPort		      2
+      DstBlock		      "Scope 2"
       DstPort		      1
     }
   }

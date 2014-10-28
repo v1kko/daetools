@@ -49,17 +49,19 @@ public:
     unsigned int GetNumberOfInputs() const;
     unsigned int GetNumberOfOutputs() const;
 
-    void GetParameterInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
-    void GetInputInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
-    void GetOutputInfo(unsigned int index, std::string& strName, unsigned int& numberOfPoints) const;
+    void GetParameterInfo(unsigned int index, std::string& strName, unsigned int* numberOfPoints) const;
+    void GetInputInfo(unsigned int index, std::string& strName, unsigned int* numberOfPoints) const;
+    void GetOutputInfo(unsigned int index, std::string& strName, unsigned int* numberOfPoints) const;
 
     void GetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
     void GetInputValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
     void GetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
 
-    void SetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints);
-    void SetInputValue(unsigned int index, double* value, unsigned int numberOfPoints);
-    void SetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints);
+    void SetParameterValue(unsigned int index, const double* value, unsigned int numberOfPoints);
+    void SetInputValue(unsigned int index, const double* value, unsigned int numberOfPoints);
+    void SetOutputValue(unsigned int index, const double* value, unsigned int numberOfPoints);
+
+    static std::string GetStrippedName(const std::string& strSource);
 
 protected:
     void SetupInputsAndOutputs();

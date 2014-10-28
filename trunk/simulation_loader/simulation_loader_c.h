@@ -32,14 +32,15 @@ unsigned int GetNumberOfOutputs(void* s);
 void GetParameterInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
 void GetInputInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
 void GetOutputInfo(void* s, unsigned int index, char strName[512], unsigned int* numberOfPoints);
+void GetStrippedName(const char strSource[512], char strDestination[512]);
 
 void GetParameterValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 void GetInputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 void GetOutputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
 
-void SetParameterValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
-void SetInputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
-void SetOutputValue(void* s, unsigned int index, double* value, unsigned int numberOfPoints);
+void SetParameterValue(void* s, unsigned int index, const double* value, unsigned int numberOfPoints);
+void SetInputValue(void* s, unsigned int index, const double* value, unsigned int numberOfPoints);
+void SetOutputValue(void* s, unsigned int index, const double* value, unsigned int numberOfPoints);
 
 void  IntegrateForTimeInterval(void* s, double timeInterval);
 void  IntegrateUntilTime(void* s, double time);

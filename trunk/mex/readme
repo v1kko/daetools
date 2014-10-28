@@ -2,11 +2,11 @@ MEX function
 ------------
 GNU Octave compile:
   cd mex
-  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader daetools_mex.cpp 
+  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader daetools_mex.c
 
 Matlab compile:
   cd mex
-  mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_mex.cpp 
+  mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_mex.c
 
 Scilab compile:
   cd mex
@@ -14,16 +14,27 @@ Scilab compile:
   exec('builder.sce')
   exec('loader.sce')  
   
-Run daetools simulation:
-daetools_mex('daetools/examples/tutorial6.py', 'simTutorial', {0}, {1})
-
+Running daetools_mex simulation:
+  res = daetools_mex('daetools/examples/tutorial20.py', 'simTutorial', {}, {})
+  Arguments are:
+    1. Path to the python file
+    2. Simulation class name
+    3. Unused
+    4. Unused
 
 Simulink S-function
 -------------------
 Matlab compile:
   cd mex
   mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_s.c 
-  
-Open S-function block, set the first parameter to the path to python file and the second to the simulation class name
+
+Running S-function:
+  Open the Simulink file with the test function: test_s_function.mdl.
+  Set the parameters:
+    1. Path to the python file
+    2. Simulation class name
+    3. Number of input ports
+    4. Number of Output ports
+    5. Unused
 
 
