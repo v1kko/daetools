@@ -1,80 +1,5 @@
 #include "mex.h"
-#include "math.h"
-#include "simulation_loader_c.h"
-
-#define IS_PARAM_DOUBLE(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && mxIsDouble(pVal))
-
-#define IS_PARAM_UINT(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal))
-
-#define IS_PARAM_STRING(pVal) (mxIsChar(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
-
-#define IS_PARAM_CELL(pVal) (mxIsCell(pVal) && !mxIsEmpty(pVal))
-
-static double getItem(mxArray* mat, int i, int j) 
-{
-    mwSize mrows = mxGetM(mat);
-    double* data = mxGetPr(mat);
-    return data[i + j*mrows];
-}
-
-static void setItem(mxArray* mat, int i, int j, double value) 
-{
-    mwSize mrows = mxGetM(mat);
-    double* data = mxGetPr(mat);
-    data[i + j*mrows] = value;
-}
-
-static reportData(void* simulation, mxArray* results, double currentTime, int step)
-{
-    int i, j;
-    unsigned int noPoints;
-    char name[512];
-    mxArray *itemCell, *outMatrix;
-
-    int nOutletPorts = GetNumberOfOutputs(simulation);
-
-    /* Set the outputs' values */
-    for(i = 0; i < nOutletPorts; i++)
-    {
-        /* Get the result from daetools. */
-        GetOutputInfo(simulation, i, name, &noPoints);
-        double* data = (double*)malloc(noPoints*sizeof(double));
-        GetOutputValue(simulation, i, data, noPoints);
-
-        /* Get the i-th output matrix */
-        itemCell  = mxGetCell(results, i);
-        outMatrix = mxGetCell(itemCell, 1);
-        for(j = 0; j < noPoints; j++)
-            setItem(outMatrix, step, j, data[j]);
-
-        free(data);
-    }
-    /* Set time */
-    itemCell  = mxGetCell(results, nOutletPorts);
-    outMatrix = mxGetCell(itemCell, 1);
-    setItem(outMatrix, step, 0, currentTime);
-}
-
-static setSimulationInputs(void* simulation, const mxArray* inputs)
-{
-}
-
-static initializeSimulation(void* simulation, const mxArray* pOptions)
-{
-    /* Default settings. */
-    char DAESolver[64]          = "IDAS";
-    char LASolver[64]           = "";
-    char DataReporter[64]       = "TCPIPDataReporter";
-    char ConnectionString[64]   = "";
-    char Log[64]                = "StdOutLog";
-    bool ShowSimulationExplorer = false;
-    
-    /* Initialize the simulation. */
-    Initialize(simulation, DAESolver, LASolver, DataReporter, ConnectionString, Log, ShowSimulationExplorer);
-}
+#include "daetools_matlab_common.h"
 
 char usage[] = "daetools_mex function usage:\n"
                "Arguments:\n"
@@ -125,17 +50,20 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     {
         mexErrMsgTxt("First argument must be a string (full path to the python file)");
         return;
-    } 
+    }
+    
     if(!IS_PARAM_STRING(pSimulationClass)) 
     {
         mexErrMsgTxt("Second argument must be a string (simulation class name)");
         return;
-    } 
+    }
+    
     if(!IS_PARAM_DOUBLE(pTimeHorizon))
     {
         mexErrMsgTxt("Third argument must be float value (time horizon)");
         return;
     }
+    
     if(!IS_PARAM_DOUBLE(pReportingInterval))
     {
         mexErrMsgTxt("Fourth argument must be float value (reporting interval)");
@@ -147,6 +75,7 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
         mexErrMsgTxt("Fifth argument must be a cell (simulation inputs)");
         return;
     }
+    
     if(!IS_PARAM_CELL(pOptions))
     {
         mexErrMsgTxt("Sixth argument must be a cell (simulation options)");
@@ -172,7 +101,7 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     SetReportingInterval(simulation, reportingInterval);
     SetTimeHorizon(simulation,       timeHorizon);
 
-    /* Set the simulation parameters/DOFs/InitialConditions. */
+    /* Set the simulation parameters, DOFs, initial conditions, active states, .... */
     setSimulationInputs(simulation, pInputs);
 
     /* Allocate mx arrays to hold the output data. */
@@ -215,7 +144,7 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     /* Solve the system with the specified initial conditions and report data. */
     SolveInitial(simulation);
     ReportData(simulation);
-    reportData(simulation, results, currentTime, step);
+    reportDataToMatrix(simulation, results, currentTime, step);
     step += 1;
     
     /* Run. */
@@ -230,7 +159,7 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
 
         IntegrateUntilTime(simulation, targetTime);
         ReportData(simulation);
-        reportData(simulation, results, targetTime, step);
+        reportDataToMatrix(simulation, results, targetTime, step);
         
         currentTime = targetTime;
         step += 1;

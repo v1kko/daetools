@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.47"
+    ComputedModelVersion    "1.49"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -27,9 +27,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "ciroki"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Mon Oct 27 18:10:04 2014"
-  RTWModifiedTimeStamp	  336334058
-  ModelVersionFormat	  "1.%<AutoIncrement:47>"
+  LastModifiedDate	  "Thu Oct 30 17:17:20 2014"
+  RTWModifiedTimeStamp	  336590127
+  ModelVersionFormat	  "1.%<AutoIncrement:49>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -67,6 +67,7 @@ Model {
     $ObjectID		    1
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
     model_		    "test_s_function"
+    signals_		    []
     overrideMode_	    [0.0]
     Array {
       Type		      "Cell"
@@ -766,7 +767,7 @@ Model {
   }
   System {
     Name		    "test_s_function"
-    Location		    [571, 377, 1020, 619]
+    Location		    [571, 405, 1020, 647]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -798,7 +799,7 @@ Model {
       Position		      [360, 64, 390, 96]
       ZOrder		      -3
       Floating		      off
-      Location		      [884, 110, 1208, 349]
+      Location		      [874, 100, 1198, 339]
       Open		      on
       NumInputPorts	      "1"
       List {
@@ -830,7 +831,7 @@ Model {
       Position		      [360, 134, 390, 166]
       ZOrder		      -3
       Floating		      off
-      Location		      [940, 362, 1264, 601]
+      Location		      [919, 341, 1244, 581]
       Open		      on
       NumInputPorts	      "1"
       List {
@@ -848,6 +849,8 @@ Model {
 	MarkerStyles		"none|none|none|none|none|none"
       }
       ShowLegends	      off
+      YMin		      "0"
+      YMax		      "300"
       SaveToWorkspace	      on
       SaveName		      "ScopeData2"
       DataFormat	      "StructureWithTime"
@@ -917,7 +920,7 @@ Model {
 	  ZOrder		  -5
 	  FunctionName		  "daetools_s"
 	  Parameters		  "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial20.py', 'simTutorial', 2, 2,"
-	  " ' '"
+	  " {0}, {0}"
 	  EnableBusSupport	  off
 	}
 	Block {

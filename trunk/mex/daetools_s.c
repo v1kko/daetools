@@ -1,23 +1,8 @@
 #define S_FUNCTION_LEVEL 2
 #define S_FUNCTION_NAME  daetools_s
 
-/* S-function header. */
 #include "simstruc.h"
-/* daetools simulation loader header. */
-#include "simulation_loader_c.h"
-
-#define IS_PARAM_DOUBLE(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && mxIsDouble(pVal))
-
-#define IS_PARAM_UINT(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal))
-
-#define IS_PARAM_STRING(pVal) (mxIsChar(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
-
-/* A buffer for error/warning messages. */
-char msg[1024];
-bool debugMode = false;
+#include "daetools_matlab_common.h"
 
 #define MDL_CHECK_PARAMETERS
 #if defined(MDL_CHECK_PARAMETERS)  && defined(MATLAB_MEX_FILE)
@@ -27,37 +12,45 @@ static void mdlCheckParameters(SimStruct *S)
     const mxArray *pSimulationClass     = ssGetSFcnParam(S,1);
     const mxArray *pNumberOfInletPorts  = ssGetSFcnParam(S,2);
     const mxArray *pNumberOfOutletPorts = ssGetSFcnParam(S,3);
-    const mxArray *pParametersStruct    = ssGetSFcnParam(S,4);
+    const mxArray *pInputs              = ssGetSFcnParam(S,4);
+    const mxArray *pOptions             = ssGetSFcnParam(S,5);
 
     if(!IS_PARAM_STRING(pPythonPath)) 
     {
-        ssSetErrorStatus(S, "First parameter to daetools_s S-function must be a string (full path to the python file)");
+        ssSetErrorStatus(S, "First parameter must be a string (full path to the python file)");
         return;
-    } 
+    }
     
     if(!IS_PARAM_STRING(pSimulationClass)) 
     {
-        ssSetErrorStatus(S, "Second parameter to daetools_s S-function must be a string (simulation class name)");
+        ssSetErrorStatus(S, "Second parameter must be a string (simulation class name)");
         return;
-    } 
+    }
     
     if(!IS_PARAM_UINT(pNumberOfInletPorts)) 
     {
-        ssSetErrorStatus(S, "Third parameter to daetools_s S-function must be an unsigned integer (number of inlet ports)");
+        ssSetErrorStatus(S, "Third parameter must be an unsigned integer (number of inlet ports)");
         return;
-    } 
+    }
     
     if(!IS_PARAM_UINT(pNumberOfOutletPorts)) 
     {
-        ssSetErrorStatus(S, "Fourth parameter to daetools_s S-function must be an unsigned integer (number of outlet ports)");
+        ssSetErrorStatus(S, "Fourth parameter must be an unsigned integer (number of outlet ports)");
         return;
-    } 
-    
-    if(!IS_PARAM_STRING(pParametersStruct)) 
+    }
+    /*
+    if(!IS_PARAM_CELL(pInputs)) 
     {
-        ssSetErrorStatus(S, "Fifth parameter to daetools_s S-function must be a string (domains/parameters/DOFs/initial_conditions/active_states in json format)");
+        ssSetErrorStatus(S, "Fifth parameter must be a cell (simulation inputs: parameters, DOFs, initial_conditions, active_states, ...)");
         return;
-    } 
+    }
+    
+    if(!IS_PARAM_CELL(pOptions)) 
+    {
+        ssSetErrorStatus(S, "Sixth parameter must be a cell (simulation options: DAE solver, LA solver, dataeporter, log, ...)");
+        return;
+    }
+    */
 }
 #endif
 
@@ -65,7 +58,7 @@ static void mdlCheckParameters(SimStruct *S)
 static void mdlInitializeSizes(SimStruct *S)
 {
     int i;
-    ssSetNumSFcnParams(S, 5);
+    ssSetNumSFcnParams(S, 6);
     
 #if defined(MATLAB_MEX_FILE)
     if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S)) 
@@ -84,7 +77,8 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetSFcnParamTunable(S, 1, false);
     ssSetSFcnParamTunable(S, 2, false);
     ssSetSFcnParamTunable(S, 3, false);
-    ssSetSFcnParamTunable(S, 4, false);
+    ssSetSFcnParamTunable(S, 4, true);
+    ssSetSFcnParamTunable(S, 5, false);
 
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);
@@ -138,8 +132,10 @@ static void mdlStart(SimStruct *S)
     if(debugMode)
         ssPrintf("Loading the simulation...\n");
 
-    char* path         = mxArrayToString(ssGetSFcnParam(S, 0));
-    char* simClassName = mxArrayToString(ssGetSFcnParam(S, 1));
+    char* path              = mxArrayToString(ssGetSFcnParam(S, 0));
+    char* simClassName      = mxArrayToString(ssGetSFcnParam(S, 1));
+    const mxArray* pInputs  = ssGetSFcnParam(S, 4);
+    const mxArray* pOptions = ssGetSFcnParam(S, 5);
     
     if(debugMode)
     {
@@ -162,7 +158,9 @@ static void mdlStart(SimStruct *S)
     /* Initialize the simulation with the default settings */
     if(debugMode)
         ssPrintf("Initializing simulation...\n");
-    Initialize(simulation, "daeIDAS", "", "TCPIPDataReporter", "", "daeStdOutLog", false);
+    
+    /* Initialize the simulation with the given settings. */
+    initializeSimulation(simulation, pOptions);
 
     /* Get the number of parameters, inlet and outlet ports and check their number */
     int i;
@@ -190,6 +188,13 @@ static void mdlStart(SimStruct *S)
         ssSetErrorStatus(S, msg);
         return;
     }
+ 
+    /* Set a dummy time horizon and reporting interval. */
+    SetReportingInterval(simulation, 1.0);
+    SetTimeHorizon(simulation,       10.0);
+
+    /* Set the simulation parameters, DOFs, initial conditions, active states, .... */
+    setSimulationInputs(simulation, pInputs);
 }
 
 static void mdlOutputs(SimStruct *S, int_T tid)
