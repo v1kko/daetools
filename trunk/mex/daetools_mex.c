@@ -11,6 +11,8 @@
 #define IS_PARAM_STRING(pVal) (mxIsChar(pVal) && !mxIsLogical(pVal) &&\
 !mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
 
+#define IS_PARAM_CELL(pVal) (mxIsCell(pVal) && !mxIsEmpty(pVal))
+
 static double getItem(mxArray* mat, int i, int j) 
 {
     mwSize mrows = mxGetM(mat);
@@ -56,15 +58,43 @@ static reportData(void* simulation, mxArray* results, double currentTime, int st
     setItem(outMatrix, step, 0, currentTime);
 }
 
-char usage[] = "\n"
-               "daetools mex function usage:\n"
+static setSimulationInputs(void* simulation, const mxArray* inputs)
+{
+}
+
+static initializeSimulation(void* simulation, const mxArray* pOptions)
+{
+    /* Default settings. */
+    char DAESolver[64]          = "IDAS";
+    char LASolver[64]           = "";
+    char DataReporter[64]       = "TCPIPDataReporter";
+    char ConnectionString[64]   = "";
+    char Log[64]                = "StdOutLog";
+    bool ShowSimulationExplorer = false;
+    
+    /* Initialize the simulation. */
+    Initialize(simulation, DAESolver, LASolver, DataReporter, ConnectionString, Log, ShowSimulationExplorer);
+}
+
+char usage[] = "daetools_mex function usage:\n"
                "Arguments:\n"
-               "  [0] - Path to python file (char array)\n"
-               "  [1] - Simulation class name (char array)\n"
-               "  [2] - Inputs (cell array)\n"
-               "  [3] - Simulation options (cell array)\n"
+               "  [1] - Path to python file (char array)\n"
+               "  [2] - Simulation class name (char array)\n"
+               "  [3] - TimeHorizon (double scalar),\n"
+               "  [4] - ReportingInterval (double scalar),\n"
+               "  [5] - Simulation inputs: parameters/DOFs/ICs (cell array) - UNUSED AT THE MOMENT:\n"
+               "        format: {'canonical_name', double_array}\n"
+               "  [6] - Simulation options (cell array) - UNUSED AT THE MOMENT:\n"
+               "        {'DAESolver',    char array: 'IDAS'},\n"
+               "        {'LASolver',     char array: one of 'SuperLU'|'SuperLU_MT'|'Pardiso'|'IntelPardiso'|...},\n"
+               "        {'DataReporter', char array: one of 'TCPIPDataReporter'|...,\n"
+               "                         char array: 'connection string'},\n"
+               "        {'Log',          char array: one of 'StdOutLog'|'PythonStdOutLog'|...}\n"
                " Outputs:\n"
-               "  [0] - Cell array\n";
+               "  [1] - Cell array (pairs: {'variable_name', double_matrix})\n"
+               "\n"
+               "Example:\n"
+               "  res = daetools_mex('.../tutorial20.py', 'simTutorial', 100.0, 5.0, {}, {})";
 
 void mexFunction (int n_outputs,         mxArray* outputs[],
                   int n_arguments, const mxArray* arguments[])
@@ -72,38 +102,57 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     int i, j;
     unsigned int noPoints;
     char name[512];
-    bool debugMode = true;
+    bool debugMode = false;
     
     /* Check the number of arguments. */
-    if(n_arguments != 4)
+    if(n_arguments != 6)
         mexErrMsgTxt(usage);
 
     /* Check the number of outputs. */
     if(n_outputs != 1)
         mexErrMsgTxt(usage);
     
-    const mxArray *pPythonPath      = arguments[0];
-    const mxArray *pSimulationClass = arguments[1];
-    const mxArray *pParameters      = arguments[2];
-    const mxArray *pOptions         = arguments[3];
+    const mxArray *pPythonPath        = arguments[0];
+    const mxArray *pSimulationClass   = arguments[1];
+    const mxArray *pTimeHorizon       = arguments[2];
+    const mxArray *pReportingInterval = arguments[3];
+    const mxArray *pInputs            = arguments[4];
+    const mxArray *pOptions           = arguments[5];
 
     /* Validate arguments */    
     /* First two arguments must be strings. */
     if(!IS_PARAM_STRING(pPythonPath)) 
     {
-        mexErrMsgTxt("First parameter to daetools_mex function must be a string (full path to the python file)");
+        mexErrMsgTxt("First argument must be a string (full path to the python file)");
         return;
     } 
-    
     if(!IS_PARAM_STRING(pSimulationClass)) 
     {
-        mexErrMsgTxt("Second parameter to daetools_mex function must be a string (simulation class name)");
+        mexErrMsgTxt("Second argument must be a string (simulation class name)");
         return;
     } 
-
-    /*if(mxIsCell(arguments[2]) != 1 || mxIsCell(arguments[3]) != 1)
-        mexErrMsgTxt("Third and fourth argument must be cells"); */
-    
+    if(!IS_PARAM_DOUBLE(pTimeHorizon))
+    {
+        mexErrMsgTxt("Third argument must be float value (time horizon)");
+        return;
+    }
+    if(!IS_PARAM_DOUBLE(pReportingInterval))
+    {
+        mexErrMsgTxt("Fourth argument must be float value (reporting interval)");
+        return;
+    }
+    /*
+    if(!IS_PARAM_CELL(pInputs))
+    {
+        mexErrMsgTxt("Fifth argument must be a cell (simulation inputs)");
+        return;
+    }
+    if(!IS_PARAM_CELL(pOptions))
+    {
+        mexErrMsgTxt("Sixth argument must be a cell (simulation options)");
+        return;
+    }
+    */
     /* Get the length of the input string. */
     char* path      = mxArrayToString(pPythonPath);
     char* className = mxArrayToString(pSimulationClass);
@@ -114,23 +163,21 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     if(!simulation)
         mexErrMsgTxt("Cannot load DAETools simulation");
 
-    /* Initialize the simulation with the default settings */
-    Initialize(simulation, "daeIDAS", "", "TCPIPDataReporter", "", "daeStdOutLog", false);
+    /* Initialize the simulation with the given settings. */
+    initializeSimulation(simulation, pOptions);
 
-    /* Set the time horizon (see if it can be done before the simulation start). */
-    double timeHorizon       = 100;
-    double reportingInterval = 5;
-    if(timeHorizon <= reportingInterval)
-        mexErrMsgTxt("Time horizon must be greater than the reporting interval");
- 
+    /* Set the time horizon and reporting interval. */
+    double timeHorizon       = (mxGetPr(pTimeHorizon))[0];
+    double reportingInterval = (mxGetPr(pReportingInterval))[0];
     SetReportingInterval(simulation, reportingInterval);
     SetTimeHorizon(simulation,       timeHorizon);
+
+    /* Set the simulation parameters/DOFs/InitialConditions. */
+    setSimulationInputs(simulation, pInputs);
 
     /* Allocate mx arrays to hold the output data. */
     int numberOfSteps = (int)(timeHorizon / reportingInterval) + 1 + 
                         (fmod(timeHorizon, reportingInterval) == 0 ? 0 : 1);
-    if(debugMode)
-        mexPrintf("Number of time steps = %d\n", numberOfSteps);
     
     int nOutletPorts = GetNumberOfOutputs(simulation);
     mwSize ndim = 1;

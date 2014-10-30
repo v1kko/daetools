@@ -1221,7 +1221,7 @@ void daeSimulationLoaderData::SetupDataReporter(const std::string& strDataReport
        // pData->m_pDataReporter = daeCreateTCPIPDataReporter();
 
         m_pDataReporter = NULL;
-        boost::python::exec("__data_reporter__ = daetools.pyDAE.daeTCPIPDataReporter()", main_namespace);
+        boost::python::exec("__data_reporter__ = daetools.pyDAE.daeBlackHoleDataReporter()", main_namespace);
         m_pDataReporter = boost::python::extract<daeDataReporter_t*>(main_namespace["__data_reporter__"]);
         std::string strProcessName = m_pSimulation->GetModel()->GetName() + "-" + boost::posix_time::to_iso_string(boost::posix_time::second_clock::local_time());
         m_pDataReporter->Connect(strConnectionString, strProcessName);
@@ -1245,7 +1245,7 @@ void daeSimulationLoaderData::SetupLog(const std::string& strLog)
         //pData->m_pLog = daeCreateStdOutLog();
 
         m_pLog = NULL;
-        boost::python::exec("__log__ = daetools.pyDAE.daeStdOutLog()", main_namespace);
+        boost::python::exec("__log__ = daetools.pyDAE.daeBaseLog()", main_namespace);
         m_pLog = boost::python::extract<daeLog_t*>(main_namespace["__log__"]);
 //    }
 //    catch(boost::python::error_already_set const &)
