@@ -15,15 +15,16 @@ Scilab compile:
   exec('loader.sce')  
   
 Running daetools_mex simulation:
-  res = daetools_mex('.../daetools/examples/tutorial20.py', 'simTutorial', 100.0, 5.0, {...}, {...})
-Arguments:
-  1. Path to python file (char array)
+  res = daetools_mex('.../daetools/examples/tutorial20.py', 'simTutorial', 100.0, 5.0, {}, {})
+  
+MEX-function arguments:
+  1. Path to the python file with daetools simulation (char array)
   2. Simulation class name (char array)
   3. TimeHorizon (double scalar),
   4. ReportingInterval (double scalar),
   5. Simulation inputs: parameters, DOFs, init.conditions, active states (cell array):
      Achtung, Achtung!! UNUSED AT THE MOMENT
-       format: {'canonical_name', double_array}
+       format: {'canonical_name', double array}
   6. Simulation options (cell array):
      Achtung, Achtung!! UNUSED AT THE MOMENT
        {'DAESolver',    char array: 'IDAS'},
@@ -32,7 +33,7 @@ Arguments:
                         char array: 'connection string'},
        {'Log',          char array: one of 'StdOutLog'|'PythonStdOutLog'|...}
 Outputs:
-  1. Cell array (pairs: {'variable_name', double_matrix})
+  1. Cell array (pairs: {'variable_name', double matrix})
   Variables are put into the caller's workspace as well.
 
 Simulink S-function
@@ -42,15 +43,25 @@ Matlab compile:
   mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_s.c 
 
 Running S-function:
-  Open the Simulink file with the test function: test_s_function.mdl.
-Arguments:
-  1. Path to python file (char array)
+  Add a new S-Function ('system') from the User-Defined Functions palette.
+  Set its dialog box parameters:
+    - S-Function name: daetools_s
+      (this is a compiled daetools_s.c file, resulting in, for instance, deatools.mexa64 binary)
+    - S-Function parameters: see the description below
+      example: '.../daetools/examples/tutorial20.py', 'simTutorial', 2, 2, {}, {}
+    - S-Function modules: leave blank
+  As a working example, the file 'test_s_function.mdl' in 'daetools/trunk/mex' directory can be used.
+
+S-function parameters:
+  1. Path to the python file with daetools simulation (char array)
   2. Simulation class name (char array)
-  3. Number of input ports (integer, must match the number of ports inthe simulation)
-  4. Number of output ports (integer, must match the number of ports inthe simulation)
+  3. Number of input ports (integer, must match the number of inlet ports in daetools simulation)
+  4. Number of output ports (integer, must match the number of outlet ports in daetools simulation)
   5. Simulation inputs (cell array)
      Achtung, Achtung!! UNUSED AT THE MOMENT
+     For more details see the description of the simulation inputs argument of the daetools_mex function.
   6. Simulation options (cell array)
      Achtung, Achtung!! UNUSED AT THE MOMENT
+     For more details see the description of the simulation options argument of the daetools_mex function.
 
 
