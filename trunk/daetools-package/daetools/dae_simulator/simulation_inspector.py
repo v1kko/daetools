@@ -27,7 +27,7 @@ def _collectParameters(nodeItem, model, dictParameters):
     """
     for obj in model.Parameters:
         name = obj.Name
-        if obj.NumberOfPoints == 1:
+        if obj.NumberOfPoints == 1 and len(obj.Domains) == 0:
             value = float(obj.GetValue())
         else:
             value = obj.npyValues.tolist()
@@ -197,7 +197,7 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
         if not cnDifferential in IDs[var.OverallIndex : var.OverallIndex + var.NumberOfPoints]:
             continue
         
-        if var.NumberOfPoints == 1:
+        if var.NumberOfPoints == 1 and len(var.Domains) == 0:
             value = var.GetValue()
         else:
             values = numpy.array(var.npyValues, dtype=object)
@@ -232,7 +232,7 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
         if not cnAssigned in IDs[var.OverallIndex : var.OverallIndex + var.NumberOfPoints]:
             continue
         
-        if var.NumberOfPoints == 1:
+        if var.NumberOfPoints == 1 and len(var.Domains) == 0:
             value = var.GetValue()
         else:
             values = numpy.array(var.npyValues, dtype=object)

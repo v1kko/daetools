@@ -887,7 +887,7 @@ void daeSTN::GetStates(vector<daeState_t*>& ptrarrStates)
 		ptrarrStates.push_back(m_ptrarrStates[i]);
 }
 
-void daeSTN::SetActiveState2(const string& strStateName)
+void daeSTN::SetActiveState(const string& strStateName)
 {
 	daeState* pState = FindState(strStateName);
 

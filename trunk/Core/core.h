@@ -756,6 +756,7 @@ class daeSTN_t : virtual public daeObject_t
 public:
     virtual void		GetStates(std::vector<daeState_t*>& ptrarrStates)	= 0;
     virtual daeState_t*	GetActiveState(void)								= 0;
+    virtual void		SetActiveState(const std::string& strStateName)     = 0;
     virtual void		CleanUpSetupData()									= 0;
     virtual void        UpdateEquations(void) = 0;
 };

@@ -2,27 +2,36 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
-//#include <boost/python.hpp>
+#include <boost/python.hpp>
 
 int main(int argc, char *argv[])
 {
     try
     {
         daeSimulationLoader loader;
-        loader.LoadSimulation("../daetools-package/daetools/examples/tutorial6.py", "simTutorial");
+        loader.LoadSimulation("../daetools-package/daetools/examples/tutorial20.py", "simTutorial");
 
-        //loader.Initialize("IDAS", "Sundials LU", "TCPIPDataReporter", "", "StdOutLog", false, "");
+        if(true)
+        {
+            loader.Initialize("Sundials IDAS", "", "TCPIPDataReporter", "", "StdOutLog", false, "");
+        }
+        else
+        {
+            std::ifstream jsonFile("../daetools-package/daetools/examples/tutorial20.json");
+            std::string jsonSettings((std::istreambuf_iterator<char>(jsonFile)), std::istreambuf_iterator<char>());
+            loader.Initialize(jsonSettings);
+        }
 
-        std::ifstream jsonFile("../daetools-package/daetools/examples/tutorial6.json");
-        std::string jsonSettings((std::istreambuf_iterator<char>(jsonFile)), std::istreambuf_iterator<char>());
-        loader.Initialize(jsonSettings);
+        // Has to go after the call to Initialize() for it sets a default time horizon and reporting interval
+        loader.SetReportingInterval(5);
+        loader.SetTimeHorizon(100);
 
         std::cout << std::endl << "NumberOfParameters = " << loader.GetNumberOfParameters() << std::endl;
         for(size_t i = 0; i < loader.GetNumberOfParameters(); i++)
         {
             std::string strName;
             unsigned int numberOfPoints;
-            loader.GetParameterInfo(i, strName, numberOfPoints);
+            loader.GetParameterInfo(i, strName, &numberOfPoints);
             std::cout << "  parameter [" << i <<  "]: " << strName << " with " << numberOfPoints << " points" << std::endl;
         }
 
@@ -31,7 +40,7 @@ int main(int argc, char *argv[])
         {
             std::string strName;
             unsigned int numberOfPoints;
-            loader.GetInputInfo(i, strName, numberOfPoints);
+            loader.GetInputInfo(i, strName, &numberOfPoints);
             std::cout << "  input [" << i <<  "]: " << strName << " with " << numberOfPoints << " points" << std::endl;
         }
 
@@ -40,7 +49,7 @@ int main(int argc, char *argv[])
         {
             std::string strName;
             unsigned int numberOfPoints;
-            loader.GetOutputInfo(i, strName, numberOfPoints);
+            loader.GetOutputInfo(i, strName, &numberOfPoints);
             std::cout << "  output [" << i <<  "]: " << strName << " with " << numberOfPoints << " points" << std::endl;
         }
 
@@ -49,10 +58,10 @@ int main(int argc, char *argv[])
         loader.Run();
         loader.Finalize();
     }
-    //catch(boost::python::error_already_set const &)
-    //{
-    //    PyErr_Print();
-    //}
+    catch(boost::python::error_already_set const &)
+    {
+        PyErr_Print();
+    }
     catch(std::exception& e)
     {
         std::cout << e.what() << std::endl;

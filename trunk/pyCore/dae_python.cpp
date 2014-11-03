@@ -1669,10 +1669,11 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daeSTN, bases<daeObject>, boost::noncopyable>("daeSTN", DOCSTR_daeSTN, no_init)
-        .add_property("ActiveState", &daeSTN::GetActiveState2, &daeSTN::SetActiveState2, DOCSTR_daeSTN_ActiveState)
-        .add_property("States",      &daepython::daeSTN_States,                          DOCSTR_daeSTN_States)
-        .add_property("dictStates",  &daepython::daeSTN_dictStates,                      DOCSTR_daeSTN_States)
-        .add_property("Type",	     &daeSTN::GetType, &daeSTN::SetType,                 DOCSTR_daeSTN_Type)
+        .add_property("ActiveState", &daepython::daeSTN_GetActiveState,
+                                     &daepython::daeSTN_SetActiveState,     DOCSTR_daeSTN_ActiveState)
+        .add_property("States",      &daepython::daeSTN_States,             DOCSTR_daeSTN_States)
+        .add_property("dictStates",  &daepython::daeSTN_dictStates,         DOCSTR_daeSTN_States)
+        .add_property("Type",	     &daeSTN::GetType, &daeSTN::SetType,    DOCSTR_daeSTN_Type)
 
         .def("__str__",				&daepython::daeSTN__str__)
         .def("__repr__",			&daepython::daeSTN__repr__)

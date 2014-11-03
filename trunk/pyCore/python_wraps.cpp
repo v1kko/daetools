@@ -4185,6 +4185,16 @@ boost::python::list daePortConnection_GetEquations(daePortConnection& self)
 /*******************************************************
     daeSTN
 *******************************************************/
+std::string daeSTN_GetActiveState(daeSTN& self)
+{
+    return self.GetActiveState2();
+}
+
+void daeSTN_SetActiveState(daeSTN& self, const std::string& strActiveState)
+{
+    self.SetActiveState(strActiveState);
+}
+
 boost::python::list daeSTN_States(daeSTN& self)
 {
     return getListFromVector(self.States());

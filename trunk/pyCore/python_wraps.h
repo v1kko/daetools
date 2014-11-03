@@ -1147,6 +1147,8 @@ boost::python::list daePortConnection_GetEquations(daePortConnection& self);
 *******************************************************/
 boost::python::list daeSTN_States(daeSTN& self);
 boost::python::dict daeSTN_dictStates(daeSTN& self);
+std::string daeSTN_GetActiveState(daeSTN& self);
+void daeSTN_SetActiveState(daeSTN& self, const std::string& strActiveState);
 
 /*******************************************************
 	daeOnEventActions

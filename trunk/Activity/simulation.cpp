@@ -1683,7 +1683,7 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
         string strActiveState = v_stn.second.get<string>("ActiveState");
 
         // Set the active state
-        pSTN->SetActiveState2(strActiveState);
+        pSTN->SetActiveState(strActiveState);
 
         if(bPrintInfo)
             std::cout << "          ActiveState = " << strActiveState << std::endl;

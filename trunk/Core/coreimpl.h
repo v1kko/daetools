@@ -3108,6 +3108,7 @@ public:
 	virtual string      GetCanonicalName(void) const;
 	virtual void		GetStates(std::vector<daeState_t*>& ptrarrStates);
 	virtual daeState_t*	GetActiveState(void);
+    virtual void		SetActiveState(const std::string& strStateName);
 
 public:	
 	void Open(io::xmlTag_t* pTag);
@@ -3131,7 +3132,6 @@ public:
 
 	size_t			GetNumberOfStates(void) const;
 	string			GetActiveState2(void) const;
-	void			SetActiveState2(const string& strStateName);
 	void			SetActiveState(daeState* pState);
 	void			CalcNonZeroElements(int& NNZ);
 	void			FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix);

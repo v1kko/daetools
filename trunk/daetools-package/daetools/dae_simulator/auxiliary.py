@@ -383,34 +383,104 @@ def createLogByName(name):
             return createLog(obj[1])
     return None
 
-def InitializeSimulation(simulation, jsonSettings):
+def InitializeSimulation(simulation, strDAESolver,
+                                     strLASolver,
+                                     strDataReporter,
+                                     strDataReporterConnectionString,
+                                     strLog,
+                                     bCalculateSensitivities):
+    """
+    This function initializes a simulation using the strings supplied:
+    DAE solver, LA solver, DataReporter, Log etc.
+    """
+    if not simulation:
+        raise RuntimeError('Invalid simulation object')
+    if not isinstance(strDAESolver, str):
+        raise RuntimeError('DAE solver argument must be a string')
+    if not isinstance(strLASolver, str):
+        raise RuntimeError('LA solver argument must be a string')
+    if not isinstance(strDataReporter, str):
+        raise RuntimeError('Data reporter argument must be a string')
+    if not isinstance(strDataReporterConnectionString, str):
+        raise RuntimeError('Data reporter connection string argument must be a string')
+    if not isinstance(strLog, str):
+        raise RuntimeError('Log argument must be a string')
+    
+    log = createLogByName(strLog)
+    if not log:
+        raise RuntimeError('Cannot create log: %s' % strLog)
+
+    daesolver = createDAESolverByName(strDAESolver)
+    if not daesolver:
+        raise RuntimeError('Cannot create DAE solver: %s' % strDAESolver)
+
+    lasolver  = None
+    if strLASolver:
+        lasolver = createLASolverByName(strLASolver)
+        if not lasolver:
+            raise RuntimeError('Cannot create LA solver: %s' % strLASolver)
+        daesolver.SetLASolver(lasolver)
+
+    datareporter = createDataReporterByName(strDataReporter)
+    if not datareporter:
+        raise RuntimeError('Cannot create datareporter: %s' % strDataReporter)
+
+    process_name = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if not datareporter.Connect(strDataReporterConnectionString, process_name):
+        raise RuntimeError("Cannot connect data reporter")
+
+    simulation.Initialize(daesolver, datareporter, log, bCalculateSensitivities)
+    
+    # Save objects somewhere so they don't get destroyed after leaving the scope
+    simulation.__rt_objects__ = [daesolver, lasolver, datareporter, log]
+
+    return daesolver, lasolver, datareporter, log
+
+def InitializeSimulationJSON(simulation, jsonSettings):
     """
     This function reads all information needed to initialize a simulation
     from the jsonSettings argument, including DAE solver, LA solver, DataReporter, Log etc.
     """
+    if not simulation:
+        raise RuntimeError('Invalid simulation object')
     if not isinstance(jsonSettings, str):
         raise RuntimeError('jsonSettings argument must be a string')
-    
+
     settings = json.loads(jsonSettings)
+
+    daesolver_name    = settings['DAESolver']['Name']
+    la_solver_name    = settings['LASolver']['Name']
+    datareporter_name = settings['DataReporter']['Name']
+    log_name          = settings['Log']['Name']
     
-    log          = createLogByName(settings['Log']['Name'])
-    daesolver    = createDAESolverByName(settings['DAESolver']['Name'])
-    datareporter = createDataReporterByName(settings['DataReporter']['Name'])
-    lasolver     = None
-    la_solver_name = settings['LASolver']['Name']
+    log = createLogByName(log_name)
+    if not log:
+        raise RuntimeError('Cannot create log: %s' % log_name)
+
+    daesolver = createDAESolverByName(daesolver_name)
+    if not daesolver:
+        raise RuntimeError('Cannot create DAE solver: %s' % daesolver_name)
+    lasolver = None
     if la_solver_name:
         lasolver = createLASolverByName(la_solver_name)
+        if not lasolver:
+            raise RuntimeError('Cannot create LA solver: %s' % la_solver_name)
         daesolver.SetLASolver(lasolver)
 
-    connect_string  = settings['DataReporter']['ConnectString'].encode('ascii','ignore')
-    #process_name   = settings['DataReporter']['ProcessName']
-    process_name    = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    datareporter = createDataReporterByName(datareporter_name)
+    if not datareporter:
+        raise RuntimeError('Cannot create datareporter: %s' % datareporter_name)
+    
+    connect_string = settings['DataReporter']['ConnectString'].encode('ascii','ignore')
+    process_name   = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if not datareporter.Connect(connect_string, process_name):
         raise RuntimeError("Cannot connect datareporter")
 
     calculateSensitivities = settings['CalculateSensitivities']
 
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities, jsonSettings)
-    
+
     # Save objects somewhere so they don't get destroyed after leaving the scope
     simulation.__rt_objects__ = [daesolver, lasolver, datareporter, log]
+
+    return daesolver, lasolver, datareporter, log
