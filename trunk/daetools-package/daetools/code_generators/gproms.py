@@ -5,40 +5,56 @@ from .analyzer import daeCodeGeneratorAnalyzer
 from .code_generator import daeCodeGenerator
 
 modelTemplate = """\
-class %(model_name)s
-
-/* Description:
-%(doc_string)s
-
-daetools-Modelica code-generator warnings:
+{ daetools-gPROMS code-generator warnings:
 %(warnings)s
-*/
+}
 
-/* Import libs */
-  import Modelica.Math.*;
-  
+%(variable_types_defs)s
+
+MODEL %(model_name)s
+PARAMETER
+  %(domains_defs)s
   %(parameters_defs)s
-  
+
+VARIABLE
   %(variables_defs)s
 
-equation
+SELECTOR
+  %(stns_defs)s
+
+EQUATION
   %(equations_defs)s
+END
 
-  %(whens)s
+PROCESS %(model_name)s
+UNIT
+  %(instance_name)s as %(model_name)s
 
-initial equation
+SET
+  %(domains_inits)s
+  %(parameters_inits)s
+
+ASSIGN
+  %(assigned_inits)s
+
+%(stns_inits)s
+
+INITIAL
   %(initial_conditions)s
 
-  annotation(experiment(StartTime = %(start_time)s, StopTime = %(end_time)s, Tolerance = %(tolerance)s));
+SOLUTIONPARAMETERS
+  ReportingInterval := %(reporting_interval)f;
 
-end %(model_name)s;
+SCHEDULE
+  CONTINUE FOR %(time_horizon)f;
+END
 """
 
-class daeExpressionFormatter_Modelica(daeExpressionFormatter):
+class daeExpressionFormatter_gPROMS(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)
-
-        # Index base in arrays
+        
+        # Index base for arrays
         self.indexBase = 1
 
         self.useFlattenedNamesForAssignedVariables = False
@@ -49,16 +65,16 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         self.useRelativeNames   = True
         self.flattenIdentifiers = True
 
-        self.domain                   = '{domain}[{index}]'
+        self.domain                   = '{domain}({index})'
 
         self.parameter                = '{parameter}{indexes}'
-        self.parameterIndexStart      = '['
-        self.parameterIndexEnd        = ']'
+        self.parameterIndexStart      = '('
+        self.parameterIndexEnd        = ')'
         self.parameterIndexDelimiter  = ','
 
         self.variable                 = '{variable}{indexes}'
-        self.variableIndexStart       = '['
-        self.variableIndexEnd         = ']'
+        self.variableIndexStart       = '('
+        self.variableIndexEnd         = ')'
         self.variableIndexDelimiter   = ','
 
         self.assignedVariable         = '{variable}'
@@ -68,9 +84,9 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
 
         # String format for the time derivative, ie. der(variable[1,2]) in Modelica
         # daetools use: variable.dt(1,2), gPROMS $variable(1,2) ...
-        self.derivative               = 'der({variable}{indexes})'
-        self.derivativeIndexStart     = '['
-        self.derivativeIndexEnd       = ']'
+        self.derivative               = '${variable}{indexes}'
+        self.derivativeIndexStart     = '('
+        self.derivativeIndexEnd       = ')'
         self.derivativeIndexDelimiter = ','
 
         # Constants
@@ -86,7 +102,7 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         self.NOT   = 'not {value}'
 
         self.EQ    = '{leftValue} == {rightValue}'
-        self.NEQ   = '{leftValue} <> {rightValue}'
+        self.NEQ   = '{leftValue} != {rightValue}'
         self.LT    = '{leftValue} < {rightValue}'
         self.LTEQ  = '{leftValue} <= {rightValue}'
         self.GT    = '{leftValue} > {rightValue}'
@@ -102,71 +118,35 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         self.POWER  = '{leftValue} ^ {rightValue}'
 
         # Mathematical functions
-        self.SIN    = 'sin({value})'
-        self.COS    = 'cos({value})'
-        self.TAN    = 'tan({value})'
-        self.ASIN   = 'asin({value})'
-        self.ACOS   = 'acos({value})'
-        self.ATAN   = 'atan({value})'
-        self.EXP    = 'exp({value})'
-        self.SQRT   = 'sqrt({value})'
-        self.LOG    = 'log({value})'
-        self.LOG10  = 'log10({value})'
-        self.FLOOR  = 'floor({value})'
-        self.CEIL   = 'ceil({value})'
-        self.ABS    = 'abs({value})'
+        self.SIN    = 'SIN({value})'
+        self.COS    = 'COS({value})'
+        self.TAN    = 'TAN({value})'
+        self.ASIN   = 'ASIN({value})'
+        self.ACOS   = 'ACOS({value})'
+        self.ATAN   = 'ATAN({value})'
+        self.EXP    = 'EXP({value})'
+        self.SQRT   = 'SQRT({value})'
+        self.LOG    = 'LOG({value})'
+        self.LOG10  = 'LOG10({value})'
+        self.FLOOR  = 'FLOOR({value})'
+        self.CEIL   = 'CEIL({value})'
+        self.ABS    = 'ABS({value})'
 
-        self.MIN    = 'min({leftValue}, {rightValue})'
-        self.MAX    = 'max({leftValue}, {rightValue})'
+        self.MIN    = 'MIN({leftValue}, {rightValue})'
+        self.MAX    = 'MAX({leftValue}, {rightValue})'
 
         # Current time in simulation
-        self.TIME   = 'time'
+        self.TIME   = '__TIME__'
 
     def formatNumpyArray(self, arr):
         if isinstance(arr, (numpy.ndarray, list)):
-            return '{' + ', '.join([self.formatNumpyArray(val) for val in arr]) + '}'
+            return '[' + ', '.join([self.formatNumpyArray(val) for val in arr]) + ']'
         else:
             return str(arr)
-
-    def formatQuantity(self, quantity):
-        # Formats constants/quantities in equations that have a value and units
-        return str(quantity.value)
-
-    def formatUnits(self, units):
-        # Format: m.kg2/s-2 meaning m * kg**2 / s**2
-        positive = []
-        negative = []
-        for u, exp in list(units.toDict().items()):
-            if exp >= 0:
-                if exp == 1:
-                    positive.append('{0}'.format(u))
-                elif int(exp) == exp:
-                    positive.append('{0}{1}'.format(u, int(exp)))
-                else:
-                    positive.append('{0}{1}'.format(u, exp))
-
-        for u, exp in list(units.toDict().items()):
-            if exp < 0:
-                if exp == -1:
-                    negative.append('{0}'.format(u))
-                elif int(exp) == exp:
-                    negative.append('{0}{1}'.format(u, int(math.fabs(exp))))
-                else:
-                    negative.append('{0}{1}'.format(u, math.fabs(exp)))
-
-        sPositive = '.'.join(positive)
-        if len(negative) == 0:
-            sNegative = ''
-        elif len(negative) == 1:
-            sNegative = '/' + '.'.join(negative)
-        else:
-            sNegative = '/(' + '.'.join(negative) + ')'
-
-        return sPositive + sNegative
-
-class daeCodeGenerator_Modelica(daeCodeGenerator):
+     
+class daeCodeGenerator_gPROMS(daeCodeGenerator):
     def __init__(self):
-        self.exprFormatter = daeExpressionFormatter_Modelica()
+        self.exprFormatter = daeExpressionFormatter_gPROMS()
         self.analyzer      = daeCodeGeneratorAnalyzer()
 
         self._reset()
@@ -182,12 +162,13 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         self.domains        = []
         self.parameters     = []
         self.variables      = []
+        self.stns           = []
         self.equations      = []
-        self.whens          = []
 
         self.domains_inits      = []
         self.parameters_inits   = []
         self.assigned_inits     = []
+        self.stns_inits         = []
         self.initial_conditions = []
         
     def generateSimulation(self, simulation, directory):
@@ -211,7 +192,6 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
 
         model_name    = simulation.m.GetStrippedName()
         instance_name = simulation.m.GetStrippedName()
-        doc_string    = sys.modules[simulation.__module__].__doc__
 
         indent   = 1
         s_indent = indent * self.defaultIndent
@@ -226,48 +206,52 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         warnings  = '\n'.join(self.warnings)
 
         # Model
-        variable_types_defs = separator.join(self.variable_types)
+        variable_types_defs = '\n'.join(self.variable_types)
         domains_defs        = separator.join(self.domains)
         parameters_defs     = separator.join(self.parameters)
         variables_defs      = separator.join(self.variables)
+        stns_defs           = separator.join(self.stns)
         equations_defs      = separator.join(self.equations)
 
         # Simulation
         domains_inits      = separator.join(self.domains_inits)
         parameters_inits   = separator.join(self.parameters_inits)
         assigned_inits     = separator.join(self.assigned_inits)
-        whens              = separator.join(self.whens)
+        stns_inits         = ''
+        if self.stns_inits:
+            stns_inits = 'SELECTOR\n  '
+            stns_inits += separator.join(self.stns_inits)
         initial_conditions = separator.join(self.initial_conditions)
         reporting_interval = self.simulation.ReportingInterval
         time_horizon       = self.simulation.TimeHorizon
         relative_tolerance = self.simulation.DAESolver.RelativeTolerance
-
+            
         dictInfo = {
                      'instance_name' :      instance_name,
                      'model_name' :         model_name,
-                     'doc_string' :         doc_string,
                      
                      'variable_types_defs': variable_types_defs,
                      'domains_defs' :       domains_defs,
                      'parameters_defs' :    parameters_defs,
                      'variables_defs' :     variables_defs,
+                     'stns_defs' :          stns_defs,
                      'equations_defs' :     equations_defs,
                         
                      'domains_inits' :      domains_inits,
                      'parameters_inits' :   parameters_inits,
                      'assigned_inits' :     assigned_inits,
-                     'whens' :              whens,
+                     'stns_inits' :         stns_inits,
                      'initial_conditions' : initial_conditions,
-                     'start_time' :         0.0,
-                     'end_time' :           time_horizon,
-                     'tolerance' :          relative_tolerance,
-
+                     'reporting_interval' : reporting_interval,
+                     'time_horizon' :       time_horizon,
+                     'relative_tolerance' : relative_tolerance,
+                     
                      'warnings' :           warnings
                    }
 
         model_contents = modelTemplate % dictInfo;
 
-        f = open(os.path.join(directory, '%s.mo' % model_name), "w")
+        f = open(os.path.join(directory, '%s.gPROMS' % model_name), "w")
         f.write(model_contents)
         f.close()
 
@@ -282,7 +266,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         for equation in Equations:
             description = equation['Description']
             if description:
-                self.equations.append(s_indent + '/* {0}: */'.format(description))
+                self.equations.append(s_indent + '# {0}:'.format(description))
             
             for eeinfo in equation['EquationExecutionInfos']:
                 res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
@@ -313,7 +297,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                         on_condition_action = state['OnConditionActions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'if ({0}) then'.format(condition)
+                        temp = s_indent + 'IF ({0}) THEN'.format(condition)
                         self.equations.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
@@ -321,11 +305,11 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                         on_condition_action = state['OnConditionActions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'elseif ({0}) then'.format(condition)
+                        temp = s_indent + 'ELSE IF ({0}) THEN'.format(condition)
                         self.equations.append(temp)
 
                     else:
-                        temp = s_indent + 'else '
+                        temp = s_indent + 'ELSE '
                         self.equations.append(temp)
 
                     # 1a. Generate NestedSTNs
@@ -334,7 +318,9 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                     # 1b. Put equations into the residuals list
                     self._processEquations(state['Equations'], indent+1)
 
-                end = s_indent + 'end if;'
+                end = s_indent
+                for i in range(nStates-1):
+                    end += 'END '
                 self.equations.append(end)
 
             elif stn['Class'] == 'daeSTN':
@@ -345,95 +331,59 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                stnTemplate = 'String {name} "{description}"; /* States: [{states}] */'
-                self.variables.append(stnTemplate.format(name = stnVariableName,
-                                                         description = description,
-                                                         activeState = activeState,
-                                                         states = states))
-                stnTemplate = '{name} = "{activeState}";'
-                self.initial_conditions.append(stnTemplate.format(name = stnVariableName,
-                                                                  activeState = activeState))
-                counter = 0
+                if description:
+                    stnTemplate = '# {description}:'
+                    self.stns.append(stnTemplate.format(description = description))
+
+                stnTemplate = '{name} AS ({states})'
+                self.stns.append(stnTemplate.format(name = stnVariableName,
+                                                    states = states))
+                stnTemplate = '{rootModel}.{name} := {rootModel}.{activeState};'
+                self.stns_inits.append(stnTemplate.format(name = stnVariableName,
+                                                          rootModel = rootModel,
+                                                          activeState = activeState))
+
+                temp = s_indent + 'CASE {0} OF'.format(stnVariableName)
+                self.equations.append(temp)
+                
                 nStates = len(stn['States'])
                 for i, state in enumerate(stn['States']):
-                    # Not all states have state_transitions ('else' state has no state transitions)
-                    on_condition_action = None
-                    if i == 0:
-                        temp = s_indent + 'if ({name} == "{state}") then'.format(name = stnVariableName,
-                                                                                 state = state["Name"])
-                        self.equations.append(temp)
+                    temp = s_indent1 + 'WHEN {state}:'.format(state = state['Name'])
+                    self.equations.append(temp)
 
-                    elif (i > 0) and (i < nStates - 1):
-                        temp = s_indent + 'elseif ({name} == "{state}") then'.format(name = stnVariableName,
-                                                                                     state = state["Name"])
-                        self.equations.append(temp)
+                    # 1a. Generate NestedSTNs
+                    self._processSTNs(state['NestedSTNs'], indent+2)
+                    
+                    # 1b. Put equations into the residuals list
+                    self._processEquations(state['Equations'], indent+2)
 
-                    else:
-                        temp = s_indent + 'else '
-                        self.equations.append(temp)
+                    # 3. actions
+                    for i, on_condition_action in enumerate(state['OnConditionActions']):
+                        condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
+                        self._processActions(on_condition_action['Actions'], condition, indent+2)
+                        
+                temp = s_indent + 'END'
+                self.equations.append(temp)
 
-                    if len(state['OnConditionActions']) > 0:
-                        temp = s_indent + '/* OnConditionActions for {stn}.{state} */'.format(stn = stnVariableName,
-                                                                                              state = state['Name'])
-                        self.whens.append(temp)
-
-                        for on_condition_action in state['OnConditionActions']:
-                            condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
-
-                            if counter == 0:
-                                temp = s_indent + 'when ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition)
-                            else:
-                                temp = s_indent + 'elsewhen ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition)
-                            self.whens.append(temp)
-
-                            # Generate on condition actions
-                            self._processActions(on_condition_action['Actions'], indent+1)
-                            counter += 1
-
-                    # Generate NestedSTNs
-                    self._processSTNs(state['NestedSTNs'], indent+1)
-
-                    # Generate equations
-                    self._processEquations(state['Equations'], indent+1)
-
-                if counter > 0:
-                    end = s_indent + 'end when;'
-                    self.whens.append(end)
-
-                end = s_indent + 'end if;'
-                self.equations.append(end)
-
-    def _processActions(self, Actions, indent):
-        s_indent  = indent * self.defaultIndent
+    def _processActions(self, Actions, condition, indent):
+        s_indent = indent * self.defaultIndent
 
         for action in Actions:
-            print action
-
             if action['Type'] == 'eChangeState':
-                stnVariableName = action['STN']
-                stateTo         = action['StateTo']
-                self.whens.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
+                stateTo = action['StateTo']
+                self.equations.append(s_indent + 'SWITCH TO {0} IF {1};'.format(stateTo, condition))
 
             elif action['Type'] == 'eSendEvent':
-                self.warnings.append('Modelica code cannot be generated for SendEvent actions - the model will not work as expected!!')
+                self.warnings.append('gPROMS code cannot be generated for SendEvent actions on event port [%s]' % action['SendEventPort'])
 
             elif action['Type'] == 'eReAssignOrReInitializeVariable':
-                relativeName = daeGetRelativeName(self.wrapperInstanceName, action['VariableWrapper'].Variable.CanonicalName)
-                relativeName = self.exprFormatter.formatIdentifier(relativeName)
-                domainIndexes = action['VariableWrapper'].DomainIndexes
-                node          = action['RuntimeNode']
-                strDomainIndexes = ''
-                if len(domainIndexes) > 0:
-                    strDomainIndexes = '[' + ','.join() + ']'
-                variableName = relativeName + strDomainIndexes
-                value = self.exprFormatter.formatRuntimeNode(node)
-                self.whens.append(s_indent + 'reinit({0}, {1});'.format(variableName, value))
-
+                self.warnings.append('gPROMS code cannot be generated for actions that re-assign/initialize variable [%s]' % action['VariableCanonicalName'])
+                
             elif action['Type'] == 'eUserDefinedAction':
-                self.warnings.append('Modelica code cannot be generated for UserDefined actions - the model will not work as expected!!')
+                self.warnings.append('gPROMS code cannot be generated for UserDefined actions')
 
             else:
-                pass
+                raise RuntimeError('Unknown action type')
 
     def _generateRuntimeInformation(self, runtimeInformation):
         Ntotal             = runtimeInformation['TotalNumberOfVariables']
@@ -471,17 +421,19 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             domains        = '[' + str(domain['NumberOfPoints']) + ']'
             points         = self.exprFormatter.formatNumpyArray(domain['Points']) # Numpy array
 
-            domTemplate   = 'parameter Integer {name}_np = {numberOfPoints} "Number of points in domain {name}";'
-            self.parameters.append(domTemplate.format(name = name,
-                                                      description = description,
-                                                      numberOfPoints = numberOfPoints))
-                                                      
-            domTemplate   = 'parameter Real {name}[{name}_np](each unit = "{units}") = {points} "{description}";'
-            self.parameters.append(domTemplate.format(name = name,
-                                                      description = description,
-                                                      units = units,
-                                                      points = points,
-                                                      numberOfPoints = numberOfPoints))
+            domTemplate   = '{name}_np as integer'
+            self.domains.append(domTemplate.format(name = name))
+            domTemplate   = '{name} as array({name}_np) of real'
+            self.domains.append(domTemplate.format(name = name))
+
+            domTemplate   = '{rootModel}.{name}_np := {numberOfPoints};'
+            self.domains_inits.append(domTemplate.format(name = name,
+                                                         rootModel = rootModel,
+                                                         numberOfPoints = numberOfPoints))
+            domTemplate   = '{rootModel}.{name} := {points};'
+            self.domains_inits.append(domTemplate.format(name = name,
+                                                         rootModel = rootModel,
+                                                         points = points))
             
         for parameter in runtimeInformation['Parameters']:
             relativeName    = daeGetRelativeName(self.rootModelName, parameter['CanonicalName'])
@@ -493,27 +445,33 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             values          = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
             numberOfDomains = len(parameter['Domains'])
             
+            paramTemplate = '# {description} [{units}]:'
+            self.parameters.append(paramTemplate.format(units = units,
+                                                        description = description))
             if numberOfDomains > 0:
-                relativeDomains = [daeGetRelativeName(self.rootModelName, dn)   for dn in parameter['DomainNames']]
-                formatDomains = [self.exprFormatter.formatIdentifier(dn)        for dn in relativeDomains]
-                flatDomains   = [self.exprFormatter.flattenIdentifier(dn)+'_np' for dn in formatDomains]
-                domains       = '{0}'.format(', '.join(flatDomains))
-                attributes    = '(each unit = "%s")' % units
+                relativeDomains = [daeGetRelativeName(self.rootModelName, dn)     for dn in variable['DomainNames']]
+                formatDomains   = [self.exprFormatter.formatIdentifier(dn)        for dn in relativeDomains]
+                flatDomains     = [self.exprFormatter.flattenIdentifier(dn)+'_np' for dn in formatDomains]
+                domains = '{0}'.format(', '.join(flatDomains))
 
-                paramTemplate = 'parameter Real {name}[{domains}]{attributes} = {values} "{description}";'
+                paramTemplate = '{name} as array({domains}) of real'
                 self.parameters.append(paramTemplate.format(name = name,
-                                                            attributes = attributes,
-                                                            description = description,
-                                                            values = values,
                                                             domains = domains))
 
+                paramTemplate = '{rootModel}.{name} := [{values}]; # {units}'
+                self.parameters_inits.append(paramTemplate.format(name = name,
+                                                                  units = units,
+                                                                  rootModel = rootModel,
+                                                                  values = values))
             else:
-                attributes    = '(unit = "%s")' % units
-                paramTemplate = 'parameter Real {name}{attributes} = {value} "{description}";'
-                self.parameters.append(paramTemplate.format(name = name,
-                                                            attributes = attributes,
-                                                            value = values,
-                                                            description = description))
+                paramTemplate = '{name} as real'
+                self.parameters.append(paramTemplate.format(name = name))
+
+                paramTemplate = '{rootModel}.{name} := {value}; # {units}'
+                self.parameters_inits.append(paramTemplate.format(name = name,
+                                                                  units = units,
+                                                                  rootModel = rootModel,
+                                                                  value = values))
 
         variableTypesUsed = {}
         for variable in runtimeInformation['Variables']:
@@ -527,27 +485,35 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             varType        = variable['VariableType']
             numberOfDomains = len(variable['Domains'])
 
-            vartypeTemplate = '{name}({min}, {max}, {default}, {absTol});'
+            vartypeTemplate = '  {name} = {default} : {min} : {max} UNIT = "{units}"'
             if not varTypeName in variableTypesUsed:
                 variableTypesUsed[varTypeName] = None
+                self.variable_types.append('DECLARE TYPE')
                 self.variable_types.append(vartypeTemplate.format(name = varTypeName,
                                                                   min = varType.LowerBound,
                                                                   max = varType.UpperBound,
                                                                   default = varType.InitialGuess,
+                                                                  units = units,
                                                                   absTol = varType.AbsoluteTolerance))
+                self.variable_types.append('END')
                 
+            varTemplate = '#  {description} [{units}]:'
+            self.variables.append(varTemplate.format(units = units,
+                                                     description = description))
+            
             if numberOfDomains > 0:
                 relativeDomains = [daeGetRelativeName(self.rootModelName, dn)     for dn in variable['DomainNames']]
                 formatDomains   = [self.exprFormatter.formatIdentifier(dn)        for dn in relativeDomains]
                 flatDomains     = [self.exprFormatter.flattenIdentifier(dn)+'_np' for dn in formatDomains]
-                domains         = '{0}'.format(', '.join(flatDomains))
-                attributes      = '(each unit = "%s")' % units
+                domains = '{0}'.format(', '.join(flatDomains))
 
-                varTemplate = 'Real {name}[{domains}]{attributes} "{description}";'
+                varTemplate = '{name} as array({domains}) of {type}'
                 self.variables.append(varTemplate.format(name = name,
-                                                         attributes = attributes,
-                                                         description = description,
-                                                         domains = domains))
+                                                         domains = domains,
+                                                         type = varTypeName,
+                                                         units = units,
+                                                         relativeName = relativeName,
+                                                         description = description))
 
                 domainsIndexesMap = variable['DomainsIndexesMap']
                 for i in range(0, numberOfPoints):
@@ -555,56 +521,53 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                     ID           = int(variable['IDs'][domIndexes])         # cnDifferential, cnAssigned or cnAlgebraic
                     value        = float(variable['Values'][domIndexes])    # numpy float
                     overallIndex = variable['OverallIndex'] + i
-                    #fullName     = name + '[' + ','.join(str(di+self.exprFormatter.indexBase) for di in domIndexes) + ']'
+                    #fullName    = name + '(' + ','.join(str(di + self.exprFormatter.indexBase) for di in domIndexes) + ')'
                     fullName     = self.exprFormatter.formatVariable(variable['CanonicalName'], domIndexes, overallIndex)
 
                     if ID == cnDifferential:
-                        temp = '{name} = {value};'.format(name = fullName,
-                                                          value = value,
-                                                          rootModel = rootModel,
-                                                          units = units)
+                        temp = '{rootModel}.{name} = {value}; # {units}'.format(name = fullName,
+                                                                                 value = value,
+                                                                                 rootModel = rootModel,
+                                                                                 units = units)
                         self.initial_conditions.append(temp)
 
                     elif ID == cnAssigned:
-                        temp = '{name} = {value}'.format(name = fullName,
-                                                         value = value,
-                                                         rootModel = rootModel,
-                                                         units = units)
+                        temp = '{rootModel}.{name} := {value}; # {units}'.format(name = fullName,
+                                                                                 value = value,
+                                                                                 rootModel = rootModel,
+                                                                                 units = units)
                         self.assigned_inits.append(temp)
-                                                         
+
             else:
                 ID    = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
                 value = float(variable['Values'])   # numpy float
 
-                if ID == cnDifferential:
-                    attributes = '(start = 0.0, unit = "%s")' % units
-                    varTemplate = 'Real {name}{attributes} "{description}";'
-
-                    initTemplate = '{name} = {value};'
-                    self.initial_conditions.append(initTemplate.format(name = name,
-                                                                       units = units,
-                                                                       rootModel = rootModel,
-                                                                       value = value))
-                elif ID == cnAssigned:
-                    attributes = '(fixed = true, unit = "%s")' % units
-                    varTemplate = 'Real {name}{attributes} = {value} "{description}";'
-
-                else:
-                    attributes = '(unit = "%s")' % units
-                    varTemplate = 'Real {name}{attributes} "{description}";'
-
+                varTemplate = '{name} as {type}'
                 self.variables.append(varTemplate.format(name = name,
-                                                         attributes = attributes,
-                                                         value = value,
-                                                         rootModel = rootModel,
+                                                         type = varTypeName,
+                                                         units = units,
+                                                         relativeName = relativeName,
                                                          description = description))
+
+                if ID == cnDifferential:
+                    varTemplate = '{rootModel}.{name} = {value}; # {units}'
+                    self.initial_conditions.append(varTemplate.format(name = name,
+                                                                      units = units,
+                                                                      rootModel = rootModel,
+                                                                      value = value))
+                elif ID == cnAssigned:
+                    varTemplate = '{rootModel}.{name} := {value}; # {units}'
+                    self.assigned_inits.append(varTemplate.format(name = name,
+                                                                  units = units,
+                                                                  rootModel = rootModel,
+                                                                  value = value))
 
         indent = 1
         s_indent = indent * self.defaultIndent
 
         # First, generate equations for port connections
         for port_connection in runtimeInformation['PortConnections']:
-            self.equations.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
+            self.equations.append(s_indent + '# Port connection: {0} -> {1}'.format(port_connection['PortFrom'], port_connection['PortTo']))
             self._processEquations(port_connection['Equations'], indent)
 
         # Then, generate ordinary equations
@@ -613,4 +576,13 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         # Finally, generate equations for IFs/STNs
         self._processSTNs(runtimeInformation['STNs'], indent)
 
-   
+        # gPROMS has no current TIME reserved word... add variable __TIME__
+        equations_s = ''.join(self.equations)
+        if equations_s.find(self.exprFormatter.TIME):
+            self.variable_types.append('DECLARE TYPE')
+            self.variable_types.append('  no_t = 0 : -1e30 : +1e30 UNIT = ""')
+            self.variable_types.append('END')
+            self.variables.append('%s as no_t' % self.exprFormatter.TIME)
+            self.equations.append('$%s = 1;' % self.exprFormatter.TIME)
+            self.initial_conditions.append('{rootModel}.{time} = 0;'.format(rootModel = rootModel,
+                                                                            time = self.exprFormatter.TIME))

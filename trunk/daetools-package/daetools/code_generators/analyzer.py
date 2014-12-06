@@ -440,6 +440,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['CanonicalName']        = parameter.CanonicalName
             data['Description']          = parameter.Description
             data['Domains']              = [domain.NumberOfPoints for domain in parameter.Domains]
+            data['DomainNames']          = [domain.CanonicalName for domain in parameter.Domains]
             data['NumberOfPoints']       = parameter.NumberOfPoints
             data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = parameter.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
@@ -453,6 +454,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['CanonicalName']        = variable.CanonicalName
             data['Description']          = variable.Description
             data['Domains']              = [domain.NumberOfPoints for domain in variable.Domains]
+            data['DomainNames']          = [domain.CanonicalName for domain in variable.Domains]
             data['NumberOfPoints']       = variable.NumberOfPoints
             data['OverallIndex']         = variable.OverallIndex
             data['Values']               = variable.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
@@ -460,6 +462,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
             data['ReportingOn']          = variable.ReportingOn
             data['Units']                = variable.VariableType.Units
+            data['VariableType']         = variable.VariableType
 
             self.runtimeInformation['Variables'].append(data)
 
@@ -474,25 +477,6 @@ class daeCodeGeneratorAnalyzer(object):
 
             self.runtimeInformation['PortConnections'].append(data)
 
-        # OLD
-        """
-        for stn in model.STNs:
-            if isinstance(stn, daeSTN):
-                data = {}
-                if isinstance(stn, daeIF):
-                    data['Class'] = 'daeIF'
-                else:
-                    data['Class'] = 'daeSTN'
-                data['CanonicalName']   = stn.CanonicalName
-                data['ActiveState']     = stn.ActiveState
-                stateMap = {}
-                for i, state in enumerate(stn.States):
-                    stateMap[state.Name] = i
-                data['StateMap']        = stateMap
-
-                self.runtimeInformation['STNs'].append(data)
-        """
-        
         # equations
         self.runtimeInformation['Equations'].extend( self._processEquations(model.Equations, model) )
 
@@ -545,5 +529,6 @@ class daeCodeGeneratorAnalyzer(object):
             data['DomainsIndexesMap']    = variable.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
             data['ReportingOn']          = variable.ReportingOn
             data['Units']                = variable.VariableType.Units
+            data['VariableType']         = variable.VariableType
 
             self.runtimeInformation['Variables'].append(data)

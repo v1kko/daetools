@@ -238,7 +238,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             print('Done!')
         
     def generateCode(self, language):
-        if not language in ['c99','Modelica','FMI']:
+        if not language in ['c99', 'Modelica', 'gPROMS', 'FMI']:
             return
         
         if language == 'c99':
@@ -261,6 +261,16 @@ class daeSimulationExplorer(QtGui.QDialog):
             cg = daeCodeGenerator_Modelica()
             cg.generateSimulation(self._simulation, directory)
         
+        elif language == 'gPROMS':
+            from daetools.code_generators.gproms import daeCodeGenerator_gPROMS
+            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
+                                                                            '',
+                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+            if directory == '':
+                return
+            cg = daeCodeGenerator_gPROMS()
+            cg.generateSimulation(self._simulation, directory)
+
         elif language == 'FMI':
             from daetools.code_generators.fmi import daeCodeGenerator_FMI
             directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
@@ -618,7 +628,7 @@ class daeSimulationExplorer(QtGui.QDialog):
     
     def _slotGenerateCode(self):
         try:
-            languages = ['c99','Modelica','FMI']
+            languages = ['Modelica', 'gPROMS', 'c99', 'FMI']
             language, ok = QtGui.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
             if not ok:
                 return

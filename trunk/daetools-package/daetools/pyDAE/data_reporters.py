@@ -18,9 +18,12 @@ from pyDataReporting import *
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):
     def __init__(self):
         daeDataReporterLocal.__init__(self)
-        self.ProcessName = ""
+        self.ProcessName   = ""
+        self.ConnectString = ""
 
     def Connect(self, ConnectString, ProcessName):
+        print ConnectString, ProcessName
+        
         self.ProcessName   = ProcessName
         self.ConnectString = ConnectString
         return True
