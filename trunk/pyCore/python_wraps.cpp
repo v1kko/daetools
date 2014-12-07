@@ -4271,6 +4271,27 @@ daeSparseMatrixRowIterator__iter__* daeSparseMatrixRowIterator_iter(daeSparseMat
 /*******************************************************
     daeModel
 *******************************************************/
+boost::python::dict daeModel_GetCoSimulationInterface(daeModel& self)
+{
+    std::vector<daeParameter_t*> ptrarrParameters;
+    std::vector<daeVariable_t*>  ptrarrInputs;
+    std::vector<daeVariable_t*>  ptrarrOutputs;
+    std::vector<daeSTN_t*>       ptrarrSTNs;
+
+    self.GetCoSimulationInterface(ptrarrParameters,
+                                  ptrarrInputs,
+                                  ptrarrOutputs,
+                                  ptrarrSTNs);
+
+    boost::python::dict dictCSInterface;
+    dictCSInterface["Parameters"] = getListFromVectorAndCastPointer<daeParameter_t*, daeParameter*>(ptrarrParameters);
+    dictCSInterface["Inputs"]     = getListFromVectorAndCastPointer<daeVariable_t*,  daeVariable*> (ptrarrInputs);
+    dictCSInterface["Outputs"]    = getListFromVectorAndCastPointer<daeVariable_t*,  daeVariable*> (ptrarrOutputs);
+    dictCSInterface["STNs"]       = getListFromVectorAndCastPointer<daeSTN_t*,       daeSTN*>      (ptrarrSTNs);
+
+    return dictCSInterface;
+}
+
 void daeModel_def_InitializeModel(daeModel& self, const std::string& jsonInit)
 {
     self.InitializeModel(jsonInit);

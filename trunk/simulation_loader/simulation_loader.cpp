@@ -982,85 +982,11 @@ void daeSimulationLoader::SetupInputsAndOutputs()
     if(!pData)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    // Collect all parameters and ports and initialize parameters/inputs/outputs arrays
-    std::vector<daeVariable_t*> ptrarrVariables;
-    std::map<std::string, daeParameter_t*> mapParameters;
-    std::map<std::string, daeVariable_t*> mapVariables;
-    std::vector<daePort_t*> arrPorts;
     daeModel_t* pTopLevelModel = pData->m_pSimulation->GetModel();
-
-    pTopLevelModel->CollectAllParameters(mapParameters);
-    pTopLevelModel->GetPorts(arrPorts);
-    pTopLevelModel->CollectAllVariables(mapVariables);
-
-    for(std::map<std::string, daeParameter_t*>::iterator iter = mapParameters.begin(); iter != mapParameters.end(); iter++)
-        pData->m_ptrarrParameters.push_back(iter->second);
-
-    // Only ports from the top-level model (not internal models!)
-    for(size_t i = 0; i < arrPorts.size(); i++)
-    {
-        daePort_t* port = arrPorts[i];
-
-        ptrarrVariables.clear();
-        port->GetVariables(ptrarrVariables);
-
-        if(port->GetType() == eInletPort)
-        {
-            for(size_t i = 0; i < ptrarrVariables.size(); i++)
-            {
-                daeVariable_t* pVariable = ptrarrVariables[i];
-		
-		// Achtung, Achtung!!
-		// To enable external tools to change values of input ports, port variables must be assigned (that is be a DOF).
-		// Throw an exception if that is NOT the case!
-                if(pVariable->GetType() != cnAssigned)
-                {
-                    daeDeclareException(exInvalidCall);
-                    e << "Inlet port variables [" << pVariable->GetCanonicalName() << "] must have assigned values (must be DOFs)";
-                    throw e;
-                }
-
-                pData->m_ptrarrInputs.push_back(pVariable);
-            }
-        }
-        else if(port->GetType() == eOutletPort)
-        {
-            for(size_t i = 0; i < ptrarrVariables.size(); i++)
-            {
-                daeVariable_t* pVariable = ptrarrVariables[i];
-                if(pVariable->GetType() == cnAssigned || pVariable->GetType() == cnSomePointsAssigned)
-                {
-                    daeDeclareException(exInvalidCall);
-                    e << "Outlet port variables [" << pVariable->GetCanonicalName() << "] cannot have assigned values (can't be DOFs)";
-                    throw e;
-                }
-
-                pData->m_ptrarrOutputs.push_back(pVariable);
-            }
-        }
-        else
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Ports can be either inlet or outlet; inlet/outlet ports are not supported [" << port->GetCanonicalName() << "]";
-            throw e;
-        }
-    }
-   
-    // DOFs
-    /*
-    for(std::map<std::string, daeVariable_t*>::iterator iter = mapVariables.begin(); iter != mapVariables.end(); iter++)
-    {
-        daeVariable_t* pVariable = iter->second;
-        if(pVariable->GetType() == cnAssigned)
-        {
-            pData->m_ptrarrDOFs.push_back(pVariable);
-        }
-        else if(pVariable->GetType() == cnSomePointsAssigned)
-        {
-            std::cout << "Variable: " << pVariable->GetCanonicalName() << " has only some points assigned" << std::endl;
-        }
-    }
-    */
+    pTopLevelModel->GetCoSimulationInterface(pData->m_ptrarrParameters,
+                                             pData->m_ptrarrInputs,
+                                             pData->m_ptrarrOutputs,
+                                             pData->m_ptrarrSTNs);
 }
 
 std::string daeSimulationLoader::GetStrippedName(const std::string& strSource)

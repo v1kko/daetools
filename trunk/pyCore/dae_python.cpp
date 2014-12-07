@@ -1514,6 +1514,9 @@ BOOST_PYTHON_MODULE(pyCore)
                                   arg("userDefinedActions") = boost::python::list()
                                 ), DOCSTR_daeModel_ON_EVENT )
 
+        .def("GetCoSimulationInterface", &daepython::daeModel_GetCoSimulationInterface,
+                                         ( arg("self") ), DOCSTR_daeModel_GetCoSimulationInterface)
+
         .def("SaveModelReport",			&daeModel::SaveModelReport,
                                         ( arg("self"), arg("xmlFilename") ), DOCSTR_daeModel_SaveModelReport)
         .def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport,

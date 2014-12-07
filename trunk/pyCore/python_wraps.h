@@ -1209,6 +1209,8 @@ public:
     }
 };
 
+boost::python::dict daeModel_GetCoSimulationInterface(daeModel& self);
+
 void daeModel_def_InitializeModel(daeModel& self, const std::string& jsonInit);
 
 void daeModel_ON_CONDITION(daeModel& self, const daeCondition& rCondition,

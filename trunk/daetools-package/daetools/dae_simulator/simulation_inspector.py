@@ -221,7 +221,19 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
     adds a new treeItem object to the parent item 'nodeItem' for all those
     who are differential and need an initial conditions to be set.
     """
-    for var in model.Variables:
+
+    
+    """
+    ACHTUNG, ACHTUNG!!!!!
+    DOFs should also be collected from ports (i.e. this is common in MEX- and S-functions)
+    """
+
+    
+    variables = model.Variables;
+    for port in model.Ports:
+        variables.extend(port.Variables)
+
+    for var in variables:
         name              = var.Name
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units

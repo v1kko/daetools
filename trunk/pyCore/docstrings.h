@@ -315,6 +315,7 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_SWITCH_TO = ".";
     const char* DOCSTR_daeModel_ON_CONDITION = ".";
     const char* DOCSTR_daeModel_ON_EVENT = ".";
+    const char* DOCSTR_daeModel_GetCoSimulationInterface = "";
     const char* DOCSTR_daeModel_SaveModelReport = ".";
     const char* DOCSTR_daeModel_SaveRuntimeModelReport = ".";
     const char* DOCSTR_daeModel_ExportObjects = ".";

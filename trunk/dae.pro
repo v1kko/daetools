@@ -10,7 +10,8 @@ SUBDIRS = Core \
     pyDataReporting \
     pyIDAS \
     pyUnits \
-    simulation_loader
+    simulation_loader \
+    fmi
 
 HEADERS += config.h \
            dae_develop.h \

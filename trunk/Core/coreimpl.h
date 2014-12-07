@@ -2618,6 +2618,11 @@ public:
     virtual void	CollectAllSTNs(std::map<dae::string, daeSTN_t*>& mapSTNs) const;
 	virtual void	CollectAllPorts(std::map<dae::string, daePort_t*>& mapPorts) const;
 
+    virtual void    GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrParameters,
+                                             std::vector<daeVariable_t*>&  ptrarrInputs,
+                                             std::vector<daeVariable_t*>&  ptrarrOutputs,
+                                             std::vector<daeSTN_t*>&       ptrarrSTNs);
+
     virtual daeDomain_t*		FindDomain(string& strCanonicalName);
 	virtual daeParameter_t*		FindParameter(string& strCanonicalName);
 	virtual daeVariable_t*		FindVariable(string& strCanonicalName);

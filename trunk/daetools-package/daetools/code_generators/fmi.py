@@ -56,7 +56,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 os.makedirs(folder)
 
             cgC99 = daeCodeGenerator_c99()
-            cgC99.generateSimulation(simulation, projectDirectory = source_dir)
+            cgC99.generateSimulation(simulation, source_dir)
             self.wrapperInstanceName = simulation.m.Name
 
             self.modelName                  = simulation.m.Name #*
@@ -73,7 +73,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
             self.CoSimulation = fmiCoSimulation()
             self.CoSimulation.modelIdentifier                        = simulation.m.Name #*
-            self.CoSimulation.needsExecutionTool                     = False
+            self.CoSimulation.needsExecutionTool                     = True
             self.CoSimulation.canHandleVariableCommunicationStepSize = True
             self.CoSimulation.canHandleEvents                        = True
             self.CoSimulation.canInterpolateInputs                   = False
@@ -108,6 +108,9 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Add model structure (inputs/outputs)
             
             # Add model variables
+            csi = simulation.m.GetCoSimulationInterface()
+            print csi
+
             for i, (ref_type, ref_name, ref_flat_name, block_index) in enumerate(cgC99.floatValuesReferences):
                 if ref_type == 'Assigned':
                     self._addAssignedVariable(ref_name, i, '')
