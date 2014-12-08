@@ -1210,6 +1210,7 @@ public:
 };
 
 boost::python::dict daeModel_GetCoSimulationInterface(daeModel& self);
+boost::python::dict daeModel_GetFMIInterface(daeModel& self);
 
 void daeModel_def_InitializeModel(daeModel& self, const std::string& jsonInit);
 

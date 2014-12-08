@@ -753,6 +753,12 @@ boost::shared_ptr<daeExternalObject_t> daeModel::LoadExternalObject(const string
 }
 */
 
+template<class CLASS>
+bool compareCanonicalNames(CLASS first, CLASS second)
+{
+    return (first->GetCanonicalName() < second->GetCanonicalName());
+}
+
 void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrParameters,
                                         std::vector<daeVariable_t*>&  ptrarrInputs,
                                         std::vector<daeVariable_t*>&  ptrarrOutputs,
@@ -836,6 +842,122 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
         }
     }
     */
+
+    /* Achtung, Achtung!!
+     * Sort by name so that every platform get identical vectors! */
+    std::sort(ptrarrParameters.begin(), ptrarrParameters.end(), compareCanonicalNames<daeParameter_t*>);
+    std::sort(ptrarrInputs.begin(),     ptrarrInputs.end(),     compareCanonicalNames<daeVariable_t*>);
+    std::sort(ptrarrOutputs.begin(),    ptrarrOutputs.end(),    compareCanonicalNames<daeVariable_t*>);
+    std::sort(ptrarrSTNs.begin(),       ptrarrSTNs.end(),       compareCanonicalNames<daeSTN_t*>);
+}
+
+void addToInterfaceMap(std::map<size_t, daeFMI2Object_t>& mapInterface, const daeFMI2Object_t& fmi)
+{
+
+}
+
+void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
+{
+    std::vector<daeParameter_t*> ptrarrParameters;
+    std::vector<daeVariable_t*>  ptrarrInputs;
+    std::vector<daeVariable_t*>  ptrarrOutputs;
+    std::vector<daeSTN_t*>       ptrarrSTNs;
+    std::map<size_t, std::vector<size_t> > mapDomainsIndexes;
+    std::map<size_t, std::vector<size_t> >::iterator iter;
+
+    GetCoSimulationInterface(ptrarrParameters,
+                             ptrarrInputs,
+                             ptrarrOutputs,
+                             ptrarrSTNs);
+
+    size_t counter = 0;
+    for(size_t i = 0; i < ptrarrParameters.size(); i++)
+    {
+        daeParameter* pParameter = dynamic_cast<daeParameter*>(ptrarrParameters[i]);
+        mapDomainsIndexes.clear();
+        pParameter->GetDomainsIndexesMap(mapDomainsIndexes, 0);
+        size_t noPoints = pParameter->GetNumberOfPoints();
+
+        for(iter = mapDomainsIndexes.begin(); iter != mapDomainsIndexes.end(); iter++)
+        {
+            daeFMI2Object_t fmi;
+            fmi.type        = "Parameter";
+            fmi.parameter   = pParameter;
+            fmi.reference   = counter;
+            fmi.indexes     = iter->second;
+            fmi.name        = daeGetStrippedRelativeName(this, pParameter);
+            if(noPoints > 1)
+                fmi.name  += "(" + toString(iter->second, ",") + ")";
+            fmi.description = pParameter->GetDescription();
+            fmi.units       = pParameter->GetUnits().toString();
+            mapInterface[counter] = fmi;
+            counter++;
+        }
+    }
+
+    for(size_t i = 0; i < ptrarrInputs.size(); i++)
+    {
+        daeVariable* pVariable = dynamic_cast<daeVariable*>(ptrarrInputs[i]);
+        mapDomainsIndexes.clear();
+        pVariable->GetDomainsIndexesMap(mapDomainsIndexes, 0);
+        size_t noPoints = pVariable->GetNumberOfPoints();
+
+        for(iter = mapDomainsIndexes.begin(); iter != mapDomainsIndexes.end(); iter++)
+        {
+            daeFMI2Object_t fmi;
+            fmi.type      = "Input";
+            fmi.variable  = pVariable;
+            fmi.reference = counter;
+            fmi.indexes   = iter->second;
+            fmi.name      = daeGetStrippedRelativeName(this, pVariable);
+            if(noPoints > 1)
+                fmi.name  += "(" + toString(iter->second, ",") + ")";
+            fmi.description = pVariable->GetDescription();
+            fmi.units       = pVariable->GetVariableType()->GetUnits().toString();
+            mapInterface[counter] = fmi;
+            counter++;
+        }
+    }
+
+    for(size_t i = 0; i < ptrarrOutputs.size(); i++)
+    {
+        daeVariable* pVariable = dynamic_cast<daeVariable*>(ptrarrOutputs[i]);
+        mapDomainsIndexes.clear();
+        pVariable->GetDomainsIndexesMap(mapDomainsIndexes, 0);
+        size_t noPoints = pVariable->GetNumberOfPoints();
+
+        for(iter = mapDomainsIndexes.begin(); iter != mapDomainsIndexes.end(); iter++)
+        {
+            daeFMI2Object_t fmi;
+            fmi.type      = "Output";
+            fmi.variable  = pVariable;
+            fmi.reference = counter;
+            fmi.indexes   = iter->second;
+            fmi.name      = daeGetStrippedRelativeName(this, pVariable);
+            if(noPoints > 1)
+                fmi.name  += "(" + toString(iter->second, ",") + ")";
+            fmi.description = pVariable->GetDescription();
+            fmi.units       = pVariable->GetVariableType()->GetUnits().toString();
+            mapInterface[counter] = fmi;
+            counter++;
+        }
+    }
+
+    for(size_t i = 0; i < ptrarrSTNs.size(); i++)
+    {
+        daeSTN* pSTN = dynamic_cast<daeSTN*>(ptrarrSTNs[i]);
+
+        daeFMI2Object_t fmi;
+        fmi.reference      = counter;
+        fmi.stn            = pSTN;
+        //fmi.indexes - >Not relevant in this context
+        fmi.name           = daeGetStrippedRelativeName(this, pSTN);
+        fmi.type           = "STN";
+        fmi.description    = pSTN->GetDescription();
+        fmi.units          = ""; // Doesn't exist
+        mapInterface[counter] = fmi;
+        counter++;
+    }
 }
 
 void daeModel::AddDomain(daeDomain* pDomain)

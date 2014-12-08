@@ -63,6 +63,13 @@ public:
     void SetOutputValue(unsigned int index, const double* value, unsigned int numberOfPoints);
     void SetActiveState(unsigned int index, const std::string& strActiveState);
 
+// FMI interface
+    double      GetFMIValue(unsigned int fmi_reference) const;
+    std::string GetFMIActiveState(unsigned int fmi_reference) const;
+
+    void SetFMIValue(unsigned int fmi_reference, double value);
+    void SetFMIActiveState(unsigned int fmi_reference, const std::string& value);
+
     static std::string GetStrippedName(const std::string& strSource);
 
 protected:

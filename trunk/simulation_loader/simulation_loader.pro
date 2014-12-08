@@ -9,14 +9,15 @@ CONFIG += shared
 TARGET  = cdaeSimulationLoader
 
 SOURCES += dllmain.cpp \
-           simulation_loader.cpp
+           simulation_loader.cpp \
+           simulation_loader_c.cpp
 
 HEADERS += stdafx.h \
            simulation_loader.h \
            simulation_loader_c.h
 
-message($$system($${PYTHON}-config --cflags))
-message($$system($${PYTHON}-config --ldflags))
+#message($$system($${PYTHON}-config --cflags))
+#message($$system($${PYTHON}-config --ldflags))
 
 QMAKE_CXXFLAGS += $$system($${PYTHON}-config --cflags)
 #QMAKE_LFLAGS  += $$system($${PYTHON}-config --ldflags)

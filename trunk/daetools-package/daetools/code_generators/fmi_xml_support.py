@@ -34,7 +34,7 @@ def addObjects(element, name, objects, required = False):
 fmiDefaultVersion = '2.0'
 
 class fmiObject(object):
-    fmiSupportedVersions = ['1.0', '2.0']
+    fmiSupportedVersions = ['2.0']
 
     def __init__(self, fmiVersion = fmiDefaultVersion):
         if not fmiVersion in self.fmiSupportedVersions:
@@ -51,34 +51,7 @@ class fmiModelDescription(fmiObject):
     def __init__(self, fmiVersion = fmiDefaultVersion):
         fmiObject.__init__(self, fmiVersion)
 
-        # fmiVersion is required and located in fmiObject class
-        if self.fmiVersion == "1.0":
-            # Required attributes
-            self.modelName                  = ''   # string
-            self.guid                       = ''   # string
-            self.modelIdentifier            = ''   # string
-            self.numberOfEventIndicators    = None # int
-            self.numberOfContinuousStates   = None # int
-
-            # Optional attributes
-            self.description                = None # string
-            self.author                     = None # string
-            self.version                    = None # string
-            self.generationTool             = None # string
-            self.generationDateAndTime      = None # string
-            self.variableNamingConvention   = None # enum
-
-            # Required elements
-            self.ModelVariables = []   # array of fmiScalarVariable
-            self.Implementation = None # fmiImplementation
-
-            # Optional elements
-            self.DefaultExperiment = None
-            self.TypeDefinitions   = []
-            self.UnitDefinitions   = []
-            self.VendorAnnotations = []
-
-        elif self.fmiVersion == '2.0':
+        if self.fmiVersion == '2.0':
             # Required attributes
             self.modelName         = ''    # string
             self.guid              = ''    # string
@@ -107,34 +80,12 @@ class fmiModelDescription(fmiObject):
             self.VendorAnnotations = []
 
         else:
-            raise RuntimeError('Unsupported FMI version %s' % self.fmiVersion)
+            raise RuntimeError('Unsupported FMI version: %s' % self.fmiVersion)
             
     def to_xml(self, filename):
         fmi_root = etree.Element(self.xmlTagName)
 
-        if self.fmiVersion == "1.0":
-            addAttribute(fmi_root, 'fmiVersion',                 self.fmiVersion, required = True)
-            addAttribute(fmi_root, 'modelName',                  self.modelName, required = True)
-            addAttribute(fmi_root, 'modelIdentifier',            self.modelIdentifier, required = True)
-            addAttribute(fmi_root, 'guid',                       self.guid, required = True)
-            addAttribute(fmi_root, 'numberOfEventIndicators',    self.numberOfEventIndicators, required = True)
-            addAttribute(fmi_root, 'numberOfContinuousStates',   self.numberOfContinuousStates, required = True)
-
-            addAttribute(fmi_root, 'description',                self.description)
-            addAttribute(fmi_root, 'author',                     self.author)
-            addAttribute(fmi_root, 'version',                    self.version)
-            addAttribute(fmi_root, 'generationTool',             self.generationTool)
-            addAttribute(fmi_root, 'generationDateAndTime',      self.generationDateAndTime)
-            addAttribute(fmi_root, 'variableNamingConvention',   self.variableNamingConvention)
-
-            addObject(fmi_root, self.Implementation, required = True)
-            addObjects(fmi_root, 'ModelVariables',    self.ModelVariables, required = True)
-            addObject(fmi_root, self.DefaultExperiment)
-            addObjects(fmi_root, 'TypeDefinitions',   self.TypeDefinitions)
-            addObjects(fmi_root, 'UnitDefinitions',   self.UnitDefinitions)
-            addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
-
-        elif self.fmiVersion == "2.0":
+        if self.fmiVersion == "2.0":
             addAttribute(fmi_root, 'fmiVersion',                 self.fmiVersion, required = True)
             addAttribute(fmi_root, 'modelName',                  self.modelName, required = True)
             addAttribute(fmi_root, 'guid',                       self.guid, required = True)
@@ -160,7 +111,7 @@ class fmiModelDescription(fmiObject):
             addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
 
         else:
-            raise RuntimeError('Unsupported FMI version %s' % self.fmiVersion)
+            raise RuntimeError('Unsupported FMI version: %s' % self.fmiVersion)
             
         etree.ElementTree(fmi_root).write(filename, encoding="utf-8", pretty_print=True, xml_declaration=True)
         
@@ -168,37 +119,6 @@ class fmiModelDescription(fmiObject):
     def from_xml(cls, filename):
         pass
 
-class fmiImplementation_CoSimulation_Tool(object):
-    # Version 1.0 only
-
-    xmlTagName = 'CoSimulation_Tool'
-
-    def __init__(self):
-        self.canHandleVariableCommunicationStepSize = None # bool
-        self.canHandleEvents                        = None # bool
-        self.canRejectSteps                         = None # bool
-        self.canInterpolateInputs                   = None # bool
-        self.maxOutputDerivativeOrder               = None # unsigned int
-        self.canRunAsynchronuously                  = None # bool
-        self.canSignalEvents                        = None # bool
-        self.canBeInstantiatedOnlyOncePerProcess    = None # bool
-        self.canNotUseMemoryManagementFunctions     = None # bool
-
-    def to_xml(self, tag):
-        addAttribute(tag, 'canHandleVariableCommunicationStepSize', self.canHandleVariableCommunicationStepSize)
-        addAttribute(tag, 'canHandleEvents',                        self.canHandleEvents)
-        addAttribute(tag, 'canRejectSteps',                         self.canRejectSteps)
-        addAttribute(tag, 'canInterpolateInputs',                   self.canInterpolateInputs)
-        addAttribute(tag, 'maxOutputDerivativeOrder',               self.maxOutputDerivativeOrder)
-        addAttribute(tag, 'canRunAsynchronuously',                  self.canRunAsynchronuously)
-        addAttribute(tag, 'canSignalEvents',                        self.canSignalEvents)
-        addAttribute(tag, 'canBeInstantiatedOnlyOncePerProcess',    self.canBeInstantiatedOnlyOncePerProcess)
-        addAttribute(tag, 'canNotUseMemoryManagementFunctions',     self.canNotUseMemoryManagementFunctions)
-
-    @classmethod
-    def from_xml(cls, tag):
-        pass
-    
 class fmiCoSimulation(object):
     # Version 2.0 only
 
@@ -208,19 +128,14 @@ class fmiCoSimulation(object):
         self.modelIdentifier                        = None # Required: string
         self.needsExecutionTool                     = None # bool
         self.canHandleVariableCommunicationStepSize = None # bool
-        self.canHandleEvents                        = None # bool
         self.canInterpolateInputs                   = None # bool
         self.maxOutputDerivativeOrder               = None # unsigned int
         self.canRunAsynchronuously                  = None # bool
-        self.canSignalEvents                        = None # bool
         self.canBeInstantiatedOnlyOncePerProcess    = None # bool
         self.canNotUseMemoryManagementFunctions     = None # bool
         self.canGetAndSetFMUstate                   = None # bool
         self.canSerializeFMUstate                   = None # bool
-        self.providesPartialDerivativesOf_DerivativeFunction_wrt_States = None # bool
-        self.providesPartialDerivativesOf_DerivativeFunction_wrt_Inputs = None # bool
-        self.providesPartialDerivativesOf_OutputFunction_wrt_States     = None # bool
-        self.providesPartialDerivativesOf_OutputFunction_wrt_Inputs     = None # bool
+        self.providesDirectionalDerivative          = None # bool
         
     def to_xml(self, tag):
         addAttribute(tag, 'canHandleVariableCommunicationStepSize', self.canHandleVariableCommunicationStepSize)
@@ -228,18 +143,13 @@ class fmiCoSimulation(object):
         addAttribute(tag, 'canInterpolateInputs',                   self.canInterpolateInputs)
         addAttribute(tag, 'maxOutputDerivativeOrder',               self.maxOutputDerivativeOrder)
         addAttribute(tag, 'canRunAsynchronuously',                  self.canRunAsynchronuously)
-        addAttribute(tag, 'canSignalEvents',                        self.canSignalEvents)
         addAttribute(tag, 'canBeInstantiatedOnlyOncePerProcess',    self.canBeInstantiatedOnlyOncePerProcess)
         addAttribute(tag, 'canNotUseMemoryManagementFunctions',     self.canNotUseMemoryManagementFunctions)
-
         addAttribute(tag, 'modelIdentifier',                        self.modelIdentifier, required = True)
         addAttribute(tag, 'needsExecutionTool',                     self.needsExecutionTool)
         addAttribute(tag, 'canGetAndSetFMUstate',                   self.canGetAndSetFMUstate)
         addAttribute(tag, 'canSerializeFMUstate',                   self.canSerializeFMUstate)
-        addAttribute(tag, 'providesPartialDerivativesOf_DerivativeFunction_wrt_States', self.providesPartialDerivativesOf_DerivativeFunction_wrt_States)
-        addAttribute(tag, 'providesPartialDerivativesOf_DerivativeFunction_wrt_Inputs', self.providesPartialDerivativesOf_DerivativeFunction_wrt_Inputs)
-        addAttribute(tag, 'providesPartialDerivativesOf_OutputFunction_wrt_States',     self.providesPartialDerivativesOf_OutputFunction_wrt_States)
-        addAttribute(tag, 'providesPartialDerivativesOf_OutputFunction_wrt_Inputs',     self.providesPartialDerivativesOf_OutputFunction_wrt_Inputs)
+        addAttribute(tag, 'providesDirectionalDerivative',          self.providesPartialDerivativesOf_DerivativeFunction_wrt_States)
 
     @classmethod
     def from_xml(cls, tag):
@@ -580,21 +490,16 @@ def test_fmi2():
 
     cos = fmiCoSimulation()
     cos.modelIdentifier                        = 'mi' #*
-    cos.needsExecutionTool                     = False
+    cos.needsExecutionTool                     = True
     cos.canHandleVariableCommunicationStepSize = True
-    cos.canHandleEvents                        = True
     cos.canInterpolateInputs                   = False
-    cos.maxOutputDerivativeOrder               = 1
+    cos.maxOutputDerivativeOrder               = 0
     cos.canRunAsynchronuously                  = False
-    cos.canSignalEvents                        = True
     cos.canBeInstantiatedOnlyOncePerProcess    = False
     cos.canNotUseMemoryManagementFunctions     = True
     cos.canGetAndSetFMUstate                   = False
     cos.canSerializeFMUstate                   = False
-    cos.providesPartialDerivativesOf_DerivativeFunction_wrt_States = False
-    cos.providesPartialDerivativesOf_DerivativeFunction_wrt_Inputs = False
-    cos.providesPartialDerivativesOf_OutputFunction_wrt_States     = False
-    cos.providesPartialDerivativesOf_OutputFunction_wrt_Inputs     = False
+    cos.providesDirectionalDerivative           = False
     fmi_model.CoSimulation = cos
 
     ms = fmiModelStructure()

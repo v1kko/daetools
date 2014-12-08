@@ -142,11 +142,13 @@ def getAvailableDataReporters():
     available_datareporters = []
     
     available_datareporters.append(("TCPIPDataReporter", TCPIPDataReporter, ""))
+    # NoOp does not do anything but DOES store the data (Local data reporter)
     available_datareporters.append(("NoOpDataReporter", NoOpDataReporter, ""))
     available_datareporters.append(("DelegateDataReporter", DelegateDataReporter, ""))
     available_datareporters.append(("TEXTFileDataReporter", TEXTFileDataReporter, ""))
     available_datareporters.append(("PlotDataReporter", PlotDataReporter, ""))
     available_datareporters.append(("MatlabMATFileDataReporter", MatlabMATFileDataReporter, ""))
+    # BlackHole does not do anything and DOES NOT store the data
     available_datareporters.append(("BlackHoleDataReporter", BlackHoleDataReporter, ""))
     
     return available_datareporters

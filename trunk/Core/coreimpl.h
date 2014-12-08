@@ -2622,6 +2622,7 @@ public:
                                              std::vector<daeVariable_t*>&  ptrarrInputs,
                                              std::vector<daeVariable_t*>&  ptrarrOutputs,
                                              std::vector<daeSTN_t*>&       ptrarrSTNs);
+    virtual void    GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface);
 
     virtual daeDomain_t*		FindDomain(string& strCanonicalName);
 	virtual daeParameter_t*		FindParameter(string& strCanonicalName);

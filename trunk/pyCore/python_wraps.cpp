@@ -4292,6 +4292,22 @@ boost::python::dict daeModel_GetCoSimulationInterface(daeModel& self)
     return dictCSInterface;
 }
 
+boost::python::dict daeModel_GetFMIInterface(daeModel& self)
+{
+    std::map<size_t, daeFMI2Object_t> mapInterface;
+    std::map<size_t, daeFMI2Object_t>::iterator iter;
+    boost::python::dict dictFMIInterface;
+
+    self.GetFMIInterface(mapInterface);
+
+    for(iter = mapInterface.begin(); iter != mapInterface.end(); iter++)
+    {
+        dictFMIInterface[iter->first] = iter->second;
+    }
+
+    return dictFMIInterface;
+}
+
 void daeModel_def_InitializeModel(daeModel& self, const std::string& jsonInit)
 {
     self.InitializeModel(jsonInit);

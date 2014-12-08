@@ -1,4 +1,8 @@
 #include "daetools_fmi_cs.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/detail/file_parser_error.hpp>
 
 /***************************************************
   Types for Common Functions
@@ -49,8 +53,22 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
                     strDAESolver, strLASolver, strDataReporter,
                     strDataReporterConnectionString, strLog;
 
+        strDAESolver    = "Sundials IDAS";
+        strDataReporter = "TCPIPDataReporter"; // BlackHoleDataReporter
+        strLog          = "BaseLog";
+
+        boost::property_tree::ptree pt;
+        std::string					json_settings = std::string(fmuResourceLocation) + "/resources/settings.json";
+        std::string					json_ini_file = std::string(fmuResourceLocation) + "/resources/init.json";
+
+        boost::property_tree::json_parser::read_json(json_settings, pt);
+        strPythonFile      = pt.get<std::string>("simulationClass");
+        strSimulationClass = pt.get<std::string>("simulationName");
+        strLASolver        = pt.get<std::string>("LASolver");
+
         c->simulationLoader.LoadSimulation(strPythonFile, strSimulationClass);
         c->simulationLoader.Initialize(strDAESolver, strLASolver, strDataReporter, strDataReporterConnectionString, strLog, false, "");
+
         return c;
     }
     catch(std::exception& e)
@@ -151,122 +169,128 @@ fmi2Status fmi2Reset(fmi2Component comp)
 }
 
 /* Getting and setting variable values */
-fmi2Status fmi2GetReal(fmi2Component comp, const fmi2ValueReference[], size_t, fmi2Real   [])
+fmi2Status fmi2GetReal(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, fmi2Real value[])
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
-/*
-        int i;
-        unsigned int noPoints;
-        char name[512];
-        int nOutletPorts = c->simulationLoader.GetNumberOfOutputs();
-        for(i = 0; i < nOutletPorts; i++)
+
+    try
+    {
+        for(size_t i = 0; i < nvr; i++)
         {
-            GetOutputInfo(simulation, i, name, &noPoints);
-            if(debugMode)
-                ssPrintf("Output %d name: %s, no.points: %d\n", i, name, noPoints);
-            if(noPoints != ssGetOutputPortWidth(S, i))
-            {
-                sprintf(msg, "Invalid width of outlet port %s: %d (expected %d)", name, ssGetOutputPortWidth(S, i), noPoints);
-                ssSetErrorStatus(S, msg);
-                return;
-            }
-
-            double* data = (double*)malloc(noPoints * sizeof(double));
-            GetOutputValue(simulation, i, data, noPoints);
-            if(debugMode)
-                ssPrintf("Get output %d value: %f\n", i, data[0]);
-
-            double* y = ssGetOutputPortRealSignal(S, i);
-            memcpy(y, data, noPoints * sizeof(double));
-
-            free(data);
+            unsigned int reference = static_cast<unsigned int>(vr[i]);
+            value[i] = c->simulationLoader.GetFMIValue(reference);
         }
+    }
+    catch(std::exception& e)
+    {
+        return fmi2Fatal;
+    }
+
+    return fmi2OK;
+}
+
+fmi2Status fmi2GetInteger(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[])
+{
+    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
+    if(c == NULL)
+        return fmi2Fatal;
+
+    return fmi2Error;
+}
+
+fmi2Status fmi2GetBoolean(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[])
+{
+    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
+    if(c == NULL)
+        return fmi2Fatal;
+
+    return fmi2Error;
+}
+
+fmi2Status fmi2GetString(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, fmi2String value[])
+{
+    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
+    if(c == NULL)
+        return fmi2Fatal;
+
+    return fmi2Fatal;
+/*
+    try
+    {
+        for(size_t i = 0; i < nvr; i++)
+        {
+            unsigned int reference = static_cast<unsigned int>(vr[i]);
+            strncpy(value[i], c->simulationLoader.GetFMIActiveState(reference).c_str(), 255);
+        }
+    }
+    catch(std::exception& e)
+    {
+        return fmi2Fatal;
+    }
 */
     return fmi2OK;
 }
 
-fmi2Status fmi2GetInteger(fmi2Component comp, const fmi2ValueReference[], size_t, fmi2Integer[])
+fmi2Status fmi2SetReal(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[])
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
-}
-
-fmi2Status fmi2GetBoolean(fmi2Component comp, const fmi2ValueReference[], size_t, fmi2Boolean[])
-{
-    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
-    if(c == NULL)
-        return fmi2Fatal;
-
-    return fmi2OK;
-}
-
-fmi2Status fmi2GetString(fmi2Component comp, const fmi2ValueReference[], size_t, fmi2String [])
-{
-    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
-    if(c == NULL)
-        return fmi2Fatal;
-
-    return fmi2OK;
-}
-
-fmi2Status fmi2SetReal(fmi2Component comp, const fmi2ValueReference[], size_t, const fmi2Real   [])
-{
-    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
-    if(c == NULL)
-        return fmi2Fatal;
-/*
-        int i;
-        unsigned int noPoints;
-        char name[512];
-        int nInletPorts  = c->simulationLoader.GetNumberOfInputs();
-        for(i = 0; i < nInletPorts; i++)
+    try
+    {
+        for(size_t i = 0; i < nvr; i++)
         {
-            c->simulationLoader.GetInputInfo(i, name, &noPoints);
-            if(debugMode)
-                ssPrintf("Input %d name: %s, no.points: %d\n", i, name, noPoints);
-            if(noPoints != ssGetInputPortWidth(S, i))
-            {
-                sprintf(msg, "Invalid width of port %s: %d (expected %d)", name, ssGetInputPortWidth(S, i), noPoints);
-                ssSetErrorStatus(S, msg);
-                return;
-            }
-            const double* data = ssGetInputPortRealSignal(S, i);
-            if(debugMode)
-                ssPrintf("Set input %d value to: %f\n", i, data[0]);
-            SetInputValue(simulation, i, data, noPoints);
+            unsigned int reference = static_cast<unsigned int>(vr[i]);
+            c->simulationLoader.SetFMIValue(reference, value[i]);
         }
-*/
+    }
+    catch(std::exception& e)
+    {
+        return fmi2Fatal;
+    }
+
     return fmi2OK;
 }
 
-fmi2Status fmi2SetInteger(fmi2Component comp, const fmi2ValueReference[], size_t, const fmi2Integer[])
+fmi2Status fmi2SetInteger(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[])
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
 
-fmi2Status fmi2SetBoolean(fmi2Component comp, const fmi2ValueReference[], size_t, const fmi2Boolean[])
+fmi2Status fmi2SetBoolean(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[])
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
 
-fmi2Status fmi2SetString(fmi2Component comp, const fmi2ValueReference[], size_t, const fmi2String [])
+fmi2Status fmi2SetString(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, const fmi2String value[])
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
+
+    try
+    {
+        for(size_t i = 0; i < nvr; i++)
+        {
+            unsigned int reference = static_cast<unsigned int>(vr[i]);
+            c->simulationLoader.SetFMIActiveState(reference, std::string(value[i]));
+        }
+    }
+    catch(std::exception& e)
+    {
+        return fmi2Fatal;
+    }
 
     return fmi2OK;
 }
@@ -307,7 +331,7 @@ fmi2Status fmi2DoStep(fmi2Component comp,
 
     return fmi2OK;
 }
-
+/*
 fmi2Status fmi2CancelStep(fmi2Component comp)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
@@ -316,9 +340,10 @@ fmi2Status fmi2CancelStep(fmi2Component comp)
 
     return fmi2OK;
 }
-
+*/
 /* Inquire slave status */
-fmi2Status fmi2GetStatus(fmi2Component comp, const fmi2StatusKind, fmi2Status* )
+/*
+fmi2Status fmi2GetStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Status* )
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
@@ -327,7 +352,7 @@ fmi2Status fmi2GetStatus(fmi2Component comp, const fmi2StatusKind, fmi2Status* )
     return fmi2OK;
 }
 
-fmi2Status fmi2GetRealStatus(fmi2Component comp, const fmi2StatusKind, fmi2Real* )
+fmi2Status fmi2GetRealStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Real* )
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
@@ -336,7 +361,7 @@ fmi2Status fmi2GetRealStatus(fmi2Component comp, const fmi2StatusKind, fmi2Real*
     return fmi2OK;
 }
 
-fmi2Status fmi2GetIntegerStatus(fmi2Component comp, const fmi2StatusKind, fmi2Integer*)
+fmi2Status fmi2GetIntegerStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Integer*)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
@@ -345,7 +370,7 @@ fmi2Status fmi2GetIntegerStatus(fmi2Component comp, const fmi2StatusKind, fmi2In
     return fmi2OK;
 }
 
-fmi2Status fmi2GetBooleanStatus(fmi2Component comp, const fmi2StatusKind, fmi2Boolean*)
+fmi2Status fmi2GetBooleanStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Boolean*)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
@@ -354,7 +379,7 @@ fmi2Status fmi2GetBooleanStatus(fmi2Component comp, const fmi2StatusKind, fmi2Bo
     return fmi2OK;
 }
 
-fmi2Status fmi2GetStringStatus (fmi2Component comp, const fmi2StatusKind, fmi2String* )
+fmi2Status fmi2GetStringStatus(fmi2Component comp, const fmi2StatusKind, fmi2String* )
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
@@ -362,6 +387,7 @@ fmi2Status fmi2GetStringStatus (fmi2Component comp, const fmi2StatusKind, fmi2St
 
     return fmi2OK;
 }
+*/
 
 /***************************************************
  *  daeFMIComponent_t

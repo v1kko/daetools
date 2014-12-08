@@ -12,14 +12,14 @@ public:
     virtual ~daeFMIComponent_t();
 
 public:
-    daeSimulationLoader          simulationLoader;
-    std::string                  instanceName;
-    std::string                  fmuGUID;
-    std::string                  fmuResourceLocation;
-    bool                         visible;
-    const fmi2CallbackFunctions* functions;
-    bool                         loggingOn;
-    bool                         debugMode;
+    daeSimulationLoader                 simulationLoader;
+    std::string                         instanceName;
+    std::string                         fmuGUID;
+    std::string                         fmuResourceLocation;
+    bool                                visible;
+    const fmi2CallbackFunctions*        functions;
+    bool                                loggingOn;
+    bool                                debugMode;
 };
 
 #endif

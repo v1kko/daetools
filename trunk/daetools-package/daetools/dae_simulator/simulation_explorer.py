@@ -238,7 +238,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             print('Done!')
         
     def generateCode(self, language):
-        if not language in ['c99', 'Modelica', 'gPROMS', 'FMI']:
+        if not language in ['c99', 'Modelica', 'gPROMS', 'FMI (Co-Simulation)']:
             return
         
         if language == 'c99':
@@ -271,15 +271,30 @@ class daeSimulationExplorer(QtGui.QDialog):
             cg = daeCodeGenerator_gPROMS()
             cg.generateSimulation(self._simulation, directory)
 
-        elif language == 'FMI':
+        elif language == 'FMI (Co-Simulation)':
             from daetools.code_generators.fmi import daeCodeGenerator_FMI
             directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
-                                                                            '', 
-                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+                                                                         "",
+                                                                         QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
             if directory == '':
                 return
+
+            qt_files = QtGui.QFileDialog.getOpenFileNames(self, "Select python files to pack in the .FMU file",
+                                                                "",
+                                                                "Python files (*.py *.*)")
+            if len(qt_files) == 0:
+                return
+            py_files = []
+            for qt_file in qt_files:
+                py_files.append(str(qt_file))
+
+            qt_simulation_name, ok = QtGui.QInputDialog.getText(self, "FMU Code generator", "Insert the python simulation class name:")
+            if not ok:
+                return
+            simulation_name = str(qt_simulation_name)
+            
             cg = daeCodeGenerator_FMI()
-            cg.generateSimulation(self._simulation, directory)
+            cg.generateSimulation(self._simulation, directory, py_files, simulation_name)
             
         QtGui.QMessageBox.information(self, "Code generator: %s" % language, 'Code generated successfuly!')
             
@@ -628,7 +643,7 @@ class daeSimulationExplorer(QtGui.QDialog):
     
     def _slotGenerateCode(self):
         try:
-            languages = ['Modelica', 'gPROMS', 'c99', 'FMI']
+            languages = ['Modelica', 'gPROMS', 'c99', 'FMI (Co-Simulation)']
             language, ok = QtGui.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
             if not ok:
                 return

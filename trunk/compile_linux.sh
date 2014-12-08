@@ -63,7 +63,7 @@ PROJECT:
     all             Build all daetools c++ libraries, solvers and python extension modules.
                     Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
-                    Equivalent to: units data_reporting idas core activity
+                    Equivalent to: units data_reporting idas core activity simulation_loader fmi
     solvers         Build all solvers and their python extension modules.
                     Equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
     pydae           Build daetools core python extension modules only.
@@ -75,6 +75,7 @@ PROJECT:
         idas                Build IDAS c++ library and its python extension module.
         units               Build Units c++ library and its python extension module.
         simulation_loader   Build simulation_loader shared library.
+        fmi                 Build FMI wrapper shared library.
         trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module.
         superlu             Build SuperLU linear solver and its python extension module.
         superlu_mt          Build SuperLU_MT linear solver and its python extension module.
@@ -226,6 +227,7 @@ do
     idas)             ;;
     units)            ;;
     simulation_loader);;
+    fmi)              ;;
     dae)              ;;
     pydae)            ;;
     solvers)          ;;
@@ -324,6 +326,9 @@ do
 
         simulation_loader)  compile simulation_loader   "-j1"
                             ;;
+                            
+        fmi)  compile fmi "-j1"
+              ;;
                             
         dae)    compile dae "-j$Ncpu"
                 ;;

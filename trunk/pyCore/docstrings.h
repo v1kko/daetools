@@ -85,7 +85,15 @@ const char* DOCSTR_daeVariableType = "";
     const char* DOCSTR_daeVariableType_UpperBound = "";
     const char* DOCSTR_daeVariableType_InitialGuess = "";
     const char* DOCSTR_daeVariableType_AbsoluteTolerance = "";
- 
+
+const char* DOCSTR_daeFMI2Object_t = "";
+    const char* DOCSTR_daeFMI2Object_t_reference = "";
+    const char* DOCSTR_daeFMI2Object_t_name = "";
+    const char* DOCSTR_daeFMI2Object_t_type = "";
+    const char* DOCSTR_daeFMI2Object_t_description = "";
+    const char* DOCSTR_daeFMI2Object_t_units = "";
+    const char* DOCSTR_daeFMI2Object_t_indexes = "";
+
 const char* DOCSTR_daeObject = "";  
     const char* DOCSTR_daeObject_ID = "";  
     const char* DOCSTR_daeObject_Version = "";  
@@ -316,6 +324,7 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_ON_CONDITION = ".";
     const char* DOCSTR_daeModel_ON_EVENT = ".";
     const char* DOCSTR_daeModel_GetCoSimulationInterface = "";
+    const char* DOCSTR_daeModel_GetFMIInterface = "";
     const char* DOCSTR_daeModel_SaveModelReport = ".";
     const char* DOCSTR_daeModel_SaveRuntimeModelReport = ".";
     const char* DOCSTR_daeModel_ExportObjects = ".";

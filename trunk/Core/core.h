@@ -994,6 +994,26 @@ struct daeModelInfo
 };
 
 /******************************************************************
+    daeFMI2Object_t
+*******************************************************************/
+struct daeFMI2Object_t
+{
+    size_t              reference;   // FMI reference
+    std::vector<size_t> indexes;     // DAE Tools domain indexes
+    std::string         name;        // Flat, stripped name
+    std::string         description; // Description
+    std::string         units;       // Units
+    std::string         type;        // Parameter, Input, Output, STN
+    // Only one valid, depending on "type"
+    union
+    {
+        daeVariable_t*  variable;  // Input, Output
+        daeParameter_t* parameter; // Parameter
+        daeSTN_t*       stn;       // STN
+    };
+};
+
+/******************************************************************
     daeModel_t
 *******************************************************************/
 class daeModel_t : virtual public daeObject_t
@@ -1046,6 +1066,7 @@ public:
                                              std::vector<daeVariable_t*>&  ptrarrInputs,
                                              std::vector<daeVariable_t*>&  ptrarrOutputs,
                                              std::vector<daeSTN_t*>&       ptrarrSTNs) = 0;
+    virtual void    GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)   = 0;
 
     virtual daeDomain_t*		FindDomain(string& strCanonicalName)		= 0;
     virtual daeParameter_t*		FindParameter(string& strCanonicalName)		= 0;

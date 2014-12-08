@@ -723,6 +723,15 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__repr__",					&daepython::daeVariableType__repr__)
     ;
 
+    class_<daeFMI2Object_t>("daeFMI2Object_t", DOCSTR_daeFMI2Object_t)
+        .def_readonly("reference",   &daeFMI2Object_t::reference,   DOCSTR_daeFMI2Object_t_reference)
+        .def_readonly("name",        &daeFMI2Object_t::name,        DOCSTR_daeFMI2Object_t_name)
+        .def_readonly("type",        &daeFMI2Object_t::type,        DOCSTR_daeFMI2Object_t_type)
+        .def_readonly("description", &daeFMI2Object_t::description, DOCSTR_daeFMI2Object_t_description)
+        .def_readonly("units",       &daeFMI2Object_t::units,       DOCSTR_daeFMI2Object_t_units)
+        .def_readonly("indexes",     &daeFMI2Object_t::indexes,     DOCSTR_daeFMI2Object_t_indexes)
+    ;
+
     class_<daeObject, boost::noncopyable>("daeObject", DOCSTR_daeObject, no_init)
         // daeSerializable part
         .add_property("ID",             &daeObject::GetID,      DOCSTR_daeObject_ID)
@@ -1516,6 +1525,9 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("GetCoSimulationInterface", &daepython::daeModel_GetCoSimulationInterface,
                                          ( arg("self") ), DOCSTR_daeModel_GetCoSimulationInterface)
+
+        .def("GetFMIInterface", &daepython::daeModel_GetFMIInterface,
+                                ( arg("self") ), DOCSTR_daeModel_GetFMIInterface)
 
         .def("SaveModelReport",			&daeModel::SaveModelReport,
                                         ( arg("self"), arg("xmlFilename") ), DOCSTR_daeModel_SaveModelReport)
