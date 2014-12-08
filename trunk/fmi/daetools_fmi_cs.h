@@ -3,6 +3,7 @@
 
 #include "include/fmi2Functions.h"
 #include "../dae.h"
+#include "../simulation_loader/simulation_loader.h"
 
 class daeFMIComponent_t
 {
@@ -11,11 +12,14 @@ public:
     virtual ~daeFMIComponent_t();
 
 public:
-    std::string instanceName;
-    std::string fmuGUID;
-    std::string fmuResourceLocation;
-    bool visible;
-    bool loggingOn;
+    daeSimulationLoader          simulationLoader;
+    std::string                  instanceName;
+    std::string                  fmuGUID;
+    std::string                  fmuResourceLocation;
+    bool                         visible;
+    const fmi2CallbackFunctions* functions;
+    bool                         loggingOn;
+    bool                         debugMode;
 };
 
 #endif
