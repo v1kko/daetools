@@ -101,8 +101,8 @@ class fmiModelDescription(fmiObject):
             addAttribute(fmi_root, 'numberOfEventIndicators',    self.numberOfEventIndicators)
 
             addObject(fmi_root, self.CoSimulation, required = True)
-            addObject(fmi_root, self.ModelStructure, required = True)
-            addObjects(fmi_root, 'ModelVariables',    self.ModelVariables, required = True)
+            addObject(fmi_root, self.ModelStructure,)
+            addObjects(fmi_root, 'ModelVariables',  self.ModelVariables, required = True)
 
             addObject(fmi_root, self.DefaultExperiment)
             addObjects(fmi_root, 'TypeDefinitions',   self.TypeDefinitions)
@@ -138,18 +138,17 @@ class fmiCoSimulation(object):
         self.providesDirectionalDerivative          = None # bool
         
     def to_xml(self, tag):
+        addAttribute(tag, 'modelIdentifier',                        self.modelIdentifier, required = True)
+        addAttribute(tag, 'needsExecutionTool',                     self.needsExecutionTool)
         addAttribute(tag, 'canHandleVariableCommunicationStepSize', self.canHandleVariableCommunicationStepSize)
-        addAttribute(tag, 'canHandleEvents',                        self.canHandleEvents)
         addAttribute(tag, 'canInterpolateInputs',                   self.canInterpolateInputs)
         addAttribute(tag, 'maxOutputDerivativeOrder',               self.maxOutputDerivativeOrder)
         addAttribute(tag, 'canRunAsynchronuously',                  self.canRunAsynchronuously)
         addAttribute(tag, 'canBeInstantiatedOnlyOncePerProcess',    self.canBeInstantiatedOnlyOncePerProcess)
         addAttribute(tag, 'canNotUseMemoryManagementFunctions',     self.canNotUseMemoryManagementFunctions)
-        addAttribute(tag, 'modelIdentifier',                        self.modelIdentifier, required = True)
-        addAttribute(tag, 'needsExecutionTool',                     self.needsExecutionTool)
         addAttribute(tag, 'canGetAndSetFMUstate',                   self.canGetAndSetFMUstate)
         addAttribute(tag, 'canSerializeFMUstate',                   self.canSerializeFMUstate)
-        addAttribute(tag, 'providesDirectionalDerivative',          self.providesPartialDerivativesOf_DerivativeFunction_wrt_States)
+        addAttribute(tag, 'providesDirectionalDerivative',          self.providesDirectionalDerivative)
 
     @classmethod
     def from_xml(cls, tag):
@@ -205,8 +204,8 @@ class fmiSimpleType(object):
     xmlTagName = 'SimpleType'
 
     def __init__(self):
-        self.name        = ''   # Required: string
-        self.description = ''   # string
+        self.name        = None # Required: string
+        self.description = None # string
         self.type        = None # Required: fmiReal, fmiInteger, fmiBoolean, fmiString, fmiEnumeration
     
     def to_xml(self, tag):
@@ -222,6 +221,7 @@ class fmiReal(object):
     xmlTagName = 'Real'
 
     def __init__(self):
+        self.declaredType       = None # string
         self.quantity           = None # string
         self.unit               = None # string
         self.displayUnit        = None # string
@@ -230,8 +230,12 @@ class fmiReal(object):
         self.max                = None # float
         self.nominal            = None # float
         self.unbounded          = None # bool
+        self.start              = None # float
+        self.derivative         = None # unsigned int
+        self.reinit             = None # bool (ME only)
 
     def to_xml(self, tag):
+        addAttribute(tag, 'declaredType',     self.declaredType)
         addAttribute(tag, 'quantity',         self.quantity)
         addAttribute(tag, 'unit',             self.unit)
         addAttribute(tag, 'displayUnit',      self.displayUnit)
@@ -240,6 +244,9 @@ class fmiReal(object):
         addAttribute(tag, 'max',              self.max)
         addAttribute(tag, 'nominal',          self.nominal)
         addAttribute(tag, 'unbounded',        self.unbounded)
+        addAttribute(tag, 'start',            self.start)
+        addAttribute(tag, 'derivative',       self.derivative)
+        addAttribute(tag, 'reinit',           self.reinit)
 
     @classmethod
     def from_xml(cls, tag):
@@ -249,14 +256,16 @@ class fmiInteger(object):
     xmlTagName = 'Integer'
 
     def __init__(self):
-        self.quantity = None # string
-        self.min      = None # float
-        self.max      = None # float
+        self.declaredType = None # string
+        self.quantity     = None # string
+        self.min          = None # float
+        self.max          = None # float
 
     def to_xml(self, tag):
-        addAttribute(tag, 'quantity', self.quantity)
-        addAttribute(tag, 'min',      self.min)
-        addAttribute(tag, 'max',      self.max)
+        addAttribute(tag, 'declaredType', self.declaredType)
+        addAttribute(tag, 'quantity',     self.quantity)
+        addAttribute(tag, 'min',          self.min)
+        addAttribute(tag, 'max',          self.max)
 
     @classmethod
     def from_xml(cls, tag):
@@ -266,10 +275,10 @@ class fmiBoolean(object):
     xmlTagName = 'Boolean'
 
     def __init__(self):
-        pass
+        self.declaredType = None # string
 
     def to_xml(self, tag):
-        pass
+        addAttribute(tag, 'declaredType', self.declaredType)
 
     @classmethod
     def from_xml(cls, tag):
@@ -279,10 +288,12 @@ class fmiString(object):
     xmlTagName = 'String'
 
     def __init__(self):
-        pass
+        self.declaredType = None # string
+        self.start        = None # string
 
     def to_xml(self, tag):
-        pass
+        addAttribute(tag, 'declaredType', self.declaredType)
+        addAttribute(tag, 'start',        self.start)
 
     @classmethod
     def from_xml(cls, tag):
@@ -292,11 +303,13 @@ class fmiEnumeration(object):
     xmlTagName = 'Enumeration'
 
     def __init__(self):
-        self.quantity = None # string
-        self.items    = []   # array of fmiEnumerationItem
+        self.declaredType = None # string
+        self.quantity     = None # string
+        self.items        = []   # array of fmiEnumerationItem
 
     def to_xml(self, tag):
-        addAttribute(tag, 'quantity', self.quantity)
+        addAttribute(tag, 'declaredType', self.declaredType)
+        addAttribute(tag, 'quantity',     self.quantity)
         for obj in self.items:
             addObject(tag, obj)
 
@@ -328,6 +341,12 @@ class fmiLogCategory(object):
     logSingularLinearSystems = 'logSingularLinearSystems'
     logNonlinearSystems      = 'logNonlinearSystems'
     logDynamicStateSelection = 'logDynamicStateSelection'
+    logStatusWarning         = 'logStatusWarning'
+    logStatusDiscard         = 'logStatusDiscard'
+    logStatusError           = 'logStatusError'
+    logStatusFatal           = 'logStatusFatal'
+    logStatusPending         = 'logStatusPending'
+    logAll                   = 'logAll'
 
     def __init__(self):
         self.name = None # Required: enum or user-defined string
@@ -388,12 +407,13 @@ class fmiScalarVariable(object):
     initialCalculated = 'calculated'
 
     def __init__(self):
-        self.name           = None # string
-        self.valueReference = None # unsigned int
+        self.name           = None # Required: string
+        self.valueReference = None # Required: unsigned int
         self.description    = None # string
         self.causality      = None # string
         self.variability    = None # string
         self.initial        = None # string
+        self.type           = None # Required: fmiReal, fmiInteger, fmiBoolean, fmiString, fmiEnumeration
 
     def to_xml(self, tag):
         addAttribute(tag, 'name',             self.name, required = True)
@@ -402,6 +422,7 @@ class fmiScalarVariable(object):
         addAttribute(tag, 'causality',        self.causality)
         addAttribute(tag, 'variability',      self.variability)
         addAttribute(tag, 'initial',          self.initial)
+        addObject(tag, self.type, required = True)
 
     @classmethod
     def from_xml(cls, tag):
@@ -499,27 +520,8 @@ def test_fmi2():
     cos.canNotUseMemoryManagementFunctions     = True
     cos.canGetAndSetFMUstate                   = False
     cos.canSerializeFMUstate                   = False
-    cos.providesDirectionalDerivative           = False
+    cos.providesDirectionalDerivative          = False
     fmi_model.CoSimulation = cos
-
-    ms = fmiModelStructure()
-    
-    i = fmiInput()
-    i.name       = 'i' #*
-    i.derivative = None
-    ms.Inputs = [i]
-
-    d = fmiDerivative()
-    d.name  = 'd' #*
-    d.state = 's' #*
-    ms.Derivatives = [d]
-
-    o = fmiOutput()
-    o.name       = 'o' #*
-    o.derivative = None
-    ms.Outputs = [o]
-
-    fmi_model.ModelStructure = ms
 
     param = fmiScalarVariable()
     param.name           = 'parameter' #*
@@ -528,6 +530,7 @@ def test_fmi2():
     param.causality      = fmiScalarVariable.causalityParameter
     param.variability    = fmiScalarVariable.variabilityFixed
     param.initial        = fmiScalarVariable.initialExact
+    param.type           = fmiReal()
 
     no_points_in_domain = fmiScalarVariable()
     no_points_in_domain.name           = 'no_points_in_domain' #*
@@ -536,6 +539,7 @@ def test_fmi2():
     no_points_in_domain.causality      = fmiScalarVariable.causalityLocal
     no_points_in_domain.variability    = fmiScalarVariable.variabilityConstant
     no_points_in_domain.initial        = fmiScalarVariable.initialExact
+    no_points_in_domain.type           = fmiReal()
 
     domain_points = fmiScalarVariable()
     domain_points.name           = 'domain_points' #*
@@ -544,6 +548,7 @@ def test_fmi2():
     domain_points.causality      = fmiScalarVariable.causalityParameter
     domain_points.variability    = fmiScalarVariable.variabilityTunable
     domain_points.initial        = fmiScalarVariable.initialExact
+    domain_points.type           = fmiInteger()
 
     assigned = fmiScalarVariable()
     assigned.name           = 'assigned' #*
@@ -552,6 +557,7 @@ def test_fmi2():
     assigned.causality      = fmiScalarVariable.causalityParameter
     assigned.variability    = fmiScalarVariable.variabilityTunable
     assigned.initial        = fmiScalarVariable.initialExact
+    assigned.type           = fmiReal()
 
     algebraic = fmiScalarVariable()
     algebraic.name           = 'algebraic' #*
@@ -560,6 +566,7 @@ def test_fmi2():
     algebraic.causality      = fmiScalarVariable.causalityLocal
     algebraic.variability    = fmiScalarVariable.variabilityContinuous
     algebraic.initial        = fmiScalarVariable.initialCalculated
+    algebraic.type           = fmiReal()
 
     diff = fmiScalarVariable()
     diff.name           = 'diff' #*
@@ -568,6 +575,7 @@ def test_fmi2():
     diff.causality      = fmiScalarVariable.causalityLocal
     diff.variability    = fmiScalarVariable.variabilityContinuous
     diff.initial        = fmiScalarVariable.initialCalculated
+    diff.type           = fmiReal()
 
     stn = fmiScalarVariable()
     stn.name           = 'stn' #*
@@ -576,6 +584,7 @@ def test_fmi2():
     stn.causality      = fmiScalarVariable.causalityParameter
     stn.variability    = fmiScalarVariable.variabilityDiscrete
     stn.initial        = fmiScalarVariable.initialExact
+    stn.type           = fmiString()
 
     port_in = fmiScalarVariable()
     port_in.name           = 'port_in' #*
@@ -584,6 +593,7 @@ def test_fmi2():
     port_in.causality      = fmiScalarVariable.causalityInput
     port_in.variability    = fmiScalarVariable.variabilityContinuous
     port_in.initial        = fmiScalarVariable.initialExact
+    port_in.type           = fmiReal()
 
     port_out = fmiScalarVariable()
     port_out.name           = 'port_out' #*
@@ -592,6 +602,7 @@ def test_fmi2():
     port_out.causality      = fmiScalarVariable.causalityOutput
     port_out.variability    = fmiScalarVariable.variabilityContinuous
     port_out.initial        = fmiScalarVariable.initialCalculated
+    port_out.type           = fmiReal()
 
     fmi_model.ModelVariables = [param, no_points_in_domain, domain_points, assigned, algebraic, diff, stn, port_in, port_out]
 

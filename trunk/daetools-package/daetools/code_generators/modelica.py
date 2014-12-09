@@ -24,6 +24,10 @@ daetools-Modelica code-generator warnings:
 equation
   %(equations_defs)s
 
+  /* DOFs */
+  %(assigned_inits)s
+
+  /* OnConditionActions from STNs */
   %(whens)s
 
 initial equation
@@ -154,7 +158,11 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
                 else:
                     negative.append('{0}{1}'.format(u, math.fabs(exp)))
 
-        sPositive = '.'.join(positive)
+        if len(positive) == 0:
+            sPositive = 'rad'
+        else:
+            sPositive = '.'.join(positive)
+
         if len(negative) == 0:
             sNegative = ''
         elif len(negative) == 1:
@@ -407,8 +415,6 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         s_indent  = indent * self.defaultIndent
 
         for action in Actions:
-            print action
-
             if action['Type'] == 'eChangeState':
                 stnVariableName = action['STN']
                 stateTo         = action['StateTo']
@@ -559,17 +565,15 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                     fullName     = self.exprFormatter.formatVariable(variable['CanonicalName'], domIndexes, overallIndex)
 
                     if ID == cnDifferential:
-                        temp = '{name} = {value};'.format(name = fullName,
-                                                          value = value,
-                                                          rootModel = rootModel,
-                                                          units = units)
+                        temp = '{name} = {value} /* {units} */;'.format(name = fullName,
+                                                                        value = value,
+                                                                        units = units)
                         self.initial_conditions.append(temp)
 
                     elif ID == cnAssigned:
-                        temp = '{name} = {value}'.format(name = fullName,
-                                                         value = value,
-                                                         rootModel = rootModel,
-                                                         units = units)
+                        temp = '{name} = {value} /* {units} */;'.format(name = fullName,
+                                                                        value = value,
+                                                                        units = units)
                         self.assigned_inits.append(temp)
                                                          
             else:
@@ -580,14 +584,18 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                     attributes = '(start = 0.0, unit = "%s")' % units
                     varTemplate = 'Real {name}{attributes} "{description}";'
 
-                    initTemplate = '{name} = {value};'
+                    initTemplate = '{name} = {value} /* {units} */;'
                     self.initial_conditions.append(initTemplate.format(name = name,
                                                                        units = units,
-                                                                       rootModel = rootModel,
                                                                        value = value))
                 elif ID == cnAssigned:
-                    attributes = '(fixed = true, unit = "%s")' % units
-                    varTemplate = 'Real {name}{attributes} = {value} "{description}";'
+                    attributes = '(unit = "%s")' % units
+                    varTemplate = 'Real {name}{attributes} "{description}";'
+                    
+                    temp = '{name} = {value} /* {units} */;'.format(name = name,
+                                                                    value = value,
+                                                                    units = units)
+                    self.assigned_inits.append(temp)
 
                 else:
                     attributes = '(unit = "%s")' % units

@@ -430,9 +430,10 @@ class daeCodeGenerator_gPROMS(daeCodeGenerator):
             self.domains_inits.append(domTemplate.format(name = name,
                                                          rootModel = rootModel,
                                                          numberOfPoints = numberOfPoints))
-            domTemplate   = '{rootModel}.{name} := {points};'
+            domTemplate   = '{rootModel}.{name} := {points}; # {units}'
             self.domains_inits.append(domTemplate.format(name = name,
                                                          rootModel = rootModel,
+                                                         units = units,
                                                          points = points))
             
         for parameter in runtimeInformation['Parameters']:
@@ -580,9 +581,9 @@ class daeCodeGenerator_gPROMS(daeCodeGenerator):
         equations_s = ''.join(self.equations)
         if equations_s.find(self.exprFormatter.TIME):
             self.variable_types.append('DECLARE TYPE')
-            self.variable_types.append('  no_t = 0 : -1e30 : +1e30 UNIT = ""')
+            self.variable_types.append('  gproms_time_t = 0 : 0 : +1e30 UNIT = "s"')
             self.variable_types.append('END')
-            self.variables.append('%s as no_t' % self.exprFormatter.TIME)
+            self.variables.append('%s as gproms_time_t' % self.exprFormatter.TIME)
             self.equations.append('$%s = 1;' % self.exprFormatter.TIME)
-            self.initial_conditions.append('{rootModel}.{time} = 0;'.format(rootModel = rootModel,
-                                                                            time = self.exprFormatter.TIME))
+            self.initial_conditions.append('{rootModel}.{time} = 0; # s'.format(rootModel = rootModel,
+                                                                                time = self.exprFormatter.TIME))

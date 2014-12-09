@@ -38,9 +38,14 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
     if(fmuType != fmi2CoSimulation)
         return NULL;
 
+    daeFMIComponent_t* c = NULL;
+    std::string strPythonFile, strSimulationClass,
+                strDAESolver, strLASolver, strDataReporter,
+                strDataReporterConnectionString, strLog;
+
     try
     {
-        daeFMIComponent_t* c = new daeFMIComponent_t();
+        c = new daeFMIComponent_t();
 
         c->instanceName         = instanceName;
         c->fmuGUID              = fmuGUID;
@@ -49,21 +54,18 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         c->visible              = visible;
         c->loggingOn            = loggingOn;
 
-        std::string strPythonFile, strSimulationClass,
-                    strDAESolver, strLASolver, strDataReporter,
-                    strDataReporterConnectionString, strLog;
-
         strDAESolver    = "Sundials IDAS";
         strDataReporter = "TCPIPDataReporter"; // BlackHoleDataReporter
         strLog          = "BaseLog";
 
         boost::property_tree::ptree pt;
-        std::string					json_settings = std::string(fmuResourceLocation) + "/resources/settings.json";
-        std::string					json_ini_file = std::string(fmuResourceLocation) + "/resources/init.json";
+        std::string resources_dir = std::string(fmuResourceLocation) + "/resources/";
+        std::string	json_settings = resources_dir + "settings.json";
+        std::string	json_ini_file = resources_dir + "init.json";
 
         boost::property_tree::json_parser::read_json(json_settings, pt);
-        strPythonFile      = pt.get<std::string>("simulationClass");
-        strSimulationClass = pt.get<std::string>("simulationName");
+        strPythonFile      = resources_dir + pt.get<std::string>("simulationFile");
+        strSimulationClass = pt.get<std::string>("simulationClass");
         strLASolver        = pt.get<std::string>("LASolver");
 
         c->simulationLoader.LoadSimulation(strPythonFile, strSimulationClass);
@@ -73,7 +75,19 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
     }
     catch(std::exception& e)
     {
+        std::string error = "Exception thrown in daetools FMI:\n";
+        error += std::string(e.what()) + "\n\n";
+        error += std::string("FMU settings:\n");
+        error += std::string("  fmuResourceLocation = ") + fmuResourceLocation+  + "\n";
+        error += std::string("  PythonFile = ")          + strPythonFile.c_str() + "\n";
+        error += std::string("  SimulationClass = ")     + strSimulationClass.c_str() + "\n";
+        error += std::string("  LASolver = ")            + strLASolver.c_str() + "\n";
+
+        std::cout << error<< std::endl;
+        if(c)
+            c->logFatal(error);
     }
+
     return NULL;
 }
 
@@ -89,6 +103,7 @@ void fmi2FreeInstance(fmi2Component comp)
     }
     catch(std::exception& e)
     {
+        c->logError(e.what());
     }
 }
 
@@ -111,12 +126,20 @@ fmi2Status fmi2SetupExperiment(fmi2Component comp,
             c->simulationLoader.SetTimeHorizon(stopTime);
             c->simulationLoader.SetReportingInterval(stopTime/2);
         }
+
+        /* First solve initial with the inputs provided at the beggining.
+         * Then, show the SimulationExplorer if the "visible" flag is set
+         * to allow inspection and further changes. Finally, report the data
+         * in case the user set-up the model to use the daetools data-reporter. */
         c->simulationLoader.SolveInitial();
+        if(c->visible)
+            c->simulationLoader.ShowSimulationExplorer();
         c->simulationLoader.ReportData();
     }
     catch(std::exception& e)
     {
-        return fmi2Error;
+        c->logFatal(e.what());
+        return fmi2Fatal;
     }
 
     return fmi2OK;
@@ -152,7 +175,8 @@ fmi2Status fmi2Terminate(fmi2Component comp)
     }
     catch(std::exception& e)
     {
-        return fmi2Error;
+        c->logFatal(e.what());
+        return fmi2Fatal;
     }
 
     return fmi2OK;
@@ -185,6 +209,7 @@ fmi2Status fmi2GetReal(fmi2Component comp, const fmi2ValueReference vr[], size_t
     }
     catch(std::exception& e)
     {
+        c->logFatal(e.what());
         return fmi2Fatal;
     }
 
@@ -215,7 +240,7 @@ fmi2Status fmi2GetString(fmi2Component comp, const fmi2ValueReference vr[], size
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2Fatal;
+    return fmi2Error;
 /*
     try
     {
@@ -249,6 +274,7 @@ fmi2Status fmi2SetReal(fmi2Component comp, const fmi2ValueReference vr[], size_t
     }
     catch(std::exception& e)
     {
+        c->logFatal(e.what());
         return fmi2Fatal;
     }
 
@@ -289,6 +315,7 @@ fmi2Status fmi2SetString(fmi2Component comp, const fmi2ValueReference vr[], size
     }
     catch(std::exception& e)
     {
+        c->logFatal(e.what());
         return fmi2Fatal;
     }
 
@@ -326,6 +353,7 @@ fmi2Status fmi2DoStep(fmi2Component comp,
     }
     catch(std::exception& e)
     {
+        c->logError(e.what());
         return fmi2Error;
     }
 
@@ -400,4 +428,16 @@ daeFMIComponent_t::daeFMIComponent_t()
 daeFMIComponent_t::~daeFMIComponent_t()
 {
 
+}
+
+void daeFMIComponent_t::logFatal(const std::string& error)
+{
+    if(functions && loggingOn && functions->logger)
+        functions->logger(functions->componentEnvironment, instanceName.c_str(), fmi2Fatal, "logStatusFatal", error.c_str());
+}
+
+void daeFMIComponent_t::logError(const std::string& error)
+{
+    if(functions && loggingOn && functions->logger)
+        functions->logger(functions->componentEnvironment, instanceName.c_str(), fmi2Error, "logStatusError", error.c_str());
 }

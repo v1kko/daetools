@@ -14,7 +14,8 @@ SOURCES += dllmain.cpp \
 
 HEADERS += stdafx.h \
            simulation_loader.h \
-           simulation_loader_c.h
+           simulation_loader_c.h \
+           simulation_loader_common.h
 
 #message($$system($${PYTHON}-config --cflags))
 #message($$system($${PYTHON}-config --ldflags))

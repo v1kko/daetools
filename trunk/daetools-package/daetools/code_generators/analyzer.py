@@ -29,7 +29,7 @@ class daeCodeGeneratorAnalyzer(object):
                                   }
 
         self._collectObjects(self._simulation.m)
-        print self.ports
+        #print self.ports
         #print self.models
         
         self.models.reverse()
@@ -509,6 +509,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['CanonicalName']        = parameter.CanonicalName
             data['Description']          = parameter.Description
             data['Domains']              = [domain.NumberOfPoints for domain in parameter.Domains]
+            data['DomainNames']          = [domain.CanonicalName for domain in parameter.Domains]
             data['NumberOfPoints']       = parameter.NumberOfPoints
             data['Values']               = parameter.npyValues                # nd_array[d1][d2]...[dn] or float if no domains
             data['DomainsIndexesMap']    = parameter.GetDomainsIndexesMap(0)  # {index : [domains indexes]}
@@ -522,6 +523,7 @@ class daeCodeGeneratorAnalyzer(object):
             data['CanonicalName']        = variable.CanonicalName
             data['Description']          = variable.Description
             data['Domains']              = [domain.NumberOfPoints for domain in variable.Domains]
+            data['DomainNames']          = [domain.CanonicalName for domain in variable.Domains]
             data['NumberOfPoints']       = variable.NumberOfPoints
             data['OverallIndex']         = variable.OverallIndex
             data['Values']               = variable.npyValues                # nd_array[d1][d2]...[dn] or float if no domains

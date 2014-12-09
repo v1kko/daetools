@@ -17,7 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we model a very simmple conduction problem where a piece of copper
+In this example we model a very simple conduction problem where a piece of copper
 (a plate) is at one side exposed to the source of heat and at the other to the
 surroundings.
 

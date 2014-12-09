@@ -58,7 +58,10 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.w = daeDomain("w", self, m, "Ports width")
+        self.w = daeDomain("w", self, unit(), "Ports width")
+
+        self.p1 = daeParameter("p1", s**(-1), self, "Parameter multiplier 1")
+        self.p2 = daeParameter("p2", s**(-1), self, "Parameter multiplier 2")
 
         self.y1 = daeVariable("y1", no_t, self, "State variable 1")
         self.y2 = daeVariable("y2", no_t, self, "State variable 2", [self.w])
@@ -75,12 +78,12 @@ class modTutorial(daeModel):
         nw = self.w.NumberOfPoints
 
         # State variables
-        eq = self.CreateEquation("y1", "Equation to calculate the state variable y1.")
-        eq.Residual = self.y1.dt() - self.in1.y() * Constant(1/s)
+        eq = self.CreateEquation("y1", "Equation to calculate the state variable y1")
+        eq.Residual = self.y1.dt() - self.in1.y() * self.p1()
 
         for w in range(nw):
             eq = self.CreateEquation("y2(%d)" % w, "Equation to calculate the state variable y2(%d)" % w)
-            eq.Residual = self.y2.dt(w) - self.in2.y(w) * Constant(1/s)
+            eq.Residual = self.y2.dt(w) - self.in2.y(w) * self.p2()
 
         # Set the outlet port values
         eq = self.CreateEquation("out_1", "Equation to calculate out1.y")
@@ -98,6 +101,9 @@ class simTutorial(daeSimulation):
 
     def SetUpParametersAndDomains(self):
         self.m.w.CreateArray(1)
+
+        self.m.p1.SetValue(10)
+        self.m.p2.SetValues(20)
 
     def SetUpVariables(self):
         nw = self.m.w.NumberOfPoints
@@ -146,6 +152,26 @@ def consoleRun():
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
+    
+    # Code generators
+    import tempfile
+    tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-fmi-')
+    print('Generated code will be located in: %s' % tmp_folder)
+
+    # Modelica:
+    from daetools.code_generators.modelica import daeCodeGenerator_Modelica
+    cg = daeCodeGenerator_Modelica()
+    cg.generateSimulation(simulation, tmp_folder)
+
+    # gPROMS:
+    from daetools.code_generators.gproms import daeCodeGenerator_gPROMS
+    cg = daeCodeGenerator_gPROMS()
+    cg.generateSimulation(simulation, tmp_folder)
+
+    # Functional Mock-up Interface for co-simulation
+    from daetools.code_generators.fmi import daeCodeGenerator_FMI
+    cg = daeCodeGenerator_FMI()
+    cg.generateSimulation(simulation, tmp_folder, __file__, 'simTutorial', [])
 
     # Run
     simulation.Run()

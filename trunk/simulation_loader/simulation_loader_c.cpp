@@ -4,33 +4,34 @@
 #include <boost/python.hpp>
 
 #include "simulation_loader.h"
-#include "simulation_loader_c.h"
+#include "simulation_loader_common.h"
 #include "../dae.h"
 
+/* Common functions */
 static std::string g_strLastError;
-
-static std::string getPythonTraceback()
-{
-    PyObject *ptype, *pvalue, *ptraceback;
-    PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-
-    boost::python::handle<> hType(ptype);
-    boost::python::object extype(hType);
-    boost::python::handle<> hTraceback(ptraceback);
-    boost::python::object traceback(hTraceback);
-
-    //Extract error message
-    std::string strErrorMessage = boost::python::extract<std::string>(pvalue);
-    std::string strTraceback    = boost::python::extract<std::string>(ptraceback);
-
-    return strTraceback;
-}
 
 const char* GetLastError()
 {
     return g_strLastError.c_str();
 }
 
+bool GetStrippedName(const char strSource[512], char strDestination[512])
+{
+    try
+    {
+        std::string strStripped = daeSimulationLoader::GetStrippedName(strSource);
+        strncpy(strDestination, strStripped.c_str(), 512);
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
+/* SimulationLoader c-interface */
 void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
 {
     try
@@ -38,11 +39,6 @@ void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
         daeSimulationLoader* loader = new daeSimulationLoader();
         loader->LoadSimulation(strPythonFile, strSimulationClass);
         return loader;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -77,11 +73,6 @@ bool Initialize(void* s,
                                bCalculateSensitivities);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -103,11 +94,6 @@ bool InitializeJSON(void* s, const char* strJSONRuntimeSettings)
 
         ptr_loader->Initialize(strJSONRuntimeSettings);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -131,11 +117,6 @@ bool SetTimeHorizon(void* s, double timeHorizon)
         ptr_loader->SetTimeHorizon(timeHorizon);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -157,11 +138,6 @@ bool SetReportingInterval(void* s, double reportingInterval)
 
         ptr_loader->SetReportingInterval(reportingInterval);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -185,11 +161,6 @@ bool SolveInitial(void* s)
         ptr_loader->SolveInitial();
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -211,11 +182,6 @@ bool Run(void* s)
 
         ptr_loader->Run();
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -239,11 +205,6 @@ bool Reinitialize(void* s)
         ptr_loader->Reinitialize();
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -266,32 +227,6 @@ bool Finalize(void* s)
         ptr_loader->Finalize();
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
-    catch(std::exception& e)
-    {
-        g_strLastError = e.what();
-        std::cout << e.what() << std::endl;
-    }
-    return false;
-}
-
-bool GetStrippedName(const char strSource[512], char strDestination[512])
-{
-    try
-    {
-        std::string strStripped = daeSimulationLoader::GetStrippedName(strSource);
-        strncpy(strDestination, strStripped.c_str(), 512);
-        return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -312,11 +247,6 @@ unsigned int GetNumberOfParameters(void* s)
         }
 
         return ptr_loader->GetNumberOfParameters();
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -346,11 +276,6 @@ unsigned int GetNumberOfInputs(void* s)
         }
         return ptr_loader->GetNumberOfInputs();
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -371,11 +296,6 @@ unsigned int GetNumberOfOutputs(void* s)
         }
         return ptr_loader->GetNumberOfOutputs();
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -395,11 +315,6 @@ unsigned int GetNumberOfStateTransitionNetworks(void* s)
             return 0;
         }
         return ptr_loader->GetNumberOfStateTransitionNetworks();
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -424,11 +339,6 @@ bool GetParameterInfo(void* s, unsigned int index, char strName[512], unsigned i
         ptr_loader->GetParameterInfo(index, name, numberOfPoints);
         strncpy(strName, name.c_str(), 512);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -465,11 +375,6 @@ bool GetInputInfo(void* s, unsigned int index, char strName[512], unsigned int* 
         strncpy(strName, name.c_str(), 512);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -493,11 +398,6 @@ bool GetOutputInfo(void* s, unsigned int index, char strName[512], unsigned int*
         ptr_loader->GetOutputInfo(index, name, numberOfPoints);
         strncpy(strName, name.c_str(), 512);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -523,11 +423,6 @@ bool GetStateTransitionNetworkInfo(void* s, unsigned int index, char strName[512
         strncpy(strName, name.c_str(), 512);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -550,11 +445,6 @@ bool GetParameterValue(void* s, unsigned int index, double* value, unsigned int 
 
         ptr_loader->GetParameterValue(index, value, numberOfPoints);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -585,11 +475,6 @@ bool GetInputValue(void* s, unsigned int index, double* value, unsigned int numb
         ptr_loader->GetInputValue(index, value, numberOfPoints);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -611,11 +496,6 @@ bool GetOutputValue(void* s, unsigned int index, double* value, unsigned int num
 
         ptr_loader->GetOutputValue(index, value, numberOfPoints);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -641,11 +521,6 @@ bool GetActiveState(void* s, unsigned int index, char strActiveState[64])
         strncpy(strActiveState, state.c_str(), 64);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -667,11 +542,6 @@ bool SetParameterValue(void* s, unsigned int index, const double* value, unsigne
 
         ptr_loader->SetParameterValue(index, value, numberOfPoints);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -702,11 +572,6 @@ bool SetInputValue(void* s, unsigned int index, const double* value, unsigned in
         ptr_loader->SetInputValue(index, value, numberOfPoints);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -728,11 +593,6 @@ bool SetOutputValue(void* s, unsigned int index, const double* value, unsigned i
 
         ptr_loader->SetOutputValue(index, value, numberOfPoints);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -757,11 +617,6 @@ bool SetActiveState(void* s, unsigned int index, char strActiveState[64])
         ptr_loader->SetActiveState(index, state);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -783,11 +638,6 @@ bool IntegrateForTimeInterval(void* s, double timeInterval)
 
         ptr_loader->IntegrateForTimeInterval(timeInterval, true);
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -811,11 +661,6 @@ bool IntegrateUntilTime(void* s, double time)
         ptr_loader->IntegrateUntilTime(time, false, true);
         return true;
     }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
-    }
     catch(std::exception& e)
     {
         g_strLastError = e.what();
@@ -837,11 +682,6 @@ bool ReportData(void* s)
 
         ptr_loader->ReportData();
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {
@@ -865,11 +705,6 @@ bool FreeSimulation(void* s)
         delete ptr_loader;
         ptr_loader = NULL;
         return true;
-    }
-    catch(boost::python::error_already_set const &)
-    {
-        g_strLastError = getPythonTraceback();
-        PyErr_Print();
     }
     catch(std::exception& e)
     {

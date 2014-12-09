@@ -137,7 +137,11 @@ class daeExpressionFormatter(object):
                 else:
                     negative.append('{0}^{1}'.format(u, math.fabs(exp)))
 
-        sPositive = ' '.join(positive)
+        if len(positive) == 0:
+            sPositive = 'rad'
+        else:
+            sPositive = ' '.join(positive)
+            
         if len(negative) == 0:
             sNegative = ''
         elif len(negative) == 1:

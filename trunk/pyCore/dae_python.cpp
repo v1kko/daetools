@@ -730,6 +730,13 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("description", &daeFMI2Object_t::description, DOCSTR_daeFMI2Object_t_description)
         .def_readonly("units",       &daeFMI2Object_t::units,       DOCSTR_daeFMI2Object_t_units)
         .def_readonly("indexes",     &daeFMI2Object_t::indexes,     DOCSTR_daeFMI2Object_t_indexes)
+        // Only one valid, depending on "type"
+        .add_property("parameter",   make_function(&daepython::daeFMI2Object_t_parameter, return_internal_reference<>()),
+                                     DOCSTR_daeFMI2Object_t_parameter)
+        .add_property("variable",    make_function(&daepython::daeFMI2Object_t_variable, return_internal_reference<>()),
+                                     DOCSTR_daeFMI2Object_t_variable)
+        .add_property("stn",         make_function(&daepython::daeFMI2Object_t_stn, return_internal_reference<>()),
+                                     DOCSTR_daeFMI2Object_t_stn)
     ;
 
     class_<daeObject, boost::noncopyable>("daeObject", DOCSTR_daeObject, no_init)

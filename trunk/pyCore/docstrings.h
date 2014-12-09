@@ -93,6 +93,9 @@ const char* DOCSTR_daeFMI2Object_t = "";
     const char* DOCSTR_daeFMI2Object_t_description = "";
     const char* DOCSTR_daeFMI2Object_t_units = "";
     const char* DOCSTR_daeFMI2Object_t_indexes = "";
+    const char* DOCSTR_daeFMI2Object_t_variable = "";
+    const char* DOCSTR_daeFMI2Object_t_parameter = "";
+    const char* DOCSTR_daeFMI2Object_t_stn = "";
 
 const char* DOCSTR_daeObject = "";  
     const char* DOCSTR_daeObject_ID = "";  

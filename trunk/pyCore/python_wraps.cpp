@@ -1365,6 +1365,27 @@ boost::python::list daeCondition_GetExpressions(daeCondition& self)
 }
 
 /*******************************************************
+    daeFMI2Object_t
+*******************************************************/
+daeParameter* daeFMI2Object_t_parameter(daeFMI2Object_t& self)
+{
+    daeParameter* parameter = dynamic_cast<daeParameter*>(self.parameter);
+    return parameter;
+}
+
+daeVariable* daeFMI2Object_t_variable(daeFMI2Object_t& self)
+{
+    daeVariable* variable = dynamic_cast<daeVariable*>(self.variable);
+    return variable;
+}
+
+daeSTN* daeFMI2Object_t_stn(daeFMI2Object_t& self)
+{
+    daeSTN* stn = dynamic_cast<daeSTN*>(self.stn);
+    return stn;
+}
+
+/*******************************************************
     daeObject
 *******************************************************/
 daeObject* daeObject_GetModel(daeObject& self)

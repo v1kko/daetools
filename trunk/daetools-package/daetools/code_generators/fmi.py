@@ -1,4 +1,4 @@
-import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile, json
+import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile, json, time
 import daetools
 from daetools.pyDAE import *
 from .c99 import daeCodeGenerator_c99
@@ -101,7 +101,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self.copyright                  = ''
             self.license                    = ''
             self.generationTool             = 'DAE Tools v%s' % daeVersion(True)
-            self.generationDateAndTime      = ''
+            self.generationDateAndTime      = time.strftime("%d.%m.%Y %H:%M:%S", time.localtime())
             self.variableNamingConvention   = fmiModelDescription.variableNamingConventionStructured
             self.numberOfEventIndicators    = 0
 
@@ -135,27 +135,45 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self.DefaultExperiment.stopTime  = simulation.TimeHorizon
             self.DefaultExperiment.tolerance = simulation.DAESolver.RelativeTolerance
 
-            # Add unit definitions
-
-            # Add variable types
-            
-            # Add model structure (inputs/outputs)
-            
             # Add model variables
             fmi_interface = simulation.m.GetFMIInterface()
-            print fmi_interface
+            #print fmi_interface
 
+            variableTypesUsed = {}
+            unitsUsed = {}
             for ref, f in fmi_interface.items():
                 if f.type == 'Input':
                     self._addInput(f)
+                    if not f.variable.VariableType.Name in variableTypesUsed:
+                        variableTypesUsed[f.variable.VariableType.Name] = f.variable.VariableType
+                    if not str(f.variable.VariableType.Units) in unitsUsed:
+                        unitsUsed[str(f.variable.VariableType.Units)] = f.variable.VariableType.Units
+
                 elif f.type == 'Output':
                     self._addOutput(f)
+                    if not f.variable.VariableType.Name in variableTypesUsed:
+                        variableTypesUsed[f.variable.VariableType.Name] = f.variable.VariableType
+                    if not str(f.variable.VariableType.Units) in unitsUsed:
+                        unitsUsed[str(f.variable.VariableType.Units)] = f.variable.VariableType.Units
+
                 elif f.type == 'Parameter':
                     self._addParameter(f)
+                    if not str(f.parameter.Units) in unitsUsed:
+                        unitsUsed[str(f.parameter.Units)] = f.parameter.Units
+
                 elif f.type == 'STN':
                     self._addSTN(f)
+
                 else:
                     raise RuntimeError('Invalid variable reference type')
+
+            # Add unit definitions
+            for unit_name, u in unitsUsed.items():
+                self._addUnitDefinition(u)
+
+            # Add variable types
+            for vartype_name, var_type in variableTypesUsed.items():
+                self._addTypeDefinition(var_type)
 
             # Save model description xml file
             self.to_xml(xml_description_filename)
@@ -178,6 +196,42 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 #shutil.rmtree(tmp_folder)
                 pass
 
+    def _formatUnits(self, units):
+        # Format: m.kg2/s-2 meaning m * kg**2 / s**2
+        positive = []
+        negative = []
+        for u, exp in list(units.toDict().items()):
+            if exp >= 0:
+                if exp == 1:
+                    positive.append('{0}'.format(u))
+                elif int(exp) == exp:
+                    positive.append('{0}^{1}'.format(u, int(exp)))
+                else:
+                    positive.append('{0}^{1}'.format(u, exp))
+
+        for u, exp in list(units.toDict().items()):
+            if exp < 0:
+                if exp == -1:
+                    negative.append('{0}'.format(u))
+                elif int(exp) == exp:
+                    negative.append('{0}^{1}'.format(u, int(math.fabs(exp))))
+                else:
+                    negative.append('{0}^{1}'.format(u, math.fabs(exp)))
+
+        if len(positive) == 0:
+            sPositive = 'rad'
+        else:
+            sPositive = '.'.join(positive)
+
+        if len(negative) == 0:
+            sNegative = ''
+        elif len(negative) == 1:
+            sNegative = '/' + '.'.join(negative)
+        else:
+            sNegative = '/(' + '.'.join(negative) + ')'
+
+        return sPositive + sNegative
+        
     def _copy_solib(self, platform_system, platform_machine, modelIdentifier, binaries_dir):
         # Copy libdaetools_fmi_cs-{platform}_{system}.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder
         if platform_system == 'Linux':
@@ -216,18 +270,16 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             pass
         
     def _addInput(self, fmi_obj):
-        #i = fmiInput()
-        #i.name       = str(fmi_obj.name) #*
-        #i.derivative = int(fmi_obj.reference)
-        #i.description    = str(fmi_obj.description) + ' [%s]' % fmi_obj.units
-        #self.ModelStructure.Inputs.append(i)
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*
         sv.valueReference = int(fmi_obj.reference) #*
-        sv.description    = str(fmi_obj.description) + ' [%s]' % fmi_obj.units
+        sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityInput
         sv.variability    = fmiScalarVariable.variabilityTunable
         sv.initial        = fmiScalarVariable.initialExact
+        sv.type           = fmiReal()
+        sv.type.declaredType = fmi_obj.variable.VariableType.Name
+        sv.type.start        = fmi_obj.variable.GetValue(list(fmi_obj.indexes))
         self.ModelVariables.append(sv)
 
     def _addOutput(self, fmi_obj):
@@ -238,22 +290,40 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*
         sv.valueReference = int(fmi_obj.reference) #*
-        sv.description    = str(fmi_obj.description) + ' [%s]' % fmi_obj.units
+        sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityOutput
         sv.variability    = fmiScalarVariable.variabilityContinuous
         sv.initial        = fmiScalarVariable.initialCalculated
+        sv.type           = fmiReal()
+        sv.type.declaredType = fmi_obj.variable.VariableType.Name
         self.ModelVariables.append(sv)
 
     def _addParameter(self, fmi_obj):
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*
         sv.valueReference = int(fmi_obj.reference) #*
-        sv.description    = str(fmi_obj.description) + ' [%s]' % fmi_obj.units
+        sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityParameter
         sv.variability    = fmiScalarVariable.variabilityFixed
         sv.initial        = fmiScalarVariable.initialExact
+        sv.type           = fmiReal()
+        sv.type.unit      = self._formatUnits(fmi_obj.parameter.Units)
+        sv.type.start     = fmi_obj.parameter.GetValue()
         self.ModelVariables.append(sv)
 
+    def _addSTN(self, fmi_obj):
+        sv = fmiScalarVariable()
+        sv.name           = str(fmi_obj.name) #*
+        sv.valueReference = int(fmi_obj.reference) #*
+        sv.description    = str(fmi_obj.description)
+        sv.causality      = fmiScalarVariable.causalityParameter
+        sv.variability    = fmiScalarVariable.variabilityDiscrete
+        sv.initial        = fmiScalarVariable.initialExact
+        sv.type           = fmiString()
+        sv.type.start     = fmi_obj.stn.ActiveState
+        self.ModelVariables.append(sv)
+        
+    """
     def _addNumberOfPointsInDomain(self, fmi_obj):
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*
@@ -304,16 +374,6 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.initial        = fmiScalarVariable.initialCalculated
         self.ModelVariables.append(sv)
 
-    def _addSTN(self, fmi_obj):
-        sv = fmiScalarVariable()
-        sv.name           = str(fmi_obj.name) #*
-        sv.valueReference = int(fmi_obj.reference) #*
-        sv.description    = str(fmi_obj.description) + ' [%s]' % fmi_obj.units
-        sv.causality      = fmiScalarVariable.causalityParameter
-        sv.variability    = fmiScalarVariable.variabilityDiscrete
-        sv.initial        = fmiScalarVariable.initialExact
-        self.ModelVariables.append(sv)
-
     def _addInletPortVariable(self, fmi_obj):
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*
@@ -333,48 +393,46 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.variability    = fmiScalarVariable.variabilityContinuous
         sv.initial        = fmiScalarVariable.initialCalculated
         self.ModelVariables.append(sv)
-
+    """
+    
     def _addUnitDefinition(self, dae_unit):
         dae_bu = dae_unit.baseUnit
         
         unit = fmiUnit()
-        bu = fmiBaseUnit()
-        unit.name     = str(dae_unit) # *
-        unit.baseUnit = bu
-
-        bu.factor = dae_bu.multiplier
-        bu.offset = 0.0
+        unit.name = self._formatUnits(dae_unit) # *
+        
+        unit.baseUnit = fmiBaseUnit()
+        unit.baseUnit.factor = dae_bu.multiplier
+        unit.baseUnit.offset = 0.0
         if dae_bu.L != 0:
-            bu.m = dae_bu.L
+            unit.baseUnit.m = dae_bu.L
         if dae_bu.M != 0:
-            bu.kg = dae_bu.M
+            unit.baseUnit.kg = dae_bu.M
         if dae_bu.T != 0:
-            bu.s = dae_bu.T
+            unit.baseUnit.s = dae_bu.T
         if dae_bu.C != 0:
-            bu.cd = dae_bu.C
+            unit.baseUnit.cd = dae_bu.C
         if dae_bu.I != 0:
-            bu.A = dae_bu.I
+            unit.baseUnit.A = dae_bu.I
         if dae_bu.O != 0:
-            bu.K = dae_bu.O
+            unit.baseUnit.K = dae_bu.O
         if dae_bu.N != 0:
-            bu.mol = dae_bu.N
-        bu.rad = None
+            unit.baseUnit.mol = dae_bu.N
+
+        # If all are 0, set rad = 1
+        if dae_bu.L == 0 and dae_bu.M == 0 and dae_bu.T == 0 and dae_bu.C == 0 and dae_bu.I == 0 and dae_bu.O == 0 and dae_bu.N == 0:
+            unit.baseUnit.rad = 1
+
         self.UnitDefinitions.append(unit)
 
     def _addTypeDefinition(self, var_type):
-        t = fmiReal()
-        real = fmiSimpleType()
-        real.name        = var_type.Name #*
-        real.description = None
-        real.type        = t #*
+        st = fmiSimpleType()
+        st.name = var_type.Name #*
+ 
+        st.type = fmiReal()
+        st.type.unit    = self._formatUnits(var_type.Units)
+        st.type.min     = var_type.LowerBound
+        st.type.max     = var_type.UpperBound
+        st.type.nominal = var_type.InitialGuess
 
-        t.quantity           = None
-        t.unit               = str(var_type.Unit)
-        t.displayUnit        = None
-        t.relativeQuantity   = True
-        t.min                = var_type.LB
-        t.max                = var_type.UB
-        t.nominal            = None
-        t.unbounded          = True
-
-        self.TypeDefinitions.append(real)
+        self.TypeDefinitions.append(st)

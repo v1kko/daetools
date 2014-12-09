@@ -6,9 +6,6 @@ extern "C"
 {
 #endif
 
-const char* GetLastError();
-bool GetStrippedName(const char strSource[512], char strDestination[512]);
-
 void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass);
 bool Initialize(void* s,
                 const char* strDAESolver,

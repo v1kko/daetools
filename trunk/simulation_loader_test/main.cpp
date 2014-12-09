@@ -4,6 +4,24 @@
 #include <streambuf>
 #include <boost/python.hpp>
 
+#define FMI2_Export
+#include "../fmi/include/fmi2Functions.h"
+
+
+int main(int argc, char *argv[])
+{
+    fmi2Component comp = fmi2Instantiate("tutorial20",
+                                         fmi2CoSimulation,
+                                         "6f6dd048-7eff-11e4-bf92-9cb70d5dfdfc",
+                                         "/tmp/daetools-fmu-QOp8id",
+                                         NULL,
+                                         0,
+                                         1);
+
+    if(comp == NULL)
+        std::cout << "comp is NULL" << std::endl;
+}
+/*
 int main(int argc, char *argv[])
 {
     try
@@ -67,3 +85,4 @@ int main(int argc, char *argv[])
         std::cout << e.what() << std::endl;
     }
 }
+*/

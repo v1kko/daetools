@@ -318,6 +318,13 @@ adouble adouble_array__call__(adouble_array& a, boost::python::object index);
 boost::python::list daeCondition_GetExpressions(daeCondition& self);
 
 /*******************************************************
+    daeFMI2Object_t
+*******************************************************/
+daeParameter* daeFMI2Object_t_parameter(daeFMI2Object_t& self);
+daeVariable*  daeFMI2Object_t_variable(daeFMI2Object_t& self);
+daeSTN*       daeFMI2Object_t_stn(daeFMI2Object_t& self);
+
+/*******************************************************
 	daeObject
 *******************************************************/
 daeObject* daeObject_GetModel(daeObject& self);

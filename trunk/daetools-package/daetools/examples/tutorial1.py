@@ -266,12 +266,13 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+
     # Save runtime settings in json format
-    daeSimulationExplorer.saveJSONSettings('tutorial1.json', simulation, simName)
+    #daeSimulationExplorer.saveJSONSettings('tutorial1.json', simulation, simName)
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
-    
+
     # Run
     simulation.Run()
     simulation.Finalize()
