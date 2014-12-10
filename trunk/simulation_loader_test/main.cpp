@@ -7,21 +7,96 @@
 #define FMI2_Export
 #include "../fmi/include/fmi2Functions.h"
 
-
+/* Test FMU */
 int main(int argc, char *argv[])
 {
+    fmi2Status status;
     fmi2Component comp = fmi2Instantiate("tutorial20",
                                          fmi2CoSimulation,
                                          "6f6dd048-7eff-11e4-bf92-9cb70d5dfdfc",
-                                         "/tmp/daetools-fmu-QOp8id",
+                                         "/tmp/daetools-fmu-67cEqB",
                                          NULL,
                                          0,
                                          1);
 
     if(comp == NULL)
-        std::cout << "comp is NULL" << std::endl;
+    {
+        std::cout << "Cannot load tutorial20.fmu" << std::endl;
+        return 255;
+    }
+
+    /* tutorial20.py:
+         0 - parameter p1
+         1 - parameter p2
+         2 - input in_1.y
+         3 - input in_2.y
+         4 - output out_1.y
+         5 - output out_2.y
+    */
+
+    /* Setup experiment */
+    status = fmi2SetupExperiment(comp, false, 1e-5, 0.0, true, 100.0);
+    if(status != fmi2OK)
+        return 1;
+
+    /* Initialization phase */
+    status = fmi2EnterInitializationMode(comp);
+    if(status != fmi2OK)
+        return 2;
+
+    /* Set parameters/inputs */
+    {
+        unsigned int nvr = 4;
+        unsigned int vr[] = {0, 1, 2, 3};
+        double value[] = {11, 21, 3, 4};
+        status = fmi2SetReal(comp, vr, nvr, value);
+        if(status != fmi2OK)
+            return 3;
+    }
+
+    status = fmi2ExitInitializationMode(comp);
+    if(status != fmi2OK)
+        return 4;
+
+    /* Integration from 0.0 to 100.0 */
+    double current_time = 0;
+    double step = 10;
+    while(current_time < 100)
+    {
+        std::cout << "Integrating from [" << current_time << "] to [" << current_time+step << "]..." << std::endl;
+        status = fmi2DoStep(comp, current_time, step, 1);
+        if(status != fmi2OK)
+            return 5;
+
+        /* Get values */
+        {
+            unsigned int nvr = 6;
+            unsigned int vr[] = {0, 1, 2, 3, 4, 5};
+            double value[] = {0, 0, 0, 0, 0, 0};
+
+            status = fmi2GetReal(comp, vr, nvr, value);
+            if(status != fmi2OK)
+                return 6;
+
+            for(size_t i = 0; i < nvr; i++)
+                std::cout << "  v[" << i << "] = " << value[i] << std::endl;
+        }
+
+        current_time += step;
+    }
+
+    /* Terminate simulation */
+    status = fmi2Terminate(comp);
+    if(status != fmi2OK)
+        return 7;
+
+    /* Free FMU object */
+    fmi2FreeInstance(comp);
+    //if(status != fmi2OK)
+    //    return 8;
 }
-/*
+
+/* Test simulation loader
 int main(int argc, char *argv[])
 {
     try

@@ -9,8 +9,6 @@ class %(model_name)s
 
 /* Description:
 %(doc_string)s
-
-daetools-Modelica code-generator warnings:
 %(warnings)s
 */
 
@@ -231,7 +229,10 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
         separator = '\n' + self.defaultIndent
-        warnings  = '\n'.join(self.warnings)
+        warnings = ''
+        if len(self.warnings) > 0:
+            warnings  = 'daetools-Modelica code-generator warnings:\n'
+            warnings += '\n'.join(self.warnings)
 
         # Model
         variable_types_defs = separator.join(self.variable_types)
@@ -290,12 +291,11 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         for equation in Equations:
             description = equation['Description']
             if description:
-                self.equations.append(s_indent + '/* {0}: */'.format(description))
+                self.equations.append('/* {0}: */'.format(description))
             
             for eeinfo in equation['EquationExecutionInfos']:
                 res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
-                # self.equations.append(s_indent + '# Type: {0}'.format(eeinfo['EquationType']))
-                self.equations.append(s_indent + '{0} = 0;'.format(res))
+                self.equations.append('{0} = 0;'.format(res))
 
     def _processSTNs(self, STNs, indent):
         s_indent = indent * self.defaultIndent

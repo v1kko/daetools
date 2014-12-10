@@ -5,10 +5,7 @@ from .analyzer import daeCodeGeneratorAnalyzer
 from .code_generator import daeCodeGenerator
 
 modelTemplate = """\
-{ daetools-gPROMS code-generator warnings:
 %(warnings)s
-}
-
 %(variable_types_defs)s
 
 MODEL %(model_name)s
@@ -203,7 +200,11 @@ class daeCodeGenerator_gPROMS(daeCodeGenerator):
         self._generateRuntimeInformation(self.analyzer.runtimeInformation)
 
         separator = '\n' + self.defaultIndent
-        warnings  = '\n'.join(self.warnings)
+        warnings = ''
+        if len(self.warnings) > 0:
+            warnings  = '{ daetools-gPROMS code-generator warnings:\n'
+            warnings += '\n'.join(self.warnings)
+            warnings += '}\n'
 
         # Model
         variable_types_defs = '\n'.join(self.variable_types)
@@ -583,6 +584,7 @@ class daeCodeGenerator_gPROMS(daeCodeGenerator):
             self.variable_types.append('DECLARE TYPE')
             self.variable_types.append('  gproms_time_t = 0 : 0 : +1e30 UNIT = "s"')
             self.variable_types.append('END')
+            self.variables.append('# Simulation current time [s]:')
             self.variables.append('%s as gproms_time_t' % self.exprFormatter.TIME)
             self.equations.append('$%s = 1;' % self.exprFormatter.TIME)
             self.initial_conditions.append('{rootModel}.{time} = 0; # s'.format(rootModel = rootModel,

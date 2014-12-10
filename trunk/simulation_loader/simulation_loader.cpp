@@ -846,12 +846,21 @@ void daeSimulationLoader::SetFMIValue(unsigned int fmi_reference, double value)
     const daeFMI2Object_t& fmi = citer->second;
     if(fmi.type == "Parameter")
         fmi.parameter->SetValue(fmi.indexes, value);
-    else if(fmi.type == "Input" || fmi.type == "Output")
-        fmi.variable->SetValue(fmi.indexes, value);
+
+    else if(fmi.type == "Input")
+        fmi.variable->ReAssignValue(fmi.indexes, value);
+
     else if(fmi.type == "STN")
         fmi.variable->SetValue(fmi.indexes, value);
-    else
+
+    else if(fmi.type == "Output")
+    {
         daeDeclareAndThrowException(exInvalidCall);
+    }
+    else
+    {
+        daeDeclareAndThrowException(exInvalidCall);
+    }
 }
 
 void daeSimulationLoader::SetFMIActiveState(unsigned int fmi_reference, const std::string& value)
