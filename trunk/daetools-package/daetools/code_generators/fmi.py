@@ -129,6 +129,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self.TypeDefinitions   = []
             self.VendorAnnotations = []
             self.DefaultExperiment = fmiDefaultExperiment()
+            self.LogCategories     = []
 
             # Setup a default experiment
             self.DefaultExperiment.startTime = 0.0
@@ -174,6 +175,11 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Add variable types
             for vartype_name, var_type in variableTypesUsed.items():
                 self._addTypeDefinition(var_type)
+
+            # Add log categories
+            cat = fmiLogCategory()
+            cat.name = 'logAll'
+            self.LogCategories.append(cat)
 
             # Save model description xml file
             self.to_xml(xml_description_filename)
@@ -275,7 +281,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.valueReference = int(fmi_obj.reference) #*
         sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityInput
-        sv.variability    = fmiScalarVariable.variabilityTunable
+        sv.variability    = fmiScalarVariable.variabilityContinuous # Set it to continuous (page 49 FMI-v2.0.pdf)
         sv.initial        = fmiScalarVariable.initialExact
         sv.type           = fmiReal()
         sv.type.declaredType = fmi_obj.variable.VariableType.Name
@@ -283,10 +289,15 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         self.ModelVariables.append(sv)
 
     def _addOutput(self, fmi_obj):
-        #o = fmiOutput()
-        #o.name       = str(fmi_obj.name) #*
-        #o.derivative = int(fmi_obj.reference)
-        #self.ModelStructure.Outputs.append(o)
+        #
+        unknown = fmiVariableDependency()
+        unknown.index = int(fmi_obj.reference) #*
+        self.ModelStructure.Outputs.append(unknown)
+
+        unknown = fmiVariableDependency()
+        unknown.index = int(fmi_obj.reference) #*
+        self.ModelStructure.InitialUnknowns.append(unknown)
+        
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*
         sv.valueReference = int(fmi_obj.reference) #*
@@ -304,7 +315,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.valueReference = int(fmi_obj.reference) #*
         sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityParameter
-        sv.variability    = fmiScalarVariable.variabilityFixed
+        sv.variability    = fmiScalarVariable.variabilityTunable # If it is tunable it can be changed during the simulation
         sv.initial        = fmiScalarVariable.initialExact
         sv.type           = fmiReal()
         sv.type.unit      = self._formatUnits(fmi_obj.parameter.Units)
@@ -316,7 +327,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.name           = str(fmi_obj.name) #*
         sv.valueReference = int(fmi_obj.reference) #*
         sv.description    = str(fmi_obj.description)
-        sv.causality      = fmiScalarVariable.causalityParameter
+        sv.causality      = fmiScalarVariable.causalityInput # If it is input then it can be changed by the simulator
         sv.variability    = fmiScalarVariable.variabilityDiscrete
         sv.initial        = fmiScalarVariable.initialExact
         sv.type           = fmiString()

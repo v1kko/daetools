@@ -59,7 +59,7 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         strLog          = "BaseLog";
 
         boost::property_tree::ptree pt;
-        std::string resources_dir = std::string(fmuResourceLocation) + "/resources/";
+        std::string resources_dir = std::string(fmuResourceLocation) + "/";
         std::string	json_settings = resources_dir + "settings.json";
         std::string	json_ini_file = resources_dir + "init.json";
 
@@ -128,13 +128,17 @@ fmi2Status fmi2SetupExperiment(fmi2Component comp,
         }
 
         /* First solve initial with the inputs provided at the beggining.
-         * Then, show the SimulationExplorer if the "visible" flag is set
-         * to allow inspection and further changes. Finally, report the data
-         * in case the user set-up the model to use the daetools data-reporter. */
+         * Then, report the data in case the user set-up the model to use the daetools data-reporter.
+         * Finally, show the SimulationExplorer if the "visible" flag is set to allow inspection and further changes.  */
         c->simulationLoader.SolveInitial();
-        if(c->visible)
-            c->simulationLoader.ShowSimulationExplorer();
         c->simulationLoader.ReportData();
+
+        /* Achtung, Achtung!! A bug!!
+         * Whenever I show SimulationExplorer from the SimulationLoader I get SEG. FAULT during pyFinalize()
+         * The best is to restrain showing it at all!
+         if(c->visible)
+            c->simulationLoader.ShowSimulationExplorer();
+        */
     }
     catch(std::exception& e)
     {
@@ -240,21 +244,22 @@ fmi2Status fmi2GetString(fmi2Component comp, const fmi2ValueReference vr[], size
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2Error;
-/*
     try
     {
         for(size_t i = 0; i < nvr; i++)
         {
             unsigned int reference = static_cast<unsigned int>(vr[i]);
-            strncpy(value[i], c->simulationLoader.GetFMIActiveState(reference).c_str(), 255);
+
+            /* Here, we just set an item of the value[] array (shallow copy, no memory copy).
+             * If the simulator wants to use the returned strings - it needs to deep copy them. */
+            value[i] = c->simulationLoader.GetFMIActiveState(reference).c_str();
         }
     }
     catch(std::exception& e)
     {
         return fmi2Fatal;
     }
-*/
+
     return fmi2OK;
 }
 

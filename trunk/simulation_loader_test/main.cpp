@@ -8,30 +8,56 @@
 #include "../fmi/include/fmi2Functions.h"
 
 /* Test FMU */
+void logger(fmi2ComponentEnvironment env, fmi2String instanceName, fmi2Status status, fmi2String category, fmi2String message, ...)
+{
+    std::string strStatus;
+    if(status == fmi2OK)
+        strStatus = "fmi2OK";
+    else if(status == fmi2Warning)
+        strStatus = "fmi2Warning";
+    else if(status == fmi2Discard)
+        strStatus = "fmi2Discard";
+    else if(status == fmi2Error)
+        strStatus = "fmi2Error";
+    else if(status == fmi2Fatal)
+        strStatus = "fmi2Fatal";
+    else
+       strStatus = "fmi2Pending";
+
+    std::cout << "[" << (const char*)env << "] log message from \"" << instanceName << "\" "
+              << "(status: \"" << strStatus << "\", logCategory: \"" << category << "\"):" << std::endl;
+    std::cout << message << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     fmi2Status status;
+
+    fmi2CallbackFunctions functions = {logger, NULL, NULL, NULL, (const fmi2ComponentEnvironment)"testFMU"};
+
     fmi2Component comp = fmi2Instantiate("tutorial20",
                                          fmi2CoSimulation,
                                          "6f6dd048-7eff-11e4-bf92-9cb70d5dfdfc",
-                                         "/tmp/daetools-fmu-67cEqB",
-                                         NULL,
-                                         0,
-                                         1);
+                                         "/tmp/daetools-fmu-3GvyUb/resources",
+                                         &functions,
+                                         true, /* visible */
+                                         true  /* logging */);
 
     if(comp == NULL)
     {
         std::cout << "Cannot load tutorial20.fmu" << std::endl;
-        return 255;
+        return 66;
     }
 
-    /* tutorial20.py:
+    /* tutorial20.py FMI references:
          0 - parameter p1
          1 - parameter p2
          2 - input in_1.y
          3 - input in_2.y
          4 - output out_1.y
          5 - output out_2.y
+         6 - stnMultipliers ['variable', 'constant']
+       There are variables m1 and m2[] but they are internal and therefore not exported.
     */
 
     /* Setup experiment */
@@ -44,12 +70,22 @@ int main(int argc, char *argv[])
     if(status != fmi2OK)
         return 2;
 
-    /* Set parameters/inputs */
+    /* Set Real parameters/inputs values */
     {
-        unsigned int nvr = 4;
+        unsigned int nvr  = 4;
         unsigned int vr[] = {0, 1, 2, 3};
-        double value[] = {11, 21, 3, 4};
+        double value[]    = {10, 20, 1, 2};
         status = fmi2SetReal(comp, vr, nvr, value);
+        if(status != fmi2OK)
+            return 3;
+    }
+    /* Set String inputs (STNs active states) */
+    {
+        unsigned int nvr  = 1;
+        unsigned int vr[] = {6};
+        fmi2String state[1] = {"variable"};
+
+        status = fmi2SetString(comp, vr, nvr, state);
         if(status != fmi2OK)
             return 3;
     }
@@ -64,15 +100,15 @@ int main(int argc, char *argv[])
     while(current_time < 100)
     {
         std::cout << "Integrating from [" << current_time << "] to [" << current_time+step << "]..." << std::endl;
-        status = fmi2DoStep(comp, current_time, step, 1);
+        status = fmi2DoStep(comp, current_time, step, true);
         if(status != fmi2OK)
             return 5;
 
-        /* Get values */
+        /* Get Real values */
         {
-            unsigned int nvr = 6;
+            unsigned int nvr  = 6;
             unsigned int vr[] = {0, 1, 2, 3, 4, 5};
-            double value[] = {0, 0, 0, 0, 0, 0};
+            double value[]    = {0, 0, 0, 0, 0, 0};
 
             status = fmi2GetReal(comp, vr, nvr, value);
             if(status != fmi2OK)
@@ -80,6 +116,19 @@ int main(int argc, char *argv[])
 
             for(size_t i = 0; i < nvr; i++)
                 std::cout << "  v[" << i << "] = " << value[i] << std::endl;
+        }
+        /* Get String values (STNs active states) */
+        {
+            unsigned int nvr  = 1;
+            unsigned int vr[] = {6};
+            fmi2String state[1]; // allocate an array of {const char*}
+
+            status = fmi2GetString(comp, vr, nvr, state);
+            if(status != fmi2OK)
+                return 6;
+
+            for(size_t i = 0; i < nvr; i++)
+                std::cout << "  v[" << i << "] = " << state[i] << std::endl;
         }
 
         current_time += step;

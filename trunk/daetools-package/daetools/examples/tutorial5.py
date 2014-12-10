@@ -56,18 +56,26 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
-        # Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.
-        # Again, states MUST contain the SAME NUMBER OF EQUATIONS.
-        # First start with the call to STN("STN_Name") function from daeModel class.
-        # If you need to change active states in operating procedure in function Run()
-        # store the stn reference (here in the stnRegulator object).
-        # After that call, define your states by calling the function STATE("State1") and write
-        # equations that will be active if this state (called 'State1') is active.
-        # If there are state transitions, write them by calling the function SWITCH_TO("State2", 'condition').
-        # This function defines the condition when the state 'State2' becomes the active one.
-        # Repeat this procedure for all states in the state transition network.
-        # Finally call the function END_STN() to finalize the state transition network.
-        # Again, there is an optional argument eventTolerance of the function SWITCH_TO, as explained in tutorial 4.
+        """
+        Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.
+        Again, states MUST contain the SAME NUMBER OF EQUATIONS.
+        First start with the call to STN("STN_Name") function from daeModel class.
+        If you need to change active states in operating procedure in function Run()
+        store the stn reference (here in the stnRegulator object).
+        After that call, define your states by calling the function STATE("State1") and write
+        equations that will be active if this state (called 'State1') is active.
+
+        Models and states can contain OnConditionActions and OnEventActions.
+        OnConditionActions are trigerred when a specified logical condition is satisfied.
+        OnEventActions are trigerred when a specified EventPort receives an event (more info in tutorial13.py).
+        There are different types of actions that can be executed by a logical condition.
+        In this example, we want to change the active states subject to given conditions and
+        ON_CONDITION(logical_condition, switchToStates = [list_of_actions]) function will be used.
+        Again, there is an optional argument eventTolerance, as explained in tutorial 4.
+        
+        Repeat this procedure for all states in the state transition network.
+        Finally call the function END_STN() to finalize the state transition network.
+        """
         self.stnRegulator = self.STN("Regulator")
 
         self.STATE("Heating")
@@ -75,17 +83,41 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_in", "The heater is on")
         eq.Residual = self.Qin() - Constant(1500 * W)
 
-        # Here the Time() function is used to get the current time (time elapsed) in the simulation
-        self.SWITCH_TO("Cooling",   self.T() > Constant(340 * K))
-        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
+        """
+        ON_CONDITION() function
+        Arguments:
+          - Condition that triggers the actions
+          - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name) that will be set active
+             when the condition is satisified
+          - 'triggerEvents' is a list of python tuples (outlet-event-port, expression),
+             where the first part is the event-port object and the second a value to be sent when the event is trigerred
+          - 'setVariableValues' is a list of python tuples (variable, expression); if the variable is differential it
+             will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)
+          - 'userDefinedActions' is a list of user defined daeAction-derived objects (see tutorial13.py for more information)
+        """
+        # Here the built-in Time() function is used to get the current time (time elapsed) in the simulation
+        self.ON_CONDITION(self.T() > Constant(340*K), switchToStates     = [ ('Regulator', 'Cooling') ],
+                                                      setVariableValues  = [],
+                                                      triggerEvents      = [],
+                                                      userDefinedActions = [] )
+        self.ON_CONDITION(Time() > Constant(350*s), switchToStates     = [ ('Regulator', 'HeaterOff') ],
+                                                    setVariableValues  = [],
+                                                    triggerEvents      = [],
+                                                    userDefinedActions = [] )
 
         self.STATE("Cooling")
 
         eq = self.CreateEquation("Q_in", "The heater is off")
         eq.Residual = self.Qin()
 
-        self.SWITCH_TO("Heating",   self.T() < Constant(320 * K))
-        self.SWITCH_TO("HeaterOff", Time()   > Constant(350 * s))
+        self.ON_CONDITION(self.T() < Constant(320*K), switchToStates     = [ ('Regulator', 'Heating') ],
+                                                      setVariableValues  = [],
+                                                      triggerEvents      = [],
+                                                      userDefinedActions = [] )
+        self.ON_CONDITION(Time() > Constant(350*s), switchToStates     = [ ('Regulator', 'HeaterOff') ],
+                                                    setVariableValues  = [],
+                                                    triggerEvents      = [],
+                                                    userDefinedActions = [] )
 
         self.STATE("HeaterOff")
 

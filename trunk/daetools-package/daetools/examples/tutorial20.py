@@ -18,26 +18,40 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 __doc__ = """
 This is a simple model to test the support for:
- - Scilab/GNU Octave/Matlab MEX functions
+ - Scilab/GNU_Octave/Matlab MEX functions
  - Simulink S-functions
- - FMI
+ - Modelica code-generator
+ - gPROMS code-generator
+ - FMI code-generator (for Co-Simulation)
 
 The model is very simple: it has two inlet and two outlet ports.
-The values of the outlet port variables are: 
-    out1 = in1
-    out2 = in2
+The values of the outlets are equal to inputs multiplied by a multiplier:
+    out1.y   = m1   x in1.y
+    out2.y[] = m2[] x in2.y[]
+
+where multipliers m1 and m2[] are:
+  STN(Multipliers):
+    when 'Variable':
+        dm1/dt   = p1
+        dm2[]/dt = p2
+    when 'Constant':
+        dm1/dt   = 0
+        dm2[]/dt = 0
+
 The ports in1 and out1 are scalar (width = 1).
 The ports in2 and out2 are vectors (width = 1).
 
-Note:
-  1. Inlet ports must be DOFs (have their values asssigned) for they can't be connected
-     outside of daetools simulation.
-  2. Only scalar output ports are supported at the moment.
+Achtung, Achtung!!
+ Notate bene:
+  1. Inlet ports must be DOFs (that is to have their values asssigned),
+     for they can't be connected when the model is simulated outside of daetools context.
+  2. Only scalar output ports are supported at the moment!! (Simulink issue)
 """
 
 import sys, numpy
 from daetools.pyDAE import *
 from time import localtime, strftime
+from daetools.solvers.superlu import pySuperLU as superlu
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
@@ -60,38 +74,53 @@ class modTutorial(daeModel):
 
         self.w = daeDomain("w", self, unit(), "Ports width")
 
-        self.p1 = daeParameter("p1", s**(-1), self, "Parameter multiplier 1")
-        self.p2 = daeParameter("p2", s**(-1), self, "Parameter multiplier 2")
+        self.p1 = daeParameter("p1", s**(-1), self, "Parameter multiplier 1 (fixed)")
+        self.p2 = daeParameter("p2", s**(-1), self, "Parameter multiplier 2 (fixed)")
 
-        self.y1 = daeVariable("y1", no_t, self, "State variable 1")
-        self.y2 = daeVariable("y2", no_t, self, "State variable 2", [self.w])
+        self.m1 = daeVariable("m1", no_t, self, "Multiplier 1")
+        self.m2 = daeVariable("m2", no_t, self, "Multiplier 2", [self.w])
 
-        self.in1  = portScalar("in_1",  eInletPort,  self, "The multiplier 1")
-        self.out1 = portScalar("out_1", eOutletPort, self, "The result 1")
+        self.in1  = portScalar("in_1",  eInletPort,  self, "Input 1")
+        self.out1 = portScalar("out_1", eOutletPort, self, "Output 1 = p1 x m1")
 
-        self.in2  = portVector("in_2",  eInletPort,  self, "The multiplier 2", self.w)
-        self.out2 = portVector("out_2", eOutletPort, self, "The result 2",     self.w)
+        self.in2  = portVector("in_2",  eInletPort,  self, "Input 2",               self.w)
+        self.out2 = portVector("out_2", eOutletPort, self, "Output 2 = p2 x m2[]", self.w)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
         nw = self.w.NumberOfPoints
 
-        # State variables
-        eq = self.CreateEquation("y1", "Equation to calculate the state variable y1")
-        eq.Residual = self.y1.dt() - self.in1.y() * self.p1()
-
-        for w in range(nw):
-            eq = self.CreateEquation("y2(%d)" % w, "Equation to calculate the state variable y2(%d)" % w)
-            eq.Residual = self.y2.dt(w) - self.in2.y(w) * self.p2()
-
         # Set the outlet port values
-        eq = self.CreateEquation("out_1", "Equation to calculate out1.y")
-        eq.Residual = self.out1.y() - self.y1()
+        eq = self.CreateEquation("out_1", "out_1.y = m1 x in1.y")
+        eq.Residual = self.out1.y() - self.m1() * self.in1.y()
 
         for w in range(nw):
-            eq = self.CreateEquation("out_2(%d)" % w, "Equation to calculate out2.y(%d)" % w)
-            eq.Residual = self.out2.y(w) - self.y2(w)
+            eq = self.CreateEquation("out_2(%d)" % w, "out_2.y[%d] = m2[%d] * in2.y[%d]" % (w, w, w))
+            eq.Residual = self.out2.y(w) - self.m2(w) * self.in2.y(w)
+
+        # STN Multipliers
+        self.stnMultipliers = self.STN("Multipliers")
+
+        self.STATE("variableMultipliers") # Variable multipliers
+
+        eq = self.CreateEquation("m1", "Multiplier 1 (Variable)")
+        eq.Residual = self.m1.dt() - self.p1()
+
+        for w in range(nw):
+            eq = self.CreateEquation("m2(%d)" % w, "Multiplier 2 (Variable)")
+            eq.Residual = self.m2.dt(w) - self.p2()
+
+        self.STATE("constantMultipliers") # Constant multipliers
+
+        eq = self.CreateEquation("m1", "Multiplier 1 (Constant)")
+        eq.Residual = self.m1.dt()
+
+        for w in range(nw):
+            eq = self.CreateEquation("m2(%d)" % w, "Multiplier 2 (Constant)")
+            eq.Residual = self.m2.dt(w)
+
+        self.END_STN()
    
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -108,11 +137,13 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         nw = self.m.w.NumberOfPoints
 
+        self.m.stnMultipliers.ActiveState = "variableMultipliers"
+
         self.m.in1.y.AssignValue(1)
         self.m.in2.y.AssignValues(numpy.ones(nw) * 2)
 
-        self.m.y1.SetInitialCondition(0)
-        self.m.y2.SetInitialConditions(numpy.zeros(nw))
+        self.m.m1.SetInitialCondition(1)
+        self.m.m2.SetInitialConditions(numpy.ones(nw))
 
 # Use daeSimulator class
 def guiRun(app):
@@ -130,6 +161,10 @@ def consoleRun():
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
+
+    # LA solver
+    lasolver = superlu.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

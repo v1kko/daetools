@@ -35,21 +35,33 @@ void __attribute__ ((destructor))  so_unload(void);
 // Called when the library is loaded and before dlopen() returns
 void so_load(void)
 {
-    char python_so_name[20];
-    ::sprintf(python_so_name, "libpython%d.%d.so", DAE_PYTHON_MAJOR, DAE_PYTHON_MINOR);
-    //printf("dlopen(%s);\n", python_so_name);
+    try
+    {
+        char python_so_name[20];
+        ::sprintf(python_so_name, "libpython%d.%d.so", DAE_PYTHON_MAJOR, DAE_PYTHON_MINOR);
+        //printf("dlopen(%s);\n", python_so_name);
 
-    dlopen(python_so_name, RTLD_GLOBAL|RTLD_LAZY);
+        dlopen(python_so_name, RTLD_GLOBAL|RTLD_LAZY);
 
-    char argv[] = "daeSimulationLoader";
-    Py_SetProgramName(argv);
-    Py_Initialize();
+        char argv[] = "daeSimulationLoader";
+        Py_SetProgramName(argv);
+        Py_Initialize();
+    }
+    catch(...)
+    {
+    }
 }
 
 // Called when the library is unloaded and before dlclose() returns
 void so_unload(void)
 {
-    Py_Finalize();
+    try
+    {
+        Py_Finalize();
+    }
+    catch(...)
+    {
+    }
 }
 
 #endif

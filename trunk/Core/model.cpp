@@ -767,15 +767,21 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
     // Collect all parameters and ports and initialize parameters/inputs/outputs arrays
     std::vector<daeVariable_t*> ptrarrVariables;
     std::map<std::string, daeParameter_t*> mapParameters;
-    std::map<std::string, daeVariable_t*> mapVariables;
+    std::map<std::string, daeSTN_t*> mapSTNs;
     std::vector<daePort_t*> arrPorts;
 
+    // All parameters
     CollectAllParameters(mapParameters);
+    // All STNs
+    CollectAllSTNs(mapSTNs);
+    // Only ports in the top-level model
     GetPorts(arrPorts);
-    CollectAllVariables(mapVariables);
 
     for(std::map<std::string, daeParameter_t*>::iterator iter = mapParameters.begin(); iter != mapParameters.end(); iter++)
         ptrarrParameters.push_back(iter->second);
+
+    for(std::map<std::string, daeSTN_t*>::iterator iter = mapSTNs.begin(); iter != mapSTNs.end(); iter++)
+        ptrarrSTNs.push_back(iter->second);
 
     // Only ports from the top-level model (not internal models!)
     for(size_t i = 0; i < arrPorts.size(); i++)
@@ -828,6 +834,8 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
     }
 
     // DOFs
+    // Nota bene:
+    //   Here we have a problem: inlet ports are marked as DOFs, so there is an overlap between the DOF and Input variables)
     /*
     for(std::map<std::string, daeVariable_t*>::iterator iter = mapVariables.begin(); iter != mapVariables.end(); iter++)
     {
@@ -849,11 +857,6 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
     std::sort(ptrarrInputs.begin(),     ptrarrInputs.end(),     compareCanonicalNames<daeVariable_t*>);
     std::sort(ptrarrOutputs.begin(),    ptrarrOutputs.end(),    compareCanonicalNames<daeVariable_t*>);
     std::sort(ptrarrSTNs.begin(),       ptrarrSTNs.end(),       compareCanonicalNames<daeSTN_t*>);
-}
-
-void addToInterfaceMap(std::map<size_t, daeFMI2Object_t>& mapInterface, const daeFMI2Object_t& fmi)
-{
-
 }
 
 void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)

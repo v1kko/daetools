@@ -67,12 +67,12 @@ class fmiModelDescription(fmiObject):
             self.variableNamingConvention   = None # enum
             self.numberOfEventIndicators    = None # int
 
-            # Required elements
-            self.ModelStructure    = None # fmiModelStructure
+            # Required elements for Co-Simulation
             self.ModelVariables    = []   # array of fmiScalarVariable
             self.CoSimulation      = None # fmiCoSimulation
 
             # Optional elements
+            self.ModelStructure    = None # fmiModelStructure
             self.DefaultExperiment = None
             self.TypeDefinitions   = []
             self.UnitDefinitions   = []
@@ -101,12 +101,12 @@ class fmiModelDescription(fmiObject):
             addAttribute(fmi_root, 'numberOfEventIndicators',    self.numberOfEventIndicators)
 
             addObject(fmi_root, self.CoSimulation, required = True)
-            addObject(fmi_root, self.ModelStructure,)
+            addObjects(fmi_root, 'UnitDefinitions', self.UnitDefinitions)
+            addObjects(fmi_root, 'TypeDefinitions', self.TypeDefinitions)
             addObjects(fmi_root, 'ModelVariables',  self.ModelVariables, required = True)
+            addObject(fmi_root, self.ModelStructure,required = True)
 
             addObject(fmi_root, self.DefaultExperiment)
-            addObjects(fmi_root, 'TypeDefinitions',   self.TypeDefinitions)
-            addObjects(fmi_root, 'UnitDefinitions',   self.UnitDefinitions)
             addObjects(fmi_root, 'LogCategories',     self.LogCategories)
             addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
 
@@ -221,7 +221,12 @@ class fmiReal(object):
     xmlTagName = 'Real'
 
     def __init__(self):
+        # fmiReal specific part
         self.declaredType       = None # string
+        self.start              = None # float
+        self.derivative         = None # unsigned int
+        self.reinit             = None # bool (ME only)        
+        # Type part
         self.quantity           = None # string
         self.unit               = None # string
         self.displayUnit        = None # string
@@ -230,9 +235,6 @@ class fmiReal(object):
         self.max                = None # float
         self.nominal            = None # float
         self.unbounded          = None # bool
-        self.start              = None # float
-        self.derivative         = None # unsigned int
-        self.reinit             = None # bool (ME only)
 
     def to_xml(self, tag):
         addAttribute(tag, 'declaredType',     self.declaredType)
@@ -256,10 +258,12 @@ class fmiInteger(object):
     xmlTagName = 'Integer'
 
     def __init__(self):
+        # fmiInteger specific part
         self.declaredType = None # string
+        # Type part
         self.quantity     = None # string
-        self.min          = None # float
-        self.max          = None # float
+        self.min          = None # integer
+        self.max          = None # integer
 
     def to_xml(self, tag):
         addAttribute(tag, 'declaredType', self.declaredType)
@@ -276,9 +280,11 @@ class fmiBoolean(object):
 
     def __init__(self):
         self.declaredType = None # string
+        self.start        = None # boolean
 
     def to_xml(self, tag):
         addAttribute(tag, 'declaredType', self.declaredType)
+        addAttribute(tag, 'start',        self.start)
 
     @classmethod
     def from_xml(cls, tag):
@@ -298,18 +304,24 @@ class fmiString(object):
     @classmethod
     def from_xml(cls, tag):
         pass
-
+    
+"""
+# Enumeration type not completely clear from the documantation (double-check it)
 class fmiEnumeration(object):
     xmlTagName = 'Enumeration'
 
     def __init__(self):
         self.declaredType = None # string
         self.quantity     = None # string
+        self.min          = None # integer
+        self.max          = None # integer
         self.items        = []   # array of fmiEnumerationItem
 
     def to_xml(self, tag):
         addAttribute(tag, 'declaredType', self.declaredType)
         addAttribute(tag, 'quantity',     self.quantity)
+        addAttribute(tag, 'min',          self.min)
+        addAttribute(tag, 'max',          self.max)
         for obj in self.items:
             addObject(tag, obj)
 
@@ -333,6 +345,7 @@ class fmiEnumerationItem(object):
     @classmethod
     def from_xml(cls, tag):
         pass
+"""
 
 class fmiLogCategory(object):
     xmlTagName = 'Category'
@@ -349,10 +362,12 @@ class fmiLogCategory(object):
     logAll                   = 'logAll'
 
     def __init__(self):
-        self.name = None # Required: enum or user-defined string
+        self.name        = None # Required: user-defined string
+        self.description = None # user-defined string
 
     def to_xml(self, tag):
-        addAttribute(tag, 'name', self.name, required = True)
+        addAttribute(tag, 'name',        self.name, required = True)
+        addAttribute(tag, 'description', self.description)
 
     @classmethod
     def from_xml(cls, tag):
@@ -365,11 +380,13 @@ class fmiDefaultExperiment(object):
         self.startTime = None # float
         self.stopTime  = None # float
         self.tolerance = None # float
+        self.stepSize  = None # float
 
     def to_xml(self, tag):
         addAttribute(tag, 'startTime', self.startTime)
         addAttribute(tag, 'stopTime',  self.stopTime)
         addAttribute(tag, 'tolerance', self.tolerance)
+        addAttribute(tag, 'stepSize',  self.stepSize)
 
     @classmethod
     def from_xml(cls, tag):
@@ -380,9 +397,12 @@ class fmiVendorAnnotation(object):
 
     def __init__(self):
         self.name = None # string
+        self.any  = []   # list of used defined attributes, tuple: (attrName:string, value:string)
 
     def to_xml(self, tag):
         addAttribute(tag, 'name', self.name, required = True)
+        for name, value in self.any:
+            addAttribute(tag, str(name), str(value))
 
     @classmethod
     def from_xml(cls, tag):
@@ -428,71 +448,41 @@ class fmiScalarVariable(object):
     def from_xml(cls, tag):
         pass
 
+# ModelStructure related classes
 class fmiModelStructure(object):
     xmlTagName = 'ModelStructure'
 
     def __init__(self):
-        self.Inputs       = [] # array of fmiInput
-        self.Derivatives  = [] # array of fmiDerivative
-        self.Outputs      = [] # array of fmiOutput
+        self.Outputs         = [] # array of fmiVariableDependency (all with causality = "output")
+        self.Derivatives     = [] # array of fmiVariableDependency (ignored for co-simulation if providesDirectionalDerivative = false)
+        self.InitialUnknowns = [] # array of fmiVariableDependency (all with causality="output" and variablility="calculated")
 
     def to_xml(self, tag):
-        addObjects(tag, 'Inputs',      self.Inputs)
-        addObjects(tag, 'Derivatives', self.Derivatives)
-        addObjects(tag, 'Outputs',     self.Outputs)
+        addObjects(tag, 'Derivatives',     self.Derivatives)
+        addObjects(tag, 'Outputs',         self.Outputs)
+        addObjects(tag, 'InitialUnknowns', self.InitialUnknowns)
 
     @classmethod
     def from_xml(cls, tag):
         pass
-        
-class fmiInput(object):
-    xmlTagName = 'Input'
+
+class fmiVariableDependency(object):
+    xmlTagName = 'Unknown'
 
     def __init__(self):
-        self.name       = None # Required: string
-        self.derivative = None # int
+        self.index  = None # Required: int
+        self.dependencies = None # list of integers
+        self.dependenciesKind = None # list of strings
 
     def to_xml(self, tag):
-        addAttribute(tag, 'name',       self.name, required = True)
-        addAttribute(tag, 'derivative', self.derivative)
+        addAttribute(tag, 'index',            self.index, required = True)
+        addAttribute(tag, 'dependencies',     self.dependencies)
+        addAttribute(tag, 'dependenciesKind', self.dependenciesKind)
 
     @classmethod
     def from_xml(cls, tag):
         pass
-
-class fmiDerivative(object):
-    xmlTagName = 'Derivative'
-
-    def __init__(self):
-        self.name  = None # Required: string
-        self.state = None # Required: string
-
-    def to_xml(self, tag):
-        addAttribute(tag, 'name',  self.name,  required = True)
-        addAttribute(tag, 'state', self.state, required = True)
-
-    @classmethod
-    def from_xml(cls, tag):
-        pass
-
-class fmiOutput(object):
-    xmlTagName = 'Output'
-
-    def __init__(self):
-        self.name       = None # Required: string
-        self.derivative = None # int
-
-    def to_xml(self, tag):
-        addAttribute(tag, 'name',       self.name, required = True)
-        addAttribute(tag, 'derivative', self.derivative)
-
-    @classmethod
-    def from_xml(cls, tag):
-        pass
-
-def test_fmi1():
-    pass
-
+    
 def test_fmi2():
     fmi_model = fmiModelDescription(fmiVersion = '2.0')
 
@@ -644,7 +634,7 @@ def test_fmi2():
     t3.description = None
     t = fmiString()
     t3.type = t
-
+    """
     t4 = fmiSimpleType()
     t4.name = 't4' #*
     t4.description = None
@@ -660,11 +650,13 @@ def test_fmi2():
     i2.description = None
     t.items = [i1, i2]
     t4.type = t #*
-
-    fmi_model.TypeDefinitions = [t1, t2, t3, t4]
+    """
+    
+    fmi_model.TypeDefinitions = [t1, t2, t3]
 
     ann = fmiVendorAnnotation()
     ann.name = 'vann' #*
+    ann.any  = [('attr1', 'val1'), ('attr2', 'val2')]
     fmi_model.VendorAnnotations = [ann]
 
     defex = fmiDefaultExperiment()

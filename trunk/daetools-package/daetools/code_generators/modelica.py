@@ -17,6 +17,8 @@ class %(model_name)s
   
   %(parameters_defs)s
   
+  %(stns_defs)s
+
   %(variables_defs)s
 
 equation
@@ -25,7 +27,6 @@ equation
   /* DOFs */
   %(assigned_inits)s
 
-  /* OnConditionActions from STNs */
   %(whens)s
 
 initial equation
@@ -189,6 +190,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         self.parameters     = []
         self.variables      = []
         self.equations      = []
+        self.stns           = []
         self.whens          = []
 
         self.domains_inits      = []
@@ -239,6 +241,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         domains_defs        = separator.join(self.domains)
         parameters_defs     = separator.join(self.parameters)
         variables_defs      = separator.join(self.variables)
+        stns_defs           = separator.join(self.stns)
         equations_defs      = separator.join(self.equations)
 
         # Simulation
@@ -260,6 +263,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                      'domains_defs' :       domains_defs,
                      'parameters_defs' :    parameters_defs,
                      'variables_defs' :     variables_defs,
+                     'stns_defs' :          stns_defs,
                      'equations_defs' :     equations_defs,
                         
                      'domains_inits' :      domains_inits,
@@ -285,17 +289,16 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             print(warnings)
 
     def _processEquations(self, Equations, indent):
-        s_indent  = indent     * self.defaultIndent
-        s_indent2 = (indent+1) * self.defaultIndent
+        s_indent  = indent * self.defaultIndent
         
         for equation in Equations:
             description = equation['Description']
             if description:
-                self.equations.append('/* {0}: */'.format(description))
+                self.equations.append(s_indent + '/* {0}: */'.format(description))
             
             for eeinfo in equation['EquationExecutionInfos']:
                 res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
-                self.equations.append('{0} = 0;'.format(res))
+                self.equations.append(s_indent + '{0} = 0;'.format(res))
 
     def _processSTNs(self, STNs, indent):
         s_indent = indent * self.defaultIndent
@@ -321,7 +324,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                         on_condition_action = state['OnConditionActions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'if ({0}) then'.format(condition)
+                        temp = 'if ({0}) then'.format(condition)
                         self.equations.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
@@ -329,11 +332,11 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                         on_condition_action = state['OnConditionActions'][0]
                         condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
-                        temp = s_indent + 'elseif ({0}) then'.format(condition)
+                        temp = 'elseif ({0}) then'.format(condition)
                         self.equations.append(temp)
 
                     else:
-                        temp = s_indent + 'else '
+                        temp = 'else '
                         self.equations.append(temp)
 
                     # 1a. Generate NestedSTNs
@@ -353,45 +356,50 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
+                # If there are no active state changes then Modelica complains about the number of equations
+                # What to do?
+                # = "{activeState}"
                 stnTemplate = 'String {name} "{description}"; /* States: [{states}] */'
-                self.variables.append(stnTemplate.format(name = stnVariableName,
-                                                         description = description,
-                                                         activeState = activeState,
-                                                         states = states))
+                self.stns.append(stnTemplate.format(name = stnVariableName,
+                                                    description = description,
+                                                    activeState = activeState,
+                                                    states = states))
+                # Initial equations
                 stnTemplate = '{name} = "{activeState}";'
                 self.initial_conditions.append(stnTemplate.format(name = stnVariableName,
                                                                   activeState = activeState))
+                                                    
                 counter = 0
                 nStates = len(stn['States'])
                 for i, state in enumerate(stn['States']):
                     # Not all states have state_transitions ('else' state has no state transitions)
                     on_condition_action = None
                     if i == 0:
-                        temp = s_indent + 'if ({name} == "{state}") then'.format(name = stnVariableName,
-                                                                                 state = state["Name"])
+                        temp = 'if ({name} == "{state}") then'.format(name = stnVariableName,
+                                                                      state = state["Name"])
                         self.equations.append(temp)
 
                     elif (i > 0) and (i < nStates - 1):
-                        temp = s_indent + 'elseif ({name} == "{state}") then'.format(name = stnVariableName,
-                                                                                     state = state["Name"])
+                        temp = 'elseif ({name} == "{state}") then'.format(name = stnVariableName,
+                                                                          state = state["Name"])
                         self.equations.append(temp)
 
                     else:
-                        temp = s_indent + 'else '
+                        temp = 'else '
                         self.equations.append(temp)
 
                     if len(state['OnConditionActions']) > 0:
-                        temp = s_indent + '/* OnConditionActions for {stn}.{state} */'.format(stn = stnVariableName,
-                                                                                              state = state['Name'])
+                        temp = '/* OnConditionActions for {stn}.{state} */'.format(stn = stnVariableName,
+                                                                                   state = state['Name'])
                         self.whens.append(temp)
 
                         for on_condition_action in state['OnConditionActions']:
                             condition = self.exprFormatter.formatRuntimeConditionNode(on_condition_action['ConditionRuntimeNode'])
 
                             if counter == 0:
-                                temp = s_indent + 'when ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition)
+                                temp = 'when ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition)
                             else:
-                                temp = s_indent + 'elsewhen ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition)
+                                temp = 'elsewhen ({0} == "{1}") and ({2}) then'.format(stnVariableName, state['Name'], condition)
                             self.whens.append(temp)
 
                             # Generate on condition actions
@@ -405,10 +413,10 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                     self._processEquations(state['Equations'], indent+1)
 
                 if counter > 0:
-                    end = s_indent + 'end when;'
+                    end = 'end when;'
                     self.whens.append(end)
 
-                end = s_indent + 'end if;'
+                end = 'end if;'
                 self.equations.append(end)
 
     def _processActions(self, Actions, indent):
@@ -607,12 +615,11 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                                                          rootModel = rootModel,
                                                          description = description))
 
-        indent = 1
-        s_indent = indent * self.defaultIndent
+        indent = 0
 
         # First, generate equations for port connections
         for port_connection in runtimeInformation['PortConnections']:
-            self.equations.append(s_indent + '/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
+            self.equations.append('/* Port connection: {0} -> {1} */'.format(port_connection['PortFrom'], port_connection['PortTo']))
             self._processEquations(port_connection['Equations'], indent)
 
         # Then, generate ordinary equations
