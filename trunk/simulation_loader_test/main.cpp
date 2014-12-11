@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     fmi2Component comp = fmi2Instantiate("tutorial20",
                                          fmi2CoSimulation,
                                          "6f6dd048-7eff-11e4-bf92-9cb70d5dfdfc",
-                                         "/tmp/daetools-fmu-3GvyUb/resources",
+                                         "/tmp/daetools-fmu-IBgeiQ/resources",
                                          &functions,
                                          true, /* visible */
                                          true  /* logging */);
@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
     /* tutorial20.py FMI references:
          0 - parameter p1
          1 - parameter p2
-         2 - input in_1.y
-         3 - input in_2.y
-         4 - output out_1.y
-         5 - output out_2.y
-         6 - stnMultipliers ['variable', 'constant']
+         2 - stn Multipliers ['variableMultipliers', 'constantMultipliers']
+         3 - input in_1.y
+         4 - input in_2.y
+         5 - output out_1.y
+         6 - output out_2.y
        There are variables m1 and m2[] but they are internal and therefore not exported.
     */
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     /* Set Real parameters/inputs values */
     {
         unsigned int nvr  = 4;
-        unsigned int vr[] = {0, 1, 2, 3};
+        unsigned int vr[] = {0, 1, 3, 4};
         double value[]    = {10, 20, 1, 2};
         status = fmi2SetReal(comp, vr, nvr, value);
         if(status != fmi2OK)
@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
     /* Set String inputs (STNs active states) */
     {
         unsigned int nvr  = 1;
-        unsigned int vr[] = {6};
-        fmi2String state[1] = {"variable"};
+        unsigned int vr[] = {2};
+        fmi2String state[1] = {"variableMultipliers"};
 
         status = fmi2SetString(comp, vr, nvr, state);
         if(status != fmi2OK)
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
         /* Get Real values */
         {
             unsigned int nvr  = 6;
-            unsigned int vr[] = {0, 1, 2, 3, 4, 5};
+            unsigned int vr[] = {0, 1, 3, 4, 5, 6};
             double value[]    = {0, 0, 0, 0, 0, 0};
 
             status = fmi2GetReal(comp, vr, nvr, value);
@@ -115,20 +115,20 @@ int main(int argc, char *argv[])
                 return 6;
 
             for(size_t i = 0; i < nvr; i++)
-                std::cout << "  v[" << i << "] = " << value[i] << std::endl;
+                std::cout << "  v[" << vr[i] << "] = " << value[i] << std::endl;
         }
         /* Get String values (STNs active states) */
         {
             unsigned int nvr  = 1;
-            unsigned int vr[] = {6};
-            fmi2String state[1]; // allocate an array of {const char*}
+            unsigned int vr[] = {2};
+            fmi2String state[1]; // allocate an array of {const char*} pointers
 
             status = fmi2GetString(comp, vr, nvr, state);
             if(status != fmi2OK)
                 return 6;
 
             for(size_t i = 0; i < nvr; i++)
-                std::cout << "  v[" << i << "] = " << state[i] << std::endl;
+                std::cout << "  stn[" << vr[i] << "] = " << state[i] << std::endl;
         }
 
         current_time += step;
@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
 
     /* Free FMU object */
     fmi2FreeInstance(comp);
-    //if(status != fmi2OK)
-    //    return 8;
+
+    std::cout << "Simulation has been completed successfuly" << std::endl;
 }
 
 /* Test simulation loader

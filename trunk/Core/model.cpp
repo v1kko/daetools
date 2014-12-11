@@ -898,6 +898,22 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
         }
     }
 
+    for(size_t i = 0; i < ptrarrSTNs.size(); i++)
+    {
+        daeSTN* pSTN = dynamic_cast<daeSTN*>(ptrarrSTNs[i]);
+
+        daeFMI2Object_t fmi;
+        fmi.reference      = counter;
+        fmi.stn            = pSTN;
+        //fmi.indexes - >Not relevant in this context
+        fmi.name           = daeGetStrippedRelativeName(this, pSTN);
+        fmi.type           = "STN";
+        fmi.description    = pSTN->GetDescription();
+        fmi.units          = ""; // Doesn't exist
+        mapInterface[counter] = fmi;
+        counter++;
+    }
+
     for(size_t i = 0; i < ptrarrInputs.size(); i++)
     {
         daeVariable* pVariable = dynamic_cast<daeVariable*>(ptrarrInputs[i]);
@@ -944,22 +960,6 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
             mapInterface[counter] = fmi;
             counter++;
         }
-    }
-
-    for(size_t i = 0; i < ptrarrSTNs.size(); i++)
-    {
-        daeSTN* pSTN = dynamic_cast<daeSTN*>(ptrarrSTNs[i]);
-
-        daeFMI2Object_t fmi;
-        fmi.reference      = counter;
-        fmi.stn            = pSTN;
-        //fmi.indexes - >Not relevant in this context
-        fmi.name           = daeGetStrippedRelativeName(this, pSTN);
-        fmi.type           = "STN";
-        fmi.description    = pSTN->GetDescription();
-        fmi.units          = ""; // Doesn't exist
-        mapInterface[counter] = fmi;
-        counter++;
     }
 }
 
