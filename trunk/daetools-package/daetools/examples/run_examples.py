@@ -47,14 +47,14 @@ except Exception as e:
     sys.exit()
 
 try:
-    from .RunExamples_ui import Ui_RunExamplesDialog
+    from RunExamples_ui import Ui_RunExamplesDialog
     from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception as e:
     print('[daeRunExamples]: Cannot load UI modules\n Error: ', str(e))
 
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
-for i in range(1, 20):
+for i in range(1, 21):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 3):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))
@@ -63,7 +63,7 @@ for i in range(1, 8):
 
 for m_name, data  in tutorial_modules:
     try:
-        module = __import__(m_name, globals(), locals(), [], -1)
+        module = __import__(m_name, globals(), locals(), [])
         doc    = module.__doc__
         data.append(module)
         data.append(doc)

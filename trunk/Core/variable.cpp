@@ -1372,6 +1372,38 @@ void daeVariable::GetValues(std::vector<real_t>& values) const
         values[i] = m_pModel->m_pDataProxy->GetValue(m_nOverallIndex + i);
 }
 
+void daeVariable::GetValues(std::vector<quantity>& quantities) const
+{
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pModel->m_pDataProxy)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    size_t noPoints = GetNumberOfPoints();
+    quantities.resize(noPoints);
+
+    for(size_t i = 0; i < noPoints; i++)
+        quantities[i] = quantity(m_pModel->m_pDataProxy->GetValue(m_nOverallIndex + i), m_VariableType.GetUnits());
+}
+
+void daeVariable::SetValues(const std::vector<quantity>& quantities)
+{
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pModel->m_pDataProxy)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    size_t noPoints = GetNumberOfPoints();
+    if(noPoints != quantities.size())
+        daeDeclareAndThrowException(exInvalidCall);
+
+    for(size_t i = 0; i < noPoints; i++)
+    {
+        real_t val = quantities[i].scaleTo(m_VariableType.GetUnits()).getValue();
+        m_pModel->m_pDataProxy->SetValue(m_nOverallIndex + i, val);
+    }
+}
+
 void daeVariable::SetValues(const std::vector<real_t>& values)
 {
     if(!m_pModel)

@@ -1540,6 +1540,10 @@ BOOST_PYTHON_MODULE(pyCore)
                                         ( arg("self"), arg("xmlFilename") ), DOCSTR_daeModel_SaveModelReport)
         .def("SaveRuntimeModelReport",	&daeModel::SaveRuntimeModelReport,
                                         ( arg("self"), arg("xmlFilename") ), DOCSTR_daeModel_SaveRuntimeModelReport)
+
+        .def("PropagateDomain",			&daeModel::PropagateDomain,    DOCSTR_daeModel_PropagateDomain)
+        .def("PropagateParameter",		&daeModel::PropagateParameter, DOCSTR_daeModel_PropagateParameter)
+
         /*
         .def("ExportObjects",			&daepython::daeModelWrapper::ExportObjects,
                                         ( arg("self"), arg("objects"), arg("language") ), DOCSTR_daeModel_ExportObjects)

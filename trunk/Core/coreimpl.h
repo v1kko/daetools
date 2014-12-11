@@ -1600,7 +1600,7 @@ public:
 	virtual size_t	GetNumberOfPoints(void)	const;
 	virtual real_t*	GetValuePointer(void);
 
-	virtual void	SetValue(real_t value);
+    virtual void	SetValue(real_t value);
 	virtual void	SetValue(size_t nD1, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, real_t value);
@@ -1623,6 +1623,8 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
     virtual real_t  GetValue(const std::vector<size_t>& narrDomainIndexes);
+    virtual void	GetValues(std::vector<real_t>& values) const;
+    virtual void    GetValues(std::vector<quantity>& quantities) const;
 
 	virtual void	SetValue(const quantity& value);
 	virtual void	SetValue(size_t nD1, const quantity& value);
@@ -1759,9 +1761,6 @@ public:
 	virtual bool	GetReportingOn(void) const;
 	virtual void	SetReportingOn(bool bOn);
 
-    virtual void	GetValues(std::vector<real_t>& values) const;
-    virtual void	SetValues(const std::vector<real_t>& values);
-
 	virtual void	SetValue(real_t value);
 	virtual void	SetValue(size_t nD1, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, real_t value);
@@ -1772,8 +1771,10 @@ public:
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value);
 	virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value);
     virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, real_t value);
+    virtual void	SetValues(const std::vector<real_t>& values);
+    virtual void    SetValues(const std::vector<quantity>& quantities);
 
-	virtual real_t	GetValue(void);
+    virtual real_t	GetValue(void);
 	virtual real_t	GetValue(size_t nD1);
 	virtual real_t	GetValue(size_t nD1, size_t nD2);
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3);
@@ -1783,6 +1784,8 @@ public:
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7);
 	virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8);
     virtual real_t  GetValue(const std::vector<size_t>& narrDomainIndexes);
+    virtual void	GetValues(std::vector<real_t>& values) const;
+    virtual void    GetValues(std::vector<quantity>& quantities) const;
 
 	virtual void	SetValue(const quantity& value);
 	virtual void	SetValue(size_t nD1, const quantity& value);
@@ -2224,6 +2227,9 @@ public:
     void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                        const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
 
+    void PropagateDomain(daeDomain& propagatedDomain);
+    void PropagateParameter(daeParameter& propagatedParameter);
+
 protected:
 	void			InitializeParameters(void);
 	void			InitializeVariables(void);
@@ -2657,7 +2663,7 @@ public:
 	virtual size_t	GetTotalNumberOfVariables(void) const;
 	virtual size_t	GetTotalNumberOfEquations(void) const;
 
-	size_t			GetNumberOfSTNs(void) const;
+    size_t GetNumberOfSTNs(void) const;
     
     void BuildExpressions(daeBlock* pBlock);
     bool CheckDiscontinuities(void);
@@ -2683,6 +2689,9 @@ public:
 
 	void ConnectPorts(daePort* pPortFrom, daePort* pPortTo);
 	void ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo);
+
+    void PropagateDomain(daeDomain& propagatedDomain);
+    void PropagateParameter(daeParameter& propagatedParameter);
 
 	const std::vector<daePort*>& Ports() const;
     const std::vector<daeEventPort*>& EventPorts() const;
@@ -2922,6 +2931,8 @@ protected:
     virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                                const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)          = 0;
     virtual void UpdateEquations(const daeExecutionContext* pExecutionContext)                                                      = 0;
+    virtual void PropagateDomain(daeDomain& propagatedDomain)          = 0;
+    virtual void PropagateParameter(daeParameter& propagatedParameter) = 0;
 
 protected:
 	virtual void Create(void);
@@ -2998,7 +3009,7 @@ public:
 	
 	size_t GetVariablesStartingIndex(void) const;
 	void   SetVariablesStartingIndex(size_t nVariablesStartingIndex);
-	
+
 protected:
 	virtual void DeclareData(void)					= 0;
 	virtual void InitializeParameters(void)			= 0;
@@ -3007,6 +3018,8 @@ protected:
 	virtual void SetDefaultInitialGuesses(void)		= 0;	
     virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                                const std::map<size_t, size_t>& mapOverallIndex_BlockIndex) = 0;
+    virtual void PropagateDomain(daeDomain& propagatedDomain)          = 0;
+    virtual void PropagateParameter(daeParameter& propagatedParameter) = 0;
 
 protected:
 	virtual void Create(void);

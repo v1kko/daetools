@@ -92,7 +92,19 @@ protected:
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
 			it->SetDefaultInitialGuesses();
 	}
-		
+
+    virtual void PropagateDomain(daeDomain& propagatedDomain)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->PropagateDomain(propagatedDomain);
+    }
+
+    virtual void PropagateParameter(daeParameter& propagatedParameter)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->PropagateParameter(propagatedParameter);
+    }
+
 protected:
 	boost::multi_array<TYPE, M> m_ptrarrObjects;
 };

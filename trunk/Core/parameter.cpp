@@ -858,11 +858,16 @@ void daeParameter::SetValues(const std::vector<real_t>& values)
     if(m_darrValues.size() == 0)
         Initialize();
 
-    size_t nTotalNumberOfVariables = GetNumberOfPoints();
-    if(values.size() != nTotalNumberOfVariables)
-        daeDeclareAndThrowException(exInvalidCall);
+    size_t noPoints = GetNumberOfPoints();
+    if(values.size() != noPoints)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid size of array of parameters (" << values.size() << ") in function SetValues for parameter " << GetCanonicalName()
+          << " (required " << noPoints << ")";
+        throw e;
+    }
 
-    for(size_t i = 0; i < nTotalNumberOfVariables; i++)
+    for(size_t i = 0; i < noPoints; i++)
         m_darrValues[i] = values[i];
 }
 
@@ -876,23 +881,43 @@ void daeParameter::SetValue(const std::vector<size_t>& narrDomainIndexes, real_t
     m_darrValues[nIndex] = value;
 }
 
-void daeParameter::SetValues(const std::vector<quantity>& values)
+void daeParameter::GetValues(std::vector<real_t>& values) const
+{
+    if(m_darrValues.size() == 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    values = m_darrValues;
+}
+
+void daeParameter::GetValues(std::vector<quantity>& quantities) const
+{
+    if(m_darrValues.size() == 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    size_t noPoints = GetNumberOfPoints();
+    quantities.resize(noPoints);
+
+    for(size_t i = 0; i < noPoints; i++)
+        quantities[i] = quantity(m_darrValues[i], m_Unit);
+}
+
+void daeParameter::SetValues(const std::vector<quantity>& quantities)
 {
 // If not previously initialized, do it now
     if(m_darrValues.size() == 0)
         Initialize();
 
-    size_t nTotalNumberOfVariables = GetNumberOfPoints();
-    if(values.size() != nTotalNumberOfVariables)
+    size_t noPoints = GetNumberOfPoints();
+    if(quantities.size() != noPoints)
     {
         daeDeclareException(exInvalidCall);
-        e << "Invalid size of array of values (" << values.size() << ") in function SetValues for parameter " << GetCanonicalName()
-          << " (required " << nTotalNumberOfVariables << ")";
+        e << "Invalid size of array of parameters (" << quantities.size() << ") in function SetValues for parameter " << GetCanonicalName()
+          << " (required " << noPoints << ")";
         throw e;
     }
 
-    for(size_t i = 0; i < nTotalNumberOfVariables; i++)
-        m_darrValues[i] = values[i].scaleTo(m_Unit).getValue();
+    for(size_t i = 0; i < noPoints; i++)
+        m_darrValues[i] = quantities[i].scaleTo(m_Unit).getValue();
 }
 
 void daeParameter::SetValue(const std::vector<size_t>& narrDomainIndexes, const quantity& q)

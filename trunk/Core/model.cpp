@@ -2122,6 +2122,121 @@ void daeModel::ConnectEventPorts(daeEventPort* pPortFrom, daeEventPort* pPortTo)
     AddEventPortConnection(pEventPortConnection);
 }
 
+void daeModel::PropagateDomain(daeDomain& propagatedDomain)
+{
+    size_t i;
+    daePort* pPort;
+    daeModel* pModel;
+    daeModelArray* pModelArray;
+    daePortArray* pPortArray;
+    daeDomain* pDomain;
+
+// First, propagate domain in this model
+    for(i = 0; i < m_ptrarrDomains.size(); i++)
+    {
+        pDomain = m_ptrarrDomains[i];
+        if(pDomain->GetName() == propagatedDomain.GetName())
+        {
+            if(propagatedDomain.GetType() == eArray)
+            {
+                pDomain->CreateArray(propagatedDomain.GetNumberOfPoints());
+            }
+            else if(propagatedDomain.GetType() == eStructuredGrid)
+            {
+                pDomain->CreateStructuredGrid(propagatedDomain.GetDiscretizationMethod(),
+                                              propagatedDomain.GetDiscretizationOrder(),
+                                              propagatedDomain.GetNumberOfIntervals(),
+                                              propagatedDomain.GetLowerBound(),
+                                              propagatedDomain.GetUpperBound());
+            }
+            else if(propagatedDomain.GetType() == eUnstructuredGrid)
+            {
+                pDomain->CreateUnstructuredGrid(propagatedDomain.GetCoordinates());
+            }
+            else
+                daeDeclareAndThrowException(exInvalidCall);
+        }
+    }
+
+// Then, propagate domain in the contained ports
+    for(i = 0; i < m_ptrarrPorts.size(); i++)
+    {
+        pPort = m_ptrarrPorts[i];
+        pPort->PropagateDomain(propagatedDomain);
+    }
+
+// Next, propagate domain in the child-models
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->PropagateDomain(propagatedDomain);
+    }
+
+// Next, propagate domain in each portarray
+    for(i = 0; i < m_ptrarrPortArrays.size(); i++)
+    {
+        pPortArray = m_ptrarrPortArrays[i];
+        pPortArray->PropagateDomain(propagatedDomain);
+    }
+
+// Finally, propagate domain in the modelarrays
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->PropagateDomain(propagatedDomain);
+    }
+}
+
+void daeModel::PropagateParameter(daeParameter& propagatedParameter)
+{
+    size_t i;
+    daePort* pPort;
+    daeModel* pModel;
+    daeModelArray* pModelArray;
+    daePortArray* pPortArray;
+    daeParameter* pParameter;
+    std::vector<quantity> quantities;
+
+// First, propagate parameter in this model
+    for(i = 0; i < m_ptrarrParameters.size(); i++)
+    {
+        pParameter = m_ptrarrParameters[i];
+        if(pParameter->GetName() == propagatedParameter.GetName())
+        {
+            propagatedParameter.GetValues(quantities);
+            pParameter->SetValues(quantities);
+        }
+    }
+
+// Then, propagate parameter in the contained ports
+    for(i = 0; i < m_ptrarrPorts.size(); i++)
+    {
+        pPort = m_ptrarrPorts[i];
+        pPort->PropagateParameter(propagatedParameter);
+    }
+
+// Next, propagate parameter in the child-models
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->PropagateParameter(propagatedParameter);
+    }
+
+// Next, propagate parameter in each portarray
+    for(i = 0; i < m_ptrarrPortArrays.size(); i++)
+    {
+        pPortArray = m_ptrarrPortArrays[i];
+        pPortArray->PropagateParameter(propagatedParameter);
+    }
+
+// Finally, propagate parameter in the modelarrays
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->PropagateParameter(propagatedParameter);
+    }
+}
+
 boost::shared_ptr<daeDataProxy_t> daeModel::GetDataProxy(void) const
 {
     return m_pDataProxy;

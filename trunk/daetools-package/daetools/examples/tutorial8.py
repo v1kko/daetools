@@ -278,8 +278,8 @@ def consoleRun():
     matplotlib.pyplot.plot(times,values)
     matplotlib.pyplot.show()
 
-    print simulation.dr9.data_frame
-    print simulation.dr9.data_frame['Value']['tutorial8.T']
+    print(simulation.dr9.data_frame)
+    print(simulation.dr9.data_frame['Value']['tutorial8.T'])
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

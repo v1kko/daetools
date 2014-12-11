@@ -419,12 +419,15 @@ class daeSimulationExplorer(QtGui.QDialog):
             self._ui.logComboBox.addItem(log[0], userData = log[1]) #QtCore.QVariant(log[1]))
             self._ui.logComboBox.setItemData(i, dr[2], QtCore.Qt.ToolTipRole)
 
+        # Nota bene:
+        # DAE/LA solver, datareporter and log are disabled, since they can't be changed anyway
+        
         # DAE Solvers
         self._ui.daesolverComboBox.setEnabled(False)
 
         # LA Solvers
         if not self._lasolver:
-            self._ui.lasolverComboBox.setEnabled(True)
+            self._ui.lasolverComboBox.setEnabled(False)
         else:
             # If LA solver has been sent then clear and disable LASolver combo box
             self._ui.lasolverComboBox.clear()
@@ -433,7 +436,7 @@ class daeSimulationExplorer(QtGui.QDialog):
 
         # Logs
         if not self._log:
-            self._ui.logComboBox.setEnabled(True)
+            self._ui.logComboBox.setEnabled(False)
         else:
             # If LA solver has been sent then clear and disable LASolver combo box
             self._ui.logComboBox.clear()
@@ -442,7 +445,7 @@ class daeSimulationExplorer(QtGui.QDialog):
 
         # DataReporters
         if not self._datareporter:
-            self._ui.datareporterComboBox.setEnabled(True)
+            self._ui.datareporterComboBox.setEnabled(False)
         else:
             # If data reporter has been sent then clear and disable DataReporters combo box
             self._ui.datareporterComboBox.clear()

@@ -330,6 +330,8 @@ const char* DOCSTR_daeModel = "Base model class.";
     const char* DOCSTR_daeModel_GetFMIInterface = "";
     const char* DOCSTR_daeModel_SaveModelReport = ".";
     const char* DOCSTR_daeModel_SaveRuntimeModelReport = ".";
+    const char* DOCSTR_daeModel_PropagateDomain = ".";
+    const char* DOCSTR_daeModel_PropagateParameter = ".";
     const char* DOCSTR_daeModel_ExportObjects = ".";
     const char* DOCSTR_daeModel_Export = ".";
 

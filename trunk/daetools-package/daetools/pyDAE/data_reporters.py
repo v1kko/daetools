@@ -22,7 +22,7 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
         self.ConnectString = ""
 
     def Connect(self, ConnectString, ProcessName):
-        print ConnectString, ProcessName
+        print(ConnectString, ProcessName)
         
         self.ProcessName   = ProcessName
         self.ConnectString = ConnectString

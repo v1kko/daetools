@@ -43,8 +43,8 @@ void so_load(void)
 
         dlopen(python_so_name, RTLD_GLOBAL|RTLD_LAZY);
 
-        char argv[] = "daeSimulationLoader";
-        Py_SetProgramName(argv);
+        //char argv[] = "daeSimulationLoader";
+        //Py_SetProgramName(argv);
         Py_Initialize();
     }
     catch(...)

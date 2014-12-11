@@ -41,7 +41,7 @@ def getAvailableDAESolvers():
         from daetools.pyDAE import pyIDAS
         available_dae_solvers.append(("Sundials IDAS", daeSundialsIDAS, "DAE"))
     except Exception as e:
-        print str(e)
+        print(str(e))
 
     return available_dae_solvers
 

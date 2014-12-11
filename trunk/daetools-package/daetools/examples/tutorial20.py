@@ -176,7 +176,7 @@ def consoleRun():
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+    if(datareporter.Connect("127.0.0.1:50000", simName) == False):
         sys.exit()
 
     # Initialize the simulation

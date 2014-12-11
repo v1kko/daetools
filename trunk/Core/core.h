@@ -397,6 +397,8 @@ public:
     virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
     virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)	= 0;
     virtual real_t  GetValue(const std::vector<size_t>& narrDomainIndexes)                                                      = 0;
+    virtual void    GetValues(std::vector<real_t>& values) const                                                                = 0;
+    virtual void    GetValues(std::vector<quantity>& quantities) const                                                          = 0;
 
     virtual void	SetValue(const quantity& value)																									= 0;
     virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
@@ -440,9 +442,6 @@ public:
     virtual bool	GetReportingOn(void) const  = 0;
     virtual void	SetReportingOn(bool bOn)    = 0;
 
-    virtual void	GetValues(std::vector<real_t>& values) const = 0;
-    virtual void	SetValues(const std::vector<real_t>& values) = 0;
-
     virtual void	SetValue(real_t value) = 0;
     virtual void	SetValue(size_t nD1, real_t value) = 0;
     virtual void	SetValue(size_t nD1, size_t nD2, real_t value) = 0;
@@ -453,6 +452,8 @@ public:
     virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, real_t value) = 0;
     virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, real_t value) = 0;
     virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, real_t value) = 0;
+    virtual void	SetValues(const std::vector<real_t>& values) = 0;
+    virtual void    SetValues(const std::vector<quantity>& quantities) = 0;
 
     virtual real_t	GetValue(void) = 0;
     virtual real_t	GetValue(size_t nD1) = 0;
@@ -464,6 +465,29 @@ public:
     virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7) = 0;
     virtual real_t	GetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8) = 0;
     virtual real_t  GetValue(const std::vector<size_t>& narrDomainIndexes) = 0;
+    virtual void	GetValues(std::vector<real_t>& values) const = 0;
+    virtual void    GetValues(std::vector<quantity>& quantities) const = 0;
+
+    virtual void	SetValue(const quantity& value)																									= 0;
+    virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, const quantity& value)																			= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value)																= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value)													= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value)										= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
+    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
+    virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, const quantity& value)                                                   = 0;
+
+    virtual quantity GetQuantity(void)																							= 0;
+    virtual quantity GetQuantity(size_t nD1)																					= 0;
+    virtual quantity GetQuantity(size_t nD1, size_t nD2) 																		= 0;
+    virtual quantity GetQuantity(size_t nD1, size_t nD2, size_t nD3) 															= 0;
+    virtual quantity GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4) 												= 0;
+    virtual quantity GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) 									= 0;
+    virtual quantity GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)						= 0;
+    virtual quantity GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)			= 0;
+    virtual quantity GetQuantity(const std::vector<size_t>& narrDomainIndexes)                                                  = 0;
 
     virtual void	AssignValue(real_t value) = 0;
     virtual void	AssignValue(size_t nD1, real_t value) = 0;
@@ -529,27 +553,6 @@ public:
     virtual void    ReSetInitialCondition(const std::vector<size_t>& narrDomainIndexes, real_t dInitialCondition) = 0;
     virtual void	ReSetInitialConditions(real_t dInitialConditions) = 0;
     virtual void	ReSetInitialConditions(const std::vector<real_t>& initialConditions) = 0;
-
-    virtual void	SetValue(const quantity& value)																									= 0;
-    virtual void	SetValue(size_t nD1, const quantity& value)																						= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, const quantity& value)																			= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& value)																= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& value)													= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& value)										= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& value)							= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& value)				= 0;
-    virtual void	SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& value)	= 0;
-    virtual void    SetValue(const std::vector<size_t>& narrDomainIndexes, const quantity& value)                                                   = 0;
-
-    virtual quantity	GetQuantity(void)																							= 0;
-    virtual quantity	GetQuantity(size_t nD1)																						= 0;
-    virtual quantity	GetQuantity(size_t nD1, size_t nD2) 																		= 0;
-    virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3) 															= 0;
-    virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4) 												= 0;
-    virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5) 									= 0;
-    virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)							= 0;
-    virtual quantity	GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)				= 0;
-    virtual quantity    GetQuantity(const std::vector<size_t>& narrDomainIndexes)                                                   = 0;
 
     virtual void	AssignValue(const quantity& value) = 0;
     virtual void	AssignValue(size_t nD1, const quantity& value) = 0;

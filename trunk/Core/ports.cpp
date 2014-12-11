@@ -625,6 +625,55 @@ void daePort::SetVariablesStartingIndex(size_t nVariablesStartingIndex)
 	m_nVariablesStartingIndex = nVariablesStartingIndex;
 }
 
+void daePort::PropagateDomain(daeDomain& propagatedDomain)
+{
+    size_t i;
+    daeDomain* pDomain;
+
+    for(i = 0; i < m_ptrarrDomains.size(); i++)
+    {
+        pDomain = m_ptrarrDomains[i];
+        if(pDomain->GetName() == propagatedDomain.GetName())
+        {
+            if(propagatedDomain.GetType() == eArray)
+            {
+                pDomain->CreateArray(propagatedDomain.GetNumberOfPoints());
+            }
+            else if(propagatedDomain.GetType() == eStructuredGrid)
+            {
+                pDomain->CreateStructuredGrid(propagatedDomain.GetDiscretizationMethod(),
+                                              propagatedDomain.GetDiscretizationOrder(),
+                                              propagatedDomain.GetNumberOfIntervals(),
+                                              propagatedDomain.GetLowerBound(),
+                                              propagatedDomain.GetUpperBound());
+            }
+            else if(propagatedDomain.GetType() == eUnstructuredGrid)
+            {
+                pDomain->CreateUnstructuredGrid(propagatedDomain.GetCoordinates());
+            }
+            else
+                daeDeclareAndThrowException(exInvalidCall);
+        }
+    }
+}
+
+void daePort::PropagateParameter(daeParameter& propagatedParameter)
+{
+    size_t i;
+    daeParameter* pParameter;
+    std::vector<quantity> quantities;
+
+    for(i = 0; i < m_ptrarrParameters.size(); i++)
+    {
+        pParameter = m_ptrarrParameters[i];
+        if(pParameter->GetName() == propagatedParameter.GetName())
+        {
+            propagatedParameter.GetValues(quantities);
+            pParameter->SetValues(quantities);
+        }
+    }
+}
+
 void daePort::CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                              const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
 {

@@ -3717,17 +3717,18 @@ void AssignValues2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
+        // ACHTUNG!! If an item is None or NaN set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none() || numpy.attr("isnan")(obj))
+
+        boost::python::extract<real_t>   rValue(obj);
+        boost::python::extract<quantity> qValue(obj);
+
+        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
-            boost::python::extract<real_t>   rValue(obj);
-            boost::python::extract<quantity> qValue(obj);
-
             if(rValue.check())
                 q_values[i] = quantity(rValue(), u);
             else if(qValue.check())
@@ -3791,9 +3792,13 @@ void ReAssignValues2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
+        // ACHTUNG!! If an item is None or NaN set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none() || numpy.attr("isnan")(obj))
+
+        boost::python::extract<real_t>   rValue(obj);
+        boost::python::extract<quantity> qValue(obj);
+
+        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3865,17 +3870,18 @@ void SetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
+        // ACHTUNG!! If an item is None or NaN set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none() || numpy.attr("isnan")(obj))
+
+        boost::python::extract<real_t>   rValue(obj);
+        boost::python::extract<quantity> qValue(obj);
+
+        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
-            boost::python::extract<real_t>   rValue(obj);
-            boost::python::extract<quantity> qValue(obj);
-
             if(rValue.check())
                 q_values[i] = quantity(rValue(), u);
             else if(qValue.check())
@@ -3939,17 +3945,18 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
+        // ACHTUNG!! If an item is None or NaN set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none() || numpy.attr("isnan")(obj))
+
+        boost::python::extract<real_t>   rValue(obj);
+        boost::python::extract<quantity> qValue(obj);
+
+        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
-            boost::python::extract<real_t>   rValue(obj);
-            boost::python::extract<quantity> qValue(obj);
-
             if(rValue.check())
                 q_values[i] = quantity(rValue(), u);
             else if(qValue.check())
@@ -4013,17 +4020,18 @@ void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values)
 
     for(boost::python::ssize_t i = 0; i < n; i++)
     {
-        // ACHTUNG!! If an item is None set its value to cnUnsetValue (by design: that means unset value)
+        // ACHTUNG!! If an item is None or NaN set its value to cnUnsetValue (by design: that means unset value)
         boost::python::object obj = values.attr("__getitem__")(i);
-        if(obj.is_none() || numpy.attr("isnan")(obj))
+
+        boost::python::extract<real_t>   rValue(obj);
+        boost::python::extract<quantity> qValue(obj);
+
+        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
         else
         {
-            boost::python::extract<real_t>   rValue(obj);
-            boost::python::extract<quantity> qValue(obj);
-
             if(rValue.check())
                 q_values[i] = quantity(rValue(), u);
             else if(qValue.check())

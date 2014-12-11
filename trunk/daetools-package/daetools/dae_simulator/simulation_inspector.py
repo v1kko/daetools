@@ -20,12 +20,18 @@ import sys, tempfile, numpy
 from daetools.pyDAE import *
 from .tree_item import *
 
-def _collectParameters(nodeItem, model, dictParameters):
+def _collectParameters(nodeItem, model_or_port, dictParameters):
     """
-    Recursively looks for parameters in the 'model' and all its child-models and
+    Recursively looks for parameters in the model/port and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem'.
     """
-    for obj in model.Parameters:
+    if not isinstance(model_or_port, (daePort, daeModel)):
+        raise RuntimeError('Invalid type of object in _collectDOFs function')
+
+    # Process parameters in the current port/model
+    parameters = model_or_port.Parameters
+
+    for obj in parameters:
         name = obj.Name
         if obj.NumberOfPoints == 1 and len(obj.Domains) == 0:
             value = float(obj.GetValue())
@@ -36,16 +42,27 @@ def _collectParameters(nodeItem, model, dictParameters):
         item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = True)
         dictParameters[obj.CanonicalName] = (obj, item)
 
-    for component in model.Components:
-        componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
-        _collectParameters(componentItem, component, dictParameters)
+    if isinstance(model_or_port, daeModel):
+        model = model_or_port
+        for port in model.Ports:
+            portItem = treeItem(nodeItem, port.Name, treeItem.typeNone)
+            _collectParameters(portItem, port, dictParameters)
+        for component in model.Components:
+            componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
+            _collectParameters(componentItem, component, dictParameters)
 
-def _collectDomains(nodeItem, model, dictDomains):
+def _collectDomains(nodeItem, model_or_port, dictDomains):
     """
     Recursively looks for domains in the 'model' and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem'.
     """
-    for obj in model.Domains:
+    if not isinstance(model_or_port, (daePort, daeModel)):
+        raise RuntimeError('Invalid type of object in _collectDOFs function')
+
+    # Process domains in the current port/model
+    domains = model_or_port.Domains
+
+    for obj in domains:
         name  = obj.Name
         type  = obj.Type 
         units = obj.Units
@@ -70,30 +87,47 @@ def _collectDomains(nodeItem, model, dictDomains):
         
         dictDomains[obj.CanonicalName] = (obj, item)
 
-    for component in model.Components:
-        componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
-        _collectDomains(componentItem, component, dictDomains)
+    if isinstance(model_or_port, daeModel):
+        model = model_or_port
+        for port in model.Ports:
+            portItem = treeItem(nodeItem, port.Name, treeItem.typeNone)
+            _collectDomains(portItem, port, dictDomains)
+        for component in model.Components:
+            componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
+            _collectDomains(componentItem, component, dictDomains)
 
-def _collectOutputVariables(nodeItem, model, dictOutputVariables):
+def _collectOutputVariables(nodeItem, model_or_port, dictOutputVariables):
     """
     Recursively looks for variables in the 'model' and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem'.
     """
-    for obj in model.Variables:
+    if not isinstance(model_or_port, (daePort, daeModel)):
+        raise RuntimeError('Invalid type of object in _collectDOFs function')
+
+    # Process variables/parameters in the current port/model
+    variables = model_or_port.Variables
+    parameters = model_or_port.Parameters
+
+    for obj in variables:
         name  = obj.Name
         value = obj.ReportingOn
         item  = treeItem_OutputVariable(nodeItem, name, value)
         dictOutputVariables[obj.CanonicalName] = (obj, item)
     
-    for obj in model.Parameters:
+    for obj in parameters:
         name  = obj.Name
         value = obj.ReportingOn
         item  = treeItem_OutputVariable(nodeItem, name, value)
         dictOutputVariables[obj.CanonicalName] = (obj, item)
 
-    for component in model.Components:
-        componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
-        _collectOutputVariables(componentItem, component, dictOutputVariables)
+    if isinstance(model_or_port, daeModel):
+        model = model_or_port
+        for port in model.Ports:
+            portItem = treeItem(nodeItem, port.Name, treeItem.typeNone)
+            _collectOutputVariables(portItem, port, dictOutputVariables)
+        for component in model.Components:
+            componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
+            _collectOutputVariables(componentItem, component, dictOutputVariables)
 
 def _checkIfAnyOfNestedSTNsIsdaeSTN(state):
     # Returns True if there is any daeSTN type of STN in any of nested STNs
@@ -180,13 +214,19 @@ def _collectStates(nodeItem, model, dictSTNs):
         componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
         _collectStates(componentItem, component, dictSTNs)
 
-def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
+def _collectInitialConditions(nodeItem, model_or_port, dictInitialConditions, IDs):
     """
-    Recursively looks for variables in the 'model' and all its child-models and
+    Recursively looks for variables in the model/port and all models child-models and
     adds a new treeItem object to the parent item 'nodeItem' for all those
     who are differential and need an initial conditions to be set.
     """
-    for var in model.Variables:
+    if not isinstance(model_or_port, (daePort, daeModel)):
+        raise RuntimeError('Invalid type of object in _collectDOFs function')
+
+    # Process variables in the current port/model
+    variables = model_or_port.Variables
+
+    for var in variables:
         name              = var.Name
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units
@@ -211,39 +251,41 @@ def _collectInitialConditions(nodeItem, model, dictInitialConditions, IDs):
         item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = False)
         dictInitialConditions[name] = (var, item)
 
-    for component in model.Components:
-        componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
-        _collectInitialConditions(componentItem, component, dictInitialConditions, IDs)
+    if isinstance(model_or_port, daeModel):
+        model = model_or_port
+        for port in model.Ports:
+            portItem = treeItem(nodeItem, port.Name, treeItem.typeNone)
+            _collectInitialConditions(portItem, port, dictInitialConditions, IDs)
+        for component in model.Components:
+            componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
+            _collectInitialConditions(componentItem, component, dictInitialConditions, IDs)
     
-def _collectDOFs(nodeItem, model, dictDOFs, IDs):
+def _collectDOFs(nodeItem, model_or_port, dictDOFs, IDs):
     """
     Recursively looks for variables in the 'model' and all its child-models and
     adds a new treeItem object to the parent item 'nodeItem' for all those
     who are differential and need an initial conditions to be set.
-    """
-
-    
-    """
     ACHTUNG, ACHTUNG!!!!!
-    DOFs should also be collected from ports (i.e. this is common in MEX- and S-functions)
+    DOFs should be collected from models and ports.
     """
 
-    
-    variables = model.Variables;
-    for port in model.Ports:
-        variables.extend(port.Variables)
+    if not isinstance(model_or_port, (daePort, daeModel)):
+        raise RuntimeError('Invalid type of object in _collectDOFs function')
 
+    # Process variables in the current port/model
+    variables = model_or_port.Variables
+    
     for var in variables:
         name              = var.Name
         domainsIndexesMap = var.GetDomainsIndexesMap(indexBase = 0)
         units             = var.VariableType.Units
         description       = var.Description
-        
+
         # Check if there is assigned flag set for any point in the variable
         # If there is not then skip the variable
         if not cnAssigned in IDs[var.OverallIndex : var.OverallIndex + var.NumberOfPoints]:
             continue
-        
+
         if var.NumberOfPoints == 1 and len(var.Domains) == 0:
             value = var.GetValue()
         else:
@@ -257,9 +299,14 @@ def _collectDOFs(nodeItem, model, dictDOFs, IDs):
         item = treeItem_Quantity(nodeItem, name, description, value, units, checkIfItemsAreFloats = False)
         dictDOFs[name] = (var, item)
 
-    for component in model.Components:
-        componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
-        _collectDOFs(componentItem, component, dictDOFs, IDs)
+    if isinstance(model_or_port, daeModel):
+        model = model_or_port
+        for port in model.Ports:
+            portItem = treeItem(nodeItem, port.Name, treeItem.typeNone)
+            _collectDOFs(portItem, port, dictDOFs, IDs)
+        for component in model.Components:
+            componentItem = treeItem(nodeItem, component.Name, treeItem.typeNone)
+            _collectDOFs(componentItem, component, dictDOFs, IDs)
         
 class daeSimulationInspector(object):
     def __init__(self, simulation):

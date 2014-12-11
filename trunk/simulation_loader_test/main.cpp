@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
         {
             unsigned int nvr  = 1;
             unsigned int vr[] = {2};
-            fmi2String state[1]; // allocate an array of {const char*} pointers
+            fmi2String state[1]; // allocate an array of {const char*} pointers (all NULL, will be set by fmi2GetString)
 
             status = fmi2GetString(comp, vr, nvr, state);
             if(status != fmi2OK)

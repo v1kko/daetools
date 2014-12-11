@@ -259,7 +259,7 @@ def run():
     print('Number of function evaluations =', minpack.infodict['nfev'])
     print('Estimated parameters\' values:', minpack.p_estimated)
     print('The real parameters\' values:', ['10.0', '33.33333333', '0.523598333'])
-    print('χ2 =', minpack.x2)
+    print('chi2 =', minpack.x2)
     print('Standard deviation =', minpack.sigma)
     print('Covariance matrix:')
     print(minpack.cov_x)
