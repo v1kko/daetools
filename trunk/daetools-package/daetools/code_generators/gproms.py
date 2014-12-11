@@ -128,9 +128,17 @@ class daeExpressionFormatter_gPROMS(daeExpressionFormatter):
         self.FLOOR  = 'FLOOR({value})'
         self.CEIL   = 'CEIL({value})'
         self.ABS    = 'ABS({value})'
+        self.SINH   = 'SINH({value})'
+        self.COSH   = 'COSH({value})'
+        self.TANH   = 'TANH({value})'
+        self.ASINH  = 'ASINH({value})'
+        self.ACOSH  = 'ACOSH({value})'
+        self.ATANH  = 'ATANH({value})'
+        self.ERF    = 'ERF({value})'
 
-        self.MIN    = 'MIN({leftValue}, {rightValue})'
-        self.MAX    = 'MAX({leftValue}, {rightValue})'
+        self.MIN     = 'MIN({leftValue}, {rightValue})'
+        self.MAX     = 'MAX({leftValue}, {rightValue})'
+        self.ARCTAN2 = 'ATAN2({leftValue}, {rightValue})'
 
         # Current time in simulation
         self.TIME   = '__TIME__'

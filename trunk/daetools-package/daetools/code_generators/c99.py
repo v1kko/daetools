@@ -93,8 +93,8 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
         self.ATANH  = '_atanh_({value})'
         self.ERF    = '_erf_({value})'
 
-        self.MIN    = '_min_({leftValue}, {rightValue})'
-        self.MAX    = '_max_({leftValue}, {rightValue})'
+        self.MIN     = '_min_({leftValue}, {rightValue})'
+        self.MAX     = '_max_({leftValue}, {rightValue})'
         self.ARCTAN2 = '_atan2_({leftValue}, {rightValue})'
 
         # Current time in simulation

@@ -6,8 +6,9 @@ class daeExpressionFormatter(object):
         # Equation and condition node formatting settings
 
         # Index base in arrays:
-        #  - Modelica, Fortran use 1
+        #  - Modelica, gPROMS use 1
         #  - daetools, python, c/c++ use 0
+        #  - FMI not relevant (variables are flattened)
         self.indexBase = 0
 
         self.useFlattenedNamesForAssignedVariables = False

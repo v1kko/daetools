@@ -17,14 +17,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This is a simple model to test the support for:
+This is a simple example to test daetools support for:
  - Scilab/GNU_Octave/Matlab MEX functions
  - Simulink S-functions
  - Modelica code-generator
  - gPROMS code-generator
  - FMI code-generator (for Co-Simulation)
 
-The model is very simple: it has two inlet and two outlet ports.
+The model has two inlet and two outlet ports.
 The values of the outlets are equal to inputs multiplied by a multiplier:
     out1.y   = m1   x in1.y
     out2.y[] = m2[] x in2.y[]
@@ -37,12 +37,13 @@ where multipliers m1 and m2[] are:
     when 'Constant':
         dm1/dt   = 0
         dm2[]/dt = 0
+that is can be constant or variable.
 
 The ports in1 and out1 are scalar (width = 1).
 The ports in2 and out2 are vectors (width = 1).
 
 Achtung, Achtung!!
- Notate bene:
+Notate bene:
   1. Inlet ports must be DOFs (that is to have their values asssigned),
      for they can't be connected when the model is simulated outside of daetools context.
   2. Only scalar output ports are supported at the moment!! (Simulink issue)
@@ -83,7 +84,7 @@ class modTutorial(daeModel):
         self.in1  = portScalar("in_1",  eInletPort,  self, "Input 1")
         self.out1 = portScalar("out_1", eOutletPort, self, "Output 1 = p1 x m1")
 
-        self.in2  = portVector("in_2",  eInletPort,  self, "Input 2",               self.w)
+        self.in2  = portVector("in_2",  eInletPort,  self, "Input 2",              self.w)
         self.out2 = portVector("out_2", eOutletPort, self, "Output 2 = p2 x m2[]", self.w)
 
     def DeclareEquations(self):

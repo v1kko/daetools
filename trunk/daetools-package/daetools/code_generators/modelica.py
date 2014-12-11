@@ -118,9 +118,17 @@ class daeExpressionFormatter_Modelica(daeExpressionFormatter):
         self.FLOOR  = 'floor({value})'
         self.CEIL   = 'ceil({value})'
         self.ABS    = 'abs({value})'
+        self.SINH   = 'sinh({value})'
+        self.COSH   = 'cosh({value})'
+        self.TANH   = 'tanh({value})'
+        self.ASINH  = 'asinh({value})'
+        self.ACOSH  = 'acosh({value})'
+        self.ATANH  = 'atanh({value})'
+        self.ERF    = 'erf({value})'
 
-        self.MIN    = 'min({leftValue}, {rightValue})'
-        self.MAX    = 'max({leftValue}, {rightValue})'
+        self.MIN     = 'min({leftValue}, {rightValue})'
+        self.MAX     = 'max({leftValue}, {rightValue})'
+        self.ARCTAN2 = 'atan2({leftValue}, {rightValue})'
 
         # Current time in simulation
         self.TIME   = 'time'
@@ -356,19 +364,14 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                 states          = ', '.join(st['Name'] for st in stn['States'])
                 activeState     = stn['ActiveState']
 
-                # If there are no active state changes then Modelica complains about the number of equations
-                # What to do?
-                # = "{activeState}"
-                stnTemplate = 'String {name} "{description}"; /* States: [{states}] */'
-                self.stns.append(stnTemplate.format(name = stnVariableName,
-                                                    description = description,
-                                                    activeState = activeState,
-                                                    states = states))
-                # Initial equations
-                stnTemplate = '{name} = "{activeState}";'
-                self.initial_conditions.append(stnTemplate.format(name = stnVariableName,
-                                                                  activeState = activeState))
-                                                    
+                # Achtung, Achtung!!
+                # If there are no active state changes ("when" blocks) Modelica complains about the number of equations.
+                # Is it a bug in OpenModelica or the rule? Investigate...
+                # The workaround is to count the number of state-change actions and if larger than 0
+                # the initially active state goes to the "initial equation" section.
+                # If equal to zero, it never changes so it can go to the String declaration
+                numberOfChangeStateActions = 0
+
                 counter = 0
                 nStates = len(stn['States'])
                 for i, state in enumerate(stn['States']):
@@ -403,7 +406,9 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                             self.whens.append(temp)
 
                             # Generate on condition actions
-                            self._processActions(on_condition_action['Actions'], indent+1)
+                            # Nota bene:
+                            #   Add the number of state-change actions to numberOfChangeStateActions
+                            numberOfChangeStateActions += self._processActions(on_condition_action['Actions'], indent+1)
                             counter += 1
 
                     # Generate NestedSTNs
@@ -419,14 +424,37 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                 end = 'end if;'
                 self.equations.append(end)
 
+                # Finally add the String variable (taking into account the total number of state-change actions)
+                if numberOfChangeStateActions > 0:
+                    # If there are state-change actions, an initial value goes to the initial equation section
+                    stnTemplate = 'String {name} "{description}"; /* States: [{states}] */'
+                    self.stns.append(stnTemplate.format(name = stnVariableName,
+                                                        description = description,
+                                                        activeState = activeState,
+                                                        states = states))
+                    # Initial equations
+                    stnTemplate = '{name} = "{activeState}";'
+                    self.initial_conditions.append(stnTemplate.format(name = stnVariableName,
+                                                                      activeState = activeState))
+                else:
+                    # If there are NO state-change actions, an initial value goes into the String variable declaration
+                    stnTemplate = 'String {name} = "{activeState}" "{description}"; /* States: [{states}] */'
+                    self.stns.append(stnTemplate.format(name = stnVariableName,
+                                                        description = description,
+                                                        activeState = activeState,
+                                                        states = states))
+
     def _processActions(self, Actions, indent):
         s_indent  = indent * self.defaultIndent
 
+        numberOfChangeStateActions = 0
         for action in Actions:
             if action['Type'] == 'eChangeState':
                 stnVariableName = action['STN']
                 stateTo         = action['StateTo']
                 self.whens.append(s_indent + '{0} = "{1}";'.format(stnVariableName, stateTo))
+
+                numberOfChangeStateActions += 1
 
             elif action['Type'] == 'eSendEvent':
                 self.warnings.append('Modelica code cannot be generated for SendEvent actions - the model will not work as expected!!')
@@ -448,6 +476,8 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
 
             else:
                 pass
+
+        return numberOfChangeStateActions
 
     def _generateRuntimeInformation(self, runtimeInformation):
         Ntotal             = runtimeInformation['TotalNumberOfVariables']
