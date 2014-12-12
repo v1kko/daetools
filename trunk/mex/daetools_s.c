@@ -12,45 +12,37 @@ static void mdlCheckParameters(SimStruct *S)
     const mxArray *pSimulationClass     = ssGetSFcnParam(S,1);
     const mxArray *pNumberOfInletPorts  = ssGetSFcnParam(S,2);
     const mxArray *pNumberOfOutletPorts = ssGetSFcnParam(S,3);
-    const mxArray *pInputs              = ssGetSFcnParam(S,4);
-    const mxArray *pOptions             = ssGetSFcnParam(S,5);
+    const mxArray *pOptions             = ssGetSFcnParam(S,4);
 
-    if(!IS_PARAM_STRING(pPythonPath)) 
+    if(!IS_PARAM_STRING(pPythonPath))
     {
         ssSetErrorStatus(S, "First parameter must be a string (full path to the python file)");
         return;
     }
-    
-    if(!IS_PARAM_STRING(pSimulationClass)) 
+
+    if(!IS_PARAM_STRING(pSimulationClass))
     {
         ssSetErrorStatus(S, "Second parameter must be a string (simulation class name)");
         return;
     }
-    
-    if(!IS_PARAM_UINT(pNumberOfInletPorts)) 
+
+    if(!IS_PARAM_UINT(pNumberOfInletPorts))
     {
         ssSetErrorStatus(S, "Third parameter must be an unsigned integer (number of inlet ports)");
         return;
     }
-    
-    if(!IS_PARAM_UINT(pNumberOfOutletPorts)) 
+
+    if(!IS_PARAM_UINT(pNumberOfOutletPorts))
     {
         ssSetErrorStatus(S, "Fourth parameter must be an unsigned integer (number of outlet ports)");
         return;
     }
-    /*
-    if(!IS_PARAM_CELL(pInputs)) 
+
+    if(!IS_PARAM_STRING(pOptions) || !IS_PARAM_CELL(pOptions))
     {
-        ssSetErrorStatus(S, "Fifth parameter must be a cell (simulation inputs: parameters, DOFs, initial_conditions, active_states, ...)");
+        ssSetErrorStatus("Fifth argument must be either a cell (options) or a string (initialization settings in JSON format)");
         return;
     }
-    
-    if(!IS_PARAM_CELL(pOptions)) 
-    {
-        ssSetErrorStatus(S, "Sixth parameter must be a cell (simulation options: DAE solver, LA solver, dataeporter, log, ...)");
-        return;
-    }
-    */
 }
 #endif
 
@@ -58,27 +50,26 @@ static void mdlCheckParameters(SimStruct *S)
 static void mdlInitializeSizes(SimStruct *S)
 {
     int i;
-    ssSetNumSFcnParams(S, 6);
-    
+    ssSetNumSFcnParams(S, 5);
+
 #if defined(MATLAB_MEX_FILE)
-    if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S)) 
+    if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S))
     {
         mdlCheckParameters(S);
-        if(ssGetErrorStatus(S) != NULL) 
+        if(ssGetErrorStatus(S) != NULL)
             return;
     }
-    else 
+    else
     {
         return;
     }
 #endif
 
-    ssSetSFcnParamTunable(S, 0, false); 
+    ssSetSFcnParamTunable(S, 0, false);
     ssSetSFcnParamTunable(S, 1, false);
     ssSetSFcnParamTunable(S, 2, false);
     ssSetSFcnParamTunable(S, 3, false);
-    ssSetSFcnParamTunable(S, 4, true);
-    ssSetSFcnParamTunable(S, 5, false);
+    ssSetSFcnParamTunable(S, 4, false);
 
     ssSetNumContStates(S, 0);
     ssSetNumDiscStates(S, 0);
@@ -86,9 +77,9 @@ static void mdlInitializeSizes(SimStruct *S)
     /* Set the number of input ports to the third parameter.
      * Ports' width will be inherited from the connected ports. */
     unsigned int nInletPorts = *(mxGetPr(ssGetSFcnParam(S, 2)));
-    if (!ssSetNumInputPorts(S, nInletPorts)) 
+    if (!ssSetNumInputPorts(S, nInletPorts))
         return;
-    
+
     for(i = 0; i < nInletPorts; i++)
     {
         ssSetInputPortWidth(S, i, DYNAMICALLY_SIZED);
@@ -96,21 +87,21 @@ static void mdlInitializeSizes(SimStruct *S)
         ssSetInputPortDataType(S, i, SS_DOUBLE);
         ssSetInputPortDirectFeedThrough(S, i, true);
     }
-    
+
     /* Set the number of output ports to the fourth parameter.
      * Ports' width must be 1 at the moment. */
     unsigned int nOutletPorts = *(mxGetPr(ssGetSFcnParam(S, 3)));
-    if (!ssSetNumOutputPorts(S, nOutletPorts)) 
+    if (!ssSetNumOutputPorts(S, nOutletPorts))
         return;
-    
+
     for(i = 0; i < nOutletPorts; i++)
     {
         ssSetOutputPortWidth(S, i, 1);
         ssSetOutputPortDataType(S, i, SS_DOUBLE);
     }
-    
+
     ssSetNumSampleTimes(S, 1);
-    
+
     ssSetNumRWork(S, 0);
     ssSetNumIWork(S, 0);
     ssSetNumPWork(S, 1);
@@ -133,34 +124,38 @@ static void mdlStart(SimStruct *S)
         ssPrintf("Loading the simulation...\n");
 
     char* path              = mxArrayToString(ssGetSFcnParam(S, 0));
-    char* simClassName      = mxArrayToString(ssGetSFcnParam(S, 1));
+    char* simCallableName   = mxArrayToString(ssGetSFcnParam(S, 1));
     const mxArray* pInputs  = ssGetSFcnParam(S, 4);
     const mxArray* pOptions = ssGetSFcnParam(S, 5);
-    
+
     if(debugMode)
     {
         ssPrintf("Python file: %s\n",      path);
         ssPrintf("Simulation class: %s\n", simClassName);
     }
-    
-    /* Load the simulation object with the specified name (simClassName) and 
+
+    /* Load the simulation object with the specified name (simClassName) and
      * from the specified file (path). */
-    void *simulation = LoadSimulation(path, simClassName);
+    void *simulation = LoadSimulation(path, simCallableName);
     if(!simulation)
     {
         ssSetErrorStatus(S, "Cannot load DAETools simulation");
         return;
     }
-    
+
     /* Save the simulation object for later use. */
     ssGetPWork(S)[0] = simulation;
 
     /* Initialize the simulation with the default settings */
     if(debugMode)
         ssPrintf("Initializing simulation...\n");
-    
+
     /* Initialize the simulation with the given settings. */
     initializeSimulation(simulation, pOptions);
+
+    /* Free memory */
+    mxFree(path);
+    mxFree(callableName);
 
     /* Get the number of parameters, inlet and outlet ports and check their number */
     int i;
@@ -174,34 +169,31 @@ static void mdlStart(SimStruct *S)
         ssPrintf("Number of inputs: %d\n",     nInletPorts);
         ssPrintf("Number of outputs: %d\n",    nOutletPorts);
     }
-    
+
     if(ssGetNumInputPorts(S) != nInletPorts)
     {
         sprintf(msg, "Invalid number of input ports: %d (should be %d)", ssGetNumInputPorts(S), nInletPorts);
         ssSetErrorStatus(S, msg);
         return;
     }
-    
+
     if(ssGetNumOutputPorts(S) != nOutletPorts)
     {
         sprintf(msg, "Invalid number of output ports: %d (should be %d)", ssGetNumOutputPorts(S), nOutletPorts);
         ssSetErrorStatus(S, msg);
         return;
     }
- 
+
     /* Set a dummy time horizon and reporting interval. */
     SetReportingInterval(simulation, 1.0);
     SetTimeHorizon(simulation,       10.0);
-
-    /* Set the simulation parameters, DOFs, initial conditions, active states, .... */
-    setSimulationInputs(simulation, pInputs);
 }
 
 static void mdlOutputs(SimStruct *S, int_T tid)
 {
     /* Get the simulation object from the PWork array */
     void *simulation = (void *) ssGetPWork(S)[0];
-    
+
     /* Set the time horizon (for the current step only)
      * Achtung, Achtung!!
      *   Try to obtain an overall time horizon (final time of the simulation) */
@@ -214,7 +206,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 
     int nInletPorts  = GetNumberOfInputs(simulation);
     int nOutletPorts = GetNumberOfOutputs(simulation);
-    
+
     if(stepTimeHorizon == 0)
     {
         /* Solve the system with the specified initial conditions and report data. */
@@ -225,7 +217,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     }
     else
     {
-        /* Integrate until the specified step final time. 
+        /* Integrate until the specified step final time.
          * Achtung, Achtung!!
          *   How to set the reporting interval during the initialization phase?
          *   Do we need to set it in advance, or just report the data after every mdlOuptuts call? */
@@ -258,7 +250,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
         IntegrateUntilTime(simulation, stepTimeHorizon);
         ReportData(simulation);
     }
-    
+
     /* Set the outputs' values */
     for(i = 0; i < nOutletPorts; i++)
     {
@@ -272,28 +264,28 @@ static void mdlOutputs(SimStruct *S, int_T tid)
             ssSetErrorStatus(S, msg);
             return;
         }
-        
+
         /* Get the result from daetools. */
         double* data = (double*)malloc(noPoints * sizeof(double));
         GetOutputValue(simulation, i, data, noPoints);
         if(debugMode)
             ssPrintf("Get output %d value: %f\n", i, data[0]);
-        
+
         /* Set the outlet port value. */
         double* y = ssGetOutputPortRealSignal(S, i);
         memcpy(y, data, noPoints * sizeof(double));
-        
+
         /* Free the data buffer. */
         free(data);
-    }    
-}                                                
+    }
+}
 
 static void mdlTerminate(SimStruct *S)
 {
     /* Get the simulation object from the PWork array */
     void *simulation = (void *) ssGetPWork(S)[0];
-     
-    /* Finalize the simulation and free the object */ 
+
+    /* Finalize the simulation and free the object */
     Finalize(simulation);
     FreeSimulation(simulation);
 }

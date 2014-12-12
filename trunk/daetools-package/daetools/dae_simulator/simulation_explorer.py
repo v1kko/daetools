@@ -288,13 +288,18 @@ class daeSimulationExplorer(QtGui.QDialog):
             for qt_file in qt_files:
                 py_files.append(str(qt_file))
 
-            qt_simulation_name, ok = QtGui.QInputDialog.getText(self, "FMU Code generator", "Insert the python simulation class name:")
+            qt_callable_name, ok = QtGui.QInputDialog.getText(self, "FMU Code generator", "Insert the name of python callable object:")
             if not ok:
                 return
-            simulation_name = str(qt_simulation_name)
-            
+            callable_name = str(qt_callable_name)
+
+            qt_arguments, ok = QtGui.QInputDialog.getText(self, "FMU Code generator", "Insert the arguments for the python callable object:")
+            if not ok:
+                return
+            arguments = str(qt_arguments)
+
             cg = daeCodeGenerator_FMI()
-            cg.generateSimulation(self._simulation, directory, py_files, simulation_name)
+            cg.generateSimulation(self._simulation, directory, py_files, callable_name, arguments, [])
             
         QtGui.QMessageBox.information(self, "Code generator: %s" % language, 'Code generated successfuly!')
             

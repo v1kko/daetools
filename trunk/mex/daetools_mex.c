@@ -28,72 +28,72 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     unsigned int noPoints;
     char name[512];
     bool debugMode = false;
-    
+
     /* Check the number of arguments. */
-    if(n_arguments != 6)
+    if(n_arguments != 5)
         mexErrMsgTxt(usage);
 
     /* Check the number of outputs. */
     if(n_outputs != 1)
         mexErrMsgTxt(usage);
-    
-    const mxArray *pPythonPath        = arguments[0];
-    const mxArray *pSimulationClass   = arguments[1];
-    const mxArray *pTimeHorizon       = arguments[2];
-    const mxArray *pReportingInterval = arguments[3];
-    const mxArray *pInputs            = arguments[4];
-    const mxArray *pOptions           = arguments[5];
 
-    /* Validate arguments */    
+    const mxArray *pPythonPath         = arguments[0];
+    const mxArray *pSimulationCallable = arguments[1];
+    const mxArray *pTimeHorizon        = arguments[2];
+    const mxArray *pReportingInterval  = arguments[3];
+    const mxArray *pOptions            = arguments[4];
+
+    /* Validate arguments */
     /* First two arguments must be strings. */
-    if(!IS_PARAM_STRING(pPythonPath)) 
+    if(!IS_PARAM_STRING(pPythonPath))
     {
         mexErrMsgTxt("First argument must be a string (full path to the python file)");
         return;
     }
-    
-    if(!IS_PARAM_STRING(pSimulationClass)) 
+
+    if(!IS_PARAM_STRING(pSimulationCallable))
     {
         mexErrMsgTxt("Second argument must be a string (simulation class name)");
         return;
     }
-    
+
     if(!IS_PARAM_DOUBLE(pTimeHorizon))
     {
         mexErrMsgTxt("Third argument must be float value (time horizon)");
         return;
     }
-    
+
     if(!IS_PARAM_DOUBLE(pReportingInterval))
     {
         mexErrMsgTxt("Fourth argument must be float value (reporting interval)");
         return;
     }
-    /*
-    if(!IS_PARAM_CELL(pInputs))
-    {
-        mexErrMsgTxt("Fifth argument must be a cell (simulation inputs)");
-        return;
-    }
     
-    if(!IS_PARAM_CELL(pOptions))
+    if(!IS_PARAM_STRING(pOptions) || !IS_PARAM_CELL(pOptions))
     {
-        mexErrMsgTxt("Sixth argument must be a cell (simulation options)");
+        mexErrMsgTxt("Fifth argument must be either a cell (options) or a string (initialization settings in JSON format)");
         return;
     }
-    */
-    /* Get the length of the input string. */
-    char* path      = mxArrayToString(pPythonPath);
-    char* className = mxArrayToString(pSimulationClass);
 
-    /* Load the simulation object with the specified name (simClassName) and 
+    /* Get the length of the input string. */
+    char* path         = mxArrayToString(pPythonPath);
+    char* callableName = mxArrayToString(pSimulationCallable);
+
+    /* Load the simulation object with the specified name (simClassName) and
      * from the specified file (path). */
-    void *simulation = LoadSimulation(path, className);
+    void *simulation = LoadSimulation(path, callableName);
     if(!simulation)
         mexErrMsgTxt("Cannot load DAETools simulation");
 
-    /* Initialize the simulation with the given settings. */
-    initializeSimulation(simulation, pOptions);
+    /* Initialize the simulation with the given options that can be one of
+         a) LA solver, ShowSimulationExplorer
+         b) JSON runtime settings (can be exported from every simulation) */
+    if(!initializeSimulation(simulation, pOptions))
+        mexErrMsgTxt("Failed to initialize DAETools simulation");
+
+    /* Free memory */
+    mxFree(path);
+    mxFree(callableName);
 
     /* Set the time horizon and reporting interval. */
     double timeHorizon       = (mxGetPr(pTimeHorizon))[0];
@@ -101,13 +101,12 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     SetReportingInterval(simulation, reportingInterval);
     SetTimeHorizon(simulation,       timeHorizon);
 
-    /* Set the simulation parameters, DOFs, initial conditions, active states, .... */
     setSimulationInputs(simulation, pInputs);
 
     /* Allocate mx arrays to hold the output data. */
-    int numberOfSteps = (int)(timeHorizon / reportingInterval) + 1 + 
+    int numberOfSteps = (int)(timeHorizon / reportingInterval) + 1 +
                         (fmod(timeHorizon, reportingInterval) == 0 ? 0 : 1);
-    
+
     int nOutletPorts = GetNumberOfOutputs(simulation);
     mwSize ndim = 1;
     mwSize dims[1] = {nOutletPorts + 1};
@@ -136,7 +135,7 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     mxSetCell(itemCell, 0, outName);
     mxSetCell(itemCell, 1, outMatrix);
     mxSetCell(results, nOutletPorts, itemCell);
-    
+
     int step = 0;
     double currentTime = 0;
     double targetTime  = 0;
@@ -146,25 +145,25 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
     ReportData(simulation);
     reportDataToMatrix(simulation, results, currentTime, step);
     step += 1;
-    
+
     /* Run. */
     while(targetTime < timeHorizon)
     {
         targetTime += reportingInterval;
         if(targetTime > timeHorizon)
             targetTime = timeHorizon;
-        
+
         if(debugMode)
             mexPrintf("  Integrating from %.6f to %.6f ...\n", currentTime, targetTime);
 
         IntegrateUntilTime(simulation, targetTime);
         ReportData(simulation);
         reportDataToMatrix(simulation, results, targetTime, step);
-        
+
         currentTime = targetTime;
         step += 1;
     }
-    
+
     /* Put all outputs and times to the caller workspace. */
     char workspace[] = "caller";
     for(i = 0; i < nOutletPorts; i++)
@@ -177,16 +176,12 @@ void mexFunction (int n_outputs,         mxArray* outputs[],
         itemCell  = mxGetCell(results, i);
         outMatrix = mxGetCell(itemCell, 1);
         mexPutVariable(workspace, name, outMatrix);
-    }  
+    }
     itemCell  = mxGetCell(results, nOutletPorts);
     outMatrix = mxGetCell(itemCell, 1);
     mexPutVariable(workspace, "times__", outMatrix);
 
     /* Return the results. */
     outputs[0] = results;
-    
-    /* Free memory */
-    mxFree(path);
-    mxFree(className);
 }
 

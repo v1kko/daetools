@@ -442,6 +442,7 @@ def InitializeSimulationJSON(simulation, jsonSettings):
     """
     This function reads all information needed to initialize a simulation
     from the jsonSettings argument, including DAE solver, LA solver, DataReporter, Log etc.
+    If the data in json string are not available the defaults are used.
     """
     if not simulation:
         raise RuntimeError('Invalid simulation object')
@@ -450,10 +451,24 @@ def InitializeSimulationJSON(simulation, jsonSettings):
 
     settings = json.loads(jsonSettings)
 
-    daesolver_name    = settings['DAESolver']['Name']
-    la_solver_name    = settings['LASolver']['Name']
-    datareporter_name = settings['DataReporter']['Name']
-    log_name          = settings['Log']['Name']
+    daesolver_name    = 'Sundials IDAS'
+    la_solver_name    = None
+    datareporter_name = 'BlackHoleDataReporter'
+    connect_string    = ''
+    log_name          = 'daePythonStdOutLog'
+    calculateSensitivities = False
+
+    if 'DAESolver' in settings:
+        daesolver_name = settings['DAESolver']['Name']
+    if 'LASolver' in settings:
+        la_solver_name = settings['LASolver']['Name']
+    if 'DataReporter' in settings:
+        datareporter_name = settings['DataReporter']['Name']
+        connect_string    = settings['DataReporter']['ConnectString'].encode('ascii','ignore')
+    if 'Log' in settings:
+        log_name = settings['Log']['Name']
+    if 'CalculateSensitivities' in settings:
+        calculateSensitivities = settings['CalculateSensitivities']
     
     log = createLogByName(log_name)
     if not log:
@@ -473,12 +488,9 @@ def InitializeSimulationJSON(simulation, jsonSettings):
     if not datareporter:
         raise RuntimeError('Cannot create datareporter: %s' % datareporter_name)
     
-    connect_string = settings['DataReporter']['ConnectString'].encode('ascii','ignore')
     process_name   = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if not datareporter.Connect(connect_string, process_name):
         raise RuntimeError("Cannot connect datareporter")
-
-    calculateSensitivities = settings['CalculateSensitivities']
 
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities, jsonSettings)
 

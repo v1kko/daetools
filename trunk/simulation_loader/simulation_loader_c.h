@@ -1,12 +1,14 @@
 #ifndef DAE_SIMULATION_LOADER_C_H
 #define DAE_SIMULATION_LOADER_C_H
 
+#include "simulation_loader_common.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass);
+void* LoadSimulation(const char*  strPythonFile, const char* strSimulationCallable, const char* strArguments);
 bool Initialize(void* s,
                 const char* strDAESolver,
                 const char* strLASolver,
@@ -20,6 +22,7 @@ bool SetReportingInterval(void* s, double reportingInterval);
 bool SolveInitial(void* s);
 bool Run(void* s);
 bool Reinitialize(void* s);
+bool ReturnToInitialSystem(void* s);
 bool Finalize(void* s);
 bool FreeSimulation(void* s);
 

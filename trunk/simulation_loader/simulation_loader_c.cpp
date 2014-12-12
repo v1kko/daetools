@@ -3,8 +3,8 @@
 #endif
 #include <boost/python.hpp>
 
+#include "simulation_loader_c.h"
 #include "simulation_loader.h"
-#include "simulation_loader_common.h"
 #include "../dae.h"
 
 /* Common functions */
@@ -32,12 +32,12 @@ bool GetStrippedName(const char strSource[512], char strDestination[512])
 }
 
 /* SimulationLoader c-interface */
-void* LoadSimulation(const char*  strPythonFile, const char* strSimulationClass)
+void* LoadSimulation(const char*  strPythonFile, const char* strSimulationCallable, const char* strArguments)
 {
     try
     {
         daeSimulationLoader* loader = new daeSimulationLoader();
-        loader->LoadSimulation(strPythonFile, strSimulationClass);
+        loader->LoadSimulation(strPythonFile, strSimulationCallable, strArguments);
         return loader;
     }
     catch(std::exception& e)
@@ -203,6 +203,28 @@ bool Reinitialize(void* s)
         }
 
         ptr_loader->Reinitialize();
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
+bool ReturnToInitialSystem(void* s)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        ptr_loader->ReturnToInitialSystem();
         return true;
     }
     catch(std::exception& e)

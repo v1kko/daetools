@@ -39,9 +39,7 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         return NULL;
 
     daeFMIComponent_t* c = NULL;
-    std::string strPythonFile, strSimulationClass,
-                strDAESolver, strLASolver, strDataReporter,
-                strDataReporterConnectionString, strLog;
+    std::string strPythonFile, strCallableObjectName, strArguments;
 
     try
     {
@@ -54,22 +52,27 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         c->visible              = visible;
         c->loggingOn            = loggingOn;
 
-        strDAESolver    = "Sundials IDAS";
-        strDataReporter = "TCPIPDataReporter"; // BlackHoleDataReporter
-        strLog          = "BaseLog";
-
         boost::property_tree::ptree pt;
         std::string resources_dir = std::string(fmuResourceLocation) + "/";
         std::string	json_settings = resources_dir + "settings.json";
         std::string	json_ini_file = resources_dir + "init.json";
 
         boost::property_tree::json_parser::read_json(json_settings, pt);
-        strPythonFile      = resources_dir + pt.get<std::string>("simulationFile");
-        strSimulationClass = pt.get<std::string>("simulationClass");
-        strLASolver        = pt.get<std::string>("LASolver");
+        strPythonFile         = resources_dir + pt.get<std::string>("simulationFile");
+        strCallableObjectName = pt.get<std::string>("callableObjectName");
+        strArguments          = pt.get<std::string>("arguments");
 
-        c->simulationLoader.LoadSimulation(strPythonFile, strSimulationClass);
+        c->simulationLoader.LoadSimulation(strPythonFile, strCallableObjectName, strArguments);
+
+        /* Nota bene:
+         * Not needed anymore: the callable object should return an initialized simulation!!
+
+        strDAESolver    = "Sundials IDAS";
+        strDataReporter = "TCPIPDataReporter"; // BlackHoleDataReporter
+        strLog          = "BaseLog";
+
         c->simulationLoader.Initialize(strDAESolver, strLASolver, strDataReporter, strDataReporterConnectionString, strLog, false, "");
+        */
 
         return c;
     }
@@ -80,8 +83,8 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         error += std::string("FMU settings:\n");
         error += std::string("  fmuResourceLocation = ") + fmuResourceLocation+  + "\n";
         error += std::string("  PythonFile = ")          + strPythonFile.c_str() + "\n";
-        error += std::string("  SimulationClass = ")     + strSimulationClass.c_str() + "\n";
-        error += std::string("  LASolver = ")            + strLASolver.c_str() + "\n";
+        error += std::string("  CallableObjectName = ")  + strCallableObjectName.c_str() + "\n";
+        error += std::string("  Arguments = ")           + strArguments.c_str() + "\n";
 
         std::cout << error<< std::endl;
         if(c)
@@ -193,7 +196,9 @@ fmi2Status fmi2Reset(fmi2Component comp)
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2Error;
+    c->simulationLoader.ReturnToInitialSystem();
+
+    return fmi2OK;
 }
 
 /* Getting and setting variable values */

@@ -8,7 +8,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
     def __init__(self):
         fmiModelDescription.__init__(self)        
     
-    def generateSimulation(self, simulation, directory, py_simulation_file, simulation_classname, py_additional_files = []):
+    def generateSimulation(self, simulation, directory, py_simulation_file, callable_object_name, arguments, py_additional_files = []):
         try:
             if not simulation:
                 raise RuntimeError('Invalid simulation object')
@@ -16,8 +16,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 os.makedirs(directory)
             if not isinstance(py_additional_files, list):
                 raise RuntimeError('Additional python files must be a list')
-            if not simulation_classname:
-                raise RuntimeError('No python simulation name specified for FMU')
+            if not callable_object_name:
+                raise RuntimeError('No python callable object name specified for FMU')
             
             self.wrapperInstanceName = simulation.m.Name
             modelIdentifier          = simulation.m.GetStrippedName()
@@ -80,17 +80,14 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Generate settings.json file
             f = open(os.path.join(resources_dir, 'settings.json'), "w")
             settings = {}
-            settings['simulationClass'] = simulation_classname
-            settings['simulationFile']  = py_simulation_file
-            if simulation.DAESolver.LASolver:
-                settings['LASolver']    = simulation.DAESolver.LASolver.Name
-            else:
-                settings['LASolver']    = ''
+            settings['simulationFile']     = py_simulation_file
+            settings['callableObjectName'] = callable_object_name
+            settings['arguments']          = arguments
             f.write(json.dumps(settings, indent = 4, sort_keys = True))
             f.close()
 
             # Generate initialization.json file 
-            daeSimulationExplorer.saveJSONSettings(os.path.join(resources_dir, 'init.json'), simulation, simulation_classname)
+            daeSimulationExplorer.saveJSONSettings(os.path.join(resources_dir, 'init.json'), simulation, callable_object_name)
 
             # Fill in the xml data
             self.modelName                  = modelIdentifier #*

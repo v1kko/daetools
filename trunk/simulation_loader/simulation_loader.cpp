@@ -10,7 +10,6 @@
 #include <boost/format.hpp>
 
 #include "simulation_loader.h"
-#include "simulation_loader_common.h"
 #include "../dae.h"
 
 /* Common functions */
@@ -93,7 +92,9 @@ daeSimulationLoader::~daeSimulationLoader()
     //Py_Finalize() call moved to dllmain.cpp
 }
 
-void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const std::string& strSimulationClass)
+void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile,
+                                         const std::string& strSimulationCallable,
+                                         const std::string& strArguments)
 {
     try
     {
@@ -122,7 +123,7 @@ void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const
     // Here it fails if I do call Py_Finalize()
         result  = boost::python::exec(command.c_str(), main_namespace);
 
-        command = (boost::format("__daetools_simulation__ = %s.%s()") % strSimulationModule % strSimulationClass).str();
+        command = (boost::format("__daetools_simulation__ = %s.%s(%s)") % strSimulationModule % strSimulationCallable % strArguments).str();
         result  = boost::python::exec(command.c_str(), main_namespace);
 
         // Set the boost::python simulation object
@@ -136,6 +137,12 @@ void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile, const
             daeDeclareAndThrowException(exInvalidPointer);
         if(!pData->m_pSimulation->GetModel())
             daeDeclareAndThrowException(exInvalidPointer);
+
+        // The simulation is initialized so obtain the interfaces
+        SetupInputsAndOutputs();
+
+        pData->m_mapFMIReferences.clear();
+        pData->m_pSimulation->GetModel()->GetFMIInterface(pData->m_mapFMIReferences);
     }
     catch(const boost::python::error_already_set&)
     {
@@ -160,6 +167,7 @@ void daeSimulationLoader::Initialize(const std::string& strJSONRuntimeSettings)
         std::string command = "__DAESolver__, __LASolver__, __DataReporter__, __Log__ = InitializeSimulationJSON(__daetools_simulation__, _json_runtime_settings_)";
         boost::python::exec(command.c_str(), main_namespace, locals);
 
+        // The simulation is initialized so obtain the interfaces
         SetupInputsAndOutputs();
 
         pData->m_mapFMIReferences.clear();
@@ -198,6 +206,7 @@ void daeSimulationLoader::Initialize(const std::string& strDAESolver,
                                                   % strDataReporterConnectionString % strLog % (bCalculateSensitivities ? "True" : "False")).str();
         boost::python::exec(command.c_str(), main_namespace);
 
+        // The simulation is initialized so obtain the interfaces
         SetupInputsAndOutputs();
 
         pData->m_mapFMIReferences.clear();
@@ -322,7 +331,7 @@ void daeSimulationLoader::Reinitialize()
     pData->m_pSimulation->Reinitialize();
 }
 
-void daeSimulationLoader::Reset()
+void daeSimulationLoader::ReturnToInitialSystem()
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -331,7 +340,9 @@ void daeSimulationLoader::Reset()
     if(!pData->m_pSimulation)
         daeDeclareAndThrowException(exInvalidPointer);
 
+    pData->m_pSimulation->SetUpVariables();
     pData->m_pSimulation->Reset();
+    pData->m_pSimulation->SolveInitial();
 }
 
 void daeSimulationLoader::ReportData()

@@ -207,12 +207,43 @@ def consoleRun():
     # Functional Mock-up Interface for co-simulation
     from daetools.code_generators.fmi import daeCodeGenerator_FMI
     cg = daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, __file__, 'simTutorial', [])
+    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation', '', [])
 
     # Run
     simulation.Run()
     simulation.Finalize()
 
+def create_simulation():
+    # Create Log, Solver, DataReporter and Simulation object
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
+
+    # LA solver
+    lasolver = superlu.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
+
+    # Enable reporting of all variables
+    simulation.m.SetReportingOn(True)
+
+    # Set the time horizon and the reporting interval
+    simulation.ReportingInterval = 10
+    simulation.TimeHorizon = 100
+
+    # Connect data reporter
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("127.0.0.1:50000", simName) == False):
+        sys.exit()
+
+    # Initialize the simulation
+    simulation.Initialize(daesolver, datareporter, log)
+
+    # Nota bene: store the objects since they will be destroyed when they go out of scope
+    simulation.__rt_objects__ = [daesolver, lasolver, datareporter, log]
+
+    return simulation
+    
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()

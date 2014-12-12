@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include "simulation_loader_common.h"
 
 class daeSimulationLoader
 {
@@ -12,7 +13,7 @@ public:
 
 public:
 // Loading function
-    void LoadSimulation(const std::string& strPythonFile, const std::string& strSimulationClass);
+    void LoadSimulation(const std::string& strPythonFile, const std::string& strSimulationCallable, const std::string& strArguments);
 
 // Low-level simulation functions
     void Initialize(const std::string& strDAESolver,
@@ -31,7 +32,7 @@ public:
     void Pause();
     void Finalize();
     void Reinitialize();
-    void Reset();
+    void ReturnToInitialSystem();
     void ShowSimulationExplorer();
 
 // Data reporting

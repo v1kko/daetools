@@ -10,6 +10,8 @@
 #define IS_PARAM_STRING(pVal) (mxIsChar(pVal) && !mxIsLogical(pVal) &&\
 !mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
 
+#define IS_PARAM_LOGICAL(pVal) (mxIsLogical(pVal) && mxIsLogicalScalar(pVal) && !mxIsEmpty(pVal))
+
 #define IS_PARAM_CELL(pVal) (mxIsCell(pVal) && !mxIsEmpty(pVal))
 
 /* A buffer for error/warning messages. */
@@ -19,7 +21,7 @@ char msg[1024];
 bool debugMode = false;
 
 /* Gets an item of the Matlab 2D mxArray (matrix) */
-static double getItem(mxArray* mat, int i, int j) 
+static double getItem(mxArray* mat, int i, int j)
 {
     mwSize mrows = mxGetM(mat);
     double* data = mxGetPr(mat);
@@ -27,34 +29,78 @@ static double getItem(mxArray* mat, int i, int j)
 }
 
 /* Sets an item of the Matlab 2D mxArray (matrix) */
-static void setItem(mxArray* mat, int i, int j, double value) 
+static void setItem(mxArray* mat, int i, int j, double value)
 {
     mwSize mrows = mxGetM(mat);
     double* data = mxGetPr(mat);
     data[i + j*mrows] = value;
 }
 
-/* MEX- an S-function inputs (parameters, DOFs, initial conditions, active states) */
-static void setSimulationInputs(void* simulation, const mxArray* inputs)
+/* MEX- and S-function initialization options (LA solver or json runtime settings) */
+static int initializeSimulation(void* simulation, const mxArray* pOptions)
 {
-}
+    if(IS_PARAM_STRING(pOptions))
+    {
+        /* Load the json string. */
+        char* jsonSettings = mxArrayToString(pOptions);
+        
+        /* Initialize the simulation. */
+        Initialize(simulation, jsonSettings);
 
-/* MEX- an S-function initialization options (DAE solver, LA solver, data reporter, log, ...) */
-static void initializeSimulation(void* simulation, const mxArray* pOptions)
-{
-    if(!pOptions)
-        return;
-  
-    /* Default settings. */
-    char DAESolver[64]          = "IDAS";
-    char LASolver[64]           = "";
-    char DataReporter[64]       = "TCPIPDataReporter";
-    char ConnectionString[64]   = "";
-    char Log[64]                = "StdOutLog";
-    bool ShowSimulationExplorer = false;
+        /* Free the memory */
+        mxFree(jsonSettings);
+
+        return 0;
+    }
+    else if(IS_PARAM_CELL(pOptions))
+    {
+        if(mxGetNumberOfElements(pOptions) != 2)
+        {
+            mexErrMsgTxt("The size of simulation options argument must be 2 (LASolver and ShowSimulationExplorer)");
+            return;
+        }
+
+        mxArray* item;
+        bool inputsOK = true;
+        for(int i = 0; i < 2; i++)
+        {
+            item = mxGetCell(inputs, i);
+            if(i == 0 && !IS_PARAM_STRING(item))
+            {
+                mexPrintf("Item[%d] of the inputs cell (LA Solver) must be a string", i);
+                inputsOK = false;
+            }
+            if(i == 1 && !IS_PARAM_LOGICAL(item))
+            {
+                mexPrintf("Item[%d] of the inputs cell (ShowSimulationExplorer) must be logical scalar", i);
+                inputsOK = false;
+            }
+        }
+
+        if(!inputsOK)
+            return -1;
+
+        const char* DAESolver = "Sundials IDAS";
+        const char* DataReporter = "BlackHoleDataReporter;
+        const char* ConnectString = "";
+        const char* Log = "StdOutLog";
+
+        item = mxGetCell(inputs, 0);
+        char* LASolver = mxArrayToString(item);
+
+        item = mxGetCell(inputs, 1);
+        bool ShowSimulationExplorer = mxIsLogicalScalarTrue(item);
+
+        /* Initialize the simulation. */
+        Initialize(simulation, DAESolver, LASolver, DataReporter, ConnectionString, Log, ShowSimulationExplorer);
+
+        /* Free the memory */
+        mxFree(LASolver);
+
+        return 0;
+    }
     
-    /* Initialize the simulation. */
-    Initialize(simulation, DAESolver, LASolver, DataReporter, ConnectionString, Log, ShowSimulationExplorer);
+    return -1;
 }
 
 /* Sets the outputs of the MEX-function (Matlab mxArray 2D array) */
