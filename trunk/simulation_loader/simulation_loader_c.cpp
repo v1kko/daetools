@@ -213,7 +213,7 @@ bool Reinitialize(void* s)
     return false;
 }
 
-bool ReturnToInitialSystem(void* s)
+bool ResetToInitialSystem(void* s)
 {
     try
     {
@@ -224,7 +224,7 @@ bool ReturnToInitialSystem(void* s)
             return false;
         }
 
-        ptr_loader->ReturnToInitialSystem();
+        ptr_loader->ResetToInitialSystem();
         return true;
     }
     catch(std::exception& e)
@@ -614,6 +614,100 @@ bool SetOutputValue(void* s, unsigned int index, const double* value, unsigned i
         }
 
         ptr_loader->SetOutputValue(index, value, numberOfPoints);
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
+bool GetFMIValue(void* s, unsigned int fmi_reference, double* value)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        *value = ptr_loader->GetFMIValue(fmi_reference);
+
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
+bool GetFMIActiveState(void* s, unsigned int fmi_reference, char* state)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        std::string str_state = ptr_loader->GetFMIActiveState(fmi_reference);
+        strncpy(state, str_state.c_str(), 512);
+
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
+bool SetFMIValue(void* s, unsigned int fmi_reference, double value)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        ptr_loader->SetFMIValue(fmi_reference, value);
+
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
+bool SetFMIActiveState(void* s, unsigned int fmi_reference, const char* state)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        std::string str_state = state;
+        ptr_loader->SetFMIActiveState(fmi_reference, str_state);
+
         return true;
     }
     catch(std::exception& e)

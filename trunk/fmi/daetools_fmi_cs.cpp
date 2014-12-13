@@ -196,7 +196,7 @@ fmi2Status fmi2Reset(fmi2Component comp)
     if(c == NULL)
         return fmi2Fatal;
 
-    c->simulationLoader.ReturnToInitialSystem();
+    c->simulationLoader.ResetToInitialSystem();
 
     return fmi2OK;
 }

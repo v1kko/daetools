@@ -1,8 +1,7 @@
-#include "../simulation_loader/simulation_loader.h"
+#include <iostream>
 #include <string>
 #include <fstream>
 #include <streambuf>
-#include <boost/python.hpp>
 
 #define FMI2_Export
 #include "../fmi/include/fmi2Functions.h"
@@ -146,6 +145,8 @@ int main(int argc, char *argv[])
 }
 
 /* Test simulation loader
+#include "../simulation_loader/simulation_loader.h"
+
 int main(int argc, char *argv[])
 {
     try

@@ -152,6 +152,7 @@ void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile,
     }
 }
 
+// Not needed anymore for the python callable object has to instantiate and initialize a simulation
 void daeSimulationLoader::Initialize(const std::string& strJSONRuntimeSettings)
 {
     try
@@ -181,6 +182,7 @@ void daeSimulationLoader::Initialize(const std::string& strJSONRuntimeSettings)
     }
 }
 
+// Not needed anymore for the python callable object has to instantiate and initialize a simulation
 void daeSimulationLoader::Initialize(const std::string& strDAESolver,
                                      const std::string& strLASolver,
                                      const std::string& strDataReporter,
@@ -331,7 +333,7 @@ void daeSimulationLoader::Reinitialize()
     pData->m_pSimulation->Reinitialize();
 }
 
-void daeSimulationLoader::ReturnToInitialSystem()
+void daeSimulationLoader::ResetToInitialSystem()
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)

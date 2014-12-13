@@ -9,10 +9,10 @@
 static void mdlCheckParameters(SimStruct *S)
 {
     const mxArray *pPythonPath          = ssGetSFcnParam(S,0);
-    const mxArray *pSimulationClass     = ssGetSFcnParam(S,1);
-    const mxArray *pNumberOfInletPorts  = ssGetSFcnParam(S,2);
-    const mxArray *pNumberOfOutletPorts = ssGetSFcnParam(S,3);
-    const mxArray *pOptions             = ssGetSFcnParam(S,4);
+    const mxArray *pSimulationCallable  = ssGetSFcnParam(S,1);
+    const mxArray *pCallableArguments   = ssGetSFcnParam(S,2);
+    const mxArray *pNumberOfInletPorts  = ssGetSFcnParam(S,3);
+    const mxArray *pNumberOfOutletPorts = ssGetSFcnParam(S,4);
 
     if(!IS_PARAM_STRING(pPythonPath))
     {
@@ -20,27 +20,27 @@ static void mdlCheckParameters(SimStruct *S)
         return;
     }
 
-    if(!IS_PARAM_STRING(pSimulationClass))
+    if(!IS_PARAM_STRING(pSimulationCallable))
     {
-        ssSetErrorStatus(S, "Second parameter must be a string (simulation class name)");
+        ssSetErrorStatus(S, "Second argument must be a string (name of python callable object)");
+        return;
+    }
+
+    if(!IS_PARAM_STRING(pCallableArguments))
+    {
+        ssSetErrorStatus(S, "Third argument must be a string (callable object arguments)");
         return;
     }
 
     if(!IS_PARAM_UINT(pNumberOfInletPorts))
     {
-        ssSetErrorStatus(S, "Third parameter must be an unsigned integer (number of inlet ports)");
+        ssSetErrorStatus(S, "Fourth parameter must be an unsigned integer (number of inlet ports)");
         return;
     }
 
     if(!IS_PARAM_UINT(pNumberOfOutletPorts))
     {
-        ssSetErrorStatus(S, "Fourth parameter must be an unsigned integer (number of outlet ports)");
-        return;
-    }
-
-    if(!IS_PARAM_STRING(pOptions) || !IS_PARAM_CELL(pOptions))
-    {
-        ssSetErrorStatus("Fifth argument must be either a cell (options) or a string (initialization settings in JSON format)");
+        ssSetErrorStatus(S, "Fifth parameter must be an unsigned integer (number of outlet ports)");
         return;
     }
 }
@@ -76,7 +76,7 @@ static void mdlInitializeSizes(SimStruct *S)
 
     /* Set the number of input ports to the third parameter.
      * Ports' width will be inherited from the connected ports. */
-    unsigned int nInletPorts = *(mxGetPr(ssGetSFcnParam(S, 2)));
+    unsigned int nInletPorts = *(mxGetPr(ssGetSFcnParam(S, 3)));
     if (!ssSetNumInputPorts(S, nInletPorts))
         return;
 
@@ -90,7 +90,7 @@ static void mdlInitializeSizes(SimStruct *S)
 
     /* Set the number of output ports to the fourth parameter.
      * Ports' width must be 1 at the moment. */
-    unsigned int nOutletPorts = *(mxGetPr(ssGetSFcnParam(S, 3)));
+    unsigned int nOutletPorts = *(mxGetPr(ssGetSFcnParam(S, 4)));
     if (!ssSetNumOutputPorts(S, nOutletPorts))
         return;
 
@@ -123,20 +123,19 @@ static void mdlStart(SimStruct *S)
     if(debugMode)
         ssPrintf("Loading the simulation...\n");
 
-    char* path              = mxArrayToString(ssGetSFcnParam(S, 0));
+    char* pyFile            = mxArrayToString(ssGetSFcnParam(S, 0));
     char* simCallableName   = mxArrayToString(ssGetSFcnParam(S, 1));
-    const mxArray* pInputs  = ssGetSFcnParam(S, 4);
-    const mxArray* pOptions = ssGetSFcnParam(S, 5);
+    char* simArguments      = mxArrayToString(ssGetSFcnParam(S, 2));
 
     if(debugMode)
     {
-        ssPrintf("Python file: %s\n",      path);
+        ssPrintf("Python file: %s\n",      pyFile);
         ssPrintf("Simulation class: %s\n", simClassName);
     }
 
-    /* Load the simulation object with the specified name (simClassName) and
-     * from the specified file (path). */
-    void *simulation = LoadSimulation(path, simCallableName);
+    /* Load the simulation object from the specified file using 
+     * the callable object and its arguments. */
+    void *simulation = LoadSimulation(pyFile, simCallableName, simArguments);
     if(!simulation)
     {
         ssSetErrorStatus(S, "Cannot load DAETools simulation");
@@ -150,12 +149,10 @@ static void mdlStart(SimStruct *S)
     if(debugMode)
         ssPrintf("Initializing simulation...\n");
 
-    /* Initialize the simulation with the given settings. */
-    initializeSimulation(simulation, pOptions);
-
     /* Free memory */
-    mxFree(path);
+    mxFree(pyFile);
     mxFree(callableName);
+    mxFree(simArguments);
 
     /* Get the number of parameters, inlet and outlet ports and check their number */
     int i;

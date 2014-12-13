@@ -9,13 +9,15 @@ class daeSimulationLoader
 {
 public:
     daeSimulationLoader();
-    ~daeSimulationLoader();
+    virtual ~daeSimulationLoader();
 
 public:
 // Loading function
     void LoadSimulation(const std::string& strPythonFile, const std::string& strSimulationCallable, const std::string& strArguments);
 
-// Low-level simulation functions
+// Nota bene:
+// Initialize() functions not needed anymore since the python callable object has to instantiate and initialize a simulation.
+// However, they are still available, just in case.
     void Initialize(const std::string& strDAESolver,
                     const std::string& strLASolver,
                     const std::string& strDataReporter,
@@ -25,6 +27,7 @@ public:
                     const std::string& strJSONRuntimeSettings = "");
     void Initialize(const std::string& strJSONRuntimeSettings);
 
+// Low-level simulation functions
     void SetTimeHorizon(double timeHorizon);
     void SetReportingInterval(double reportingInterval);
     void SolveInitial();
@@ -32,7 +35,7 @@ public:
     void Pause();
     void Finalize();
     void Reinitialize();
-    void ReturnToInitialSystem();
+    void ResetToInitialSystem();
     void ShowSimulationExplorer();
 
 // Data reporting
@@ -54,6 +57,7 @@ public:
     void GetOutputInfo(unsigned int index, std::string& strName, unsigned int* numberOfPoints) const;
     void GetStateTransitionNetworkInfo(unsigned int index, std::string& strName, unsigned int* numberOfStates) const;
 
+// Get/Set value functions
     void GetParameterValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
     void GetInputValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
     void GetOutputValue(unsigned int index, double* value, unsigned int numberOfPoints) const;
@@ -71,6 +75,7 @@ public:
     void SetFMIValue(unsigned int fmi_reference, double value);
     void SetFMIActiveState(unsigned int fmi_reference, const std::string& value);
 
+// Auxiliary functions
     static std::string GetStrippedName(const std::string& strSource);
 
 protected:

@@ -37,34 +37,33 @@ static void setItem(mxArray* mat, int i, int j, double value)
 }
 
 /* MEX- and S-function initialization options (LA solver or json runtime settings) */
-static int initializeSimulation(void* simulation, const mxArray* pOptions)
+/*
+static int initializeSimulation(void* simulation, const mxArray* options)
 {
-    if(IS_PARAM_STRING(pOptions))
+    if(IS_PARAM_STRING(options))
     {
-        /* Load the json string. */
-        char* jsonSettings = mxArrayToString(pOptions);
+        char* jsonSettings = mxArrayToString(options);
         
-        /* Initialize the simulation. */
-        Initialize(simulation, jsonSettings);
+        InitializeJSON(simulation, jsonSettings);
 
-        /* Free the memory */
         mxFree(jsonSettings);
 
         return 0;
     }
-    else if(IS_PARAM_CELL(pOptions))
+    else if(IS_PARAM_CELL(options))
     {
-        if(mxGetNumberOfElements(pOptions) != 2)
+        if(mxGetNumberOfElements(options) != 2)
         {
             mexErrMsgTxt("The size of simulation options argument must be 2 (LASolver and ShowSimulationExplorer)");
             return;
         }
 
+        int i;
         mxArray* item;
         bool inputsOK = true;
-        for(int i = 0; i < 2; i++)
+        for(i = 0; i < 2; i++)
         {
-            item = mxGetCell(inputs, i);
+            item = mxGetCell(options, i);
             if(i == 0 && !IS_PARAM_STRING(item))
             {
                 mexPrintf("Item[%d] of the inputs cell (LA Solver) must be a string", i);
@@ -80,21 +79,19 @@ static int initializeSimulation(void* simulation, const mxArray* pOptions)
         if(!inputsOK)
             return -1;
 
-        const char* DAESolver = "Sundials IDAS";
-        const char* DataReporter = "BlackHoleDataReporter;
-        const char* ConnectString = "";
-        const char* Log = "StdOutLog";
+        char DAESolver[64]     = "Sundials IDAS";
+        char DataReporter[64]  = "BlackHoleDataReporter";
+        char ConnectString[64] = "";
+        char Log[64]           = "StdOutLog";
 
-        item = mxGetCell(inputs, 0);
+        item = mxGetCell(options, 0);
         char* LASolver = mxArrayToString(item);
 
-        item = mxGetCell(inputs, 1);
+        item = mxGetCell(options, 1);
         bool ShowSimulationExplorer = mxIsLogicalScalarTrue(item);
 
-        /* Initialize the simulation. */
-        Initialize(simulation, DAESolver, LASolver, DataReporter, ConnectionString, Log, ShowSimulationExplorer);
+        Initialize(simulation, DAESolver, LASolver, DataReporter, ConnectString, Log, ShowSimulationExplorer);
 
-        /* Free the memory */
         mxFree(LASolver);
 
         return 0;
@@ -102,7 +99,8 @@ static int initializeSimulation(void* simulation, const mxArray* pOptions)
     
     return -1;
 }
-
+*/
+        
 /* Sets the outputs of the MEX-function (Matlab mxArray 2D array) */
 static reportDataToMatrix(void* simulation, mxArray* results, double currentTime, int step)
 {
