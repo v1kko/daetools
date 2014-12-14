@@ -37,29 +37,21 @@ Supported platforms:
 
 Supported python versions:
 
-* 2.6 (some older GNU/Linux distributions only)
 * 2.7
-
-Supported numpy versions:
-    
-* GNU/Linux (1.5, 1.6, 1.7)
-* Windows (1.6, 1.7)
-* MacOS (1.6)
+* 3.x
 
 Mandatory packages:
 
-* Python (2.7.x): `<http://www.python.org>`_
-* Numpy (1.5.x, 1.6.x, 1.7.x): `<http://numpy.scipy.org>`_
+* Python (2.7, 3.x): `<http://www.python.org>`_
+* Numpy: `<http://numpy.scipy.org>`_
 * Scipy: `<http://www.scipy.org>`_
 * Matplotlib: `<http://matplotlib.sourceforge.net>`_
 * pyQt4 (4.x): `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
-* OpenBLAS: `<http://www.openblas.net>`_
 
 Optional packages (proprietary):
 
 * Pardiso linear solver: `<http://www.pardiso-project.org>`_
 * Intel Pardiso linear solver: `<https://software.intel.com/en-us/intel-mkl>`_
-* METIS graph partitioning: `<http://glaros.dtc.umn.edu/gkhome/views/metis>`_
 
 For more information on how to install packages please refer to the documentation for the specific library.
 By default all versions (GNU/Linux, Windows and MacOS) come with the Sundials dense LU and Lapack linear
@@ -82,13 +74,13 @@ The naming convention of the installation files:
 ``daetools-major.minor.build-platform-architecture-python_version.tar.gz``
 
 where ``major.minor.build`` represents the version (``1.2.1`` for instance), ``architecture`` could be ``i686``, ``x86_64``
-or ``universal``, and ``python_version`` can be ``py26``, ``py27`` etc. An example:
-``daetools-1.2.1-gnu_linux-x86_64-py27.tar.gz`` is the version 1.2.1 for 64 bit GNU/Linux with python 2.7.
+or ``universal``, and ``python_version`` can be ``py27``, ``py34`` etc. An example:
+``daetools-1.4.0-gnu_linux-x86_64-py27.tar.gz`` is the version 1.4.0 for 64 bit GNU/Linux with python 2.7.
 
 For the other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the folder with a particular version
-(``daetools-1.2.1-source.tar.gz`` for instance).
+(``daetools-1.4.0-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -96,7 +88,7 @@ Installation
 GNU/Linux
 ---------
 
-First install the mandatory packages: python 2.7, numpy 1.5/1.6/1.7, scipy, matplotlib and pyqt4.
+First, install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
 
 Use the system's package manager or install from shell:
 
@@ -104,36 +96,36 @@ Use the system's package manager or install from shell:
     
   .. code-block:: bash
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2
+    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2 python-lxml
     # Optional packages:
-    sudo apt-get install python-xlwt python-lxml python-h5py
+    sudo apt-get install python-xlwt python-h5py python-pandas
 
 * Red Hat and derivatives (Fedora, CentOS):
     
   .. code-block:: bash
 
-    sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi
+    sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi python-lxml
     # Optional packages:
-    sudo yum install python-xlwt python-lxml h5py
+    sudo yum install python-xlwt h5py pandas
 
 * SUSE Linux:
 
   .. code-block:: bash
 
-    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 
+    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 python-lxml 
     # Optional packages:
-    sudo zypper in python-xlwt python-lxml h5py
+    sudo zypper in python-xlwt h5py pandas
     
 * Arch Linux:
 
   .. code-block:: bash
 
-    sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi
+    sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi python-lxml
     # Optional packages:
-    sudo pacman -S python2-xlwt python-lxml python-h5py
+    sudo pacman -S python2-xlwt python-h5py python-pandas
 
     
-Then unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
+Then, unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
 the following shell command:
 
 .. code-block:: bash
@@ -144,14 +136,24 @@ the following shell command:
 MacOS
 -----
 
-First install the mandatory packages: python 2.7, numpy 1.6, scipy, matplotlib and pyqt4.
+Easy way
+########
+Install one of scientific python distributions:
+    
+* Anaconda `<https://store.continuum.io/cshop/anaconda>`_
+* Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
+
+By hand
+########
+The default python version usually does not work well. Therefore, it is better to install
+a custom python. First, install the mandatory packages: python 2.7, numpy, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
-* Python 2.7: `<http://www.python.org/ftp/python/2.7.3/python-2.7.3-macosx10.6.dmg>`_
-* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.6.2/numpy-1.6.2-py2.7-python.org-macosx10.6.dmg/download>`_
-* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.10.1/scipy-0.10.1-py2.7-python.org-macosx10.6.dmg/download>`_
-* Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0-py2.7-python.org-macosx10.6.dmg/download>`_
-* PyQt4: `<http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4 download section>`_
+* Python: `<https://www.python.org/ftp/python/2.7.9/python-2.7.9-macosx10.6.pkg>`_
+* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.9.1>`_
+* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.14.0>`_
+* Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/mac/>`_
+* PyQt4: `<http://www.riverbankcomputing.com/software/pyqt/download>`_
 
 Then unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
 the following shell command:
@@ -163,17 +165,26 @@ the following shell command:
 
 Windows
 -------
+Easy way
+########
+Install one of available scientific python distributions:
+    
+* Anaconda `<https://store.continuum.io/cshop/anaconda>`_
+* Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
+* Python(x,y) `<http://www.pythonxy.com>`_
 
+By hand
+########
 **DAE Tools** is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use **DAE Tools** on
 64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
 First install the mandatory packages: python 2.7, numpy 1.6/1.7, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
-* Python 2.7: `<http://www.python.org/ftp/python/2.7.3/python-2.7.3.msi>`_
-* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.7.1/numpy-1.7.1-win32-superpack-python2.7.exe/download>`_
-* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.12.0/scipy-0.12.0-win32-superpack-python2.7.exe/download>`_
-* Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.1.0/matplotlib-1.1.0.win32-py2.7.exe/download>`_
-* PyQt4: `<http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4 download section>`_
+* Python 2.7: `<http://www.python.org/ftp/python/2.7.9/python-2.7.9.msi>`_
+* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.9.1/numpy-1.9.1-win32-superpack-python2.7.exe/download>`_
+* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.14.0/scipy-0.14.0-win32-superpack-python2.7.exe/download>`_
+* Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/windows/matplotlib-1.4.2.win32-py2.7.exe/download>`_
+* PyQt4: `<http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt4-4.11.3-gpl-Py2.7-Qt4.8.6-x32.exe>`_
 
 To be able to create 3D plots you need to install Mayavi2 package. It can be installed using the following shell command:
 
@@ -234,8 +245,8 @@ GNU/Linux and MacOS
 .. rubric:: The easy way
 
 First, install all the necessary dependencies by executing ``install_dependencies_linux.sh`` shell script located
-in the ``trunk`` directory. It will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS and
-Fedora are supported but other can be easily added) and install all necessary packages needed for **DAE Tools**
+in the ``trunk`` directory. It will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS, Suse Linux,
+Arch Linux and Fedora are supported but other can be easily added) and install all necessary packages needed for **DAE Tools**
 development.
 
 .. code-block:: bash
@@ -258,17 +269,7 @@ the libraries.
 
 .. code-block:: bash
 
-    sh compile_libraries_linux.sh
-
-
-.. note:: There is a bug in Sundials IDAS library. When compiling fails, go to the folder ``trunk/idas`` and change the line 24
-          (or somewhere around it) in the ``Makefile``:
-
-          .. code-block:: bash
-
-              top_builddir =
-              to:
-              top_builddir = .
+    sh compile_libraries_linux.sh all
 
 .. note:: There are known problems to compile the older bonmin and trilinos libraries using GNU GCC 4.6. This has been fixed
           in bonmin 1.5+ and trilinos 10.8+ versions. Therefore, either GCC 4.5 and below or the recent
@@ -287,7 +288,7 @@ following is accepted: ``all``, ``core``, ``pydae``, ``solvers``, ``superlu``, `
     # sh compile_linux.sh dae superlu nlopt
 
 
-All python extensions should be placed in ``trunk/daetools-package/daetools/pyDAE`` and
+All python extensions are located in platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.
 **DAE Tools** can be now installed by using the folowing commands:
     
@@ -345,28 +346,30 @@ DAE Tools can also be compiled from within QtCreator IDE. First install dependen
 
 Windows
 -------
-
-Necessary tools: `QtCreator <http://qt.nokia.com/products/developer-tools>`_,
-`Microsoft VC++ <http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=14597>`_
-and `G95 Fortran <http://www.g95.org>`_ compiler (Mumps only).
+DAE Tools support cross-compilation since the version 1.3.0. For more information about the gcc toolchain and options
+read the help sections in compile_libraries_linux.sh and compile_linux.sh scripts.
 
 .. note:: Compiling all third party libraries and **DAE Tools** projects requires a mental gymnastics
           impossible to describe by any human language so that the pre-compiled libraries are provided in the downloads
           section (`windows libraries <https://sourceforge.net/projects/daetools/files/windows%20libraries>`_).
+..
+    Necessary tools: `QtCreator <http://qt.nokia.com/products/developer-tools>`_,
+    `Microsoft VC++ <http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=14597>`_
+    and `G95 Fortran <http://www.g95.org>`_ compiler (Mumps only).
 
-**DAE Tools** should be compiled from within QtCreator IDE:
-    
-* Unpack the downloaded archive ``bonmin-trilinos-idas-superlu-nlopt-mumps-g95-msvc-win32.zip`` into the 
-  ``daetools/trunk`` folder. All libraries are compiled with MS VC++ 2008 Express edition (the most likely other
-  versions of MS VC++ will also work). Mumps Fortran 95 files are compiled with G95 Fortran compiler.
+    **DAE Tools** should be compiled from within QtCreator IDE:
 
-* Path to ``libf95.a`` and ``libgcc.a`` libraries should be set in ``dae.pri`` config file.
-  For instance, if G95 is installed in ``c:\g95`` set the ``G95_LIBDIR`` variable to:
-  ``G95_LIBDIR = c:\g95\lib\gcc-lib\i686-pc-mingw32\4.1.2``
- 
-* Follow the instructions for compiling **DAE Tools** described in :ref:`From QtCreator IDE <from_qtcreator_ide>` section above.
+    * Unpack the downloaded archive ``bonmin-trilinos-idas-superlu-nlopt-mumps-g95-msvc-win32.zip`` into the
+    ``daetools/trunk`` folder. All libraries are compiled with MS VC++ 2008 Express edition (the most likely other
+    versions of MS VC++ will also work). Mumps Fortran 95 files are compiled with G95 Fortran compiler.
 
-.. note:: superlu_mt and superlu_cuda cannot be compiled on Windows at the moment.
+    * Path to ``libf95.a`` and ``libgcc.a`` libraries should be set in ``dae.pri`` config file.
+    For instance, if G95 is installed in ``c:\g95`` set the ``G95_LIBDIR`` variable to:
+    ``G95_LIBDIR = c:\g95\lib\gcc-lib\i686-pc-mingw32\4.1.2``
+
+    * Follow the instructions for compiling **DAE Tools** described in :ref:`From QtCreator IDE <from_qtcreator_ide>` section above.
+
+    .. note:: superlu_mt and superlu_cuda cannot be compiled on Windows at the moment.
 
 DAE Tools can be installed by using the folowing commands:
 

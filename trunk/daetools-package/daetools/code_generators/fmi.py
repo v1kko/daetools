@@ -87,7 +87,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             f.close()
 
             # Generate initialization.json file 
-            daeSimulationExplorer.saveJSONSettings(os.path.join(resources_dir, 'init.json'), simulation, callable_object_name)
+            # daeSimulationExplorer.saveJSONSettings(os.path.join(resources_dir, 'init.json'), simulation, callable_object_name)
 
             # Fill in the xml data
             self.modelName                  = modelIdentifier #*

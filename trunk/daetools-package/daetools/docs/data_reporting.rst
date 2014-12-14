@@ -86,6 +86,11 @@ Third-party local data reporters
 .. autosummary::
     daePlotDataReporter
     daeMatlabMATFileDataReporter
+    daeExcelFileDataReporter
+    daeJSONFileDataReporter
+    daeXMLFileDataReporter
+    daeHDF5FileDataReporter
+    daePandasDataReporter
 
 .. autoclass:: daetools.pyDAE.data_reporters.daePlotDataReporter
     :members:
@@ -94,6 +99,36 @@ Third-party local data reporters
                       EndRegistration, StartNewResultSet, EndOfData, SendVariable
 
 .. autoclass:: daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+.. autoclass:: daetools.pyDAE.data_reporters.daeExcelFileDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+.. autoclass:: daetools.pyDAE.data_reporters.daeJSONFileDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+.. autoclass:: daetools.pyDAE.data_reporters.daeXMLFileDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+.. autoclass:: daetools.pyDAE.data_reporters.daeHDF5FileDataReporter
+    :members:
+    :undoc-members:
+    :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,
+                      EndRegistration, StartNewResultSet, EndOfData, SendVariable
+
+.. autoclass:: daetools.pyDAE.data_reporters.daePandasDataReporter
     :members:
     :undoc-members:
     :exclude-members: Connect, Disconnect, IsConnected, StartRegistration, RegisterDomain, RegisterVariable,

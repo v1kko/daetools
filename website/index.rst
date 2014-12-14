@@ -18,7 +18,6 @@ DAE Tools Project
    news
    contact
    docs/index.rst
-   superlu_cuda
 
 
 .. include:: docs/introduction.rst
@@ -31,10 +30,10 @@ of the :doc:`docs/index`.
 Download
 ========
 
-The current and a very outdated version is 1.2.1. A new release 1.3.0 is in the beta 3 state.
+The current release is 1.4.0.
 
-Installation files can be found on the SourceForge website 
-`download section <https://sourceforge.net/projects/daetools/files>`_,
+Installation files can be found in the SourceForge website
+`download section <https://sourceforge.net/projects/daetools/files/1.4.0>`_,
 and the source code in the SourceForge
 `subversion repository <https://sourceforge.net/p/daetools/code/HEAD/tree>`_.
 
@@ -43,62 +42,47 @@ can be found in :doc:`docs/getting_daetools`.
 
 News
 ====
-The third beta is released. It contains many important bug fixes, memory leaks fixes and new features.
+The new 1.4.0 version is released on 22 December 2014. It contains a large number of important features and bug fixes.
 
-A new version 1.3.0 will bring the following new features and
-improvements:
-
--  Numerical simulation of partial differential equations on adaptive
-   unstructured grids using Finite Elements Method.
+The most important new features:
+    
+-  Code generators for `Modelica`_, `gPROMS <http://www.psenterprise.com/gproms.html>`_ and `c99`_.
+   They can be found in daetools/code\_generators. Almost all features
+   available in daetools are supported except event ports, user defined actions,
+   external functions and finite element objects whose equations need to be updated during
+   a simulation.
+-  Support for simulation in other simulators using standard interfaces for Co-Simulation:
+   `Functional Mockup Interface <https://www.fmi-standard.org>`_, `Matlab MEX-functions <http://www.mathworks.com/help/matlab/matlab_external/introducing-mex-files.html>`_
+   and `Simulink S-functions <http://www.mathworks.com/help/simulink/sfg/what-is-an-s-function.html>`_.
+-  DAE Tools objects such as adouble can be used as NumPy native data type.
+   The most of the NuPy and SciPy functions are supported.
+-  New data reporters that export the simulation results to various file formats (MS Excel, hdf5, xml, json) and
+   to Pandas data sets.
+-  Added new math functions: Sinh, Cosh, Tanh, ASinh, ACosh, ATanh, ATan2, Erf.
+-  Added `Pardiso <http://www.pardiso-project.org>`_ linear solver.
+-  Added SimulationExplorer GUI that lists all domains, parameters, initial conditions, degrees of freedom
+   and state transition networks.
+-  Simulations can export the initialization values to JSON format and initialize using a JSON string.
+   daetools.cfg config file is now in JSON format.
+-  Domains and parameters can now be propagated through the whole model hierarchy (daeModel.PropagateDomain() and
+   daeModel.PropagateParameter()). All domains/parameters with the same name will have identical properties.
+-  daeVariable functions SetValues, SetInitialConditions, AssignValues etc. accept NumPy arrays as arguments.
+   Now, values and initial conditions can be set using numpy float or quantity arrays.
+-  All equation can generate Jacobian expressions by setting daeEquation.BuildJacobianExpressions to True.
+   This is useful when an expression is huge and contains a large number of variables. Calculation of a Jacobian
+   for such equation would take a very long time. Generation of Jacobian expressions will increase the memory
+   requirements but may tremendously decrease the computational time.
+-  Numerical simulation of partial differential equations on adaptive unstructured grids using Finite Elements Method.
    `deal.II`_ library is used for low-level tasks such as mesh loading/processing
    and assembly of the system stiffness/mass matrices and the system load vector.
    `deal.II`_ structures are then used to
-   generate daetools equations which are solved together with the rest of the model 
-   equations. All details about the mesh, basis functions, quadrature rules, refinement 
-   etc. are handled by the `deal.II`_ library. The advantage of this concept is that the 
-   generated equations (linear, nonlinear or differential - depending on the class of the system) 
+   generate daetools equations which are solved together with the rest of the model
+   equations. All details about the mesh, basis functions, quadrature rules, refinement
+   etc. are handled by the `deal.II`_ library. The advantage of this concept is that the
+   generated equations (linear, nonlinear or differential - depending on the class of the system)
    can be coupled with other FE-unrelated equations in a daetools model and solved
    together by daetools solvers; system discontinuities can be handled
    as usual in daetools; modelled processes can be optimized, etc.
-
--  Code generators for `Modelica`_ (whole simulation or just
-   selected models/ports), `FMI`_ and `c99`_. They are already functional
-   (available only in python) and located in the folder
-   daetools/code\_generators (with some tests). Almost all features
-   available in daetools can be exported to Modelica and c,
-   except event ports, user defined actions, external functions and 
-   finite element objects whose equations need to be updated during 
-   a simulation. The existing model analyzer make code generation rather simple 
-   (as long as the very basic modelling concepts such as parameters, variables
-   and discontinuous equations are supported in the target language).
--  Support for Functional Mock-up Interface for Model Exchange and
-   Co-Simulation (FMI) `FMI`_.
-
-A bug fix in 3D plot when detecting free domains (by Caleb Hattingh).
-
-**DAE Tools** v1.2.1 is released on 14 June 2012. It brings several new
-features and improvements (:ref:`v1.2.1 <v1_2_1>`). The most important are:
-
-- Integration speed improvements (more than an order of magnitude, in
-  some cases); no need for a memory copy from/to the DAE solver, a
-  better integration step control and an option to avoid sparse matrix
-  re-creations after a discontinuity
-- Added support for units; variables, parameters, domains points must
-  have a numerical value in terms of a unit of measurement (quantity)
-  and units-consistency is strictly enforced (although it can be
-  switched off in the daetools.cfg config file); all constants in
-  equations must be dimensional and assigned units
-- A basic support for external functions that can handle and evaluate
-  functions in external libraries (the goal is to support certain software
-  components such as thermodynamic property packages)
-- A new type of 2D plots: Animated2D plot
-- Equations can have an optional scaling
-- Improved data reporting speed and changes in data reporting during an optimization
-- New distribution format (python disutils)
-- Mac OSX port
-- c++ (cDAE) tutorials
-- Support for the information about the progress of a simulation/optimization activity
-- Other small improvements and minor bugs fixes
 
 .. _libMesh: http://libmesh.sourceforge.net/index.php
 .. _deal.II: http://dealii.org
@@ -108,7 +92,7 @@ features and improvements (:ref:`v1.2.1 <v1_2_1>`). The most important are:
 .. _FMI: https://www.fmi-standard.org
 .. _Simulink: http://www.mathworks.com/products/simulink
 .. _c99: https://en.wikipedia.org/wiki/C99
-
+  
 Full list of news can be found here: :doc:`news`
 
 Contact
@@ -130,11 +114,3 @@ Documentation
 
 Detailed information about using **DAE Tools**, presentations, API reference and tutorials
 can be found in :doc:`docs/index`.
-
-SuperLU_CUDA
-============
-
-This is a new DAE Tools subproject with the aim to provide
-a direct sparse linear equation solver which works with NVidia CUDA GPUs.
-More information: :doc:`superlu_cuda`.
-

@@ -2,7 +2,7 @@
 News
 *****
 ..
-    Copyright (C) Dragan Nikolic, 2013
+    Copyright (C) Dragan Nikolic, 2014
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -14,6 +14,115 @@ News
 .. begin-command
 
 .. end-command
+
+v1.4.0, 22.12.2014.
+-------------------
+
+- Code generators for Modelica, gPROMS and c99.
+  They can be found in daetools/code\_generators. Almost all features
+  available in daetools are supported except event ports, user defined actions,
+  external functions and finite element objects whose equations need to be updated during
+  a simulation.
+- Support for simulation in other simulators using standard interfaces for Co-Simulation:
+  Functional Mockup Interface (FMI), Matlab MEX-functions and Simulink S-functions.
+- Added SimulationLoader project with c and c++ interface that can load a simulation from a python file
+  and perform all other available operations on it. It is used by daetools_mex (Matlab MEX wrapper),
+  daetools_s (Simulink S-function wrapper) and daetools_fmi_cs (FMI for Co-Simulation wrapper).
+- DAE Tools objects such as adouble can be used as NumPy native data type.
+  The most of the NumPy and SciPy functions are supported.
+- New data reporters that export the simulation results to various file formats (MS Excel, hdf5, xml, json) and
+  to Pandas data sets.
+- Added new math functions: Sinh, Cosh, Tanh, ASinh, ACosh, ATanh, ATan2, Erf.
+- Added Pardiso linear solver.
+- Added SimulationExplorer GUI that lists all domains, parameters, initial conditions, degrees of freedom
+  and state transition networks.
+- Simulations can export the initialization values to JSON format (daeSimulationExplorer.generateJSONSettings,
+  daeSimulationExplorer.saveJSOnSettings) and initialize using a JSON string (auxiliary.InitializeSimulation function).
+  daeSimulation.Initialize accepts an optional argument jsonRuntimeSettings.
+  daetools.cfg config file is now in JSON format.
+- Condition nodes can be exported to Latex.
+- All node classes have NodeAsPlainText and NodeAsLatex functions.
+- Added new function dictVariableValues that returns a tuple (values:ndarray, times:ndarray, domains:list).
+- Domains and parameters can now be propagated through the whole model hierarchy (daeModel.PropagateDomain() and
+  daeModel.PropagateParameter()). All domains/parameters with the same name will have identical properties.
+- daeVariable functions SetValues, SetInitialConditions, AssignValues etc. accept NumPy arrays as arguments.
+  Now, values and initial conditions can be set using numpy float or quantity arrays.
+- Runtime model reports show completely expanded equations now. Consequently, many adRuntimeNode-classes are deleted.
+- Functions that operate on adouble_array objects always generate setup nodes and never perform any calculations
+- All data reporters have ConnectString and ProcessName attributes.
+- Fixed bug in unit class (one day has 83400 seconds).
+- All equation can generate Jacobian expressions by setting daeEquation.BuildJacobianExpressions to True.
+  This is useful when an expression is huge and contains a large number of variables. Calculation of a Jacobian
+  for such equation would take a very long time. Generation of Jacobian expressions will increase the memory
+  requirements but may tremendously decrease the computational time. They are stored in daeEquationExecutionInfo.JacobianExpressions
+  and the equation execution infos are stored in daeEquation.EquationExecutionInfos.
+- daeConfig first looks for config files in /etc/daetools and then in HOME/.daetools directory.
+  If it can't find any config file it remains empty and consequently the defaults are used.
+- Added operator ~ (logical NOT) to adouble class.
+- Fixed bug in unit::toString function.
+- Other small improvements and minor bugs fixes
+
+v1.3.0 beta 3, 01.10.2014.
+--------------------------
+
+- Fixed bug in 3D plot
+- Functions Sum, Product, Average, Min, Max, d, dt moved to the global namespace
+- adouble_array objects can be manipulated from python now. Two new static functions are added to adouble_array:
+  FromList and FromNumpyArray which take as an argument a list/ndarray of double objects and return adouble_array.
+  Several new functions were added: __len__, __getitem__, __setitem__, items
+- Functions GetNumpyArray from daeVariable, daeParameter and daeDomain replaced with npyValues attribute.
+- Added new function to daeVariable: GetDomainsIndexesMap
+- Added new attributes to daeVariable: npyIDs, npyValues, npyTimeDerivatives
+- operator() in daeDomain does the same as operator[]
+- Equations have EquationType attribute
+- daeModel has GetModelType function that returns one of: eSteadyState, eDynamic, eODE
+- Added operators +=, -+, *= and /+ to adouble
+- Added new constructors to adouble and adouble_array
+- All python wrapper classes have updated __str__ and __repr__ functions
+- New documentation in Sphinx
+- Removed daeStateTransition class from pyCore
+  Added a new class daeOnConditionActions
+- Changed ON_CONDITION function and now accepts a list of tuples (STN_Name, State_Name). This way an unlimited number of
+  active states can be set
+- Added some unit tests
+- Folders daePlotter and daeSimulator renamed to dae_plotter and dae_simulator
+  Many other files renamed to lower case names
+- Fixed bug with nested STNs and IFs
+- Updated daetools.xslt and daetools-rt.xslt files
+- Added LastSatisfiedCondition to daeSimulation class that returns the condition that caused a discontinuity
+- daeDataReporterProcess renamed to daeDataReceiverProcess.
+  Added new attributes: dictDomains and dictVariables to enable access to the results through dictionary like
+  interface. The same attributes added to daeDataReporterLocal
+- Implemented daeTCPIPLog and daeTCPIPLogServer
+- Added daeDelegateLog with the same functionality as daeDelegateDataReporter
+- Added new tutorials and optimization tutorials
+- Fixed bugs in SaveAsMathML functions for some nodes
+- Added function array to daeDomain
+- Fixed bug in units for constraints and objective function. Now they have the same units as their residual function
+- New functions in daeOptimization: StartIterationRun and EndIterationRun
+- Added a new argument 'name' to daeEquation.DistributeOnDomain function. Now distribution domains can have a user-defined names
+- Options for IDA solver can be set through daetools.cfg config file
+- Fixed bug in the eQuasySteadyState initialization mode in daeSimulation
+- Function DeclareEquations must be called from derived-classes' DeclareEquations function
+- Unit consistency test can be switched on or off for individual equations through CheckUnitConsistency attribute in daeEquation class
+- Added functions to daeIDAS DAE solver: OnCalculateResiduals, OnCalculateJacobian, OnCalculateConditions, OnCalculateSensitivityResiduals,
+  and new attributes: Values, TimeDerivatives, Residuals, Jacobian, SensitivityResiduals
+- Fixed but in initialization of the DAE system where discontinuities were not properly handled
+- Fixed bug in daeSimulation.Reinitialize function where the root functions were not being updated
+- Fixed bug with taking the variables' indexes from quations located in STN or IF blocks, causing the Jacobian matrix to be invalid
+  in certain cases
+- Fixed bug in daeExternalFunction_t related to processing of adouble_array type of arguments
+- Added new nodes: adSetupValueInArrayAtIndex, adSetupCustomNodeArray
+- Implemented daeVectorExternalFunction
+- Added EstLocalErrors and ErrWeights functions to daeIDAS dae solver
+- IDAS solver now takes abs. tolerances from the daetools.cfg config file
+- Fixed memory leaks with smart pointers (in boost::intrusive_ptr)
+- Fixed but with the reset of DAE solver during optimization
+- Now before every optimization iteration the initialization file is loaded
+- Added daeFiniteElementModel and daeFiniteElementEquation classes
+- Added pyDealII FE solver
+- Added daeSimulationExplorer
+- Other small improvements and minor bugs fixes
 
 Bug fixes, 11.10.2012.
 ----------------------

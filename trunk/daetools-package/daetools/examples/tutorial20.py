@@ -52,7 +52,6 @@ Notate bene:
 import sys, numpy
 from daetools.pyDAE import *
 from time import localtime, strftime
-from daetools.solvers.superlu import pySuperLU as superlu
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
@@ -163,10 +162,6 @@ def consoleRun():
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
-    # LA solver
-    lasolver = superlu.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
@@ -220,10 +215,6 @@ def create_simulation():
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
-    # LA solver
-    lasolver = superlu.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
@@ -240,7 +231,7 @@ def create_simulation():
     simulation.Initialize(daesolver, datareporter, log)
 
     # Nota bene: store the objects since they will be destroyed when they go out of scope
-    simulation.__rt_objects__ = [daesolver, lasolver, datareporter, log]
+    simulation.__rt_objects__ = [daesolver, datareporter, log]
 
     return simulation
     

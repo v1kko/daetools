@@ -1,7 +1,7 @@
 """********************************************************************************
-                             dae2DPlot.py
+                             plot2d.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the 
 terms of the GNU General Public License version 3 as published by the Free Software 

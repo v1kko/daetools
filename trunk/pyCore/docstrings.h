@@ -35,7 +35,7 @@ const char* DOCSTR_daeConfig_ = "";
 
 const char* DOCSTR_adouble = "Class adouble operates on values/derivatives of domains, parameters and variables. "
          "It supports basic mathematical operators (+, -, *, /, **), comparison operators (<, <=, >, >=, ==, !=), " 
-         "and logical operators (and, or, not). Operands can be instances of adouble or float values.";
+         "and logical operators and (&), or (|) and not (~). Operands can be instances of adouble or float values.";
     const char* DOCSTR_adouble_init = "";
     const char* DOCSTR_adouble_Value = "Value";
     const char* DOCSTR_adouble_Derivative = "Derivative";

@@ -26,7 +26,7 @@ static void mdlCheckParameters(SimStruct *S)
         return;
     }
 
-    if(!IS_PARAM_STRING(pCallableArguments))
+    if(!IS_PARAM_STRING_EMPTY_ALLOWED(pCallableArguments))
     {
         ssSetErrorStatus(S, "Third argument must be a string (callable object arguments)");
         return;
@@ -129,8 +129,9 @@ static void mdlStart(SimStruct *S)
 
     if(debugMode)
     {
-        ssPrintf("Python file: %s\n",      pyFile);
-        ssPrintf("Simulation class: %s\n", simClassName);
+        ssPrintf("Python file: %s\n",               pyFile);
+        ssPrintf("Python callable name: %s\n",      simCallableName);
+        ssPrintf("Python callable arguments: %s\n", simArguments);
     }
 
     /* Load the simulation object from the specified file using 
@@ -151,7 +152,7 @@ static void mdlStart(SimStruct *S)
 
     /* Free memory */
     mxFree(pyFile);
-    mxFree(callableName);
+    mxFree(simCallableName);
     mxFree(simArguments);
 
     /* Get the number of parameters, inlet and outlet ports and check their number */

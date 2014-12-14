@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """********************************************************************************
-                             daePlotter.py
+                             plotter.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the 
 terms of the GNU General Public License version 3 as published by the Free Software 
@@ -58,7 +58,7 @@ class daeMainWindow(QtGui.QMainWindow):
         self.move(0, 0)
         self.resize(400, 200)
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
-        self.setWindowTitle("DAE Plotter v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
+        self.setWindowTitle("DAE Tools Plotter v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
 
         exit = QtGui.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')

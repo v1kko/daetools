@@ -54,7 +54,7 @@ CODENAME=`echo $(lsb_release -sc) | tr "[:upper:]" "[:lower:]"`
 if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
-                       python-xlwt python-lxml python-h5py python-pandas \
+                       python-xlwt python-lxml python-h5py python-pandas pyqt4-dev-tools \
                        libblas3gf liblapack3gf libqt4-dev qtcreator \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
@@ -62,7 +62,7 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
-                       python-xlwt python-lxml python-h5py python-pandas \
+                       python-xlwt python-lxml python-h5py python-pandas pyqt4-dev-tools \
                        libblas3gf liblapack3gf libqt4-dev qtcreator \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
@@ -70,7 +70,7 @@ elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
 elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
   #sudo apt-get update
   sudo apt-get install python-qt4 python-numpy python-scipy python-matplotlib python-tk mayavi2 \
-                       python-xlwt python-lxml python-h5py python-pandas \
+                       python-xlwt python-lxml python-h5py python-pandas pyqt4-dev-tools \
                        libblas3gf liblapack3gf libqt4-dev qtcreator \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
                        wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
@@ -78,7 +78,7 @@ elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   #sudo yum check-update
   sudo yum install PyQt4 numpy scipy python-matplotlib python-tk \
-                   python-xlwt python-lxml h5py python-pandas \
+                   python-xlwt python-lxml h5py python-pandas PyQt4-devel \
                    blas blas-devel lapack lapack-devel qt-creator qt-devel \
                    automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake patch \
                    wget subversion fakeroot rpm-build libbz2-devel
@@ -87,7 +87,7 @@ elif [ ${DISTRIBUTOR_ID} = "centos" ]; then
   #sudo yum check-update
   # Missing: scipy, suitesparse-devel, qt-creator 
   # Should be manually installed, ie. from http://pkgs.org
-  sudo yum install PyQt4 numpy python-matplotlib python-tk python-devel \
+  sudo yum install PyQt4 numpy python-matplotlib python-tk python-devel PyQt4-devel \
                    python-xlwt python-lxml h5py python-pandas \
                    blas blas-devel lapack lapack-devel qt-devel \
                    automake make autoconf gcc gcc-c++ gcc-gfortran binutils cmake patch \

@@ -26,6 +26,25 @@ fmi2Status fmi2SetDebugLogging(fmi2Component comp, fmi2Boolean, size_t, const fm
     return fmi2OK;
 }
 
+static std::string getFolderFromURI(const std::string& uri)
+{
+    std::string protocol;
+    size_t found;
+
+    protocol = "file:///";
+    found = uri.find(protocol);
+    if(found != std::string::npos)
+        return uri.substr(found + protocol.size() - 1) + std::string("/");
+
+    protocol = "file:/";
+    found = uri.find(protocol);
+    if(found != std::string::npos)
+        return uri.substr(found + protocol.size() - 1) + std::string("/");
+
+    // If nothing found - simply return an original URI
+    return uri + "/";
+}
+
 /* Creation and destruction of FMU instances and setting debug status */
 fmi2Component fmi2Instantiate(fmi2String                    instanceName,
                               fmi2Type                      fmuType,
@@ -53,9 +72,8 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         c->loggingOn            = loggingOn;
 
         boost::property_tree::ptree pt;
-        std::string resources_dir = std::string(fmuResourceLocation) + "/";
+        std::string resources_dir = getFolderFromURI(fmuResourceLocation);
         std::string	json_settings = resources_dir + "settings.json";
-        std::string	json_ini_file = resources_dir + "init.json";
 
         boost::property_tree::json_parser::read_json(json_settings, pt);
         strPythonFile         = resources_dir + pt.get<std::string>("simulationFile");

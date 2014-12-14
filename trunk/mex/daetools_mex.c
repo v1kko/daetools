@@ -49,7 +49,7 @@ void mexFunction(int n_outputs,         mxArray* outputs[],
         return;
     }
 
-    if(!IS_PARAM_STRING(pCallableArguments))
+    if(!IS_PARAM_STRING_EMPTY_ALLOWED(pCallableArguments))
     {
         mexErrMsgTxt("Third argument must be a string (callable object arguments)");
         return;
@@ -70,32 +70,30 @@ void mexFunction(int n_outputs,         mxArray* outputs[],
     /* Get the strings from mxArrays. */
     char* path              = mxArrayToString(pPythonPath);
     char* callableName      = mxArrayToString(pSimulationCallable);
-    
-    mexPrintf("%s %s(%s)\n", path, callableName, "");
+    char* callableArguments = mxArrayToString(pCallableArguments);
     
     /* Load the simulation object from the specified file using 
      * the callable object and its arguments. */
-    void *simulation = LoadSimulation(path, callableName, "");
+    void *simulation = LoadSimulation(path, callableName, callableArguments);
     if(!simulation)
         mexErrMsgTxt("Cannot load DAETools simulation");
 
     /* Free memory */
     mxFree(path);
     mxFree(callableName);
+    mxFree(callableArguments);
     
     /* Set the time horizon and reporting interval. */
     double timeHorizon       = (mxGetPr(pTimeHorizon))[0];
     double reportingInterval = (mxGetPr(pReportingInterval))[0];
     SetTimeHorizon(simulation,       timeHorizon);
     SetReportingInterval(simulation, reportingInterval);
-    mexPrintf("th = %f, ri = %f\n", timeHorizon, reportingInterval);
 
     /* Allocate mx arrays to hold the output data. */
     int numberOfSteps = (int)(timeHorizon / reportingInterval) + 1 +
                         (fmod(timeHorizon, reportingInterval) == 0 ? 0 : 1);
     
     int nOutletPorts = GetNumberOfOutputs(simulation);
-    mexPrintf("no = %d\n", nOutletPorts);
 
     mwSize ndim = 1;
     mwSize dims[1] = {nOutletPorts + 1};
@@ -134,7 +132,7 @@ void mexFunction(int n_outputs,         mxArray* outputs[],
     
     /* Solve the system with the specified initial conditions and report data. */
     SolveInitial(simulation);
-    return;
+    
     ReportData(simulation);
     reportDataToMatrix(simulation, results, currentTime, step);
     step += 1;

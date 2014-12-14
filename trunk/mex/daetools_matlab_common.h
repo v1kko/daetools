@@ -2,13 +2,16 @@
 #include "simulation_loader_c.h"
 
 #define IS_PARAM_DOUBLE(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && mxIsDouble(pVal))
+                               !mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && mxIsDouble(pVal))
 
 #define IS_PARAM_UINT(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal))
+                             !mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal))
 
 #define IS_PARAM_STRING(pVal) (mxIsChar(pVal) && !mxIsLogical(pVal) &&\
-!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
+                               !mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
+
+#define IS_PARAM_STRING_EMPTY_ALLOWED(pVal) (mxIsChar(pVal) && !mxIsLogical(pVal) &&\
+                                             !mxIsSparse(pVal) && !mxIsComplex(pVal) && !mxIsDouble(pVal))
 
 #define IS_PARAM_LOGICAL(pVal) (mxIsLogical(pVal) && mxIsLogicalScalar(pVal) && !mxIsEmpty(pVal))
 

@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     fmi2Component comp = fmi2Instantiate("tutorial20",
                                          fmi2CoSimulation,
                                          "6f6dd048-7eff-11e4-bf92-9cb70d5dfdfc",
-                                         "/tmp/daetools-fmu-0qoln2fk/resources",
+                                         "file:///tmp/daetools-fmu-v3huvi2t/resources",
                                          &functions,
                                          true, /* visible */
                                          true  /* logging */);

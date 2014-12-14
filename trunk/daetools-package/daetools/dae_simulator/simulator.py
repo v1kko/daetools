@@ -4,7 +4,7 @@
 ***********************************************************************************
                                simulator.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2013
+                 Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -209,9 +209,9 @@ class daeSimulator(QtGui.QDialog):
                 self.datareporter = daeTCPIPDataReporter()
                 simName = self.simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
                 if(self.datareporter.Connect(str(tcpipaddress), simName) == False):
-                    self.showMessage("Cannot connect data reporter!\nDid you forget to start daePlotter?")
+                    self.showMessage("Cannot connect data reporter!\nDid you forget to start DAE Tools Plotter?")
+                    self.datareporter = None
                     raise RuntimeError("Cannot connect daeTCPIPDataReporter")
-                    return
 
             if self.log == None:
                 self.log = daeTextEditLog(self.ui.textEdit, self.ui.progressBar, self.ui.progressLabel, self.app)

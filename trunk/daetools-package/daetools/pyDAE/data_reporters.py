@@ -1,7 +1,7 @@
 """********************************************************************************
-                            daeDataReporters.py
+                            data_reporters.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -16,6 +16,10 @@ from pyCore import *
 from pyDataReporting import *
 
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):
+    """
+    Saves data in Matlab MAT format format (.mat) using scipy.io.savemat function.
+    Does not need Matlab installed.
+    """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName   = ""
@@ -55,6 +59,9 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
 
 
 class daeJSONFileDataReporter(daeDataReporterLocal):
+    """
+    Saves data in JSON text format using python json library.
+    """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
@@ -89,6 +96,9 @@ class daeJSONFileDataReporter(daeDataReporterLocal):
             print(('Cannot write data in JSON format:\n' + str(e)))
    
 class daeHDF5FileDataReporter(daeDataReporterLocal):
+    """
+    Saves data in HDF5 format using python h5py library.
+    """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
@@ -122,7 +132,7 @@ class daeHDF5FileDataReporter(daeDataReporterLocal):
 
 class daeXMLFileDataReporter(daeDataReporterLocal):
     """
-    Saves data in XML format (.xml)
+    Saves data in XML format (.xml) using python xml library.
     """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
@@ -246,8 +256,8 @@ class daeXMLFileDataReporter(daeDataReporterLocal):
            
 class daeExcelFileDataReporter(daeDataReporterLocal):
     """
-    Saves data in MS Excel format (.xls).
-    Does not need Excel installed (works under GNU'Linux too).
+    Saves data in MS Excel format (.xls) using python xlwt library.
+    Does not need Excel installed (works under GNU/Linux too).
     """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
@@ -290,7 +300,7 @@ class daeExcelFileDataReporter(daeDataReporterLocal):
 
 class daePandasDataReporter(daeDataReporterLocal):
     """
-    Returns data as pandas DataSet
+    Creates pandas DataSet using pandas library.
     """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
@@ -328,6 +338,9 @@ class daePandasDataReporter(daeDataReporterLocal):
             print(('Cannot generate Pandas DataFrame; is python-pandas package installed?\n' + str(e)))
 
 class daePlotDataReporter(daeDataReporterLocal):
+    """
+    Plots the specified variables using Matplotlib (by Caleb Hattingh).
+    """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""

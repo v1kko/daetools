@@ -278,6 +278,8 @@ def consoleRun():
     matplotlib.pyplot.plot(times,values)
     matplotlib.pyplot.show()
 
+    # Pandas dataset
+    print('pandas dataset')
     print(simulation.dr9.data_frame)
     print(simulation.dr9.data_frame['Value']['tutorial8.T'])
 

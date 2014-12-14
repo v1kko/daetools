@@ -115,7 +115,7 @@ class RunExamples(QtGui.QDialog):
             font.setPointSize(9)
         self.ui.docstringEdit.setFont(font)
         
-        self.setWindowTitle("DAE Tools Tutorials v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
+        self.setWindowTitle("DAE Tools Examples v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
         self.connect(self.ui.toolButtonRun,                QtCore.SIGNAL('clicked()'), self.slotRunTutorial)

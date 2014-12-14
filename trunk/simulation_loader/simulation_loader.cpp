@@ -119,11 +119,11 @@ void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile,
         command = (boost::format("sys.path.insert(0, '%s')") % strPath).str();
         result  = boost::python::exec(command.c_str(), main_namespace);
 
-        command = (boost::format("import %s") % strSimulationModule).str();
+        command = (boost::format("from %s import *") % strSimulationModule).str();
     // Here it fails if I do call Py_Finalize()
         result  = boost::python::exec(command.c_str(), main_namespace);
 
-        command = (boost::format("__daetools_simulation__ = %s.%s(%s)") % strSimulationModule % strSimulationCallable % strArguments).str();
+        command = (boost::format("__daetools_simulation__ = %s(%s)") % strSimulationCallable % strArguments).str();
         result  = boost::python::exec(command.c_str(), main_namespace);
 
         // Set the boost::python simulation object

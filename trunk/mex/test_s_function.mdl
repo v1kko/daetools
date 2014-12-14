@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.49"
+    ComputedModelVersion    "1.51"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -27,9 +27,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "ciroki"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Oct 30 17:17:20 2014"
-  RTWModifiedTimeStamp	  336590127
-  ModelVersionFormat	  "1.%<AutoIncrement:49>"
+  LastModifiedDate	  "Sat Dec 13 18:13:48 2014"
+  RTWModifiedTimeStamp	  340395153
+  ModelVersionFormat	  "1.%<AutoIncrement:51>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -67,7 +67,6 @@ Model {
     $ObjectID		    1
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
     model_		    "test_s_function"
-    signals_		    []
     overrideMode_	    [0.0]
     Array {
       Type		      "Cell"
@@ -614,7 +613,7 @@ Model {
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition     [ 210, 94, 1140, 654 ] 
+      ConfigPrmDlgPosition     [ 210, 122, 1140, 682 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -788,7 +787,7 @@ Model {
       SID		      "21"
       Position		      [55, 135, 85, 165]
       ZOrder		      -4
-      Value		      "3"
+      Value		      "2"
       OutDataTypeStr	      "double"
     }
     Block {
@@ -799,7 +798,7 @@ Model {
       Position		      [360, 64, 390, 96]
       ZOrder		      -3
       Floating		      off
-      Location		      [874, 100, 1198, 339]
+      Location		      [864, 91, 1188, 330]
       Open		      on
       NumInputPorts	      "1"
       List {
@@ -831,7 +830,7 @@ Model {
       Position		      [360, 134, 390, 166]
       ZOrder		      -3
       Floating		      off
-      Location		      [919, 341, 1244, 581]
+      Location		      [909, 331, 1234, 571]
       Open		      on
       NumInputPorts	      "1"
       List {
@@ -919,8 +918,8 @@ Model {
 	  Position		  [140, 27, 220, 98]
 	  ZOrder		  -5
 	  FunctionName		  "daetools_s"
-	  Parameters		  "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial20.py', 'simTutorial', 2, 2,"
-	  " {0}, {0}"
+	  Parameters		  "'/home/ciroki/daetools/trunk/daetools-package/daetools/examples/tutorial20.py', 'create_simulation',"
+	  " ' ', 2, 2"
 	  EnableBusSupport	  off
 	}
 	Block {

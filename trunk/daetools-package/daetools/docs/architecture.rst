@@ -4,7 +4,7 @@
 Architecture
 ************
 ..
-    Copyright (C) Dragan Nikolic, 2013
+    Copyright (C) Dragan Nikolic, 2014
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -33,7 +33,7 @@ The components are located in the following modules:
 * pyDataReporting module (Data reporter and Data receiver components)
 * pyUnits module
 * Large number of third party linear equation solver modules (LA solver component):
-  pySuperLU, pySuperLU_MT, pyTrilinos
+  pySuperLU, pySuperLU_MT, pyTrilinos, pyPardiso, pyIntelPardiso
 * Large number of third party NLP/MINLP solver modules (NLP solver component):
   pyIPOPT, pyBONMIN, pyNLOPT
 

@@ -2,7 +2,7 @@
 Getting Started with DAE Tools
 ******************************
 ..
-    Copyright (C) Dragan Nikolic, 2013
+    Copyright (C) Dragan Nikolic, 2014
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -16,8 +16,7 @@ Getting Started with DAE Tools
    <br />
 
 This chapter gives the basic information about exploring examples/tutorials,
-developing models, defining and running a simulation or an optimization and
-plotting the simulation results.
+developing models, defining and running a simulation and plotting the simulation results.
 
 Running tutorials
 =================
@@ -26,7 +25,7 @@ Running tutorials
 
   * GNU/Linux:
       
-    Run ``Applications/Development/daePlotter`` from the system menu or execute the following shell command:
+    Run ``Applications/Development/daetools Plotter`` from the system menu or execute the following shell command:
 
     .. code-block:: bash
 
@@ -42,9 +41,9 @@ Running tutorials
 
   * Windows:
 
-    Run ``Start/Programs/DAE Tools/daePlotter`` from the Start menu.
+    Run ``Start/Programs/DAE Tools/daetools Plotter`` from the Start menu.
 
-  The ``daePlotter`` main window should appear (given in :ref:`Figure-1`)
+  The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-1`)
 
     .. _Figure-1:
     .. figure:: _static/Screenshot-DAEPlotter.png
@@ -52,13 +51,13 @@ Running tutorials
        :figwidth: 300 pt
        :align: center
 
-       DAE Plotter main window.
+       DAE Tools Plotter main window.
 
-2. Start ``DAE Tools Examples`` program to try some examples:
+2. Start ``DAE Tools Tutorials`` program to try some examples:
 
   * GNU/Linux:
 
-    Run ``Applications/Development/DAE Tools Examples`` from the system menu or execute the following shell command:
+    Run ``Applications/Development/daetools Examples`` from the system menu or execute the following shell command:
 
     .. code-block:: bash
 
@@ -77,8 +76,8 @@ Running tutorials
     Run ``Start/Programs/DAE Tools/DAE Tools Examples`` from the Start menu.
 
 The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-2a` while
-the output from the simulation run in :ref:`Figure-2b`. Users can select one of several tutorials,
-run them, and inspect their source code or model reports.
+the output from the simulation run in :ref:`Figure-2b`. There, tutorials can be run, their source code
+inspected, model reports generated.
 Model reports open in a new window of the system's default web browser (however, only Mozilla Firefox is currently
 supported because of the MathML rendering issue).
 
@@ -106,6 +105,8 @@ Tutorials can also be started from the shell:
     # Or in windows:
     # cd C:\PythonX.Y\Lib\site-packages\daetools\examples
     
+    python tutorial1.py console
+    # or
     python tutorial1.py gui
 
 The sample output is given in :ref:`Figure-3`:
@@ -615,7 +616,23 @@ Starting the optimization problems is analogous to running a simulation.
 Processing the results
 ======================
 
-The simulation/optimization results can be easily plotted using the **DAE Plotter** application.
+DAE Tools provide a protocol for reporting the simulation results. It uses a concept of **data reporter** and
+**data receiver** interfaces. **Data reporter** interface is used by a simulation to send the data, while the
+**data receiver** interface is used to receive, store and offer the data to users.
+There are two types of data reporters: local (store data locally) and remote (send data to a server,
+i.e. via TCP/IP protocol).
+
+There are three ways to obtain the results from the simulation:
+
+* Through DAE Tools Plotter GUI
+* Programmatically, using one of many different types of local data reporters
+* Develop a custom user-defined data reporter by creating one of bese classes (daeDataReporter_t,
+  daeDataReporterLocal, daeDataReporterFile)
+
+DAE Tools Plotter
+-----------------
+
+The simulation/optimization results can be easily plotted using the **DAE Tools Plotter** application.
 Three types of plots are supported: 2D, animated 2D and 3D plots.
 After choosing a desired type, a **Choose variable** (given in :ref:`Figure-5`)
 dialog appears where a variable to be plotted can be selected and information about domains
@@ -648,4 +665,20 @@ Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
 
     Example 3D plot (produced by Mayavi2)
 
+Getting the results programmatically
+------------------------------------
 
+There is a large number of custom data reporters. Some of them are listed below.
+
+* Data reporters that export the results to a specified file format:
+    
+ * Matlab .mat file (daeMatlabMATFileDataReporter)
+ * Excell .xls file (daeExcelFileDataReporter)
+ * JSON format (daeJSONFileDataReporter)
+ * XML file (daeXMLFileDataReporter)
+ * HDF5 file (daeHDF5FileDataReporter)
+
+* Other types of data reporters
+
+ * Pandas dataset (daePandasDataReporter)
+ * Quick matplotlib plots (daePlotDataReporter)

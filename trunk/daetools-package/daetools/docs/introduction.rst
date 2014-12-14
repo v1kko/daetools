@@ -2,7 +2,7 @@
 Introduction
 ************
 ..
-    Copyright (C) Dragan Nikolic, 2013
+    Copyright (C) Dragan Nikolic, 2014
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -16,15 +16,16 @@ About DAE Tools
 
 .. begin-command
 
-**DAE Tools** is a free/open-source cross-platform object- and equation-oriented process
-modelling and optimization software.
-It is not a modelling language, rather a collection of software packages with the API for:
-    
-* Model development
-* Simulation, optimization, and parameter estimation
-* Processing of the results (plotting and exporting to various file formats)
+**DAE Tools** is a free/open-source cross-platform equation-based and object-oriented process
+modelling and optimization software. It is not a modelling language nor a collection of numerical
+libraries but rather a higher level structure – an architectural design of interdependent
+software components providing an API for:
+   
+* Model development/specification
+* Activities on developed models, such as simulation, optimization, and parameter estimation
+* Processing of the results, such as plotting and exporting to various file formats
 * Report generation
-* Code generation and model exchange
+* Code generation, co-simulation and model exchange
 
 **DAE Tools** runs on all major operating systems (Windows, GNU Linux and Mac OS X)
 and architectures (x86, x86_64, arm).
@@ -69,7 +70,7 @@ Class of problems that can be solved by **DAE Tools**:
 * Continuous with some elements of event-driven systems (discontinuous equations, state transition networks
   and discrete events) 
 
-Type of activities that can be carried out with models developed in **DAE Tools**:
+Type of activities that can be performed on models developed in **DAE Tools**:
 
 * Simulation (steady-state or dynamic, with simple or complex operating procedures)
 
@@ -78,19 +79,32 @@ Type of activities that can be carried out with models developed in **DAE Tools*
 * Parameter estimation (the least squares method:
   `Levenberg–Marquardt algorithm <https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm>`_)
 
-* Model report generation (in XML + MathML format with XSL transformations for XHTML code generation)
+* Generation of model reports (in XML + MathML format with XSL transformations for XHTML code generation)
 
-* Code generation for other modelling languages and general purpose programming languages
+* Code generation for other modelling or general-purpose programming languages
 
   * `Modelica <http://www.modelica.org>`_
-  * ANSI C
-  * `Functional Mockup Interface (FMI) <https://www.fmi-standard.org>`_
+  * `gPROMS <http://www.psenterprise.com/gproms.html>`_
+  * `Standard ISO C (c99) <http://www.open-std.org/jtc1/sc22/wg14/www/standards>`_
+  
+* Simulation in other simulators using standard co-simulation interfaces
 
-* Export of the simulation results to various file formats
+  * `Functional Mockup Interface (FMI) for Co-Simulation <https://www.fmi-standard.org>`_
+  * `Matlab MEX-functions <www.mathworks.com/help/matlab/matlab_external/introducing-mex-files.html>`_
+  * `Simulink user-defined S-functions <www.mathworks.com/help/simulink/sfg/what-is-an-s-function.html>`_
+
+* Export of the simulation results to various file formats:
+
+  * `Matlab MAT (.mat) <http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf>`_
+  * `Microsoft Excel (.xls) <http://office.microsoft.com/en-gb/excel>`_
+  * `JSON (.json) <http://www.json.org>`_
+  * `XML (.xml) <www.w3.org/XML>`_
+  * `Hierarchical Data Format (.hdf5) <http://www.hdfgroup.org/HDF5>`_
+  * `Pandas (Python Data Analysis) data sets <http://pandas.pydata.org>`_
 
 .. end-command
 
-All core libraries are written in standard ANSI/ISO c++. It is highly portable - it runs on all
+All core libraries are written in standard c++. It is highly portable - it runs on all
 major operating systems (GNU/Linux, MacOS, Windows) and all platforms with a decent c++ compiler,
 Boost and standard c/c++ libraries (by now it is tested on 32/64 bit x86 and ARM architectures
 making it suitable for use in embedded systems). Models can be developed in Python
@@ -111,7 +125,7 @@ and `Trilinos AztecOO <http://trilinos.sandia.gov/packages/aztecoo>`_ (with buil
 which can take advantage of multi-core/cpu computers.
 Linear solvers that exploit general-purpose graphics processing
 units (`GPGPU <http://en.wikipedia.org/wiki/GPGPU>`_, such as `NVidia CUDA <http://www.nvidia.com/object/cuda_home_new.html>`_)
-are also available ([[SuperLU_CUDA]], `CUSP <http://code.google.com/p/cusp-library>`_) but in an early development stage.
+are also available (`CUSP <http://code.google.com/p/cusp-library>`_) but in an early development stage.
 
 Licence
 =======
@@ -176,8 +190,8 @@ DAE Tools use the following third party free software libraries (GNU GPL, GNU LG
 
 **DAE Tools** can optionally use the following proprietary software libraries:
 
-* AMD ACML linear solver (pyAmdACML module): `<http://www.amd.com/acml>`_
-* Intel MKL linear solvers (pyIntelMKL and pyIntelPardiso modules): `<http://software.intel.com/en-us/articles/intel-mkl>`_
+* Pardiso linear solver (pyPardiso module): `<http://www.pardiso-project.org>`_
+* Intel Pardiso linear solver (pyIntelPardiso module): `<http://software.intel.com/en-us/articles/intel-mkl>`_
 
 Please see the corresponding websites for more details about the licences.
 
@@ -185,5 +199,6 @@ How to cite
 ===========
 
 If you use **DAE Tools** in your work then please cite it in the following way:
-D. Nikolic, DAE Tools process modelling software, 2010. http://www.daetools.com
+    
+D.D. Nikolic, DAE Tools process modelling software (http://www.daetools.com), 2010.
 
