@@ -163,12 +163,15 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    
+
+    import pprint
     for eq in simulation.m.Equations:
         print(eq.CanonicalName, ':')
         for eei in eq.EquationExecutionInfos:
-            print('    {0}:'.format(eei.Name))
-            print('      {0}'.format(eei.JacobianExpressions))
+            print('    %s:' % eei.Name)
+            # dictionary {overall_index : (block_index,derivative_node)}
+            for oi, (bi,node) in eei.JacobianExpressions.items():
+                print('        %d : %s' % (bi, node))
             
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

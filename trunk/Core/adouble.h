@@ -426,6 +426,15 @@ DAE_CORE_API const adouble_array asin(const adouble_array& a);
 DAE_CORE_API const adouble_array acos(const adouble_array& a);
 DAE_CORE_API const adouble_array atan(const adouble_array& a);
 
+DAE_CORE_API const adouble_array sinh(const adouble_array &a);
+DAE_CORE_API const adouble_array cosh(const adouble_array &a);
+DAE_CORE_API const adouble_array tanh(const adouble_array &a);
+DAE_CORE_API const adouble_array asinh(const adouble_array &a);
+DAE_CORE_API const adouble_array acosh(const adouble_array &a);
+DAE_CORE_API const adouble_array atanh(const adouble_array &a);
+DAE_CORE_API const adouble_array atan2(const adouble_array &a, const adouble_array &b);
+DAE_CORE_API const adouble_array erf(const adouble_array &a);
+
 //DAE_CORE_API const adouble_array pow(const adouble_array& a, real_t v);
 
 

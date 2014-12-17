@@ -331,12 +331,12 @@ void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag,
 	}
 }
 
-//adNodePtr _one_(new adConstantNode(1.0));
-//adNodePtr _two_(new adConstantNode(2.0));
-//adNodePtr _invTimeStep_(new adInverseTimeStepNode());
-
 adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
 {
+    /* Status (not working):
+        - Unary nodes: abs, celi, floor, sinh, cosh, tanh, asinh, acosh, atanh, erf
+        - Binary nodes: min, max, atan2
+    */
     adNodePtr val_, deriv_;
 
     if(!node_)
@@ -515,10 +515,8 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         adNodePtr no = jac.value;
         adNodePtr dn = jac.derivative;
 
-        // Values is always the same function 'eFunction' of jac.value
-        val_   = adNodePtr(new adUnaryNode(node->eFunction, no));
-
-        deriv_ = adNodePtr(new adUnaryNode(node->eFunction, dn));
+        // Value is always the same function 'eFunction' of jac.value
+        val_ = adNodePtr(new adUnaryNode(node->eFunction, no));
 
         if(node->eFunction == eSign)
         {

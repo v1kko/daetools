@@ -991,6 +991,156 @@ const adouble_array atan(const adouble_array& a)
 }
 
 
+
+const adouble_array sinh(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eSinh,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = sinh(a[i]);
+    return tmp;
+}
+
+const adouble_array cosh(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eCosh,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = cosh(a[i]);
+    return tmp;
+}
+
+const adouble_array tanh(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eTanh,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = tanh(a[i]);
+    return tmp;
+}
+
+const adouble_array asinh(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcSinh,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = asinh(a[i]);
+    return tmp;
+}
+
+const adouble_array acosh(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcCosh,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = acosh(a[i]);
+    return tmp;
+}
+
+const adouble_array atanh(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eArcTanh,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = atanh(a[i]);
+    return tmp;
+}
+
+const adouble_array atan2(const adouble_array &a, const adouble_array &b)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adBinaryNodeArray(eArcTan2,
+                                                        CLONE_NODE_ARRAY(a.node),
+                                                        CLONE_NODE_ARRAY(b.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = atan2(a[i], b[i]);
+    return tmp;
+}
+
+const adouble_array erf(const adouble_array &a)
+{
+    adouble_array tmp;
+    if(a.getGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        tmp.node = adNodeArrayPtr(new adUnaryNodeArray(eErf,
+                                                       CLONE_NODE_ARRAY(a.node) ));
+        return tmp;
+    }
+
+    size_t n = a.GetSize();
+    tmp.Resize(n);
+    for(size_t i = 0; i < n; i++)
+        tmp[i] = erf(a[i]);
+    return tmp;
+}
+
+
+
+
+
 string adouble_array::NodeAsPlainText(void) const
 {
     string strContent;

@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
-
 import sys, tempfile, numpy, json, traceback
 from time import localtime, strftime
 from os.path import join, dirname
@@ -302,6 +301,27 @@ class daeSimulationExplorer(QtGui.QDialog):
             cg.generateSimulation(self._simulation, directory, py_files, callable_name, arguments, [])
             
         QtGui.QMessageBox.information(self, "Code generator: %s" % language, 'Code generated successfuly!')
+
+    @staticmethod
+    def generateHTMLForm(simulation, htmlOutputFile, find_files_dir = '.'):
+        # Create application in case there is not one already created
+        if not QtGui.QApplication.instance():
+            app_ = QtGui.QApplication(sys.argv)
+
+        _inspector = daeSimulationInspector(simulation)
+
+        from .html_form import css_styles, html_template
+        of = open(htmlOutputFile, 'w')
+        html_content = _inspector._generateHTMLForm()
+        #logo = open(os.path.join(find_files_dir, 'logo.png'), 'rb').read()
+        #logo_data = logo.encode("base64")
+        dictOptions = {'css_style' : css_styles,
+                       'name' : simulation.m.GetStrippedName(),
+                       'content' : html_content
+                      }
+        html = html_template % dictOptions
+        of.write(html)
+        of.close()
             
     @property
     def jsonRuntimeSettings(self):

@@ -6,7 +6,7 @@ extern "C"
 {
 #endif
 
-const char* GetLastError();
+const char* GetLastPythonError();
 bool GetStrippedName(const char strSource[512], char strDestination[512]);
 
 #ifdef __cplusplus

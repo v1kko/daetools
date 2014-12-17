@@ -1367,6 +1367,30 @@ is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look
 on :ref:`tutorial_13`.
 
+Code generators
+===============
+
+Modelica
+--------
+
+gPROMS
+------
+
+c99
+---
+
+
+Co-Simulation
+=============
+
+FMI
+---
+
+Matlab MEX-functions
+--------------------
+
+Simulink S-functions
+--------------------
 ..
     Simulation
     ==========

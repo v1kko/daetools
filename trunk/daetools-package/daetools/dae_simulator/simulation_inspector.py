@@ -309,6 +309,13 @@ def _collectDOFs(nodeItem, model_or_port, dictDOFs, IDs):
             _collectDOFs(componentItem, component, dictDOFs, IDs)
         
 class daeSimulationInspector(object):
+    categoryParameters              = '___PARAMETERS___'
+    categoryInitialConditions       = '___INITIAL_CONDITIONS___'
+    categoryActiveStates            = '___ACTIVE_STATES___'
+    categoryDOFs                    = '___DOFS___'
+    categoryDomains                 = '___DOMAINS___'
+    categoryVariablesToReport       = '___VARIABLES_TO_REPORT___'
+
     def __init__(self, simulation):
         self.simulation = simulation
         
@@ -347,3 +354,114 @@ class daeSimulationInspector(object):
 
         self.treeOutputVariables = treeItem(None, self.simulation.m.Name, treeItem.typeNone)
         _collectOutputVariables(self.treeOutputVariables, self.simulation.m, self.output_variables)
+        
+    def _generateHTMLForm(self):
+        content = ''
+        content += '<fieldset>'
+        content += '<legend>General</legend>'
+        content += '<label for="testName">Test name</label>'
+        content += '<input class="ninemlString required" id="id_testName" type="text" name="testName" value=""/><br/>'
+        content += '<label for="testDescription">Test description</label>'
+        content += '<textarea class="ninemlMultilineString" id="id_testDescription" name="testDescription" rows="2" cols="2"></textarea><br/>'
+        content += '</fieldset>\n'
+
+        content += '<fieldset>'
+        content += '<legend>Simulation</legend>'
+        #content += '<label for="timeHorizon">Time horizon</label>'
+        #content += '<input class="ninemlFloat required number" id="id_timeHorizon" type="text" name="timeHorizon" value="{0}"/><br/>'.format(self.timeHorizon)
+        #content += '<label for="reportingInterval">Reporting interval</label>'
+        #content += '<input class="ninemlFloat required number" id="id_reportingInterval" type="text" name="reportingInterval" value="{0}"/><br/>'.format(self.reportingInterval)
+        content += '</fieldset>\n'
+
+        if self.treeParameters:
+            content += '<fieldset>'
+            content += '<legend>Parameters</legend>\n'
+            content += self._generateHTMLFormTree(self.treeParameters, daeSimulationInspector.categoryParameters)
+            content += '</fieldset>\n'
+
+        if self.treeDomains:
+            content += '<fieldset>'
+            content += '<legend>Domains</legend>\n'
+            content += self._generateHTMLFormTree(self.treeDomains, daeSimulationInspector.categoryDomains)
+            content += '</fieldset>\n'
+
+        if self.treeInitialConditions:
+            content += '<fieldset>'
+            content += '<legend>Initial conditions</legend>\n'
+            content += self._generateHTMLFormTree(self.treeInitialConditions, daeSimulationInspector.categoryInitialConditions) + '\n'
+            content += '</fieldset>\n'
+
+        if self.treeDOFs:
+            content += '<fieldset>'
+            content += '<legend>Degrees Of Freedom</legend>\n'
+            content += self._generateHTMLFormTree(self.treeDOFs, daeSimulationInspector.categoryDOFs)
+            content += '</fieldset>\n'
+
+        if self.treeStates:
+            content += '<fieldset>'
+            content += '<legend>Initially active states</legend>\n'
+            content += self._generateHTMLFormTree(self.treeStates, daeSimulationInspector.categoryActiveStates)
+            content += '</fieldset>\n'
+
+        if self.treeOutputVariables:
+            content += '<fieldset>'
+            content +='<legend>Output variables</legend>\n'
+            content += self._generateHTMLFormTree(self.treeOutputVariables, daeSimulationInspector.categoryVariablesToReport) + '\n'
+            content += '</fieldset>\n'
+
+        return content
+
+    def _generateHTMLFormTree(self, item, category = '', required = False):
+        """
+        Internal function to recursively generate a HTML form for the given treeItem root item.
+
+        :param item: treeItem object
+        :param category: string
+        :param required: boolean
+
+        :rtype: string
+        :raises:
+        """
+        if category == '':
+            inputName = item.canonicalName
+        else:
+            inputName = category + '.' + item.canonicalName
+
+        content = '<ul>'
+        if item.itemType == treeItem.typeQuantity:
+            content += '<li><label for="{1}">{0}</label><input class="ninemlFloat required number" type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.getValueAsText())
+
+        elif item.itemType == treeItem.typeDomain:
+            content += '<li><label for="{1}">{0}</label><input class="ninemlString" type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.getValueAsText())
+
+        elif item.itemType == treeItem.typeState:
+            #    if isinstance(item.data, collections.Iterable) and len(item.data) > 0:
+            #        content += '<li><label for="{1}">{0}</label> <select class="ninemlComboBox" name="{1}">'.format(item.name, inputName)
+            #        for available_regime in item.data:
+            #            if available_regime == item.value:
+            #                content += '<option value="{0}" selected>{0}</option>'.format(available_regime)
+            #            else:
+            #                content += '<option value="{0}">{0}</option>'.format(available_regime)
+            #        content += '</select></li>'
+            #    else:
+            #        content += '<li>{0}</li>'.format(item.name)
+            if required:
+                content += '<li><label for="{1}">{0}</label><input class="ninemlString required" type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.getValueAsText())
+            else:
+                content += '<li><label for="{1}">{0}</label><input class="ninemlString" type="text" name="{1}" value="{2}"/></li>'.format(item.name, inputName, item.getValueAsText())
+
+        elif item.itemType == treeItem.typeOutputVariable:
+            if item.getValue():
+                content += '<li><label for="{1}">{0}</label><input class="ninemlCheckBox" type="checkbox" name="{1}" checked/></li>'.format(item.name, inputName)
+            else:
+                content += '<li><label for="{1}">{0}</label><input class="ninemlCheckBox" type="checkbox" name="{1}"/></li>'.format(item.name, inputName)
+                
+        else:
+            content += '<li>{0}</li>'.format(item.name)
+
+        for child in item.children:
+            content += self._generateHTMLFormTree(child, category, required)
+
+        content += '</ul>'
+        return content
+        

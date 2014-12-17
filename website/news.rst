@@ -32,7 +32,7 @@ v1.4.0, 22.12.2014.
   The most of the NumPy and SciPy functions are supported.
 - New data reporters that export the simulation results to various file formats (MS Excel, hdf5, xml, json) and
   to Pandas data sets.
-- Added new math functions: Sinh, Cosh, Tanh, ASinh, ACosh, ATanh, ATan2, Erf.
+- Added new math functions: Sinh, Cosh, Tanh, ASinh, ACosh, ATanh, ATan2, Erf and Erf to adouble/adouble_array.
 - Added Pardiso linear solver.
 - Added SimulationExplorer GUI that lists all domains, parameters, initial conditions, degrees of freedom
   and state transition networks.
@@ -112,7 +112,9 @@ v1.3.0 beta 3, 01.10.2014.
 - Fixed bug with taking the variables' indexes from quations located in STN or IF blocks, causing the Jacobian matrix to be invalid
   in certain cases
 - Fixed bug in daeExternalFunction_t related to processing of adouble_array type of arguments
-- Added new nodes: adSetupValueInArrayAtIndex, adSetupCustomNodeArray
+- Added new node class: adSetupCustomNodeArray and new static functions to adouble_array: FromNumpyArray and FromList
+  that create adouble_array object from the given list/ndarray of adoubles with setup nodes.
+  Useful when using daetools array functions on arrays of adoubles that are a product of numpy operations.
 - Implemented daeVectorExternalFunction
 - Added EstLocalErrors and ErrWeights functions to daeIDAS dae solver
 - IDAS solver now takes abs. tolerances from the daetools.cfg config file
@@ -188,6 +190,7 @@ List of changes/new features:
 -  All constants in equations must be dimensional and assigned units;
    two new functions (Constant and Array) are added that create single
    or an array of dimensional quantities
+-  Added new node class: adVectorNodeArray.
 -  The functions Time and Constant moved from the daeModel class to the
    global namespace
 -  A basic support for external functions (daeScalarExternalFunction and
@@ -310,6 +313,7 @@ List of new features:
    creation of the system, approximately 1%; however, the system
    creation time is very low and there is no overall performance
    degradation).
+-  Added __true_div__ and __floor_div__ functions to adouble (numpy complaints). 
 -  Some API polishing
 
 v1.1.1, 17.06.2011

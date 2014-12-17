@@ -36,5 +36,6 @@ from .variable_types import *
 try:
     from daetools.dae_simulator.simulator import daeSimulator
     from daetools.dae_simulator.simulation_explorer import daeSimulationExplorer
+    from daetools.dae_simulator.simulation_inspector import daeSimulationInspector
 except ImportError as e:
     print('Cannot import daeSimulator module. Error: {0}'.format(str(e)))

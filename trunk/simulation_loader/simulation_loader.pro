@@ -31,9 +31,6 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS += $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS}
 
-unix::QMAKE_POST_LINK = $${COPY_FILE} \
-                        $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}* \
-                        $${SOLIBS_DIR}
-win32::QMAKE_POST_LINK = $${COPY_FILE} \
-                         $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}* \
-                         $${SOLIBS_DIR}/$${TARGET}.$${SHARED_LIB_APPEND}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${SOLIBS_DIR}/$${TARGET}.$${SHARED_LIB_APPEND}

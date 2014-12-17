@@ -41,7 +41,7 @@ class treeItem(object):
     typeNone             = -1
     typeDomain           =  0
     typeQuantity         =  1
-    typeSTN              =  2
+    #typeSTN              =  2
     typeOutputVariable   =  3
     typeState            =  4
 
@@ -360,7 +360,7 @@ class editor_StateTransition(QtGui.QFrame):
     def slotUpdate(self):
         index = self.ui.activeStateComboBox.currentIndex()
         self.treeItem.setValue( str(self.ui.activeStateComboBox.currentText()) )
-
+"""
 class treeItem_STN(treeItem):
     def __init__(self, parent, name, description, states, active_state):
         treeItem.__init__(self, parent, name, treeItem.typeSTN)
@@ -389,7 +389,8 @@ class treeItem_STN(treeItem):
         
     def hide(self):
         self._editor.hide()
-        
+"""
+
 class treeItem_State(treeItem):
     def __init__(self, parent, name, description, isActive):
         treeItem.__init__(self, parent, name, treeItem.typeState)

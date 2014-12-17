@@ -557,6 +557,16 @@ BOOST_PYTHON_MODULE(pyCore)
         .def(real_t() >= self)
         .def(real_t() != self)
 
+        // True division operator (/), mostly used by numpy
+        .def("__truediv__",  &daepython::ad_true_divide1)   // adouble / adouble
+        .def("__truediv__",  &daepython::ad_true_divide2)   // adouble / real_t
+        .def("__truediv__",  &daepython::ad_true_divide3)   // real_t  / adouble
+
+        // Floor division operator (//), mostly used by numpy
+        .def("__floordiv__", &daepython::ad_floor_divide1)  // adouble // adouble
+        .def("__floordiv__", &daepython::ad_floor_divide2)  // adouble // real_t
+        .def("__floordiv__", &daepython::ad_floor_divide3)  // real_t  // adouble
+
     // Math. functions declared as members to enable numpy support
     // For instance, the following will be possible to write in python:
     //  x = np.empty(n, dtype=object)
@@ -649,13 +659,14 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("NodeAsPlainText", &adouble_array::NodeAsPlainText)
         .def("NodeAsLatex",     &adouble_array::NodeAsLatex)
 
-        .def("__str__",     &daepython::adouble_array__str__)
-        .def("__repr__",    &daepython::adouble_array__repr__)
+        .def("__str__",  &daepython::adouble_array__str__)
+        .def("__repr__", &daepython::adouble_array__repr__)
 
-        .def("FromList",	   &daepython::adarr_FromList,   (arg("values")), DOCSTR_adouble_array_FromList)
-            .staticmethod("FromList")
+        .def("FromList", &daepython::adarr_FromList,   (arg("values")), DOCSTR_adouble_array_FromList)
+        .staticmethod("FromList")
+
         .def("FromNumpyArray", &daepython::adarr_FromNumpyArray, (arg("values")), DOCSTR_adouble_array_FromNumpyArray)
-            .staticmethod("FromNumpyArray")
+        .staticmethod("FromNumpyArray")
 
         .def(- self)
         .def(self + self)
@@ -695,6 +706,15 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Abs",		&daepython::adarr_abs);
     def("Ceil",		&daepython::adarr_ceil);
     def("Floor",	&daepython::adarr_floor);
+
+    def("Sinh",  &daepython::adarr_sinh);
+    def("Cosh",  &daepython::adarr_cosh);
+    def("Tanh",  &daepython::adarr_tanh);
+    def("ASinh", &daepython::adarr_asinh);
+    def("ACosh", &daepython::adarr_acosh);
+    def("ATanh", &daepython::adarr_atanh);
+    def("ATan2", &daepython::adarr_atan2);
+    def("Erf",   &daepython::adarr_erf);
 
     def("Sum",		 &daepython::adarr_sum,      (arg("adarray")), DOCSTR_Sum);
     def("Product",   &daepython::adarr_product,  (arg("adarray")), DOCSTR_Product);

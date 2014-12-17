@@ -243,6 +243,13 @@ real_t adFEVectorItemNode_Value(adFEVectorItemNode& self);
 /*******************************************************
 	adouble
 *******************************************************/
+const adouble ad_true_divide1(const adouble &a, const adouble &b);
+const adouble ad_true_divide2(const adouble &a, const real_t v);
+const adouble ad_true_divide3(const real_t v, const adouble &a);
+const adouble ad_floor_divide1(const adouble &a, const adouble &b);
+const adouble ad_floor_divide2(const adouble &a, const real_t v);
+const adouble ad_floor_divide3(const real_t v, const adouble &a);
+
 const adouble ad_exp(const adouble &a);
 const adouble ad_log(const adouble &a);
 const adouble ad_sqrt(const adouble &a);
@@ -302,6 +309,15 @@ const adouble_array adarr_tan(const adouble_array& a);
 const adouble_array adarr_asin(const adouble_array& a);
 const adouble_array adarr_acos(const adouble_array& a);
 const adouble_array adarr_atan(const adouble_array& a);
+
+const adouble_array adarr_sinh(const adouble_array &a);
+const adouble_array adarr_cosh(const adouble_array &a);
+const adouble_array adarr_tanh(const adouble_array &a);
+const adouble_array adarr_asinh(const adouble_array &a);
+const adouble_array adarr_acosh(const adouble_array &a);
+const adouble_array adarr_atanh(const adouble_array &a);
+const adouble_array adarr_atan2(const adouble_array &a, const adouble_array &b);
+const adouble_array adarr_erf(const adouble_array &a);
 
 const adouble adarr_sum(const adouble_array& a);
 const adouble adarr_product(const adouble_array& a);

@@ -17,10 +17,10 @@ HEADERS += stdafx.h \
 INCLUDEPATH += $${BOOSTDIR}
 
 LIBS += -lcdaeSimulationLoader
+# Achtung, Achtung!!
+# It uses daetools/solibs for linking
+QMAKE_LIBDIR += $${SOLIBS_DIR}
 
-unix::QMAKE_POST_LINK = $${COPY_FILE} \
-                        $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}* \
-                        $${FMI_DIR}
-win32::QMAKE_POST_LINK = $${COPY_FILE} \
-                         $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}* \
-                         $${FMI_DIR}/$${TARGET}.$${SHARED_LIB_APPEND}
+QMAKE_POST_LINK = $${COPY_FILE} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${FMI_DIR}/$${TARGET}.$${SHARED_LIB_APPEND}

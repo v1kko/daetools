@@ -10,7 +10,7 @@
 /* Common functions */
 static std::string g_strLastError;
 
-const char* GetLastError()
+const char* GetLastPythonError()
 {
     return g_strLastError.c_str();
 }

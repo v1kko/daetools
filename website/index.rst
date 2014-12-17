@@ -58,7 +58,7 @@ The most important new features:
    The most of the NuPy and SciPy functions are supported.
 -  New data reporters that export the simulation results to various file formats (MS Excel, hdf5, xml, json) and
    to Pandas data sets.
--  Added new math functions: Sinh, Cosh, Tanh, ASinh, ACosh, ATanh, ATan2, Erf.
+-  Added new math functions: Sinh, Cosh, Tanh, ASinh, ACosh, ATanh, ATan2 and Erf to adouble/adouble_array.
 -  Added `Pardiso <http://www.pardiso-project.org>`_ linear solver.
 -  Added SimulationExplorer GUI that lists all domains, parameters, initial conditions, degrees of freedom
    and state transition networks.

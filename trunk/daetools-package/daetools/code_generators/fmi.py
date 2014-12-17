@@ -263,7 +263,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             raise RuntimeError('Unsupported platform: %s' % platform_system)
 
         daetools_fmu_solib = '%s.%s' % (modelIdentifier, so_ext)
-        daetools_fmi_cs = 'libdaetools_fmi_cs-%s_%s.%s' % (platform_system, platform_machine, so_ext)
+        daetools_fmi_cs = 'daetools_fmi_cs-%s_%s.%s' % (platform_system, platform_machine, so_ext)
         #print daetools_fmi_cs
         try:
             shutil.copy2(os.path.join(daetools.daetools_dir, 'code_generators', 'fmi', daetools_fmi_cs),

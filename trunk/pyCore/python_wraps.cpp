@@ -1071,7 +1071,6 @@ const adouble_array adarr_FromNumpyArray(boost::python::object ndValues)
     }
 
     ptrarrValues.resize(n);
-
     for(i = 0; i < n; i++)
     {
         boost::python::object value = ndValues.attr("__getitem__")(i);
@@ -1108,7 +1107,6 @@ const adouble_array adarr_FromList(boost::python::list lValues)
     }
 
     ptrarrValues.resize(n);
-
     for(i = 0; i < n; i++)
     {
         boost::python::extract<adouble> get_adouble(lValues[i]);
@@ -1127,6 +1125,36 @@ const adouble_array adarr_FromList(boost::python::list lValues)
     }
 
     return Array(ptrarrValues);
+}
+
+const adouble ad_true_divide1(const adouble &a, const adouble &b)
+{
+    return a/b;
+}
+
+const adouble ad_true_divide2(const adouble &a, const real_t v)
+{
+    return a/v;
+}
+
+const adouble ad_true_divide3(const real_t v, const adouble &a)
+{
+    return v/a;
+}
+
+const adouble ad_floor_divide1(const adouble &a, const adouble &b)
+{
+    return a/b;
+}
+
+const adouble ad_floor_divide2(const adouble &a, const real_t v)
+{
+    return a/v;
+}
+
+const adouble ad_floor_divide3(const real_t v, const adouble &a)
+{
+    return v/a;
 }
 
 const adouble ad_exp(const adouble &a)
@@ -1315,7 +1343,38 @@ const adouble_array adarr_atan(const adouble_array& a)
 {
     return atan(a);
 }
-
+const adouble_array adarr_sinh(const adouble_array &a)
+{
+    return sinh(a);
+}
+const adouble_array adarr_cosh(const adouble_array &a)
+{
+    return cosh(a);
+}
+const adouble_array adarr_tanh(const adouble_array &a)
+{
+    return tanh(a);
+}
+const adouble_array adarr_asinh(const adouble_array &a)
+{
+    return asinh(a);
+}
+const adouble_array adarr_acosh(const adouble_array &a)
+{
+    return acosh(a);
+}
+const adouble_array adarr_atanh(const adouble_array &a)
+{
+    return atanh(a);
+}
+const adouble_array adarr_atan2(const adouble_array &a, const adouble_array &b)
+{
+    return atan2(a, b);
+}
+const adouble_array adarr_erf(const adouble_array &a)
+{
+    return erf(a);
+}
 const adouble adarr_sum(const adouble_array& a)
 {
     return Sum(a, false);
@@ -4169,6 +4228,7 @@ boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExec
     std::map< size_t, std::pair<size_t, adNodePtr> >::const_iterator iter;
     const std::map< size_t, std::pair<size_t, adNodePtr> >& mapJacobianExpressions = self.GetJacobianExpressions();
 
+    // dictionary {overall_index : tuple(block_index, derivative_node)}
     for(iter = mapJacobianExpressions.begin(); iter != mapJacobianExpressions.end(); iter++)
         d[iter->first] = boost::python::make_tuple(iter->second.first, boost::cref(iter->second.second.get()));
 
