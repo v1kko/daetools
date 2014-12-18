@@ -1465,7 +1465,7 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild)
 /*******************************************************
     daeDomain
 *******************************************************/
-boost::python::object GetNumPyArrayDomain(daeDomain& domain)
+boost::python::object GetDomainPoints(daeDomain& domain)
 {
 /* NUMPY
     size_t nType;
@@ -1509,14 +1509,19 @@ boost::python::object GetNumPyArrayDomain(daeDomain& domain)
     return ndarray.attr("reshape")(shape);
 }
 
-boost::python::list GetDomainPoints(daeDomain& domain)
+void SetDomainPoints(daeDomain& domain, boost::python::object points)
 {
-    boost::python::list l;
+    real_t point;
+    std::vector<real_t> darrPoints;
 
-    for(size_t i = 0; i < domain.GetNumberOfPoints(); i++)
-        l.append(*domain.GetPoint(i));
+    boost::python::ssize_t n = boost::python::len(points);
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        point = extract<real_t>(points[i]);
+        darrPoints.push_back(point);
+    }
 
-    return l;
+    domain.SetPoints(darrPoints);
 }
 
 boost::python::list GetDomainCoordinates(daeDomain& domain)
@@ -1549,21 +1554,6 @@ void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords)
     }
 
     domain.CreateUnstructuredGrid(arrCoords);
-}
-
-void SetDomainPoints(daeDomain& domain, boost::python::list l)
-{
-    real_t point;
-    std::vector<real_t> darrPoints;
-
-    boost::python::ssize_t n = boost::python::len(l);
-    for(boost::python::ssize_t i = 0; i < n; i++)
-    {
-        point = extract<real_t>(l[i]);
-        darrPoints.push_back(point);
-    }
-
-    domain.SetPoints(darrPoints);
 }
 
 adouble_array DomainArray(daeDomain& domain, boost::python::object indexes)
@@ -3782,7 +3772,8 @@ void AssignValues2(daeVariable& var, boost::python::object nd_values)
         boost::python::extract<real_t>   rValue(obj);
         boost::python::extract<quantity> qValue(obj);
 
-        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
+        // If the datatype=object and it is None or datatype=float and it is NaN then the item has unset value
+        if(obj.is_none() || (rValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3857,7 +3848,8 @@ void ReAssignValues2(daeVariable& var, boost::python::object nd_values)
         boost::python::extract<real_t>   rValue(obj);
         boost::python::extract<quantity> qValue(obj);
 
-        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
+        // If the datatype=object and it is None or datatype=float and it is NaN then the item has unset value
+        if(obj.is_none() || (rValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -3935,7 +3927,8 @@ void SetInitialConditions2(daeVariable& var, boost::python::object nd_values)
         boost::python::extract<real_t>   rValue(obj);
         boost::python::extract<quantity> qValue(obj);
 
-        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
+        // If the datatype=object and it is None or datatype=float and it is NaN then the item has unset value
+        if(obj.is_none() || (rValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -4010,7 +4003,8 @@ void ReSetInitialConditions2(daeVariable& var, boost::python::object nd_values)
         boost::python::extract<real_t>   rValue(obj);
         boost::python::extract<quantity> qValue(obj);
 
-        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
+        // If the datatype=object and it is None or datatype=float and it is NaN then the item has unset value
+        if(obj.is_none() || (rValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }
@@ -4085,7 +4079,8 @@ void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values)
         boost::python::extract<real_t>   rValue(obj);
         boost::python::extract<quantity> qValue(obj);
 
-        if(obj.is_none() || (!rValue.check() && !qValue.check() && numpy.attr("isnan")(obj)))
+        // If the datatype=object and it is None or datatype=float and it is NaN then the item has unset value
+        if(obj.is_none() || (rValue.check() && numpy.attr("isnan")(obj)))
         {
             q_values[i] = quantity(cnUnsetValue, u);
         }

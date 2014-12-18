@@ -20,34 +20,33 @@ __doc__ = """
 This tutorial shows how to use DAE Tools objects with Numpy arrays to solve a simple
 stationary heat conduction in one dimension (1D Poisson equation) using a simple 
 Finite Elements method (with linear elements):
-      d^2T(x)/dx^2 = F(x);  for all x in: (0, Lx),
 
-Linear finite elements discretization:
+d2T(x)/dx2 = F(x);  for all x in: (0, Lx)
+
+Linear finite elements discretization and simple FE matrix assembly:
 
 .. code-block:: none
 
-                  phi                 phi
-                     (k-1)               (k)
-                     
-                    *                   *             
-                  * | *               * | *            
-                *   |   *           *   |   *          
-              *     |     *       *     |     *        
-            *       |       *   *       |       *      
-          *         |         *         |         *        
-        *           |       *   *       |           *      
-      *             |     *       *     |             *    
-    *               |   *           *   |               *  
-  *                 | *  element (k)  * |                 *
-*-------------------*+++++++++++++++++++*-------------------*-
-                    x                   x
-                     (k-i                (k)
-                   
-                    \_________ _________/
-                              |
-                              dx
-       
- - Simple FE matrix assembly 
+                   phi                 phi
+                      (k-1)               (k)
+                      
+                     *                   *             
+                   * | *               * | *            
+                 *   |   *           *   |   *          
+               *     |     *       *     |     *        
+             *       |       *   *       |       *      
+           *         |         *         |         *        
+         *           |       *   *       |           *      
+       *             |     *       *     |             *    
+     *               |   *           *   |               *  
+   *                 | *  element (k)  * |                 *
+ *-------------------*+++++++++++++++++++*-------------------*-
+                     x                   x
+                      (k-i                (k)
+                    
+                     \_________ _________/
+                               |
+                               dx
 
 """
 

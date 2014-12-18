@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial13.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -66,9 +66,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
             <b>if</b> QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>'tutorial13'</span>, msg)
         <b>finally</b>:
-            <b>print</b> <span style='color:#c00000;'>'********************************************************'</span>
-            <b>print</b> msg
-            <b>print</b> <span style='color:#c00000;'>'********************************************************'</span>
+            <b>print</b>(<span style='color:#c00000;'>'********************************************************'</span>)
+            <b>print</b>(msg)
+            <b>print</b>(<span style='color:#c00000;'>'********************************************************'</span>)
 
 <b>class</b> simpleUserAction2(daeAction):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, msg):
@@ -83,10 +83,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
             <b>if</b> QtCore.QCoreApplication.instance():
                 QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>'tutorial13'</span>, <span style='color:#0000ff;'>self</span>.msg)
         <b>finally</b>:
-            <b>print</b> <span style='color:#c00000;'>'********************************************************'</span>
-            <b>print</b> <span style='color:#c00000;'>'tutorial13 simpleUserAction2 message: '</span>
-            <b>print</b> <span style='color:#0000ff;'>self</span>.msg
-            <b>print</b> <span style='color:#c00000;'>'********************************************************'</span>
+            <b>print</b>(<span style='color:#c00000;'>'********************************************************'</span>)
+            <b>print</b>(<span style='color:#c00000;'>'tutorial13 simpleUserAction2 message: '</span>)
+            <b>print</b>(<span style='color:#0000ff;'>self</span>.msg)
+            <b>print</b>(<span style='color:#c00000;'>'********************************************************'</span>)
             
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):

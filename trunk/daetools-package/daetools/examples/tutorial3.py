@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial3.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2013
+                Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -27,7 +27,7 @@ Here we introduce:
 - Non-uniform domain grids
 """
 
-import sys
+import sys, numpy
 from daetools.pyDAE import *
 from time import localtime, strftime
 
@@ -50,8 +50,8 @@ class modTutorial(daeModel):
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
         self.Tave   = daeVariable("T_ave",  temperature_t, self, "The average temperature")
         self.Qsum   = daeVariable("Q_sum",  heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
-        self.Qmul   = daeVariable("Q_mul",  heat_flux_t,   self, "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
-        self.adTest = daeVariable("adTest", heat_flux_t,   self, "User-defined adouble_array test variable")
+        self.Qsum1  = daeVariable("Q_sum1", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate (more complicated way, as an illustration)")
+        self.Qsum2  = daeVariable("Q_sum2", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate (numpy version)")
 
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
         self.T.DistributeOnDomain(self.x)
@@ -135,7 +135,8 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
         eq.Residual = self.Qsum() + self.k() * Sum( self.T.d_array(self.y, '*', 0) )
         
-        # This equations is just a mental gymnastics to illustrate various functions (array, Constant, Array)
+        Nx = self.x.NumberOfPoints
+        # These equations are just a mental gymnastics to illustrate various functions (array, Constant, Array)
         #  - The function Constant() creates a constant quantity that contains a value and units 
         #  - The function Array() creates an array of constant quantities that contain a value and units
         # Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)
@@ -149,36 +150,38 @@ class modTutorial(daeModel):
         #
         # Achtung: the value of Qmul must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
-        values = [2 * K for i in range(self.x.NumberOfPoints)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
-        eq.Residual = self.Qmul() + Sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
+        values = [2 * K for i in range(Nx)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
+        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
 
-        # This is physically meaningles example how to setup a user-defined array of adouble objects.
-        # In some cases when a user needs to create his own adouble_array then the functions:
-        # array, d_array, dt_array, Array etc are NOT available (due to some implementation details)!
-        # and arrays must be filled with adouble items manually as shown bellow.
-        # Check the model report to see the result and differences.
-        arr1 = adouble_array()
-        arr1.Resize(2)
-        arr1[0] = self.Qb()
-        arr1[1] = self.Qt()
-        # Or simply:
-        #arr1 = adouble_array.FromList([self.Qb(), self.Qt()])
-        print(arr1, len(arr1))
-        for a in list(arr1.items()):
-            print(a)
+        # Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.
+        # In those cases the functions suxh as array(), d_array(), dt_array(), Array() etc
+        # are NOT applicable since they return adouble_array objects.
+        # However, we can create a numpy array of adouble objects, apply numpy functions on them
+        # and finally create adouble_array object from resulting numpy arrays of adouble objects, if necessary.
+        #
+        # In this example, we will demonstrate interoperability between daetools and numpy.
+        # As an illustration, we can construct a sum of heat fluxes at the bottom edge of the plate
+        # (which should be identical to the previous Q_sum equation).
+        # 1. First, create an empty numpy array as a container for daetools adouble objects
+        Qbottom = numpy.empty(Nx, dtype=object)
+        # 2. Then, fill the created numpy array with adouble objects.
+        #    The result is: [k*dT[0,0]/dt, k*dT[1,0]/dt, ..., k*dT[Nx-1,0]/dt]
+        #    There are two ways:
+        #      - all items at once
+        #      - item by item
+        #    In this case, we populate all items at once
+        Qbottom[:] = [self.k() * self.T.d(self.y, x, 0) for x in range(Nx)]
+        # 3. Finally, create an equation
+        eq = self.CreateEquation("Q_sum2", "The sum of heat fluxes at the bottom edge of the plate (numpy version)")
+        eq.Residual = self.Qsum2() + numpy.sum(Qbottom)
 
-        arr2 = adouble_array()
-        arr2.Resize(2)
-        arr2[0] = self.k() * self.T.d(self.y, 0, 0)
-        arr2[1] = self.k() * self.T.d(self.y, 1, 0)
-        # Or simply:
-        #arr2 = adouble_array.FromList([self.k() * self.T.d(self.y, 0, 0), self.k() * self.T.d(self.y, 1, 0)])
-        print(arr2, len(arr2))
-        for a in list(arr2.items()):
-            print(a)
-
-        eq = self.CreateEquation("adTest", "User-defined adouble_array")
-        eq.Residual = self.adTest() - Sum(arr1 * 2 / 15 - arr2)
+        # If adouble_aray is needed after operations on a numpy array we can use two functions:
+        #   a) static function adouble_array.FromList(python-list)
+        #   b) static function adouble_array.FromNumpyArray(numpy-array)
+        # Both return an adouble_array object.
+        ad_arr_Qbottom = adouble_array.FromNumpyArray(Qbottom)
+        print('ad_arr_Qbottom:')
+        print(ad_arr_Qbottom)
         
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -192,16 +195,18 @@ class simTutorial(daeSimulation):
         self.m.x.CreateStructuredGrid(eCFDM, 2, n, 0, 0.1)
         self.m.y.CreateStructuredGrid(eCFDM, 2, n, 0, 0.1)
 
-        # Points in distributed domains can be changed after the domain is defined by the CreateDistributed function.
-        # In certain situations it is not desired to have a uniform distribution of the points within the given interval (LB, UB)
-        # In these cases, a non-uniform grid can be specified by using the Points property od daeDomain.
-        # A good candidates for the non-uniform grid are cases where we have a very stiff fronts at one side of the domain.
-        # In these cases it is desirable to place more points at that part od the domain.
-        # Here, we first print the points before changing them and then set the new values.
-        self.Log.Message("  Before:" + str(self.m.y.Points), 0)
-        self.m.y.Points = [0.000, 0.005, 0.010, 0.015, 0.020, 0.025, 0.030, 0.035, 0.040, 0.070, 0.100]
-        self.Log.Message("  After:" + str(self.m.y.Points), 0)
-
+        # Points of structured grids can be changed after the domain is defined by the CreateDistributed function.
+        # In certain situations it is desired to create a non-uniform grid within the given interval (LB, UB).
+        # In these cases, a non-uniform grid can be specified by changing the daeDomain.Points property.
+        # Good candidates for non-uniform grids are cases where there is a stiff front at one side of a domain.
+        # First, create an uniform grid and then create a new list of points and assign it to the Points property.
+        # Nota bene: the number of points must remain the same.
+        old_grid = self.m.y.Points # numpy array
+        new_grid = [0.000, 0.005, 0.010, 0.015, 0.020, 0.025, 0.030, 0.035, 0.040, 0.070, 0.100]
+        self.Log.Message("  Before: %s" % old_grid, 0)
+        self.m.y.Points = new_grid
+        self.Log.Message("  After: %s" % new_grid, 0)
+        
         self.m.k.SetValue(401   * W/(m*K))
         self.m.cp.SetValue(385  * J/(kg*K))
         self.m.ro.SetValue(8960 * kg/(m**3))

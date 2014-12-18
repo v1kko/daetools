@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial6.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -113,18 +113,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
         <span style='color:#0000ff;'>self</span>.m.mpout.time.SetInitialCondition(<span style='color:#c000c0;'>0</span>)
 
-<b>def</b> export(simulation, objects_to_export):
-    pydae_model <b><span style='color:#0000ff;'>=</span></b> simulation.m.ExportObjects(objects_to_export, ePYDAE)
-    cdae_model  <b><span style='color:#0000ff;'>=</span></b> simulation.m.ExportObjects(objects_to_export, eCDAE)
-
-    file_pydae <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;/&quot;</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;_export.py&quot;</span>, <span style='color:#c00000;'>&quot;w&quot;</span>)
-    file_cdae  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;/&quot;</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;_export.h&quot;</span>,  <span style='color:#c00000;'>&quot;w&quot;</span>)
-
-    file_pydae.write(pydae_model)
-    file_cdae.write(cdae_model)
-    file_pydae.close()
-    file_cdae.close()
-
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
@@ -160,9 +148,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
-
-    <span style='color:#008000;'># Export models and ports</span>
-    <span style='color:#008000;'>#export(simulation, [simulation.m.mpin.Pin, simulation.m.mpin, simulation.m.mpout, simulation.m])</span>
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

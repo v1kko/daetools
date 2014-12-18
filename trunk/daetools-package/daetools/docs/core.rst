@@ -420,9 +420,6 @@ Classes
     :members:
 
     .. automethod:: __init__
-    .. automethod:: __len__
-    .. automethod:: __getitem__
-    .. automethod:: __setitem__
 
 .. autoclass:: pyCore.daeCondition
     :members:

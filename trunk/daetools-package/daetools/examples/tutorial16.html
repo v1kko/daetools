@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial16.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -40,7 +40,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime, sleep
 <span style='color:#0000ff;'>from</span> os.path <span style='color:#0000ff;'>import</span> join, realpath, dirname
 <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-<span style='color:#0000ff;'>from</span> tutorial16_ui <span style='color:#0000ff;'>import</span> Ui_InteractiveRunDialog
+<span style='color:#0000ff;'>import</span> tutorial16_ui
 <span style='color:#0000ff;'>import</span> matplotlib
 <span style='color:#0000ff;'>from</span> matplotlib.figure <span style='color:#0000ff;'>import</span> Figure
 <span style='color:#0000ff;'>from</span> matplotlib.backends.backend_qt4agg <span style='color:#0000ff;'>import</span> FigureCanvasQTAgg <span style='color:#0000ff;'>as</span> FigureCanvas
@@ -92,7 +92,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, simulation):
         QtGui.QDialog.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
 
-        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> Ui_InteractiveRunDialog()
+        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> tutorial16_ui.Ui_InteractiveRunDialog()
         <span style='color:#0000ff;'>self</span>.ui.setupUi(<span style='color:#0000ff;'>self</span>)
 
         <span style='color:#0000ff;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#0000ff;'>__file__</span>), <span style='color:#c00000;'>'daetools-48x48.png'</span>)))

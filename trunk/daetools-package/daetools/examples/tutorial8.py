@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial8.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2013
+                Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -26,6 +26,7 @@ Here we introduce a data reporter concept and show how to export results to seve
  - XML file (needs python-lxml package)
  - HDF5 file (needs python-h5py package)
  - Pandas dataset (needs python-pandas package)
+
 and how to write custom data reporters. Some time it is not enough to send the results
 to daePlotter but it is desirable to export them in certain format for use in other programs.
 Here we show how the custom data reporter can be created.

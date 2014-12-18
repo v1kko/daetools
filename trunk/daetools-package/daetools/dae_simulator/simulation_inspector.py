@@ -74,7 +74,7 @@ def _collectDomains(nodeItem, model_or_port, dictDomains):
             discrMethod        = obj.DiscretizationMethod # not edited
             order              = obj.DiscretizationOrder  # not edited
             numberOfIntervals  = obj.NumberOfIntervals    # not edited
-            points             = obj.Points
+            points             = obj.Points.tolist()
             item = treeItem_Domain(nodeItem, type, name, description, discrMethod = discrMethod, 
                                                    order = order, numberOfIntervals = numberOfIntervals, 
                                                    points = points, units = units)

@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            opt_tutorial4.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -124,11 +124,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <span style='color:#008000;'>#    Objective function and constraints have Value (float) and Gradients (numpy array) properties where</span>
     <span style='color:#008000;'>#    their values and gradients in respect to optimization variables are stored. Here, as the example,</span>
     <span style='color:#008000;'>#    the value and gradients of the objective function are printed (since no constraints are involved).</span>
-    <b>print</b> <span style='color:#c00000;'>'Objective function inputs: '</span>
-    <b>print</b> <span style='color:#c00000;'>'   Inputs: {0}'</span>.<span style='color:#0000ff;'>format</span>(x)
-    <b>print</b> <span style='color:#c00000;'>'   Value     = {0}'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Value)
-    <b>print</b> <span style='color:#c00000;'>'   Gradients = {0}'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Gradients)
-    <b>print</b> <span style='color:#c00000;'>''</span>
+    <b>print</b>(<span style='color:#c00000;'>'Objective function inputs: '</span>)
+    <b>print</b>(<span style='color:#c00000;'>'   Inputs: {0}'</span>.<span style='color:#0000ff;'>format</span>(x))
+    <b>print</b>(<span style='color:#c00000;'>'   Value     = {0}'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Value))
+    <b>print</b>(<span style='color:#c00000;'>'   Gradients = {0}'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Gradients))
+    <b>print</b>(<span style='color:#c00000;'>''</span>)
     <b>return</b> simulation.ObjectiveFunction.Value
 
 <b>def</b> run():
@@ -164,7 +164,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
           simulation.ov4.StartingPoint,
           simulation.ov5.StartingPoint]
 
-    <b>print</b> fmin(ObjectiveFunction, x0, args<b><span style='color:#0000ff;'>=</span></b>[simulation], xtol<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1e-8</span>)
+    <b>print</b>(fmin(ObjectiveFunction, x0, args<b><span style='color:#0000ff;'>=</span></b>(simulation,), xtol<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1e-8</span>))
 
 <b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
     run()

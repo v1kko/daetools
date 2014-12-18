@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial14.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2013</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -29,13 +29,10 @@
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 <span style='color:#c00000;'>In this example we use the same conduction problem as in the tutorial 5.</span>
 
-<span style='color:#c00000;'>Here we introduce the external functions concept that can handle and evaluate</span>
-<span style='color:#c00000;'>functions in external libraries. Here we use daeScalarExternalFunction class</span>
-<span style='color:#c00000;'>derived external function object to calculate the power and interpolate a set of</span>
+<span style='color:#c00000;'>Here we introduce the external functions concept that can handle and execute</span>
+<span style='color:#c00000;'>functions in external libraries. Here we use daeScalarExternalFunction-derived</span>
+<span style='color:#c00000;'>external function object to calculate the heat transferred and interpolate a set of</span>
 <span style='color:#c00000;'>values using scipy.interpolate.interp1d object.</span>
-
-<span style='color:#c00000;'>A support for external functions is still experimental and the goal is</span>
-<span style='color:#c00000;'>to support certain software components such as thermodynamic property packages etc.</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
@@ -46,53 +43,55 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
 
-<b>class</b> extfnPower(daeScalarExternalFunction):
+<b>class</b> extfnHeatTransferred(daeScalarExternalFunction):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Model, units, m, cp, dT):
+        <span style='color:#008000;'># Instantiate the scalar external function by specifying</span>
+        <span style='color:#008000;'># the arguments dictionary {'name' : adouble-object}</span>
         arguments <b><span style='color:#0000ff;'>=</span></b> {}
         arguments[<span style='color:#c00000;'>&quot;m&quot;</span>]  <b><span style='color:#0000ff;'>=</span></b> m
         arguments[<span style='color:#c00000;'>&quot;cp&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> cp
         arguments[<span style='color:#c00000;'>&quot;dT&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> dT
-        
+
         daeScalarExternalFunction.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Model, units, arguments)
     
     <b>def</b> Calculate(<span style='color:#0000ff;'>self</span>, values):
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        This function calculates a value and derivatives per given argument.</span>
-<span style='color:#008000;'>        Here a derivative will be calculated automatically (the function just returns m*cp*dT).</span>
-<span style='color:#008000;'>        </span>
-<span style='color:#008000;'>        However, in a general case if a derivative part is not equal to zero the derivative should be calculated:</span>
-<span style='color:#008000;'>        if values[&quot;arg1&quot;].Derivative != 0:</span>
-<span style='color:#008000;'>            res.Derivative = ... # derivative per argument arg1</span>
-<span style='color:#008000;'>        elif values[&quot;arg2&quot;].Derivative != 0:</span>
-<span style='color:#008000;'>            res.Derivative = ... # derivative per argument arg2</span>
+        <span style='color:#008000;'># Calculate function is used to calculate a value and a derivative (if requested)</span>
+        <span style='color:#008000;'># of the external function per given argument. Here the simple function is given by:</span>
+        <span style='color:#008000;'>#    f(m, cp, dT/dt) = m * cp * dT/dt</span>
 
-<span style='color:#008000;'>        For instance, an implementation of the following external function:</span>
-<span style='color:#008000;'>            f(x) = x^2 + y^2</span>
-<span style='color:#008000;'>        would look like:</span>
-
-<span style='color:#008000;'>        # Get the arguments from the dictionary &quot;values&quot; as adouble objects</span>
-<span style='color:#008000;'>        x = values[&quot;x&quot;]</span>
-<span style='color:#008000;'>        y = values[&quot;y&quot;]</span>
-
-<span style='color:#008000;'>        # Always set the value (derivative part is equal zero by default):</span>
-<span style='color:#008000;'>        res = adouble(x.Value**2 + y.Value**2)</span>
-
-<span style='color:#008000;'>        # Calculate a derivative using the chain rule: (arg1)' * df/darg1</span>
-<span style='color:#008000;'>        if x.Derivative != 0:</span>
-<span style='color:#008000;'>            res.Derivative = x.Derivative * (2 * x.Value)</span>
-<span style='color:#008000;'>        elif y.Derivative != 0:</span>
-<span style='color:#008000;'>            res.Derivative = y.Derivative * (2 * y.Value)</span>
-
-<span style='color:#008000;'>        # Return the result</span>
-<span style='color:#008000;'>        return res</span>
-<span style='color:#008000;'>        &quot;&quot;&quot;</span>
+        <span style='color:#008000;'># Procedure:</span>
+        <span style='color:#008000;'># 1. Get the arguments from the dictionary values: {'arg-name' : adouble-object}.</span>
+        <span style='color:#008000;'>#    Every adouble object has two properties: Value and Derivative that can be</span>
+        <span style='color:#008000;'>#    used to evaluate function or its partial derivatives per its arguments</span>
+        <span style='color:#008000;'>#    (partial derivatives are used to fill in a Jacobian matrix necessary to solve</span>
+        <span style='color:#008000;'>#    a system of non-linear equations using the Newton method).</span>
         m  <b><span style='color:#0000ff;'>=</span></b> values[<span style='color:#c00000;'>&quot;m&quot;</span>]
         cp <b><span style='color:#0000ff;'>=</span></b> values[<span style='color:#c00000;'>&quot;cp&quot;</span>]
         dT <b><span style='color:#0000ff;'>=</span></b> values[<span style='color:#c00000;'>&quot;dT&quot;</span>]
         
-        res <b><span style='color:#0000ff;'>=</span></b> m <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> dT
+        <span style='color:#008000;'># 2. Always calculate the value of a function (derivative part is zero by default)</span>
+        res <b><span style='color:#0000ff;'>=</span></b> adouble(m.Value <b><span style='color:#0000ff;'>*</span></b> cp.Value <b><span style='color:#0000ff;'>*</span></b> dT.Value)
         
-        <span style='color:#008000;'>#print('Power(m = {0}, cp = {1}, dT = {2}) = {3}'.format(m, cp, dT, res))</span>
+        <span style='color:#008000;'># 3. If a function derivative per one of its arguments is requested,</span>
+        <span style='color:#008000;'>#    a derivative part of that argument will be non-zero.</span>
+        <span style='color:#008000;'>#    In that case, investigate which derivative is requested and calculate it</span>
+        <span style='color:#008000;'>#    using the chain rule: f'(x) = x' * df(x)/dx</span>
+        <b>if</b> m.Derivative <b><span style='color:#0000ff;'>!=</span></b> <span style='color:#c000c0;'>0</span>:
+            <span style='color:#008000;'># A derivative per 'm' was requested</span>
+            res.Derivative <b><span style='color:#0000ff;'>=</span></b> m.Derivative <b><span style='color:#0000ff;'>*</span></b> (cp.Value <b><span style='color:#0000ff;'>*</span></b> dT.Value)
+        <b>elif</b> cp.Derivative <b><span style='color:#0000ff;'>!=</span></b> <span style='color:#c000c0;'>0</span>:
+            <span style='color:#008000;'># A derivative per 'cp' was requested</span>
+            res.Derivative <b><span style='color:#0000ff;'>=</span></b> cp.Derivative <b><span style='color:#0000ff;'>*</span></b> (m.Value <b><span style='color:#0000ff;'>*</span></b> dT.Value)
+        <b>elif</b> dT.Derivative <b><span style='color:#0000ff;'>!=</span></b> <span style='color:#c000c0;'>0</span>:
+            <span style='color:#008000;'># A derivative per 'dT' was requested</span>
+            res.Derivative <b><span style='color:#0000ff;'>=</span></b> dT.Derivative <b><span style='color:#0000ff;'>*</span></b> (m.Value <b><span style='color:#0000ff;'>*</span></b> cp.Value)
+        
+        <span style='color:#008000;'>#print('Heat(m=(%f,%f), cp=(%f,%f), dT=(%f,%f)) = (%f,%f)' % (m.Value,m.Derivative,</span>
+        <span style='color:#008000;'>#                                                             cp.Value,cp.Derivative,</span>
+        <span style='color:#008000;'>#                                                             dT.Value,dT.Derivative,</span>
+        <span style='color:#008000;'>#                                                             res.Value,res.Derivative))</span>
+
+        <span style='color:#008000;'># 4. Return the result as a adouble object (contains both value and derivative)</span>
         <b>return</b> res
         
 <b>class</b> extfn_interp1d(daeScalarExternalFunction):
@@ -100,24 +99,31 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         arguments <b><span style='color:#0000ff;'>=</span></b> {}
         arguments[<span style='color:#c00000;'>&quot;t&quot;</span>]  <b><span style='color:#0000ff;'>=</span></b> Time
 
-        <span style='color:#008000;'># Instantiate interp1d object</span>
+        <span style='color:#008000;'># Instantiate interp1d object and initialize interpolation using supplied (x,y) values</span>
         <span style='color:#0000ff;'>self</span>.interp <b><span style='color:#0000ff;'>=</span></b> scipy.interpolate.interp1d(times, values)
 
-        <span style='color:#008000;'># Cache the last interpolated value to speed up a simulation</span>
+        <span style='color:#008000;'># During the solver iterations, the function is called very often with the same arguments</span>
+        <span style='color:#008000;'># Therefore, cache the last interpolated value to speed up a simulation</span>
         <span style='color:#0000ff;'>self</span>.cache <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>
 
-        <span style='color:#008000;'># Counters for performance</span>
+        <span style='color:#008000;'># Counters for performance (just an info; not really needed)</span>
         <span style='color:#0000ff;'>self</span>.counter       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
         <span style='color:#0000ff;'>self</span>.cache_counter <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
 
         daeScalarExternalFunction.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Model, units, arguments)
 
     <b>def</b> Calculate(<span style='color:#0000ff;'>self</span>, values):
+        <span style='color:#008000;'># Increase the call counter every time the function is called</span>
         <span style='color:#0000ff;'>self</span>.counter <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#c000c0;'>1</span>
 
         <span style='color:#008000;'># Get the argument from the dictionary of arguments' values.</span>
         time <b><span style='color:#0000ff;'>=</span></b> values[<span style='color:#c00000;'>&quot;t&quot;</span>].Value
 
+        <span style='color:#008000;'># Here we do not need to return a derivative for it is not a function of variables.</span>
+        <span style='color:#008000;'># See the remarks above if thats not the case.</span>
+
+        <span style='color:#008000;'># First check if an interpolated value was already calculated during the previous call</span>
+        <span style='color:#008000;'># If it was return the cached value (derivative part is always equal to zero in this case)</span>
         <b>if</b> <span style='color:#0000ff;'>self</span>.cache:
             <b>if</b> <span style='color:#0000ff;'>self</span>.cache[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>==</span></b> time:
                 <span style='color:#0000ff;'>self</span>.cache_counter <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#c000c0;'>1</span>
@@ -131,9 +137,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
         <span style='color:#008000;'># Save it in the cache for later use</span>
         <span style='color:#0000ff;'>self</span>.cache <b><span style='color:#0000ff;'>=</span></b> (time, res.Value)
-        
-        <span style='color:#008000;'># Here we do not need to return a derivative for it is not a function of variables.</span>
-        <span style='color:#008000;'># See the remarks above if thats not the case.</span>
 
         <b>return</b> res
         
@@ -150,11 +153,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.Qin   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Power of the heater&quot;</span>)
         <span style='color:#0000ff;'>self</span>.T     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature of the plate&quot;</span>)
         
-        <span style='color:#0000ff;'>self</span>.Power     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Power&quot;</span>,     power_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Power&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Power_ext <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Power_ext&quot;</span>, power_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Power&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Heat     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Heat&quot;</span>,     power_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat transferred&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Heat_ext <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Heat_ext&quot;</span>, power_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat transferred calculated using an external function&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Value        <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Value&quot;</span>,        time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Value_interp <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Value_interp&quot;</span>, time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Value        <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Value&quot;</span>,        time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Simple value&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Value_interp <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Value_interp&quot;</span>, time_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Simple value calculated using an external function that wraps scipy.interp1d&quot;</span>)
         
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
@@ -164,16 +167,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'># Create external function</span>
         <span style='color:#008000;'># It has to be created in DeclareEquations since it accesses the params/vars values</span>
-        <span style='color:#0000ff;'>self</span>.Pext <b><span style='color:#0000ff;'>=</span></b> extfnPower(<span style='color:#c00000;'>&quot;Power&quot;</span>, <span style='color:#0000ff;'>self</span>, W, <span style='color:#0000ff;'>self</span>.m(), <span style='color:#0000ff;'>self</span>.cp(), <span style='color:#0000ff;'>self</span>.T.dt())
+        <span style='color:#0000ff;'>self</span>.exfnHeat <b><span style='color:#0000ff;'>=</span></b> extfnHeatTransferred(<span style='color:#c00000;'>&quot;Heat&quot;</span>, <span style='color:#0000ff;'>self</span>, W, <span style='color:#0000ff;'>self</span>.m(), <span style='color:#0000ff;'>self</span>.cp(), <span style='color:#0000ff;'>self</span>.T.dt())
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Integral heat balance equation&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Power&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Power() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Heat&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Heat() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt()
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Power_ext&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Power_ext() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Pext()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Heat_ext&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Heat_ext() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.exfnHeat()
 
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'># Scalar external function #2</span>

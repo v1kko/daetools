@@ -374,6 +374,86 @@ Source code             `tutorial17.py <../../examples/tutorial17.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_18:
+
+Tutorial 18
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial18
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial18.xml <../../examples/tutorial18.xml>`_
+Runtime model report    `tutorial18-rt.xml <../../examples/tutorial18-rt.xml>`_
+Source code             `tutorial18.py <../../examples/tutorial18.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_19:
+
+Tutorial 19
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial19
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial19.xml <../../examples/tutorial19.xml>`_
+Runtime model report    `tutorial19-rt.xml <../../examples/tutorial19-rt.xml>`_
+Source code             `tutorial19.py <../../examples/tutorial19.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_20:
+
+Tutorial 20
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial20
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial20.xml <../../examples/tutorial20.xml>`_
+Runtime model report    `tutorial20-rt.xml <../../examples/tutorial20-rt.xml>`_
+Source code             `tutorial20.py <../../examples/tutorial20.html>`_
+=====================   =================================================================
+
+..
+  .. _tutorial_21:
+
+  Tutorial 21
+  ===========
+  .. rubric:: Description
+
+  .. automodule:: daetools.examples.tutorial21
+     :no-members:
+     :no-undoc-members:
+
+  .. rubric:: Files
+
+  =====================   =================================================================
+  =====================   =================================================================
+  Model report            `tutorial21.xml <../../examples/tutorial21.xml>`_
+  Runtime model report    `tutorial21-rt.xml <../../examples/tutorial21-rt.xml>`_
+  Source code             `tutorial21.py <../../examples/tutorial21.html>`_
+  =====================   =================================================================
+
+
 .. _opt_tutorial_1:
 
 Optimization tutorial 1

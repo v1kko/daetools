@@ -35,7 +35,8 @@ const char* DOCSTR_daeConfig_ = "";
 
 const char* DOCSTR_adouble = "Class adouble operates on values/derivatives of domains, parameters and variables. "
          "It supports basic mathematical operators (+, -, *, /, **), comparison operators (<, <=, >, >=, ==, !=), " 
-         "and logical operators and (&), or (|) and not (~). Operands can be instances of adouble or float values.";
+         "logical operators and (&), or (|) and not (~), and mathematical functions (sqrt, exp, sin, cos, ...). "
+         "Operands can be instances of adouble or float values.";
     const char* DOCSTR_adouble_init = "";
     const char* DOCSTR_adouble_Value = "Value";
     const char* DOCSTR_adouble_Derivative = "Derivative";
@@ -43,7 +44,8 @@ const char* DOCSTR_adouble = "Class adouble operates on values/derivatives of do
     const char* DOCSTR_adouble_Node = "Contains the equation evaluation node.";
 
 const char* DOCSTR_adouble_array = "Class adouble_array operates on arrays of values/derivatives of domains, parameters and variables. "
-         "It supports basic mathematical operators (+, -, *, /, **). Operands can be instances of adouble_array, adouble or float values.";
+         "It supports basic mathematical operators (+, -, *, /, **) and functions (sqrt, exp, sin, cos,...). Operands can be instances "
+         "of adouble_array, adouble or float values.";
     const char* DOCSTR_adouble_array_init = "";
     const char* DOCSTR_adouble_array_GatherInfo = "Used internally by the framework.";
     const char* DOCSTR_adouble_array_Node = "Contains the equation evaluation node.";

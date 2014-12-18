@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial17.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -37,8 +37,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
 <span style='color:#0000ff;'>import</span> os, sys
 <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-<span style='color:#0000ff;'>from</span> tutorial17_ui <span style='color:#0000ff;'>import</span> Ui_tcpipLogServerMainWindow
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>import</span> tutorial17_ui
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime, sleep
 <span style='color:#0000ff;'>from</span> os.path <span style='color:#0000ff;'>import</span> join, realpath, dirname
 <span style='color:#0000ff;'>import</span> threading
@@ -115,12 +115,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, app):
         QtGui.QMainWindow.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
 
-        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> Ui_tcpipLogServerMainWindow()
+        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> tutorial17_ui.Ui_tcpipLogServerMainWindow()
         <span style='color:#0000ff;'>self</span>.ui.setupUi(<span style='color:#0000ff;'>self</span>)
         <span style='color:#008000;'>#self.setAttribute(QtCore.Qt.WA_DeleteOnClose)</span>
         <span style='color:#0000ff;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#0000ff;'>__file__</span>), <span style='color:#c00000;'>'daetools-48x48.png'</span>)))
-        <span style='color:#0000ff;'>self</span>.setGeometry(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>600</span>, <span style='color:#c000c0;'>150</span>) <span style='color:#008000;'># Position window</span>
-        <span style='color:#0000ff;'>self</span>.resize(<span style='color:#c000c0;'>600</span>, <span style='color:#c000c0;'>150</span>)  <span style='color:#008000;'># Resize window</span>
+        <span style='color:#0000ff;'>self</span>.setGeometry(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>600</span>, <span style='color:#c000c0;'>200</span>) <span style='color:#008000;'># Position window</span>
+        <span style='color:#0000ff;'>self</span>.resize(<span style='color:#c000c0;'>600</span>, <span style='color:#c000c0;'>300</span>)  <span style='color:#008000;'># Resize window</span>
 
         <span style='color:#008000;'># Create TCPIP log server</span>
         <span style='color:#0000ff;'>self</span>.logServer <b><span style='color:#0000ff;'>=</span></b> tcpipLogServer(<span style='color:#c000c0;'>0</span>, app, <span style='color:#0000ff;'>self</span>.ui.messagesEdit)

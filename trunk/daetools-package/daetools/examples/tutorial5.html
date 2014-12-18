@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial5.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -66,18 +66,26 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Integral heat balance equation&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
 
-        <span style='color:#008000;'># Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.</span>
-        <span style='color:#008000;'># Again, states MUST contain the SAME NUMBER OF EQUATIONS.</span>
-        <span style='color:#008000;'># First start with the call to STN(&quot;STN_Name&quot;) function from daeModel class.</span>
-        <span style='color:#008000;'># If you need to change active states in operating procedure in function Run()</span>
-        <span style='color:#008000;'># store the stn reference (here in the stnRegulator object).</span>
-        <span style='color:#008000;'># After that call, define your states by calling the function STATE(&quot;State1&quot;) and write</span>
-        <span style='color:#008000;'># equations that will be active if this state (called 'State1') is active.</span>
-        <span style='color:#008000;'># If there are state transitions, write them by calling the function SWITCH_TO(&quot;State2&quot;, 'condition').</span>
-        <span style='color:#008000;'># This function defines the condition when the state 'State2' becomes the active one.</span>
-        <span style='color:#008000;'># Repeat this procedure for all states in the state transition network.</span>
-        <span style='color:#008000;'># Finally call the function END_STN() to finalize the state transition network.</span>
-        <span style='color:#008000;'># Again, there is an optional argument eventTolerance of the function SWITCH_TO, as explained in tutorial 4.</span>
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>        Non-symmetrical STNs in DAE Tools can be created by using STN/STATE/END_STN statements.</span>
+<span style='color:#008000;'>        Again, states MUST contain the SAME NUMBER OF EQUATIONS.</span>
+<span style='color:#008000;'>        First start with the call to STN(&quot;STN_Name&quot;) function from daeModel class.</span>
+<span style='color:#008000;'>        If you need to change active states in operating procedure in function Run()</span>
+<span style='color:#008000;'>        store the stn reference (here in the stnRegulator object).</span>
+<span style='color:#008000;'>        After that call, define your states by calling the function STATE(&quot;State1&quot;) and write</span>
+<span style='color:#008000;'>        equations that will be active if this state (called 'State1') is active.</span>
+
+<span style='color:#008000;'>        Models and states can contain OnConditionActions and OnEventActions.</span>
+<span style='color:#008000;'>        OnConditionActions are trigerred when a specified logical condition is satisfied.</span>
+<span style='color:#008000;'>        OnEventActions are trigerred when a specified EventPort receives an event (more info in tutorial13.py).</span>
+<span style='color:#008000;'>        There are different types of actions that can be executed by a logical condition.</span>
+<span style='color:#008000;'>        In this example, we want to change the active states subject to given conditions and</span>
+<span style='color:#008000;'>        ON_CONDITION(logical_condition, switchToStates = [list_of_actions]) function will be used.</span>
+<span style='color:#008000;'>        Again, there is an optional argument eventTolerance, as explained in tutorial 4.</span>
+<span style='color:#008000;'>        </span>
+<span style='color:#008000;'>        Repeat this procedure for all states in the state transition network.</span>
+<span style='color:#008000;'>        Finally call the function END_STN() to finalize the state transition network.</span>
+<span style='color:#008000;'>        &quot;&quot;&quot;</span>
         <span style='color:#0000ff;'>self</span>.stnRegulator <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.STN(<span style='color:#c00000;'>&quot;Regulator&quot;</span>)
 
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;Heating&quot;</span>)
@@ -85,17 +93,41 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Q_in&quot;</span>, <span style='color:#c00000;'>&quot;The heater is on&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#c000c0;'>1500</span> <b><span style='color:#0000ff;'>*</span></b> W)
 
-        <span style='color:#008000;'># Here the Time() function is used to get the current time (time elapsed) in the simulation</span>
-        <span style='color:#0000ff;'>self</span>.SWITCH_TO(<span style='color:#c00000;'>&quot;Cooling&quot;</span>,   <span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>340</span> <b><span style='color:#0000ff;'>*</span></b> K))
-        <span style='color:#0000ff;'>self</span>.SWITCH_TO(<span style='color:#c00000;'>&quot;HeaterOff&quot;</span>, Time()   <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>350</span> <b><span style='color:#0000ff;'>*</span></b> s))
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>        ON_CONDITION() function</span>
+<span style='color:#008000;'>        Arguments:</span>
+<span style='color:#008000;'>          - Condition that triggers the actions</span>
+<span style='color:#008000;'>          - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name) that will be set active</span>
+<span style='color:#008000;'>             when the condition is satisified</span>
+<span style='color:#008000;'>          - 'triggerEvents' is a list of python tuples (outlet-event-port, expression),</span>
+<span style='color:#008000;'>             where the first part is the event-port object and the second a value to be sent when the event is trigerred</span>
+<span style='color:#008000;'>          - 'setVariableValues' is a list of python tuples (variable, expression); if the variable is differential it</span>
+<span style='color:#008000;'>             will be reinitialized (using ReInitialize() function), otherwise it will be reassigned (using ReAssign() function)</span>
+<span style='color:#008000;'>          - 'userDefinedActions' is a list of user defined daeAction-derived objects (see tutorial13.py for more information)</span>
+<span style='color:#008000;'>        &quot;&quot;&quot;</span>
+        <span style='color:#008000;'># Here the built-in Time() function is used to get the current time (time elapsed) in the simulation</span>
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>340</span><b><span style='color:#0000ff;'>*</span></b>K), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#c00000;'>'Regulator'</span>, <span style='color:#c00000;'>'Cooling'</span>) ],
+                                                      setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                      triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                      userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(Time() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>350</span><b><span style='color:#0000ff;'>*</span></b>s), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#c00000;'>'Regulator'</span>, <span style='color:#c00000;'>'HeaterOff'</span>) ],
+                                                    setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                    triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                    userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
 
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;Cooling&quot;</span>)
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Q_in&quot;</span>, <span style='color:#c00000;'>&quot;The heater is off&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qin()
 
-        <span style='color:#0000ff;'>self</span>.SWITCH_TO(<span style='color:#c00000;'>&quot;Heating&quot;</span>,   <span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>&lt;</span></b> Constant(<span style='color:#c000c0;'>320</span> <b><span style='color:#0000ff;'>*</span></b> K))
-        <span style='color:#0000ff;'>self</span>.SWITCH_TO(<span style='color:#c00000;'>&quot;HeaterOff&quot;</span>, Time()   <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>350</span> <b><span style='color:#0000ff;'>*</span></b> s))
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>&lt;</span></b> Constant(<span style='color:#c000c0;'>320</span><b><span style='color:#0000ff;'>*</span></b>K), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#c00000;'>'Regulator'</span>, <span style='color:#c00000;'>'Heating'</span>) ],
+                                                      setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                      triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                      userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
+        <span style='color:#0000ff;'>self</span>.ON_CONDITION(Time() <b><span style='color:#0000ff;'>&gt;</span></b> Constant(<span style='color:#c000c0;'>350</span><b><span style='color:#0000ff;'>*</span></b>s), switchToStates     <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#c00000;'>'Regulator'</span>, <span style='color:#c00000;'>'HeaterOff'</span>) ],
+                                                    setVariableValues  <b><span style='color:#0000ff;'>=</span></b> [],
+                                                    triggerEvents      <b><span style='color:#0000ff;'>=</span></b> [],
+                                                    userDefinedActions <b><span style='color:#0000ff;'>=</span></b> [] )
 
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;HeaterOff&quot;</span>)
 

@@ -430,7 +430,7 @@ class daeCodeGeneratorAnalyzer(object):
             if domain.Type == eUnstructuredGrid:
                 data['Points']           = numpy.array([i for i in range(domain.NumberOfPoints)])
             else:
-                data['Points']           = domain.npyPoints
+                data['Points']           = domain.Points
             data['Units']                = domain.Units
 
             self.runtimeInformation['Domains'].append(data)

@@ -306,7 +306,7 @@ class daeSimulationExplorer(QtGui.QDialog):
     def generateHTMLForm(simulation, htmlOutputFile, find_files_dir = '.'):
         # Create application in case there is not one already created
         if not QtGui.QApplication.instance():
-            app_ = QtGui.QApplication(sys.argv)
+            app_ = QtGui.QApplication(['html'])
 
         _inspector = daeSimulationInspector(simulation)
 
@@ -333,23 +333,23 @@ class daeSimulationExplorer(QtGui.QDialog):
         return self._runtimeSettings
     
     @staticmethod
-    def saveJSONSettings(filename, simulation, simulationName):
-        jsonSettings = daeSimulationExplorer.generateJSONSettings(simulation, simulationName)
+    def saveJSONSettings(simulation, filename):
+        jsonSettings = daeSimulationExplorer.generateJSONSettings(simulation)
         f = open(filename, 'w')
         f.write(jsonSettings)
         f.close()
         
     @staticmethod
-    def generateJSONSettings(simulation, simulationName):
+    def generateJSONSettings(simulation):
         try:
             # Create application in case there is not one already created
             if not QtGui.QApplication.instance():
-                app_ = QtGui.QApplication(sys.argv)
+                app_ = QtGui.QApplication(['json'])
 
             _inspector = daeSimulationInspector(simulation)
 
             _runtimeSettings = {}
-            _runtimeSettings['Name']                  = simulationName
+            _runtimeSettings['Name']                  = simulation.m.Name
             _runtimeSettings['TimeHorizon']           = simulation.TimeHorizon
             _runtimeSettings['ReportingInterval']     = simulation.ReportingInterval
             _runtimeSettings['RelativeTolerance']     = simulation.DAESolver.RelativeTolerance
@@ -386,7 +386,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             return json.dumps(_runtimeSettings, indent = 4, sort_keys = True)
 
         except Exception as e:
-            print(str(e))
+            print('Exception in generateJSONSettings: %s' % str(e))
             
     ############################################################################
     #                   Implementation (private methods)

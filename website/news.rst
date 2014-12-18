@@ -313,7 +313,7 @@ List of new features:
    creation of the system, approximately 1%; however, the system
    creation time is very low and there is no overall performance
    degradation).
--  Added __true_div__ and __floor_div__ functions to adouble (numpy complaints). 
+-  Added __true_div__ and __floor_div__ functions to adouble. 
 -  Some API polishing
 
 v1.1.1, 17.06.2011

@@ -350,13 +350,13 @@ string daeGetRelativeName_2(const string& strParent, const string& strChild);
 /*******************************************************
 	daeDomain
 *******************************************************/
-boost::python::object GetNumPyArrayDomain(daeDomain& domain);
-adouble_array DomainArray(daeDomain& domain, boost::python::object indexes);
+//boost::python::object GetNumPyArrayDomain(daeDomain& domain);
 //daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step);
 //daeIndexRange FunctionCallDomain2(daeDomain& domain, boost::python::list l);
 //daeIndexRange FunctionCallDomain3(daeDomain& domain);
-boost::python::list GetDomainPoints(daeDomain& domain);
-void SetDomainPoints(daeDomain& domain, boost::python::list l);
+boost::python::object GetDomainPoints(daeDomain& domain);
+void SetDomainPoints(daeDomain& domain, boost::python::object points);
+adouble_array DomainArray(daeDomain& domain, boost::python::object indexes);
 boost::python::list GetDomainCoordinates(daeDomain& domain);
 void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords);
 

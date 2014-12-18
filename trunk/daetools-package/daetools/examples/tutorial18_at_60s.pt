@@ -1,0 +1,9 @@
+{"updateInterval": 0, 
+ "curves": [
+             ["tutorial18.ni_analytical", [12, -1], ["60.0", "*"]], 
+             ["tutorial18.ni_VanLeer",    [12, -1], ["60.0", "*"]], 
+             ["tutorial18.ni_I_upwind",   [12, -1], ["60.0", "*"]], 
+             ["tutorial18.ni_II_upwind",  [12, -1], ["60.0", "*"]], 
+             ["tutorial18.ni_II_central", [12, -1], ["60.0", "*"]]
+           ]
+}

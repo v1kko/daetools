@@ -18,18 +18,25 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 __doc__ = """
 This is a simple example to test daetools support for:
- - Scilab/GNU_Octave/Matlab MEX functions
- - Simulink S-functions
- - Modelica code-generator
- - gPROMS code-generator
- - FMI code-generator (for Co-Simulation)
+
+- Scilab/GNU_Octave/Matlab MEX functions
+- Simulink S-functions
+- Modelica code-generator
+- gPROMS code-generator
+- FMI code-generator (for Co-Simulation)
 
 The model has two inlet and two outlet ports.
 The values of the outlets are equal to inputs multiplied by a multiplier:
+
+.. code-block:: none
+
     out1.y   = m1   x in1.y
     out2.y[] = m2[] x in2.y[]
 
 where multipliers m1 and m2[] are:
+
+.. code-block:: none
+
   STN(Multipliers):
     when 'Variable':
         dm1/dt   = p1
@@ -37,16 +44,18 @@ where multipliers m1 and m2[] are:
     when 'Constant':
         dm1/dt   = 0
         dm2[]/dt = 0
-that is can be constant or variable.
+        
+(that is the multipliesr can be constant or variable).
 
 The ports in1 and out1 are scalar (width = 1).
 The ports in2 and out2 are vectors (width = 1).
 
 Achtung, Achtung!!
 Notate bene:
-  1. Inlet ports must be DOFs (that is to have their values asssigned),
-     for they can't be connected when the model is simulated outside of daetools context.
-  2. Only scalar output ports are supported at the moment!! (Simulink issue)
+
+1. Inlet ports must be DOFs (that is to have their values asssigned),
+   for they can't be connected when the model is simulated outside of daetools context.
+2. Only scalar output ports are supported at the moment!! (Simulink issue)
 """
 
 import sys, numpy
@@ -145,49 +154,18 @@ class simTutorial(daeSimulation):
         self.m.m1.SetInitialCondition(1)
         self.m.m2.SetInitialConditions(numpy.ones(nw))
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 100
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 100
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("127.0.0.1:50000", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-    
-    # Code generators
+def run_code_generators(simulation, log):
+    # Demonstration of daetools code-generators:
     import tempfile
     tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-fmi-')
-    print('Generated code will be located in: %s' % tmp_folder)
+    msg = 'Generated code (Modelica, gPROMS and FMU) will be located in: \n%s' % tmp_folder
+    log.Message(msg, 0)
+    
+    try:
+        from PyQt4 import QtCore, QtGui
+        QtGui.QMessageBox.warning(None, "tutorial20", msg)
+    except Exception as e:
+        log.Message(str(e), 0)
 
     # Modelica:
     from daetools.code_generators.modelica import daeCodeGenerator_Modelica
@@ -204,10 +182,17 @@ def consoleRun():
     cg = daeCodeGenerator_FMI()
     cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation', '', [])
 
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+# Use daeSimulator class
+def guiRun(app):
+    sim = simTutorial()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 10
+    sim.TimeHorizon       = 100
+    simulator  = daeSimulator(app, simulation=sim, run_before_simulation_begin_fn = run_code_generators)
+    simulator.exec_()
 
+# This function is used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
+# It can have any number of arguments, but must return an initialized daeSimulation object.
 def create_simulation():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -224,7 +209,7 @@ def create_simulation():
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("127.0.0.1:50000", simName) == False):
+    if(datareporter.Connect("", simName) == False):
         sys.exit()
 
     # Initialize the simulation
@@ -235,6 +220,21 @@ def create_simulation():
 
     return simulation
     
+# Setup everything manually and run in a console
+def consoleRun():
+    # Create simulation
+    simulation = create_simulation()
+
+    # Solve at time=0 (initialization)
+    simulation.SolveInitial()
+
+    # Run code-generators
+    run_code_generators(simulation, simulation.Log)
+    
+    # Run
+    simulation.Run()
+    simulation.Finalize()
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()

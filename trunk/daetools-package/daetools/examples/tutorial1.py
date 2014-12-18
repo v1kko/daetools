@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial1.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2013
+                Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -266,9 +266,6 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Save runtime settings in json format
-    #daeSimulationExplorer.saveJSONSettings('tutorial1.json', simulation, simName)
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

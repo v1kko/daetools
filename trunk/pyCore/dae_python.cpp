@@ -648,12 +648,14 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("GatherInfo",	 &adouble_array::getGatherInfo,	&adouble_array::setGatherInfo,                DOCSTR_adouble_array_GatherInfo)
         .add_property("Node",        make_function(&adouble_array::getNodeRawPtr, return_internal_reference<>()), DOCSTR_adouble_array_Node)
 
+       /*
         .def("Resize",      &adouble_array::Resize, ( arg("self"), arg("newSize") ),                DOCSTR_adouble_array_Resize)
         .def("__len__",     &adouble_array::GetSize, ( arg("self") ),                               DOCSTR_adouble_array_len)
         .def("__getitem__", &adouble_array::GetItem, ( arg("self"), arg("index") ),                 DOCSTR_adouble_array_getitem)
         .def("__setitem__", &adouble_array::SetItem, ( arg("self"), arg("index"), arg("value") ),   DOCSTR_adouble_array_setitem)
-        .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end),
-                            DOCSTR_adouble_array_items)
+        .def("items",       range< return_value_policy<copy_non_const_reference> >(&adouble_array::begin, &adouble_array::end), DOCSTR_adouble_array_items)
+       */
+
         .def("__call__",    &daepython::adouble_array__call__, ( arg("self"), arg("index") ), DOCSTR_adouble_array_call)
 
         .def("NodeAsPlainText", &adouble_array::NodeAsPlainText)
@@ -662,10 +664,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__str__",  &daepython::adouble_array__str__)
         .def("__repr__", &daepython::adouble_array__repr__)
 
-        .def("FromList", &daepython::adarr_FromList,   (arg("values")), DOCSTR_adouble_array_FromList)
+        .def("FromList",        &daepython::adarr_FromList,       arg("values"), DOCSTR_adouble_array_FromList)
         .staticmethod("FromList")
 
-        .def("FromNumpyArray", &daepython::adarr_FromNumpyArray, (arg("values")), DOCSTR_adouble_array_FromNumpyArray)
+        .def("FromNumpyArray",  &daepython::adarr_FromNumpyArray, arg("values"), DOCSTR_adouble_array_FromNumpyArray)
         .staticmethod("FromNumpyArray")
 
         .def(- self)
@@ -846,12 +848,11 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Type",					&daeDomain::GetType,                DOCSTR_daeDomain_Type)
         .add_property("NumberOfIntervals",		&daeDomain::GetNumberOfIntervals,   DOCSTR_daeDomain_NumberOfIntervals)
         .add_property("NumberOfPoints",			&daeDomain::GetNumberOfPoints,      DOCSTR_daeDomain_NumberOfPoints)
-        .add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod, DOCSTR_daeDomain_DiscretizationMethod)
+        .add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod,DOCSTR_daeDomain_DiscretizationMethod)
         .add_property("DiscretizationOrder",	&daeDomain::GetDiscretizationOrder, DOCSTR_daeDomain_DiscretizationOrder)
         .add_property("LowerBound",				&daeDomain::GetLowerBound,          DOCSTR_daeDomain_LowerBound)
         .add_property("UpperBound",				&daeDomain::GetUpperBound,          DOCSTR_daeDomain_UpperBound)
         .add_property("Units",					&daeDomain::GetUnits,               DOCSTR_daeDomain_Units)
-        .add_property("npyPoints",              &daepython::GetNumPyArrayDomain,    DOCSTR_daeDomain_npyPoints)
         .add_property("Points",					&daepython::GetDomainPoints,
                                                 &daepython::SetDomainPoints,        DOCSTR_daeDomain_Points)
         .add_property("Coordinates",			&daepython::GetDomainCoordinates,   DOCSTR_daeDomain_Coordinates)

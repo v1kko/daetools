@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial9.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -39,6 +39,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>- SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)</span>
 <span style='color:#c00000;'>- Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)</span>
 <span style='color:#c00000;'>- IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span>
+<span style='color:#c00000;'>- Pardiso: multi-threaded sparse direct solver defined in pyPardiso module (proprietary)</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
@@ -50,9 +51,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <span style='color:#0000ff;'>from</span> daetools.solvers.trilinos <span style='color:#0000ff;'>import</span> pyTrilinos
     <span style='color:#008000;'>#from daetools.solvers.superlu import pySuperLU</span>
     <span style='color:#008000;'>#from daetools.solvers.superlu_mt import pySuperLU_MT</span>
-    <span style='color:#008000;'>#from daetools.solvers import.intel_pardiso pyIntelPardiso</span>
+    <span style='color:#008000;'>#from daetools.solvers.intel_pardiso import pyIntelPardiso</span>
+    <span style='color:#008000;'>#from daetools.solvers.pardiso import pyPardiso</span>
 <b>except</b> <b><span style='color:#054d00;'>ImportError</span></b> <span style='color:#0000ff;'>as</span> e:
-    <b>print</b>(<span style='color:#c00000;'>'Unable to import LA solver: {0}'</span>.<span style='color:#0000ff;'>format</span>(e))
+    <b>print</b>((<span style='color:#c00000;'>'Unable to import LA solver: {0}'</span>.<span style='color:#0000ff;'>format</span>(e)))
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, J, W
@@ -112,8 +114,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>25</span>
 
-        <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
@@ -145,35 +147,49 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># The default linear solver is Sundials dense sequential solver (LU decomposition).</span>
     <span style='color:#008000;'># The following 3rd party direct linear solvers are supported:</span>
-    <span style='color:#008000;'>#  1. Sparse solvers:</span>
-    <span style='color:#008000;'>#      - IntelPardiso (multi-threaded - OMP)</span>
-    <span style='color:#008000;'>#      - SuperLU (sequential)</span>
-    <span style='color:#008000;'>#      - SuperLU_MT (multi-threaded - pthreads, OMP)</span>
-    <span style='color:#008000;'>#      - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack</span>
-    <span style='color:#008000;'>#  3. Dense lapack wrappers:</span>
-    <span style='color:#008000;'>#      - Amd ACML (OMP)</span>
-    <span style='color:#008000;'>#      - Intel MKL (OMP)</span>
-    <span style='color:#008000;'>#      - Generic Lapack (Sequential)</span>
-    <span style='color:#008000;'>#      - Magma lapack (GPU)</span>
-    <span style='color:#008000;'># If you are using Intel/AMD solvers you have to export their bin directories (see their docs how to do it).</span>
-    <span style='color:#008000;'># If you are using OMP capable solvers you should set the number of threads to the number of cores.</span>
-    <span style='color:#008000;'># For instance:</span>
+    <span style='color:#008000;'>#   - Pardiso (multi-threaded - OMP)</span>
+    <span style='color:#008000;'>#   - IntelPardiso (multi-threaded - OMP)</span>
+    <span style='color:#008000;'>#   - SuperLU (sequential)</span>
+    <span style='color:#008000;'>#   - SuperLU_MT (multi-threaded - pthreads, OMP)</span>
+    <span style='color:#008000;'>#   - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack</span>
+    <span style='color:#008000;'># If you are using Pardiso or IntelPardiso solvers you have to export their bin directories,</span>
+    <span style='color:#008000;'># using, for instance, LD_LIBRARY_PATH shell variable (for more details see their documentation).</span>
+    <span style='color:#008000;'># If you are using OpenMP capable solvers you should set the number of threads</span>
+    <span style='color:#008000;'># (typically to the number of cores), for instance:</span>
     <span style='color:#008000;'>#    export OMP_NUM_THREADS=4</span>
+    <span style='color:#008000;'># or if using IntelPardiso solver:</span>
+    <span style='color:#008000;'>#    export MKL_NUM_THREADS=24</span>
     <span style='color:#008000;'># You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).</span>
 
-    <span style='color:#008000;'># Import desired module and uncomment corresponding solver and set it by using SetLASolver function</span>
-    <b>print</b> <span style='color:#c00000;'>&quot;Supported Trilinos 3rd party LA solvers:&quot;</span>, <span style='color:#0000ff;'>str</span>(pyTrilinos.daeTrilinosSupportedSolvers())
+    <span style='color:#008000;'># Import desired solver module (uncomment it from below) and set it using SetLASolver function:</span>
+    <span style='color:#008000;'>#print(&quot;Supported Trilinos 3rd party LA solvers:&quot;, str(pyTrilinos.daeTrilinosSupportedSolvers()))</span>
     <span style='color:#008000;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Klu&quot;, &quot;&quot;)</span>
     lasolver     <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Superlu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
     <span style='color:#008000;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Lapack&quot;, &quot;&quot;)</span>
     <span style='color:#008000;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Umfpack&quot;, &quot;&quot;)</span>
     <span style='color:#008000;'>#lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()</span>
-    <span style='color:#008000;'>#lasolver     = pyAmdACML.daeCreateLapackSolver()</span>
-    <span style='color:#008000;'>#lasolver     = pyIntelMKL.daeCreateLapackSolver()</span>
-    <span style='color:#008000;'>#lasolver     = pyLapack.daeCreateLapackSolver()</span>
-    <span style='color:#008000;'>#lasolver     = pyAtlas.daeCreateLapackSolver()</span>
+    <span style='color:#008000;'>#lasolver     = pyPardiso.daeCreatePardisoSolver()</span>
     daesolver.SetLASolver(lasolver)
 
+    <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>    # Get Pardiso/IntelPardiso parameters (iparm[64] list of integers)</span>
+<span style='color:#008000;'>    iparm = lasolver.get_iparm()</span>
+<span style='color:#008000;'>    iparm_def = list(iparm) # Save it for comparison</span>
+<span style='color:#008000;'>    # Change some options</span>
+<span style='color:#008000;'>    # Achtung, Achtung!!</span>
+<span style='color:#008000;'>    # The meaning of items in iparm[64] is NOT identical in Pardiso and IntelPardiso solvers!!</span>
+<span style='color:#008000;'>    iparm[ 7] = 2 # Max. number of iterative refinement steps (common for both Pardiso and IntelPardiso)</span>
+<span style='color:#008000;'>    #iparm[27] = 1 # in Pardiso it means:      use METIS parallel reordering</span>
+<span style='color:#008000;'>                   # in IntelPardiso it means: use single precision (do not change it!)</span>
+<span style='color:#008000;'>    # Set them back</span>
+<span style='color:#008000;'>    lasolver.set_iparm(iparm)    </span>
+<span style='color:#008000;'>    iparm = lasolver.get_iparm()</span>
+<span style='color:#008000;'>    # Print the side by side comparison</span>
+<span style='color:#008000;'>    print('iparm     default new')</span>
+<span style='color:#008000;'>    for i in range(64):</span>
+<span style='color:#008000;'>        print 'iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i])</span>
+<span style='color:#008000;'>    &quot;&quot;&quot;</span>
+    
     <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
@@ -188,7 +204,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
-
+    
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)

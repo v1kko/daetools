@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial10.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2010</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -126,17 +126,17 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>25</span>
+        n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
 
         <span style='color:#008000;'># The domain for a semi-circle</span>
-        <span style='color:#0000ff;'>self</span>.m.c.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>100</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>)
+        <span style='color:#0000ff;'>self</span>.m.c.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>100</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>)
 
         <span style='color:#0000ff;'>self</span>.m.dx.SetValue(<span style='color:#c000c0;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> m)
         <span style='color:#0000ff;'>self</span>.m.dy.SetValue(<span style='color:#c000c0;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> m)
 
         <span style='color:#008000;'># Domain bounds can depend on input parameters:</span>
-        <span style='color:#0000ff;'>self</span>.m.x.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.dx.GetValue())
-        <span style='color:#0000ff;'>self</span>.m.y.CreateDistributed(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.dy.GetValue())
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.dx.GetValue())
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.dy.GetValue())
 
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
@@ -145,15 +145,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.m.T.SetInitialGuesses(<span style='color:#c000c0;'>250</span><b><span style='color:#0000ff;'>*</span></b>K)
         <b>for</b> x <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.x.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1</span>):
             <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>1</span>, <span style='color:#0000ff;'>self</span>.m.y.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1</span>):
                 <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#c000c0;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
-
-        <span style='color:#008000;'># Load initialization file previously saved after the successful initialization phase.</span>
-        <span style='color:#008000;'># The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, however</span>
-        <span style='color:#008000;'># here the system is still being built and the initial conditions/guesses etc. will be copied</span>
-        <span style='color:#008000;'># automatically to the DAE solver at later stage.</span>
-        <span style='color:#0000ff;'>self</span>.LoadInitializationValues(<span style='color:#c00000;'>&quot;tutorial10.init&quot;</span>)
 
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
@@ -191,8 +186,21 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
 
+    <span style='color:#008000;'># Load initialization file previously saved after the successful initialization phase.</span>
+    <span style='color:#008000;'># The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, </span>
+    <span style='color:#008000;'># however here the system has not been solved initially (at t = 0) and the values and  </span>
+    <span style='color:#008000;'># initial conditions will be copied automatically to DAE solver during SolveInitial call.</span>
+    <b>print</b>(<span style='color:#c00000;'>'T before loading:'</span>)
+    <b>print</b>(simulation.m.T.npyValues)
+    simulation.LoadInitializationValues(<span style='color:#c00000;'>&quot;tutorial10.init&quot;</span>)
+    <b>print</b>(<span style='color:#c00000;'>'T after loading:'</span>)
+    <b>print</b>(simulation.m.T.npyValues)
+    
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
+    <b>print</b>(<span style='color:#c00000;'>'T after SolveInitial:'</span>)
+    <b>print</b>(simulation.m.T.npyValues)
+    
     <span style='color:#008000;'># Save the initialization file that can be used during later initialization</span>
     simulation.StoreInitializationValues(<span style='color:#c00000;'>&quot;tutorial10.init&quot;</span>)
 

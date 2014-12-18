@@ -120,7 +120,8 @@ class daeSimulator(QtGui.QDialog):
         self.nlpsolver                   = kwargs.get('nlpsolver',                  None)
         self.nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
         self.lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
-        self.run_after_simulation_end_fn = kwargs.get('run_after_simulation_end_fn',None)
+        self.run_before_simulation_begin_fn = kwargs.get('run_before_simulation_begin_fn',None)
+        self.run_after_simulation_end_fn    = kwargs.get('run_after_simulation_end_fn',None)
 
         if self.app == None:
             if not QtCore.QCoreApplication.instance():
@@ -278,6 +279,9 @@ class daeSimulator(QtGui.QDialog):
                     self.lasolver_setoptions_fn(self.lasolver)
 
                 self.simulation.SolveInitial()
+
+                if self.run_before_simulation_begin_fn:
+                    self.run_before_simulation_begin_fn(self.simulation, self.log)
 
                 if showExplorer:
                     explorer = simulation_explorer.daeSimulationExplorer(self.app, simulation = self.simulation)
