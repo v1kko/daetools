@@ -158,7 +158,7 @@ def run_code_generators(simulation, log):
     # Demonstration of daetools code-generators:
     import tempfile
     tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-fmi-')
-    msg = 'Generated code (Modelica, gPROMS and FMU) will be located in: \n%s' % tmp_folder
+    msg = 'Generated code (Modelica, gPROMS and FMU) \nwill be located in: \n%s' % tmp_folder
     log.Message(msg, 0)
     
     try:

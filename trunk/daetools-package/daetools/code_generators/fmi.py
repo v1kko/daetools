@@ -273,10 +273,11 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         try:
             _source = os.path.join(daetools.fmi_sodir,    daetools_fmi_cs)
             _target = os.path.join(platform_binaries_dir, daetools_fmu_solib)
-            print('copy %s %s' % (_source, _target))
+            #print('copy %s %s' % (_source, _target))
             shutil.copy2(_source, _target)
+
         except Exception as e:
-            # Ignore exceptions, since some of binaries could be missing
+            # Ignore exceptions, since some of binaries are certainly not available
             pass
         
     def _addInput(self, fmi_obj):

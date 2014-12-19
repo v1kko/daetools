@@ -67,6 +67,9 @@ $PYTHON tutorial18.py console
 echo tutorial19.py
 $PYTHON tutorial19.py console
 
+echo tutorial20.py
+$PYTHON tutorial20.py console
+
 echo tutorial_dealii_1.py
 $PYTHON tutorial_dealii_1.py console
 

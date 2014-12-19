@@ -115,6 +115,7 @@ if platform.system() == 'Linux':
                     (usrlib,                    shared_libs)
                  ]
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
+    fmi_solibs = 'fmi/{0}/*.so'.format(platform_solib_dir)
 
 elif platform.system() == 'Windows':
     for f in shared_libs:
@@ -133,6 +134,7 @@ elif platform.system() == 'Windows':
                '{0}/*.pyd'.format(platform_solib_dir),
                '{0}/*.dll'.format(platform_solib_dir)
              ]
+    fmi_solibs = 'fmi/{0}/*.dll'.format(platform_solib_dir)
 
 elif platform.system() == 'Darwin':
     data_files = [
@@ -153,6 +155,7 @@ elif platform.system() == 'Darwin':
                  ]
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
+    fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)
 
 #print 'solibs = ', solibs
 
@@ -188,7 +191,7 @@ setup(name = 'daetools',
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
                        'daetools.dae_plotter':     ['images/*.png'],
-                       'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*', 'fmi/*daetools_fmi*.*'],
+                       'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*', fmi_solibs],
                        'daetools.dae_simulator':   ['images/*.png'],
                        'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
                      },

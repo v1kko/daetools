@@ -264,26 +264,29 @@ def consoleRun():
         [simulation.m.T, simulation.m.T]      # Subplot 2 (2 sets)
         )
 
-    # All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter
-    # classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class
-    # contains dictVariableValues property which represents a dictionary 'variable_name':(ndarr_times, ndarr_values)
-    # First print the contents of the abovementioned dictionary:
-    import pprint
-    pprint.pprint(simulation.dr1.Process.dictVariableValues)
+    try:
+        # All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter
+        # classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class
+        # contains dictVariableValues property which represents a dictionary 'variable_name':(ndarr_times, ndarr_values)
+        # First print the contents of the abovementioned dictionary:
+        import pprint
+        pprint.pprint(simulation.dr1.Process.dictVariableValues)
 
-    # Get the dictionary
-    dvals = simulation.dr1.Process.dictVariableValues
-    # Plot some variables
-    values,times,domains = dvals['tutorial8.T']
-    import matplotlib
-    matplotlib.pyplot.plot(times,values)
-    matplotlib.pyplot.show()
+        # Get the dictionary
+        dvals = simulation.dr1.Process.dictVariableValues
+        # Plot some variables
+        values,times,domains = dvals['tutorial8.T']
+        import matplotlib
+        matplotlib.pyplot.plot(times,values)
+        matplotlib.pyplot.show()
 
-    # Pandas dataset
-    print('pandas dataset')
-    print(simulation.dr9.data_frame)
-    print(simulation.dr9.data_frame['Value']['tutorial8.T'])
-
+        # Pandas dataset
+        print('pandas dataset')
+        print(simulation.dr9.data_frame)
+        print(simulation.dr9.data_frame['Value']['tutorial8.T'])
+    except Exception as e:
+        print(str(e))
+    
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
