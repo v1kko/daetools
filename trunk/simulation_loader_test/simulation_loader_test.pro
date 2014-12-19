@@ -4,8 +4,8 @@ CONFIG -= qt
 
 SOURCES += main.cpp
 
-LIBS += -ldaetools_fmi_cs-Linux_x86_64
-       #-lcdaeSimulationLoader
+LIBS += -lcdaeFMU_CS-py27
+       #-lcdaeSimulationLoader-py27
 
 QMAKE_LIBDIR += ../release
 

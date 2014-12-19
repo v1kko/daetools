@@ -55,4 +55,11 @@ solvers_sodir = os.path.join(daetools_dir, 'solvers', '{0}_{1}_py{2}{3}'.format(
                                                                                 python_version_minor))
 sys.path.append(solvers_sodir)
 
+# fmi platform-dependant extension modules directory
+fmi_sodir = os.path.join(daetools_dir, 'code_generators', 'fmi', '{0}_{1}_py{2}{3}'.format(daetools_system,
+                                                                                           daetools_machine,
+                                                                                           python_version_major,
+                                                                                           python_version_minor))
+sys.path.append(fmi_sodir)
+
 #print sys.path

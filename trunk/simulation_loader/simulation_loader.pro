@@ -6,7 +6,7 @@ QT -= gui
 TEMPLATE = lib
 CONFIG += shared
 
-TARGET  = cdaeSimulationLoader
+TARGET  = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
 SOURCES += dllmain.cpp \
            simulation_loader.cpp \
@@ -33,4 +33,4 @@ LIBS += $${BOOST_PYTHON_LIB} \
 
 QMAKE_POST_LINK = $${COPY_FILE} \
                   $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
-                  $${SOLIBS_DIR}/$${TARGET}.$${SHARED_LIB_APPEND}
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_APPEND}

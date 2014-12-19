@@ -306,7 +306,7 @@ class daeSimulationExplorer(QtGui.QDialog):
     def generateHTMLForm(simulation, htmlOutputFile, find_files_dir = '.'):
         # Create application in case there is not one already created
         if not QtGui.QApplication.instance():
-            app_ = QtGui.QApplication(['html'])
+            app_ = QtGui.QApplication(sys.argv)
 
         _inspector = daeSimulationInspector(simulation)
 
@@ -344,7 +344,7 @@ class daeSimulationExplorer(QtGui.QDialog):
         try:
             # Create application in case there is not one already created
             if not QtGui.QApplication.instance():
-                app_ = QtGui.QApplication(['json'])
+                app_ = QtGui.QApplication(sys.argv)
 
             _inspector = daeSimulationInspector(simulation)
 

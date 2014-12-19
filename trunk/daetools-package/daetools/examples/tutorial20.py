@@ -163,6 +163,8 @@ def run_code_generators(simulation, log):
     
     try:
         from PyQt4 import QtCore, QtGui
+        if not QtGui.QApplication.instance():
+            app_ = QtGui.QApplication(sys.argv)
         QtGui.QMessageBox.warning(None, "tutorial20", msg)
     except Exception as e:
         log.Message(str(e), 0)

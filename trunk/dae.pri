@@ -27,14 +27,14 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 # Build universal binaries for MAC OS-X
 # There is a problem with ppc64 under OSX 10.6 so it is excluded
 # Otherwise ppc64 should be added as well
-macx-g++::CONFIG += x86 x86_64
-macx-g++::QMAKE_CC  += llvm-gcc
-macx-g++::QMAKE_CXX += llvm-g++
+macx-g++::CONFIG    += x86 x86_64
+macx-g++::QMAKE_CC   = llvm-gcc
+macx-g++::QMAKE_CXX  = llvm-g++
 
-#win32-msvc2008::SHARED_LIB_EXT  = dll
-#win32-g++-*::SHARED_LIB_EXT     = dll
-#linux-g++::SHARED_LIB_EXT       = so
-#macx-g++::SHARED_LIB_EXT        = dylib
+win32-msvc2008::SHARED_LIB_EXT  = dll
+win32-g++-*::SHARED_LIB_EXT     = dll
+linux-g++::SHARED_LIB_EXT       = so
+macx-g++::SHARED_LIB_EXT        = dylib
 
 win32-msvc2008::SHARED_LIB_PREFIX   =
 win32-g++-*::SHARED_LIB_PREFIX      =
@@ -640,6 +640,8 @@ win32-msvc2008::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
 win32-msvc2008::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
 win32-msvc2008::DAE_PARDISO_SOLVER_LIB       = cdaePardiso_LASolver.lib
 win32-msvc2008::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
+win32-msvc2008::DAE_SIMULATION_LOADER_LIB    = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
+win32-msvc2008::DAE_DAETOOLS_FMI_CS_LIB      = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
 
 win32-g++-*::DAE_CORE_LIB                 = -lcdaeCore
 win32-g++-*::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
@@ -656,7 +658,8 @@ win32-g++-*::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
 win32-g++-*::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
 win32-g++-*::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 win32-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
-
+win32-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
 unix::DAE_CORE_LIB                 = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
@@ -673,6 +676,8 @@ unix::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
 unix::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
 unix::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 unix::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
+unix::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 
@@ -683,16 +688,19 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 SOLIBS_DIR   = ../daetools-package/solibs
 SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-FMI_DIR      = ../daetools-package/daetools/code_generators/fmi
+FMI_DIR      = ../daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
 win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\code_generators\fmi\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
 win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+win32-g++-*::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
 unix::DUMMY = $$system(mkdir -p daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 unix::DUMMY = $$system(mkdir -p daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
+unix::DUMMY = $$system(mkdir -p daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 
 STATIC_LIBS_DIR = ../daetools-package/daetools/usr/local/lib
 HEADERS_DIR     = ../daetools-package/daetools/usr/local/include

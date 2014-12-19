@@ -239,12 +239,14 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         # Copy libdaetools_fmi_cs-{platform}_{system}.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder
         if platform_system == 'Linux':
             so_ext = 'so'
+            shared_lib_prefix = 'lib'
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'linux64')
             else:
                 platform_binaries_dir = os.path.join(binaries_dir, 'linux32')
         elif platform_system == 'Windows':
             so_ext = 'dll'
+            shared_lib_prefix = ''
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'win64')
             else:
@@ -253,6 +255,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             platform_machine = 'win32'
         elif platform_system == 'Darwin':
             so_ext = 'dynlib'
+            shared_lib_prefix = 'lib'
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'darwin64')
             else:
@@ -263,11 +266,15 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             raise RuntimeError('Unsupported platform: %s' % platform_system)
 
         daetools_fmu_solib = '%s.%s' % (modelIdentifier, so_ext)
-        daetools_fmi_cs = 'daetools_fmi_cs-%s_%s.%s' % (platform_system, platform_machine, so_ext)
-        #print daetools_fmi_cs
+        daetools_fmi_cs = '%scdaeFMU_CS-py%s%s.%s' % (shared_lib_prefix,
+                                                      daetools.python_version_major,
+                                                      daetools.python_version_minor,
+                                                      so_ext)
         try:
-            shutil.copy2(os.path.join(daetools.daetools_dir, 'code_generators', 'fmi', daetools_fmi_cs),
-                         os.path.join(platform_binaries_dir, daetools_fmu_solib))
+            _source = os.path.join(daetools.fmi_sodir,    daetools_fmi_cs)
+            _target = os.path.join(platform_binaries_dir, daetools_fmu_solib)
+            print('copy %s %s' % (_source, _target))
+            shutil.copy2(_source, _target)
         except Exception as e:
             # Ignore exceptions, since some of binaries could be missing
             pass
