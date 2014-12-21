@@ -2,7 +2,10 @@ from lxml import etree
 
 def addAttribute(element, name, value, required = False):
     if value != None:
-        element.set(name, str(value))
+        if isinstance(value, bool):
+            element.set(name, 'true' if value else 'false')
+        else:
+            element.set(name, str(value))
     elif value == None and required:
         raise RuntimeError('Attribute [{0}] in [{1}] is required but not set'.format(name, element.tag))
   
@@ -103,12 +106,11 @@ class fmiModelDescription(fmiObject):
             addObject(fmi_root, self.CoSimulation, required = True)
             addObjects(fmi_root, 'UnitDefinitions', self.UnitDefinitions)
             addObjects(fmi_root, 'TypeDefinitions', self.TypeDefinitions)
+            addObjects(fmi_root, 'LogCategories',     self.LogCategories)
+            addObject(fmi_root, self.DefaultExperiment)
+            addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
             addObjects(fmi_root, 'ModelVariables',  self.ModelVariables, required = True)
             addObject(fmi_root, self.ModelStructure,required = True)
-
-            addObject(fmi_root, self.DefaultExperiment)
-            addObjects(fmi_root, 'LogCategories',     self.LogCategories)
-            addObjects(fmi_root, 'VendorAnnotations', self.VendorAnnotations)
 
         else:
             raise RuntimeError('Unsupported FMI version: %s' % self.fmiVersion)

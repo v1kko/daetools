@@ -4,7 +4,8 @@ QT -= core
 QT -= gui
 
 TEMPLATE = lib
-CONFIG += shared
+# Add "plugin" to avoid creation of symlinks
+CONFIG += shared plugin
 
 TARGET  = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
@@ -32,5 +33,5 @@ LIBS += $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS}
 
 QMAKE_POST_LINK = $${COPY_FILE} \
-                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
-                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_APPEND}
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT}

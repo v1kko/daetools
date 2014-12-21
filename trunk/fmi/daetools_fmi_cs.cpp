@@ -387,66 +387,82 @@ fmi2Status fmi2DoStep(fmi2Component comp,
 
     return fmi2OK;
 }
-/*
+
 fmi2Status fmi2CancelStep(fmi2Component comp)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
-*/
+
 /* Inquire slave status */
-/*
-fmi2Status fmi2GetStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Status* )
+fmi2Status fmi2GetStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Status* status)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
 
-fmi2Status fmi2GetRealStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Real* )
+fmi2Status fmi2GetRealStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Real* status)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
 
-fmi2Status fmi2GetIntegerStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Integer*)
+fmi2Status fmi2GetIntegerStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Integer* status)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
 
-fmi2Status fmi2GetBooleanStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Boolean*)
+fmi2Status fmi2GetBooleanStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2Boolean* status)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
 
-fmi2Status fmi2GetStringStatus(fmi2Component comp, const fmi2StatusKind, fmi2String* )
+fmi2Status fmi2GetStringStatus(fmi2Component comp, const fmi2StatusKind kind, fmi2String* status)
 {
     daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
     if(c == NULL)
         return fmi2Fatal;
 
-    return fmi2OK;
+    return fmi2Error;
 }
-*/
+
+fmi2Status fmi2SetRealInputDerivatives(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, const fmi2Integer order[], const fmi2Real value[])
+{
+    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
+    if(c == NULL)
+        return fmi2Fatal;
+
+    return fmi2Error;
+}
+
+fmi2Status fmi2GetRealOutputDerivatives(fmi2Component comp, const fmi2ValueReference vr[], size_t nvr, const fmi2Integer order[], fmi2Real value[])
+{
+    daeFMIComponent_t* c = (daeFMIComponent_t*)comp;
+    if(c == NULL)
+        return fmi2Fatal;
+
+    return fmi2Error;
+}
 
 /***************************************************
- *  daeFMIComponent_t
+       daeFMIComponent_t
 ***************************************************/
 daeFMIComponent_t::daeFMIComponent_t()
 {

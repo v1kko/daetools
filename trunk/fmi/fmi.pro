@@ -4,9 +4,12 @@ QT -= core
 QT -= gui
 
 TEMPLATE = lib
-CONFIG += shared
+# Add "plugin" to avoid creation of symlinks
+CONFIG += shared plugin
 
 TARGET = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+
+unix::QMAKE_CXXFLAGS += -fvisibility=hidden
 
 SOURCES += dllmain.cpp \
            daetools_fmi_cs.cpp
@@ -23,5 +26,5 @@ LIBS += $${DAE_SIMULATION_LOADER_LIB}
 QMAKE_LIBDIR += $${SOLIBS_DIR}
 
 QMAKE_POST_LINK = $${COPY_FILE} \
-                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
+                  $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
                   $${FMI_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT}

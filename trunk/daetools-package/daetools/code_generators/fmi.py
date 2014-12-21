@@ -287,7 +287,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityInput
         sv.variability    = fmiScalarVariable.variabilityContinuous # Set it to continuous (page 49 FMI-v2.0.pdf)
-        sv.initial        = fmiScalarVariable.initialExact
+        sv.initial        = None # It is not allowed to provide a value for initial if causality = "input" or "independent"
         sv.type           = fmiReal()
         sv.type.declaredType = fmi_obj.variable.VariableType.Name
         sv.type.start        = fmi_obj.variable.GetValue(list(fmi_obj.indexes))
@@ -332,8 +332,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.name           = str(fmi_obj.name) #*
         sv.valueReference = int(fmi_obj.reference) #*
         sv.description    = str(fmi_obj.description)
-        sv.causality      = fmiScalarVariable.causalityInput # If it is input then it can be changed by the simulator
-        sv.variability    = fmiScalarVariable.variabilityDiscrete
+        sv.causality      = fmiScalarVariable.causalityParameter # If it is input then it can be changed by the simulator
+        sv.variability    = fmiScalarVariable.variabilityTunable
         sv.initial        = fmiScalarVariable.initialExact
         sv.type           = fmiString()
         sv.type.start     = fmi_obj.stn.ActiveState
