@@ -1,6 +1,13 @@
 #include "math.h"
 #include "simulation_loader_c.h"
 
+/* In c90 bool is not a native type, and true/false are not defined
+#ifndef false
+#define false 0
+#define true  1
+#endif
+*/
+
 #define IS_PARAM_DOUBLE(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
                                !mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && mxIsDouble(pVal))
 

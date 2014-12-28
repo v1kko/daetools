@@ -2,7 +2,7 @@ MEX function
 ------------
 GNU Octave compile:
   cd mex
-  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader daetools_mex.c
+  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader-py27 daetools_mex.c
 
 Matlab compile:
   cd mex
@@ -31,13 +31,13 @@ Simulink S-function
 -------------------
 Simulink compile:
   cd mex
-  mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_s.c 
+  mex -v -I../simulation_loader -lcdaeSimulationLoader-py27 daetools_s.c 
 
 Running S-function:
   Add a new S-Function ('system') from the User-Defined Functions palette.
   Set its dialog box parameters:
     - S-Function name: daetools_s
-      (this is a compiled daetools_s.c file, resulting in, for instance, deatools.mexa64 binary)
+      (this is a compiled daetools_s.c file, resulting in, for instance, deatools_s.mexa64 binary)
     - S-Function parameters: see the description below
       example: '.../daetools/examples/tutorial20.py', 'create_simulation', ' ', 2, 2
     - S-Function modules: leave blank

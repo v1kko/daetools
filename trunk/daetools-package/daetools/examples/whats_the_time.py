@@ -27,8 +27,8 @@ a single variable (called 'time') and a single differential equation::
 This way, the value of the variable 'time' is equal to the elapsed time in the
 simulation at any moment.
 
-This tutorial presents the basic structure of the daeModel and the daeSimulation
-classes. A typical DAETools simulation requires the following 8 tasks:
+This tutorial presents the basic structure of daeModel and daeSimulation classes.
+A typical DAETools simulation requires the following 8 tasks:
 
 1. Importing DAE Tools pyDAE module(s)
 
@@ -169,7 +169,7 @@ class modTutorial(daeModel):
         about their units. Units of variables, parameters and domains are specified in their constructor while constants
         and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very
         strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.
-        However, it helps to eliminate some very hard to find errors and might save some NASA orbiters.
+        However, it helps eliminate some very hard to find errors and might save some NASA orbiters.
         'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following
         predefined units:
             - All base SI units: m, kg, s, A, K, cd, mol

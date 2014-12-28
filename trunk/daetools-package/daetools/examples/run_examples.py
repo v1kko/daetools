@@ -3,7 +3,7 @@
 ***********************************************************************************
                            run_examples.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2013
+                Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -78,6 +78,13 @@ except:
     # In case we are running the module on its own (i.e. as __main__)
     _examples_dir = realpath(dirname(sys.argv[0]))
 
+try:
+    # Try to get Firefox webbrowser instance
+    # If can't find it - get the default one
+    firefox = webbrowser.get('firefox')
+except:
+    firefox = webbrowser.get()
+
 class daeTextEditLog(daeStdOutLog):
     def __init__(self, TextEdit, App):
         daeStdOutLog.__init__(self)
@@ -149,19 +156,19 @@ class RunExamples(QtGui.QDialog):
             wv.setWindowTitle(title)
             wv.exec_()
         except Exception as e:
-            webbrowser.open_new_tab(simName + ".html")
+            firefox.open_new_tab(simName + ".html")
             
     #@QtCore.pyqtSlot()
     def slotShowModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
         url     = join(_examples_dir, simName + ".xml")
-        webbrowser.open_new_tab(url)
+        firefox.open_new_tab(url)
 
     #@QtCore.pyqtSlot()
     def slotShowRuntimeModelReport(self):
         simName = str(self.ui.comboBoxExample.currentText())
         url     = join(_examples_dir, simName + "-rt.xml")
-        webbrowser.open_new_tab(url)
+        firefox.open_new_tab(url)
 
     #@QtCore.pyqtSlot()
     def slotRunTutorial(self):
@@ -198,7 +205,7 @@ class RunExamples(QtGui.QDialog):
                 f, path = tempfile.mkstemp(suffix='.html', prefix='')
                 f.write(message)
                 f.close()
-                webbrowser.open_new_tab(path)
+                firefox.open_new_tab(path)
         except:
             sys.stdout = saveout
 

@@ -26,7 +26,7 @@ This is a simple example to test daetools support for:
 - FMI code-generator (for Co-Simulation)
 
 The model has two inlet and two outlet ports.
-The values of the outlets are equal to inputs multiplied by a multiplier:
+The values of the outlets are equal to inputs multiplied by a multiplier "m":
 
 .. code-block:: none
 
@@ -37,15 +37,15 @@ where multipliers m1 and m2[] are:
 
 .. code-block:: none
 
-  STN(Multipliers):
-    when 'Variable':
-        dm1/dt   = p1
-        dm2[]/dt = p2
-    when 'Constant':
-        dm1/dt   = 0
-        dm2[]/dt = 0
+  STN('Multipliers'):
+      when 'variableMultipliers':
+          dm1/dt   = p1
+          dm2[]/dt = p2
+      when 'constantMultipliers':
+          dm1/dt   = 0
+          dm2[]/dt = 0
         
-(that is the multipliesr can be constant or variable).
+(that is the multipliers can be constant or variable).
 
 The ports in1 and out1 are scalar (width = 1).
 The ports in2 and out2 are vectors (width = 1).

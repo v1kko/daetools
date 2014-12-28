@@ -26,13 +26,13 @@ if getos() <> 'Windows' then
   if part(getenv('OSTYPE','no'),1:6)=='darwin' then 
 	  cflags = ""
 	  fflags = ""; 
-	  ldflags= "  -lcdaeSimulationLoader -ldl "; 
+	  ldflags= "  -lcdaeSimulationLoader-py27 -ldl "; 
 	  cc = "g++";
   else 
     // Since linking is done by gcc and not g++
     // we must add the libstdc++ to cflags
     // an other possibility would be to use cflags="" and cc="
-    cflags = " -lstdc++ -I~/Data/daetools/trunk/simulation_loader -lcdaeSimulationLoader -ldl"
+    cflags = " -lstdc++ -I~/Data/daetools/trunk/simulation_loader -lcdaeSimulationLoader-py27 -ldl"
     fflags = ""; 
     ldflags= ""; 
     cc="";

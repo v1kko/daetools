@@ -210,6 +210,9 @@ for i; do
   esac
 done
 
+PYTHON_MAJOR=`$PYTHON -c "import sys; print(sys.version_info[0])"`
+PYTHON_MINOR=`$PYTHON -c "import sys; print(sys.version_info[1])"`
+
 # Check if any project is specified
 if [ -z "$@" ]; then
   usage
@@ -249,8 +252,9 @@ done
 echo ""
 echo "###############################################################################"
 echo "Proceed with the following options:"
-echo "  - Qmake-spec:           ${QMAKE_SPEC}"
-echo "  - Python:               ${PYTHON}"
+echo "  - QMAKE-SPEC:           ${QMAKE_SPEC}"
+echo "  - Python binary:        ${PYTHON}"
+echo "  - Python version:       ${PYTHON_MAJOR}.${PYTHON_MINOR}"
 echo "  - Platform:             $PLATFORM"
 echo "  - Architecture:         $HOST_ARCH"
 echo "  - Number of threads:    ${Ncpu}"
