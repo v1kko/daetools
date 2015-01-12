@@ -16,7 +16,7 @@ About DAE Tools
 
 .. begin-command
 
-**DAE Tools** is a free/open-source cross-platform equation-based and object-oriented process
+**DAE Tools** is a cross-platform equation-based and object-oriented process
 modelling and optimization software. It is not a modelling language nor a collection of numerical
 libraries but rather a higher level structure – an architectural design of interdependent
 software components providing an API for:
@@ -90,15 +90,15 @@ Type of activities that can be performed on models developed in **DAE Tools**:
 * Simulation in other simulators using standard co-simulation interfaces
 
   * `Functional Mockup Interface (FMI) for Co-Simulation <https://www.fmi-standard.org>`_
-  * `Matlab MEX-functions <www.mathworks.com/help/matlab/matlab_external/introducing-mex-files.html>`_
-  * `Simulink user-defined S-functions <www.mathworks.com/help/simulink/sfg/what-is-an-s-function.html>`_
+  * `Matlab MEX-functions <http://www.mathworks.com/help/matlab/matlab_external/introducing-mex-files.html>`_
+  * `Simulink user-defined S-functions <http://www.mathworks.com/help/simulink/sfg/what-is-an-s-function.html>`_
 
 * Export of the simulation results to various file formats:
 
   * `Matlab MAT (.mat) <http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf>`_
   * `Microsoft Excel (.xls) <http://office.microsoft.com/en-gb/excel>`_
   * `JSON (.json) <http://www.json.org>`_
-  * `XML (.xml) <www.w3.org/XML>`_
+  * `XML (.xml) <http://www.w3.org/XML>`_
   * `Hierarchical Data Format (.hdf5) <http://www.hdfgroup.org/HDF5>`_
   * `Pandas (Python Data Analysis) data sets <http://pandas.pydata.org>`_
 

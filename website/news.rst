@@ -15,7 +15,7 @@ News
 
 .. end-command
 
-v1.4.0, 22.12.2014.
+v1.4.0, 28.12.2014.
 -------------------
 
 - Code generators for Modelica, gPROMS and c99.

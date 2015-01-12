@@ -141,6 +141,14 @@ Easy way
 Install one of scientific python distributions:
     
 * Anaconda `<https://store.continuum.io/cshop/anaconda>`_
+* Miniconda `<http://conda.pydata.org/miniconda.html>`_
+
+  Install dependencies using:
+      
+  .. code-block:: bash
+
+    conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
+  
 * Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
 
 By hand
@@ -170,6 +178,14 @@ Easy way
 Install one of available scientific python distributions:
     
 * Anaconda `<https://store.continuum.io/cshop/anaconda>`_
+* Miniconda `<http://conda.pydata.org/miniconda.html>`_
+  
+  Install dependencies using:
+
+  .. code-block:: bash
+
+    conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
+  
 * Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
 * Python(x,y) `<http://www.pythonxy.com>`_
 

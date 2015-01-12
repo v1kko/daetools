@@ -2,7 +2,7 @@
 DAE Tools Project
 *****************
 ..
-    Copyright (C) Dragan Nikolic, 2013
+    Copyright (C) Dragan Nikolic, 2014
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -42,7 +42,7 @@ can be found in :doc:`docs/getting_daetools`.
 
 News
 ====
-The new 1.4.0 version is released on 22 December 2014. It contains a large number of important features and bug fixes.
+The new 1.4.0 version is released on 28 December 2014. It contains a large number of important features and bug fixes.
 
 The most important new features:
     
