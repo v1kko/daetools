@@ -165,9 +165,14 @@ class modTutorial(daeModel):
         # Also DomainBounds argument can be a list (an array) of points within a domain, for example: x: {0, 3, 4, 6, 8, 10}
         # Since our heat balance equation should exclude the top, bottom, left and right edges,
         # it is distributed on the open x and y domains, thus we use the eOpenOpen flag:
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        # In this example we use the default center-finite difference method (eCFDM) of 2nd order
+        # to discretize the domains x and y. Other available methods are:
+        #  - eBFDM: backward-finite difference method,
+        #  - eFFDM: forward-finite difference method
+        #  - eUpwindCCFV: cell-centered finite-volume method with flux limiter
         eq.Residual = self.ro() * self.cp() * self.T.dt(x, y) - self.k() * \
                      (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
 
@@ -204,17 +209,14 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
-        # In this example we use the center-finite difference method (CFDM) of 2nd order to discretize the domains x and y.
-        # The function CreateDistributed can be used to create a distributed domain. It accepts 5 arguments:
-        # - DiscretizationMethod: can be eBFDM (backward-), BFDM (forward) and eCFDM (center) finite difference method
-        # - Order: currently only 2nd order is implemented
-        # - NoIntervals: 25
-        # - LowerBound: 0
-        # - UpperBound: 0.1
-        # Here we use 25 intervals. In general any number of intervals can be used. However, the computational costs become
-        # prohibitive at the very high number (especially if dense linear solvers are used).
-        self.m.x.CreateStructuredGrid(eCFDM, 2, 10, 0, 0.1)
-        self.m.y.CreateStructuredGrid(eCFDM, 2, 10, 0, 0.1)
+        # The function CreateStructuredGrid can be used to create a structured grid. It accepts 3 arguments:
+        #  - NoIntervals: integer
+        #  - LowerBound:  float
+        #  - UpperBound:  float
+        # Here we create 2D structured gird with 10x10 intervals in x and y domains
+        # (resulting in 11x11 points in both directions).
+        self.m.x.CreateStructuredGrid(10, 0, 0.1)
+        self.m.y.CreateStructuredGrid(10, 0, 0.1)
 
         # Parameter values can be set by using a function SetValue.
         self.m.k.SetValue(401 * W/(m*K))

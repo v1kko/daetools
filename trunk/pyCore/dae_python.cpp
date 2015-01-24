@@ -43,7 +43,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eCFDM",			dae::core::eCFDM)
         .value("eFFDM",			dae::core::eFFDM)
         .value("eBFDM",			dae::core::eBFDM)
-        .value("eCustomDM",		dae::core::eCustomDM)
+        .value("eUpwindCCFV",	dae::core::eUpwindCCFV)
         .export_values()
         ;
 
@@ -360,13 +360,13 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adSetupTimeDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupTimeDerivativeNode", no_init)
-        .def_readonly("Order",          &adSetupTimeDerivativeNode::m_nDegree)
+        .def_readonly("Order",          &adSetupTimeDerivativeNode::m_nOrder)
         .add_property("Variable",       make_function(&daepython::adSetupTimeDerivativeNode_Variable, return_internal_reference<>()))
         .add_property("DomainIndexes",	&daepython::adSetupTimeDerivativeNode_Domains)
     ;
 
     class_<adSetupPartialDerivativeNode, bases<adNode>, boost::noncopyable>("adSetupPartialDerivativeNode", no_init)
-        .def_readonly("Order",          &adSetupPartialDerivativeNode::m_nDegree)
+        .def_readonly("Order",          &adSetupPartialDerivativeNode::m_nOrder)
         .add_property("Variable",       make_function(&daepython::adSetupPartialDerivativeNode_Variable, return_internal_reference<>()))
         .add_property("Domain",         make_function(&daepython::adSetupPartialDerivativeNode_Domain,   return_internal_reference<>()))
         .add_property("DomainIndexes",	&daepython::adSetupPartialDerivativeNode_Domains)
@@ -427,7 +427,7 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adRuntimeTimeDerivativeNode, bases<adNode>, boost::noncopyable>("adRuntimeTimeDerivativeNode", no_init)
-        .def_readonly("Order",          &adRuntimeTimeDerivativeNode::m_nDegree)
+        .def_readonly("Order",          &adRuntimeTimeDerivativeNode::m_nOrder)
         .def_readonly("OverallIndex",   &adRuntimeTimeDerivativeNode::m_nOverallIndex)
         .def_readonly("BlockIndex",     &adRuntimeTimeDerivativeNode::m_nBlockIndex)
         .add_property("Variable",       make_function(&daepython::adRuntimeTimeDerivativeNode_Variable, return_internal_reference<>()))
@@ -634,7 +634,12 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Max",   &daepython::ad_max3);
 
     def("dt",	 &daepython::ad_dt, (arg("ad")), DOCSTR_dt);
-    def("d",	 &daepython::ad_d,  (arg("ad")), DOCSTR_d);
+
+    def("d",	 &daepython::ad_d,  (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM,
+                                     arg("options") = boost::python::dict()), DOCSTR_d);
+
+    def("d2",    &daepython::ad_d2, (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM,
+                                     arg("options") = boost::python::dict()), DOCSTR_d2);
 
     def("Time",             &Time,                                           DOCSTR_Time);
     def("Constant",         &daepython::ad_Constant_c,      (arg("value")),  DOCSTR_Constant_c);
@@ -724,6 +729,12 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Min",		 &daepython::adarr_min,      (arg("adarray")), DOCSTR_Min_adarr);
     def("Max",		 &daepython::adarr_max,      (arg("adarray")), DOCSTR_Max_adarr);
     def("Average",	 &daepython::adarr_average,  (arg("adarray")), DOCSTR_Average);
+
+    def("dt_array",	 &daepython::ad_dt_array,    (arg("adarr")), DOCSTR_dt_array);
+    def("d_array",	 &daepython::ad_d_array,     (arg("adarr"), arg("domain"),
+                                                  arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d_array);
+    def("d2_array",	 &daepython::ad_d2_array,    (arg("adarr"), arg("domain"),
+                                                  arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2_array);
 
     class_<daeVariableType>("daeVariableType", DOCSTR_daeVariableType, no_init)
         .def(init<string, unit, real_t, real_t, real_t, real_t>( ( arg("self"),
@@ -848,8 +859,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Type",					&daeDomain::GetType,                DOCSTR_daeDomain_Type)
         .add_property("NumberOfIntervals",		&daeDomain::GetNumberOfIntervals,   DOCSTR_daeDomain_NumberOfIntervals)
         .add_property("NumberOfPoints",			&daeDomain::GetNumberOfPoints,      DOCSTR_daeDomain_NumberOfPoints)
-        .add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod,DOCSTR_daeDomain_DiscretizationMethod)
-        .add_property("DiscretizationOrder",	&daeDomain::GetDiscretizationOrder, DOCSTR_daeDomain_DiscretizationOrder)
+        //.add_property("DiscretizationMethod",	&daeDomain::GetDiscretizationMethod,DOCSTR_daeDomain_DiscretizationMethod)
+        //.add_property("DiscretizationOrder",	&daeDomain::GetDiscretizationOrder, DOCSTR_daeDomain_DiscretizationOrder)
         .add_property("LowerBound",				&daeDomain::GetLowerBound,          DOCSTR_daeDomain_LowerBound)
         .add_property("UpperBound",				&daeDomain::GetUpperBound,          DOCSTR_daeDomain_UpperBound)
         .add_property("Units",					&daeDomain::GetUnits,               DOCSTR_daeDomain_Units)
@@ -863,17 +874,15 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("CreateArray",						&daeDomain::CreateArray, ( arg("self"),
                                                                            arg("noPoints")
                                                                          ), DOCSTR_daeDomain_CreateArray)
-        // CreateDistributed is deprecated; CreateStructuredGrid should be used instead
+        // CreateStructuredGrid that sets discr.method and order is deprecated; use new CreateStructuredGrid instead
+        .def("CreateStructuredGrid",			&daepython::CreateStructuredGrid_old, ( arg("self"),
+                                                                                        arg("dicretizationMethod"),
+                                                                                        arg("dicretizationOrder"),
+                                                                                        arg("numberOfIntervals"),
+                                                                                        arg("lowerBound"),
+                                                                                        arg("upperBound")
+                                                                                      ), DOCSTR_daeDomain_CreateStructuredGrid)
         .def("CreateStructuredGrid",			&daeDomain::CreateStructuredGrid, ( arg("self"),
-                                                                                    arg("discretizationMethod"),
-                                                                                    arg("discretizationOrder"),
-                                                                                    arg("numberOfIntervals"),
-                                                                                    arg("lowerBound"),
-                                                                                    arg("upperBound")
-                                                                                  ), DOCSTR_daeDomain_CreateStructuredGrid)
-        .def("CreateDistributed",				&daeDomain::CreateStructuredGrid, ( arg("self"),
-                                                                                    arg("discretizationMethod"),
-                                                                                    arg("discretizationOrder"),
                                                                                     arg("numberOfIntervals"),
                                                                                     arg("lowerBound"),
                                                                                     arg("upperBound")

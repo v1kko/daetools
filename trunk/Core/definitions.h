@@ -382,6 +382,7 @@ static const string  exXMLIOError			= "XML IO error";
 static const string  exDataReportingError	= "Data reporting error";
 static const string  exRuntimeCheck			= "Runtime Check";
 static const string  exNotImplemented		= "Not implemented";
+static const string  exDeprecated   		= "Deprecated";
 
 #define daeDeclareException(TYPE)	          dae::daeException e(std::string(TYPE), std::string(__FUNCTION__), std::string(__FILE__), __LINE__);
 #define daeDeclareAndThrowException(TYPE)	{ dae::daeException e(std::string(TYPE), std::string(__FUNCTION__), std::string(__FILE__), __LINE__); throw e; }

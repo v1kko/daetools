@@ -190,7 +190,15 @@ public:
     adouble& operator /=(const real_t v);
 
     friend DAE_CORE_API const adouble dt(const adouble& a);
-    friend DAE_CORE_API const adouble d(const adouble& a, daeDomain& domain);
+
+    friend DAE_CORE_API const adouble d(const adouble&                            a,
+                                        daeDomain&                                domain,
+                                        daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                        const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
+    friend DAE_CORE_API const adouble d2(const adouble&                            a,
+                                         daeDomain&                                domain,
+                                         daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                         const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
 
     friend DAE_CORE_API const adouble exp(const adouble &a);
     friend DAE_CORE_API const adouble log(const adouble &a);
@@ -404,6 +412,16 @@ DAE_CORE_API const adouble_array operator +(const adouble& a, const adouble_arra
 DAE_CORE_API const adouble_array operator -(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator *(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator /(const adouble& a, const adouble_array& arr);
+
+DAE_CORE_API const adouble_array dt_array(const adouble_array& adarr);
+DAE_CORE_API const adouble_array d_array(const adouble_array&                      adarr,
+                                         daeDomain&                                domain,
+                                         daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                         const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
+DAE_CORE_API const adouble_array d2_array(const adouble_array&                      adarr,
+                                          daeDomain&                                domain,
+                                          daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                          const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
 
 DAE_CORE_API const adouble Sum(const adouble_array& a, bool bIsLargeArray = false);
 DAE_CORE_API const adouble Product(const adouble_array& a, bool bIsLargeArray = false);

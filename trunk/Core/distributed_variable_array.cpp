@@ -244,11 +244,17 @@ void daeVariable::Fill_dt_array(vector<adouble>& arrValues, const daeArrayRange*
 	}
 }
 
-void daeVariable::Fill_partial_array(vector<adouble>& arrValues, size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const
+void daeVariable::Fill_partial_array(vector<adouble>& arrValues,
+                                     size_t nOrder,
+                                     const daeDomain_t& rDomain,
+                                     const daeArrayRange* ranges, size_t* indexes,
+                                     const size_t N, size_t currentN,
+                                     daeeDiscretizationMethod  eDiscretizationMethod,
+                                     const std::map<std::string, std::string>& mapDiscretizationOptions) const
 {
 	if(currentN == N) // create and add adouble to the vector
 	{
-		dae_push_back(arrValues, partial(nOrder, rDomain, indexes, N));
+        dae_push_back(arrValues, partial(nOrder, rDomain, indexes, N, eDiscretizationMethod, mapDiscretizationOptions));
 	}
 	else // continue iterating
 	{
@@ -261,7 +267,7 @@ void daeVariable::Fill_partial_array(vector<adouble>& arrValues, size_t nOrder, 
 		for(size_t i = 0; i < narrPoints.size(); i++)
 		{
 			indexes[currentN] = narrPoints[i]; // Wasn't it bug below??? It should be narrPoints[i] !!
-			Fill_partial_array(arrValues, nOrder, rDomain, ranges, indexes, N, currentN + 1);
+            Fill_partial_array(arrValues, nOrder, rDomain, ranges, indexes, N, currentN + 1, eDiscretizationMethod, mapDiscretizationOptions);
 		}
 		
 //		if(r.m_eType == eRangeConstantIndex)
@@ -345,7 +351,7 @@ adouble_array daeVariable::Calculate_dt_array(const daeArrayRange* ranges, const
 //		varArray.node = adNodeArrayPtr(node);
 //		varArray.setGatherInfo(true);
 //		node->m_pVariable = const_cast<daeVariable*>(this);
-//		node->m_nDegree   = 1;
+//		node->m_nOrder   = 1;
 //		
 //		size_t size = varArray.m_arrValues.size();
 //		if(size == 0)
@@ -362,7 +368,12 @@ adouble_array daeVariable::Calculate_dt_array(const daeArrayRange* ranges, const
     return varArray;
 }
 
-adouble_array daeVariable::partial_array(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const
+adouble_array daeVariable::partial_array(const size_t nOrder,
+                                         const daeDomain_t& rDomain,
+                                         const daeArrayRange* ranges,
+                                         const size_t N,
+                                         const daeeDiscretizationMethod  eDiscretizationMethod,
+                                         const std::map<std::string, std::string>& mapDiscretizationOptions) const
 {
 	if(!m_pModel)
 		daeDeclareAndThrowException(exInvalidPointer); 
@@ -371,7 +382,7 @@ adouble_array daeVariable::partial_array(const size_t nOrder, const daeDomain_t&
 
 	adouble_array varArray;
 	size_t* indexes = new size_t[N];
-	Fill_partial_array(varArray.m_arrValues, nOrder, rDomain, ranges, indexes, N, 0);
+    Fill_partial_array(varArray.m_arrValues, nOrder, rDomain, ranges, indexes, N, 0, eDiscretizationMethod, mapDiscretizationOptions);
 	delete[] indexes;
 
 //	if(m_pModel->m_pDataProxy->GetGatherInfo())
@@ -382,7 +393,7 @@ adouble_array daeVariable::partial_array(const size_t nOrder, const daeDomain_t&
 //		node->m_pVariable = const_cast<daeVariable*>(this);
 //		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&rDomain);
 //		node->m_pDomain = const_cast<daeDomain*>(pDomain);
-//		node->m_nDegree = nOrder;
+//		node->m_nOrder = nOrder;
 //		
 //		size_t size = varArray.m_arrValues.size();
 //		if(size == 0)
@@ -535,7 +546,7 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 	varArray.node = adNodeArrayPtr(node);
 	varArray.setGatherInfo(true);
 
-	node->m_nDegree = 1;
+    node->m_nOrder = 1;
 	node->m_pVariable = const_cast<daeVariable*>(this);
 	node->m_arrRanges.resize(N);
 	for(size_t i = 0; i < N; i++)
@@ -544,7 +555,12 @@ adouble_array daeVariable::CreateSetupTimeDerivativeArray(const daeArrayRange* r
 	return varArray;
 }
 
-adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const
+adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder,
+                                                             const daeDomain_t& rDomain,
+                                                             const daeArrayRange* ranges,
+                                                             const size_t N,
+                                                             const daeeDiscretizationMethod  eDiscretizationMethod,
+                                                             const std::map<std::string, std::string>& mapDiscretizationOptions) const
 {
 	adouble_array varArray;
 
@@ -608,13 +624,15 @@ adouble_array daeVariable::CreateSetupPartialDerivativeArray(const size_t nOrder
 	varArray.node = adNodeArrayPtr(node);
 	varArray.setGatherInfo(true);
 
-	node->m_nDegree = nOrder;
+    node->m_nOrder = nOrder;
 	node->m_pVariable = const_cast<daeVariable*>(this);
 	const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&rDomain);
 	node->m_pDomain = const_cast<daeDomain*>(pDomain);
 	node->m_arrRanges.resize(N);
 	for(size_t i = 0; i < N; i++)
 		node->m_arrRanges[i] = ranges[i];
+    node->m_eDiscretizationMethod = eDiscretizationMethod;
+    node->m_mapDiscretizationOptions = mapDiscretizationOptions;
 
 	return varArray;
 }
@@ -930,7 +948,7 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		adRuntimeTimeDerivativeNode* node = new adRuntimeTimeDerivativeNode();
 		node->m_pVariable = const_cast<daeVariable*>(this);
 		node->m_nOverallIndex = nIndex;
-		node->m_nDegree = 1;
+        node->m_nOrder = 1;
 		if(N > 0)
 		{
 			node->m_narrDomains.resize(N);
@@ -990,7 +1008,7 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 	adouble tmp;
 	adSetupTimeDerivativeNode* node = new adSetupTimeDerivativeNode();
 	node->m_pVariable = const_cast<daeVariable*>(this);
-	node->m_nDegree = 1;
+    node->m_nOrder = 1;
 
 	if(N > 0)
 	{
@@ -1003,7 +1021,12 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 	return tmp;
 }
 
-adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const size_t* indexes, const size_t N) const
+adouble daeVariable::partial(const size_t nOrder,
+                             const daeDomain_t& D,
+                             const size_t* indexes,
+                             const size_t N,
+                             const daeeDiscretizationMethod  eDiscretizationMethod,
+                             const std::map<std::string, std::string>& mapDiscretizationOptions) const
 {
 	adouble tmp;
 	vector<adouble> V;
@@ -1054,8 +1077,8 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 	if(!pDomain)
 		daeDeclareAndThrowException(exInvalidPointer);
 
-	daePartialDerivativeVariable pdv(nOrder, *this, *pDomain, nFixedDomain, N, indexes);
-	tmp = pDomain->partial(pdv);
+    daePartialDerivativeVariable pdv(nOrder, *this, *pDomain, nFixedDomain, N, indexes, eDiscretizationMethod, mapDiscretizationOptions);
+    tmp = pdv.CreateSetupNode();
 
 //	if(m_pModel->m_pDataProxy->GetGatherInfo())
 //	{
@@ -1065,7 +1088,7 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 //		const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&D);
 //		node->m_pDomain = const_cast<daeDomain*>(pDomain);
 //		node->m_pVariable = const_cast<daeVariable*>(this);
-//		node->m_nDegree = nOrder;
+//		node->m_nOrder = nOrder;
 //		if(N > 0)
 //		{
 //			node->m_narrDomains.resize(N);
@@ -1079,7 +1102,12 @@ adouble daeVariable::partial(const size_t nOrder, const daeDomain_t& D, const si
 	return tmp;
 }
 
-adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder, const daeDomain_t& D, const daeDomainIndex* indexes, const size_t N) const
+adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder,
+                                                  const daeDomain_t& D,
+                                                  const daeDomainIndex* indexes,
+                                                  const size_t N,
+                                                  const daeeDiscretizationMethod  eDiscretizationMethod,
+                                                  const std::map<std::string, std::string>& mapDiscretizationOptions) const
 {
 	if(m_ptrDomains.size() != N)
 	{	
@@ -1128,7 +1156,9 @@ adouble daeVariable::CreateSetupPartialDerivative(const size_t nOrder, const dae
 	const daeDomain* pDomain = dynamic_cast<const daeDomain*>(&D);
 	node->m_pDomain = const_cast<daeDomain*>(pDomain);
 	node->m_pVariable = const_cast<daeVariable*>(this);
-	node->m_nDegree = nOrder;
+    node->m_nOrder = nOrder;
+    node->m_eDiscretizationMethod = eDiscretizationMethod;
+    node->m_mapDiscretizationOptions = mapDiscretizationOptions;
 
 	if(N > 0)
 	{

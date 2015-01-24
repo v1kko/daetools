@@ -146,7 +146,7 @@ class simTutorial(daeSimulation):
         self.m = modelMoC("tutorial18")
 
     def SetUpParametersAndDomains(self):
-        self.m.L.CreateStructuredGrid(eCFDM, 2, 200, 0, 100)
+        self.m.L.CreateStructuredGrid(200, 0, 100)
 
     def SetUpVariables(self):
         # Initial conditions

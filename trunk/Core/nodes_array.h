@@ -210,7 +210,7 @@ public:
 public:
 // Runtime part
 	std::vector< adNodePtr >	m_ptrarrTimeDerivativeNodes;
-	size_t								m_nDegree;
+    size_t								m_nDegree;
 // Report/GUI part
 	daeVariable*						m_pVariable;
 	std::vector<daeArrayRange>				m_arrRanges;
@@ -422,70 +422,6 @@ public:
 	adNodeArrayPtr              node;
 	daeeSpecialUnaryFunctions	eFunction;
     bool                        m_bIsLargeArray;
-};
-
-/*********************************************************************************************
-	adSetupExpressionDerivativeNode
-**********************************************************************************************/
-class DAE_CORE_API adSetupExpressionDerivativeNode : public adNodeImpl
-{
-public:
-	daeDeclareDynamicClass(adSetupExpressionDerivativeNode)
-	adSetupExpressionDerivativeNode(void);
-	adSetupExpressionDerivativeNode(adNodePtr n);
-	virtual ~adSetupExpressionDerivativeNode(void);
-
-public:
-	virtual adouble	Evaluate(const daeExecutionContext* pExecutionContext) const;
-	virtual adNode*	Clone(void) const;
-	virtual void	Open(io::xmlTag_t* pTag);
-	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-	virtual const quantity GetQuantity(void) const;
-    virtual bool    IsDifferential(void) const;
-
-protected:
-	adNodePtr calc_dt(adNodePtr n, const daeExecutionContext* pExecutionContext) const;
-	
-public:
-	adNodePtr	node;
-	size_t		m_nDegree;
-};
-
-/*********************************************************************************************
-	adSetupExpressionPartialDerivativeNode
-**********************************************************************************************/
-class DAE_CORE_API adSetupExpressionPartialDerivativeNode : public adNodeImpl
-{
-public:
-	daeDeclareDynamicClass(adSetupExpressionPartialDerivativeNode)
-	adSetupExpressionPartialDerivativeNode(void);
-	adSetupExpressionPartialDerivativeNode(daeDomain* pDomain, adNodePtr n);
-	virtual ~adSetupExpressionPartialDerivativeNode(void);
-
-public:
-	virtual adouble	Evaluate(const daeExecutionContext* pExecutionContext) const;
-	virtual adNode*	Clone(void) const;
-	virtual void	Open(io::xmlTag_t* pTag);
-	virtual void	Save(io::xmlTag_t* pTag) const;
-	virtual string	SaveAsLatex(const daeNodeSaveAsContext* c) const;
-	virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-	virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
-	virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
-	virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
-	virtual const quantity GetQuantity(void) const;
-
-protected:
-	adNodePtr calc_d(adNodePtr n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const;
-	
-public:
-	daeDomain*	m_pDomain;
-	adNodePtr	node;
-	size_t		m_nDegree;
 };
 
 /*********************************************************************************************
@@ -716,7 +652,7 @@ public:
 	daeDeclareDynamicClass(adSetupTimeDerivativeNodeArray)
 	adSetupTimeDerivativeNodeArray(void);
 	adSetupTimeDerivativeNodeArray(daeVariable* pVariable, 
-	                               size_t nDegree,
+                                   size_t nOrder,
 							       std::vector<daeArrayRange>& arrRanges);
 	virtual ~adSetupTimeDerivativeNodeArray(void);
 
@@ -737,7 +673,7 @@ public:
 
 public:
 	daeVariable*                m_pVariable;
-	size_t                      m_nDegree;
+    size_t                      m_nOrder;
 	std::vector<daeArrayRange>	m_arrRanges;
 };
 
@@ -750,9 +686,11 @@ public:
 	daeDeclareDynamicClass(adSetupPartialDerivativeNodeArray)
 	adSetupPartialDerivativeNodeArray(void);
 	adSetupPartialDerivativeNodeArray(daeVariable* pVariable, 
-	                                  size_t nDegree, 
+                                      size_t nOrder,
 								      std::vector<daeArrayRange>& arrRanges,
-								      daeDomain* pDomain);
+                                      daeDomain* pDomain,
+                                      const daeeDiscretizationMethod  eDiscretizationMethod,
+                                      const std::map<std::string, std::string>& mapDiscretizationOptions);
 	virtual ~adSetupPartialDerivativeNodeArray(void);
 
 public:
@@ -770,12 +708,13 @@ public:
 	virtual const quantity	GetQuantity(void) const;
 
 public:
-	daeVariable*                m_pVariable;
-	daeDomain*                  m_pDomain;
-	size_t                      m_nDegree;
-	std::vector<daeArrayRange>	m_arrRanges;
+    daeVariable*                        m_pVariable;
+    daeDomain*                          m_pDomain;
+    size_t                              m_nOrder;
+    std::vector<daeArrayRange>          m_arrRanges;
+    daeeDiscretizationMethod            m_eDiscretizationMethod;
+    std::map<std::string, std::string>  m_mapDiscretizationOptions;
 };
-
 
 /*********************************************************************************************
 	adVectorExternalFunctionNode

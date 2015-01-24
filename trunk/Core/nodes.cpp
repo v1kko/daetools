@@ -1603,10 +1603,10 @@ bool adRuntimeVariableNode::IsFunctionOfVariables(void) const
 **********************************************************************************************/
 adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(daeVariable* pVariable, 
 														 size_t nOverallIndex, 
-														 size_t nDegree, 
+                                                         size_t nOrder,
 														 vector<size_t>& narrDomains)
                : m_nOverallIndex(nOverallIndex), 
-				 m_nDegree(nDegree), 
+                 m_nOrder(nOrder),
 				 m_pVariable(pVariable),
 				 m_narrDomains(narrDomains)
 {
@@ -1617,7 +1617,7 @@ adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(daeVariable* pVariable,
 adRuntimeTimeDerivativeNode::adRuntimeTimeDerivativeNode(void)
 {	
 	m_pVariable        = NULL;
-	m_nDegree          = 0;
+    m_nOrder           = 0;
 	m_nOverallIndex    = ULONG_MAX;
 	m_nBlockIndex      = ULONG_MAX;
 	m_pdTimeDerivative = NULL;
@@ -1720,7 +1720,7 @@ void adRuntimeTimeDerivativeNode::Export(std::string& strContent, daeeModelLangu
 //		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 //
 //	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-//	return textCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+//	return textCreator::TimeDerivative(m_nOrder, strName, strarrIndexes);
 //}
 
 string adRuntimeTimeDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
@@ -1730,7 +1730,7 @@ string adRuntimeTimeDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c) c
 		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 
 	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	return latexCreator::TimeDerivative(m_nDegree, strName, strarrIndexes);
+    return latexCreator::TimeDerivative(m_nOrder, strName, strarrIndexes);
 }
 
 void adRuntimeTimeDerivativeNode::Open(io::xmlTag_t* pTag)
@@ -1741,7 +1741,7 @@ void adRuntimeTimeDerivativeNode::Open(io::xmlTag_t* pTag)
 	//pTag->Open(strName, m_pVariable->GetName());
 
 	strName = "Degree";
-	pTag->Open(strName, m_nDegree);
+    pTag->Open(strName, m_nOrder);
 
 	strName = "OverallIndex";
 	pTag->Open(strName, m_nOverallIndex);
@@ -1761,7 +1761,7 @@ void adRuntimeTimeDerivativeNode::Save(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_pVariable->GetName());
 
 	strName = "Degree";
-	pTag->Save(strName, m_nDegree);
+    pTag->Save(strName, m_nOrder);
 
 	strName = "OverallIndex";
 	pTag->Save(strName, m_nOverallIndex);
@@ -1780,7 +1780,7 @@ void adRuntimeTimeDerivativeNode::SaveAsContentMathML(io::xmlTag_t* pTag, const 
 		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 
 	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	xmlContentCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
+    xmlContentCreator::TimeDerivative(pTag, m_nOrder, strName, strarrIndexes);
 }
 
 void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
@@ -1790,7 +1790,7 @@ void adRuntimeTimeDerivativeNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, c
 		strarrIndexes.push_back(toString<size_t>(m_narrDomains[i]));
 
 	string strName = daeGetRelativeName(c->m_pModel, m_pVariable);
-	xmlPresentationCreator::TimeDerivative(pTag, m_nDegree, strName, strarrIndexes);
+    xmlPresentationCreator::TimeDerivative(pTag, m_nOrder, strName, strarrIndexes);
 }
 
 void adRuntimeTimeDerivativeNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
@@ -1890,7 +1890,7 @@ adRuntimePartialDerivativeNode::adRuntimePartialDerivativeNode(daeVariable* pVar
 															   adNodePtr pdnode)
                : pardevnode(pdnode),  
 			     m_nOverallIndex(nOverallIndex), 
-				 m_nDegree(nDegree), 
+                 m_nOrder(nDegree),
 				 m_pVariable(pVariable),
 				 m_pDomain(pDomain), 				 
 				 m_narrDomains(narrDomains)
@@ -1901,7 +1901,7 @@ adRuntimePartialDerivativeNode::adRuntimePartialDerivativeNode()
 {	
 	m_pVariable = NULL;
 	m_pDomain   = NULL;
-	m_nDegree   = 0;
+    m_nOrder   = 0;
 	m_nOverallIndex = ULONG_MAX;
 }
 
@@ -1931,7 +1931,7 @@ const quantity adRuntimePartialDerivativeNode::GetQuantity(void) const
 		daeDeclareAndThrowException(exInvalidCall);
 	
 	//std::cout << (boost::format("%s units = %s") % m_pVariable->GetCanonicalName() % (m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits()).getBaseUnit()).str() << std::endl;
-	if(m_nDegree == 1)
+    if(m_nOrder == 1)
 		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / m_pDomain->GetUnits());
 	else
 		return quantity(0.0, m_pVariable->GetVariableType()->GetUnits() / (m_pDomain->GetUnits() ^ 2));
@@ -1955,7 +1955,7 @@ string adRuntimePartialDerivativeNode::SaveAsLatex(const daeNodeSaveAsContext* c
 
 //	string strVariableName = daeGetRelativeName(c->m_pModel, m_pVariable);
 //	string strDomainName   = daeGetRelativeName(c->m_pModel, m_pDomain);
-//	return latexCreator::PartialDerivative(m_nDegree, strVariableName, strDomainName, strarrIndexes);
+//	return latexCreator::PartialDerivative(m_nOrder, strVariableName, strDomainName, strarrIndexes);
 	return pardevnode->SaveAsLatex(c);
 }
 
@@ -1970,7 +1970,7 @@ void adRuntimePartialDerivativeNode::Open(io::xmlTag_t* pTag)
 	pTag->Save(strName, m_pDomain->GetName());
 
 	strName = "Degree";
-	pTag->Save(strName, m_nDegree);
+    pTag->Save(strName, m_nOrder);
 
 	strName = "OverallIndex";
 	pTag->Save(strName, m_nOverallIndex);
@@ -1994,7 +1994,7 @@ void adRuntimePartialDerivativeNode::Save(io::xmlTag_t* pTag) const
 	pTag->Save(strName, m_pDomain->GetName());
 
 	strName = "Degree";
-	pTag->Save(strName, m_nDegree);
+    pTag->Save(strName, m_nOrder);
 
 	strName = "OverallIndex";
 	pTag->Save(strName, m_nOverallIndex);

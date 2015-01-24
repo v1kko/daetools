@@ -589,22 +589,38 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 }
 
 /*********************************************************************************************
-  d, dt
+  d_array, d2_array, dt_array
 **********************************************************************************************/
-const adouble dt(const adouble& a)
+const adouble_array dt_array(const adouble_array& adarr)
 {
-    adouble tmp;
+    daeDeclareAndThrowException(exNotImplemented);
+
+    adouble_array tmp;
     tmp.setGatherInfo(true);
-    tmp.node = adNodePtr(new adSetupExpressionDerivativeNode(CLONE_NODE(a.node, a.getValue()) ));
     return tmp;
 }
 
-const adouble d(const adouble& a, daeDomain& domain)
+const adouble_array d_array(const adouble_array&                      adarr,
+                            daeDomain&                                domain,
+                            daeeDiscretizationMethod                  eDiscretizationMethod,
+                            const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
-    adouble tmp;
+    daeDeclareAndThrowException(exNotImplemented);
+
+    adouble_array tmp;
     tmp.setGatherInfo(true);
-    tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(&domain,
-                                                                    CLONE_NODE(a.node, a.getValue()) ));
+    return tmp;
+}
+
+const adouble_array d2_array(const adouble_array&                      adarr,
+                             daeDomain&                                domain,
+                             daeeDiscretizationMethod                  eDiscretizationMethod,
+                             const std::map<std::string, std::string>& mapDiscretizationOptions)
+{
+    daeDeclareAndThrowException(exNotImplemented);
+
+    adouble_array tmp;
+    tmp.setGatherInfo(true);
     return tmp;
 }
 

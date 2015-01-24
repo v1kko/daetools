@@ -132,8 +132,8 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeDiscreti
 		pTag->AddTag(strEnumName, string("eFFDM"));
 	else if(eValue == eBFDM)
 		pTag->AddTag(strEnumName, string("eBFDM"));
-	else if(eValue == eCustomDM)
-		pTag->AddTag(strEnumName, string("eCustomDM"));
+    else if(eValue == eUpwindCCFV)
+        pTag->AddTag(strEnumName, string("eUpwindCCFV"));
 	else
 		pTag->AddTag(strEnumName, strUnknown);
 }
@@ -426,8 +426,8 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeDiscretization
 		eValue = eFFDM;
 	else if(strValue == "eBFDM")
 		eValue = eBFDM;
-	else if(strValue == "eCustomDM")
-		eValue = eCustomDM;
+    else if(strValue == "eUpwindCCFV")
+        eValue = eUpwindCCFV;
 	else
 		eValue = eDMUnknown;
 }

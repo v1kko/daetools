@@ -72,7 +72,7 @@ enum daeeDiscretizationMethod
     eCFDM,
     eFFDM,
     eBFDM,
-    eCustomDM
+    eUpwindCCFV
 };
 
 enum daeeInitialConditionMode
@@ -337,8 +337,8 @@ public:
     virtual unit						GetUnits(void) const					= 0;
 
 // Only for Distributed domains
-    virtual daeeDiscretizationMethod	GetDiscretizationMethod(void) const		= 0;
-    virtual size_t						GetDiscretizationOrder(void) const		= 0;
+    //virtual daeeDiscretizationMethod	GetDiscretizationMethod(void) const		= 0;
+    //virtual size_t					GetDiscretizationOrder(void) const		= 0;
     virtual real_t						GetLowerBound(void) const				= 0;
     virtual real_t						GetUpperBound(void) const				= 0;
 

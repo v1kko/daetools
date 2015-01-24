@@ -237,12 +237,14 @@ class daeVariable;
 class DAE_CORE_API daePartialDerivativeVariable
 {
 public:
-	daePartialDerivativeVariable(const size_t		nOrder,
-		                         const daeVariable&	rVariable,
-								 const daeDomain&	rDomain,
-								 const size_t		nDomainIndex,
-								 const size_t		nNoIndexes,
-								 const size_t*		pIndexes);
+    daePartialDerivativeVariable(const size_t                               nOrder,
+                                 const daeVariable&                         rVariable,
+                                 const daeDomain&                           rDomain,
+                                 const size_t                               nDomainIndex,
+                                 const size_t                               nNoIndexes,
+                                 const size_t*                              pIndexes,
+                                 const daeeDiscretizationMethod             eDiscretizationMethod,
+                                 const std::map<std::string, std::string>&  mapDiscretizationOptions);
 	virtual ~daePartialDerivativeVariable(void);
 
 public:
@@ -253,13 +255,18 @@ public:
 	const daeDomain&	GetDomain(void) const;
 	const daeVariable&	GetVariable(void) const;
 
+    adouble             CreateSetupNode(void);
+
 public:
-	size_t*				m_pIndexes;
-	const size_t		m_nOrder;
-	const daeVariable&	m_rVariable;
-	const daeDomain&	m_rDomain;
-	const size_t		m_nDomainIndex;
-	const size_t		m_nNoIndexes;
+    size_t*                         m_pIndexes;
+    const size_t                    m_nOrder;
+    const daeVariable&              m_rVariable;
+    const daeDomain&                m_rDomain;
+    const size_t                    m_nDomainIndex;
+    const size_t                    m_nNoIndexes;
+
+    const daeeDiscretizationMethod           m_eDiscretizationMethod;
+    const std::map<std::string, std::string> m_mapDiscretizationOptions;
 };
 
 /******************************************************************
@@ -318,8 +325,8 @@ public:
 	virtual unit						GetUnits(void) const;
 
 // Only for Distributed domains
-	virtual daeeDiscretizationMethod	GetDiscretizationMethod(void) const;
-	virtual size_t						GetDiscretizationOrder(void) const;
+    //virtual daeeDiscretizationMethod	GetDiscretizationMethod(void) const;
+    //virtual size_t					GetDiscretizationOrder(void) const;
 	virtual real_t						GetLowerBound(void) const;
 	virtual real_t						GetUpperBound(void) const;
 
@@ -344,13 +351,11 @@ public:
     adouble_array array(const daeIndexRange& indexRange);
     adouble_array array(const daeArrayRange& arrayRange);
 	
-	adouble	partial(daePartialDerivativeVariable& pdv) const;
-
 	adouble	operator[](size_t nIndex) const;
 	adouble	operator()(size_t nIndex) const;
 	
     void CreateArray(size_t nNoPoints);
-    void CreateStructuredGrid(daeeDiscretizationMethod eMethod, size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dRB);
+    void CreateStructuredGrid(/*daeeDiscretizationMethod eMethod, size_t nOrder,*/ size_t nNoIntervals, real_t dLB, real_t dRB);
     void CreateUnstructuredGrid(const std::vector<daePoint>& coordinates);
 
     daePort* GetParentPort(void) const;
@@ -359,10 +364,6 @@ protected:
 	void	CreatePoints(void);
 	void	SetType(daeeDomainType eDomainType);
 	void	SetUnits(const unit& units);
-	virtual adouble pd_BFD(daePartialDerivativeVariable& pdv) const;
-	virtual adouble pd_FFD(daePartialDerivativeVariable& pdv) const;
-	virtual adouble pd_CFD(daePartialDerivativeVariable& pdv) const;
-	virtual adouble customPartialDerivative(daePartialDerivativeVariable& pdv) const;
 
 protected:
 	unit							m_Unit;
@@ -372,8 +373,6 @@ protected:
     daePort*						m_pParentPort;
 
     // StructuredGrid:
-	daeeDiscretizationMethod		m_eDiscretizationMethod;
-	size_t							m_nDiscretizationOrder;
     real_t							m_dLowerBound;
     real_t							m_dUpperBound;
     size_t							m_nNumberOfIntervals;
@@ -2001,39 +2000,39 @@ public:
 		adouble	dt(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 	template<typename TYPE1>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1);
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1);
 	template<typename TYPE1, typename TYPE2>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
 	template<typename TYPE1, typename TYPE2, typename TYPE3>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
-		adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
+        adouble	d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 	template<typename TYPE1>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1);
-	template<typename TYPE1, typename TYPE2>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
-	template<typename TYPE1, typename TYPE2, typename TYPE3>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
-		adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
-	
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1);
+    template<typename TYPE1, typename TYPE2>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
+    template<typename TYPE1, typename TYPE2, typename TYPE3>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
+        adouble	d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
+
 	template<typename TYPE1>
 		adouble_array array(TYPE1 d1);
 	template<typename TYPE1, typename TYPE2>
@@ -2069,58 +2068,86 @@ public:
 		adouble_array	dt_array(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 	template<typename TYPE1>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1);
-	template<typename TYPE1, typename TYPE2>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
-	template<typename TYPE1, typename TYPE2, typename TYPE3>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
-		adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1);
+    template<typename TYPE1, typename TYPE2>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
+    template<typename TYPE1, typename TYPE2, typename TYPE3>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
+        adouble_array d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
 	template<typename TYPE1>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1);
-	template<typename TYPE1, typename TYPE2>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
-	template<typename TYPE1, typename TYPE2, typename TYPE3>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
-	template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
-		adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
-	
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1);
+    template<typename TYPE1, typename TYPE2>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2);
+    template<typename TYPE1, typename TYPE2, typename TYPE3>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7);
+    template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
+        adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
+
 protected:
 	adouble	Create_adouble(const size_t* indexes, const size_t N) const;
 	adouble	Calculate_dt(const size_t* indexes, const size_t N) const;
-	adouble	partial(const size_t nOrder, const daeDomain_t& rDomain, const size_t* indexes, const size_t N) const;
+    adouble	partial(const size_t nOrder,
+                    const daeDomain_t& rDomain,
+                    const size_t* indexes,
+                    const size_t N,
+                    const daeeDiscretizationMethod  eDiscretizationMethod,
+                    const std::map<std::string, std::string>& mapDiscretizationOptions) const;
 	adouble	CreateSetupVariable(const daeDomainIndex* indexes, const size_t N) const;
 	adouble	CreateSetupTimeDerivative(const daeDomainIndex* indexes, const size_t N) const;
-	adouble	CreateSetupPartialDerivative(const size_t nOrder, const daeDomain_t& rDomain, const daeDomainIndex* indexes, const size_t N) const;
+    adouble	CreateSetupPartialDerivative(const size_t nOrder,
+                                         const daeDomain_t& rDomain,
+                                         const daeDomainIndex* indexes,
+                                         const size_t N,
+                                         const daeeDiscretizationMethod  eDiscretizationMethod,
+                                         const std::map<std::string, std::string>& mapDiscretizationOptions) const;
 
 	adouble_array Create_adouble_array(const daeArrayRange* ranges, const size_t N) const;
 	adouble_array Calculate_dt_array(const daeArrayRange* ranges, const size_t N) const;
-	adouble_array partial_array(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const;
+    adouble_array partial_array(const size_t nOrder,
+                                const daeDomain_t& rDomain,
+                                const daeArrayRange* ranges,
+                                const size_t N,
+                                const daeeDiscretizationMethod eDiscretizationMethod,
+                                const std::map<std::string, std::string>& mapDiscretizationOptions) const;
 	adouble_array CreateSetupVariableArray(const daeArrayRange* ranges, const size_t N) const;
 	adouble_array CreateSetupTimeDerivativeArray(const daeArrayRange* ranges, const size_t N) const;
-	adouble_array CreateSetupPartialDerivativeArray(const size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, const size_t N) const;
+    adouble_array CreateSetupPartialDerivativeArray(const size_t nOrder,
+                                                    const daeDomain_t& rDomain,
+                                                    const daeArrayRange* ranges,
+                                                    const size_t N,
+                                                    const daeeDiscretizationMethod  eDiscretizationMethod,
+                                                    const std::map<std::string, std::string>& mapDiscretizationOptions) const;
 	
 	void	SetVariableType(const daeVariableType& VariableType);
 	void	Fill_adouble_array(std::vector<adouble>& arrValues, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
 	void	Fill_dt_array(std::vector<adouble>& arrValues, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
-	void	Fill_partial_array(std::vector<adouble>& arrValues, size_t nOrder, const daeDomain_t& rDomain, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const;
+    void	Fill_partial_array(std::vector<adouble>& arrValues,
+                               size_t nOrder,
+                               const daeDomain_t& rDomain,
+                               const daeArrayRange* ranges,
+                               size_t* indexes,
+                               const size_t N,
+                               size_t currentN,
+                               daeeDiscretizationMethod  eDiscretizationMethod,
+                               const std::map<std::string, std::string>& mapDiscretizationOptions) const;
 
 	size_t	CalculateIndex(const size_t* indexes, size_t N) const; 
 	size_t	CalculateIndex(const std::vector<size_t>& narrDomainIndexes) const;

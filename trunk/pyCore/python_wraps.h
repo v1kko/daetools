@@ -28,6 +28,25 @@
 
 namespace daepython
 {
+template<typename TYPE1, typename TYPE2>
+std::map<TYPE1,TYPE2> getMapFromDict(boost::python::dict d)
+{
+    std::map<TYPE1,TYPE2> m;
+
+    // Get the list of pairs key:value
+    boost::python::stl_input_iterator<boost::python::tuple> iter(d.attr("items")()), end;
+
+    for(; iter != end; iter++)
+    {
+        boost::python::tuple t = *iter;
+        TYPE1 key = boost::python::extract<TYPE1>(t[0]);
+        TYPE2 val = boost::python::extract<TYPE1>(t[1]);
+        m[key] = val;
+    }
+
+    return m;
+}
+
 template<typename ITEM>
 boost::python::dict getDictFromObjectArray(const std::vector<ITEM>& arrObjects)
 {
@@ -285,7 +304,25 @@ const adouble ad_min2(real_t v, const adouble &a);
 const adouble ad_min3(const adouble &a, real_t v);
 
 const adouble ad_dt(const adouble& a);
-const adouble ad_d(const adouble& a, daeDomain& domain);
+const adouble_array ad_dt_array(const adouble_array& adarr);
+
+const adouble ad_d(const adouble&           a,
+                   daeDomain&               domain,
+                   daeeDiscretizationMethod method  = eCFDM,
+                   boost::python::dict      options = boost::python::dict());
+const adouble ad_d2(const adouble&           a,
+                    daeDomain&               domain,
+                    daeeDiscretizationMethod method  = eCFDM,
+                    boost::python::dict      options = boost::python::dict());
+
+const adouble_array ad_d_array(const adouble_array&     adarr,
+                               daeDomain&               domain,
+                               daeeDiscretizationMethod method  = eCFDM,
+                               boost::python::dict      options = boost::python::dict());
+const adouble_array ad_d2_array(const adouble_array&     adarr,
+                                daeDomain&               domain,
+                                daeeDiscretizationMethod method  = eCFDM,
+                                boost::python::dict      options = boost::python::dict());
 
 const adouble ad_Constant_q(const quantity& q);
 const adouble ad_Constant_c(real_t c);
@@ -359,6 +396,8 @@ void SetDomainPoints(daeDomain& domain, boost::python::object points);
 adouble_array DomainArray(daeDomain& domain, boost::python::object indexes);
 boost::python::list GetDomainCoordinates(daeDomain& domain);
 void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords);
+void CreateStructuredGrid_old(daeDomain& domain, daeeDiscretizationMethod eMethod,
+                              size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dUB);
 
 daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list CustomPoints);
 daeDomain* daeIndexRange_GetDomain(daeIndexRange& self);

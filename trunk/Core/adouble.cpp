@@ -1120,6 +1120,44 @@ const adouble Constant(real_t c)
     return Constant(q);
 }
 
+
+/*********************************************************************************************
+  d, d2, dt
+**********************************************************************************************/
+const adouble dt(const adouble& a)
+{
+    adouble tmp;
+    tmp.setGatherInfo(true);
+    tmp.node = adNodePtr(new adSetupExpressionDerivativeNode(CLONE_NODE(a.node, a.getValue()) ));
+    return tmp;
+}
+
+const adouble d(const adouble&                            a,
+                daeDomain&                                domain,
+                daeeDiscretizationMethod                  eDiscretizationMethod,
+                const std::map<std::string, std::string>& mapDiscretizationOptions)
+{
+    adouble tmp;
+    tmp.setGatherInfo(true);
+    tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(&domain,
+                                                                    eDiscretizationMethod,
+                                                                    mapDiscretizationOptions,
+                                                                    CLONE_NODE(a.node, a.getValue()) ));
+    return tmp;
+}
+
+const adouble d2(const adouble&                            a,
+                 daeDomain&                                domain,
+                 daeeDiscretizationMethod                  eDiscretizationMethod,
+                 const std::map<std::string, std::string>& mapDiscretizationOptions)
+{
+    daeDeclareAndThrowException(exNotImplemented);
+
+    adouble tmp;
+    tmp.setGatherInfo(true);
+    return tmp;
+}
+
 adouble& adouble::operator =(const real_t v)
 {
     //if(getGatherInfo())

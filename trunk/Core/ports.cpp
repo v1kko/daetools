@@ -641,8 +641,8 @@ void daePort::PropagateDomain(daeDomain& propagatedDomain)
             }
             else if(propagatedDomain.GetType() == eStructuredGrid)
             {
-                pDomain->CreateStructuredGrid(propagatedDomain.GetDiscretizationMethod(),
-                                              propagatedDomain.GetDiscretizationOrder(),
+                pDomain->CreateStructuredGrid(/*propagatedDomain.GetDiscretizationMethod(),
+                                              propagatedDomain.GetDiscretizationOrder(),*/
                                               propagatedDomain.GetNumberOfIntervals(),
                                               propagatedDomain.GetLowerBound(),
                                               propagatedDomain.GetUpperBound());

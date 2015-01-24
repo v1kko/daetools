@@ -410,7 +410,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1)
 {
     Check_Variable_d(1);
 	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 1);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 1, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2>
@@ -420,7 +420,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2)
 	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
 								 dae::core::CreateDomainIndex(d2) 
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 2);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 2, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3>
@@ -431,7 +431,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3)
 								 dae::core::CreateDomainIndex(d2), 
 								 dae::core::CreateDomainIndex(d3) 
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 3);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 3, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
@@ -443,7 +443,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3,
 								 dae::core::CreateDomainIndex(d3), 
 								 dae::core::CreateDomainIndex(d4) 
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 4);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 4, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
@@ -456,7 +456,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3,
 								 dae::core::CreateDomainIndex(d4), 
 								 dae::core::CreateDomainIndex(d5) 
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 5);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 5, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
@@ -470,7 +470,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3,
 								 dae::core::CreateDomainIndex(d5), 
 								 dae::core::CreateDomainIndex(d6)
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 6);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 6, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
@@ -485,7 +485,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3,
 								 dae::core::CreateDomainIndex(d6), 
 								 dae::core::CreateDomainIndex(d7)
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 7);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 7, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
@@ -501,7 +501,7 @@ adouble	daeVariable::d(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3,
 								 dae::core::CreateDomainIndex(d7), 
 								 dae::core::CreateDomainIndex(d8)
 								};
-	return this->CreateSetupPartialDerivative(1, rDomain, indexes, 8);
+    return this->CreateSetupPartialDerivative(1, rDomain, indexes, 8, eCFDM, std::map<std::string, std::string>());
 }
 
 
@@ -510,7 +510,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1)
 {
     Check_Variable_d2(1);
 	daeDomainIndex indexes[1] = {dae::core::CreateDomainIndex(d1)};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 1);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 1, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2>
@@ -520,7 +520,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2)
 	daeDomainIndex indexes[2] = {dae::core::CreateDomainIndex(d1), 
 								 dae::core::CreateDomainIndex(d2) 
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 2);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 2, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3>
@@ -531,7 +531,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3
 								 dae::core::CreateDomainIndex(d2), 
 								 dae::core::CreateDomainIndex(d3) 
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 3);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 3, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
@@ -543,7 +543,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3
 								 dae::core::CreateDomainIndex(d3), 
 								 dae::core::CreateDomainIndex(d4) 
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 4);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 4, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
@@ -556,7 +556,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3
 								 dae::core::CreateDomainIndex(d4), 
 								 dae::core::CreateDomainIndex(d5) 
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 5);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 5, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
@@ -570,7 +570,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3
 								 dae::core::CreateDomainIndex(d5), 
 								 dae::core::CreateDomainIndex(d6)
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 6);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 6, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
@@ -585,7 +585,7 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3
 								 dae::core::CreateDomainIndex(d6), 
 								 dae::core::CreateDomainIndex(d7)
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 7);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 7, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
@@ -601,5 +601,5 @@ adouble	daeVariable::d2(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3
 								 dae::core::CreateDomainIndex(d7), 
 								 dae::core::CreateDomainIndex(d8)
 								};
-	return this->CreateSetupPartialDerivative(2, rDomain, indexes, 8);
+    return this->CreateSetupPartialDerivative(2, rDomain, indexes, 8, eCFDM, std::map<std::string, std::string>());
 }

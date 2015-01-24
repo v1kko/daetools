@@ -3575,18 +3575,23 @@ bool adSetupExpressionDerivativeNode::IsDifferential(void) const
 /*********************************************************************************************
 	adSetupExpressionPartialDerivativeNode
 **********************************************************************************************/
-adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(daeDomain* pDomain,
-													                           adNodePtr n)
+adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(daeDomain*                                pDomain,
+                                                                               daeeDiscretizationMethod                  eDiscretizationMethod,
+                                                                               const std::map<std::string, std::string>& mapDiscretizationOptions,
+                                                                               adNodePtr                                 n)
 {
-	m_pDomain = pDomain;
-	node      = n;
-	m_nDegree = 1;
+    m_pDomain                  = pDomain;
+    m_eDiscretizationMethod    = eDiscretizationMethod;
+    m_mapDiscretizationOptions = mapDiscretizationOptions;
+    node                       = n;
+    m_nOrder                   = 1;
 }
 
 adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode()
 {
-	m_nDegree = 0;
-	m_pDomain = NULL;
+    m_nOrder                = 0;
+    m_pDomain               = NULL;
+    m_eDiscretizationMethod = eDMUnknown;
 }
 
 adSetupExpressionPartialDerivativeNode::~adSetupExpressionPartialDerivativeNode()
@@ -3604,7 +3609,7 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 	
 	a = node->Evaluate(pExecutionContext);
 	tmp.setGatherInfo(true);
-	tmp.node = calc_d(a.node, m_pDomain, pExecutionContext);
+    tmp.node = calc_d(a.node, pExecutionContext);
 	return tmp;
 }
 
@@ -3618,7 +3623,7 @@ const quantity adSetupExpressionPartialDerivativeNode::GetQuantity(void) const
 }
 
 // Here I work on runtime nodes!!
-adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, daeDomain* pDomain, const daeExecutionContext* pExecutionContext) const
+adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeExecutionContext* pExecutionContext) const
 {
 	adNode* adnode;
 	adouble l, r, dl, dr;
@@ -3638,8 +3643,8 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, daeDomain*
 		dl.setGatherInfo(true);
 		dr.setGatherInfo(true);
 
-		dl.node = calc_d(node->left, pDomain, pExecutionContext); 
-		dr.node = calc_d(node->right, pDomain, pExecutionContext); 
+        dl.node = calc_d(node->left, pExecutionContext);
+        dr.node = calc_d(node->right, pExecutionContext);
 		l.node = node->left; 
 		r.node = node->right; 
 		
@@ -3673,7 +3678,12 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, daeDomain*
 		}
 		else
 		{
-			adouble adres = rtnode->m_pVariable->partial(1, *pDomain, &rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
+            adouble adres = rtnode->m_pVariable->partial(1,
+                                                         *m_pDomain,
+                                                         &rtnode->m_narrDomains[0],
+                                                         rtnode->m_narrDomains.size(),
+                                                         m_eDiscretizationMethod,
+                                                         m_mapDiscretizationOptions);
 			tmp = adres.node;
 		}
 	}
@@ -3706,19 +3716,45 @@ void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, dae
 	boost::format fmtFile;
 
 	node->Export(strExpression, eLanguage, c);
+
 	string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
-	
+
+    string strDiscretizationMethod;
+    if(m_eDiscretizationMethod == eCFDM)
+        strDiscretizationMethod = "eCFDM";
+    else if(m_eDiscretizationMethod == eFFDM)
+        strDiscretizationMethod = "eFFDM";
+    else if(m_eDiscretizationMethod == eBFDM)
+        strDiscretizationMethod = "eBFDM";
+    else if(m_eDiscretizationMethod == eUpwindCCFV)
+        strDiscretizationMethod = "eUpwindCCFV";
+    else
+        daeDeclareAndThrowException(exNotImplemented);
+
 	if(eLanguage == eCDAE)
 	{
-		strExport = "d(%1%, %2%)";
+        // This needs some thinking...
+        string strDiscretizationOptions = toString(m_mapDiscretizationOptions);
+
+        strExport = "d(%1%, %2%, %3%, \"%4%\")";
 		fmtFile.parse(strExport);
-		fmtFile % strExpression % strDomainName;
+        fmtFile % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
 	}
 	else if(eLanguage == ePYDAE)
 	{
-		strExport = "d(%1%, %2%)";
+        string strDiscretizationOptions = "{";
+        std::map<string, string>::const_iterator citer;
+        for(citer = m_mapDiscretizationOptions.begin(); citer != m_mapDiscretizationOptions.end(); citer++)
+        {
+            if(citer != m_mapDiscretizationOptions.begin())
+                strDiscretizationOptions += ",";
+            strDiscretizationOptions += "'" + citer->first + "' : '" + citer->second + "'";
+        }
+        strDiscretizationOptions += "}";
+
+        strExport = "d(%1%, %2%, %3%, %4%)";
 		fmtFile.parse(strExport);
-		fmtFile % strExpression % strDomainName;
+        fmtFile % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
 	}
 	else
 		daeDeclareAndThrowException(exNotImplemented);
@@ -3738,7 +3774,7 @@ string adSetupExpressionPartialDerivativeNode::SaveAsLatex(const daeNodeSaveAsCo
 	vector<string> strarrIndexes;
 	string strExpression = node->SaveAsLatex(c);
 	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
-	return latexCreator::PartialDerivative(m_nDegree, strExpression, strDomainName, strarrIndexes, true);
+    return latexCreator::PartialDerivative(m_nOrder, strExpression, strDomainName, strarrIndexes, true);
 }
 
 void adSetupExpressionPartialDerivativeNode::Open(io::xmlTag_t* pTag)
@@ -3750,8 +3786,8 @@ void adSetupExpressionPartialDerivativeNode::Save(io::xmlTag_t* pTag) const
 {
 	string strName;
 
-	strName = "Degree";
-	pTag->Save(strName, m_nDegree);
+    strName = "Order";
+    pTag->Save(strName, m_nOrder);
 
 	strName = "Domain";
 	pTag->SaveObjectRef(strName, m_pDomain);
@@ -3783,7 +3819,7 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
 	strValue = "";
 	mrow1 = mfrac->AddTag(strName, strValue);
 
-	if(m_nDegree == 1)
+    if(m_nOrder == 1)
 	{
         strName  = "mo";
         strValue = "&PartialD;";
@@ -3807,7 +3843,7 @@ void adSetupExpressionPartialDerivativeNode::SaveAsPresentationMathML(io::xmlTag
 	strValue = "";
 	mrow2 = mfrac->AddTag(strName, strValue);
 
-	if(m_nDegree == 1)
+    if(m_nOrder == 1)
 	{
         strName  = "mo";
         strValue = "&PartialD;";

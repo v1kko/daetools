@@ -65,8 +65,12 @@ const char* DOCSTR_daeCondition = "";
     const char* DOCSTR_daeCondition_Expressions = "";
         
 const char* DOCSTR_dt = "";  
-const char* DOCSTR_d = "";  
-const char* DOCSTR_Time = "";  
+const char* DOCSTR_dt_array = "";
+const char* DOCSTR_d = "";
+const char* DOCSTR_d_array = "";
+const char* DOCSTR_d2 = "";
+const char* DOCSTR_d2_array = "";
+const char* DOCSTR_Time = "";
 const char* DOCSTR_InverseTimeStep = "";
 const char* DOCSTR_Constant_c = "";
 const char* DOCSTR_Constant_q = "";  

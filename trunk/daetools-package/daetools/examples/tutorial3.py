@@ -192,8 +192,8 @@ class simTutorial(daeSimulation):
     def SetUpParametersAndDomains(self):
         n = 10
 
-        self.m.x.CreateStructuredGrid(eCFDM, 2, n, 0, 0.1)
-        self.m.y.CreateStructuredGrid(eCFDM, 2, n, 0, 0.1)
+        self.m.x.CreateStructuredGrid(n, 0, 0.1)
+        self.m.y.CreateStructuredGrid(n, 0, 0.1)
 
         # Points of structured grids can be changed after the domain is defined by the CreateDistributed function.
         # In certain situations it is desired to create a non-uniform grid within the given interval (LB, UB).

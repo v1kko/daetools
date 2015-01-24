@@ -1480,35 +1480,35 @@ void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
         {
             try
             {
-                string method               = v_domain.second.get<string>("DiscretizationMethod");
-                size_t DiscretizationOrder  = v_domain.second.get<size_t>("DiscretizationOrder");
+                //string method               = v_domain.second.get<string>("DiscretizationMethod");
+                //size_t DiscretizationOrder  = v_domain.second.get<size_t>("DiscretizationOrder");
                 size_t NumberOfIntervals    = v_domain.second.get<size_t>("NumberOfIntervals");
                 real_t LowerBound           = v_domain.second.get<real_t>("LowerBound");
                 real_t UpperBound           = v_domain.second.get<real_t>("UpperBound");
 
-                daeeDiscretizationMethod DiscretizationMethod;
-                if(method == "eCFDM")
-                    DiscretizationMethod = eCFDM;
-                else if(method == "eFFDM")
-                    DiscretizationMethod = eFFDM;
-                else if(method == "eBFDM")
-                    DiscretizationMethod = eBFDM;
-                else if(method == "eCustomDM")
-                    DiscretizationMethod = eCustomDM;
-                else
-                    DiscretizationMethod = eDMUnknown;
+                //daeeDiscretizationMethod DiscretizationMethod;
+                //if(method == "eCFDM")
+                //    DiscretizationMethod = eCFDM;
+                //else if(method == "eFFDM")
+                //    DiscretizationMethod = eFFDM;
+                //else if(method == "eBFDM")
+                //    DiscretizationMethod = eBFDM;
+                //else if(method == "eUpwindCCFV")
+                //    DiscretizationMethod = eUpwindCCFV;
+                //else
+                //    DiscretizationMethod = eDMUnknown;
 
                 if(bPrintInfo)
                 {
                     std::cout << "          Type                  = " << strType << std::endl;
-                    std::cout << "          DiscretizationMethod  = " << method << std::endl;
-                    std::cout << "          DiscretizationOrder   = " << DiscretizationOrder << std::endl;
+                    //std::cout << "          DiscretizationMethod  = " << method << std::endl;
+                    //std::cout << "          DiscretizationOrder   = " << DiscretizationOrder << std::endl;
                     std::cout << "          NumberOfIntervals     = " << NumberOfIntervals << std::endl;
                     std::cout << "          LowerBound            = " << LowerBound << std::endl;
                     std::cout << "          UpperBound            = " << UpperBound << std::endl;
                 }
 
-                pDomain->CreateStructuredGrid(DiscretizationMethod, DiscretizationOrder, NumberOfIntervals, LowerBound, UpperBound);
+                pDomain->CreateStructuredGrid(/*DiscretizationMethod, DiscretizationOrder,*/ NumberOfIntervals, LowerBound, UpperBound);
             }
             catch(std::exception& ex)
             {

@@ -303,8 +303,8 @@ adouble_array daeVariable::dt_array(TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE
 template<typename TYPE1>
 adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1)
 {
-	daeArrayRange ranges[1] = {dae::core::CreateRange(d1)};
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 1);
+    daeArrayRange ranges[1] = {dae::core::CreateRange(d1)};
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 1, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2>
@@ -313,7 +313,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 	daeArrayRange ranges[2] = {dae::core::CreateRange(d1), 
 							   dae::core::CreateRange(d2) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 2);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 2, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3>
@@ -323,7 +323,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 							   dae::core::CreateRange(d2), 
 							   dae::core::CreateRange(d3) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 3);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 3, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
@@ -334,7 +334,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 							   dae::core::CreateRange(d3), 
 							   dae::core::CreateRange(d4) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 4);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 4, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
@@ -346,7 +346,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 							   dae::core::CreateRange(d4), 
 							   dae::core::CreateRange(d5) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 5);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 5, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
@@ -359,7 +359,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 							   dae::core::CreateRange(d5), 
 							   dae::core::CreateRange(d6)
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 6);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 6, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
@@ -373,7 +373,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 							   dae::core::CreateRange(d6), 
 							   dae::core::CreateRange(d7)
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 7);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 7, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
@@ -388,7 +388,7 @@ adouble_array daeVariable::d_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d
 							   dae::core::CreateRange(d7), 
 							   dae::core::CreateRange(d8)
 						   };
-	return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 8);
+    return this->CreateSetupPartialDerivativeArray(1, rDomain, ranges, 8, eCFDM, std::map<std::string, std::string>());
 }
 
 
@@ -396,7 +396,7 @@ template<typename TYPE1>
 adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1)
 {
 	daeArrayRange ranges[1] = {dae::core::CreateRange(d1)};
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 1);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 1, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2>
@@ -405,7 +405,7 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 	daeArrayRange ranges[2] = {dae::core::CreateRange(d1), 
 							   dae::core::CreateRange(d2) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 2);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 2, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3>
@@ -415,7 +415,7 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 							   dae::core::CreateRange(d2), 
 							   dae::core::CreateRange(d3) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 3);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 3, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4>
@@ -426,7 +426,7 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 							   dae::core::CreateRange(d3), 
 							   dae::core::CreateRange(d4) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 4);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 4, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5>
@@ -438,7 +438,7 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 							   dae::core::CreateRange(d4), 
 							   dae::core::CreateRange(d5) 
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 5);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 5, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6>
@@ -451,7 +451,7 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 							   dae::core::CreateRange(d5), 
 							   dae::core::CreateRange(d6)
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 6);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 6, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7>
@@ -465,7 +465,7 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 							   dae::core::CreateRange(d6), 
 							   dae::core::CreateRange(d7)
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 7);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 7, eCFDM, std::map<std::string, std::string>());
 }
 
 template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
@@ -480,5 +480,5 @@ adouble_array daeVariable::d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 
 							   dae::core::CreateRange(d7), 
 							   dae::core::CreateRange(d8)
 						   };
-	return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 8);
+    return this->CreateSetupPartialDerivativeArray(2, rDomain, ranges, 8, eCFDM, std::map<std::string, std::string>());
 }
