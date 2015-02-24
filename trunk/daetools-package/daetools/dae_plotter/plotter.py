@@ -262,7 +262,7 @@ class daeMainWindow(QtGui.QMainWindow):
                 return
 
             plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
-            if plot2D.newFromTemplate(curves) == False:
+            if plot2D.newFromTemplate(template) == False:
                 plot2D.close()
                 del plot2D
             else:

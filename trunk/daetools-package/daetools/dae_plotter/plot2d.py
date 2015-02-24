@@ -158,9 +158,9 @@ class dae2DPlot(QtGui.QDialog):
         #self.mpl_toolbar.addSeparator()
         #self.mpl_toolbar.addAction(exit)
         
-        self.fp8  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=8)
-        self.fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
-        self.fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=11)
+        self.fp8  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
+        self.fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=10)
+        self.fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=12)
         
         self.textTime = self.figure.text(0.01, 0.01, '', fontproperties = self.fp9)
         
@@ -206,12 +206,17 @@ class dae2DPlot(QtGui.QDialog):
     def slotExportTemplate(self):
         try:
             curves = []
-            template = {'curves': curves, 'updateInterval' : self.updateInterval}
+            template = {'curves':          curves, 
+                        'updateInterval' : self.updateInterval,
+                        'xlabel' :         self.canvas.axes.get_xlabel(),
+                        'ylabel' :         self.canvas.axes.get_ylabel(),
+                        'title'  :         self.canvas.axes.get_title()
+                       }
 
             for line, variable, domainIndexes, domainPoints, fun in self.curves:
                 curves.append((variable.Name, domainIndexes, domainPoints))
             
-            s = json.dumps(template)
+            s = json.dumps(template, indent=4)
 
             filename = QtGui.QFileDialog.getSaveFileName(self, "Save 2D plot template", "template.pt", "Templates (*.pt)")
             if not filename:
@@ -317,7 +322,15 @@ class dae2DPlot(QtGui.QDialog):
 
     def newFromTemplate(self, template):
         """
-        template is a list of 'variableName', 'domainIndexes', 'domainPoints' items
+        template is a dictionary:
+        {
+           'curves' : [variableName, domainIndexes, domainPoints, lineTitle],
+           'updateInterval' : float,
+           'xlabel' : string,
+           'ylabel' : string,
+           'title'  : string
+        }
+        list of 'variableName', 'domainIndexes', 'domainPoints' items
         """
         if len(self.tcpipServer.DataReceivers) == 0:
             return
@@ -328,12 +341,20 @@ class dae2DPlot(QtGui.QDialog):
 
         if len(template) == 0:
             return False
-        
-        for i, (variableName, domainIndexes, domainPoints) in enumerate(template):
-            windowTitle = "Select process for variable {0} (of {1})".format(i+1, len(template))
-            label       = "Variable: {0}({1})".format(variableName, ','.join(domainPoints))
+            
+        curves = template['curves']
+      
+        for i, curve in enumerate(curves):
+            variableName  = curve[0]
+            domainIndexes = curve[1]
+            domainPoints  = curve[2]
+            label         = None
+            if len(curve) > 3:
+                label = curve[3]
+            windowTitle     = "Select process for variable {0} (of {1})".format(i+1, len(curves))
+            var_to_look_for = "Variable: {0}({1})".format(variableName, ','.join(domainPoints))
             items       = sorted(processes.keys())
-            processName, ok = self.showSelectProcessDialog(windowTitle, label, items)
+            processName, ok = self.showSelectProcessDialog(windowTitle, var_to_look_for, items)
             if not ok:
                 return False
 
@@ -341,8 +362,22 @@ class dae2DPlot(QtGui.QDialog):
             for variable in process.Variables:
                 if variableName == variable.Name:
                     variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = daeChooseVariable.get2DData(variable, domainIndexes, domainPoints)
-                    self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime)
+                    self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label)
+                    break
 
+        if 'xlabel' in template:
+            self.canvas.axes.set_xlabel(template['xlabel'], fontproperties=self.fp11)
+        if 'ylabel' in template:
+            self.canvas.axes.set_ylabel(template['ylabel'], fontproperties=self.fp11)
+        if 'title' in template:
+            self.setWindowTitle(template['title'])
+        
+        #fmt = matplotlib.ticker.ScalarFormatter(useOffset = False)
+        #fmt.set_scientific(False)
+        #fmt.set_powerlimits((-3, 4)) 
+        #self.canvas.axes.xaxis.set_major_formatter(fmt)
+        #self.canvas.axes.yaxis.set_major_formatter(fmt)
+        
         return True
 
     def showSelectProcessDialog(self, windowTitle, label, items):
@@ -370,34 +405,47 @@ class dae2DPlot(QtGui.QDialog):
             return False
             
         variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = cv.getPlot2DData()
-        self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime)
+        self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, None)
 
+        #fmt = matplotlib.ticker.ScalarFormatter(useOffset = False)
+        #fmt.set_scientific(False)
+        #fmt.set_powerlimits((-3, 4)) 
+        #self.canvas.axes.xaxis.set_major_formatter(fmt)
+        #self.canvas.axes.yaxis.set_major_formatter(fmt)
+        
         return True
         
-    def _addNewCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime):
+    def _addNewCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label = None):
         domains = "("
         for i in range(0, len(domainPoints)):
             if i != 0:
                 domains += ", "
             domains += domainPoints[i]
         domains += ")"
-
-        line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints, domains)
-        self.setWindowTitle(yAxisLabel + domains)
+        
+        if not label:
+            label = yAxisLabel+domains
+            
+        line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints, label)
+        self.setWindowTitle(label)
 
         self.curves.append( (line, variable, domainIndexes, domainPoints, daeChooseVariable.get2DData) )
         
-    def addLine(self, xAxisLabel, yAxisLabel, xPoints, yPoints, domains):
+    def addLine(self, xAxisLabel, yAxisLabel, xPoints, yPoints, label):
         no_lines = len(self.canvas.axes.get_lines())
         n = no_lines % len(dae2DPlot.plotDefaults)
         pd = dae2DPlot.plotDefaults[n]
         
-        line, = self.canvas.axes.plot(xPoints, yPoints, label=yAxisLabel+domains, color=pd.color, linewidth=pd.linewidth, \
+        line, = self.canvas.axes.plot(xPoints, yPoints, label=label, color=pd.color, linewidth=pd.linewidth, \
                                       linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
         if no_lines == 0:
             self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp11)
             self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp11)
+            t = self.canvas.axes.xaxis.get_offset_text()
+            t.set_fontproperties(self.fp9)
+            t = self.canvas.axes.yaxis.get_offset_text()
+            t.set_fontproperties(self.fp9)
         
         self.reformatPlot()  
         return line
