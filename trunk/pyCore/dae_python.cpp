@@ -634,12 +634,8 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Max",   &daepython::ad_max3);
 
     def("dt",	 &daepython::ad_dt, (arg("ad")), DOCSTR_dt);
-
-    def("d",	 &daepython::ad_d,  (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM,
-                                     arg("options") = boost::python::dict()), DOCSTR_d);
-
-    def("d2",    &daepython::ad_d2, (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM,
-                                     arg("options") = boost::python::dict()), DOCSTR_d2);
+    def("d",	 &daepython::ad_d,  (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d);
+    def("d2",    &daepython::ad_d2, (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2);
 
     def("Time",             &Time,                                           DOCSTR_Time);
     def("Constant",         &daepython::ad_Constant_c,      (arg("value")),  DOCSTR_Constant_c);
@@ -731,10 +727,8 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Average",	 &daepython::adarr_average,  (arg("adarray")), DOCSTR_Average);
 
     def("dt_array",	 &daepython::ad_dt_array,    (arg("adarr")), DOCSTR_dt_array);
-    def("d_array",	 &daepython::ad_d_array,     (arg("adarr"), arg("domain"),
-                                                  arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d_array);
-    def("d2_array",	 &daepython::ad_d2_array,    (arg("adarr"), arg("domain"),
-                                                  arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2_array);
+    def("d_array",	 &daepython::ad_d_array,     (arg("adarr"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d_array);
+    def("d2_array",	 &daepython::ad_d2_array,    (arg("adarr"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2_array);
 
     class_<daeVariableType>("daeVariableType", DOCSTR_daeVariableType, no_init)
         .def(init<string, unit, real_t, real_t, real_t, real_t>( ( arg("self"),
@@ -1545,19 +1539,19 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ON_CONDITION",    &daepython::daeModel_ON_CONDITION,
                                 ( arg("self"),
                                   arg("condition"),
-                                  arg("switchToStates")     = boost::python::list(),
-                                  arg("setVariableValues")  = boost::python::list(),
-                                  arg("triggerEvents")      = boost::python::list(),
-                                  arg("userDefinedActions") = boost::python::list(),
-                                  arg("eventTolerance")     = 0.0
+                                  arg("switchToStates")      = boost::python::list(),
+                                  arg("resetVariableValues") = boost::python::list(),
+                                  arg("triggerEvents")       = boost::python::list(),
+                                  arg("userDefinedActions")  = boost::python::list(),
+                                  arg("eventTolerance")      = 0.0
                                 ), DOCSTR_daeModel_ON_CONDITION)
         .def("ON_EVENT",		&daepython::daeModel_ON_EVENT,
                                 ( arg("self"),
                                   arg("eventPort"),
-                                  arg("switchToStates")     = boost::python::list(),
-                                  arg("setVariableValues")  = boost::python::list(),
-                                  arg("triggerEvents")      = boost::python::list(),
-                                  arg("userDefinedActions") = boost::python::list()
+                                  arg("switchToStates")      = boost::python::list(),
+                                  arg("resetVariableValues") = boost::python::list(),
+                                  arg("triggerEvents")       = boost::python::list(),
+                                  arg("userDefinedActions")  = boost::python::list()
                                 ), DOCSTR_daeModel_ON_EVENT )
 
         .def("GetCoSimulationInterface", &daepython::daeModel_GetCoSimulationInterface,

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include <boost/format.hpp>
 
 namespace dae 
 {
@@ -104,16 +105,19 @@ adouble daePartialDerivativeVariable::CreateSetupNode(void)
 // Discretization functions implementation
 adouble pd_upwindCCFV(daePartialDerivativeVariable& /*pdv*/)
 {
+    daeDeclareAndThrowException(exNotImplemented);
     return adouble();
 }
 
 adouble pd_BFD(daePartialDerivativeVariable& /*pdv*/)
 {
+    daeDeclareAndThrowException(exNotImplemented);
     return adouble();
 }
 
 adouble pd_FFD(daePartialDerivativeVariable& /*pdv*/)
 {
+    daeDeclareAndThrowException(exNotImplemented);
     return adouble();
 }
 
@@ -126,7 +130,7 @@ adouble pd_CFD(daePartialDerivativeVariable& pdv)
     const daeDomain& d = pdv.GetDomain();
 // Number of points in the domain we are calculating partial derivative for
     const size_t N = d.GetNumberOfPoints();
-// Discretization order should be in the DiscretizationOptions map, or a default value will be used
+// Discretization order should be in the DiscretizationOptions map, otherwise a default value will be used
     size_t nDiscretizationOrder = 2;
     std::map<std::string, std::string>::const_iterator citer = pdv.m_mapDiscretizationOptions.find("DiscretizationOrder");
     // If DiscretizationOrder found in options use it, otherwise use the default value of 2
@@ -139,7 +143,9 @@ adouble pd_CFD(daePartialDerivativeVariable& pdv)
         if(N < 3)
         {
             daeDeclareException(exInvalidCall);
-            e << "Cannot evaluate partial derivative per domain [" << d.GetCanonicalName() << "]: the number of points cannot be less than 3";
+            boost::format bf("Cannot evaluate partial derivative per domain [%s]: "
+                             "the number of points cannot be lower than 3");
+            e << (bf % d.GetCanonicalName()).str();
             throw e;
         }
 
@@ -181,20 +187,41 @@ adouble pd_CFD(daePartialDerivativeVariable& pdv)
         }
         else
         {
-            daeDeclareAndThrowException(exNotImplemented);
+            daeDeclareException(exNotImplemented);
+            boost::format bf("Cannot evaluate partial derivatives of orders higher than 2 (order %d requested)");
+            e << (bf % pdv.GetOrder()).str();
+            throw e;
         }
         break;
 
     case 4:
-        daeDeclareAndThrowException(exNotImplemented);
+        {
+            daeDeclareException(exNotImplemented);
+            boost::format bf("Cannot evaluate a partial derivative using Center Finite Difference method of order %d "
+                             "(not implemented at the moment)");
+            e << (bf % nDiscretizationOrder).str();
+            throw e;
+        }
         break;
 
     case 6:
-        daeDeclareAndThrowException(exNotImplemented);
+        {
+            daeDeclareException(exNotImplemented);
+            boost::format bf("Cannot evaluate a partial derivative using Center Finite Difference method of order %d "
+                             "(not implemented at the moment)");
+            e << (bf % nDiscretizationOrder).str();
+            throw e;
+        }
         break;
 
     default:
-        daeDeclareAndThrowException(exNotImplemented);
+        {
+            daeDeclareException(exNotImplemented);
+            boost::format bf("Cannot evaluate a partial derivative using Center Finite Difference method of order %d "
+                             "(only orders 2, 4 and 6 are supported)");
+            e << (bf % nDiscretizationOrder).str();
+            throw e;
+        }
     }
 
     return pardev;

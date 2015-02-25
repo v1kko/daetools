@@ -330,7 +330,6 @@ class dae2DPlot(QtGui.QDialog):
            'ylabel' : string,
            'title'  : string
         }
-        list of 'variableName', 'domainIndexes', 'domainPoints' items
         """
         if len(self.tcpipServer.DataReceivers) == 0:
             return
@@ -439,13 +438,13 @@ class dae2DPlot(QtGui.QDialog):
         line, = self.canvas.axes.plot(xPoints, yPoints, label=label, color=pd.color, linewidth=pd.linewidth, \
                                       linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
-        if no_lines == 0:
-            self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp11)
-            self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp11)
-            t = self.canvas.axes.xaxis.get_offset_text()
-            t.set_fontproperties(self.fp9)
-            t = self.canvas.axes.yaxis.get_offset_text()
-            t.set_fontproperties(self.fp9)
+        #if no_lines == 0: # why this?
+        self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp11)
+        self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp11)
+        t = self.canvas.axes.xaxis.get_offset_text()
+        t.set_fontproperties(self.fp9)
+        t = self.canvas.axes.yaxis.get_offset_text()
+        t.set_fontproperties(self.fp9)
         
         self.reformatPlot()  
         return line

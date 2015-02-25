@@ -105,8 +105,8 @@ class treeItem(object):
                 d['NumberOfPoints']       = int(self._value)
             else:
                 d['Type']                 = str(self.type)
-                d['DiscretizationMethod'] = str(self.discrMethod)
-                d['DiscretizationOrder']  = int(self.order)
+                #d['DiscretizationMethod'] = str(self.discrMethod)
+                #d['DiscretizationOrder']  = int(self.order)
                 d['NumberOfIntervals']    = int(self.numberOfIntervals)
                 d['LowerBound']           = float(min(self._value))
                 d['UpperBound']           = float(max(self._value))
@@ -449,15 +449,13 @@ class editor_ArrayDomain(QtGui.QFrame):
         pass # Nothing is edited
 
 class editor_DistributedDomain(QtGui.QFrame):
-    def __init__(self, treeItem, description, discrMethod, order, numberOfIntervals, points, units):
+    def __init__(self, treeItem, description, numberOfIntervals, points, units):
         QtGui.QFrame.__init__(self)
         self.ui = Ui_EditorDistributedDomain()
         self.ui.setupUi(self)
         
         self.treeItem = treeItem
         
-        self.ui.discrMethodEdit.setText(str(discrMethod))
-        self.ui.orderEdit.setText(str(order))
         self.ui.numberOfIntervalsEdit.setText(str(numberOfIntervals))
         self.ui.pointsEdit.setPlainText(str(points))
         self.ui.unitsEdit.setText(str(units))
@@ -479,13 +477,13 @@ class treeItem_Domain(treeItem):
             self._editor = editor_ArrayDomain(self, description, numberOfPoints)
         
         elif self.type == eStructuredGrid:
-            self.discrMethod        = kwargs['discrMethod']       # not edited
-            self.order              = kwargs['order']             # not edited
+            #self.discrMethod        = kwargs['discrMethod']      # not edited
+            #self.order              = kwargs['order']            # not edited
             self.numberOfIntervals  = kwargs['numberOfIntervals'] # not edited
             self.units              = kwargs['units']             # not edited
             points                  = kwargs['points']
             self.setValue(points)
-            self._editor = editor_DistributedDomain(self, description, self.discrMethod, self.order, self.numberOfIntervals, points, self.units)
+            self._editor = editor_DistributedDomain(self, description, self.numberOfIntervals, points, self.units)
         
         elif self.type == eUnstructuredGrid:
             numberOfPoints = kwargs['numberOfPoints']
@@ -559,8 +557,7 @@ class treeItem_Domain(treeItem):
         elif self.type == eUnstructuredGrid:
             return 'UnstructuredGrid(%d)' % self._value
         else:
-            return 'Distributed(%s, %d, %d, %s, %s)' % (self.discrMethod, self.order, self.numberOfIntervals, 
-                                                        self._value, str(self.units) if str(self.units) != '' else '-')
+            return 'StructuredGrid(%d, %s, %s)' % (self.numberOfIntervals, self._value, str(self.units) if str(self.units) != '' else '-')
         
     def show(self, parent):
         self._editor.setParent(parent)

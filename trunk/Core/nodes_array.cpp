@@ -3607,7 +3607,9 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 	
 	adouble a, tmp;
 	
+    // First get a runtime node
 	a = node->Evaluate(pExecutionContext);
+    // Then calculate the partial derivative expression
 	tmp.setGatherInfo(true);
     tmp.node = calc_d(a.node, pExecutionContext);
 	return tmp;

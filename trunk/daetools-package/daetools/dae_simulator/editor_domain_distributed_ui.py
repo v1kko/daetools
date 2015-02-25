@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'editor_domain_distributed.ui'
 #
-# Created: Tue Oct 15 03:28:56 2013
+# Created: Sun Jan 25 22:04:57 2015
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_EditorDistributedDomain(object):
     def setupUi(self, EditorDistributedDomain):
         EditorDistributedDomain.setObjectName(_fromUtf8("EditorDistributedDomain"))
-        EditorDistributedDomain.resize(253, 450)
+        EditorDistributedDomain.resize(250, 450)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -29,50 +29,6 @@ class Ui_EditorDistributedDomain(object):
         EditorDistributedDomain.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_3 = QtGui.QVBoxLayout(EditorDistributedDomain)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.label = QtGui.QLabel(EditorDistributedDomain)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
-        self.label.setMinimumSize(QtCore.QSize(100, 0))
-        self.label.setObjectName(_fromUtf8("label"))
-        self.horizontalLayout.addWidget(self.label)
-        self.discrMethodEdit = QtGui.QLineEdit(EditorDistributedDomain)
-        self.discrMethodEdit.setEnabled(False)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.discrMethodEdit.sizePolicy().hasHeightForWidth())
-        self.discrMethodEdit.setSizePolicy(sizePolicy)
-        self.discrMethodEdit.setMinimumSize(QtCore.QSize(100, 0))
-        self.discrMethodEdit.setObjectName(_fromUtf8("discrMethodEdit"))
-        self.horizontalLayout.addWidget(self.discrMethodEdit)
-        self.verticalLayout_3.addLayout(self.horizontalLayout)
-        self.horizontalLayout_3 = QtGui.QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.label_2 = QtGui.QLabel(EditorDistributedDomain)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
-        self.label_2.setSizePolicy(sizePolicy)
-        self.label_2.setMinimumSize(QtCore.QSize(100, 0))
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.horizontalLayout_3.addWidget(self.label_2)
-        self.orderEdit = QtGui.QLineEdit(EditorDistributedDomain)
-        self.orderEdit.setEnabled(False)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.orderEdit.sizePolicy().hasHeightForWidth())
-        self.orderEdit.setSizePolicy(sizePolicy)
-        self.orderEdit.setMinimumSize(QtCore.QSize(100, 0))
-        self.orderEdit.setObjectName(_fromUtf8("orderEdit"))
-        self.horizontalLayout_3.addWidget(self.orderEdit)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_3)
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
         self.label_3 = QtGui.QLabel(EditorDistributedDomain)
@@ -186,10 +142,6 @@ class Ui_EditorDistributedDomain(object):
         QtCore.QMetaObject.connectSlotsByName(EditorDistributedDomain)
 
     def retranslateUi(self, EditorDistributedDomain):
-        self.label.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Discr. Method", None, QtGui.QApplication.UnicodeUTF8))
-        self.discrMethodEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Select the discretization method from the list of available methods (currently eCFDM, eBFDM and eFFDM).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Order", None, QtGui.QApplication.UnicodeUTF8))
-        self.orderEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the discretization order (integer).</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("EditorDistributedDomain", "No. Intervals", None, QtGui.QApplication.UnicodeUTF8))
         self.numberOfIntervalsEdit.setToolTip(QtGui.QApplication.translate("EditorDistributedDomain", "<html><head/><body><p>Insert the number of intervals in the domain (integer). The actual number of points within the domain depends on the discretization method and order.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("EditorDistributedDomain", "Points", None, QtGui.QApplication.UnicodeUTF8))

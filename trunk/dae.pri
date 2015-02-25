@@ -11,7 +11,7 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 4
+DAE_TOOLS_MINOR = 5
 DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)

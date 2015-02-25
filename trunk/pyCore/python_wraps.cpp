@@ -1582,7 +1582,8 @@ void CreateStructuredGrid_old(daeDomain& domain, daeeDiscretizationMethod eMetho
                               size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dUB)
 {
     daeDeclareException(exDeprecated);
-    e << "The function daeDomain.CreateStructuredGrid(method, order, numberOfIntervals, lowerBound, upperBound) is deprecated. Use CreateStructuredGrid(numberOfIntervals, lowerBound, upperBound) instead"
+    e << "The function daeDomain.CreateStructuredGrid(method, order, numberOfIntervals, lowerBound, upperBound) !
+      << "is deprecated. Use CreateStructuredGrid(numberOfIntervals, lowerBound, upperBound) instead "
       << "and set the discretization method in functions d/d2(expression, domain, discretizationMethod, options)";
     throw e;
 }

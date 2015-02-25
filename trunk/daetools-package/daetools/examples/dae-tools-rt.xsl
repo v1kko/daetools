@@ -110,9 +110,11 @@
 
               <th>LowerBound</th>
               <th>UpperBound</th>
+            <!--
               <th>DiscretizationMethod</th>
               <th>DiscretizationOrder</th>
-             <!-- <th>Points</th> -->
+              <th>Points</th>
+            -->
 
             </tr>
           </thead>
@@ -157,15 +159,15 @@
                 <td>
                   <xsl:value-of select="UpperBound"/>
                 </td>
-
+              <!--
                 <td>
                   <xsl:value-of select="DiscretizationMethod"/>
                 </td>
-
+                
                 <td>
                   <xsl:value-of select="DiscretizationOrder"/>
                 </td>
-              <!--
+              
                 <td>
                   <xsl:value-of select="Points"/>
                 </td>
