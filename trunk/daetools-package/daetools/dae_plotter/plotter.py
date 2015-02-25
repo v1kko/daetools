@@ -4,10 +4,10 @@
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2014
 ***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the 
-terms of the GNU General Public License version 3 as published by the Free Software 
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT 
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
@@ -48,11 +48,11 @@ try:
 except:
     # In case we are running the module on its own (i.e. as __main__)
     images_dir = join(realpath(dirname(sys.argv[0])), 'images')
-    
+
 class daeMainWindow(QtGui.QMainWindow):
     def __init__(self, tcpipServer):
         QtGui.QMainWindow.__init__(self)
-        
+
         self.tcpipServer = tcpipServer
 
         self.move(0, 0)
@@ -162,7 +162,7 @@ class daeMainWindow(QtGui.QMainWindow):
         except Exception as e:
             QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
             return
-            
+
         plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
         if plot2D.newCurve() == False:
             plot2D.close()
@@ -179,7 +179,7 @@ class daeMainWindow(QtGui.QMainWindow):
         except Exception as e:
             QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
-        
+
         plot3D = daeMayavi3DPlot(self.tcpipServer)
         if plot3D.newSurface() == False:
             del plot3D
@@ -215,11 +215,11 @@ class daeMainWindow(QtGui.QMainWindow):
         sourceFolder = str(QtGui.QFileDialog.getExistingDirectory(self, "Choose the source folder with VTK files", '', QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
         if sourceFolder == '':
             return
-            
+
         destinationFolder = str(QtGui.QFileDialog.getExistingDirectory(self, "Choose the destination folder for generated PNG images", '', QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
         if destinationFolder == '':
             return
-            
+
         try:
             from .mayavi_plot3d import daeMayavi3DPlot
         except Exception as e:
@@ -227,7 +227,7 @@ class daeMainWindow(QtGui.QMainWindow):
             return
 
         daeMayavi3DPlot.saveVTKFilesAsImages_2D(sourceFolder, destinationFolder)
-        
+
     #@QtCore.pyqtSlot()
     def slotAnimateVTKFiles_2D(self):
         folder = str(QtGui.QFileDialog.getExistingDirectory(self, "Choose the folder with VTK files", '', QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
@@ -251,10 +251,10 @@ class daeMainWindow(QtGui.QMainWindow):
             f = open(filename, 'r')
             s = f.read(-1)
             template = json.loads(s)
-            
+
             updateInterval = template['updateInterval']
             curves         = template['curves']
-            
+
             try:
                 from .plot2d import dae2DPlot
             except Exception as e:
@@ -275,7 +275,7 @@ class daeMainWindow(QtGui.QMainWindow):
     def slotAbout(self):
         about = daeAboutDialog(self)
         about.exec_()
-    
+
     #@QtCore.pyqtSlot()
     def slotDocumentation(self):
         #site_packages = distutils.sysconfig.get_python_lib()
@@ -286,7 +286,7 @@ class daeMainWindow(QtGui.QMainWindow):
         #wv.setWindowState(QtCore.Qt.WindowMaximized)
         wv.setWindowTitle("DAE Tools documentation")
         wv.exec_()
-    
+
 def daeStartPlotter(port = 0):
     try:
         if port == 0:
@@ -303,10 +303,10 @@ def daeStartPlotter(port = 0):
         main.show()
         app.exec_()
         tcpipServer.Stop()
-    
+
     except RuntimeError:
         return
-    
+
 if __name__ == "__main__":
     if (len(sys.argv) > 1):
         daeStartPlotter(int(sys.argv[1]))
