@@ -242,6 +242,8 @@ class dae2DPlot(QtGui.QDialog):
                         'ymin' :           self.canvas.axes.get_ylim()[0],
                         'ymax' :           self.canvas.axes.get_ylim()[1],
                         'yscale' :         self.canvas.axes.get_yscale(),
+                        'legendOn' :       self.legendOn,
+                        'gridOn' :         self.gridOn,
                         'plotTitle' :      self.canvas.axes.get_title(),
                         'windowTitle' :    str(self.windowTitle())
                        }
@@ -370,7 +372,10 @@ class dae2DPlot(QtGui.QDialog):
            'ymin' : float
            'ymax' : float
            'yscale' : string [linear, log],
-           'title'  : string
+           'legendOn' : Bool,
+           'gridOn' : Bool,
+           'plotTitle' : string,
+           'windowTitle' : string
         }
         """
         if len(self.tcpipServer.DataReceivers) == 0:
@@ -424,6 +429,17 @@ class dae2DPlot(QtGui.QDialog):
         if 'yscale' in template:
             self.canvas.axes.set_yscale(template['yscale'])
 
+        if 'gridOn' in template:
+            self.gridOn = template['gridOn']
+            self.canvas.axes.grid(self.gridOn)
+
+        if 'legendOn' in template:
+            self.legendOn = template['legendOn']
+            if self.legendOn:
+                self.canvas.axes.legend(loc = 0, prop=self.fp8, numpoints = 1, fancybox=True)
+            else:
+                self.canvas.axes.legend_ = None
+
         if 'plotTitle' in template:
             self.canvas.axes.set_title(template['plotTitle'])
 
@@ -435,6 +451,9 @@ class dae2DPlot(QtGui.QDialog):
         #fmt.set_powerlimits((-3, 4))
         #self.canvas.axes.xaxis.set_major_formatter(fmt)
         #self.canvas.axes.yaxis.set_major_formatter(fmt)
+
+        self.figure.tight_layout()
+        self.canvas.draw()
 
         return True
 
