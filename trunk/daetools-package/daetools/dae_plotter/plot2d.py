@@ -190,6 +190,9 @@ class dae2DPlot(QtGui.QDialog):
 
         self.textTime = self.figure.text(0.01, 0.01, '', fontproperties = self.fp9)
 
+        self.xtransform = 1.0
+        self.ytransform = 1.0
+
         for xlabel in self.canvas.axes.get_xticklabels():
             xlabel.set_fontproperties(self.fp9)
         for ylabel in self.canvas.axes.get_yticklabels():
@@ -212,8 +215,16 @@ class dae2DPlot(QtGui.QDialog):
         try:
             for line, variable, domainIndexes, domainPoints, fun in self.curves:
                 results = fun(variable, domainIndexes, domainPoints)
-                xPoints     = results[5]
-                yPoints     = results[6]
+                if self.xtransform != 1:
+                    xPoints = numpy.array(results[5])*self.xtransform
+                else:
+                    xPoints = results[5]
+
+                if self.ytransform != 1:
+                    yPoints = numpy.array(results[6])*self.ytransform
+                else:
+                    yPoints = results[6]
+
                 currentTime = results[7]
 
                 line.set_xdata(xPoints)
@@ -238,10 +249,12 @@ class dae2DPlot(QtGui.QDialog):
                         'xmin' :           self.canvas.axes.get_xlim()[0],
                         'xmax' :           self.canvas.axes.get_xlim()[1],
                         'xscale' :         self.canvas.axes.get_xscale(),
+                        'xtransform':      1.0,
                         'ylabel' :         self.canvas.axes.get_ylabel(),
                         'ymin' :           self.canvas.axes.get_ylim()[0],
                         'ymax' :           self.canvas.axes.get_ylim()[1],
                         'yscale' :         self.canvas.axes.get_yscale(),
+                        'ytransform':      1.0,
                         'legendOn' :       self.legendOn,
                         'gridOn' :         self.gridOn,
                         'plotTitle' :      self.canvas.axes.get_title(),
@@ -365,13 +378,15 @@ class dae2DPlot(QtGui.QDialog):
            'curves' : [variableName, domainIndexes, domainPoints, lineTitle, style],
            'updateInterval' : float,
            'xlabel' : string,
-           'xmin' : float
-           'xmax' : float
+           'xmin' : float,
+           'xmax' : float,
            'xscale' : string [linear, log],
+           'xtransform': float,
            'ylabel' : string,
-           'ymin' : float
-           'ymax' : float
+           'ymin' : float,
+           'ymax' : float,
            'yscale' : string [linear, log],
+           'ytransform': float,
            'legendOn' : Bool,
            'gridOn' : Bool,
            'plotTitle' : string,
@@ -389,6 +404,11 @@ class dae2DPlot(QtGui.QDialog):
             return False
 
         curves = template['curves']
+
+        if 'xtransform' in template:
+            self.xtransform = template['xtransform']
+        if 'ytransform' in template:
+            self.ytransform = template['ytransform']
 
         for i, curve in enumerate(curves):
             variableName  = curve[0]
@@ -514,7 +534,10 @@ class dae2DPlot(QtGui.QDialog):
             n = no_lines % len(dae2DPlot.plotDefaults)
             pd = dae2DPlot.plotDefaults[n]
 
-        line, = self.canvas.axes.plot(xPoints, yPoints, label=label, color=pd.color, linewidth=pd.linewidth, \
+        xPoints_ = numpy.array(xPoints) * self.xtransform
+        yPoints_ = numpy.array(yPoints) * self.ytransform
+
+        line, = self.canvas.axes.plot(xPoints_, yPoints_, label=label, color=pd.color, linewidth=pd.linewidth, \
                                       linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, \
                                       markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
