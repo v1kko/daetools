@@ -236,8 +236,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
     
     # Save the model report and the runtime model report
-    #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

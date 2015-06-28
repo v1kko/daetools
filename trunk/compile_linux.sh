@@ -52,12 +52,11 @@ OPTIONS:
                       winetricks --gui
                         [x] Select the default wine prefix
                             [x] Install Windows dll or component
-                                Select vcrun2008 for instance (depending on the python version)
+                                Select vcrun2008 for instance (depending on the python version, vcrun2010 for python 3.4)
                     Install python:
                       wine misexec \i python-2-7-6.msi
-                    Make a symbolic link Python27 in trunk pointing to python installation in wine:
-                      cd trunk
-                      ln -s ~/.wine/drive_c/Python27 Python27
+                    or:
+                      wine misexec \i python-3-4-2.msi
 
 PROJECT:
     all             Build all daetools c++ libraries, solvers and python extension modules.

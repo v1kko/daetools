@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'Simulator.ui'
 #
-# Created: Sun Dec 14 15:20:56 2014
-#      by: PyQt4 UI code generator 4.9.3
+# Created: Mon May 18 21:33:25 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_SimulatorDialog(object):
     def setupUi(self, SimulatorDialog):
@@ -59,6 +68,7 @@ class Ui_SimulatorDialog(object):
         self.TimeHorizonLabel.setObjectName(_fromUtf8("TimeHorizonLabel"))
         self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.TimeHorizonLabel)
         self.TimeHorizonDoubleSpinBox = QtGui.QDoubleSpinBox(SimulatorDialog)
+        self.TimeHorizonDoubleSpinBox.setDecimals(5)
         self.TimeHorizonDoubleSpinBox.setMaximum(1000000000.0)
         self.TimeHorizonDoubleSpinBox.setObjectName(_fromUtf8("TimeHorizonDoubleSpinBox"))
         self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.TimeHorizonDoubleSpinBox)
@@ -66,6 +76,7 @@ class Ui_SimulatorDialog(object):
         self.ReportingIntervalLabel.setObjectName(_fromUtf8("ReportingIntervalLabel"))
         self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.ReportingIntervalLabel)
         self.ReportingIntervalDoubleSpinBox = QtGui.QDoubleSpinBox(SimulatorDialog)
+        self.ReportingIntervalDoubleSpinBox.setDecimals(5)
         self.ReportingIntervalDoubleSpinBox.setMaximum(1000000000.0)
         self.ReportingIntervalDoubleSpinBox.setObjectName(_fromUtf8("ReportingIntervalDoubleSpinBox"))
         self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.ReportingIntervalDoubleSpinBox)
@@ -154,17 +165,17 @@ class Ui_SimulatorDialog(object):
         QtCore.QMetaObject.connectSlotsByName(SimulatorDialog)
 
     def retranslateUi(self, SimulatorDialog):
-        SimulatorDialog.setWindowTitle(QtGui.QApplication.translate("SimulatorDialog", "DAE Tools Simulator", None, QtGui.QApplication.UnicodeUTF8))
-        self.simulationLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Simulation", None, QtGui.QApplication.UnicodeUTF8))
-        self.DataReporterTCPIPAddressLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Data Reporter (TCP/IP : port)", None, QtGui.QApplication.UnicodeUTF8))
-        self.MINLPSolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "(MI)NLP Solver", None, QtGui.QApplication.UnicodeUTF8))
-        self.DAESolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "DAE Solver", None, QtGui.QApplication.UnicodeUTF8))
-        self.LASolverLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "LA Solver", None, QtGui.QApplication.UnicodeUTF8))
-        self.TimeHorizonLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Time Horizon, s", None, QtGui.QApplication.UnicodeUTF8))
-        self.ReportingIntervalLabel.setText(QtGui.QApplication.translate("SimulatorDialog", "Reporting Interval, s", None, QtGui.QApplication.UnicodeUTF8))
-        self.ExportButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Export Matrix...", None, QtGui.QApplication.UnicodeUTF8))
-        self.MatrixButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Matrix Preview...", None, QtGui.QApplication.UnicodeUTF8))
-        self.RunButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Start...", None, QtGui.QApplication.UnicodeUTF8))
-        self.PauseButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Pause", None, QtGui.QApplication.UnicodeUTF8))
-        self.ResumeButton.setText(QtGui.QApplication.translate("SimulatorDialog", "Resume", None, QtGui.QApplication.UnicodeUTF8))
+        SimulatorDialog.setWindowTitle(_translate("SimulatorDialog", "DAE Tools Simulator", None))
+        self.simulationLabel.setText(_translate("SimulatorDialog", "Simulation", None))
+        self.DataReporterTCPIPAddressLabel.setText(_translate("SimulatorDialog", "Data Reporter (TCP/IP : port)", None))
+        self.MINLPSolverLabel.setText(_translate("SimulatorDialog", "(MI)NLP Solver", None))
+        self.DAESolverLabel.setText(_translate("SimulatorDialog", "DAE Solver", None))
+        self.LASolverLabel.setText(_translate("SimulatorDialog", "LA Solver", None))
+        self.TimeHorizonLabel.setText(_translate("SimulatorDialog", "Time Horizon, s", None))
+        self.ReportingIntervalLabel.setText(_translate("SimulatorDialog", "Reporting Interval, s", None))
+        self.ExportButton.setText(_translate("SimulatorDialog", "Export Matrix...", None))
+        self.MatrixButton.setText(_translate("SimulatorDialog", "Matrix Preview...", None))
+        self.RunButton.setText(_translate("SimulatorDialog", "Start...", None))
+        self.PauseButton.setText(_translate("SimulatorDialog", "Pause", None))
+        self.ResumeButton.setText(_translate("SimulatorDialog", "Resume", None))
 

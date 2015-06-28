@@ -28,7 +28,7 @@ Here we introduce:
 import os, sys
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
-import tutorial17_ui
+from .tutorial17_ui import Ui_tcpipLogServerMainWindow
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 import threading
@@ -105,7 +105,7 @@ class tcpipLogServerMainWindow(QtGui.QMainWindow):
     def __init__(self, app):
         QtGui.QMainWindow.__init__(self)
 
-        self.ui = tutorial17_ui.Ui_tcpipLogServerMainWindow()
+        self.ui = Ui_tcpipLogServerMainWindow()
         self.ui.setupUi(self)
         #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowIcon(QtGui.QIcon(join(dirname(__file__), 'daetools-48x48.png')))

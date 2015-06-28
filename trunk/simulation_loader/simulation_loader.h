@@ -43,7 +43,7 @@ public:
 
 // Integration functions
     double Integrate(bool bStopAtDiscontinuity, bool bReportDataAroundDiscontinuities = true);
-    double IntegrateForTimeInterval(double timeInterval, bool bReportDataAroundDiscontinuities = true);
+    double IntegrateForTimeInterval(double timeInterval, bool bStopAtDiscontinuity, bool bReportDataAroundDiscontinuities = true);
     double IntegrateUntilTime(double time, bool bStopAtDiscontinuity, bool bReportDataAroundDiscontinuities = true);
 
 // Info functions

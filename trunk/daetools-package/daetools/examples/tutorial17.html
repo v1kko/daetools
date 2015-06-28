@@ -38,7 +38,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#0000ff;'>import</span> os, sys
 <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>import</span> tutorial17_ui
+<span style='color:#0000ff;'>from</span> .tutorial17_ui <span style='color:#0000ff;'>import</span> Ui_tcpipLogServerMainWindow
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime, sleep
 <span style='color:#0000ff;'>from</span> os.path <span style='color:#0000ff;'>import</span> join, realpath, dirname
 <span style='color:#0000ff;'>import</span> threading
@@ -115,7 +115,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, app):
         QtGui.QMainWindow.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
 
-        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> tutorial17_ui.Ui_tcpipLogServerMainWindow()
+        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> Ui_tcpipLogServerMainWindow()
         <span style='color:#0000ff;'>self</span>.ui.setupUi(<span style='color:#0000ff;'>self</span>)
         <span style='color:#008000;'>#self.setAttribute(QtCore.Qt.WA_DeleteOnClose)</span>
         <span style='color:#0000ff;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#0000ff;'>__file__</span>), <span style='color:#c00000;'>'daetools-48x48.png'</span>)))

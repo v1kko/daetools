@@ -49,6 +49,25 @@ OPTIONS:
                     Toolchains should be located in /home/mingw32-i686 directory. 
                     /home/mingw32-i686/bin should be added to the PATH environment variable.
                     CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /home/mingw32-i686 directory.
+                    Manual compilation of boost on windows using i686-w64-mingw32-gcc-4.6.3-2:
+                        Execute in shell:
+                          set PATH=c:\i686-w64-mingw32-gcc-4.6.3-2;%PATH% (or in System/Advanced/Environmental Variables)
+                          Unpack boost to boostX.Y
+                          cd boostX.Y
+                          bootstrap.bat mingw
+                        Update toolset to gcc in project-config.jam
+                        Update ~/user-config.jam with the desired python version
+                        Replace -pyXY with the correct python version (i.e. -py27 or -py34) and run:
+                          bjam --build-dir=./build --debug-building --layout=system 
+                            --buildid=daetools-pyXY --with-date_time --with-system
+                            --with-filesystem --with-regex --with-serialization
+                            --with-thread --with-python variant=release link=shared
+                            threading=multi runtime-link=shared
+                        Copy files to daetools-package/solibs directory:
+                          copy stage/lib/libboost_python-daetools-pyXY*     ../daetools-package/solibs
+                          copy stage/lib/libboost_system-daetools-pyXY*     ../daetools-package/solibs
+                          copy stage/lib/libboost_thread-daetools-pyXY*     ../daetools-package/solibs
+                          copy stage/lib/libboost_filesystem-daetools-pyXY* ../daetools-package/solibs
                    
 LIBRARY:
     all              All libraries and solvers.
@@ -301,6 +320,8 @@ configure_boost()
 {
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     echo "Boost cannot be cross-compiled since it requires cross-compiled Python"
+    echo "The manual procedure:"
+    echo "${BOOST_CC}"
     exit
   fi
   

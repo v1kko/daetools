@@ -299,6 +299,9 @@ void xmlPresentationCreator::WrapIdentifier(xmlTag_t* parent, string name)
 	string strName, strRest;
 	string::size_type iUnderscoreFound, iAmpersendFound, iDotFound, iSemicolonFound;
 
+    if(name.empty())
+        return;
+
 	iUnderscoreFound = name.find('_');
 	iDotFound        = name.find('.');
 	iAmpersendFound  = name.find('&');
@@ -346,7 +349,7 @@ void xmlPresentationCreator::WrapIdentifier(xmlTag_t* parent, string name)
 				strName = name.substr(iAmpersendFound, iSemicolonFound+1); // &Delta;H1 -> &Delta; 
 				strRest = name.substr(iSemicolonFound+1, string::npos);    // &Delta;H1 -> H1
 			}
-			else // & is not the first character
+            else // & is not the first character
 			{
 				strName = name.substr(0, iAmpersendFound);            // HH&Delta;H1 -> HH
 				strRest = name.substr(iAmpersendFound, string::npos); // HH&Delta;H1 -> &Delta;H1

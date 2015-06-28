@@ -268,9 +268,9 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             indexes[0] = internalVariableIndex;
 
             if(!a_K.node)
-                a_K =       create_adouble(new adFEMatrixItemNode("K", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
+                a_K =       create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
             else
-                a_K = a_K + create_adouble(new adFEMatrixItemNode("K", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
+                a_K = a_K + create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
 
             /* ACHTUNG, ACHTUNG!!
                The mass matrix M is not going to change - wherever we have an item in M equal to zero it is going to stay zero
@@ -280,9 +280,9 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             if(m_FEModel.m_matM->GetItem(row, column) != 0)
             {
                 if(!a_Kdt.node)
-                    a_Kdt =         create_adouble(new adFEMatrixItemNode("", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                    a_Kdt =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
                 else
-                    a_Kdt = a_Kdt + create_adouble(new adFEMatrixItemNode("", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                    a_Kdt = a_Kdt + create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
 
                 nIndex = variable->GetOverallIndex() + internalVariableIndex;
                 m_pModel->m_pDataProxy->SetVariableTypeGathered(nIndex, cnDifferential);

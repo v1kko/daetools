@@ -162,19 +162,19 @@ public:
 		this->get_override("SetUpVariables")();
 	}
 	
-	real_t Integrate(daeeStopCriterion eStopCriterion)
+    real_t Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true)
 	{
-		return this->get_override("Integrate")(eStopCriterion);
+        return this->get_override("Integrate")(eStopCriterion, bReportDataAroundDiscontinuities);
 	}
 	
-	real_t IntegrateForTimeInterval(real_t time_interval)
+    real_t IntegrateForTimeInterval(real_t time_interval, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true)
 	{
-		return this->get_override("IntegrateForTimeInterval")(time_interval);
+        return this->get_override("IntegrateForTimeInterval")(time_interval, eStopCriterion, bReportDataAroundDiscontinuities);
 	}
 	
-	real_t IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion)
+    real_t IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true)
 	{
-		return this->get_override("IntegrateUntilTime")(time, eStopCriterion);
+        return this->get_override("IntegrateUntilTime")(time, eStopCriterion, bReportDataAroundDiscontinuities);
 	}
 	
 };

@@ -1,6 +1,6 @@
 /***********************************************************************************
                  DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2015
 ************************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -98,6 +98,7 @@ public:
     virtual real_t				Integrate(daeeStopCriterion eStopCriterion,
                                           bool bReportDataAroundDiscontinuities = true)					= 0;
     virtual real_t				IntegrateForTimeInterval(real_t time_interval,
+                                                         daeeStopCriterion eStopCriterion,
                                                          bool bReportDataAroundDiscontinuities = true)	= 0;
     virtual real_t				IntegrateUntilTime(real_t time,
                                                    daeeStopCriterion eStopCriterion,

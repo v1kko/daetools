@@ -71,7 +71,7 @@ public:
     virtual void				SolveInitial(void);
     virtual daeDAESolver_t*		GetDAESolver(void) const;
     virtual real_t				Integrate(daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
-    virtual real_t				IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities = true);
+    virtual real_t				IntegrateForTimeInterval(real_t time_interval, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
     virtual real_t				IntegrateUntilTime(real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities = true);
     virtual void				SetUpParametersAndDomains(void);
     virtual void				SetUpVariables(void);

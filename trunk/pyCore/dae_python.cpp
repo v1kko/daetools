@@ -486,6 +486,11 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daeCondition>("daeCondition", DOCSTR_daeCondition, no_init)
+        // daeSerializable part
+        .add_property("ID",             &daeCondition::GetID)
+        .add_property("Version",        &daeCondition::GetVersion)
+        .add_property("Library",        &daeCondition::GetLibrary)
+
         .add_property("EventTolerance",	&daeCondition::GetEventTolerance, &daeCondition::SetEventTolerance,                DOCSTR_daeCondition_EventTolerance)
         .add_property("SetupNode",      make_function(&daeCondition::getSetupNodeRawPtr, return_internal_reference<>()),   DOCSTR_daeCondition_SetupNode)
         .add_property("RuntimeNode",    make_function(&daeCondition::getRuntimeNodeRawPtr, return_internal_reference<>()), DOCSTR_daeCondition_RuntimeNode)

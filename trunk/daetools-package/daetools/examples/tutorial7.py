@@ -125,7 +125,7 @@ class simTutorial(daeSimulation):
     # (by using the function Integrate).
     def Run(self):
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
-        time = self.IntegrateForTimeInterval(100)
+        time = self.IntegrateForTimeInterval(100, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 

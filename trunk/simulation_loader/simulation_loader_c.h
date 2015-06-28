@@ -37,6 +37,7 @@ bool FreeSimulation(void* s);
 bool ReportData(void* s);
 
 /* Integration functions */
+bool Integrate(void* s);
 bool IntegrateForTimeInterval(void* s, double timeInterval);
 bool IntegrateUntilTime(void* s, double time);
 

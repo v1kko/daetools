@@ -140,9 +140,9 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
         m_pLog->Message(string("       @                    @                                          "), 0);
         m_pLog->Message(string("  @@@@@@   @@@@@     @@@@@  @                DAE Tools                 "), 0);
         m_pLog->Message(string(" @     @        @   @     @       Version:   ") + daeVersion(true),        0);
-        m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2014      "), 0);
+        m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2010-2015 "), 0);
         m_pLog->Message(string(" @     @  @     @   @             E-mail:    dnikolic at daetools.com  "), 0);
-        m_pLog->Message(string("  @@@@@@   @@@@@@    @@@@@        Homepage:  daetools.sourceforge.net  "), 0);
+        m_pLog->Message(string("  @@@@@@   @@@@@@    @@@@@        Homepage:  http://www.daetools.com   "), 0);
         m_pLog->Message(string("                                                                       "), 0);
         m_pLog->Message(string("***********************************************************************"), 0);
         m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
@@ -1129,7 +1129,7 @@ real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion, bool bReportDa
 }
 
 // Integrates for the given time interval
-real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, bool bReportDataAroundDiscontinuities)
+real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities)
 {
     if(!m_pModel)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -1138,7 +1138,7 @@ real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, bool bRepor
     if((m_dCurrentTime + time_interval) > m_dTimeHorizon)
         daeDeclareAndThrowException(exInvalidCall);
 
-    m_dCurrentTime = m_pDAESolver->Solve(m_dCurrentTime + time_interval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
+    m_dCurrentTime = m_pDAESolver->Solve(m_dCurrentTime + time_interval, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;
 }
 

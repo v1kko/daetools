@@ -78,9 +78,10 @@ DESTDIR = $${DAE_DEST_DIR}
 #                           System + Machine + Python info
 #####################################################################################
 crossCompile{
-    # Not used
-    PYTHON = "wine python"
+    # Not used, but should be set in compile_linux.sh as:
+    #PYTHON = "wine c:\\Python27\\python"
 
+    # Change the version if compiling for a different python version than 2.7
     PYTHON_MAJOR = 2
     PYTHON_MINOR = 7
     PYTHON_ABI   =
@@ -96,7 +97,7 @@ crossCompile{
 
     RT =
 
-    WINE_PYTHON_DIR    = $$system(echo $HOME)/.wine/drive_c/Python27
+    WINE_PYTHON_DIR    = $$system(echo $HOME)/.wine/drive_c/Python$${PYTHON_MAJOR}$${PYTHON_MINOR}
     PYTHON_INCLUDE_DIR = $${WINE_PYTHON_DIR}/include
     PYTHON_LIB_DIR     = $${WINE_PYTHON_DIR}/libs
     PYTHON_LIB         = -lpython$${PYTHON_MAJOR}$${PYTHON_MINOR}$${PYTHON_ABI} $${RT}

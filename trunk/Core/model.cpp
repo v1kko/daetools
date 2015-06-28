@@ -463,7 +463,7 @@ string daeModel::ExportObjects(std::vector<daeExportable_t*>& ptrarrObjects, dae
         strFile  =
         "\"\"\"********************************************************************************\n"
         "                 DAE Tools: pyDAE module, www.daetools.com\n"
-        "                 Copyright (C) Dragan Nikolic, 2010\n"
+        "                 Copyright (C) Dragan Nikolic, 2015\n"
         "***********************************************************************************\n"
         "DAE Tools is free software; you can redistribute it and/or modify it under the\n"
         "terms of the GNU General Public License version 3 as published by the Free Software\n"
@@ -491,7 +491,7 @@ string daeModel::ExportObjects(std::vector<daeExportable_t*>& ptrarrObjects, dae
         strFile  +=
         "/********************************************************************************\n"
         "                 DAE Tools: cDAE module, www.daetools.com\n"
-        "                 Copyright (C) Dragan Nikolic, 2010\n"
+        "                 Copyright (C) Dragan Nikolic, 2015\n"
         "*********************************************************************************\n"
         "DAE Tools is free software; you can redistribute it and/or modify it under the\n"
         "terms of the GNU General Public License version 3 as published by the Free Software\n"

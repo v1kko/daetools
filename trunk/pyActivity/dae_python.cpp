@@ -165,7 +165,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Integrate",                   &daeSimulation::Integrate,
                                             ( arg("self"), arg("stopCriterion"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_Integrate)
         .def("IntegrateForTimeInterval",    &daeSimulation::IntegrateForTimeInterval,
-                                            ( arg("self"), arg("timeInterval"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_IntegrateForTimeInterval)
+                                            ( arg("self"), arg("timeInterval"), arg("stopCriterion"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_IntegrateForTimeInterval)
         .def("IntegrateUntilTime",          &daeSimulation::IntegrateUntilTime,
                                             ( arg("self"), arg("time"), arg("stopCriterion"), arg("reportDataAroundDiscontinuities") = true ), DOCSTR_daeSimulation_IntegrateUntilTime)
 

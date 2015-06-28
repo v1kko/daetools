@@ -741,6 +741,28 @@ bool SetActiveState(void* s, unsigned int index, char strActiveState[64])
     return false;
 }
 
+bool Integrate(void* s)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        ptr_loader->Integrate(false, true);
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
 bool IntegrateForTimeInterval(void* s, double timeInterval)
 {
     try
@@ -752,7 +774,7 @@ bool IntegrateForTimeInterval(void* s, double timeInterval)
             return false;
         }
 
-        ptr_loader->IntegrateForTimeInterval(timeInterval, true);
+        ptr_loader->IntegrateForTimeInterval(timeInterval, false, true);
         return true;
     }
     catch(std::exception& e)

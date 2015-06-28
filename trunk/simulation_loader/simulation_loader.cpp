@@ -374,7 +374,7 @@ double daeSimulationLoader::Integrate(bool bStopAtDiscontinuity, bool bReportDat
         return pData->m_pSimulation->Integrate(eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
 }
 
-double daeSimulationLoader::IntegrateForTimeInterval(double timeInterval, bool bReportDataAroundDiscontinuities)
+double daeSimulationLoader::IntegrateForTimeInterval(double timeInterval, bool bStopAtDiscontinuity, bool bReportDataAroundDiscontinuities)
 {
     daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
     if(!pData)
@@ -383,7 +383,10 @@ double daeSimulationLoader::IntegrateForTimeInterval(double timeInterval, bool b
     if(!pData->m_pSimulation)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    return pData->m_pSimulation->IntegrateForTimeInterval(timeInterval, bReportDataAroundDiscontinuities);
+    if(bStopAtDiscontinuity)
+        return pData->m_pSimulation->IntegrateForTimeInterval(timeInterval, eStopAtModelDiscontinuity, bReportDataAroundDiscontinuities);
+    else
+        return pData->m_pSimulation->IntegrateForTimeInterval(timeInterval, eDoNotStopAtDiscontinuity, bReportDataAroundDiscontinuities);
 }
 
 double daeSimulationLoader::IntegrateUntilTime(double time, bool bStopAtDiscontinuity, bool bReportDataAroundDiscontinuities)
