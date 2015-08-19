@@ -175,7 +175,7 @@ class simTutorial(daeSimulation):
                 if m_dt(row, column) != 0:
                     variable, index, ic = dofIndexesMap[column]
                     variable.SetInitialCondition(index, ic)
-                    print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
+                    #print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
     
 # Use daeSimulator class
 def guiRun(app):

@@ -343,7 +343,7 @@ void daeIDASolver::CreateIDA(void)
     
     fval = cfg.Get<real_t>("daetools.IDAS.MaxStep", 0.0);
     if(fval > 0.0)
-        IDASetInitStep(m_pIDA, fval);
+        IDASetMaxStep(m_pIDA, fval);
     
     IDASetMaxErrTestFails(m_pIDA,   cfg.Get<int>   ("daetools.IDAS.MaxErrTestFails", 10));
     IDASetMaxNonlinIters(m_pIDA,    cfg.Get<int>   ("daetools.IDAS.MaxNonlinIters",  4));
@@ -622,6 +622,23 @@ void daeIDASolver::SolveInitial(void)
             throw e;
         }
 
+        // Get the corrected IC and send them to the block
+        retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Could not get the corrected initial conditions from the Sundials IDAS solver at TIME = 0; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
+
+        realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables);
+        realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
+
+        m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
+        m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
+
+        m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
+
         if(m_pBlock->CheckForDiscontinuities())
         {
             m_pBlock->ExecuteOnConditionActions();
@@ -631,10 +648,6 @@ void daeIDASolver::SolveInitial(void)
             // debug
             if(m_bPrintInfo)
             {
-                retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
-                if(!CheckFlag(retval))
-                    daeDeclareAndThrowException(exInvalidCall);
-                m_pSimulation->ReportData(m_dCurrentTime);
             }
         }
         else
@@ -649,23 +662,6 @@ void daeIDASolver::SolveInitial(void)
         e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0: Max number of STN rebuilds reached; " << CreateIDAErrorMessage(retval);
         throw e;
     }
-
-// Get the corrected IC and send them to the block
-    retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives); 
-    if(!CheckFlag(retval)) 
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Could not get the corrected initial conditions from the Sundials IDAS solver at TIME = 0; " << CreateIDAErrorMessage(retval);
-		throw e;
-	}
-    
-    realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables); 
-    realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives); 
-
-    m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
-    m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
-
-    m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 
 // Get the corrected sensitivity IC
     if(m_bCalculateSensitivities)
@@ -736,6 +732,24 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
             throw e;
         }
 
+        // Get the corrected IC and send them to the block
+        retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Could not get the corrected initial conditions from the Sundials IDAS solver at TIME = "
+              << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
+
+        realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables);
+        realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
+
+        m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
+        m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
+
+        m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
+
         if(m_pBlock->CheckForDiscontinuities())
         {
             m_pBlock->ExecuteOnConditionActions();
@@ -745,10 +759,6 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
             // debug
             if(m_bPrintInfo)
             {
-                retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
-                if(!CheckFlag(retval))
-                    daeDeclareAndThrowException(exInvalidCall);
-                m_pSimulation->ReportData(m_dCurrentTime);
             }
         }
         else
@@ -764,24 +774,6 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
 		  << CreateIDAErrorMessage(retval);
 		throw e;
     }
-
-// Get the corrected IC and send them to the block
-    retval = IDAGetConsistentIC(m_pIDA, m_pIDASolverData->m_vectorVariables, m_pIDASolverData->m_vectorTimeDerivatives);
-    if(!CheckFlag(retval))
-    {
-        daeDeclareException(exMiscellanous);
-        e << "Could not get the corrected initial conditions from the Sundials IDAS solver at TIME = "
-          << m_dCurrentTime << "; " << CreateIDAErrorMessage(retval);
-        throw e;
-    }
-
-    realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables);
-    realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
-
-    m_arrValues.InitArray         (m_nNumberOfEquations, pdValues);
-    m_arrTimeDerivatives.InitArray(m_nNumberOfEquations, pdTimeDerivatives);
-
-    m_pBlock->SetBlockData(m_arrValues, m_arrTimeDerivatives);
 
 // Get the corrected sensitivity IC
     if(m_bCalculateSensitivities)

@@ -47,6 +47,9 @@ enum daeeSimulationMode
 class daeSimulation_t
 {
 public:
+    virtual ~daeSimulation_t(void){}
+    
+public:
     virtual daeModel_t*			GetModel(void) const                                                = 0;
     virtual void				SetModel(daeModel_t* pModel)        								= 0;
     virtual daeDataReporter_t*	GetDataReporter(void) const             							= 0;

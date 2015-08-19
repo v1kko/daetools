@@ -1124,6 +1124,9 @@ real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion, bool bReportDa
     if(m_dCurrentTime >= m_dTimeHorizon)
         daeDeclareAndThrowException(exInvalidCall);
 
+    // Reset the last satisfied condition pointer
+    m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
+
     m_dCurrentTime = m_pDAESolver->Solve(m_dTimeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;
 }
@@ -1138,6 +1141,9 @@ real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, daeeStopCri
     if((m_dCurrentTime + time_interval) > m_dTimeHorizon)
         daeDeclareAndThrowException(exInvalidCall);
 
+    // Reset the last satisfied condition pointer
+    m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
+
     m_dCurrentTime = m_pDAESolver->Solve(m_dCurrentTime + time_interval, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;
 }
@@ -1151,6 +1157,9 @@ real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCri
         daeDeclareAndThrowException(exInvalidPointer);
     if(time > m_dTimeHorizon)
         daeDeclareAndThrowException(exInvalidCall);
+
+    // Reset the last satisfied condition pointer
+    m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
 
     m_dCurrentTime = m_pDAESolver->Solve(time, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;

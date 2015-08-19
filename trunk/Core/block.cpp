@@ -563,10 +563,8 @@ bool daeBlock::CheckForDiscontinuities(void)
         m_pDataProxy->LogMessage(string("Checking state transitions at time ") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15) + string("..."), 0);
 
 // Achtung, Achtung!!
-// Temporarily disable it until I discover why there is no set last satisfied condition in some cases
+// Moved to daeSimulation::Integrate_xxx() functions to get it reset before every call to simulation.Integrate/daesolver.Solve
 //    m_pDataProxy->SetLastSatisfiedCondition(NULL);
-
-
 
 // First check discontinuities in the top level model
     daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());

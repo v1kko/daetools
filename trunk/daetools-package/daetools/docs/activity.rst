@@ -13,6 +13,7 @@ Module pyActivity
 
 Overview
 ==========
+.. uml:: pyActivity
 
 Classes
 =======
