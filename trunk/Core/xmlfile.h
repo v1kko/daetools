@@ -1,6 +1,6 @@
 /***********************************************************************************
                  DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2015
+                 Copyright (C) Dragan Nikolic, 2010
 ************************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the 
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -164,7 +164,8 @@ public:
 	virtual void GetValue(std::string& Value) const;
 	virtual void GetValue(int& Value) const;
 	virtual void GetValue(long& Value) const;
-	virtual void GetValue(unsigned long& Value) const;
+	virtual void GetValue(unsigned long long& Value) const;
+    virtual void GetValue(unsigned long& Value) const;
     virtual void GetValue(unsigned int& Value) const;
 	virtual void GetValue(float& Value) const;
 	virtual void GetValue(double& Value) const;
@@ -174,7 +175,8 @@ public:
 	virtual void SetValue(std::string Value);
 	virtual void SetValue(int Value);
 	virtual void SetValue(long Value);
-	virtual void SetValue(unsigned long Value);
+	virtual void SetValue(unsigned long long Value);
+    virtual void SetValue(unsigned long Value);
     virtual void SetValue(unsigned int Value);
 	virtual void SetValue(float Value);
 	virtual void SetValue(double Value);
@@ -207,7 +209,8 @@ public:
 	void GetValue(std::string& Value) const;
 	void GetValue(int& Value) const;
 	void GetValue(long& Value) const;
-	void GetValue(unsigned long& Value) const;
+	void GetValue(unsigned long long& Value) const;
+    void GetValue(unsigned long& Value) const;
     void GetValue(unsigned int& Value) const;
 	void GetValue(float& Value) const;
 	void GetValue(double& Value) const;
@@ -218,7 +221,8 @@ public:
 	void SetValue(std::string Value);
 	void SetValue(int Value);
 	void SetValue(long Value);
-	void SetValue(unsigned long Value);
+	void SetValue(unsigned long long Value);
+    void SetValue(unsigned long Value);
     void SetValue(unsigned int Value);
 	void SetValue(float Value);
 	void SetValue(double Value);
@@ -232,6 +236,7 @@ public:
 	xmlTag_t* AddTag(const std::string& strName, double Value);
 	xmlTag_t* AddTag(const std::string& strName, int Value);
 	xmlTag_t* AddTag(const std::string& strName, long Value);
+    xmlTag_t* AddTag(const std::string& strName, unsigned long long Value);
 	xmlTag_t* AddTag(const std::string& strName, unsigned long Value);
     xmlTag_t* AddTag(const std::string& strName, unsigned int Value);
 	xmlTag_t* AddTag(const std::string& strName, bool Value);
@@ -244,7 +249,8 @@ public:
 	xmlAttribute_t* AddAttribute(const std::string& strName, double Value);
 	xmlAttribute_t* AddAttribute(const std::string& strName, int Value);
 	xmlAttribute_t* AddAttribute(const std::string& strName, long Value);
-	xmlAttribute_t* AddAttribute(const std::string& strName, unsigned long Value);
+	xmlAttribute_t* AddAttribute(const std::string& strName, unsigned long long Value);
+    xmlAttribute_t* AddAttribute(const std::string& strName, unsigned long Value);
     xmlAttribute_t* AddAttribute(const std::string& strName, unsigned int Value);
 	xmlAttribute_t* AddAttribute(const std::string& strName, bool Value);
 	xmlAttribute_t* AddAttribute(const std::string& strName, char Value);
@@ -262,12 +268,14 @@ public:
 	bool GetChildTagValue(const std::string& strTagName, double& dTagValue) const;
 	bool GetChildTagValue(const std::string& strTagName, bool& bTagValue) const;
 	bool GetChildTagValue(const std::string& strTagName, char& cTagValue) const;
+    bool GetChildTagValue(const std::string& strTagName, unsigned long long& lTagValue) const;
 	bool GetChildTagValue(const std::string& strTagName, unsigned long& lTagValue) const;
 //	bool GetChildTagValue(const std::string& strTagName, unsigned char** Value, size_t& nSize) const;
 
 	bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<std::string>& Array) const;
 	bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<int>& Array) const;
 	bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<long>& Array) const;
+    bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<unsigned long long>& Array) const;
     bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<unsigned long>& Array) const;
     bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<unsigned int>& Array) const;
     bool GetMultipleChildTagValue(const std::string& strTagName, std::vector<double>& Array) const;

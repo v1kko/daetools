@@ -1140,6 +1140,7 @@ const adouble d(const adouble&                            a,
     adouble tmp;
     tmp.setGatherInfo(true);
     tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(&domain,
+                                                                    1,
                                                                     eDiscretizationMethod,
                                                                     mapDiscretizationOptions,
                                                                     CLONE_NODE(a.node, a.getValue()) ));
@@ -1151,10 +1152,13 @@ const adouble d2(const adouble&                            a,
                  daeeDiscretizationMethod                  eDiscretizationMethod,
                  const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
-    daeDeclareAndThrowException(exNotImplemented);
-
     adouble tmp;
     tmp.setGatherInfo(true);
+    tmp.node = adNodePtr(new adSetupExpressionPartialDerivativeNode(&domain,
+                                                                    2,
+                                                                    eDiscretizationMethod,
+                                                                    mapDiscretizationOptions,
+                                                                    CLONE_NODE(a.node, a.getValue()) ));
     return tmp;
 }
 

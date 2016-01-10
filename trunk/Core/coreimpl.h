@@ -2172,7 +2172,8 @@ protected:
 	friend class adSetupPartialDerivativeNodeArray;
 	friend class adSetupExpressionDerivativeNode;
 	friend class adSetupExpressionPartialDerivativeNode;
-	friend class adRuntimeVariableNode;
+    friend class adSetupExpressionPartialDerivativeNodeArray;
+    friend class adRuntimeVariableNode;
 	friend class adRuntimeTimeDerivativeNode;
 	friend class adRuntimePartialDerivativeNode;
 	friend class daeOptimizationVariable;

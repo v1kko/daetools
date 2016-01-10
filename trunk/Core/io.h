@@ -1,6 +1,6 @@
 /***********************************************************************************
                  DAE Tools Project: www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2015
+                 Copyright (C) Dragan Nikolic, 2010
 ************************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the 
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -78,7 +78,8 @@ public:
 	virtual void GetValue(std::string& Value) const		= 0;
 	virtual void GetValue(int& Value) const				= 0;
 	virtual void GetValue(long& Value) const			= 0;
-	virtual void GetValue(unsigned long& Value) const	= 0;
+	virtual void GetValue(unsigned long long& Value) const	= 0;
+    virtual void GetValue(unsigned long& Value) const   = 0;
     virtual void GetValue(unsigned int& Value) const	= 0;
 	virtual void GetValue(float& Value) const			= 0;
 	virtual void GetValue(double& Value) const			= 0;
@@ -87,8 +88,9 @@ public:
 
 	virtual void SetValue(std::string Value)	= 0;
 	virtual void SetValue(int Value)			= 0;
-	virtual void SetValue(long Value)			= 0;
-	virtual void SetValue(unsigned long Value)	= 0;
+    virtual void SetValue(long Value)           = 0;
+	virtual void SetValue(unsigned long long Value)	= 0;
+    virtual void SetValue(unsigned long Value)  = 0;
     virtual void SetValue(unsigned int Value)	= 0;
 	virtual void SetValue(float Value)			= 0;
 	virtual void SetValue(double Value)			= 0;
@@ -111,7 +113,8 @@ public:
 	virtual void GetValue(std::string& Value) const		= 0;
 	virtual void GetValue(int& Value) const				= 0;
 	virtual void GetValue(long& Value) const			= 0;
-	virtual void GetValue(unsigned long& Value) const	= 0;
+	virtual void GetValue(unsigned long long& Value) const	= 0;
+    virtual void GetValue(unsigned long& Value) const   = 0;
     virtual void GetValue(unsigned int& Value) const	= 0;
 	virtual void GetValue(float& Value) const			= 0;
 	virtual void GetValue(double& Value) const			= 0;
@@ -121,6 +124,7 @@ public:
 	virtual void SetValue(std::string Value)	= 0;
 	virtual void SetValue(int Value)			= 0;
 	virtual void SetValue(long Value)			= 0;
+    virtual void SetValue(unsigned long long Value)  = 0;
 	virtual void SetValue(unsigned long Value)	= 0;
     virtual void SetValue(unsigned int Value)	= 0;
 	virtual void SetValue(float Value)			= 0;
@@ -134,6 +138,7 @@ public:
 	virtual xmlTag_t* AddTag(const std::string& strName, double Value)			= 0;
 	virtual xmlTag_t* AddTag(const std::string& strName, int Value)				= 0;
 	virtual xmlTag_t* AddTag(const std::string& strName, long Value)			= 0;
+    virtual xmlTag_t* AddTag(const std::string& strName, unsigned long long Value)   = 0;
 	virtual xmlTag_t* AddTag(const std::string& strName, unsigned long Value)	= 0;
     virtual xmlTag_t* AddTag(const std::string& strName, unsigned int Value)	= 0;
 	virtual xmlTag_t* AddTag(const std::string& strName, bool Value)			= 0;
@@ -145,7 +150,8 @@ public:
 	virtual xmlAttribute_t* AddAttribute(const std::string& strName, double Value)			= 0;
 	virtual xmlAttribute_t* AddAttribute(const std::string& strName, int Value)				= 0;
 	virtual xmlAttribute_t* AddAttribute(const std::string& strName, long Value)			= 0;
-	virtual xmlAttribute_t* AddAttribute(const std::string& strName, unsigned long Value)	= 0;
+	virtual xmlAttribute_t* AddAttribute(const std::string& strName, unsigned long long Value)	= 0;
+    virtual xmlAttribute_t* AddAttribute(const std::string& strName, unsigned long Value)   = 0;
     virtual xmlAttribute_t* AddAttribute(const std::string& strName, unsigned int Value)	= 0;
 	virtual xmlAttribute_t* AddAttribute(const std::string& strName, bool Value)			= 0;
 	virtual xmlAttribute_t* AddAttribute(const std::string& strName, char Value)			= 0;

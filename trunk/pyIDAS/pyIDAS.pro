@@ -15,6 +15,8 @@ INCLUDEPATH += $${BOOSTDIR} \
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${SUNDIALS_LIBDIR}
 
+LIBS += $${SOLIBS_RPATH}
+
 LIBS +=	$${DAE_IDAS_SOLVER_LIB} \
         $${DAE_UNITS_LIB} \
         $${SUNDIALS_LIBS} \

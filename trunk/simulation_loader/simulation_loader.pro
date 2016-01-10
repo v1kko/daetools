@@ -18,16 +18,12 @@ HEADERS += stdafx.h \
            simulation_loader_c.h \
            simulation_loader_common.h
 
-#message($$system($${PYTHON}-config --cflags))
-#message($$system($${PYTHON}-config --ldflags))
-
-QMAKE_CXXFLAGS += $$system($${PYTHON}-config --cflags)
-#QMAKE_LFLAGS  += $$system($${PYTHON}-config --ldflags)
-
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
+
+LIBS += $${SOLIBS_RPATH}
 
 LIBS += $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS}

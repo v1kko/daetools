@@ -32,7 +32,10 @@ daetools_system = str(platform.system())
 if platform.system() == 'Darwin':
     daetools_machine = 'universal'
 elif platform.system() == 'Windows':
-    daetools_machine = 'win32'
+    if 'AMD64' in platform.machine():
+        daetools_machine = 'win64'
+    else:
+        daetools_machine = 'win32'
 else:
     daetools_machine = str(platform.machine())
 

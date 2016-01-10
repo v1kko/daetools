@@ -186,13 +186,22 @@ xmlTag_t* xmlTag::AddTag(const std::string& strName, long Value)
 	return pTag;
 }
 
-xmlTag_t* xmlTag::AddTag(const std::string& strName, unsigned long Value)
+xmlTag_t* xmlTag::AddTag(const std::string& strName, unsigned long long Value)
 {
 	xmlTag* pTag = new xmlTag;
 	pTag->SetName(strName);
 	pTag->SetValue(Value);
 	AddTag(pTag);
 	return pTag;
+}
+
+xmlTag_t* xmlTag::AddTag(const std::string& strName, unsigned long Value)
+{
+    xmlTag* pTag = new xmlTag;
+    pTag->SetName(strName);
+    pTag->SetValue(Value);
+    AddTag(pTag);
+    return pTag;
 }
 
 xmlTag_t* xmlTag::AddTag(const std::string& strName, unsigned int Value)
@@ -281,15 +290,21 @@ xmlAttribute_t* xmlTag::AddAttribute(const std::string& strName, int Value)
 }
 xmlAttribute_t* xmlTag::AddAttribute(const std::string& strName, long Value)
 {
-	xmlAttribute_t* pAtrribute = AddAttribute(strName);
-	pAtrribute->SetValue(Value);
-	return pAtrribute;
+    xmlAttribute_t* pAtrribute = AddAttribute(strName);
+    pAtrribute->SetValue(Value);
+    return pAtrribute;
 }
 xmlAttribute_t* xmlTag::AddAttribute(const std::string& strName, unsigned long Value)
 {
 	xmlAttribute_t* pAtrribute = AddAttribute(strName);
 	pAtrribute->SetValue(Value);
 	return pAtrribute;
+}
+xmlAttribute_t* xmlTag::AddAttribute(const std::string& strName, unsigned long long Value)
+{
+    xmlAttribute_t* pAtrribute = AddAttribute(strName);
+    pAtrribute->SetValue(Value);
+    return pAtrribute;
 }
 xmlAttribute_t* xmlTag::AddAttribute(const std::string& strName, unsigned int Value)
 {
@@ -739,9 +754,13 @@ void xmlTag::GetValue(long& Value) const
 {
 	Value = fromString<long>(m_strValue);
 } 
+void xmlTag::GetValue(unsigned long long& Value) const
+{
+	Value = fromString<unsigned long long>(m_strValue);
+} 
 void xmlTag::GetValue(unsigned long& Value) const
 {
-	Value = fromString<unsigned long>(m_strValue);
+    Value = fromString<unsigned long>(m_strValue);
 } 
 void xmlTag::GetValue(unsigned int& Value) const
 {
@@ -787,6 +806,10 @@ void xmlTag::SetValue(long Value)
 void xmlTag::SetValue(unsigned long Value)
 {
 	m_strValue = toString<unsigned long>(Value);
+} 
+void xmlTag::SetValue(unsigned long long Value)
+{
+    m_strValue = toString<unsigned long long>(Value);
 } 
 void xmlTag::SetValue(unsigned int Value)
 {
@@ -898,6 +921,15 @@ bool xmlTag::GetChildTagValue(const std::string& strTagName, unsigned long& lTag
 		return false;
 	pChildTag->GetValue(lTagValue);
 	return true;
+}
+bool xmlTag::GetChildTagValue(const std::string& strTagName, unsigned long long& lTagValue) const
+{
+    xmlTag_t* pChildTag;
+    pChildTag = FindTag(strTagName);
+    if(!pChildTag)
+        return false;
+    pChildTag->GetValue(lTagValue);
+    return true;
 }
 bool xmlTag::GetChildTagValue(const std::string& strTagName, unsigned int& lTagValue) const
 {
@@ -1050,6 +1082,25 @@ bool xmlTag::GetMultipleChildTagValue(const std::string& strTagName, std::vector
     }
     return i == 0 ? false : true;
 }
+bool xmlTag::GetMultipleChildTagValue(const std::string& strTagName, std::vector<unsigned long long>& Array) const
+{
+    size_t i;
+    xmlTag_t* pChildTag;
+    std::vector<xmlTag_t*> tagArray;
+    unsigned long long Value;
+
+    Array.erase(Array.begin(), Array.end());
+    tagArray = FindMultipleTag(strTagName);
+    for(i = 0; i < tagArray.size(); i++)
+    {
+        pChildTag = tagArray[i];
+        if(!pChildTag)
+            return false;
+        pChildTag->GetValue(Value);
+        Array.push_back(Value);
+    }
+    return i == 0 ? false : true;
+}
 bool xmlTag::GetMultipleChildTagValue(const std::string& strTagName, std::vector<double>& Array) const
 {
 	size_t i;
@@ -1145,9 +1196,13 @@ void xmlAttribute::GetValue(long& Value) const
 {
 	Value = fromString<long>(m_strValue);
 } 
+void xmlAttribute::GetValue(unsigned long long& Value) const
+{
+	Value = fromString<unsigned long long>(m_strValue);
+} 
 void xmlAttribute::GetValue(unsigned long& Value) const
 {
-	Value = fromString<unsigned long>(m_strValue);
+    Value = fromString<unsigned long>(m_strValue);
 } 
 void xmlAttribute::GetValue(unsigned int& Value) const
 {
@@ -1190,9 +1245,13 @@ void xmlAttribute::SetValue(long Value)
 {
 	m_strValue = toString<long>(Value);
 } 
+void xmlAttribute::SetValue(unsigned long long Value)
+{
+	m_strValue = toString<unsigned long long>(Value);
+} 
 void xmlAttribute::SetValue(unsigned long Value)
 {
-	m_strValue = toString<unsigned long>(Value);
+    m_strValue = toString<unsigned long>(Value);
 } 
 void xmlAttribute::SetValue(unsigned int Value)
 {

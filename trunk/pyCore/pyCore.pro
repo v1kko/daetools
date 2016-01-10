@@ -12,6 +12,9 @@ INCLUDEPATH += $${BOOSTDIR} \
 			   $${MPI_INCLUDE}
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
+
+LIBS += $${SOLIBS_RPATH}
+
 LIBS +=	$${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
         $${BOOST_PYTHON_LIB} \

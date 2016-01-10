@@ -14,6 +14,8 @@ QMAKE_LIBDIR += $${SUNDIALS_LIBDIR} \
                 $${PYTHON_LIB_DIR} \
                 $${NLOPT_LIBDIR}
 
+LIBS += $${SOLIBS_RPATH}
+                
 LIBS += $${BOOST_PYTHON_LIB} \
         $${DAE_ACTIVITY_LIB} \
         $${DAE_DATAREPORTING_LIB} \

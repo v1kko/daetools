@@ -31,32 +31,13 @@ OPTIONS:
 
    Cross compiling options:
     --host          Example: --host i686-w64-mingw32 (defines --host option for cross-compiling with the GNU gcc toolchain).
-                    Cross-compilation is tested with rubenvb's toolchains with gcc-4.6-release:
-                     + https://sourceforge.net/projects/mingw-w64/files
-                       + Toolchains targetting Win32
-                         + Personal Builds
-                           + rubenvb
-                             + gcc-4.6-release
-                               - i686-w64-mingw32-gcc-4.6.3-2-release-win32_rubenvb   (for 32 bit windows)
-                               - i686-w64-mingw32-gcc-4.6.3-2-release-linux64_rubenvb (for 64 bit GNU/Linux)
-                    Toolchains should be located in /home/mingw32-i686 directory.
-                      /home/mingw32-i686/bin should be added to the PATH environment variable.
-                    Boost libraries should be compiled on windows (instructions???) while the other libraries can be compiled on GNU/Linux.
-                    CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /home/mingw32-i686 directory.
-                      Copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs
-                    Install wine and winetricks and add i386 architecture:
-                      dpkg --add-architecture i386
-                      apt-get update
-                      apt-get install wine-bin:i386
-                    Install vc redistributable packages using winetricks:
-                      winetricks --gui
-                        [x] Select the default wine prefix
-                            [x] Install Windows dll or component
-                                Select vcrun2008 for instance (depending on the python version, vcrun2010 for python 3.4)
-                    Install python:
-                      wine misexec \i python-2-7-6.msi
-                    or:
-                      wine misexec \i python-3-4-2.msi
+                    Install the mingw-w64 package from the main Debian repository.
+                    CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /usr/mingw32-i686 directory.
+                    and cross-compile-x86_64-w64-mingw32.cmake file that targets a toolchain located in /usr/mingw32-x86_64 directory.
+                    Copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs
+                    
+                    Modify dae.pri and set the python major and minor versions.
+                    Python root directory must be in the trunk folder: Python[Major][Minor]-[arch] (i.e. Python35-win32).
 
 PROJECT:
     all             Build all daetools c++ libraries, solvers and python extension modules.
@@ -199,8 +180,14 @@ for i; do
 
        --host) DAE_IF_CROSS_COMPILING=1
                QMAKE="qmake-qt4"
-               QMAKE_SPEC="win32-g++-i686-w64-mingw32"
-               PYTHON="wine python"
+               if [ "$2" = "i686-w64-mingw32" ]; then
+                  QMAKE_SPEC="win32-g++-i686-w64-mingw32"
+               elif [ "$2" = "x86_64-w64-mingw32" ]; then
+                  QMAKE_SPEC="win64-g++-x86_64-w64-mingw32"
+               else
+                  QMAKE_SPEC=
+               fi
+               PYTHON=""
                shift ; shift
                ;;
                                     
@@ -208,9 +195,6 @@ for i; do
         ;;
   esac
 done
-
-PYTHON_MAJOR=`$PYTHON -c "import sys; print(sys.version_info[0])"`
-PYTHON_MINOR=`$PYTHON -c "import sys; print(sys.version_info[1])"`
 
 # Check if any project is specified
 if [ -z "$@" ]; then
@@ -251,9 +235,8 @@ done
 echo ""
 echo "###############################################################################"
 echo "Proceed with the following options:"
-echo "  - QMAKE-SPEC:           ${QMAKE_SPEC}"
-echo "  - Python binary:        ${PYTHON}"
-echo "  - Python version:       ${PYTHON_MAJOR}.${PYTHON_MINOR}"
+echo "  - Qmake-spec:           ${QMAKE_SPEC}"
+echo "  - Python:               ${PYTHON}"
 echo "  - Platform:             $PLATFORM"
 echo "  - Architecture:         $HOST_ARCH"
 echo "  - Number of threads:    ${Ncpu}"

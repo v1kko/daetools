@@ -4,12 +4,6 @@ TARGET = pyDealII
 TEMPLATE = lib
 CONFIG += shared
 
-DEALII_DIR               = ../deal.II/build
-DEALII_INCLUDE           = $${DEALII_DIR}/include
-DEALII_LIB_DIR           = $${DEALII_DIR}/lib
-unix::DEALII_LIBS        = -ldeal_II-daetools -lz -lblas -lgfortran -lm
-win32-g++-*::DEALII_LIBS = -ldeal_II-daetools -lblas -lgfortran -lm
-
 INCLUDEPATH += $${BOOSTDIR} \
                $${PYTHON_INCLUDE_DIR} \
                $${PYTHON_SITE_PACKAGES_DIR} \
@@ -33,6 +27,8 @@ QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth 
                   -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
 
 unix::QMAKE_LFLAGS += -std=c++11
+
+LIBS += $${SOLIBS_RPATH}
 
 LIBS += $${DEALII_LIBS} \
         $${DAE_CORE_LIB} \

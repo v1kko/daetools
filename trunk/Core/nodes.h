@@ -773,6 +773,7 @@ public:
     daeDeclareDynamicClass(adSetupExpressionPartialDerivativeNode)
     adSetupExpressionPartialDerivativeNode(void);
     adSetupExpressionPartialDerivativeNode(daeDomain*                                pDomain,
+                                           size_t                                    nOrder,
                                            daeeDiscretizationMethod                  eDiscretizationMethod,
                                            const std::map<std::string, std::string>& mapDiscretizationOptions,
                                            adNodePtr                                 n);
@@ -790,8 +791,16 @@ public:
     virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
     virtual const quantity GetQuantity(void) const;
 
-protected:
-    adNodePtr calc_d(adNodePtr n, const daeExecutionContext* pExecutionContext) const;
+    static adNodePtr calc_d(adNodePtr                                 n,
+                            daeDomain*                                pDomain,
+                            daeeDiscretizationMethod                  eDiscretizationMethod,
+                            const std::map<std::string, std::string>& mapDiscretizationOptions,
+                            const daeExecutionContext*                pExecutionContext);
+    static adNodePtr calc_d2(adNodePtr                                 n,
+                             daeDomain*                                pDomain,
+                             daeeDiscretizationMethod                  eDiscretizationMethod,
+                             const std::map<std::string, std::string>& mapDiscretizationOptions,
+                             const daeExecutionContext*                pExecutionContext);
 
 public:
     daeDomain*                          m_pDomain;

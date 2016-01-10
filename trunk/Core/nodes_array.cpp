@@ -3576,6 +3576,7 @@ bool adSetupExpressionDerivativeNode::IsDifferential(void) const
 	adSetupExpressionPartialDerivativeNode
 **********************************************************************************************/
 adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(daeDomain*                                pDomain,
+                                                                               size_t                                    nOrder,
                                                                                daeeDiscretizationMethod                  eDiscretizationMethod,
                                                                                const std::map<std::string, std::string>& mapDiscretizationOptions,
                                                                                adNodePtr                                 n)
@@ -3584,7 +3585,7 @@ adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode(d
     m_eDiscretizationMethod    = eDiscretizationMethod;
     m_mapDiscretizationOptions = mapDiscretizationOptions;
     node                       = n;
-    m_nOrder                   = 1;
+    m_nOrder                   = nOrder;
 }
 
 adSetupExpressionPartialDerivativeNode::adSetupExpressionPartialDerivativeNode()
@@ -3605,14 +3606,20 @@ adouble adSetupExpressionPartialDerivativeNode::Evaluate(const daeExecutionConte
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
 	
+    if(m_nOrder == 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
 	adouble a, tmp;
 	
     // First get a runtime node
 	a = node->Evaluate(pExecutionContext);
     // Then calculate the partial derivative expression
 	tmp.setGatherInfo(true);
-    tmp.node = calc_d(a.node, pExecutionContext);
-	return tmp;
+    if(m_nOrder == 1)
+        tmp.node = adSetupExpressionPartialDerivativeNode::calc_d(a.node, m_pDomain, m_eDiscretizationMethod, m_mapDiscretizationOptions, pExecutionContext);
+    else if(m_nOrder == 2)
+        tmp.node = adSetupExpressionPartialDerivativeNode::calc_d2(a.node, m_pDomain, m_eDiscretizationMethod, m_mapDiscretizationOptions, pExecutionContext);
+    return tmp;
 }
 
 const quantity adSetupExpressionPartialDerivativeNode::GetQuantity(void) const
@@ -3621,11 +3628,21 @@ const quantity adSetupExpressionPartialDerivativeNode::GetQuantity(void) const
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	quantity q = node->GetQuantity();
-	return quantity(0.0, q.getUnits() / m_pDomain->GetUnits());
+    unit u = m_pDomain->GetUnits();
+    if(m_nOrder == 1)
+        return quantity(0.0, q.getUnits() / u);
+    else if(m_nOrder == 2)
+        return quantity(0.0, q.getUnits() / (u*u));
+    else
+        return quantity();
 }
 
-// Here I work on runtime nodes!!
-adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeExecutionContext* pExecutionContext) const
+// Here we work on runtime nodes!!
+adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr                                 n,
+                                                         daeDomain*                                pDomain,
+                                                         daeeDiscretizationMethod                  eDiscretizationMethod,
+                                                         const std::map<std::string, std::string>& mapDiscretizationOptions,
+                                                         const daeExecutionContext*                pExecutionContext)
 {
 	adNode* adnode;
 	adouble l, r, dl, dr;
@@ -3634,8 +3651,10 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeE
 	adnode = n.get();
 	if( dynamic_cast<adUnaryNode*>(adnode) )
 	{
-		daeDeclareAndThrowException(exNotImplemented)
-	}
+        daeDeclareException(exInvalidCall);
+        e << "The function d() does not accept expressions containing unary functions such as trigonometric, log, log10, exp, abs, etc.";
+        throw e;
+    }
 	else if( dynamic_cast<adBinaryNode*>(adnode) )
 	{
 		adBinaryNode* node = dynamic_cast<adBinaryNode*>(adnode);
@@ -3645,8 +3664,8 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeE
 		dl.setGatherInfo(true);
 		dr.setGatherInfo(true);
 
-        dl.node = calc_d(node->left, pExecutionContext);
-        dr.node = calc_d(node->right, pExecutionContext);
+        dl.node = adSetupExpressionPartialDerivativeNode::calc_d(node->left,  pDomain, eDiscretizationMethod, mapDiscretizationOptions, pExecutionContext);
+        dr.node = adSetupExpressionPartialDerivativeNode::calc_d(node->right, pDomain, eDiscretizationMethod, mapDiscretizationOptions, pExecutionContext);
 		l.node = node->left; 
 		r.node = node->right; 
 		
@@ -3659,10 +3678,10 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeE
 			tmp = (dl - dr).node;
 			break;
 		case eMulti:
-			tmp = (l * dr + r * dl).node; 
+            tmp = (l*dr + r*dl).node;
 			break;
 		case eDivide:
-			tmp = ((r * dl - l * dr)/(r * r)).node; 
+            tmp = ((r*dl - l*dr)/(r*r)).node;
 			break;
 		default:
 			daeDeclareException(exInvalidCall);
@@ -3681,11 +3700,11 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeE
 		else
 		{
             adouble adres = rtnode->m_pVariable->partial(1,
-                                                         *m_pDomain,
+                                                         *pDomain,
                                                          &rtnode->m_narrDomains[0],
                                                          rtnode->m_narrDomains.size(),
-                                                         m_eDiscretizationMethod,
-                                                         m_mapDiscretizationOptions);
+                                                         eDiscretizationMethod,
+                                                         mapDiscretizationOptions);
 			tmp = adres.node;
 		}
 	}
@@ -3707,6 +3726,100 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr n, const daeE
 	return tmp;
 }
 
+// Here we work on runtime nodes!!
+adNodePtr adSetupExpressionPartialDerivativeNode::calc_d2(adNodePtr                                 n,
+                                                          daeDomain*                                pDomain,
+                                                          daeeDiscretizationMethod                  eDiscretizationMethod,
+                                                          const std::map<std::string, std::string>& mapDiscretizationOptions,
+                                                          const daeExecutionContext*                pExecutionContext)
+{
+    adNode* adnode;
+    adouble l, r, dl, dr, d2l, d2r;
+    adNodePtr tmp;
+
+    adnode = n.get();
+    if( dynamic_cast<adUnaryNode*>(adnode) )
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The function d2() does not accept expressions containing unary functions such as trigonometric, log, log10, exp, abs, etc.";
+        throw e;
+    }
+    else if( dynamic_cast<adBinaryNode*>(adnode) )
+    {
+        adBinaryNode* node = dynamic_cast<adBinaryNode*>(adnode);
+
+        l.setGatherInfo(true);
+        r.setGatherInfo(true);
+        dl.setGatherInfo(true);
+        dr.setGatherInfo(true);
+        d2l.setGatherInfo(true);
+        d2r.setGatherInfo(true);
+
+        l.node = node->left;
+        r.node = node->right;
+        dl.node = adSetupExpressionPartialDerivativeNode::calc_d(node->left,  pDomain, eDiscretizationMethod, mapDiscretizationOptions, pExecutionContext);
+        dr.node = adSetupExpressionPartialDerivativeNode::calc_d(node->right, pDomain, eDiscretizationMethod, mapDiscretizationOptions, pExecutionContext);
+        d2l.node = adSetupExpressionPartialDerivativeNode::calc_d2(node->left,  pDomain, eDiscretizationMethod, mapDiscretizationOptions, pExecutionContext);
+        d2r.node = adSetupExpressionPartialDerivativeNode::calc_d2(node->right, pDomain, eDiscretizationMethod, mapDiscretizationOptions, pExecutionContext);
+
+        switch(node->eFunction)
+        {
+        case ePlus:
+            tmp = (d2l + d2r).node;
+            break;
+        case eMinus:
+            tmp = (d2l - d2r).node;
+            break;
+        case eMulti:
+            tmp = (l*d2r + 2*dl*dr + r*d2l).node;
+            break;
+        case eDivide:
+        // ACHTUNG, ACHTUNG!!!  DOUBLE CHECK THIS!!!!!
+            tmp = (-l*d2r/(r*r) + 2*l*dr*dr/(r*r*r) + d2l/r - 2*dl*dr/(r*r)).node;
+            break;
+        default:
+            daeDeclareException(exInvalidCall);
+            e << "The function d2() does not accept expressions containing pow, min and max";
+            throw e;
+        }
+    }
+    else if( dynamic_cast<adRuntimeVariableNode*>(adnode) )
+    {
+        adRuntimeVariableNode* rtnode = dynamic_cast<adRuntimeVariableNode*>(adnode);
+        size_t N = rtnode->m_narrDomains.size();
+        if(N == 0)
+        {
+            tmp = adNodePtr(new adConstantNode(0));
+        }
+        else
+        {
+            adouble adres = rtnode->m_pVariable->partial(2,
+                                                         *pDomain,
+                                                         &rtnode->m_narrDomains[0],
+                                                         rtnode->m_narrDomains.size(),
+                                                         eDiscretizationMethod,
+                                                         mapDiscretizationOptions);
+            tmp = adres.node;
+        }
+    }
+    else if( dynamic_cast<adConstantNode*>(adnode)          ||
+             dynamic_cast<adTimeNode*>(adnode)              ||
+             dynamic_cast<adDomainIndexNode*>(adnode)       ||
+             dynamic_cast<adRuntimeParameterNode*>(adnode)  ||
+             dynamic_cast<adEventPortDataNode*>(adnode)     ||
+             dynamic_cast<adInverseTimeStepNode*>(adnode) )
+    {
+        tmp = adNodePtr(new adConstantNode(0));
+    }
+    else
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The function d2() does not accept expressions containing special functions, time derivatives, etc";
+        throw e;
+    }
+    return tmp;
+}
+
 adNode* adSetupExpressionPartialDerivativeNode::Clone(void) const
 {
 	return new adSetupExpressionPartialDerivativeNode(*this);
@@ -3714,12 +3827,16 @@ adNode* adSetupExpressionPartialDerivativeNode::Clone(void) const
 
 void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strExport, strExpression;
+    string strExport, strExpression, strDFunction;
 	boost::format fmtFile;
 
 	node->Export(strExpression, eLanguage, c);
 
 	string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
+    if(m_nOrder == 1)
+        strDFunction = "d";
+    else if(m_nOrder == 2)
+        strDFunction = "d2";
 
     string strDiscretizationMethod;
     if(m_eDiscretizationMethod == eCFDM)
@@ -3738,9 +3855,9 @@ void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, dae
         // This needs some thinking...
         string strDiscretizationOptions = toString(m_mapDiscretizationOptions);
 
-        strExport = "d(%1%, %2%, %3%, \"%4%\")";
+        strExport = "%1%(%2%, %3%, %4%, \"%5%\")";
 		fmtFile.parse(strExport);
-        fmtFile % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
+        fmtFile % strDFunction % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
 	}
 	else if(eLanguage == ePYDAE)
 	{
@@ -3754,9 +3871,9 @@ void adSetupExpressionPartialDerivativeNode::Export(std::string& strContent, dae
         }
         strDiscretizationOptions += "}";
 
-        strExport = "d(%1%, %2%, %3%, %4%)";
+        strExport = "%1%(%2%, %3%, %4%, %5%)";
 		fmtFile.parse(strExport);
-        fmtFile % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
+        fmtFile % strDFunction % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
 	}
 	else
 		daeDeclareAndThrowException(exNotImplemented);

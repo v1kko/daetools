@@ -27,7 +27,10 @@ Documentation
 Presentations
 =============
 
-* `An introduction to DAE Tools <http://daetools.sourceforge.net/presentations/daetools-introduction.pdf>`_
+`DAE Tools: Equation-Based Object-Oriented Modelling, Simulation and Optimisation Software
+<https://www.researchgate.net/publication/285596842_DAE_Tools_Equation-Based_Object-Oriented_Modelling_Simulation_and_Optimisation_Software>`_
+
+`An introduction to DAE Tools <http://www.daetools.com/docs/presentations/daetools-introduction.pdf>`_
 
 Indices and tables
 ==================

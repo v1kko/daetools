@@ -195,7 +195,7 @@ class simTutorial(daeSimulation):
         self.m.x.CreateStructuredGrid(n, 0, 0.1)
         self.m.y.CreateStructuredGrid(n, 0, 0.1)
 
-        # Points of structured grids can be changed after the domain is defined by the CreateDistributed function.
+        # Points of structured grids can be changed after the domain is defined by the CreateStructuredGrid function.
         # In certain situations it is desired to create a non-uniform grid within the given interval (LB, UB).
         # In these cases, a non-uniform grid can be specified by changing the daeDomain.Points property.
         # Good candidates for non-uniform grids are cases where there is a stiff front at one side of a domain.

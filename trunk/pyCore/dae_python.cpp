@@ -1232,23 +1232,23 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("dt", &daepython::Get_dt7)
         .def("dt", &daepython::Get_dt8)
 
-        .def("d", &daepython::Get_d1)
-        .def("d", &daepython::Get_d2)
-        .def("d", &daepython::Get_d3)
-        .def("d", &daepython::Get_d4)
-        .def("d", &daepython::Get_d5)
-        .def("d", &daepython::Get_d6)
-        .def("d", &daepython::Get_d7)
-        .def("d", &daepython::Get_d8)
+        .def("d", &daepython::Get_d1, (arg("self"), arg("domain"), arg("index1")))
+        .def("d", &daepython::Get_d2, (arg("self"), arg("domain"), arg("index1"), arg("index2")))
+        .def("d", &daepython::Get_d3, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3")))
+        .def("d", &daepython::Get_d4, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4")))
+        .def("d", &daepython::Get_d5, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5")))
+        .def("d", &daepython::Get_d6, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5"), arg("index6")))
+        .def("d", &daepython::Get_d7, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5"), arg("index6"), arg("index7")))
+        .def("d", &daepython::Get_d8, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5"), arg("index6"), arg("index7"), arg("index8")))
 
-        .def("d2", &daepython::Get_d21)
-        .def("d2", &daepython::Get_d22)
-        .def("d2", &daepython::Get_d23)
-        .def("d2", &daepython::Get_d24)
-        .def("d2", &daepython::Get_d25)
-        .def("d2", &daepython::Get_d26)
-        .def("d2", &daepython::Get_d27)
-        .def("d2", &daepython::Get_d28)
+        .def("d2", &daepython::Get_d21, (arg("self"), arg("domain"), arg("index1")))
+        .def("d2", &daepython::Get_d22, (arg("self"), arg("domain"), arg("index1"), arg("index2")))
+        .def("d2", &daepython::Get_d23, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3")))
+        .def("d2", &daepython::Get_d24, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4")))
+        .def("d2", &daepython::Get_d25, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5")))
+        .def("d2", &daepython::Get_d26, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5"), arg("index6")))
+        .def("d2", &daepython::Get_d27, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5"), arg("index6"), arg("index7")))
+        .def("d2", &daepython::Get_d28, (arg("self"), arg("domain"), arg("index1"), arg("index2"), arg("index3"), arg("index4"), arg("index5"), arg("index6"), arg("index7"), arg("index8")))
 
         .def("array", &daepython::VariableArray1)
         .def("array", &daepython::VariableArray2)
@@ -1545,7 +1545,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                 ( arg("self"),
                                   arg("condition"),
                                   arg("switchToStates")      = boost::python::list(),
-                                  arg("resetVariableValues") = boost::python::list(),
+                                  arg("setVariableValues")   = boost::python::list(),
                                   arg("triggerEvents")       = boost::python::list(),
                                   arg("userDefinedActions")  = boost::python::list(),
                                   arg("eventTolerance")      = 0.0
@@ -1554,7 +1554,7 @@ BOOST_PYTHON_MODULE(pyCore)
                                 ( arg("self"),
                                   arg("eventPort"),
                                   arg("switchToStates")      = boost::python::list(),
-                                  arg("resetVariableValues") = boost::python::list(),
+                                  arg("setVariableValues")   = boost::python::list(),
                                   arg("triggerEvents")       = boost::python::list(),
                                   arg("userDefinedActions")  = boost::python::list()
                                 ), DOCSTR_daeModel_ON_EVENT )
