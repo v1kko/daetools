@@ -79,29 +79,29 @@ class modTutorial(daeModel):
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.ro() * self.cp(x, y) * self.T.dt(x, y) - self.k(x, y) * \
-                     (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
+                     (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         # Now we use Q(0) as the heat flux into the bottom edge
-        eq.Residual = - self.k(x, y) * self.T.d(self.y, x, y) - self.Q(0)
+        eq.Residual = - self.k(x, y) * d(self.T(x,y), self.y, eCFDM) - self.Q(0)
 
         eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         # Now we use Q(1) as the heat flux at the top edge
-        eq.Residual = - self.k(x, y) * self.T.d(self.y, x, y) - self.Q(1)
+        eq.Residual = - self.k(x, y) * d(self.T(x,y), self.y, eCFDM) - self.Q(1)
 
         eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         # Heat capacity as a function of the temperature
         eq = self.CreateEquation("C_p", "Equation to calculate the specific heat capacity of the plate as a function of the temperature.")

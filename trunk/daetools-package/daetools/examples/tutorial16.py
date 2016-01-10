@@ -30,7 +30,7 @@ from daetools.pyDAE import *
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 from PyQt4 import QtCore, QtGui
-from .tutorial16_ui import Ui_InteractiveRunDialog
+from tutorial16_ui import Ui_InteractiveRunDialog
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -141,7 +141,7 @@ class InteractiveOP(QtGui.QDialog):
             # Integrate for ReportingInterval until the TimeHorizon is reached
             # After each integration call update the plot with the new data
             # Sleep for 0.1 seconds after each integration to give some real-time impression
-            time = self.simulation.IntegrateForTimeInterval(self.simulation.ReportingInterval)
+            time = self.simulation.IntegrateForTimeInterval(self.simulation.ReportingInterval, eDoNotStopAtDiscontinuity)
             self.simulation.ReportData(self.simulation.CurrentTime)
             self._updatePlot()
             sleep(0.1)
@@ -152,7 +152,7 @@ class InteractiveOP(QtGui.QDialog):
                 else:
                     interval = self.simulation.ReportingInterval
 
-                time = self.simulation.IntegrateForTimeInterval(interval)
+                time = self.simulation.IntegrateForTimeInterval(interval, eDoNotStopAtDiscontinuity)
                 self.simulation.ReportData(self.simulation.CurrentTime)
                 self._updatePlot()
                 sleep(0.1)

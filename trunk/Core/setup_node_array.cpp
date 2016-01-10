@@ -1086,6 +1086,280 @@ void adSetupPartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size
 
 
 /*********************************************************************************************
+    adSetupExpressionPartialDerivativeNodeArray
+**********************************************************************************************/
+adSetupExpressionPartialDerivativeNodeArray::adSetupExpressionPartialDerivativeNodeArray(daeDomain*                                pDomain,
+                                                                                         size_t                                    nOrder,
+                                                                                         daeeDiscretizationMethod                  eDiscretizationMethod,
+                                                                                         const std::map<std::string, std::string>& mapDiscretizationOptions,
+                                                                                         adNodeArrayPtr                            n)
+{
+    m_pDomain                  = pDomain;
+    m_eDiscretizationMethod    = eDiscretizationMethod;
+    m_mapDiscretizationOptions = mapDiscretizationOptions;
+    node                       = n;
+    m_nOrder                   = nOrder;
+}
+
+adSetupExpressionPartialDerivativeNodeArray::adSetupExpressionPartialDerivativeNodeArray()
+{
+    m_nOrder                = 0;
+    m_pDomain               = NULL;
+    m_eDiscretizationMethod = eDMUnknown;
+}
+
+adSetupExpressionPartialDerivativeNodeArray::~adSetupExpressionPartialDerivativeNodeArray()
+{
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
+{
+    // Do nothing?
+}
+
+size_t adSetupExpressionPartialDerivativeNodeArray::GetSize(void) const
+{
+    return node->GetSize();
+}
+
+adouble_array adSetupExpressionPartialDerivativeNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+#ifdef DAE_DEBUG
+    if(!m_pDomain)
+        daeDeclareAndThrowException(exInvalidPointer);
+#endif
+
+    if(m_nOrder == 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    adouble_array a, tmp;
+
+    // First get a runtime node
+    a = node->Evaluate(pExecutionContext);
+
+    // Set the size of the adouble array
+    tmp.setGatherInfo(true);
+    size_t N = a.GetSize();
+    tmp.Resize(N);
+
+    // Then calculate the partial derivative expressions
+    if(m_nOrder == 1)
+    {
+        for(size_t i = 0; i < N; i++)
+            tmp[i].node = adSetupExpressionPartialDerivativeNode::calc_d(a[i].node, m_pDomain, m_eDiscretizationMethod, m_mapDiscretizationOptions, pExecutionContext);
+    }
+    else if(m_nOrder == 2)
+    {
+        for(size_t i = 0; i < N; i++)
+            tmp[i].node = adSetupExpressionPartialDerivativeNode::calc_d2(a[i].node, m_pDomain, m_eDiscretizationMethod, m_mapDiscretizationOptions, pExecutionContext);
+    }
+    return tmp;
+}
+
+const quantity adSetupExpressionPartialDerivativeNodeArray::GetQuantity(void) const
+{
+    if(!m_pDomain)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    quantity q = node->GetQuantity();
+    unit u = m_pDomain->GetUnits();
+    if(m_nOrder == 1)
+        return quantity(0.0, q.getUnits() / u);
+    else if(m_nOrder == 2)
+        return quantity(0.0, q.getUnits() / (u*u));
+    else
+        return quantity();
+}
+
+adNodeArray* adSetupExpressionPartialDerivativeNodeArray::Clone(void) const
+{
+    return new adSetupExpressionPartialDerivativeNodeArray(*this);
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+    string strExport, strExpression, strDFunction;
+    boost::format fmtFile;
+
+    node->Export(strExpression, eLanguage, c);
+
+    string strDomainName = daeGetStrippedRelativeName(c.m_pModel, m_pDomain);
+    if(m_nOrder == 1)
+        strDFunction = "d";
+    else if(m_nOrder == 2)
+        strDFunction = "d2";
+
+    string strDiscretizationMethod;
+    if(m_eDiscretizationMethod == eCFDM)
+        strDiscretizationMethod = "eCFDM";
+    else if(m_eDiscretizationMethod == eFFDM)
+        strDiscretizationMethod = "eFFDM";
+    else if(m_eDiscretizationMethod == eBFDM)
+        strDiscretizationMethod = "eBFDM";
+    else if(m_eDiscretizationMethod == eUpwindCCFV)
+        strDiscretizationMethod = "eUpwindCCFV";
+    else
+        daeDeclareAndThrowException(exNotImplemented);
+
+    if(eLanguage == eCDAE)
+    {
+        // This needs some thinking...
+        string strDiscretizationOptions = toString(m_mapDiscretizationOptions);
+
+        strExport = "%1%(%2%, %3%, %4%, \"%5%\")";
+        fmtFile.parse(strExport);
+        fmtFile % strDFunction % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
+    }
+    else if(eLanguage == ePYDAE)
+    {
+        string strDiscretizationOptions = "{";
+        std::map<string, string>::const_iterator citer;
+        for(citer = m_mapDiscretizationOptions.begin(); citer != m_mapDiscretizationOptions.end(); citer++)
+        {
+            if(citer != m_mapDiscretizationOptions.begin())
+                strDiscretizationOptions += ",";
+            strDiscretizationOptions += "'" + citer->first + "' : '" + citer->second + "'";
+        }
+        strDiscretizationOptions += "}";
+
+        strExport = "%1%(%2%, %3%, %4%, %5%)";
+        fmtFile.parse(strExport);
+        fmtFile % strDFunction % strExpression % strDomainName % strDiscretizationMethod % strDiscretizationOptions;
+    }
+    else
+        daeDeclareAndThrowException(exNotImplemented);
+
+    strContent += fmtFile.str();
+}
+//string adSetupExpressionPartialDerivativeNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
+//{
+//	vector<string> strarrIndexes;
+//	string strExpression = node->SaveAsPlainText(c);
+//	string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
+//	return textCreator::PartialDerivative(m_nDegree, strExpression, strDomainName, strarrIndexes, true);
+//}
+
+string adSetupExpressionPartialDerivativeNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+    vector<string> strarrIndexes;
+    string strExpression = node->SaveAsLatex(c);
+    string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
+    return latexCreator::PartialDerivative(m_nOrder, strExpression, strDomainName, strarrIndexes, true);
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::Open(io::xmlTag_t* pTag)
+{
+    daeDeclareAndThrowException(exNotImplemented)
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::Save(io::xmlTag_t* pTag) const
+{
+    string strName;
+
+    strName = "Order";
+    pTag->Save(strName, m_nOrder);
+
+    strName = "Domain";
+    pTag->SaveObjectRef(strName, m_pDomain);
+
+    strName = "Node";
+    adNodeArray::SaveNode(pTag, strName, node.get());
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+    string strName, strValue;
+    io::xmlTag_t *mfrac, *msup, *mrow1, *mrow2, *mrow0;
+
+    string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
+
+    strName  = "mrow";
+    strValue = "";
+    mrow0 = pTag->AddTag(strName, strValue);
+
+    strName  = "mfrac";
+    strValue = "";
+    mfrac = mrow0->AddTag(strName, strValue);
+
+    strName  = "mrow";
+    strValue = "";
+    mrow1 = mfrac->AddTag(strName, strValue);
+
+    if(m_nOrder == 1)
+    {
+        strName  = "mo";
+        strValue = "&PartialD;";
+        mrow1->AddTag(strName, strValue);
+    }
+    else
+    {
+        strName  = "msup";
+        strValue = "";
+        msup = mrow1->AddTag(strName, strValue);
+            strName  = "mo";
+            strValue = "&PartialD;";
+            msup->AddTag(strName, strValue);
+
+            strName  = "mn";
+            strValue = "2";
+            msup->AddTag(strName, strValue);
+    }
+
+    strName  = "mrow";
+    strValue = "";
+    mrow2 = mfrac->AddTag(strName, strValue);
+
+    if(m_nOrder == 1)
+    {
+        strName  = "mo";
+        strValue = "&PartialD;";
+        mrow2->AddTag(strName, strValue);
+
+        strName  = "mi";
+        strValue = strDomainName;
+        mrow2->AddTag(strName, strValue);
+    }
+    else
+    {
+        strName  = "mo";
+        strValue = "&PartialD;";
+        mrow2->AddTag(strName, strValue);
+
+        strName  = "msup";
+        strValue = "";
+        msup = mrow2->AddTag(strName, strValue);
+
+            strName  = "mi";
+            strValue = strDomainName;
+            xmlPresentationCreator::WrapIdentifier(msup, strValue);
+
+            strName  = "mn";
+            strValue = "2";
+            msup->AddTag(strName, strValue);
+    }
+
+    strName  = "mrow";
+    strValue = "";
+    mrow2 = mrow0->AddTag(strName, strValue);
+
+    mrow2->AddTag(string("mo"), string("("));
+    node->SaveAsPresentationMathML(mrow2, c);
+    mrow2->AddTag(string("mo"), string(")"));
+}
+
+void adSetupExpressionPartialDerivativeNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    if(!node)
+        daeDeclareAndThrowException(exInvalidPointer);
+    node->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+
+/*********************************************************************************************
 	adVectorExternalFunctionNode
 **********************************************************************************************/
 adVectorExternalFunctionNode::adVectorExternalFunctionNode(daeVectorExternalFunction* externalFunction) 

@@ -28,7 +28,7 @@ Here we introduce:
 import os, sys
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
-from .tutorial17_ui import Ui_tcpipLogServerMainWindow
+from tutorial17_ui import Ui_tcpipLogServerMainWindow
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 import threading
@@ -76,7 +76,7 @@ class simTutorial(daeSimulation):
     def Run(self):
         while self.CurrentTime < self.TimeHorizon:
             self.Log.Message('Integrating from %f to %f ...' % (self.CurrentTime, self.CurrentTime+self.ReportingInterval), 0)
-            self.IntegrateForTimeInterval(self.ReportingInterval)
+            self.IntegrateForTimeInterval(self.ReportingInterval, eDoNotStopAtDiscontinuity)
             self.ReportData(self.CurrentTime)
             self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
             sleep(0.2)

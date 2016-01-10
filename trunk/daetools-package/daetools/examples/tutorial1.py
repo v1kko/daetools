@@ -168,13 +168,13 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        # In this example we use the default center-finite difference method (eCFDM) of 2nd order
+        # In this example we use (the default) center-finite difference method (eCFDM) of 2nd order
         # to discretize the domains x and y. Other available methods are:
         #  - eBFDM: backward-finite difference method,
         #  - eFFDM: forward-finite difference method
         #  - eUpwindCCFV: cell-centered finite-volume method with flux limiter
-        eq.Residual = self.ro() * self.cp() * self.T.dt(x, y) - self.k() * \
-                     (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
+        eq.Residual = self.ro() * self.cp() * dt(self.T(x,y)) - self.k() * \
+                     (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
         # Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags
         # are used to define the position of the boundary.
@@ -182,25 +182,25 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qb()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qb()
 
         # The top edge is placed at y = Ly coordinate, thus we use eUpperBound for the y domain:
         eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qt()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qt()
 
         # The left edge is placed at x = 0 coordinate, thus we use eLowerBound for the x domain:
         eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         # The right edge is placed at x = Lx coordinate, thus we use eUpperBound for the x domain:
         eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
         
 class simTutorial(daeSimulation):
     def __init__(self):

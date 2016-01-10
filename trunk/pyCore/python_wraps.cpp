@@ -3058,144 +3058,112 @@ adouble Get_dt8(daeVariable& var, object o1, object o2, object o3, object o4, ob
 
 adouble Get_d1(daeVariable& var, daeDomain& d, object o1)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1));
 }
 
 adouble Get_d2(daeVariable& var, daeDomain& d, object o1, object o2)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2));
 }
 
 adouble Get_d3(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
 }
 
 adouble Get_d4(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
 }
 
 adouble Get_d5(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
 }
 
 adouble Get_d6(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
 }
 
 adouble Get_d7(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
 }
 
 adouble Get_d8(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
     return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
 }
 
 adouble Get_d21(daeVariable& var, daeDomain& d, object o1)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1));
 }
 
 adouble Get_d22(daeVariable& var, daeDomain& d, object o1, object o2)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2));
 }
 
 adouble Get_d23(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
 }
 
 adouble Get_d24(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
 }
 
 adouble Get_d25(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
 }
 
 adouble Get_d26(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
 }
 
 adouble Get_d27(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
 }
 
 adouble Get_d28(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
     return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
 }
@@ -3283,144 +3251,112 @@ adouble_array Get_dt_array8(daeVariable& var, object o1, object o2, object o3, o
 
 adouble_array Get_d_array1(daeVariable& var, daeDomain& d, object o1)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1));
 }
 
 adouble_array Get_d_array2(daeVariable& var, daeDomain& d, object o1, object o2)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2));
 }
 
 adouble_array Get_d_array3(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3));
 }
 
 adouble_array Get_d_array4(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4));
 }
 
 adouble_array Get_d_array5(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5));
 }
 
 adouble_array Get_d_array6(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6));
 }
 
 adouble_array Get_d_array7(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7));
 }
 
 adouble_array Get_d_array8(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d_array(domain, indexes) is deprecated. Use global function d(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d_array(domain, indexes) is deprecated. Use the global function d_array(expression, domain, method, options) instead", 0);
 
     return var.d_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
 
 adouble_array Get_d2_array1(daeVariable& var, daeDomain& d, object o1)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1));
 }
 
 adouble_array Get_d2_array2(daeVariable& var, daeDomain& d, object o1, object o2)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2));
 }
 
 adouble_array Get_d2_array3(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3));
 }
 
 adouble_array Get_d2_array4(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4));
 }
 
 adouble_array Get_d2_array5(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5));
 }
 
 adouble_array Get_d2_array6(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6));
 }
 
 adouble_array Get_d2_array7(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7));
 }
 
 adouble_array Get_d2_array8(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-//    daeDeclareException(exDeprecated);
-//    e << "The function daeVariable.d2_array(domain, indexes) is deprecated. Use global function d2(expression, domain, method, options) instead";
-//    throw e;
+    var.GetModel()->LogMessage("The function daeVariable.d2_array(domain, indexes) is deprecated. Use the global function d2_array(expression, domain, method, options) instead", 0);
 
     return var.d2_array(d, varRANGE(1), varRANGE(2), varRANGE(3), varRANGE(4), varRANGE(5), varRANGE(6), varRANGE(7), varRANGE(8));
 }
