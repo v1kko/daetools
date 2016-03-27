@@ -1405,7 +1405,11 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		{
 			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnAssigned)
 			{
-				self->m_nBlockIndex = m_nOverallIndex;
+            // 26.03.2016
+            // Achtung, Achtung!!
+            // Why a DOF has a block index? It is not in the DAE block - thus, it is treated as a constant!!
+            // Perhaps it should be left as ULONG_MAX (there is no sense in setting it to m_nOverallIndex)
+                //self->m_nBlockIndex = m_nOverallIndex;
 				self->m_bIsAssigned = true;
 			}
 			else
@@ -1441,10 +1445,17 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 		}
 		else
 		{
-			//If it is fixed variable then its derivative per parameter is 0
-			//Otherwise take the value from the DataProxy
+            // If it is fixed variable then its derivative per parameter is 0
+            // Otherwise take the value from the DataProxy
 			if(pExecutionContext->m_pDataProxy->GetVariableType(m_nOverallIndex) == cnAssigned)
 			{
+            // 26.03.2016
+            // Achtung, Achtung!!
+            // This branch is the most likely unreachable, since if the condition in the if statement above is satisfied
+            // then the variable is assigned and we cant reach this branch.
+            //
+            //      Double check this!!!
+            //
 				return adouble(value, 0);
 			}
 			else

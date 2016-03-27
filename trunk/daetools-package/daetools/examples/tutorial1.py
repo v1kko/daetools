@@ -173,8 +173,8 @@ class modTutorial(daeModel):
         #  - eBFDM: backward-finite difference method,
         #  - eFFDM: forward-finite difference method
         #  - eUpwindCCFV: cell-centered finite-volume method with flux limiter
-        eq.Residual = self.ro() * self.cp() * dt(self.T(x,y)) - self.k() * \
-                     (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
+        eq.Residual = self.ro() * self.cp() * dt(self.T(x,y)) - \
+                      self.k() * (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
         # Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags
         # are used to define the position of the boundary.
@@ -274,6 +274,7 @@ def consoleRun():
 
     # Run
     simulation.Run()
+
     simulation.Finalize()
 
 if __name__ == "__main__":

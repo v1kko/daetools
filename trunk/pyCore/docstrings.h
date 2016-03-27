@@ -29,6 +29,8 @@ const char* DOCSTR_global_daeVersionMajor = "";
 const char* DOCSTR_global_daeVersionMinor = "";
 const char* DOCSTR_global_daeVersionBuild = "";
 
+const char* DOCSTR_daeEquationsIndexes = "";
+
 const char* DOCSTR_daeVariableWrapper_ = "";
 
 const char* DOCSTR_daeConfig_ = "";

@@ -54,6 +54,10 @@ void daeSimulation::SetUpSensitivityAnalysis(void)
 {
 }
 
+void daeSimulation::DoDataPartitioning(daeEquationsIndexes& equationsIndexes, std::map<size_t,size_t>& mapVariableIndexes)
+{
+}
+
 void daeSimulation::Resume(void)
 {
     if(!m_bIsInitialized)
@@ -255,8 +259,20 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 // Do the block decomposition if needed (at the moment only one block is created)
     if(bPrintInfo)
         m_pLog->Message(string("    InitializeStage5"), 0);
-    m_ptrarrBlocks.EmptyAndFreeMemory();
-    m_pModel->InitializeStage5(false, m_ptrarrBlocks);
+    m_ptrBlock = m_pModel->InitializeStage5();
+
+    // If required manipulate the block indexes (i.e. used in C++(MPI) code generator)
+    if(bPrintInfo)
+        m_pLog->Message(string("    DoDataPartitioning"), 0);
+    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
+    DoDataPartitioning(pBlock->m_EquationsIndexes, pBlock->m_mapVariableIndexes);
+
+    // Use the block indexes from the daeBlock to populate EquationExecutionInfos,
+    // build Jacobian expressions (if required; also uses the block indexes),
+    // and initialize the block.
+    if(bPrintInfo)
+        m_pLog->Message(string("    InitializeStage6"), 0);
+    m_pModel->InitializeStage6(m_ptrBlock);
 
 // Setup DAE solver and sensitivities
     if(bPrintInfo)
@@ -283,10 +299,9 @@ std::vector<daeEquationExecutionInfo*> daeSimulation::GetEquationExecutionInfos(
 {
     vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
 
-    if(m_ptrarrBlocks.size() != 1)
-        daeDeclareAndThrowException(exInvalidCall);
-
-    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrarrBlocks[0]);
+    daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
+    if(!pBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
 
     pBlock->GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
     return ptrarrEquationExecutionInfos;
@@ -294,9 +309,9 @@ std::vector<daeEquationExecutionInfo*> daeSimulation::GetEquationExecutionInfos(
 
 size_t daeSimulation::GetNumberOfEquations(void) const
 {
-    if(m_ptrarrBlocks.size() != 1)
-        daeDeclareAndThrowException(exInvalidCall);
-    return m_ptrarrBlocks[0]->GetNumberOfEquations();
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+    return m_ptrBlock->GetNumberOfEquations();
 }
 
 size_t daeSimulation::GetTotalNumberOfVariables(void) const
@@ -308,16 +323,14 @@ void daeSimulation::SetupSolver(void)
 {
     size_t i;
     vector<size_t> narrParametersIndexes;
-    daeBlock_t* pBlock;
     boost::shared_ptr<daeOptimizationVariable> pOptVariable;
     boost::shared_ptr<daeOptimizationConstraint> pConstraint;
     boost::shared_ptr<daeObjectiveFunction> pObjectiveFunction;
     boost::shared_ptr<daeMeasuredVariable> pMeasuredVariable;
     vector<string> strarrErrors;
 
-    if(m_ptrarrBlocks.size() != 1)
-        daeDeclareAndThrowException(exInvalidCall);
-    pBlock = m_ptrarrBlocks[0];
+    if(!m_ptrBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
 
     if(m_bCalculateSensitivities)
     {
@@ -396,14 +409,14 @@ void daeSimulation::SetupSolver(void)
         for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
         {
             pObjectiveFunction = m_arrObjectiveFunctions[i];
-            pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+            pObjectiveFunction->Initialize(m_arrOptimizationVariables, m_ptrBlock);
         }
 
     // 4. Initialize the constraints
         for(i = 0; i < m_arrConstraints.size(); i++)
         {
             pConstraint = m_arrConstraints[i];
-            pConstraint->Initialize(m_arrOptimizationVariables, pBlock);
+            pConstraint->Initialize(m_arrOptimizationVariables, m_ptrBlock);
         }
     }
     else if(m_eSimulationMode == eParameterEstimation)
@@ -419,14 +432,14 @@ void daeSimulation::SetupSolver(void)
         for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
         {
             pObjectiveFunction = m_arrObjectiveFunctions[i];
-            pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+            pObjectiveFunction->Initialize(m_arrOptimizationVariables, m_ptrBlock);
         }
 
     // 4. Initialize measured variables
         for(i = 0; i < m_arrMeasuredVariables.size(); i++)
         {
             pMeasuredVariable = m_arrMeasuredVariables[i];
-            pMeasuredVariable->Initialize(m_arrOptimizationVariables, pBlock);
+            pMeasuredVariable->Initialize(m_arrOptimizationVariables, m_ptrBlock);
         }
     }
     else
@@ -444,19 +457,19 @@ void daeSimulation::SetupSolver(void)
             for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
             {
                 pObjectiveFunction = m_arrObjectiveFunctions[i];
-                pObjectiveFunction->Initialize(m_arrOptimizationVariables, pBlock);
+                pObjectiveFunction->Initialize(m_arrOptimizationVariables, m_ptrBlock);
             }
 
         // 4. Initialize the constraints
             for(i = 0; i < m_arrConstraints.size(); i++)
             {
                 pConstraint = m_arrConstraints[i];
-                pConstraint->Initialize(m_arrOptimizationVariables, pBlock);
+                pConstraint->Initialize(m_arrOptimizationVariables, m_ptrBlock);
             }
         }
     }
 
-    m_pDAESolver->Initialize(pBlock, m_pLog, this, m_pModel->GetInitialConditionMode(), m_bCalculateSensitivities, narrParametersIndexes);
+    m_pDAESolver->Initialize(m_ptrBlock, m_pLog, this, m_pModel->GetInitialConditionMode(), m_bCalculateSensitivities, narrParametersIndexes);
 }
 
 void daeSimulation::SolveInitial(void)

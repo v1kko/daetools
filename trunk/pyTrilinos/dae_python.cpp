@@ -10,7 +10,7 @@ boost::python::list pydaeTrilinosSupportedSolvers(void);
 
 boost::python::list pydaeTrilinosSupportedSolvers(void)
 {
-    std::vector<string> strarrSolvers = daeTrilinosSupportedSolvers();
+    std::vector<std::string> strarrSolvers = daeTrilinosSupportedSolvers();
     boost::python::list l;
 
     for(size_t i = 0; i < strarrSolvers.size(); i++)
@@ -18,15 +18,15 @@ boost::python::list pydaeTrilinosSupportedSolvers(void)
     return l;
 }
 
-void pydaeParameterListPrint(Teuchos::ParameterList& list);
-void pydaeParameterListSet_string(Teuchos::ParameterList& list, const string& strName, const string& Value);
-void pydaeParameterListSet_float(Teuchos::ParameterList& list, const string& strName, double Value);
-void pydaeParameterListSet_int(Teuchos::ParameterList& list, const string& strName, int Value);
-void pydaeParameterListSet_bool(Teuchos::ParameterList& list, const string& strName, bool Value);
-string pydaeParameterListGet_string(Teuchos::ParameterList& list, const string& strName);
-double pydaeParameterListGet_float(Teuchos::ParameterList& list, const string& strName);
-int    pydaeParameterListGet_int(Teuchos::ParameterList& list, const string& strName);
-bool   pydaeParameterListGet_bool(Teuchos::ParameterList& list, const string& strName);
+void        pydaeParameterListPrint(Teuchos::ParameterList& list);
+void        pydaeParameterListSet_string(Teuchos::ParameterList& list, const std::string& strName, const std::string& Value);
+void        pydaeParameterListSet_float(Teuchos::ParameterList& list, const std::string& strName, double Value);
+void        pydaeParameterListSet_int(Teuchos::ParameterList& list, const std::string& strName, int Value);
+void        pydaeParameterListSet_bool(Teuchos::ParameterList& list, const std::string& strName, bool Value);
+std::string pydaeParameterListGet_string(Teuchos::ParameterList& list, const std::string& strName);
+double      pydaeParameterListGet_float(Teuchos::ParameterList& list, const std::string& strName);
+int         pydaeParameterListGet_int(Teuchos::ParameterList& list, const std::string& strName);
+bool        pydaeParameterListGet_bool(Teuchos::ParameterList& list, const std::string& strName);
 
 
 void pydaeParameterListPrint(Teuchos::ParameterList& list)
@@ -34,43 +34,43 @@ void pydaeParameterListPrint(Teuchos::ParameterList& list)
     list.print(std::cout, 0, true, true);
 }
 
-void pydaeParameterListSet_string(Teuchos::ParameterList& list, const string& strName, const string& Value)
+void pydaeParameterListSet_string(Teuchos::ParameterList& list, const std::string& strName, const std::string& Value)
 {
-    list.set<string>(strName, Value);
+    list.set<std::string>(strName, Value);
 }
 
-void pydaeParameterListSet_float(Teuchos::ParameterList& list, const string& strName, double Value)
+void pydaeParameterListSet_float(Teuchos::ParameterList& list, const std::string& strName, double Value)
 {
     list.set<double>(strName, Value);
 }
 
-void pydaeParameterListSet_int(Teuchos::ParameterList& list, const string& strName, int Value)
+void pydaeParameterListSet_int(Teuchos::ParameterList& list, const std::string& strName, int Value)
 {
     list.set<int>(strName, Value);
 }
 
-void pydaeParameterListSet_bool(Teuchos::ParameterList& list, const string& strName, bool Value)
+void pydaeParameterListSet_bool(Teuchos::ParameterList& list, const std::string& strName, bool Value)
 {
     list.set<bool>(strName, Value);
 }
 
 
-string pydaeParameterListGet_string(Teuchos::ParameterList& list, const string& strName)
+std::string pydaeParameterListGet_string(Teuchos::ParameterList& list, const std::string& strName)
 {
-    return list.get<string>(strName);
+    return list.get<std::string>(strName);
 }
 
-double pydaeParameterListGet_float(Teuchos::ParameterList& list, const string& strName)
+double pydaeParameterListGet_float(Teuchos::ParameterList& list, const std::string& strName)
 {
     return list.get<double>(strName);
 }
 
-int pydaeParameterListGet_int(Teuchos::ParameterList& list, const string& strName)
+int pydaeParameterListGet_int(Teuchos::ParameterList& list, const std::string& strName)
 {
     return list.get<int>(strName);
 }
 
-bool pydaeParameterListGet_bool(Teuchos::ParameterList& list, const string& strName)
+bool pydaeParameterListGet_bool(Teuchos::ParameterList& list, const std::string& strName)
 {
     return list.get<bool>(strName);
 }

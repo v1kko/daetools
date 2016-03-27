@@ -78,6 +78,7 @@ public:
     virtual void				SetUpOptimization(void);
     virtual void				SetUpParameterEstimation(void);
     virtual void				SetUpSensitivityAnalysis(void);
+    virtual void                DoDataPartitioning(daeEquationsIndexes& equationsIndexes, std::map<size_t,size_t>& mapVariableIndexes);
 
     virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
     virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const;
@@ -155,7 +156,7 @@ protected:
     daeModel*					m_pModel;
     daeDataReporter_t*			m_pDataReporter;
     daeDAESolver_t*				m_pDAESolver;
-    daePtrVector<daeBlock_t*>	m_ptrarrBlocks;
+    daeBlock_t*                 m_ptrBlock;
     daeeActivityAction			m_eActivityAction;
     daeeSimulationMode			m_eSimulationMode;
     double						m_ProblemCreationStart;

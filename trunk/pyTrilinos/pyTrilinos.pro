@@ -17,6 +17,8 @@ TARGET  = pyTrilinos
 TEMPLATE = lib
 CONFIG += shared
 
+unix::QMAKE_CXXFLAGS += -std=c++11 
+
 INCLUDEPATH +=  $${BOOSTDIR} \
 				$${PYTHON_INCLUDE_DIR} \
 				$${PYTHON_SITE_PACKAGES_DIR} \

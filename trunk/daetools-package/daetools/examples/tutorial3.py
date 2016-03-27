@@ -60,31 +60,32 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
+        # All equations use the default discretisation method (central finite difference)
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.ro() * self.cp() * self.T.dt(x, y) - self.k() * \
-                     (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
+        eq.Residual = self.ro() * self.cp() * dt(self.T(x,y)) - \
+                      self.k() * (d2(self.T(x,y), self.x) + d2(self.T(x,y), self.y))
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qb()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y) - self.Qb()
 
         eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qt()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y) - self.Qt()
 
         eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x)
 
         eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x)
 
         # There are several function that return arrays of values (or time- or partial-derivatives)
         # such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values
@@ -133,7 +134,7 @@ class modTutorial(daeModel):
         #   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3, 5, 7 from domain y 
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
-        eq.Residual = self.Qsum() + self.k() * Sum( self.T.d_array(self.y, '*', 0) )
+        eq.Residual = self.Qsum() + self.k() * Sum( d_array(self.T.array('*', 0), self.y) )
         
         Nx = self.x.NumberOfPoints
         # These equations are just a mental gymnastics to illustrate various functions (array, Constant, Array)
@@ -151,7 +152,7 @@ class modTutorial(daeModel):
         # Achtung: the value of Qmul must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
         values = [2 * K for i in range(Nx)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
-        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * self.T.d_array(self.y, '*', 0) / Constant(2 * K) )
+        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * d_array(self.T.array('*', 0), self.y) / Constant(2 * K) )
 
         # Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.
         # In those cases the functions suxh as array(), d_array(), dt_array(), Array() etc

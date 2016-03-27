@@ -279,13 +279,13 @@ public:
     boost::python::dict GetIndexMappings(void) const
     {
     // Returns dictionary {overallIndex : blockIndex}
-        if(m_ptrarrBlocks.size() != 1)
-            daeDeclareAndThrowException(exInvalidCall);
+        if(!m_ptrBlock)
+            daeDeclareAndThrowException(exInvalidPointer);
         
         boost::python::dict d;
         typedef std::map<size_t, size_t>::iterator c_iterator;
         
-        std::map<size_t, size_t>& mapIndexes = dynamic_cast<daeBlock*>(m_ptrarrBlocks[0])->m_mapVariableIndexes;
+        std::map<size_t, size_t>& mapIndexes = dynamic_cast<daeBlock*>(m_ptrBlock)->m_mapVariableIndexes;
         
         for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
             d[iter->first] = iter->second;
@@ -331,6 +331,18 @@ public:
 	{
 		this->daeSimulation::SetUpVariables();
 	}
+
+    void DoDataPartitioning(daeEquationsIndexes& equationsOverallIndexes, std::map<size_t,size_t>& mapOverallBlockIndexes)
+    {
+        if(boost::python::override f = this->get_override("DoDataPartitioning"))
+            f(boost::ref(equationsOverallIndexes), boost::ref(mapOverallBlockIndexes));
+        else
+            this->daeSimulation::DoDataPartitioning(equationsOverallIndexes, mapOverallBlockIndexes);
+    }
+    void def_DoDataPartitioning(daeEquationsIndexes& equationsOverallIndexes, std::map<size_t,size_t>& mapOverallBlockIndexes)
+    {
+        this->daeSimulation::DoDataPartitioning(equationsOverallIndexes, mapOverallBlockIndexes);
+    }
 
 	void CleanUpSetupData(void)
 	{

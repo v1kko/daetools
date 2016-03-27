@@ -1285,11 +1285,6 @@ const adouble ad_dt(const adouble& a)
     return dt(a);
 }
 
-const adouble_array ad_dt_array(const adouble_array& adarr)
-{
-    return dt_array(adarr);
-}
-
 const adouble ad_d(const adouble& a,
                    daeDomain& domain,
                    daeeDiscretizationMethod method,
@@ -1308,6 +1303,11 @@ const adouble ad_d2(const adouble& a,
     std::map<std::string, std::string> mapOptions = getMapFromDict<std::string, std::string>(options);
 
     return d2(a, domain, method, mapOptions);
+}
+
+const adouble_array ad_dt_array(const adouble_array& adarr)
+{
+    return dt_array(adarr);
 }
 
 const adouble_array ad_d_array(const adouble_array&     adarr,

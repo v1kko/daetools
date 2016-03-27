@@ -341,6 +341,11 @@ void daeSTN::CollectEquationExecutionInfos(vector<daeEquationExecutionInfo*>& pt
 	}
 }
 
+void daeSTN::AddEquationsOverallIndexes(map<size_t, vector<size_t> >& mapIndexes)
+{
+
+}
+
 void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 {
 	size_t i, k, m;
@@ -396,6 +401,9 @@ void daeSTN::CollectVariableIndexes(map<size_t, size_t>& mapVariableIndexes)
 			if(!pOnConditionAction)
 				daeDeclareAndThrowException(exInvalidPointer); 
 
+            // Achtung, Achtung!!
+            // Is this wise (or necessary)? Why do we add it to the list of indexes?
+            // Double-check its ramifications!!!
 			pOnConditionAction->m_Condition.m_pConditionNode->AddVariableIndexToArray(mapVariableIndexes, false);
 		}
 	}

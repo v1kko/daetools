@@ -605,10 +605,13 @@ const adouble_array d_array(const adouble_array&                      adarr,
                             daeeDiscretizationMethod                  eDiscretizationMethod,
                             const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
-    daeDeclareAndThrowException(exNotImplemented);
-
     adouble_array tmp;
     tmp.setGatherInfo(true);
+    tmp.node = adNodeArrayPtr(new adSetupExpressionPartialDerivativeNodeArray(&domain,
+                                                                              1,
+                                                                              eDiscretizationMethod,
+                                                                              mapDiscretizationOptions,
+                                                                              adarr.node));
     return tmp;
 }
 
@@ -617,10 +620,13 @@ const adouble_array d2_array(const adouble_array&                      adarr,
                              daeeDiscretizationMethod                  eDiscretizationMethod,
                              const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
-    daeDeclareAndThrowException(exNotImplemented);
-
     adouble_array tmp;
     tmp.setGatherInfo(true);
+    tmp.node = adNodeArrayPtr(new adSetupExpressionPartialDerivativeNodeArray(&domain,
+                                                                              2,
+                                                                              eDiscretizationMethod,
+                                                                              mapDiscretizationOptions,
+                                                                              adarr.node));
     return tmp;
 }
 

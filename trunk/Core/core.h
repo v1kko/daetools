@@ -1017,18 +1017,28 @@ struct daeFMI2Object_t
 };
 
 /******************************************************************
+    daeEquationsIndexes
+*******************************************************************/
+struct daeEquationsIndexes
+{
+    std::map<size_t, std::vector<size_t> >     m_mapOverallIndexes_Equations;
+    std::map<std::string, daeEquationsIndexes> m_mapOverallIndexes_STNs;
+};
+
+/******************************************************************
     daeModel_t
 *******************************************************************/
 class daeModel_t : virtual public daeObject_t
 {
 public:
-    virtual void	InitializeModel(const std::string& jsonInit)                                         = 0;
+    virtual void        InitializeModel(const std::string& jsonInit) = 0;
 
-    virtual void	InitializeStage1(void)																 = 0;
-    virtual void	InitializeStage2(void)																 = 0;
-    virtual void	InitializeStage3(daeLog_t* pLog)													 = 0;
-    virtual void	InitializeStage4(void)																 = 0;
-    virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks) = 0;
+    virtual void        InitializeStage1(void)				 = 0;
+    virtual void        InitializeStage2(void)				 = 0;
+    virtual void        InitializeStage3(daeLog_t* pLog)	 = 0;
+    virtual void        InitializeStage4(void)				 = 0;
+    virtual daeBlock_t*	InitializeStage5(void)               = 0;
+    virtual void        InitializeStage6(daeBlock_t* pBlock) = 0;
 
     virtual void	CleanUpSetupData(void) = 0;
 

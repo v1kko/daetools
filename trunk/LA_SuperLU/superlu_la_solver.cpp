@@ -543,9 +543,59 @@ int daeSuperLUSolver::Setup(void*		ida,
 							    m_matJacobian, 
 							    dInverseTimeStep);
 
-/* Test the BTF stuff here */
+/* BTF_ORDER permutes a square matrix into upper block triangular form. */
 /*
-	double work;
+    double work;
+    int nmatch;
+    int* P = new int[m_nNoEquations];
+    int* Q = new int[m_nNoEquations];
+    int* R = new int[m_nNoEquations+1];
+    int* Work  = new int[5 * m_nNoEquations];
+
+    int btf_no_blocks_found =  btf_order       // returns number of blocks found
+    (
+        // --- input, not modified: ---
+        Neq,                // A is n-by-n in compressed column form
+        m_matJacobian.IA,   // size n+1
+        m_matJacobian.JA,   // size nz = Ap [n]
+        0,                  // do at most maxwork*nnz(A) work in the maximum
+                            // transversal; no limit if <= 0
+
+        // --- output, not defined on input ---
+        &work,      // return value from btf_maxtrans
+        P,          // size n, row permutation
+        Q,          // size n, column permutation
+        R,          // size n+1.  block b is in rows/cols R[b] ... R[b+1]-1
+        &nmatch,    // # nonzeros on diagonal of P*A*Q
+
+        // --- workspace, not defined on input or output ---
+        Work    // size 5n
+    );
+    std::cout << "btf_no_blocks_found = " << btf_no_blocks_found << std::endl;
+    std::cout << "nmatch = "              << nmatch << std::endl;
+    std::cout << "P:" << std::endl;
+    for(size_t i = 0; i < m_nNoEquations; i++)
+        std::cout << i << " : " << P[i] << std::endl;
+    std::cout << "Q:" << std::endl;
+    for(size_t i = 0; i < m_nNoEquations; i++)
+        std::cout << i << " : " << Q[i] << std::endl;
+    std::cout << "Blocks:" << std::endl;
+    for(size_t i = 0; i < m_nNoEquations; i++)
+        std::cout << R[i] << " - " << R[i+1] << std::endl;
+
+    m_matJacobian.SaveMatrixAsXPM("/home/ciroki/matrix.xpm");
+    m_matJacobian.P = P;
+    m_matJacobian.Q = Q;
+    m_matJacobian.SavePQMatrixAsXPM("/home/ciroki/btf-matrix.xpm");
+
+    delete[] P;
+    delete[] Q;
+    delete[] R;
+    delete[] Work;
+*/
+
+/*  BTF_MAXTRANS: finds a permutation of the columns of a matrix so that it has a zero-free diagonal. */
+/*	double work;
 	int* Match = new int[m_nNoEquations];
 	int* Work  = new int[5 * m_nNoEquations];
 	
@@ -566,19 +616,20 @@ int daeSuperLUSolver::Setup(void*		ida,
 	    Work				// size 5*ncol
 	);
 	
-//	std::cout << "m_nNoEquations = " << m_nNoEquations << std::endl; 
+    std::cout << "m_nNoEquations = " << m_nNoEquations << std::endl;
 //	std::cout << "work = " << work << std::endl; 
-//	std::cout << "btf_columns_matched = " << btf_columns_matched << std::endl; 
-//	for(size_t i = 0; i < m_nNoEquations; i++)
-//		std::cout << "Match[" << i << "] = " << Match[i] << std::endl; 
+    std::cout << "btf_columns_matched = " << btf_columns_matched << std::endl;
+    for(size_t i = 0; i < m_nNoEquations; i++)
+        std::cout << "Match[" << i << "] = " << Match[i] << std::endl;
 	
-	m_matJacobian.SetBlockTriangularForm(Match);
-	m_matJacobian.SaveBTFMatrixAsXPM("/home/ciroki/matrix.xpm");
+    m_matJacobian.SaveMatrixAsXPM("/home/ciroki/matrix.xpm");
+    m_matJacobian.SetBlockTriangularForm(Match);
+    m_matJacobian.SaveBTFMatrixAsXPM("/home/ciroki/btf-matrix.xpm");
 	
 	delete[] Match;
 	delete[] Work;
-
 */
+
 /* End of the BTF test */
 	
 //	double start, end, memcopy;

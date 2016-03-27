@@ -42,6 +42,7 @@ const char* DOCSTR_daeSimulation = "";
     const char* DOCSTR_daeSimulation_SetUpOptimization = "";
     const char* DOCSTR_daeSimulation_SetUpParameterEstimation = "";
     const char* DOCSTR_daeSimulation_SetUpSensitivityAnalysis = "";
+    const char* DOCSTR_daeSimulation_DoDataPartitioning = "";
     const char* DOCSTR_daeSimulation_Run = "";
     const char* DOCSTR_daeSimulation_CleanUpSetupData = "";
     const char* DOCSTR_daeSimulation_Reset = "";

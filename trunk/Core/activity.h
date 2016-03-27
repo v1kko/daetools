@@ -54,11 +54,15 @@ public:
     virtual void				SetModel(daeModel_t* pModel)        								= 0;
     virtual daeDataReporter_t*	GetDataReporter(void) const             							= 0;
     virtual daeLog_t*			GetLog(void) const                          						= 0;
+
     virtual void				SetUpParametersAndDomains(void)                 					= 0;
     virtual void				SetUpVariables(void)                                				= 0;
     virtual void				SetUpOptimization(void)                                 			= 0;
     virtual void				SetUpParameterEstimation(void)                              		= 0;
     virtual void				SetUpSensitivityAnalysis(void)                                  	= 0;
+    virtual void                DoDataPartitioning(daeEquationsIndexes& equationsIndexes,
+                                                   std::map<size_t,size_t>& mapVariableIndexes)     = 0;
+
     virtual void				Run(void)                                                           = 0;
     virtual void				Finalize(void)                                          			= 0;
     virtual void				ReRun(void)                                                 	    = 0;

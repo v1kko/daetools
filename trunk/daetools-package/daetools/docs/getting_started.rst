@@ -140,6 +140,8 @@ An example model developed in **pyDAE** (using python programming language):
 
 .. code-block:: python
 
+    from daetools.pyDAE import *
+
     class myModel(daeModel):
         def __init__(self, name, parent = None, description = ""):
             daeModel.__init__(self, name, parent, description)
@@ -241,7 +243,7 @@ An example simulation developed in **pyDAE**:
             daeSimulation.__init__(self)
 
             # Set the model to simulate:
-            self.m = myModel("myModel", "Description")
+            self.m = myModel("myModel")
 
         def SetUpParametersAndDomains(self):
             # Set the parameters values:
@@ -271,7 +273,7 @@ The same simulation in **cDAE**:
         myModel m;
 
     public:
-        mySimulation(void) : m("myModel", "Description")
+        mySimulation(void) : m("myModel")
         {
             // Set the model to simulate:
             SetModel(&m);

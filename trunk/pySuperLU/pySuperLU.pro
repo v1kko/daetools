@@ -35,6 +35,8 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS += $${SOLIBS_RPATH}
 LIBS += $${BOOST_PYTHON_LIB}
 
+LIBS += -lbtf
+
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp

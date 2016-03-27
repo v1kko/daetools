@@ -3145,26 +3145,12 @@ void daeModel::CollectEquationExecutionInfosFromModels(vector<daeEquationExecuti
     }
 }
 
-void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_t*>& ptrarrBlocks)
+daeBlock* daeModel::DoBlockDecomposition(void)
 {
-    size_t i, k, m;
-//	bool bOverlapped;
-//	long j, Nleft;
-    size_t nIndex, nEquationIndex;
-//	daeSTN *pSTNin, *pSTNout;
-//	daeState* pState;
     daeBlock* pBlock;
-    pair<size_t, size_t> uintPair;
-    vector<size_t> narrVariablesIndexesInEquation;
-    vector<daeSTN*>	ptrarrSTNs;
-    vector<daeVariable*> ptrarrAllVariables;
-    map<size_t, size_t>::iterator iter;
-    vector<daeEquationExecutionInfo*> ptrarrEEIfromModels, ptrarrEEIfromSTNs, ptrarrBlockEquationExecutionInfo;
-    vector<string> strarrErrors;
-    daeEquationExecutionInfo *pEquationExec;
-    daeEquationExecutionInfo *pEqExec;
-    daeEquation *pEquation;
+    //vector<daeEquationExecutionInfo*> ptrarrEEIfromModels, ptrarrEEIfromSTNs;
     vector<daeEquationExecutionInfo*> ptrarrAllEquationExecutionInfosInModel;
+    daeEquationExecutionInfo *pEquationExec;
 
     if(!m_pDataProxy)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -3172,17 +3158,19 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 /***********************************************************************************
     Populate vector with all existing equation execution infos
 ************************************************************************************/
-    CollectEquationExecutionInfosFromModels(ptrarrEEIfromModels);
-    CollectEquationExecutionInfosFromSTNs(ptrarrEEIfromSTNs);
+    m_ptrarrEEIfromModels.clear();
+    m_ptrarrEEIfromSTNs.clear();
+    CollectEquationExecutionInfosFromModels(m_ptrarrEEIfromModels);
+    CollectEquationExecutionInfosFromSTNs(m_ptrarrEEIfromSTNs);
 
-    dae_add_vector(ptrarrEEIfromSTNs, ptrarrAllEquationExecutionInfosInModel);
-    dae_add_vector(ptrarrEEIfromModels, ptrarrAllEquationExecutionInfosInModel);
+    dae_add_vector(m_ptrarrEEIfromSTNs,   ptrarrAllEquationExecutionInfosInModel);
+    dae_add_vector(m_ptrarrEEIfromModels, ptrarrAllEquationExecutionInfosInModel);
 
     dae_capacity_check(ptrarrAllEquationExecutionInfosInModel);
-    dae_capacity_check(ptrarrEEIfromSTNs);
-    dae_capacity_check(ptrarrEEIfromModels);
-//	std::cout << "ptrarrEEIfromSTNs: " << ptrarrEEIfromSTNs.size() << std::endl;
-//	std::cout << "ptrarrEEIfromModels: " << ptrarrEEIfromModels.size() << std::endl;
+    dae_capacity_check(m_ptrarrEEIfromSTNs);
+    dae_capacity_check(m_ptrarrEEIfromModels);
+//	std::cout << "m_ptrarrEEIfromSTNs: " << m_ptrarrEEIfromSTNs.size() << std::endl;
+//	std::cout << "m_ptrarrEEIfromModels: " << m_ptrarrEEIfromModels.size() << std::endl;
 
 //	size_t nVar = m_pDataProxy->GetTotalNumberOfVariables();
 //	size_t nEq  = ptrarrAllEquationExecutionInfosInModel.size();
@@ -3223,169 +3211,175 @@ void daeModel::DoBlockDecomposition(bool bDoBlockDecomposition, vector<daeBlock_
 /**/
 
 /***********************************************************************************
-    Build-up the blocks
+    Build-up the block (only one at the moment)
 ************************************************************************************/
-    if(bDoBlockDecomposition)
+    size_t i, k;
+    daeSTN* pSTN;
+    size_t nNoEquations = ptrarrAllEquationExecutionInfosInModel.size();
+
+    pBlock = new daeBlock;
+    pBlock->SetName(string("Block N-1"));
+    pBlock->SetDataProxy(m_pDataProxy.get());
+    pBlock->m_nNumberOfEquations      = nNoEquations;
+    pBlock->m_nTotalNumberOfVariables = m_pDataProxy->GetTotalNumberOfVariables();
+
+// Here I reserve memory for m_ptrarrEquationExecutionInfos vector
+    pBlock->m_ptrarrEquationExecutionInfos.reserve(m_ptrarrEEIfromModels.size());
+
+    for(i = 0; i < nNoEquations; i++)
     {
+        pEquationExec = ptrarrAllEquationExecutionInfosInModel[i];
+        pBlock->AddVariables(pEquationExec->m_mapIndexes);
     }
-    else // Without the blockdecomposition
-    {
-        size_t i, k;
-        daeSTN* pSTN;
-        size_t nNoEquations = ptrarrAllEquationExecutionInfosInModel.size();
-
-        pBlock = new daeBlock;
-        pBlock->SetName(string("Block N-1"));
-        pBlock->SetDataProxy(m_pDataProxy.get());
-        pBlock->m_nNumberOfEquations      = nNoEquations;
-        pBlock->m_nTotalNumberOfVariables = m_pDataProxy->GetTotalNumberOfVariables();
-
-    // Here I reserve memory for m_ptrarrEquationExecutionInfos vector
-        pBlock->m_ptrarrEquationExecutionInfos.reserve(ptrarrEEIfromModels.size());
-        ptrarrBlocks.push_back(pBlock);
-
-        for(i = 0; i < nNoEquations; i++)
-        {
-            pEquationExec = ptrarrAllEquationExecutionInfosInModel[i];
-            pBlock->AddVariables(pEquationExec->m_mapIndexes);
-        }
 
 ////////////////////////////////////////////////////////////////////////
 // BUG!!!! 30.07.2009
 // A sta sa STNovima iz child modela i modelarrays????
 // 31.07.2009 I corrected the code and now I use ALL STNs
 ////////////////////////////////////////////////////////////////////////
-        vector<daeSTN*> ptrarrAllSTNs;
 
-        CollectAllSTNsAsVector(ptrarrAllSTNs);
+    m_ptrarrAllSTNs.clear();
+    CollectAllSTNsAsVector(m_ptrarrAllSTNs);
 
-        map<size_t, size_t> mapVariableIndexes;
-        for(i = 0; i < ptrarrAllSTNs.size(); i++)
-        {
-            pSTN = ptrarrAllSTNs[i];
-            if(!pSTN)
-                daeDeclareAndThrowException(exInvalidPointer);
+    map<size_t, size_t> mapVariableIndexes;
+    for(i = 0; i < m_ptrarrAllSTNs.size(); i++)
+    {
+        pSTN = m_ptrarrAllSTNs[i];
+        if(!pSTN)
+            daeDeclareAndThrowException(exInvalidPointer);
 
-            pSTN->CollectVariableIndexes(mapVariableIndexes);
-        }
+        pSTN->CollectVariableIndexes(mapVariableIndexes);
+    }
 
-        // Now add variable indexes from STNs/IFs to the block
-        pBlock->AddVariables(mapVariableIndexes);
+    // Now add variable indexes from STNs/IFs to the block
+    pBlock->AddVariables(mapVariableIndexes);
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
+    // Populate the daeEquationsIndexes object from the block
+    for(i = 0; i < m_ptrarrEEIfromModels.size(); i++)
+    {
+        pEquationExec = m_ptrarrEEIfromModels[i];
+        size_t nEquationIndex = pBlock->m_EquationsIndexes.m_mapOverallIndexes_Equations.size();
 
-        map<size_t, size_t>::iterator iter, iterIndexInBlock;
+        std::vector<size_t> arrOI;
+        arrOI.reserve(pEquationExec->m_mapIndexes.size());
+        for(std::map<size_t, size_t>::const_iterator iter = pEquationExec->m_mapIndexes.begin(); iter != pEquationExec->m_mapIndexes.end(); iter++)
+            arrOI.push_back(iter->first);
+        pBlock->m_EquationsIndexes.m_mapOverallIndexes_Equations.insert(std::make_pair(nEquationIndex, arrOI));
+    }
+//    for(i = 0; i < m_ptrarrAllSTNs.size(); i++)
+//    {
+//        pSTN = m_ptrarrAllSTNs[i];
+//        size_t nSTNIndex = pBlock->m_EquationsIndexes.m_mapOverallIndexes_STNs.size();
+//        daeEquationsIndexes ei;
+//        pBlock->m_EquationsIndexes.m_mapOverallIndexes_STNs[nSTNIndex] = ei;
 
-        nEquationIndex = 0;
-        for(k = 0; k < ptrarrEEIfromModels.size(); k++)
-        {
-            pEquationExec = ptrarrEEIfromModels[k];
-            if(!pEquationExec)
-                daeDeclareAndThrowException(exInvalidPointer);
+//        pSTN->CollectVariableIndexes(mapVariableIndexes);
+//    }
 
-            pEquationExec->m_nEquationIndexInBlock = nEquationIndex;
-            //pEquationExec->m_pBlock = pBlock;
-            pBlock->AddEquationExecutionInfo(pEquationExec);
+    return pBlock;
+}
+
+void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
+{
+    /* If we change block indexes (for instance when doing data partitioning for c++(MPI) code generator)
+     * then the following data need to be updated as well:
+     *   - daeBlock::m_mapVariableIndexes (the values are block indexes)
+     *   - all daeEquationExecutionInfo::m_mapIndexes (the values are block indexes)
+     *   - all daeEquationExecutionInfo::m_mapJacobianExpressions (the keys are block indexes)
+     * Therefore, the function DoBlockDecomposition is split and a new one has been added InitializeStage6
+     * where all these block indexes are populated. A new function has been added to daeSimulation_t
+     * that can be overloaded by the users to manipulate the block indexes, if necessary.
+     */
+
+    daeSTN* pSTN;
+    size_t nEquationIndex;
+    vector<string> strarrErrors;
+    daeEquationExecutionInfo *pEquationExec;
+
+    if(!pBlock)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    // Fill all daeEquationExecutionInfo::m_mapIndexes/m_mapJacobianExpressions
+    // with block indexes from daeBlock::m_mapVariableIndexes
+    map<size_t, size_t>::iterator iter, iterIndexInBlock;
+
+    nEquationIndex = 0;
+    for(size_t k = 0; k < m_ptrarrEEIfromModels.size(); k++)
+    {
+        pEquationExec = m_ptrarrEEIfromModels[k];
+        if(!pEquationExec)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        pEquationExec->m_nEquationIndexInBlock = nEquationIndex;
+        //pEquationExec->m_pBlock = pBlock;
+        pBlock->AddEquationExecutionInfo(pEquationExec);
 //----------------->
-        // Here I have to associate overall variable indexes in equation to corresponding indexes in the block
-        // m_mapIndexes<OverallIndex, BlockIndex>
-            for(iter = pEquationExec->m_mapIndexes.begin(); iter != pEquationExec->m_mapIndexes.end(); iter++)
-            {
-            // Try to find OverallIndex in the map of BlockIndexes
-                iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
-                if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
-                {
-                    daeDeclareException(exInvalidCall);
-                    e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in model " << GetCanonicalName();
-                    throw e;
-                }
-                (*iter).second = (*iterIndexInBlock).second;
-            }
-//------------------->
-            nEquationIndex++;
-        }
-
-        pBlock->m_ptrarrSTNs = ptrarrAllSTNs;
-        for(i = 0; i < ptrarrAllSTNs.size(); i++)
+    // Here we have to associate overall variable indexes in equation to corresponding indexes in the block
+    // m_mapIndexes<OverallIndex, BlockIndex>
+        for(iter = pEquationExec->m_mapIndexes.begin(); iter != pEquationExec->m_mapIndexes.end(); iter++)
         {
-            pSTN = ptrarrAllSTNs[i];
-            if(!pSTN)
-                daeDeclareAndThrowException(exInvalidPointer);
-
-            if(pSTN->m_ptrarrStates.size() == 0)
+        // Try to find OverallIndex in the map of BlockIndexes
+            iterIndexInBlock = pBlock->m_mapVariableIndexes.find((*iter).first);
+            if(iterIndexInBlock == pBlock->m_mapVariableIndexes.end())
             {
                 daeDeclareException(exInvalidCall);
-                e << "Number of states is 0 in STN " << pSTN->GetCanonicalName();
+                e << "Cannot find overall variable index [" << toString<size_t>((*iter).first) << "] in model " << GetCanonicalName();
                 throw e;
             }
-
-            pSTN->SetIndexesWithinBlockToEquationExecutionInfos(pBlock, nEquationIndex);
-
+            (*iter).second = (*iterIndexInBlock).second;
         }
+//------------------->
+        nEquationIndex++;
+    }
 
-    // Now, after associating overall and block indexes build Jacobian expressions, if requested
-        for(i = 0; i < ptrarrEEIfromModels.size(); i++)
+    pBlock->m_ptrarrSTNs = m_ptrarrAllSTNs;
+    for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
+    {
+        pSTN = m_ptrarrAllSTNs[i];
+        if(!pSTN)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        if(pSTN->m_ptrarrStates.size() == 0)
         {
-            pEquationExec = ptrarrEEIfromModels[i];
-
-            if(pEquationExec->m_pEquation->m_bBuildJacobianExpressions)
-                pEquationExec->BuildJacobianExpressions();
-        }
-
-        for(i = 0; i < ptrarrAllSTNs.size(); i++)
-        {
-            pSTN = ptrarrAllSTNs[i];
-            pSTN->BuildJacobianExpressions();
-        }
-
-    // Initialize the block
-        pBlock->Initialize();
-
-    // Finaly, check the block
-        if(!pBlock->CheckObject(strarrErrors))
-        {
-            daeDeclareException(exRuntimeCheck);
-            for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
-                e << *it << string("\n");
+            daeDeclareException(exInvalidCall);
+            e << "Number of states is 0 in STN " << pSTN->GetCanonicalName();
             throw e;
         }
 
-// Print the block
-//		cout << "Results of block decomposition:" << endl;
-//		barrVars.resize(nNoEquations, false);
-//		for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
-//			barrVars[iter->first] = true;
-//
-//		for(k = 0; k < nNoEquations; k++)
-//			cout << (barrVars[k] ? "X" : "-") << " ";
-//		cout << endl;
-//
-//		for(k = 0; k < nNoEquations; k++)
-//			barrVars[k] = false;
-
+        pSTN->SetIndexesWithinBlockToEquationExecutionInfos(pBlock, nEquationIndex);
     }
 
-/***********************************************************************************
-    Print the results of block decomposition
-************************************************************************************/
-/*
-    cout << "Results of block decomposition:" << endl;
-    barrVars.resize(nVar, false);
-    for(i = 0; i < m_ptrarrBlocks.size(); i++)
+// Now, after associating overall and block indexes build Jacobian expressions, if requested
+    for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
     {
-        pBlock = m_ptrarrBlocks[i];
-        for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
-            barrVars[iter->first] = true;
+        pEquationExec = m_ptrarrEEIfromModels[i];
 
-        for(k = 0; k < nVar; k++)
-            cout << (barrVars[k] ? "X" : "-") << " ";
-        cout << endl;
-
-        for(k = 0; k < nVar; k++)
-            barrVars[k] = false;
+        if(pEquationExec->m_pEquation->m_bBuildJacobianExpressions)
+            pEquationExec->BuildJacobianExpressions();
     }
-*/
+
+    for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
+    {
+        pSTN = m_ptrarrAllSTNs[i];
+        pSTN->BuildJacobianExpressions();
+    }
+
+// Initialize the block
+    pBlock->Initialize();
+
+// Finaly, check the block
+    if(!pBlock->CheckObject(strarrErrors))
+    {
+        daeDeclareException(exRuntimeCheck);
+        for(vector<string>::iterator it = strarrErrors.begin(); it != strarrErrors.end(); it++)
+            e << *it << string("\n");
+        throw e;
+    }
+
+    // These are not needed anyore
+    m_ptrarrEEIfromModels.clear();
+    m_ptrarrEEIfromSTNs.clear();
+    m_ptrarrAllSTNs.clear();
 }
 
 void daeModel::SetDefaultInitialGuesses(void)
@@ -3976,10 +3970,17 @@ void daeModel::InitializeStage4(void)
     m_pDataProxy->SetGatherInfo(false);
 }
 
-void daeModel::InitializeStage5(bool bDoBlockDecomposition, vector<daeBlock_t*>& ptrarrBlocks)
+daeBlock_t* daeModel::InitializeStage5(void)
 {
 // Do block decomposition (if requested)
-    DoBlockDecomposition(bDoBlockDecomposition, ptrarrBlocks);
+    daeBlock* pBlock = DoBlockDecomposition();
+    return pBlock;
+}
+
+void daeModel::InitializeStage6(daeBlock_t* ptrBlock)
+{
+    daeBlock* pBlock = dynamic_cast<daeBlock*>(ptrBlock);
+    PopulateBlockIndexes(pBlock);
 }
 
 void daeModel::StoreInitializationValues(const std::string& strFileName) const

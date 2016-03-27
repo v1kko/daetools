@@ -233,6 +233,15 @@ BOOST_PYTHON_MODULE(pyCore)
     class_< std::vector<long> >("vector_long")
         .def(vector_indexing_suite< std::vector<long> >())
     ;
+    class_< std::map<size_t,size_t> >("map_ulong_ulong")
+        .def(map_indexing_suite< std::map<size_t,size_t> >())
+    ;
+    class_< std::map<std::string, daeEquationsIndexes> >("map_string_daeEquationsIndexes")
+        .def(map_indexing_suite< std::map<std::string, daeEquationsIndexes> >())
+    ;
+    class_< std::map< size_t,std::vector<size_t> > >("map_ulong_vector_ulong")
+        .def(map_indexing_suite< std::map< size_t,std::vector<size_t> > >())
+    ;
 
 /**************************************************************
     Global functions
@@ -257,6 +266,11 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
     Classes
 ***************************************************************/
+    class_<daeEquationsIndexes, boost::noncopyable>("daeEquationsIndexes", DOCSTR_daeEquationsIndexes, no_init)
+        .def_readonly("OverallIndexes_Equations",  &daeEquationsIndexes::m_mapOverallIndexes_Equations)
+        .def_readonly("OverallIndexes_STNs",       &daeEquationsIndexes::m_mapOverallIndexes_STNs)
+    ;
+
     class_<daeVariableWrapper>("daeVariableWrapper", DOCSTR_daeVariableWrapper_, no_init)
         .def(init<daeVariable&, optional<string> >(( arg("self"), arg("variable"), arg("name") = "" ),  DOCSTR_daeVariableWrapper_))
         .def(init<adouble&, optional<string> >    (( arg("self"), arg("ad"), arg("name") = "" ),        DOCSTR_daeVariableWrapper_))

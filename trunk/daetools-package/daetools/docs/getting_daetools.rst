@@ -38,14 +38,14 @@ Supported platforms:
 Supported python versions:
 
 * 2.7
-* 3.x
+* 3.3, 3.4
 
 Mandatory packages:
 
-* Python (2.7, 3.x): `<http://www.python.org>`_
-* Numpy: `<http://numpy.scipy.org>`_
-* Scipy: `<http://www.scipy.org>`_
-* Matplotlib: `<http://matplotlib.sourceforge.net>`_
+* Python (2.7, 3.3, 3.4): `<http://www.python.org>`_
+* Numpy (1.4\ :sup:`+`): `<http://numpy.scipy.org>`_
+* Scipy (0.12\ :sup:`+`): `<http://www.scipy.org>`_
+* Matplotlib (1.2\ :sup:`+`): `<http://matplotlib.sourceforge.net>`_
 * pyQt4 (4.x): `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
 
 Optional packages (proprietary):

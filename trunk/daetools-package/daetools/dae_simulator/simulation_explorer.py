@@ -237,7 +237,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             print('Done!')
         
     def generateCode(self, language):
-        if not language in ['c99', 'Modelica', 'gPROMS', 'FMI (Co-Simulation)']:
+        if not language in ['c99', 'c++ (MPI)', 'Modelica', 'gPROMS', 'FMI (Co-Simulation)']:
             return
         
         if language == 'c99':
@@ -250,6 +250,20 @@ class daeSimulationExplorer(QtGui.QDialog):
             cg = daeCodeGenerator_c99()
             cg.generateSimulation(self._simulation, directory)
         
+        elif language == 'c++ (MPI)':
+            nproc, ok = QtGui.QInputDialog.getInteger(self, "Code generator", "Set the # of MPI processes:", 4, min=2)
+            if not ok:
+                return
+
+            from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
+                                                                            '',
+                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+            if directory == '':
+                return
+            cg = daeCodeGenerator_cxx_mpi()
+            cg.generateSimulation(self._simulation, directory, nproc)
+
         elif language == 'Modelica':
             from daetools.code_generators.modelica import daeCodeGenerator_Modelica
             directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
@@ -671,7 +685,7 @@ class daeSimulationExplorer(QtGui.QDialog):
     
     def _slotGenerateCode(self):
         try:
-            languages = ['Modelica', 'gPROMS', 'c99', 'FMI (Co-Simulation)']
+            languages = ['Modelica', 'gPROMS', 'c99', 'c++ (MPI)', 'FMI (Co-Simulation)']
             language, ok = QtGui.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
             if not ok:
                 return

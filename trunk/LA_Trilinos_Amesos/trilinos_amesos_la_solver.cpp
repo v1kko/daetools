@@ -4,6 +4,7 @@
 #include <idas/idas_impl.h>
 #include "trilinos_amesos_la_solver.h"
 
+using namespace std;
 
 #ifdef DAE_USE_OPEN_BLAS
 extern "C" void openblas_set_num_threads(int);

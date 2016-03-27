@@ -1547,6 +1547,7 @@ public:
 
 	std::map<size_t, daeExpressionInfo>		m_mapExpressionInfos; 
 	std::map<size_t, size_t>				m_mapVariableIndexes;
+    daeEquationsIndexes                     m_EquationsIndexes;
 
 	daeDataProxy_t*	m_pDataProxy;
 
@@ -2604,14 +2605,15 @@ public:
 	virtual ~daeModel(void);
 
 public:
-    virtual void	InitializeModel(const std::string& jsonInit);
+    virtual void        InitializeModel(const std::string& jsonInit);
 
-    virtual void	InitializeStage1(void);
-	virtual void	InitializeStage2(void);
-	virtual void	InitializeStage3(daeLog_t* pLog);
-	virtual void	InitializeStage4(void);
-	virtual void	InitializeStage5(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
-	
+    virtual void        InitializeStage1(void);
+    virtual void    	InitializeStage2(void);
+    virtual void        InitializeStage3(daeLog_t* pLog);
+    virtual void        InitializeStage4(void);
+    virtual daeBlock_t*	InitializeStage5(void);
+    virtual void        InitializeStage6(daeBlock_t* pBlock);
+
 	virtual void	CleanUpSetupData(void);
     virtual void    UpdateEquations(const daeExecutionContext* pExecutionContext);
 
@@ -2816,8 +2818,9 @@ protected:
 	void		InitializePortAndModelArrays(void);
 	void		InitializeSTNs(void);
 	void		InitializeOnEventAndOnConditionActions(void);
-	void		DoBlockDecomposition(bool bDoBlockDecomposition, std::vector<daeBlock_t*>& ptrarrBlocks);
-	void		SetDefaultAbsoluteTolerances(void);
+    daeBlock*	DoBlockDecomposition(void);
+    void        PopulateBlockIndexes(daeBlock* pBlock);
+    void		SetDefaultAbsoluteTolerances(void);
 	void		SetDefaultInitialGuesses(void);	
 	void		BuildUpSTNsAndEquations(void);
 	void		CreatePortConnectionEquations(void);
@@ -2874,6 +2877,10 @@ protected:
 // Used only during GatherInfo
 	daeExecutionContext*	m_pExecutionContextForGatherInfo;
 	
+    std::vector<daeEquationExecutionInfo*> m_ptrarrEEIfromModels;
+    std::vector<daeEquationExecutionInfo*> m_ptrarrEEIfromSTNs;
+    std::vector<daeSTN*>                   m_ptrarrAllSTNs;
+
 	friend class daeIF;
 	friend class daeState;
 	friend class daeSTN;
@@ -3207,7 +3214,8 @@ protected:
 	void			CreateEquationExecutionInfo(void);
 	void			CollectEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo);
 	void			CollectVariableIndexes(std::map<size_t, size_t>& mapVariableIndexes);
-	void			SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, size_t& nEquationIndex);
+    void            AddEquationsOverallIndexes(std::map<size_t, std::vector<size_t> >& mapIndexes);
+    void			SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, size_t& nEquationIndex);
     void            BuildJacobianExpressions();
 
 	void			CalculateResiduals(daeExecutionContext& EC);

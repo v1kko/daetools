@@ -276,7 +276,7 @@ vSUPERLU=4.1
 vSUPERLU_MT=2.0
 vNLOPT=2.4.1
 vIDAS=1.1.0
-vTRILINOS=10.12.2
+vTRILINOS=12.6.1
 vUMFPACK=5.6.2
 vAMD=2.3.1
 vMETIS=5.1.0
@@ -867,7 +867,7 @@ configure_idas()
   cd idas
   patch < ../idasMakefile.in.patch
   
-  ./configure ${DAE_CROSS_COMPILE_FLAGS} --prefix=${TRUNK}/idas/build --with-pic --disable-mpi --enable-static=yes --enable-shared=no --enable-examples --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
+  ./configure ${DAE_CROSS_COMPILE_FLAGS} --prefix=${TRUNK}/idas/build --with-pic --enable-mpi --enable-static=yes --enable-shared=no --enable-examples --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
   
   cd "${TRUNK}"
   echo ""
@@ -881,7 +881,7 @@ compile_idas()
   echo ""
   echo "[*] Building idas..."
   echo ""
-  make 
+  make all
   make install
   echo ""
   echo "[*] Done!"
