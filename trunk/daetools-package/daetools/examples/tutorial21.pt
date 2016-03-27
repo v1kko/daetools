@@ -1,0 +1,80 @@
+{
+  "curves": [
+    [
+      "tutorial21.y", 
+      [
+        -1, 
+        0
+      ], 
+      [
+        "*", 
+        "1.0"
+      ], 
+      "tutorial21.y(*, 1.0)", 
+      {
+        "color": "black", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "o", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "black", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial21.y", 
+      [
+        -1, 
+        1
+      ], 
+      [
+        "*", 
+        "2.0"
+      ], 
+      "tutorial21.y(*, 2.0)", 
+      {
+        "color": "blue", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "s", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "blue", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial21.y", 
+      [
+        -1, 
+        2
+      ], 
+      [
+        "*", 
+        "3.0"
+      ], 
+      "tutorial21.y(*, 3.0)", 
+      {
+        "color": "red", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "^", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "red", 
+        "markersize": 6
+      }
+    ]
+  ], 
+  "gridOn": true, 
+  "legendOn": true, 
+  "plotTitle": "", 
+  "updateInterval": 0, 
+  "windowTitle": "tutorial21.y(*, 3.0)", 
+  "xlabel": "Time", 
+  "xmax": 0.052500000000000005, 
+  "xmin": -0.0025000000000000005, 
+  "xscale": "linear", 
+  "ylabel": "tutorial21.y", 
+  "ymax": 1.0458957773154072, 
+  "ymin": 0.036188676376451574, 
+  "yscale": "linear"
+}

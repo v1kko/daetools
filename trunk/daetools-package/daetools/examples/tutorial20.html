@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial20.py</title>
+</head>
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
+<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                            tutorial20.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#c00000;'>This is a simple example to test daetools support for:</span>
+
+<span style='color:#c00000;'>- Scilab/GNU_Octave/Matlab MEX functions</span>
+<span style='color:#c00000;'>- Simulink S-functions</span>
+<span style='color:#c00000;'>- Modelica code-generator</span>
+<span style='color:#c00000;'>- gPROMS code-generator</span>
+<span style='color:#c00000;'>- FMI code-generator (for Co-Simulation)</span>
+
+<span style='color:#c00000;'>The model has two inlet and two outlet ports.</span>
+<span style='color:#c00000;'>The values of the outlets are equal to inputs multiplied by a multiplier &quot;m&quot;:</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>    out1.y   = m1   x in1.y</span>
+<span style='color:#c00000;'>    out2.y[] = m2[] x in2.y[]</span>
+
+<span style='color:#c00000;'>where multipliers m1 and m2[] are:</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>  STN('Multipliers'):</span>
+<span style='color:#c00000;'>      when 'variableMultipliers':</span>
+<span style='color:#c00000;'>          dm1/dt   = p1</span>
+<span style='color:#c00000;'>          dm2[]/dt = p2</span>
+<span style='color:#c00000;'>      when 'constantMultipliers':</span>
+<span style='color:#c00000;'>          dm1/dt   = 0</span>
+<span style='color:#c00000;'>          dm2[]/dt = 0</span>
+<span style='color:#c00000;'>        </span>
+<span style='color:#c00000;'>(that is the multipliers can be constant or variable).</span>
+
+<span style='color:#c00000;'>The ports in1 and out1 are scalar (width = 1).</span>
+<span style='color:#c00000;'>The ports in2 and out2 are vectors (width = 1).</span>
+
+<span style='color:#c00000;'>Achtung, Achtung!!</span>
+<span style='color:#c00000;'>Notate bene:</span>
+
+<span style='color:#c00000;'>1. Inlet ports must be DOFs (that is to have their values asssigned),</span>
+<span style='color:#c00000;'>   for they can't be connected when the model is simulated outside of daetools context.</span>
+<span style='color:#c00000;'>2. Only scalar output ports are supported at the moment!! (Simulink issue)</span>
+<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#0000ff;'>import</span> sys, numpy
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+
+<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+
+<b>class</b> portScalar(daePort):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
+        daePort.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description)
+
+        <span style='color:#0000ff;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+
+<b>class</b> portVector(daePort):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description, width):
+        daePort.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description)
+
+        <span style='color:#0000ff;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [width])
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#0000ff;'>self</span>.w <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;w&quot;</span>, <span style='color:#0000ff;'>self</span>, unit(), <span style='color:#c00000;'>&quot;Ports width&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.p1 <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;p1&quot;</span>, s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Parameter multiplier 1 (fixed)&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.p2 <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;p2&quot;</span>, s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Parameter multiplier 2 (fixed)&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.m1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;m1&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Multiplier 1&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;m2&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Multiplier 2&quot;</span>, [<span style='color:#0000ff;'>self</span>.w])
+
+        <span style='color:#0000ff;'>self</span>.in1  <b><span style='color:#0000ff;'>=</span></b> portScalar(<span style='color:#c00000;'>&quot;in_1&quot;</span>,  eInletPort,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Input 1&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.out1 <b><span style='color:#0000ff;'>=</span></b> portScalar(<span style='color:#c00000;'>&quot;out_1&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Output 1 = p1 x m1&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.in2  <b><span style='color:#0000ff;'>=</span></b> portVector(<span style='color:#c00000;'>&quot;in_2&quot;</span>,  eInletPort,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Input 2&quot;</span>,              <span style='color:#0000ff;'>self</span>.w)
+        <span style='color:#0000ff;'>self</span>.out2 <b><span style='color:#0000ff;'>=</span></b> portVector(<span style='color:#c00000;'>&quot;out_2&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Output 2 = p2 x m2[]&quot;</span>, <span style='color:#0000ff;'>self</span>.w)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
+        nw <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.w.NumberOfPoints
+
+        <span style='color:#008000;'># Set the outlet port values</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;out_1&quot;</span>, <span style='color:#c00000;'>&quot;out_1.y = m1 x in1.y&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.out1.y() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m1() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.in1.y()
+
+        <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;out_2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;out_2.y[</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>] = m2[</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>] * in2.y[</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>]&quot;</span> <b><span style='color:#0000ff;'>%</span></b> (w, w, w))
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.out2.y(w) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m2(w) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.in2.y(w)
+
+        <span style='color:#008000;'># STN Multipliers</span>
+        <span style='color:#0000ff;'>self</span>.stnMultipliers <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.STN(<span style='color:#c00000;'>&quot;Multipliers&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;variableMultipliers&quot;</span>) <span style='color:#008000;'># Variable multipliers</span>
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m1&quot;</span>, <span style='color:#c00000;'>&quot;Multiplier 1 (Variable)&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m1.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p1()
+
+        <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;Multiplier 2 (Variable)&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m2.dt(w) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p2()
+
+        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;constantMultipliers&quot;</span>) <span style='color:#008000;'># Constant multipliers</span>
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m1&quot;</span>, <span style='color:#c00000;'>&quot;Multiplier 1 (Constant)&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m1.dt()
+
+        <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;Multiplier 2 (Constant)&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m2.dt(w)
+
+        <span style='color:#0000ff;'>self</span>.END_STN()
+   
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial20&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.m.w.CreateArray(<span style='color:#c000c0;'>1</span>)
+
+        <span style='color:#0000ff;'>self</span>.m.p1.SetValue(<span style='color:#c000c0;'>10</span>)
+        <span style='color:#0000ff;'>self</span>.m.p2.SetValues(<span style='color:#c000c0;'>20</span>)
+
+    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        nw <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.w.NumberOfPoints
+
+        <span style='color:#0000ff;'>self</span>.m.stnMultipliers.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;variableMultipliers&quot;</span>
+
+        <span style='color:#0000ff;'>self</span>.m.in1.y.AssignValue(<span style='color:#c000c0;'>1</span>)
+        <span style='color:#0000ff;'>self</span>.m.in2.y.AssignValues(numpy.ones(nw) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>2</span>)
+
+        <span style='color:#0000ff;'>self</span>.m.m1.SetInitialCondition(<span style='color:#c000c0;'>1</span>)
+        <span style='color:#0000ff;'>self</span>.m.m2.SetInitialConditions(numpy.ones(nw))
+
+<b>def</b> run_code_generators(simulation, log):
+    <span style='color:#008000;'># Demonstration of daetools code-generators:</span>
+    <span style='color:#0000ff;'>import</span> tempfile
+    tmp_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'daetools-code_generator-fmi-'</span>)
+    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'Generated code (Modelica, gPROMS and FMU) </span><span style='color:#c00000;'>\n</span><span style='color:#c00000;'>will be located in: </span><span style='color:#c00000;'>\n</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> tmp_folder
+    log.Message(msg, <span style='color:#c000c0;'>0</span>)
+    
+    <b>try</b>:
+        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+        <b>if</b> <b><span style='color:#0000ff;'>not</span></b> QtGui.QApplication.instance():
+            app_ <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;tutorial20&quot;</span>, msg)
+    <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
+        log.Message(<span style='color:#0000ff;'>str</span>(e), <span style='color:#c000c0;'>0</span>)
+
+    <span style='color:#008000;'># Modelica:</span>
+    <span style='color:#0000ff;'>from</span> daetools.code_generators.modelica <span style='color:#0000ff;'>import</span> daeCodeGenerator_Modelica
+    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_Modelica()
+    cg.generateSimulation(simulation, tmp_folder)
+
+    <span style='color:#008000;'># gPROMS:</span>
+    <span style='color:#0000ff;'>from</span> daetools.code_generators.gproms <span style='color:#0000ff;'>import</span> daeCodeGenerator_gPROMS
+    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_gPROMS()
+    cg.generateSimulation(simulation, tmp_folder)
+
+    <span style='color:#008000;'># Functional Mock-up Interface for co-simulation</span>
+    <span style='color:#0000ff;'>from</span> daetools.code_generators.fmi <span style='color:#0000ff;'>import</span> daeCodeGenerator_FMI
+    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_FMI()
+    cg.generateSimulation(simulation, tmp_folder, <span style='color:#0000ff;'>__file__</span>, <span style='color:#c00000;'>'create_simulation'</span>, <span style='color:#c00000;'>''</span>, [])
+
+<span style='color:#008000;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, run_before_simulation_begin_fn <b><span style='color:#0000ff;'>=</span></b> run_code_generators)
+    simulator.exec_()
+
+<span style='color:#008000;'># This function is used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.</span>
+<span style='color:#008000;'># It can have any number of arguments, but must return an initialized daeSimulation object.</span>
+<b>def</b> create_simulation():
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
+    <span style='color:#008000;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
+
+    <span style='color:#008000;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#008000;'># Nota bene: store the objects since they will be destroyed when they go out of scope</span>
+    simulation.__rt_objects__ <b><span style='color:#0000ff;'>=</span></b> [daesolver, datareporter, log]
+
+    <b>return</b> simulation
+    
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<b>def</b> consoleRun():
+    <span style='color:#008000;'># Create simulation</span>
+    simulation <b><span style='color:#0000ff;'>=</span></b> create_simulation()
+
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#008000;'># Run code-generators</span>
+    run_code_generators(simulation, simulation.Log)
+    
+    <span style='color:#008000;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+
+<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+        consoleRun()
+    <b>else</b>:
+        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        guiRun(app)
+</pre>
+</body>
+</html>

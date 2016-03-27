@@ -1,0 +1,44 @@
+CC            = gcc
+CXX           = g++
+DEFINES       =
+CFLAGS        = -pipe -std=c99   -pedantic -Os -fno-inline-small-functions -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable D_REENTRANT $(DEFINES)
+CXXFLAGS      = -pipe -std=c++11 -pedantic -Os -fno-inline-small-functions -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable D_REENTRANT $(DEFINES)
+INCPATH       = -I.
+LINK          = g++
+LFLAGS        = -Wl,-O1
+LIBS          = -lsundials_idas -lsundials_nvecserial -lblas -llapack -lpthread 
+OBJECTS_DIR   = ./
+TARGET        = daetools_simulation
+DEL_FILE      = rm -f
+
+SOURCES = auxiliary.c adouble.cpp daesolver.c simulation.c model.cpp main.c 
+OBJECTS = auxiliary.o adouble.o daesolver.o simulation.o model.o main.o
+
+first: all
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)  
+	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
+
+clean: 
+	-$(DEL_FILE) $(OBJECTS)
+
+daesolver.o: daesolver.c auxiliary.h typedefs.h daesolver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o daesolver.o daesolver.cpp
+
+simulation.o: simulation.c auxiliary.h typedefs.h model.h simulation.h daesolver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o simulation.o simulation.cpp
+
+auxiliary.o: auxiliary.c auxiliary.h typedefs.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o auxiliary.o auxiliary.cpp
+
+adouble.o: adouble.cpp adouble.h typedefs.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o adouble.o adouble.cpp
+
+model.o: model.cpp model.h auxiliary.h typedefs.h adouble.h mpi_sync.h runtime_information.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o model.o model.cpp
+
+main.o: main.c auxiliary.h typedefs.h model.h adouble.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+
