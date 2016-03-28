@@ -33,6 +33,23 @@ static int bbd_local_fn(long int Nlocal,
                         N_Vector yp,
                         N_Vector resval,
                         void *user_data);
+static int setup_preconditioner(realtype tt,
+                                N_Vector yy,
+                                N_Vector yp,
+                                N_Vector rr,
+                                realtype c_j,
+                                void *user_data,
+                                N_Vector tmp1, N_Vector tmp2, N_Vector tmp3);
+static int solve_preconditioner(realtype tt,
+                                N_Vector uu,
+                                N_Vector up,
+                                N_Vector rr,
+                                N_Vector rvec,
+                                N_Vector zvec,
+                                realtype c_j,
+                                realtype delta,
+                                void *user_data,
+                                N_Vector tmp);
 
 static int resid(realtype tres,
                  N_Vector yy,
@@ -139,6 +156,7 @@ int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Nequati
     retval = IDASpgmr(s->mem, maxl);
 
     /* Set up the BBD preconditioner. */
+/*
     long int mudq      = 5; // Upper half-bandwidth to be used in the difference-quotient Jacobian approximation.
     long int mldq      = 5; // Lower half-bandwidth to be used in the difference-quotient Jacobian approximation.
     long int mukeep    = 2; // Upper half-bandwidth of the retained banded approximate Jacobian block
@@ -148,6 +166,15 @@ int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Nequati
     retval = IDABBDPrecInit(s->mem, pmodel->Nequations_local, mudq, mldq, mukeep, mlkeep, dq_rel_yy, bbd_local_fn, NULL);
     if(check_flag(&retval, "IDABBDPrecInit", 1))
         return(-1);
+*/
+    s->pp = new real_t[pmodel->Nequations_local];
+    s->jacob = new real_t*[pmodel->Nequations_local];
+    for(i = 0; i < pmodel->Nequations_local; ++i)
+        s->jacob[i] = new real_t[pmodel->Nequations_local];
+
+    retval = IDASpilsSetPreconditioner(s->mem, setup_preconditioner, solve_preconditioner);
+    if(check_flag(&retval, "IDASpilsSetPreconditioner", 1))
+        return(-1);
 
     return IDA_SUCCESS;
 }
@@ -156,6 +183,11 @@ int solDestroy(daeIDASolver_t* s)
 {
     daeModel_t* pmodel = (daeModel_t*)s->model;
 
+    delete[] s->pp;
+    for(int i = 0; i < pmodel->Nequations_local; ++i)
+        delete[] s->jacob[i];
+    delete[] s->jacob;
+    
     print_final_stats(s->mem, pmodel->mpi_rank);
 
     /* Free memory */
@@ -386,6 +418,49 @@ int bbd_local_fn(long int Nlocal,
     }
 
     return modResiduals(model, tres, yval, ypval, res);
+}
+
+int setup_preconditioner(realtype tt,
+                         N_Vector yy, N_Vector yp, N_Vector rr,
+                         realtype cj, void *user_data,
+                         N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
+{
+    realtype* yval   = NV_DATA_P(yy);
+    realtype* ypval  = NV_DATA_P(yp);
+
+    daeIDASolver_t* dae_solver = (daeIDASolver_t*)user_data;
+    daeModel_t*     model      = (daeModel_t*)dae_solver->model;
+
+    for(int i = 0; i < dae_solver->Nequations; i++)
+    {
+        dae_solver->yval[i]  = yval[i];
+        dae_solver->ypval[i] = ypval[i];
+    }
+
+    int res = modJacobian(model, dae_solver->Nequations, tt,  cj, NULL, NULL, NULL, dae_solver->jacob);
+
+    for(int i = 0; i < dae_solver->Nequations; i++)
+        dae_solver->pp[i] = 1.0 / (dae_solver->jacob[i][i] + 1e-20);
+
+    return res;
+}
+
+int solve_preconditioner(realtype tt,
+                         N_Vector uu, N_Vector up, N_Vector rr,
+                         N_Vector rvec, N_Vector zvec,
+                         realtype c_j, realtype delta, void *user_data,
+                         N_Vector tmp)
+{
+    realtype* r = NV_DATA_P(rvec);
+    realtype* z = NV_DATA_P(zvec);
+
+    daeIDASolver_t* dae_solver = (daeIDASolver_t*)user_data;
+    daeModel_t*     model      = (daeModel_t*)dae_solver->model;
+
+    for(int i = 0; i < dae_solver->Nequations; i++)
+        z[i] = dae_solver->pp[i] * r[i];
+
+    return(0);
 }
 
 int resid(realtype tres,

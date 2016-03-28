@@ -14,7 +14,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 void _set_matrix_item_(real_t** matrix, size_t row, size_t col, real_t value)
 {
-     matrix[col][row] = value;
+//  IDAS Dense matrix
+    //matrix[col][row] = value;
+
+// c 2D array
+    matrix[row][col] = value;
 }
 
 bool _compare_strings_(const char* s1, const char* s2)

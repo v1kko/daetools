@@ -62,6 +62,9 @@ typedef struct
     real_t* idsval;
     long    Nequations;
 
+    real_t* pp; // diagonal preconditioner
+    real_t** jacob;
+
     /* Opaque pointers */
     void*   model;
     void*   simulation;
