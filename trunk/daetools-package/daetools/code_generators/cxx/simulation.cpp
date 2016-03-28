@@ -46,8 +46,11 @@ void simReinitialize(daeSimulation_t* s)
 
 void simSolveInitial(daeSimulation_t* s)
 {
-    solSolveInitial(s->m_pDAESolver);
+    int res = solSolveInitial(s->m_pDAESolver);
+    if(res < 0)
+        exit(res);
     simReportData(s);
+    printf("System successfuly initialised\n");
 }
 
 void simRun(daeSimulation_t* s)
@@ -97,7 +100,10 @@ void simReportData(daeSimulation_t* s)
 
     printf("Results at time: %12.5f\n", s->m_pDAESolver->m_dCurrentTime);
     for(int i = 0; i < s->m_pDAESolver->Nequations; i++)
-        printf("%s = %20.14e\n", model->variableNames[i], s->m_pDAESolver->yval[i]);
+    {
+        //printf("%s = %20.14e\n", model->variableNames[i], s->m_pDAESolver->yval[i]);
+        printf("(%d=%20.14e),", i, s->m_pDAESolver->yval[i]);
+    }
     printf("\n");
 /*
     int i;

@@ -3254,6 +3254,14 @@ daeBlock* daeModel::DoBlockDecomposition(void)
     // Now add variable indexes from STNs/IFs to the block
     pBlock->AddVariables(mapVariableIndexes);
 
+    if(pBlock->m_mapVariableIndexes.size() == pBlock->m_nTotalNumberOfVariables)
+    {
+    // There are no assigned variables (DOFs) - we can set the block indexes to be equal to overall ones
+        std::map<size_t, size_t>::iterator iter;
+        for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
+            iter->second = iter->first;
+    }
+
     // Populate the daeEquationsIndexes object from the block
     for(i = 0; i < m_ptrarrEEIfromModels.size(); i++)
     {
@@ -3286,6 +3294,7 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
      *   - daeBlock::m_mapVariableIndexes (the values are block indexes)
      *   - all daeEquationExecutionInfo::m_mapIndexes (the values are block indexes)
      *   - all daeEquationExecutionInfo::m_mapJacobianExpressions (the keys are block indexes)
+     *   - all adRuntimeVariableNodes/adVariableNodeArrays
      * Therefore, the function DoBlockDecomposition is split and a new one has been added InitializeStage6
      * where all these block indexes are populated. A new function has been added to daeSimulation_t
      * that can be overloaded by the users to manipulate the block indexes, if necessary.

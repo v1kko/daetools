@@ -128,9 +128,10 @@ class simTutorial(daeSimulation):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
 
     def DoDataPartitioning(self, equationsOverallIndexes, mapOverallBlockIndexes):
-        for kv in equationsOverallIndexes.OverallIndexes_Equations:
-            print [v for v in kv.data()]
-        print [str(key_value) for key_value in mapOverallBlockIndexes]
+        #for kv in equationsOverallIndexes.OverallIndexes_Equations:
+        #    print [v for v in kv.data()]
+        #print [str(key_value) for key_value in mapOverallBlockIndexes]
+        pass
 
 # Use daeSimulator class
 def guiRun(app):
@@ -143,11 +144,16 @@ def guiRun(app):
 
 # Setup everything manually and run in a console
 def consoleRun():
+    from daetools.solvers.superlu import pySuperLU
+
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
+
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -171,10 +177,17 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
+    from PyQt4 import QtCore, QtGui
+    app = QtGui.QApplication(sys.argv)
+
+    #fileName = QtGui.QFileDialog.getSaveFileName(None, "Save File", simulation.m.Name +".xpm", "xpm Files (*.xpm)")
+    #if(str(fileName) != ""):
+    #    lasolver.SaveAsXPM(str(fileName))
+
     # Generate code
-    #from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-    #cg = daeCodeGenerator_cxx_mpi()
-    #cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23', 4)
+    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+    cg = daeCodeGenerator_cxx_mpi()
+    cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23-old', 4)
 
     # Run
     simulation.Run()

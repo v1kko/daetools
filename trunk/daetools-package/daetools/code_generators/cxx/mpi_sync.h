@@ -17,6 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <map>
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 #include <boost/mpi.hpp>
 #include <boost/serialization/vector.hpp>
@@ -106,12 +107,13 @@ void CheckSynchronisationIndexes(daeModel_t* model, void* mpi_world, int mpi_ran
     ofs.close();
 }
 
-int SynchroniseData(daeModel_t* model, void* mpi_world, int mpi_rank)
+void modSynchroniseData(daeModel_t* model)
 {
+    mpi::communicator& world = *(mpi::communicator*)model->mpi_world;
+    int mpi_rank             = model->mpi_rank;
+
     // Get synchronisation info for the current node
     mpiIndexesData indData = mapIndexesData.at(mpi_rank);
-
-    mpi::communicator& world = *(mpi::communicator*)mpi_world;
 
     std::vector<mpi::request> requests;
 
@@ -166,17 +168,25 @@ int SynchroniseData(daeModel_t* model, void* mpi_world, int mpi_rank)
 
         if(indexes.size() != values.size() || indexes.size() != derivs.size())
             throw std::runtime_error(std::string("The received data do not match the requested ones, node: ") + std::to_string(mpi_rank));
-        else
-            std::cout << "Node [" << mpi_rank << "] transferred " << values.size() << " values" << std::endl;
+        //else
+        //    std::cout << "Node [" << mpi_rank << "] transferred " << values.size() << " values" << std::endl;
 
         for(size_t i = 0; i < i_size; i++)
         {
             *pvalues[i] = values[i];
             *pderivs[i] = derivs[i];
         }
-    }
 
-    return 0;
+        if(false /*mpi_rank == 0*/)
+        {
+            std::stringstream ss;
+            ss << "Node [" << mpi_rank << "] values from node [" << receive_from_mpi_rank << "]:" << std::endl;
+            for(size_t i = 0; i < i_size; i++)
+                ss << *pvalues[i] << ", ";
+            ss << std::endl;
+            std::cout << ss.str();
+        }
+    }
 }
 
 

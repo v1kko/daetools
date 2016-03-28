@@ -39,10 +39,24 @@ void modInitialize(daeModel_t* _m_)
 
     %(runtimeInformation_init)s
 
+/*  Achtung, Achtung!!
+    This part did not work!!!
     _m_->IDs                = rtnd.ids.data(); // std:vector<TYPE> is c++11 feature
     _m_->initValues         = rtnd.init_values.data();
     _m_->initDerivatives    = rtnd.init_derivatives.data();
     _m_->absoluteTolerances = rtnd.absolute_tolerances.data();
+*/
+    _m_->IDs                = new int   [_m_->Nequations_local];
+    _m_->initValues         = new real_t[_m_->Nequations_local];
+    _m_->initDerivatives    = new real_t[_m_->Nequations_local];
+    _m_->absoluteTolerances = new real_t[_m_->Nequations_local];
+    for(size_t i = 0; i < _m_->Nequations_local; i++)
+    {
+        _m_->IDs[i]                = rtnd.ids[i]; // std:vector<TYPE>::data() is c++11 feature
+        _m_->initValues[i]         = rtnd.init_values[i];
+        _m_->initDerivatives[i]    = rtnd.init_derivatives[i];
+        _m_->absoluteTolerances[i] = rtnd.absolute_tolerances[i];
+    }
     // _m_->variableNames should be allocated (using the local node Nequation or the (i_start:i_end) range)
     //for(int i = 0; i < _m_->Nequations; i++)
     //    _m_->variableNames[i] = rtnd.variable_names[i].c_str();
@@ -63,6 +77,16 @@ void modFinalize(daeModel_t* _m_)
 void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* timeDerivatives)
 {
     mpiIndexesData indData = mapIndexesData.at(_m_->mpi_rank);
+
+// These are not needed anymore
+    delete[] _m_->IDs;
+    delete[] _m_->initValues;
+    delete[] _m_->initDerivatives;
+    delete[] _m_->absoluteTolerances;
+    _m_->IDs = NULL;
+    _m_->initValues = NULL;
+    _m_->initDerivatives = NULL;
+    _m_->absoluteTolerances = NULL;
 
     // Reserve the size for internal vectors
     int fi_size = indData.foreign_indexes.size();
@@ -180,6 +204,28 @@ int modResiduals(daeModel_t* _m_,
 
 %(residuals)s
 
+/*
+    if(_m_->mpi_rank == 0)
+    {
+        std::ofstream ofs;
+        std::string filename = std::string("res-node-") + std::to_string(_m_->mpi_rank) + ".txt";
+        ofs.open(filename, std::ofstream::out|std::ofstream::app);
+
+        flat_map<int, real_t*>::const_iterator iter;
+        ofs << "_mapValues_ " << _mapValues_.size() << std::endl;
+        for(iter = _mapValues_.begin(); iter != _mapValues_.end(); iter++)
+            ofs << "[" << iter->first << ":" << *(iter->second) << "]";
+        ofs << std::endl;
+        ofs << "_mapTimeDerivatives_ " << _mapTimeDerivatives_.size() << std::endl;
+        for(iter = _mapTimeDerivatives_.begin(); iter != _mapTimeDerivatives_.end(); iter++)
+            ofs << "[" << iter->first << ":" << *(iter->second) << "]";
+        ofs << std::endl;
+        ofs << "_residuals_ " << _m_->Nequations_local << std::endl;
+        for(size_t i = 0; i < _m_->Nequations_local; i++)
+            ofs << "["<< i << ":" << _residuals_[i] << "]";
+        ofs << std::endl;
+    }
+*/
     return 0;
 }
 

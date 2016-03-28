@@ -372,7 +372,20 @@ int bbd_local_fn(long int Nlocal,
                  N_Vector resval,
                  void *user_data)
 {
-    return resid(tres, yy, yp, resval, user_data);
+    realtype* yval   = NV_DATA_P(yy);
+    realtype* ypval  = NV_DATA_P(yp);
+    realtype* res    = NV_DATA_P(resval);
+
+    daeIDASolver_t* dae_solver = (daeIDASolver_t*)user_data;
+    daeModel_t*     model      = (daeModel_t*)dae_solver->model;
+
+    for(int i = 0; i < dae_solver->Nequations; i++)
+    {
+        dae_solver->yval[i]  = yval[i];
+        dae_solver->ypval[i] = ypval[i];
+    }
+
+    return modResiduals(model, tres, yval, ypval, res);
 }
 
 int resid(realtype tres,
@@ -384,9 +397,18 @@ int resid(realtype tres,
     realtype* yval   = NV_DATA_P(yy);
     realtype* ypval  = NV_DATA_P(yp);
     realtype* res    = NV_DATA_P(resval);
-    
+
     daeIDASolver_t* dae_solver = (daeIDASolver_t*)user_data;
-    daeModel_t* model    = (daeModel_t*)dae_solver->model;
+    daeModel_t*     model      = (daeModel_t*)dae_solver->model;
+
+    for(int i = 0; i < dae_solver->Nequations; i++)
+    {
+        dae_solver->yval[i]  = yval[i];
+        dae_solver->ypval[i] = ypval[i];
+    }
+
+    // Call MPI synchronise data every time before calculating residuals
+    modSynchroniseData(model);
 
     return modResiduals(model, tres, yval, ypval, res);
 }

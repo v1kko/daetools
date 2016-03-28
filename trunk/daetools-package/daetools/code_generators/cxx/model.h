@@ -70,6 +70,7 @@ void modGetValue_string(daeModel_t* _m_, int index, char* value);
 void modSetValue_string(daeModel_t* _m_, int index, const char* value);
 void modGetValue_int(daeModel_t* _m_, int index, int* value);
 void modSetValue_int(daeModel_t* _m_, int index, int value);
+void modSynchroniseData(daeModel_t* _m_);
 
 int modResiduals(daeModel_t* _m_,
                  real_t _current_time_,
