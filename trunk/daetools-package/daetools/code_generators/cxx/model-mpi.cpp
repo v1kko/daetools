@@ -29,7 +29,7 @@ flat_map<int, real_t*> _mapTimeDerivatives_;
 // The variables in equations still use the block indexes but they are now mapped using boost::flat_maps;
 //   that's how we can still use block indexes.
 #define _v_(i)   adouble(*_mapValues_[i],          (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  adouble(*_mapTimeDerivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _dv_(i)  adouble(*_mapTimeDerivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   adouble(_current_time_, 0.0)
 
 void modInitialize(daeModel_t* _m_)
@@ -199,9 +199,6 @@ int modResiduals(daeModel_t* _m_,
     _current_index_for_jacobian_evaluation_ = -1;
     _inverse_time_step_                     = 0.0;
 
-    // Call MPI synchronise data every time before calculating residuals
-    SynchroniseData(_m_, _m_->mpi_world, _m_->mpi_rank);
-
 %(residuals)s
 
 /*
@@ -240,7 +237,10 @@ int modJacobian(daeModel_t* _m_,
 {
     adouble _temp_;
     real_t _jacobianItem_;
-    int _i_, _ec_, _block_index_, _current_index_for_jacobian_evaluation_;
+    int _i_, _ec_, _block_index_, _block_index_local_, _current_index_for_jacobian_evaluation_;
+
+    mpiIndexesData _ind_Data_ = mapIndexesData.at(_m_->mpi_rank);
+    std::map<int,int>& _map_bi_to_bi_local_ = _ind_Data_.bi_to_bi_local;
 
     _ec_                                    = 0;
     _current_index_for_jacobian_evaluation_ = -1;

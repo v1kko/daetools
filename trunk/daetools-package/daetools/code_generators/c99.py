@@ -38,7 +38,7 @@ class daeExpressionFormatter_c99(daeExpressionFormatter):
         self.feMatrixItem             = '_adouble_({value}, 0)'
         self.feVectorItem             = '_adouble_({value}, 0)'
 
-        self.derivative               = '_dt_({blockIndex})'
+        self.derivative               = '_dv_({blockIndex})'
         self.derivativeIndexStart     = ''
         self.derivativeIndexEnd       = ''
         self.derivativeIndexDelimiter = ''

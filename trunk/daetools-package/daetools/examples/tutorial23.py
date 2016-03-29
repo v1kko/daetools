@@ -28,6 +28,9 @@ from time import localtime, strftime
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+# The linear solver used is iterative (GMRES); therefore decrease the abs.tol.
+temperature_t.AbsoluteTolerance = 1e-3
+
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -154,6 +157,7 @@ def consoleRun():
 
     lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
+    daesolver.RelativeTolerance = 1e-3
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

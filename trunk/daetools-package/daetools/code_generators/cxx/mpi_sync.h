@@ -27,18 +27,19 @@ using namespace std;
 typedef std::map< int, std::vector<int> > mpiSyncMap;
 struct mpiIndexesData
 {
-    int            i_start;
-    int            i_end;
-    vector<int>    foreign_indexes;
-    mpiSyncMap     send_to;
-    mpiSyncMap     receive_from;
+    int               i_start;
+    int               i_end;
+    std::vector<int>  foreign_indexes;
+    std::map<int,int> bi_to_bi_local;
+    mpiSyncMap        send_to;
+    mpiSyncMap        receive_from;
 };
 
 typedef std::map< int, std::pair< std::vector<real_t>, std::vector<real_t> > >  mpiSyncValuesMap;
 struct mpiValuesData
 {
-    mpiSyncValuesMap send_to;
-    mpiSyncValuesMap receive_from;
+    mpiSyncValuesMap  send_to;
+    mpiSyncValuesMap  receive_from;
 };
 
 typedef std::map< int, std::pair< std::vector<real_t*>,std::vector<real_t*> > > mpiSyncPointersMap;

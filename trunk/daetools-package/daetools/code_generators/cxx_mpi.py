@@ -33,7 +33,7 @@ class daeExpressionFormatter_cxx_mpi(daeExpressionFormatter):
         self.feMatrixItem             = 'adouble({value})'
         self.feVectorItem             = 'adouble({value})'
 
-        self.derivative               = '_dt_({blockIndex})'
+        self.derivative               = '_dv_({blockIndex})'
         self.derivativeIndexStart     = ''
         self.derivativeIndexEnd       = ''
         self.derivativeIndexDelimiter = ''
@@ -433,6 +433,7 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
             all_indexes = block_indexes # this is set!
             owned_indexes = []
             foreign_indexes = []
+            bi_to_bi_local = {}
             to_send_indexes = {}
             to_receive_indexes = {}
             mpi_sync_map[node_rank] = {
@@ -441,13 +442,17 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
                                        'i_end'           : i_end,
                                        'owned_indexes'   : owned_indexes,
                                        'foreign_indexes' : foreign_indexes,
+                                       'bi_to_bi_local'  : bi_to_bi_local,
                                        'send_to'         : to_send_indexes,
                                        'receive_from'    : to_receive_indexes}
             for bi in sorted(all_indexes):
                 if bi >= i_start and bi < i_end:
                     owned_indexes.append(bi)
+                    bi_to_bi_local[bi] = bi-i_start
                 else:
                     foreign_indexes.append(bi)
+                    bi_to_bi_local[bi] = (i_end-i_start) + len(foreign_indexes)
+            #print bi_to_bi_local
 
         for node_rank, node_data in mpi_sync_map.items():
             for bi in node_data['foreign_indexes']:
@@ -511,6 +516,7 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
         mpi_sync_node_tmpl = """            %(i_start)d,
             %(i_end)d,
             (vector<int>){%(foreign_indexes)s},
+            (map<int,int>){%(bi_to_bi_local)s},
             (mpiSyncMap){ // send to
                 %(send_to)s
             },
@@ -537,6 +543,7 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
 
             # foreign_indexes_block are unmodified indexes in the range [0, Nequations)
             foreign_indexes = ', '.join([str(i) for i in n_data['foreign_indexes']])
+            bi_to_bi_local  = ', '.join(['{%d,%d}'%(bi,bi_local) for bi,bi_local in n_data['bi_to_bi_local'].items()])
 
             send_to_items      = []
             send_to_data_items = []
@@ -570,11 +577,12 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
             receive_from      = ',\n                '.join(receive_from_items)
             receive_from_data = ',\n                '.join(receive_from_data_items)
 
-            mpi_sync_node = mpi_sync_node_tmpl % {'i_start'               : i_start,
-                                                  'i_end'                 : i_end,
-                                                  'foreign_indexes'       : foreign_indexes,
-                                                  'send_to'               : send_to,
-                                                  'receive_from'          : receive_from}
+            mpi_sync_node = mpi_sync_node_tmpl % {'i_start'         : i_start,
+                                                  'i_end'           : i_end,
+                                                  'foreign_indexes' : foreign_indexes,
+                                                  'bi_to_bi_local'  : bi_to_bi_local,
+                                                  'send_to'         : send_to,
+                                                  'receive_from'    : receive_from}
             mpi_sync_node_data = mpi_sync_node_data_tmpl % {'send_to'      : send_to_data,
                                                             'receive_from' : receive_from_data}
             map_items.append(itemsTemplate % {'node_rank'          : ni,
@@ -648,12 +656,13 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
                     current_node_jacobian.append(s_indent + 'int _block_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
                     current_node_jacobian.append(s_indent + 'for(_i_ = 0; _i_ < {0}; _i_++) {{'.format(n))
                     current_node_jacobian.append(s_indent2 + '_block_index_ = _block_indexes_{0}[_i_];'.format(ID))
+                    current_node_jacobian.append(s_indent2 + '_block_index_local_ = _map_bi_to_bi_local_[_block_index_];'.format(ID))
                     current_node_jacobian.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _block_index_;')
                     
                     res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
                     current_node_jacobian.append(s_indent2 + '_temp_ = {0};'.format(res))
                     current_node_jacobian.append(s_indent2 + '_jacobianItem_ = _temp_.getDerivative();')
-                    current_node_jacobian.append(s_indent2 + '_set_matrix_item_(_jacobian_matrix_, _ec_, _block_index_, _jacobianItem_);')
+                    current_node_jacobian.append(s_indent2 + '_set_matrix_item_(_jacobian_matrix_, _ec_, _block_index_local_, _jacobianItem_);')
 
                     current_node_jacobian.append(s_indent + '}')
                     current_node_jacobian.append(s_indent + '_ec_++;')

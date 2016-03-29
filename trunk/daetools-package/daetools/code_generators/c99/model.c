@@ -13,7 +13,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "model.h"
 
 #define _v_(i)   _adouble_(_values_[i],           (i == _current_index_for_jacobian_evaluation_) ? 1.0 : 0.0)
-#define _dt_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
+#define _dv_(i)  _adouble_(_time_derivatives_[i], (i == _current_index_for_jacobian_evaluation_) ? _inverse_time_step_ : 0.0)
 #define _time_   _adouble_(_current_time_, 0.0)
 
 /* General info */          
