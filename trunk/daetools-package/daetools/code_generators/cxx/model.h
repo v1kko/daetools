@@ -15,10 +15,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "auxiliary.h"
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 /* C++ CODE GENERATOR WARNINGS!!!
 %(warnings)s
 */
@@ -104,9 +100,5 @@ real_t modCalculateScalarExtFunction(char* fun_name,
                                      real_t _current_time_,
                                      real_t* _values_,
                                      real_t* _time_derivatives_);
-
-// #ifdef __cplusplus
-// }
-// #endif
 
 #endif

@@ -50,7 +50,7 @@ void modInitialize(daeModel_t* _m_)
     _m_->initValues         = new real_t[_m_->Nequations_local];
     _m_->initDerivatives    = new real_t[_m_->Nequations_local];
     _m_->absoluteTolerances = new real_t[_m_->Nequations_local];
-    for(size_t i = 0; i < _m_->Nequations_local; i++)
+    for(int i = 0; i < _m_->Nequations_local; i++)
     {
         _m_->IDs[i]                = rtnd.ids[i]; // std:vector<TYPE>::data() is c++11 feature
         _m_->initValues[i]         = rtnd.init_values[i];
@@ -127,7 +127,7 @@ void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* time
         std::vector<real_t>   values(i_size, 0.0),     derivs(i_size, 0.0);
         std::vector<real_t*> pvalues(i_size, nullptr), pderivs(i_size, nullptr);
 
-        for(size_t i = 0; i < i_size; i++)
+        for(int i = 0; i < i_size; i++)
         {
             pvalues[i] = _mapValues_         [ indexes[i] ];
             pderivs[i] = _mapTimeDerivatives_[ indexes[i] ];
@@ -143,13 +143,13 @@ void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* time
         // it->second is vector<int>
         int mpi_rank = it->first;
         std::vector<int>& indexes = it->second;
-        size_t i_size = indexes.size();
+        int i_size = indexes.size();
 
         // Pointers to values/time_derivatives
         std::vector<real_t>   values(i_size, 0.0),     derivs(i_size, 0.0);
         std::vector<real_t*> pvalues(i_size, nullptr), pderivs(i_size, nullptr);
 
-        for(size_t i = 0; i < i_size; i++)
+        for(int i = 0; i < i_size; i++)
         {
             pvalues[i] = _mapValues_         [ indexes[i] ];
             pderivs[i] = _mapTimeDerivatives_[ indexes[i] ];
@@ -218,7 +218,7 @@ int modResiduals(daeModel_t* _m_,
             ofs << "[" << iter->first << ":" << *(iter->second) << "]";
         ofs << std::endl;
         ofs << "_residuals_ " << _m_->Nequations_local << std::endl;
-        for(size_t i = 0; i < _m_->Nequations_local; i++)
+        for(int i = 0; i < _m_->Nequations_local; i++)
             ofs << "["<< i << ":" << _residuals_[i] << "]";
         ofs << std::endl;
     }
@@ -240,6 +240,8 @@ int modJacobian(daeModel_t* _m_,
     int _i_, _ec_, _block_index_, _block_index_local_, _current_index_for_jacobian_evaluation_;
 
     mpiIndexesData _ind_Data_ = mapIndexesData.at(_m_->mpi_rank);
+    int i_start_ = _ind_Data_.i_start;
+    int i_end_   = _ind_Data_.i_end;
     std::map<int,int>& _map_bi_to_bi_local_ = _ind_Data_.bi_to_bi_local;
 
     _ec_                                    = 0;

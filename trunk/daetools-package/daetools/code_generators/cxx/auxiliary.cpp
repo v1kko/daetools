@@ -12,13 +12,17 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 #include "auxiliary.h"
 
-void _set_matrix_item_(real_t** matrix, size_t row, size_t col, real_t value)
+void _set_matrix_item_(matrix_t matrix, size_t row, size_t col, real_t value)
 {
 //  IDAS Dense matrix
     //matrix[col][row] = value;
 
 // c 2D array
-    matrix[row][col] = value;
+    //matrix[row][col] = value;
+
+// ublas matrix
+    matrix(row,col) = value;
+    //std::cout << e.what() << "; row=" << row << ", col=" << col << std::endl;
 }
 
 bool _compare_strings_(const char* s1, const char* s2)

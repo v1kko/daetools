@@ -15,10 +15,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 #include "typedefs.h"
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 /* Sundials IDAS related functions */
 int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Neqns, long Neqns_local,
                   const real_t*  initValues, const real_t* initDerivatives,
@@ -30,10 +26,6 @@ int solRefreshRootFunctions(daeIDASolver_t* s, int noRoots);
 int solResetIDASolver(daeIDASolver_t* s, bool bCopyDataFromBlock, real_t dCurrentTime, bool bResetSensitivities);
 real_t solSolve(daeIDASolver_t* s, real_t dTime, daeeStopCriterion eCriterion, bool bReportDataAroundDiscontinuities);
 int solSolveInitial(daeIDASolver_t* s);
-
-// #ifdef __cplusplus
-// }
-// #endif
 
 #endif
 

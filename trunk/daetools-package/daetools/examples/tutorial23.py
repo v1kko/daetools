@@ -28,8 +28,12 @@ from time import localtime, strftime
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+#from daetools.solvers.superlu import pySuperLU
+from daetools.solvers.trilinos import pyTrilinos
+from daetools.solvers.aztecoo_options import daeAztecOptions
+
 # The linear solver used is iterative (GMRES); therefore decrease the abs.tol.
-temperature_t.AbsoluteTolerance = 1e-3
+temperature_t.AbsoluteTolerance = 1e-2
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -81,29 +85,29 @@ class modTutorial(daeModel):
         # Get the flat list of indexes
         indexes = [(x,y) for x,y in itertools.product(range(Nx), range(Ny))]
         eq_types = numpy.empty((Nx,Ny), dtype=object)
-        eq_types[ : , : ] = 'inner'
-        eq_types[  0, : ] = 'left'
-        eq_types[ -1, : ] = 'right'
-        eq_types[ : ,  0] = 'bottom'
-        eq_types[ : , -1] = 'top'
+        eq_types[ : , : ] = 'in' # inner region
+        eq_types[  0, : ] = 'l'  # left boundary
+        eq_types[ -1, : ] = 'r'  # right boundary
+        eq_types[ : ,  0] = 'b'  # bottom boundary
+        eq_types[ : , -1] = 't'  # top boundary
         print eq_types
         for x,y in indexes:
             eq_type = eq_types[x,y]
-            print x,y,eq_type
+            #print x,y,eq_type
             eq = self.CreateEquation("HeatBalance", "")
-            if eq_type == 'inner':
+            if eq_type == 'in':
                 eq.Residual = ro*cp*dTdt[x,y] - k*(d2Tdx2[x,y] + d2Tdy2[x,y])
 
-            elif eq_type == 'left':
+            elif eq_type == 'l':
                 eq.Residual = dTdx[x,y]
 
-            elif eq_type == 'right':
+            elif eq_type == 'r':
                 eq.Residual = dTdx[x,y]
 
-            elif eq_type == 'top':
+            elif eq_type == 't':
                 eq.Residual = -k*dTdy[x,y] - Qt
 
-            elif eq_type == 'bottom':
+            elif eq_type == 'b':
                 eq.Residual = -k*dTdy[x,y] - Qb
 
             else:
@@ -116,8 +120,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(11, 0, 0.1)
-        self.m.y.CreateStructuredGrid(11, 0, 0.1)
+        self.m.x.CreateStructuredGrid(35, 0, 0.1)
+        self.m.y.CreateStructuredGrid(35, 0, 0.1)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
@@ -147,15 +151,14 @@ def guiRun(app):
 
 # Setup everything manually and run in a console
 def consoleRun():
-    from daetools.solvers.superlu import pySuperLU
-
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
-    lasolver = pySuperLU.daeCreateSuperLUSolver()
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
+    #lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
     daesolver.RelativeTolerance = 1e-3
 
@@ -171,6 +174,24 @@ def consoleRun():
     if(datareporter.Connect("", simName) == False):
         sys.exit()
 
+    paramListAztec = lasolver.AztecOOOptions
+    lasolver.NumIters  = 1000
+    lasolver.Tolerance = 1e-3
+    paramListAztec.set_int("AZ_solver",    daeAztecOptions.AZ_gmres)
+    paramListAztec.set_int("AZ_kspace",    500)
+    paramListAztec.set_int("AZ_scaling",   daeAztecOptions.AZ_none)
+    paramListAztec.set_int("AZ_reorder",   0)
+    paramListAztec.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
+    paramListAztec.set_int("AZ_keep_info", 1)
+    paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_none) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+
+    paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_Jacobi)
+    #paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
+    #paramListAztec.set_int("AZ_overlap",         daeAztecOptions.AZ_none)
+    #paramListAztec.set_int("AZ_graph_fill",      1)
+
+    paramListAztec.Print()
+
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
@@ -181,18 +202,14 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
-
-    #fileName = QtGui.QFileDialog.getSaveFileName(None, "Save File", simulation.m.Name +".xpm", "xpm Files (*.xpm)")
-    #if(str(fileName) != ""):
-    #    lasolver.SaveAsXPM(str(fileName))
+    #fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
+    #lasolver.SaveAsXPM(str(fileName))
 
     # Generate code
-    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-    cg = daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23-old', 4)
-
+    #from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+    #cg = daeCodeGenerator_cxx_mpi()
+    #cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23-old', 4)
+    
     # Run
     simulation.Run()
 

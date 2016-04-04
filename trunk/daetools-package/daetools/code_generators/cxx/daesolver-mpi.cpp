@@ -167,10 +167,8 @@ int solInitialize(daeIDASolver_t* s, void* model, void* simulation, long Nequati
     if(check_flag(&retval, "IDABBDPrecInit", 1))
         return(-1);
 */
-    s->pp = new real_t[pmodel->Nequations_local];
-    s->jacob = new real_t*[pmodel->Nequations_local];
-    for(i = 0; i < pmodel->Nequations_local; ++i)
-        s->jacob[i] = new real_t[pmodel->Nequations_local];
+    s->pp.resize(pmodel->Nequations_local, false);
+    s->jacob.resize(pmodel->Nequations_local, pmodel->Nequations_local, false);
 
     retval = IDASpilsSetPreconditioner(s->mem, setup_preconditioner, solve_preconditioner);
     if(check_flag(&retval, "IDASpilsSetPreconditioner", 1))
@@ -183,14 +181,12 @@ int solDestroy(daeIDASolver_t* s)
 {
     daeModel_t* pmodel = (daeModel_t*)s->model;
 
-    delete[] s->pp;
-    for(int i = 0; i < pmodel->Nequations_local; ++i)
-        delete[] s->jacob[i];
-    delete[] s->jacob;
-    
-    print_final_stats(s->mem, pmodel->mpi_rank);
+    if(pmodel->mpi_rank == 0)
+        print_final_stats(s->mem, pmodel->mpi_rank);
 
     /* Free memory */
+    s->pp.clear();
+    s->jacob.clear();
     IDAFree(&s->mem);
     N_VDestroy_Parallel((N_Vector)s->yy);
     N_VDestroy_Parallel((N_Vector)s->yp);
@@ -440,7 +436,7 @@ int setup_preconditioner(realtype tt,
     int res = modJacobian(model, dae_solver->Nequations, tt,  cj, NULL, NULL, NULL, dae_solver->jacob);
 
     for(int i = 0; i < dae_solver->Nequations; i++)
-        dae_solver->pp[i] = 1.0 / (dae_solver->jacob[i][i] + 1e-20);
+        dae_solver->pp[i] = 1.0 / (dae_solver->jacob(i,i) + 1e-20);
 
     return res;
 }

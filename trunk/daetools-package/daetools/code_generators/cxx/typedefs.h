@@ -13,17 +13,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #ifndef DAE_TYPEDEFS_H
 #define DAE_TYPEDEFS_H
 
-#include <stdbool.h>
-#include <stddef.h>
+#include <iostream>
+#include <string>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
+#include <boost/numeric/ublas/matrix.hpp>
 
 #ifndef real_t
 #define real_t double
@@ -62,8 +55,8 @@ typedef struct
     real_t* idsval;
     long    Nequations;
 
-    real_t* pp; // diagonal preconditioner
-    real_t** jacob;
+    boost::numeric::ublas::vector<real_t> pp;    // Diagonal preconditioner
+    boost::numeric::ublas::matrix<real_t> jacob; // Jacobian matrix
 
     /* Opaque pointers */
     void*   model;
@@ -85,9 +78,5 @@ typedef struct
     real_t                   m_dReportingInterval;
 
 } daeSimulation_t;
-
-// #ifdef __cplusplus
-// }
-// #endif
 
 #endif

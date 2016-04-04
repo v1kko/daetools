@@ -17,10 +17,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "model.h"
 #include "daesolver.h"
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 /* daeSimulation related functions*/
 void simStoreInitializationValues(daeSimulation_t* s, const char* strFileName);
 void simLoadInitializationValues(daeSimulation_t* s, const char* strFileName);
@@ -34,10 +30,6 @@ void simReportData(daeSimulation_t* s);
 real_t simIntegrate(daeSimulation_t* s, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities);
 real_t simIntegrateForTimeInterval(daeSimulation_t* s, real_t time_interval, bool bReportDataAroundDiscontinuities);
 real_t simIntegrateUntilTime(daeSimulation_t* s, real_t time, daeeStopCriterion eStopCriterion, bool bReportDataAroundDiscontinuities);
-
-// #ifdef __cplusplus
-// }
-// #endif
 
 #endif
 
