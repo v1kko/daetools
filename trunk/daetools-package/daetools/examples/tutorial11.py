@@ -117,13 +117,13 @@ def createLASolver():
     #lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
     
     # AztecOO built-in preconditioners are specified through AZ_precond option
-    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
 
     # Ifpack preconditioner can be one of: [ILU, ILUT, PointRelaxation, BlockRelaxation, IC, ICT]
     #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_Ifpack", "PointRelaxation")
     
     # ML preconditioner can be one of: [SA, DD, DD-ML, DD-ML-LU, maxwell, NSSA]
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_ML", "maxwell")
+    #lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO_ML", "maxwell")
     
     return lasolver
 
@@ -164,14 +164,14 @@ def setOptions(lasolver):
         paramListAztec = lasolver.AztecOOOptions
 
         lasolver.NumIters  = 500
-        lasolver.Tolerance = 1e-6
+        lasolver.Tolerance = 1e-3
         paramListAztec.set_int("AZ_solver",    daeAztecOptions.AZ_gmres)
         paramListAztec.set_int("AZ_kspace",    500)
         paramListAztec.set_int("AZ_scaling",   daeAztecOptions.AZ_none)
         paramListAztec.set_int("AZ_reorder",   0)
         paramListAztec.set_int("AZ_conv",      daeAztecOptions.AZ_r0)
         paramListAztec.set_int("AZ_keep_info", 1)
-        paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_all) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
+        paramListAztec.set_int("AZ_output",    daeAztecOptions.AZ_warnings) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}
         paramListAztec.Print()
 
     #######################################################
@@ -197,7 +197,7 @@ def setOptions(lasolver):
     elif "AztecOO" in lasolver.Name:
         # 2a) AztecOO built-in preconditioner:
         paramListAztec = lasolver.AztecOOOptions
-        paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_dom_decomp)
+        paramListAztec.set_int("AZ_precond",         daeAztecOptions.AZ_Jacobi)
         paramListAztec.set_int("AZ_subdomain_solve", daeAztecOptions.AZ_ilut)
         paramListAztec.set_int("AZ_overlap",         daeAztecOptions.AZ_none)
         paramListAztec.set_int("AZ_graph_fill",      1)
@@ -249,6 +249,9 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+
+    fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
+    lasolver.SaveAsXPM(str(fileName))
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

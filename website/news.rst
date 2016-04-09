@@ -15,6 +15,12 @@ News
 
 .. end-command
 
+08.04.2016.
+-------------------
+The first article on DAE Tools has been published in *PeerJ Computer Science*:
+     Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
+     **PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_.
+
 v1.4.0, 28.12.2014.
 -------------------
 

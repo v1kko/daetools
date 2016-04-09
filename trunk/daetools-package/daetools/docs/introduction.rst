@@ -2,7 +2,7 @@
 Introduction
 ************
 ..
-    Copyright (C) Dragan Nikolic, 2014
+    Copyright (C) Dragan Nikolic, 2016
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -134,6 +134,15 @@ Licence
 the `GNU General Public Licence <http://www.gnu.org/licenses/licenses.html#GPL>`_ version 3 as published by
 the Free Software Foundation (`GNU philosophy <http://www.gnu.org/philosophy/free-sw.html>`_).
 
+How to cite
+===========
+
+If you use DAE Tools in your work then please cite the following article:
+  Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
+  **PeerJ Computer Science** 2:e54 `<https://doi.org/10.7717/peerj-cs.54>`_.
+
+BibTeX: `daetools-peerj.bib <http://www.daetools.com/docs/presentations/daetools-peerj-cs-54.bib>`_.
+
 History
 =======
 
@@ -194,11 +203,3 @@ DAE Tools use the following third party free software libraries (GNU GPL, GNU LG
 * Intel Pardiso linear solver (pyIntelPardiso module): `<http://software.intel.com/en-us/articles/intel-mkl>`_
 
 Please see the corresponding websites for more details about the licences.
-
-How to cite
-===========
-
-If you use **DAE Tools** in your work then please cite it in the following way:
-    
-D.D. Nikolic, DAE Tools process modelling software (http://www.daetools.com), 2010.
-

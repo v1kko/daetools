@@ -42,6 +42,10 @@ can be found in :doc:`docs/getting_daetools`.
 
 News
 ====
+[**April 8 2016**] The first article on DAE Tools has been published in *PeerJ Computer Science*:
+     Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
+     **PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_.
+
 The new 1.4.0 version is released on 28 December 2014. It contains a large number of important features and bug fixes.
 
 The most important new features:

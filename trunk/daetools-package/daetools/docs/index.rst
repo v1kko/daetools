@@ -2,7 +2,7 @@
 Documentation
 *************
 ..
-    Copyright (C) Dragan Nikolic, 2013
+    Copyright (C) Dragan Nikolic, 2016
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -24,11 +24,14 @@ Documentation
    pyDAE_api_ref
    tutorials
 
+Journal Articles
+================
+Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
+**PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_
+(preprint available on: `ResearchGate <https://www.researchgate.net/publication/285596842_DAE_Tools_Equation-Based_Object-Oriented_Modelling_Simulation_and_Optimisation_Software>`_).
+
 Presentations
 =============
-
-`DAE Tools: Equation-Based Object-Oriented Modelling, Simulation and Optimisation Software
-<https://www.researchgate.net/publication/285596842_DAE_Tools_Equation-Based_Object-Oriented_Modelling_Simulation_and_Optimisation_Software>`_
 
 `An introduction to DAE Tools <http://www.daetools.com/docs/presentations/daetools-introduction.pdf>`_
 

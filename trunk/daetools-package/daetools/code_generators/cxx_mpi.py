@@ -656,7 +656,7 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
                     current_node_jacobian.append(s_indent + 'int _block_indexes_{0}[{1}] = {2};'.format(ID, n, str_indexes))
                     current_node_jacobian.append(s_indent + 'for(_i_ = 0; _i_ < {0}; _i_++) {{'.format(n))
                     current_node_jacobian.append(s_indent2 + '_block_index_ = _block_indexes_{0}[_i_];'.format(ID))
-                    current_node_jacobian.append(s_indent2 + 'if(_block_index_ < i_start_ || _block_index_ >= i_end_)')
+                    current_node_jacobian.append(s_indent2 + 'if(_block_index_ < i_start_ || _block_index_ >= i_end_) // block index is out of the [i_start,i_end) range')
                     current_node_jacobian.append(s_indent2 + '    continue;')
                     current_node_jacobian.append(s_indent2 + '_block_index_local_ = _map_bi_to_bi_local_[_block_index_];'.format(ID))
                     current_node_jacobian.append(s_indent2 + '_current_index_for_jacobian_evaluation_ = _block_index_;')
@@ -679,6 +679,8 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
                         node_eqn_counter = 0
 
     def _processSTNs(self, STNs, indent):
+        raise RuntimeError('c++(MPI) code generator cannot handle models with state transition networks at the moment')
+
         s_indent = indent * self.defaultIndent
         for stn in STNs:
             if stn['Class'] == 'daeIF':
