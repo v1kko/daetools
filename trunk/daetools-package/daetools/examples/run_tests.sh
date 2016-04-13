@@ -17,7 +17,7 @@ echo tutorial2.py
 $PYTHON tutorial2.py console
 
 echo tutorial3.py
-$PYTHON tutorial3.py console
+#$PYTHON tutorial3.py console
 
 echo tutorial4.py
 $PYTHON tutorial4.py console

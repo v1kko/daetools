@@ -18,7 +18,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 __doc__ = """
 This tutorial illustrates the C++ MPI code generator.
-The model is identical to themodel from the tutorial1.
+The model is identical to the model from the tutorial11.
 """
 
 import sys, numpy, itertools

@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial3.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2014
+                Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -152,7 +152,7 @@ class modTutorial(daeModel):
         # Achtung: the value of Qmul must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
         values = [2 * K for i in range(Nx)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
-        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * d_array(self.T.array('*', 0), self.y) / Constant(2 * K) )
+        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * self.T.d_array('*', 0, self.y) / Constant(2 * K) )
 
         # Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.
         # In those cases the functions suxh as array(), d_array(), dt_array(), Array() etc

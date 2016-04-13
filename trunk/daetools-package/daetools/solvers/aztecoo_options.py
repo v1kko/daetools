@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """********************************************************************************
-                             aztecoo_options.py
+                            aztecoo_options.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2010
+                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -14,9 +11,6 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-
-"""
-"""
 
 class daeAztecOptions(object):
     # Constants for solver types

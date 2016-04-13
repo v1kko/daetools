@@ -56,7 +56,7 @@ BOOST_PYTHON_MODULE(pyUnits)
         .add_property("baseUnit",	    &unit::getBaseUnit,   DOCSTR_unit_baseUnit)
 
         .def("toDict",  &daepython::unit_toDict, DOCSTR_unit_toDictionary)
-        .def("toJSON",  &unit::toJSON,            DOCSTR_unit_toJSON)
+        .def("toJSON",  &unit::toJSON,           DOCSTR_unit_toJSON)
 
 		.def(self * self)
 		.def(self / self)

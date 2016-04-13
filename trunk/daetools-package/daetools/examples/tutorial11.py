@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial11.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2014
+                Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -17,17 +17,60 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial shows the use of Trilinos group of solvers: Amesos and AztecOO iterative
-linear equation solvers with different preconditioners (built-in AztecOO, Ifpack or ML)
-and corresponding linear solver options.
+This tutorial shows the use of iterative linear solvers (AztecOO from the Trilinos project)
+with different preconditioners (built-in AztecOO, Ifpack or ML) and corresponding solver options.
+Also, the range of Trilins Amesos solver options are shown.
 
-**ACHTUNG, ACHTUNG!!**
+The model is identical to the model in tutorial 1, except that the equations are written in
+a different way to maximize the number of items around the diagonal (creating the problem
+with the diagonally dominant matrix). These type of systems can be solved using very simple
+preconditioners such as Jacobi. To do so, the interoperability with the NumPy package
+has been exploited and the package itertools used to iterate through the distribution
+domains in x and y directions.
 
-Iterative solvers are not fully working yet and this example is given just as a showcase
-and for preconditioner options experimenting purposes.
+The equations are distributed so that the following incidence matrix is obtained:
+
+.. code-block:: none
+
+    |XXX                                 |
+    | X     X     X                      |
+    |  X     X     X                     |
+    |   X     X     X                    |
+    |    X     X     X                   |
+    |   XXX                              |
+    |      XXX                           |
+    | X    XXX    X                      |
+    |  X    XXX    X                     |
+    |   X    XXX    X                    |
+    |    X    XXX    X                   |
+    |         XXX                        |
+    |            XXX                     |
+    |       X    XXX    X                |
+    |        X    XXX    X               |
+    |         X    XXX    X              |
+    |          X    XXX    X             |
+    |               XXX                  |
+    |                  XXX               |
+    |             X    XXX    X          |
+    |              X    XXX    X         |
+    |               X    XXX    X        |
+    |                X    XXX    X       |
+    |                     XXX            |
+    |                        XXX         |
+    |                   X    XXX    X    |
+    |                    X    XXX    X   |
+    |                     X    XXX    X  |
+    |                      X    XXX    X |
+    |                           XXX      |
+    |                              XXX   |
+    |                   X     X     X    |
+    |                    X     X     X   |
+    |                     X     X     X  |
+    |                      X     X     X |
+    |                                 XXX|
 """
 
-import sys
+import sys, numpy, itertools
 from daetools.pyDAE import *
 from time import localtime, strftime
 try:
@@ -60,31 +103,95 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
-        x = eq.DistributeOnDomain(self.x, eOpenOpen)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = 1e-6 * (  self.ro() * self.cp() * self.T.dt(x, y) - self.k() * \
-                               (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))  )
+        # For readibility, get the adouble objects from parameters/variables
+        # and create numpy arrays for T and its derivatives in tim and space
+        # This will also save a lot of memory (no duplicate adouble objects in equations)
+        Nx = self.x.NumberOfPoints
+        Ny = self.y.NumberOfPoints
+        ro = self.ro()
+        cp = self.cp()
+        k  = self.k()
+        Qb = self.Qb()
+        Qt = self.Qt()
 
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = 1e-6 * ( - self.k() * self.T.d(self.y, x, y) - self.Qb()  )
+        # Create numpy ndarrays to keep daetools adouble objects:
+        #   T, dT/dt, dT/dx, d2T/dx2, dT/dy and d2T/dy2
+        T      = numpy.empty((Nx,Ny), dtype=object)
+        dTdt   = numpy.empty((Nx,Ny), dtype=object)
+        dTdx   = numpy.empty((Nx,Ny), dtype=object)
+        dTdy   = numpy.empty((Nx,Ny), dtype=object)
+        d2Tdx2 = numpy.empty((Nx,Ny), dtype=object)
+        d2Tdy2 = numpy.empty((Nx,Ny), dtype=object)
 
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = 1e-6 * ( - self.k() * self.T.d(self.y, x, y) - self.Qt()  )
+        # Fill the ndarrays with daetools adouble objects:
+        for x in range(Nx):
+            for y in range(Ny):
+                T[x,y]      = self.T(x,y)
+                dTdt[x,y]   = dt(self.T(x,y))
+                dTdx[x,y]   = d (self.T(x,y), self.x, eCFDM)
+                dTdy[x,y]   = d (self.T(x,y), self.y, eCFDM)
+                d2Tdx2[x,y] = d2(self.T(x,y), self.x, eCFDM)
+                d2Tdy2[x,y] = d2(self.T(x,y), self.y, eCFDM)
 
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
-        x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        # Get the flat list of indexes from the ranges of indexes in x and y domains
+        indexes = [(x,y) for x,y in itertools.product(range(Nx), range(Ny))]
 
-        eq = self.CreateEquation("BC_righ", "Boundary conditions for the right edge")
-        x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        """
+        Populate the equation types based on the location in the 2D domain:
+
+          Y axis
+            ^
+            |
+        Ly -| T T T T T T T T T T T
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+            | L i i i i i i i i i R
+         0 -| B B B B B B B B B B B
+            --|-------------------|-------> X axis
+              0                   Lx
+        """
+        eq_types = numpy.empty((Nx,Ny), dtype=object)
+        eq_types[ : , : ] = 'i'  # inner region
+        eq_types[  0, : ] = 'L'  # left boundary
+        eq_types[ -1, : ] = 'R'  # right boundary
+        eq_types[ : ,  0] = 'B'  # bottom boundary
+        eq_types[ : , -1] = 'T'  # top boundary
+        print eq_types
+
+        # Finally, create equations based on the equation type
+        for x,y in indexes:
+            eq_type = eq_types[x,y]
+            eq = self.CreateEquation("HeatBalance", "")
+            if eq_type == 'i':
+                eq.Residual = ro*cp*dTdt[x,y] - k*(d2Tdx2[x,y] + d2Tdy2[x,y])
+                eq.Name = 'HeatBalance(inner)'
+
+            elif eq_type == 'L':
+                eq.Residual = dTdx[x,y]
+                eq.Name = 'BC(left)'
+
+            elif eq_type == 'R':
+                eq.Residual = dTdx[x,y]
+                eq.Name = 'BC(right)'
+
+            elif eq_type == 'T':
+                eq.Residual = -k*dTdy[x,y] - Qt
+                eq.Name = 'BC(top)'
+
+            elif eq_type == 'B':
+                eq.Residual = -k*dTdy[x,y] - Qb
+                eq.Name = 'BC(bottom)'
+
+            else:
+                raise RuntimeError('Invalid equation type: %s' % eq_type)
+
+            eq.Name = eq.Name + '(%02d,%02d)' % (x,y)
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -93,7 +200,7 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 5
+        n = 10
         self.m.x.CreateStructuredGrid(n, 0, 0.1)
         self.m.y.CreateStructuredGrid(n, 0, 0.1)
 
@@ -115,7 +222,7 @@ def createLASolver():
     
     # Amesos SuperLU solver
     #lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
-    
+
     # AztecOO built-in preconditioners are specified through AZ_precond option
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
 
