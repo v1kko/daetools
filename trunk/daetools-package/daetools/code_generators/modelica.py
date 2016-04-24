@@ -29,9 +29,9 @@ class %(model_name)s
 
 /* Import libs */
   import Modelica.Math.*;
-  
+
   %(parameters_defs)s
-  
+
   %(stns_defs)s
 
   %(variables_defs)s
@@ -220,7 +220,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         self.parameters_inits   = []
         self.assigned_inits     = []
         self.initial_conditions = []
-        
+
     def generateSimulation(self, simulation, directory):
         # Reset all arrays
         self._reset()
@@ -230,7 +230,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
 
         if not os.path.isdir(directory):
             os.makedirs(directory)
-        
+
         # Achtung, Achtung!!
         # rootModelName and exprFormatter.modelCanonicalName should not be stripped
         # of illegal characters, since they are used to get relative names
@@ -281,14 +281,14 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                      'instance_name' :      instance_name,
                      'model_name' :         model_name,
                      'doc_string' :         doc_string,
-                     
+
                      'variable_types_defs': variable_types_defs,
                      'domains_defs' :       domains_defs,
                      'parameters_defs' :    parameters_defs,
                      'variables_defs' :     variables_defs,
                      'stns_defs' :          stns_defs,
                      'equations_defs' :     equations_defs,
-                        
+
                      'domains_inits' :      domains_inits,
                      'parameters_inits' :   parameters_inits,
                      'assigned_inits' :     assigned_inits,
@@ -313,12 +313,12 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
 
     def _processEquations(self, Equations, indent):
         s_indent  = indent * self.defaultIndent
-        
+
         for equation in Equations:
             description = equation['Description']
             if description:
                 self.equations.append(s_indent + '/* {0}: */'.format(description))
-            
+
             for eeinfo in equation['EquationExecutionInfos']:
                 res = self.exprFormatter.formatRuntimeNode(eeinfo['ResidualRuntimeNode'])
                 self.equations.append(s_indent + '{0} = 0;'.format(res))
@@ -364,7 +364,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
 
                     # 1a. Generate NestedSTNs
                     self._processSTNs(state['NestedSTNs'], indent+1)
-                    
+
                     # 1b. Put equations into the residuals list
                     self._processEquations(state['Equations'], indent+1)
 
@@ -519,7 +519,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                 absTolerances[bi]        = absoluteTolerances[oi]
 
         rootModel = self.exprFormatter.formatIdentifier(self.rootModelName)
-        
+
         for domain in runtimeInformation['Domains']:
             relativeName   = daeGetRelativeName(self.rootModelName, domain['CanonicalName'])
             formattedName  = self.exprFormatter.formatIdentifier(relativeName)
@@ -534,14 +534,14 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             self.parameters.append(domTemplate.format(name = name,
                                                       description = description,
                                                       numberOfPoints = numberOfPoints))
-                                                      
+
             domTemplate   = 'parameter Real {name}[{name}_np](each unit = "{units}") = {points} "{description}";'
             self.parameters.append(domTemplate.format(name = name,
                                                       description = description,
                                                       units = units,
                                                       points = points,
                                                       numberOfPoints = numberOfPoints))
-            
+
         for parameter in runtimeInformation['Parameters']:
             relativeName    = daeGetRelativeName(self.rootModelName, parameter['CanonicalName'])
             formattedName   = self.exprFormatter.formatIdentifier(relativeName)
@@ -551,7 +551,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
             units           = self.exprFormatter.formatUnits(parameter['Units'])
             values          = self.exprFormatter.formatNumpyArray(parameter['Values']) # Numpy array
             numberOfDomains = len(parameter['Domains'])
-            
+
             if numberOfDomains > 0:
                 relativeDomains = [daeGetRelativeName(self.rootModelName, dn)   for dn in parameter['DomainNames']]
                 formatDomains = [self.exprFormatter.formatIdentifier(dn)        for dn in relativeDomains]
@@ -594,7 +594,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                                                                   max = varType.UpperBound,
                                                                   default = varType.InitialGuess,
                                                                   absTol = varType.AbsoluteTolerance))
-                
+
             if numberOfDomains > 0:
                 relativeDomains = [daeGetRelativeName(self.rootModelName, dn)     for dn in variable['DomainNames']]
                 formatDomains   = [self.exprFormatter.formatIdentifier(dn)        for dn in relativeDomains]
@@ -628,7 +628,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                                                                         value = value,
                                                                         units = units)
                         self.assigned_inits.append(temp)
-                                                         
+
             else:
                 ID    = int(variable['IDs'])        # cnDifferential, cnAssigned or cnAlgebraic
                 value = float(variable['Values'])   # numpy float
@@ -644,7 +644,7 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
                 elif ID == cnAssigned:
                     attributes = '(unit = "%s")' % units
                     varTemplate = 'Real {name}{attributes} "{description}";'
-                    
+
                     temp = '{name} = {value} /* {units} */;'.format(name = name,
                                                                     value = value,
                                                                     units = units)
@@ -673,4 +673,4 @@ class daeCodeGenerator_Modelica(daeCodeGenerator):
         # Finally, generate equations for IFs/STNs
         self._processSTNs(runtimeInformation['STNs'], indent)
 
-   
+

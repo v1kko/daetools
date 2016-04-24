@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
-import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile, json, time
+import os, shutil, sys, numpy, math, traceback, uuid, zipfile, tempfile, json, time, glob
 import daetools
 from daetools.pyDAE import *
 from .c99 import daeCodeGenerator_c99
@@ -85,7 +85,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 py_path, py_filename = os.path.split(py_file)
                 shutil.copy2(py_file, os.path.join(resources_dir, py_filename))
 
-            # Copy all available libdaetools_fmi_cs-{platform}_{system}.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder
+            # Copy all available libcdaeFMU_CS-pyXY.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder
             self._copy_solib('Linux',   'x86_64', modelIdentifier, binaries_dir)
             self._copy_solib('Linux',   'i386',   modelIdentifier, binaries_dir)
             self._copy_solib('Windows', 'win32',  modelIdentifier, binaries_dir)
@@ -251,9 +251,11 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         return sPositive + sNegative
         
     def _copy_solib(self, platform_system, platform_machine, modelIdentifier, binaries_dir):
-        # Copy libdaetools_fmi_cs-{platform}_{system}.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder
+        # Copy libcdaeFMU_CS-pyXY.[so/dll/dynlib] and libcdaeSimulationLoader-pyXY.[so/dll/dynlib]
+        # to the 'binaries/platform[32/64]' folder
         if platform_system == 'Linux':
             so_ext = 'so'
+            so_ext_pattern = 'so.*'
             shared_lib_prefix = 'lib'
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'linux64')
@@ -261,6 +263,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 platform_binaries_dir = os.path.join(binaries_dir, 'linux32')
         elif platform_system == 'Windows':
             so_ext = 'dll'
+            so_ext_pattern = 'dll'
             shared_lib_prefix = ''
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'win64')
@@ -269,7 +272,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Modify platform_machine to match daetools naming
             platform_machine = 'win32'
         elif platform_system == 'Darwin':
-            so_ext = 'dynlib'
+            so_ext = 'dylib'
+            so_ext_pattern = 'dylib'
             shared_lib_prefix = 'lib'
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'darwin64')
@@ -280,21 +284,68 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         else:
             raise RuntimeError('Unsupported platform: %s' % platform_system)
 
+        solibs_dir = os.path.join(daetools.daetools_dir, 'solibs', '%s_%s' % (platform_system, platform_machine))
         daetools_fmu_solib = '%s.%s' % (modelIdentifier, so_ext)
         daetools_fmi_cs = '%scdaeFMU_CS-py%s%s.%s' % (shared_lib_prefix,
                                                       daetools.python_version_major,
                                                       daetools.python_version_minor,
                                                       so_ext)
-        try:
-            _source = os.path.join(daetools.fmi_sodir,    daetools_fmi_cs)
-            _target = os.path.join(platform_binaries_dir, daetools_fmu_solib)
-            #print('copy %s %s' % (_source, _target))
-            shutil.copy2(_source, _target)
+        daetools_simulation_loader = '%scdaeSimulationLoader-py%s%s.%s' % (shared_lib_prefix,
+                                                                           daetools.python_version_major,
+                                                                           daetools.python_version_minor,
+                                                                           so_ext)
+        """
+        boost_python = '%sboost_python-daetools-py%s%s.%s.*' % (shared_lib_prefix,
+                                                                daetools.python_version_major,
+                                                                daetools.python_version_minor,
+                                                                so_ext)
+        boost_thread = '%sboost_thread-daetools-py%s%s.%s.*' % (shared_lib_prefix,
+                                                                daetools.python_version_major,
+                                                                daetools.python_version_minor,
+                                                                so_ext)
+        boost_system = '%sboost_system-daetools-py%s%s.%s.*' % (shared_lib_prefix,
+                                                                daetools.python_version_major,
+                                                                daetools.python_version_minor,
+                                                                so_ext)
+        boost_filesystem = '%sboost_filesystem-daetools-py%s%s.%s.*' % (shared_lib_prefix,
+                                                                        daetools.python_version_major,
+                                                                        daetools.python_version_minor,
+                                                                        so_ext)
+        """
+        boost_files = glob.iglob(os.path.join(solibs_dir, "*boost_*-daetools-py%s%s.%s" % (daetools.python_version_major,
+                                                                                           daetools.python_version_minor,
+                                                                                           so_ext_pattern)))
 
+        try:
+            # Copy FMU_CS
+            _source = os.path.join(solibs_dir,            daetools_fmi_cs)
+            _target = os.path.join(platform_binaries_dir, daetools_fmu_solib)
+            print('copy %s %s' % (_source, _target))
+            shutil.copy2(_source, _target)
         except Exception as e:
             # Ignore exceptions, since some of binaries are certainly not available
             pass
-        
+
+        try:
+            # Copy SimulationLoader
+            _source = os.path.join(solibs_dir, daetools_simulation_loader)
+            _target = os.path.join(platform_binaries_dir)
+            print('copy %s %s' % (_source, _target))
+            shutil.copy2(_source, _target)
+        except Exception as e:
+            # Ignore exceptions, since some of binaries are certainly not available
+            pass
+
+        try:
+            _target = os.path.join(platform_binaries_dir)
+            for _source in boost_files:
+                if os.path.isfile(_source):
+                    #print('copy %s %s' % (_source, _target))
+                    shutil.copy2(_source, _target)
+        except Exception as e:
+            # Ignore exceptions, since some of binaries are certainly not available
+            pass
+
     def _addInput(self, fmi_obj):
         sv = fmiScalarVariable()
         sv.name           = str(fmi_obj.name) #*

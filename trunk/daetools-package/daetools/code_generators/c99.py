@@ -19,11 +19,6 @@ from .formatter import daeExpressionFormatter
 from .analyzer import daeCodeGeneratorAnalyzer
 from .code_generator import daeCodeGenerator
 
-"""
-Compile with:
-  gcc -O3 -Wall -std=c99 -pedantic -o daetools_simulation auxiliary.c adouble.c main.c -lsundials_idas -lsundials_nvecserial -lblas -llapack
-"""
-
 class daeExpressionFormatter_c99(daeExpressionFormatter):
     def __init__(self):
         daeExpressionFormatter.__init__(self)

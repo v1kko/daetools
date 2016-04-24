@@ -694,7 +694,8 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
                         node_eqn_counter = 0
 
     def _processSTNs(self, STNs, indent):
-        raise RuntimeError('c++(MPI) code generator cannot handle models with state transition networks at the moment')
+        if len(STNs) > 0:
+            raise RuntimeError('c++(MPI) code generator cannot handle models with state transition networks at the moment')
 
         s_indent = indent * self.defaultIndent
         for stn in STNs:

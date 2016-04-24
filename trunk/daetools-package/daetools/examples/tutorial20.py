@@ -56,6 +56,83 @@ Notate bene:
 1. Inlet ports must be DOFs (that is to have their values asssigned),
    for they can't be connected when the model is simulated outside of daetools context.
 2. Only scalar output ports are supported at the moment!! (Simulink issue)
+
+FMI Cross-Check results:
+1. Start the DAEPlotter (or change the data reporter below).
+2. Execute:
+    ./fmuCheck.linux64 -n 10 tutorial20.fmu
+3. Results:
+    [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014
+    [INFO][FMUCHK] Will process FMU tutorial20.fmu
+    [INFO][FMILIB] XML specifies FMI standard version 2.0
+    [INFO][FMUCHK] Model name: tutorial20
+    [INFO][FMUCHK] Model GUID: e9654532-0998-11e6-957b-9cb70d5dfdfc
+    [INFO][FMUCHK] Model version:
+    [INFO][FMUCHK] FMU kind: CoSimulation
+    [INFO][FMUCHK] The FMU contains:
+    0 constants
+    3 parameters
+    0 discrete variables
+    4 continuous variables
+    2 inputs
+    2 outputs
+    0 local variables
+    0 independent variables
+    0 calculated parameters
+    6 real variables
+    0 integer variables
+    0 enumeration variables
+    0 boolean variables
+    1 string variables
+
+    [INFO][FMUCHK] Printing output file header
+    time,out_1.y,out_2.y
+    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial20
+    [INFO][FMILIB] Loading 'linux64' binary with 'default' platform types
+    [INFO][FMUCHK] Version returned from CS FMU:   2.0
+    ***********************************************************************
+                                     Version:   1.5.0
+                                     Copyright: Dragan Nikolic, 2016
+                                     Homepage:  http://www.daetools.com
+           @                       @
+           @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@
+      @@@@@@        @   @     @    @     @     @  @     @  @     @
+     @     @   @@@@@@   @@@@@@     @     @     @  @     @  @      @@@@@
+     @     @  @     @   @          @     @     @  @     @  @           @
+      @@@@@@   @@@@@@    @@@@@      @@@   @@@@@    @@@@@    @@@@  @@@@@
+    ***********************************************************************
+    DAE Tools is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 3
+    as published by the Free Software Foundation.
+    DAE Tools is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses>.
+    ***********************************************************************
+    Creating the system...
+    The system created successfully in: 0.002 s
+    Starting the initialization of the system... Done.
+    [INFO][FMUCHK] Initialized FMU for simulation starting at time 0
+    0,1.0000000010000001E+00,2.0000000039999999E+00
+    10,1.0100000000000001E+02,4.0200000000000006E+02
+    20,2.0099999999999994E+02,8.0199999999999977E+02
+    30,3.0100000000000000E+02,1.2020000000000000E+03
+    40,4.0100000000000000E+02,1.6020000000000000E+03
+    50,5.0099999999999989E+02,2.0019999999999995E+03
+    60,6.0100000000000000E+02,2.4020000000000000E+03
+    70,7.0100000000000000E+02,2.8020000000000000E+03
+    80,8.0100000000000000E+02,3.2020000000000000E+03
+    90,9.0099999999999977E+02,3.6019999999999991E+03
+    100,1.0009999999999998E+03,4.0019999999999991E+03
+    [INFO][FMUCHK] Simulation finished successfully at time 100
+    FMU check summary:
+    FMU reported:
+            0 warning(s) and error(s)
+    Checker reported:
+            0 Warning(s)
+            0 Error(s)
 """
 
 import sys, numpy

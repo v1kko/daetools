@@ -77,9 +77,9 @@ Prerequisities:
      If necessary, modify the line 'export PATH=...:${PATH}' to match the actual location.
       
   5. Boost specific options: 
-     boost-python linking will fail. Append the value of: 
+     boost-python linking will fail. Append the value of:
         ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a
-     at the end of the failed linking command, re-run it, and manually copy the stage/lib/*.dll(s) to the "daetools/solibs" directory.
+     at the end of the failed linking command, re-run it, and manually copy the stage/lib/*.dll(s) to the "daetools/solibs/${PLATFORM}_${HOST_ARCH}" directory.
      Win64 (x86_64-w64-mingw32):
       - Python 2.7 won't compile (probably issues with the MS Universal CRT voodoo mojo)
       - dl and util libraries are missing when compiling with x86_64-w64-mingw32.
@@ -204,6 +204,9 @@ for i; do
             DAE_CROSS_COMPILE_FLAGS="--host=$2"
             DAE_CROSS_COMPILE_TOOLCHAIN_FILE="-DCMAKE_TOOLCHAIN_FILE=${TRUNK}/cross-compile-$2.cmake"
             DAE_COMPILER_FLAGS=
+            HOST_ARCH="win32"
+            PLATFORM="Windows"
+
             shift ; shift
             ;;
 
@@ -229,6 +232,8 @@ if [ "${DAE_IF_CROSS_COMPILING}" = "0" ]; then
     PYTHON_LIB_DIR=`${PYTHON} -c "import sys; print(sys.prefix)"`/lib
 fi
 PYTHON_VERSION=$PYTHON_MAJOR.$PYTHON_MINOR
+
+SOLIBS_DIR="../daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}"
 
 if [ ${PLATFORM} = "Darwin" ]; then
   DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch x86_64"
@@ -433,15 +438,15 @@ compile_boost()
            toolset=gcc target-os=windows threadapi=win32 \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
     
-    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ../daetools-package/daetools/solibs
-    cp -a stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/daetools/solibs
-    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*   ../daetools-package/daetools/solibs
+    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*   ${SOLIBS_DIR}
 
     # Achtung, Achtung!
     # The following will fail at the linking phase!
     # Redo the link with the value of: 
     #     ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a
-    # appended at the end of the linking line, and manually copy the .dll to the "daetools/solibs" directory.
+    # appended at the end of the linking line, and manually copy the .dll to the "daetools/solibs/${PLATFORM}_${HOST_ARCH}" directory.
     ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
            --with-python \
            toolset=gcc target-os=windows threadapi=win32 \
@@ -452,7 +457,7 @@ compile_boost()
     export CPPFLAGS=
     export CPLUS_INCLUDE_PATH=
     
-    cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ../daetools-package/daetools/solibs
+    cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
   
   else # regular compiler (not a cross-compiler)
     
@@ -474,10 +479,10 @@ compile_boost()
            --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-    cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ../daetools-package/daetools/solibs
-    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ../daetools-package/daetools/solibs
-    cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ../daetools-package/daetools/solibs
-    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ../daetools-package/daetools/solibs
+    cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
 
   fi
   
@@ -543,7 +548,7 @@ compile_openblas()
   make -j${Ncpu} libs
   make 
   make prefix=build install
-  cp -a libopenblas_daetools* ../daetools-package/daetools/solibs
+  cp -a libopenblas_daetools* ${SOLIBS_DIR}
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1323,9 +1328,9 @@ compile_dealii()
   make -j${Ncpu} install
   
   if [ ${PLATFORM} = "Darwin" ]; then
-    cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ../daetools-package/daetools/solibs
+    cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
   elif [ ${PLATFORM} = "Linux" ]; then
-    cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ../daetools-package/daetools/solibs/libdeal_II-daetools.so.${vDEALII}
+    cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
   else
     echo "..."
   fi

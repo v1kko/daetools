@@ -66,20 +66,6 @@ win32-g++-*::COPY_FILE    = cp -fa
 win64-g++-*::COPY_FILE    = cp -fa
 unix::COPY_FILE           = cp -fa
 
-# RPATH for python extension modules
-win32-msvc2008::SOLIBS_RPATH =
-win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs\',-z,origin
-win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs\',-z,origin
-linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs\',-z,origin
-macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'\$$ORIGIN/../../solibs\',-z,origin
-
-# RPATH for the simulation_loader
-win32-msvc2008::SOLIBS_RPATH_SL =
-win32-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
-win64-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
-linux-g++::SOLIBS_RPATH_SL      = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
-macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
-
 # Set CONFIG += enable_mpi to use MPI libraries
 
 CONFIG(debug, debug|release) {
@@ -172,6 +158,20 @@ crossCompile{
     #                               $${PYTHON_INCLUDE_DIR}/numpy/core/include/numpy
 
 }
+
+# RPATH for python extension modules
+win32-msvc2008::SOLIBS_RPATH =
+win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+
+# RPATH for the simulation_loader
+win32-msvc2008::SOLIBS_RPATH_SL =
+win32-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
+win64-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
+linux-g++::SOLIBS_RPATH_SL      = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
+macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -793,10 +793,10 @@ QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 #            Settings for installing files
 #######################################################
 # Removed "_numpy$${NUMPY_VERSION}" to avoid compile-time dependency on numpy versions
-SOLIBS_DIR   = ../daetools-package/daetools/solibs
+SOLIBS_DIR   = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
 SOLVERS_DIR  = ../daetools-package/daetools/solvers/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 PYDAE_DIR    = ../daetools-package/daetools/pyDAE/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-FMI_DIR      = ../daetools-package/daetools/code_generators/fmi/$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+FMI_DIR      = ../daetools-package/daetools/solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}
 
 win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\solvers\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})
 win32-msvc2008::DUMMY = $$system(mkdir daetools-package\daetools\pyDAE\\$${DAE_SYSTEM}_$${DAE_MACHINE}_py$${PYTHON_MAJOR}$${PYTHON_MINOR})

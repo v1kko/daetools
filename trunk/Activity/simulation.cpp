@@ -140,13 +140,15 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     if(bPrintHeader)
     {
         m_pLog->Message(string("***********************************************************************"), 0);
-        m_pLog->Message(string("       @                  @@@@@                                        "), 0);
-        m_pLog->Message(string("       @                    @                                          "), 0);
-        m_pLog->Message(string("  @@@@@@   @@@@@     @@@@@  @                DAE Tools                 "), 0);
-        m_pLog->Message(string(" @     @        @   @     @       Version:   ") + daeVersion(true),        0);
-        m_pLog->Message(string(" @     @   @@@@@@   @@@@@@        Copyright: Dragan Nikolic, 2010-2015 "), 0);
-        m_pLog->Message(string(" @     @  @     @   @             E-mail:    dnikolic at daetools.com  "), 0);
-        m_pLog->Message(string("  @@@@@@   @@@@@@    @@@@@        Homepage:  http://www.daetools.com   "), 0);
+        m_pLog->Message(string("                                 Version:   ") + daeVersion(true),         0);
+        m_pLog->Message(string("                                 Copyright: Dragan Nikolic, 2016       "), 0);
+        m_pLog->Message(string("                                 Homepage:  http://www.daetools.com    "), 0);
+        m_pLog->Message(string("       @                       @                                       "), 0);
+        m_pLog->Message(string("       @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@    "), 0);
+        m_pLog->Message(string("  @@@@@@        @   @     @    @     @     @  @     @  @     @         "), 0);
+        m_pLog->Message(string(" @     @   @@@@@@   @@@@@@     @     @     @  @     @  @      @@@@@    "), 0);
+        m_pLog->Message(string(" @     @  @     @   @          @     @     @  @     @  @           @   "), 0);
+        m_pLog->Message(string("  @@@@@@   @@@@@@    @@@@@      @@@   @@@@@    @@@@@    @@@@  @@@@@    "), 0);
         m_pLog->Message(string("                                                                       "), 0);
         m_pLog->Message(string("***********************************************************************"), 0);
         m_pLog->Message(string(" DAE Tools is free software: you can redistribute it and/or modify     "), 0);
@@ -157,7 +159,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
         m_pLog->Message(string(" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      "), 0);
         m_pLog->Message(string(" General Public License for more details.                              "), 0);
         m_pLog->Message(string(" You should have received a copy of the GNU General Public License     "), 0);
-        m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses/>.  "), 0);
+        m_pLog->Message(string(" along with this program. If not, see <http://www.gnu.org/licenses>.   "), 0);
         m_pLog->Message(string("***********************************************************************"), 0);
     }
 
