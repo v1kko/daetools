@@ -32,7 +32,8 @@ from pyIDAS import *
 # Platform-independent modules
 from .logs import daePythonStdOutLog
 from .variable_types import *
-    
+from .simulation_loader_aux import *
+
 try:
     from daetools.dae_simulator.simulator import daeSimulator
     from daetools.dae_simulator.simulation_explorer import daeSimulationExplorer

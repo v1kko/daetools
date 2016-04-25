@@ -797,9 +797,9 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
             {
                 daeVariable_t* pVariable = ptrarrVariables[i];
 
-        // Achtung, Achtung!!
-        // To enable external tools to change values of input ports, port variables must be assigned (that is be a DOF).
-        // Throw an exception if that is NOT the case!
+            // Achtung, Achtung!!
+            // To enable external tools to change values of input ports, port variables must be assigned (that is be a DOF).
+            // Throw an exception if that is NOT the case!
                 if(pVariable->GetType() != cnAssigned)
                 {
                     daeDeclareException(exInvalidCall);

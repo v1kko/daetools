@@ -120,8 +120,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(35, 0, 0.1)
-        self.m.y.CreateStructuredGrid(35, 0, 0.1)
+        self.m.x.CreateStructuredGrid(99, 0, 0.1)
+        self.m.y.CreateStructuredGrid(99, 0, 0.1)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
@@ -196,22 +196,22 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
-    simulation.SolveInitial()
+    #simulation.SolveInitial()
 
     #fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
     #lasolver.SaveAsXPM(str(fileName))
 
     # Generate code
-    #from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-    #cg = daeCodeGenerator_cxx_mpi()
-    #cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23-old', 4)
+    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+    cg = daeCodeGenerator_cxx_mpi()
+    cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23-old', 4)
     
     # Run
-    simulation.Run()
+    #simulation.Run()
 
     simulation.Finalize()
 

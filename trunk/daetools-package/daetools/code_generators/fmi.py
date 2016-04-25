@@ -294,24 +294,6 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                                                                            daetools.python_version_major,
                                                                            daetools.python_version_minor,
                                                                            so_ext)
-        """
-        boost_python = '%sboost_python-daetools-py%s%s.%s.*' % (shared_lib_prefix,
-                                                                daetools.python_version_major,
-                                                                daetools.python_version_minor,
-                                                                so_ext)
-        boost_thread = '%sboost_thread-daetools-py%s%s.%s.*' % (shared_lib_prefix,
-                                                                daetools.python_version_major,
-                                                                daetools.python_version_minor,
-                                                                so_ext)
-        boost_system = '%sboost_system-daetools-py%s%s.%s.*' % (shared_lib_prefix,
-                                                                daetools.python_version_major,
-                                                                daetools.python_version_minor,
-                                                                so_ext)
-        boost_filesystem = '%sboost_filesystem-daetools-py%s%s.%s.*' % (shared_lib_prefix,
-                                                                        daetools.python_version_major,
-                                                                        daetools.python_version_minor,
-                                                                        so_ext)
-        """
         boost_files = glob.iglob(os.path.join(solibs_dir, "*boost_*-daetools-py%s%s.%s" % (daetools.python_version_major,
                                                                                            daetools.python_version_minor,
                                                                                            so_ext_pattern)))
@@ -320,7 +302,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Copy FMU_CS
             _source = os.path.join(solibs_dir,            daetools_fmi_cs)
             _target = os.path.join(platform_binaries_dir, daetools_fmu_solib)
-            print('copy %s %s' % (_source, _target))
+            #print('copy %s %s' % (_source, _target))
             shutil.copy2(_source, _target)
         except Exception as e:
             # Ignore exceptions, since some of binaries are certainly not available
@@ -330,13 +312,14 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Copy SimulationLoader
             _source = os.path.join(solibs_dir, daetools_simulation_loader)
             _target = os.path.join(platform_binaries_dir)
-            print('copy %s %s' % (_source, _target))
+            #print('copy %s %s' % (_source, _target))
             shutil.copy2(_source, _target)
         except Exception as e:
             # Ignore exceptions, since some of binaries are certainly not available
             pass
 
         try:
+            # Copy boost libs
             _target = os.path.join(platform_binaries_dir)
             for _source in boost_files:
                 if os.path.isfile(_source):
@@ -390,7 +373,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.initial        = fmiScalarVariable.initialExact
         sv.type           = fmiReal()
         sv.type.unit      = self._formatUnits(fmi_obj.parameter.Units)
-        sv.type.start     = fmi_obj.parameter.GetValue()
+        sv.type.start     = fmi_obj.parameter.GetValue(list(fmi_obj.indexes))
         self.ModelVariables.append(sv)
 
     def _addSTN(self, fmi_obj):

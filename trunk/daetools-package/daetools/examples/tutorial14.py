@@ -250,7 +250,7 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
+    simulation.ReportingInterval = 0.5
     simulation.TimeHorizon = 500
 
     # Connect data reporter

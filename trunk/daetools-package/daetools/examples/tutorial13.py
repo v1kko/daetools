@@ -211,7 +211,6 @@ class simTutorial(daeSimulation):
         self.m.T.SetInitialCondition(283 * K)
         self.m.event.AssignValue(0.0)
 
-
 # Use daeSimulator class
 def guiRun(app):
     sim = simTutorial()
