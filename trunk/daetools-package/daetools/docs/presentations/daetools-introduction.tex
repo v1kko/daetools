@@ -1,151 +1,327 @@
-% latex-beamer, texlive-publishers, texlive-latex-extra
-% pdf-presenter-console daetools-introduction.pdf
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%        DOCUMENT
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\documentclass[compress,newPxFont,sthlmFooter]{beamer}
+\usetheme{sthlm} %Luebeck
+%\usecolortheme{sthlmv42}
 
-\documentclass{beamer}
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%        PACKAGES
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+% \usepackage[backend=biber, style=numeric]{biblatex}
+\usepackage{biblatex}
+% \bibliographystyle{apalike}
+\newcommand{\skipcite}[1]{} 
+
 \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english,serbian]{babel}
 \usepackage{color}
+\usepackage{chronology}
+\renewcommand{\event}[3][e]{%
+  \pgfmathsetlength\xstop{(#2-\theyearstart)*\unit}%
+  \ifx #1e%
+    \draw[fill=black,draw=none,opacity=0.5]%
+      (\xstop, 0) circle (.2\unit)%
+      node[opacity=1,rotate=45,right=.2\unit] {#3};%
+  \else%
+    \pgfmathsetlength\xstart{(#1-\theyearstart)*\unit}%
+    \draw[fill=black,draw=none,opacity=0.5,rounded corners=.1\unit]%
+      (\xstart,-.1\unit) rectangle%
+      node[opacity=1,rotate=45,right=.2\unit] {#3} (\xstop,.1\unit);%
+  \fi}%
+  
+\usepackage{amsmath}
+\usepackage{amssymb,amsfonts,textcomp}
+\usepackage{color}
+\usepackage{placeins}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{xcolor}
+% \usepackage{droidmono}
+\usepackage{subscript}
 
-\usetheme{Luebeck}
-\usecolortheme{default}
-\usefonttheme{professionalfonts}
-\usefonttheme[onlymath]{serif}
-
-%\setbeameroption{show notes}
-%\setbeamertemplate{note page}[plain]
-\setbeamertemplate{blocks}[rounded][shadow=true]
+% \usecolortheme{default}
+% \usefonttheme{professionalfonts}
+% \usefonttheme[onlymath]{serif}
 
 \definecolor{light_red}{RGB}{255, 100, 100}
 \definecolor{light_green}{RGB}{100, 255, 100}
 
-\begin{document}
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%        BEAMER OPTIONS
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+% \addbibresource{daetools.bib}
 
-\title[\textbf{DAE Tools} - Introduction]{\textbf{DAE Tools}: An equation-oriented process\linebreak modelling and optimization software}
-\subtitle{\textbf{Introduction}}
-\author{Dragan Nikolić}
+%\setbeameroption{show notes}
+%\setbeamertemplate{note page}[plain]
+%\setbeamertemplate{blocks}[rounded][shadow=true]
+\definecolor{amethyst}{rgb}{0.6, 0.4, 0.8}
+\definecolor{aogreen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+\definecolor{battleshipgrey}{rgb}{0.52, 0.52, 0.51}
+
+\lstset{
+    language=Python,
+    basicstyle=\fontfamily{fdm}\scriptsize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{aogreen},
+    numberstyle=\color{battleshipgrey},
+    stringstyle=\color{burgundy},
+    identifierstyle=\color{black},
+    frame=single,
+    frameround=tttt,
+    %numbers=left,
+    keepspaces=true,
+    showspaces=false,
+    showtabs=false,
+    showstringspaces=false,
+    morekeywords={import, from, class, def, for, while, if, is, in, elif, else, not, and, or, print, break, 
+                  continue, return, True, False, except, finally, import, lambda, pass, raise, try, None, __init__}
+}
+
+\lstset{
+    language=C++,
+    basicstyle=\fontfamily{fdm}\scriptsize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{aogreen},
+    numberstyle=\color{battleshipgrey},
+    stringstyle=\color{burgundy},
+    identifierstyle=\color{black},
+    frame=single,
+    frameround=tttt,
+    %numbers=left,
+    keepspaces=true,
+    showspaces=false,
+    showtabs=false,
+    showstringspaces=false
+}
+
+\lstdefinestyle{gPROMS}{
+    language=Python,
+    basicstyle=\fontfamily{fdm}\scriptsize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{aogreen},
+    numberstyle=\color{battleshipgrey},
+    stringstyle=\color{burgundy},
+    identifierstyle=\color{black},
+    frame=single,
+    frameround=tttt,
+    %numbers=left,
+    keepspaces=true,
+    showspaces=false,
+    showtabs=false,
+    showstringspaces=false,
+    morekeywords={AS, EQUATION, PARAMETER, VARIABLE}
+}
+
+\lstdefinestyle{Modelica}{
+    language=C++,
+    basicstyle=\fontfamily{fdm}\scriptsize,
+    keywordstyle=\color{blue},
+    commentstyle=\color{aogreen},
+    numberstyle=\color{battleshipgrey},
+    stringstyle=\color{burgundy},
+    identifierstyle=\color{black},
+    frame=single,
+    frameround=tttt,
+    %numbers=left,
+    keepspaces=true,
+    showspaces=false,
+    showtabs=false,
+    showstringspaces=false,
+    morekeywords={model, end, import, parameter, Real, equation, der}
+}
+
+% \setbeamertemplate{bibliography entry title}{}
+% \setbeamertemplate{bibliography entry location}{}
+% \setbeamertemplate{bibliography entry note}{}
+
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+%   PRESENTATION INFORMATION
+%-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+\title{DAE Tools Software}
+\subtitle{Introduction}
+\author{D.D. Nikolić}
 \institute
 {
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{1 December 2013} 
-\titlegraphic{\includegraphics{../[d][a][e]_Tools_project.png}}
+\date{1 April 2016} 
 
-\AtBeginSection[]
-{
-  \begin{frame}
-    \frametitle{Outline}
-    \tableofcontents[currentsection]
-  \end{frame}
+\hypersetup{
+pdfauthor = {Dragan D. Nikolić: dnikolic@daetools.com},
+pdfsubject = {},
+pdfkeywords = {},
+pdfmoddate= {D:\pdfdate},
+pdfcreator = {}
 }
 
-\begin{frame}
-\titlepage
-\end{frame}
+% \titlegraphic{\includegraphics{../[d][a][e]_Tools_project.png}}
 
-\begin{frame}
-\frametitle{Outline}
-\tableofcontents[currentsubsection, 
-                 hideothersubsections, 
-                 sectionstyle=show, 
-                 subsectionstyle=hide]
-\end{frame} 
+% \AtBeginSection[]
+% {
+%   \begin{frame}
+%     \frametitle{Outline}
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+% 
+\begin{document}
+
+% \begin{frame}
+% \titlepage
+% \end{frame}
+\maketitle
+
+% \begin{frame}
+% \frametitle{Outline}
+% \tableofcontents[currentsubsection, 
+%                  hideothersubsections, 
+%                  sectionstyle=show, 
+%                  subsectionstyle=hide]
+% \end{frame} 
 
 
 \section{Intro}
+\subsection{General Information}
 
-\subsection{General Info}
-\begin{frame}
-\frametitle{What is DAE Tools?} 
-\begin{block}{}
+\begin{frame}{What is DAE Tools?} 
+Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
 \begin{itemize}
-  \item Process modelling, simulation, optimization and parameter estimation software (www.daetools.com)
   \item Areas of application:
     \begin{itemize}
-      \item Initially: chemical process industry (mass, heat and momentum transfers, chemical reactions, separation processes, phase-equilibrium, thermodynamics)
-      \item Nowadays: multi-domain
+      \item Initially: chemical process industry (mass, heat and momentum transfers, chemical reactions, 
+                                                  separation processes, thermodynamics, electro-chemistry)
+      \item Nowadays: \alert{multi-domain}
     \end{itemize}
-  \item Hybrid approach between general-purpose programming languages (c++, Fortran, Java) and domain-specific modelling languages (Modelica, gPROMS...)
+  \item Free/Open source software (\alert{GNU GPL})
+  \item \alert{Cross-platform} (GNU/Linux, MacOS, Windows)
+  \item \alert{Multiple architectures} (32/64 bit x86, ARM, ...)
 \end{itemize}
-\end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{What can be done with DAE Tools?} 
-\begin{block}{}
+\begin{frame}{What is DAE Tools? (cont'd)} 
+  \begin{itemize}
+    \item DAE Tools \alert{is not}:
+        \begin{itemize}
+            \item A modelling language (such as Modelica and gPROMS)
+            \item An integrated software suite of data structures and routines for scientific applications (such as PETSc)
+        \end{itemize}
+    \item DAE Tools \alert{is}:
+        \begin{itemize}
+            \item A higher level structure – an architectural design of interdependent software components
+                  providing an API for:
+                \begin{itemize}
+                    \item Model development/specification
+                    \item Activities on developed models (simulation, optimisation, ...)
+                    \item Processing of the results
+                    \item Report generation
+                    \item Code generation and model exchange
+                \end{itemize}
+        \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What can be done with DAE Tools?} 
 \begin{itemize}
   \item Simulation
     \begin{itemize}
       \item Steady-State 
       \item Transient
     \end{itemize}
-  \item Optimization
+  \item Optimisation
     \begin{itemize}
-      \item NLP problems: IPOPT, NLOPT, OpenOpt, scipy.optimize
-      \item MINLP problems: BONMIN
+      \item Non-Linear Programming (NLP) problems
+      \item Mixed Integer Non-Linear Programming (NLP) problems
     \end{itemize}
-  \item Parameter estimation: Levenberg–Marquardt algorithm (scipy.optimize)
+  \item Parameter estimation
+    \begin{itemize}
+      \item Levenberg–Marquardt algorithm
+    \end{itemize}
+  \item Code-generation, model-exchange, co-simulation 
+    \begin{itemize}
+      \item Modelica, gPROMS, Matlab, Simulink
+      \item Functional Mockup Interface (FMI)
+      \item C99 (for embedded systems)
+      \item C++ MPI (for distributed computing) 
+    \end{itemize}
 \end{itemize}
-\end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{Types of systems that can be modelled}
-\begin{block}{}
+\begin{frame}{Types of systems that can be modelled}
+  \alert{Initial value problems of implicit form}, 
+  (described by systems of linear, non-linear, and (partial-)differential algebraic equations).
 \begin{itemize}
-  \item Initial value problems of implicit form: systems of linear, non-linear, and (partial-)differential algebraic equations
-  \item Index-1 DAE systems
-  \item With lumped or distributed parameters: Finite Difference or Finite Elements Methods
-  \item Steady-state or dynamic
-  \item Continuous with some elements of event-driven systems (discontinuous equations, state transition networks and discrete events) 
+  \item \alert{Continuous} with some elements of \alert{event-driven} systems 
+        (discontinuous equations, state transition networks and discrete events) 
+  \item \alert{Steady-state} or \alert{dynamic}
+  \item With \alert{lumped} or \alert{distributed} parameters 
+        (finite difference, finite volume and finite element methods)
+  \item Only \alert{index-1} DAE systems at the moment
 \end{itemize}
-\end{block}
 \end{frame}
 
 \subsection{Motivation}
+
 \begin{frame}
-\frametitle{Why yet another software?}
-\begin{block}{}
-Advantages:
+\frametitle{Why modelling software?}
+In general, two scenarios:
+\begin{itemize}
+  \item \alert{Development} of a \alert{new} product/process/...
+    \begin{itemize}
+        \item Reduce the time to market (TTM)
+        \item Reduce the development costs (no physical prototypes)
+        \item Maximise the performance, yield, productivity, purity, ...
+        \item Minimise the capital and operating costs
+        \item Explore the new design options with no risks
+    \end{itemize}
+
+  \item \alert{Optimisation} of an \alert{existing} product/process/...
+    \begin{itemize}
+        \item Increase the performance, yield, productivity, purity, ...
+        \item Reduce the operating costs, energy consumption, ...
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why \textcolor{sthlmRed}{yet another} modelling software?}
+Currently available options:
 \begin{enumerate}
-  \item Hybrid approach betwen DSL and GPPL
-  \item Programmatical generation of models
-  \item Runtime modification of objcts/models (operating procedures)
-  \item Introperability with 3rd party software packages/libraries
-  \item Code generation/Model exchange capabilities
+   \item \alert{Modelling languages} (domain-specific or multi-domain): 
+         Modelica \skipcite{Fritzson-and-Engelson-1998}, Ascend \skipcite{Piela-etal-1991}, gPROMS \skipcite{Barton-and-Pantelides-1994}, 
+         GAMS \skipcite{Brook-etal-1988}, Dymola \skipcite{Elmqvist-1978}, APMonitor \skipcite{APMonitor-2014}
+   \item \alert{General-purpose programming languages}:
+      \begin{itemize}
+          \item Lower level third-generation languages such as C, C++ and Fortran:
+                PETSc \skipcite{petsc}, SUNDIALS \skipcite{Hindmarsh-etal-2005}, Assimulo \skipcite{Assimulo-2015}
+          \item Multi-paradigm numerical languages: 
+                Matlab \skipcite{matlab}, Mathematica \skipcite{mathematica}, Maple \skipcite{maple}, 
+                Scilab \skipcite{scilab}, and GNU Octave \skipcite{octave}
+      \end{itemize}
+ \end{enumerate}
+\end{frame}
+
+\begin{frame}{Why \textcolor{sthlmRed}{yet another} modelling software? (cont'd)}
+  The advantages of the \alert{Hybrid} approach betwen \alert{modelling} and \alert{general-purpose} programming languages:
+\begin{enumerate}
+  \item Support for the \alert{runtime model generation}
+  \item Support for the \alert{runtime simulation set-up}
+  \item Support for \alert{complex runtime operating procedures}
+  \item \alert{Interoperability} with the \alert{third-party software} packages (i.e. NumPy/SciPy)
+  \item Suitability for \alert{embedding} and use as a \alert{web application} or \alert{software as a service}
+  \item \alert{Code-generation}, \alert{model exchange} and \alert{co-simulation} capabilities  
 \end{enumerate}
-\end{block}
 \end{frame}
 
 \subsection{Main features}
-\begin{frame}
-\frametitle{Not a modelling language}
-\begin{block}{}
-\begin{itemize}
-  \item A set of software packages
-  \item API for:
-  \begin{itemize}
-    \item Model development
-    \item Results processing (plotting, various file formats)
-    \item Simulation, optimization and parameter estimation
-    \item Code generation for other DSLs and programming languages
-    \item Report generation (XML+MathML) and model exchange
-  \end{itemize}
-  \item Large set of supported solvers (DAE, LA, NLP, MINLP)
-\end{itemize}
-\end{block}
-\end{frame}
-
 \begin{frame}
 \frametitle{Not a modelling language (cont'd)}
 \begin{block}{}
 \begin{itemize}
   \item Allows easy interaction with other software libraries 
         (two-way interoperability with other software, embedding in other software etc.)
-  \item Free/Open source software (GNU GPL)
-  \item Cross-platform (GNU/Linux, MacOS, Windows)
-  \item Supports multiple architectures (32/64 bit x86, arm, any other with the GNU toolchain)
   \item Developed in c++ with Python bindings (Boost.Python)
 \end{itemize}
 \end{block}
@@ -732,5 +908,163 @@ A sort of the hybrid approach:
 \begin{frame}
 \frametitle{}
 \end{frame}
+
+% \appendix
+% \begin{frame}[allowframebreaks]{References}
+% \begin{thebibliography}{JModelica-2010}
+% 
+% \bibitem[Akesson et~al., 2010]{JModelica-2010}
+% Akesson, J., Arzen, K.-E., Gafvert, M., Bergdahl, T., and Tummescheit, H.
+%   (2010).
+% \newblock Modeling and optimization with {Optimica} and {JModelica}.org -
+%   languages and tools for solving large-scale dynamic optimization problems.
+% \newblock {\em Comput. Chem. Eng.}, 34(11):1737--1749.
+% 
+% \bibitem[Andersson et~al., 2015]{Assimulo-2015}
+% Andersson, C., Fuhrer, C., and Akesson, J. (2015).
+% \newblock Assimulo: A unified framework for ode solvers.
+% \newblock {\em Math. Comput. Simulat.}, 116(0):26 -- 43.
+% 
+% \bibitem[Balay et~al., 2015]{petsc}
+% Balay, S., Abhyankar, S., Adams, M.~F., Brown, J., Brune, P., Buschelman, K.,
+%   Dalcin, L., Eijkhout, V., Gropp, W.~D., Kaushik, D., Knepley, M.~G., McInnes,
+%   L.~C., Rupp, K., Smith, B.~F., Zampini, S., and Zhang, H. (2015).
+% \newblock {PETS}c users manual.
+% \newblock Technical Report ANL-95/11 - Revision 3.6, Argonne National
+%   Laboratory.
+% 
+% \bibitem[Barton and Pantelides, 1993]{Barton-and-Pantelides-1993}
+% Barton, P.~I. and Pantelides, C.~C. (1993).
+% \newblock {gPROMS - A Combined Discrete/Continuous Modelling Environment for
+%   Chemical Processing Systems}.
+% \newblock {\em Simul. Ser.}, 25:25--34.
+% 
+% \bibitem[Barton and Pantelides, 1994]{Barton-and-Pantelides-1994}
+% Barton, P.~I. and Pantelides, C.~C. (1994).
+% \newblock {Modeling of combined discrete/continuous processes}.
+% \newblock {\em AIChE J.}, 40(6):966--979.
+% 
+% \bibitem[Bonami et~al., 2008]{Bonami-etal-2008}
+% Bonami, P., Biegler, L.~T., Conn, A.~R., Cornu{\'e}jols, G., Grossmann, I.~E.,
+%   Laird, C.~D., Lee, J., Lodi, A., Margot, F., Sawaya, N., and W{\"a}chter, A.
+%   (2008).
+% \newblock {An algorithmic framework for convex mixed integer nonlinear
+%   programs}.
+% \newblock {\em Discrete Optim.}, 5(2):186--204.
+% \newblock In Memory of George B. Dantzig.
+% 
+% \bibitem[Brook et~al., 1988]{Brook-etal-1988}
+% Brook, A., Kendrick, D., and Meeraus, A. (1988).
+% \newblock {GAMS, a User's Guide}.
+% \newblock {\em SIGNUM Newsl.}, 23(3-4):10--11.
+% 
+% \bibitem[Eaton et~al., 2015]{octave}
+% Eaton, J., Bateman, D., Hauberg, S., and Wehbring, R. (2015).
+% \newblock {\em {GNU Octave} version 4.0.0 manual: a high-level interactive
+%   language for numerical computations}.
+% 
+% \bibitem[Elmqvist, 1978]{Elmqvist-1978}
+% Elmqvist, H. (1978).
+% \newblock {\em {A Structured Model Language for Large Continuous Systems}}.
+% \newblock PhD thesis, Department of Automatic Control, Lund University, Sweden.
+% 
+% \bibitem[Fritzson et~al., 2005]{OpenModelica-2005}
+% Fritzson, P., Aronsson, P., Lundvall, H., Nystrom, K., Pop, A., Saldamli, L.,
+%   and Broman, D. (2005).
+% \newblock The openmodelica modeling, simulation, and development environment.
+% \newblock SIMS - Scandinavian Simulation Society.
+% 
+% \bibitem[Fritzson and Engelson, 1998]{Fritzson-and-Engelson-1998}
+% Fritzson, P. and Engelson, V. (1998).
+% \newblock {Modelica --- A unified object-oriented language for system modeling
+%   and simulation}.
+% \newblock In Jul, E., editor, {\em {ECOOP{\rq}98 --- Object-Oriented
+%   Programming}}, volume 1445 of {\em {Lecture Notes in Computer Science}},
+%   pages 67--90. Springer Berlin Heidelberg.
+% 
+% \bibitem[Hedengren et~al., 2014]{APMonitor-2014}
+% Hedengren, J.~D., Shishavan, R.~A., Powell, K.~M., and Edgar, T.~F. (2014).
+% \newblock Nonlinear modeling, estimation and predictive control in apmonitor.
+% \newblock {\em Comput. Chem. Eng.}, 70:133 -- 148.
+% \newblock Manfred Morari Special Issue.
+% 
+% \bibitem[Hindmarsh et~al., 2005]{Hindmarsh-etal-2005}
+% Hindmarsh, A.~C., Brown, P.~N., Grant, K.~E., Lee, S.~L., Serban, R., Shumaker,
+%   D.~E., and Woodward, C.~S. (2005).
+% \newblock {SUNDIALS: Suite of Nonlinear and Differential/Algebraic Equation
+%   Solvers}.
+% \newblock {\em ACM Trans. Math. Softw.}, 31(3):363--396.
+% 
+% \bibitem[Johnson, 2015]{nlopt}
+% Johnson, S.~G. (2015).
+% \newblock {The NLopt nonlinear-optimization package}.
+% 
+% \bibitem[Li, 2005]{Li-2005}
+% Li, X.~S. (2005).
+% \newblock {An Overview of SuperLU: Algorithms, Implementation, and User
+%   Interface}.
+% \newblock {\em ACM Trans. Math. Softw.}, 31(3):302--325.
+% 
+% \bibitem[Li et~al., 2014]{Li-etal-2014}
+% Li, Y., El~Gabaly, F., Ferguson, T.~R., Smith, R.~B., Bartelt, N.~C., Sugar,
+%   J.~D., Fenton, K.~R., Cogswell, D.~A., Kilcoyne, D. A.~L., Tyliszczak, T.,
+%   Bazant, M.~Z., and Chueh, W.~C. (2014).
+% \newblock {Current-induced transition from particle-by-particle to concurrent
+%   intercalation in phase-separating battery electrodes}.
+% \newblock {\em Nat. Mater.}, 13(12):1149--1156.
+% 
+% \bibitem[Morton, 2003]{Morton-2003}
+% Morton, W. (2003).
+% \newblock {Equation-Oriented Simulation and Optimization}.
+% \newblock pages 317--357. Indian National Sciences Academy.
+% 
+% \bibitem[Piela et~al., 1991]{Piela-etal-1991}
+% Piela, P.~C., Epperly, T.~G., Westerberg, K.~M., and Westerberg, A.~W. (1991).
+% \newblock {ASCEND: an object-oriented computer environment for modeling and
+%   analysis: The modeling language}.
+% \newblock {\em Comput. Chem. Eng.}, 15(1):53--72.
+% 
+% \bibitem[Sala et~al., 2006]{amesos-2006}
+% Sala, M., Stanley, K., and Heroux, M. (2006).
+% \newblock {Amesos: A Set of General Interfaces to Sparse Direct Solver
+%   Libraries}.
+% \newblock In {\em {Proceedings of PARA'06 Conference, Umea, Sweden}}.
+% 
+% \bibitem[Schenk et~al., 2007]{Schenk-etal-2007}
+% Schenk, O., W{\"a}chter, A., and Hagemann, M. (2007).
+% \newblock {Matching-based preprocessing algorithms to the solution of
+%   saddle-point problems in large-scale nonconvex interior-point optimization}.
+% \newblock {\em Comput. Optim. Appl.}, 36(2-3):321--341.
+% 
+% \bibitem[{Scilab Enterprises}, 2015]{scilab}
+% {Scilab Enterprises} (2015).
+% \newblock {Scilab: Free and Open Source software}.
+% 
+% \bibitem[{The MathWorks, Inc.}, 2015]{matlab}
+% {The MathWorks, Inc.} (2015).
+% \newblock {MATLAB}.
+% 
+% \bibitem[W{\"a}chter and Biegler, 2006]{Wachter-and-Biegler-2006}
+% W{\"a}chter, A. and Biegler, L.~T. (2006).
+% \newblock {On the implementation of an interior-point filter line-search
+%   algorithm for large-scale nonlinear programming}.
+% \newblock {\em Math. Program.}, 106:25--57.
+% 
+% \bibitem[Walther and Griewank, 2012]{Walther-and-Griewank-2012}
+% Walther, A. and Griewank, A. (2012).
+% \newblock {\em {Getting started with ADOL-C}}.
+% \newblock Chapman-Hall CRC Computational Science.
+% 
+% \bibitem[{Waterloo Maple, Inc.}, 2015]{maple}
+% {Waterloo Maple, Inc.} (2015).
+% \newblock {Maple}.
+% 
+% \bibitem[{Wolfram Research, Inc.}, 2015]{mathematica}
+% {Wolfram Research, Inc.} (2015).
+% \newblock {Mathematica}.
+% 
+% \end{thebibliography}
+% 
+% \end{frame}
 
 \end{document}
