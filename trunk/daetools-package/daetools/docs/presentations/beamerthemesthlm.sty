@@ -68,7 +68,7 @@
 }
 
 \newlength{\@sthlm@voffset}
-\setlength{\@sthlm@voffset}{2em}
+\setlength{\@sthlm@voffset}{1em}
 
 \ProcessOptionsBeamer
 \mode<presentation>
@@ -330,14 +330,15 @@ xrightmargin=0.5em
 \setbeamertemplate{footline}{
 \hbox{
 \begin{beamercolorbox}[wd=0.25\textwidth,dp=1.5ex,leftskip=0.3cm,rightskip=0.3cm]{structure}
-\includegraphics[width=0.10\textwidth]{[d][a][e]_Tools_project.png}
+\includegraphics[width=0.07\textwidth]{[d][a][e]_Tools_project.png}
 \end{beamercolorbox}
+
 \begin{beamercolorbox}[wd=0.75\textwidth, dp=1.5ex,leftskip=0.3cm,rightskip=0.3cm plus1fil]{structure}
 \usebeamerfont{page number in head/foot}
 
 \vspace*{1em}
 
-\hfill \textcolor{sthlmDarkGrey}{\insertauthor, \insertinstitute}
+\hfill \tiny{\textcolor{sthlmDarkGrey}{\insertauthor, \insertinstitute}}
 % \insertframenumber/\inserttotalframenumber 
 \vspace*{1em}
 \end{beamercolorbox}

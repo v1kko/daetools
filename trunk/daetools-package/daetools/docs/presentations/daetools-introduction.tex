@@ -13,6 +13,7 @@
 % \bibliographystyle{apalike}
 \newcommand{\skipcite}[1]{} 
 
+\usepackage[absolute,overlay]{textpos}
 \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english,serbian]{babel}
@@ -52,6 +53,9 @@
 %        BEAMER OPTIONS
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 % \addbibresource{daetools.bib}
+
+\setbeamertemplate{caption}{\insertcaption} 
+\setbeamertemplate{caption label separator}{}
 
 %\setbeameroption{show notes}
 %\setbeamertemplate{note page}[plain]
@@ -175,17 +179,12 @@ pdfcreator = {}
 % \end{frame}
 \maketitle
 
-% \begin{frame}
-% \frametitle{Outline}
-% \tableofcontents[currentsubsection, 
-%                  hideothersubsections, 
-%                  sectionstyle=show, 
-%                  subsectionstyle=hide]
-% \end{frame} 
+\begin{frame}{Outline}
+\tableofcontents[sectionstyle=show, 
+                 subsectionstyle=hide]
+\end{frame} 
 
-
-\section{Intro}
-\subsection{General Information}
+\section{General Information}
 
 \begin{frame}{What is DAE Tools?} 
 Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
@@ -206,11 +205,12 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
   \begin{itemize}
     \item DAE Tools \alert{is not}:
         \begin{itemize}
-            \item A modelling language (such as Modelica and gPROMS)
-            \item An integrated software suite of data structures and routines for scientific applications (such as PETSc)
+            \item A modelling language (such as Modelica, gPROMS, ...)
+            \item An integrated software suite of data structures and routines for scientific applications (such as PETSc, Sundials, ...)
         \end{itemize}
     \item DAE Tools \alert{is}:
         \begin{itemize}
+            \item A \alert{hybrid} approach between modelling and general-purpose programming languages 
             \item A higher level structure – an architectural design of interdependent software components
                   providing an API for:
                 \begin{itemize}
@@ -263,7 +263,7 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
 \end{itemize}
 \end{frame}
 
-\subsection{Motivation}
+\section{Motivation}
 
 \begin{frame}
 \frametitle{Why modelling software?}
@@ -275,61 +275,69 @@ In general, two scenarios:
         \item Reduce the development costs (no physical prototypes)
         \item Maximise the performance, yield, productivity, purity, ...
         \item Minimise the capital and operating costs
-        \item Explore the new design options with no risks
+        \item Explore the new design options in less time and no risks
     \end{itemize}
 
   \item \alert{Optimisation} of an \alert{existing} product/process/...
     \begin{itemize}
         \item Increase the performance, yield, productivity, purity, ...
         \item Reduce the operating costs, energy consumption, ...
+        \item Debottleneck
     \end{itemize}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Why \textcolor{sthlmRed}{yet another} modelling software?}
+\begin{frame}{Why \textsc{yet another} modelling software?}
 Currently available options:
 \begin{enumerate}
-   \item \alert{Modelling languages} (domain-specific or multi-domain): 
-         Modelica \skipcite{Fritzson-and-Engelson-1998}, Ascend \skipcite{Piela-etal-1991}, gPROMS \skipcite{Barton-and-Pantelides-1994}, 
-         GAMS \skipcite{Brook-etal-1988}, Dymola \skipcite{Elmqvist-1978}, APMonitor \skipcite{APMonitor-2014}
+   \item \alert{Modelling languages} (domain-specific or multi-domain) 
+         (Modelica \skipcite{Fritzson-and-Engelson-1998}, Ascend \skipcite{Piela-etal-1991}, gPROMS \skipcite{Barton-and-Pantelides-1994}, 
+         GAMS \skipcite{Brook-etal-1988}, Dymola \skipcite{Elmqvist-1978}, APMonitor \skipcite{APMonitor-2014})
    \item \alert{General-purpose programming languages}:
       \begin{itemize}
-          \item Lower level third-generation languages such as C, C++ and Fortran:
-                PETSc \skipcite{petsc}, SUNDIALS \skipcite{Hindmarsh-etal-2005}, Assimulo \skipcite{Assimulo-2015}
-          \item Multi-paradigm numerical languages: 
-                Matlab \skipcite{matlab}, Mathematica \skipcite{mathematica}, Maple \skipcite{maple}, 
-                Scilab \skipcite{scilab}, and GNU Octave \skipcite{octave}
+          \item Lower level third-generation languages such as C, C++ and Fortran
+                (PETSc \skipcite{petsc}, SUNDIALS \skipcite{Hindmarsh-etal-2005})
+          \item Higher level fourth-generation languages such as Python (NumPy, SciPy, Assimulo \skipcite{Assimulo-2015}), Julia etc.
+          \item Multi-paradigm numerical languages 
+                (Matlab \skipcite{matlab}, Mathematica \skipcite{mathematica}, Maple \skipcite{maple}, 
+                Scilab \skipcite{scilab}, and GNU Octave \skipcite{octave})
       \end{itemize}
  \end{enumerate}
 \end{frame}
 
-\begin{frame}{Why \textcolor{sthlmRed}{yet another} modelling software? (cont'd)}
-  The advantages of the \alert{Hybrid} approach betwen \alert{modelling} and \alert{general-purpose} programming languages:
-\begin{enumerate}
-  \item Support for the \alert{runtime model generation}
-  \item Support for the \alert{runtime simulation set-up}
-  \item Support for \alert{complex runtime operating procedures}
-  \item \alert{Interoperability} with the \alert{third-party software} packages (i.e. NumPy/SciPy)
-  \item Suitability for \alert{embedding} and use as a \alert{web application} or \alert{software as a service}
-  \item \alert{Code-generation}, \alert{model exchange} and \alert{co-simulation} capabilities  
-\end{enumerate}
+\begin{frame}{Why \textsc{yet another} modelling software? (cont'd)}
+  The advantages of the \alert{Hybrid} approach over the \alert{modelling} and \alert{general-purpose} programming languages:
+    \begin{enumerate}
+        \item Support for the \alert{runtime model generation}
+        \item Support for the \alert{runtime simulation set-up}
+        \item Support for \alert{complex runtime operating procedures}
+        \item \alert{Interoperability} with the \alert{third-party software} packages (i.e. NumPy/SciPy)
+        \item Suitability for \alert{embedding} and use as a \alert{web application} or \alert{software as a service}
+        \item \alert{Code-generation}, \alert{model exchange} and \alert{co-simulation} capabilities  
+    \end{enumerate}
 \end{frame}
 
-\subsection{Main features}
-\begin{frame}
-\frametitle{Not a modelling language (cont'd)}
-\begin{block}{}
+\begin{frame}{Additional features}
+    \begin{itemize}
+        \item Support for the \alert{automatic differentiation} (ADOL-C)
+        \item Support for the \alert{sensitivity analysis} through the auto-differentiation capabilities
+        \item Support for the \alert{parallel} computation (OpenMP, GPGPU, MPI)
+        \item \alert{Interoperability} with the \alert{$3^{rd}$} party numerical software (NumPy, SciPy, ...)
+        \item Support for a large number of \alert{DAE}, \alert{LA} and \alert{NLP} solvers 
+        \item Support for the generation of \alert{model reports} (XML + MathML, Latex)
+        \item \alert{Export} of the \alert{simulation results} to various file formats (Matlab, Excel, json, xml, HDF5, Pandas)
+    \end{itemize}
+\end{frame}
+
+\section{Programming Paradigms}
+
+\begin{frame}{The hybrid approach}
 \begin{itemize}
-  \item Allows easy interaction with other software libraries 
-        (two-way interoperability with other software, embedding in other software etc.)
-  \item Developed in c++ with Python bindings (Boost.Python)
+  \item 
 \end{itemize}
-\end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{Object-oriented modelling}
-\begin{block}{}
+\begin{frame}{Object-oriented modelling}
 \begin{itemize}
   \item Everything is an object (models, parameters, variables, equations, state transition networks, simulations, solvers, ...) 
   \item Models are classes derived from the base daeModel class (inheriting the common functionality)
@@ -341,12 +349,9 @@ Currently available options:
       \item All parameters, variables, equations etc. remain public
   \end{itemize}
 \end{itemize}
-\end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{Equation-oriented (acausal) modelling}
-\begin{block}{}
+\begin{frame}{Equation-oriented (acausal) modelling}
 \begin{itemize}
   \item Equations given in an implicit form (as a residual)
     \begin{center}
@@ -368,12 +373,9 @@ Currently available options:
       x_3 = -x_1 - x_2$
     \end{center}
 \end{itemize}
-\end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{Separation of models definition from operations on them}
-\begin{block}{}
+\begin{frame}{Separation of model definition from activities on models}
 \begin{itemize}
   \item The structure of the model (parameters, variables, equations etc.) given in the model classes ($daeModel$, $daeFiniteElementModel$) 
   \item The runtime information in the simulation class ($daeSimulation$)
@@ -383,530 +385,380 @@ Currently available options:
     \item One or more optimization scenarios
   \end{itemize}
 \end{itemize}
-\end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{Hybrid continuous/discrete systems}
-\begin{block}{}
-\begin{itemize}
-  \item Modelling of continuous systems with some elements of event-driven systems 
-  \begin{itemize}
-    \item Discontinuous equations
-    \item State transition networks
-    \item Discrete events
-  \end{itemize}
-\end{itemize}
-\end{block}
-\end{frame}
+% \begin{frame}
+% \frametitle{Hybrid continuous/discrete systems}
+% \begin{block}{}
+% \begin{itemize}
+%   \item Modelling of continuous systems with some elements of event-driven systems 
+%   \begin{itemize}
+%     \item Discontinuous equations
+%     \item State transition networks
+%     \item Discrete events
+%   \end{itemize}
+% \end{itemize}
+% \end{block}
+% \end{frame}
 
-\begin{frame}
-\frametitle{Code generation}
-\begin{block}{}
-\begin{itemize}
-  \item Model export from DAE Tools to other DSL/modelling/programming languages
-  \begin{itemize}
-    \item Modelica
-    \item c99
-  \end{itemize}
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Model Exchange}
-\begin{block}{}
-\begin{itemize}
-  \item Support for Functional Mock-up Interface for Model Exchange and Co-Simulation (FMI): https://www.fmi-standard.org 
-  \item FMI – a tool independent standard to support both model exchange and co-simulation of dynamic models using a combination of xml-files and compiled C-code
-  \item Still in experimental phase
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Model reports}
-\begin{block}{}
-\begin{itemize}
-  \item Automatic model documentation
-  \item XML + MathML format
-  \item XSL transformation used to to generate HTML code and visualize reports 
-  \item Two types:
-  \begin{itemize}
-    \item Model description report (contains model definition)
-    \item Runtime report with all values and equations expanded (contains definition of the simulation)
-  \end{itemize}
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Model reports (cont'd)}
-\includegraphics<1>[height=0.7\paperheight]{../_static/model_report.png}
-\includegraphics<2>[height=0.7\paperheight]{../_static/runtime_model_report.png}
-\end{frame}
-
-\begin{frame}
-\frametitle{Multi-domain}
-\begin{block}{}
-\begin{itemize}
-  \item From chemical processing industry to biological neural networks
-  \item DAE Tools is not a DSL but defines the basic modelling concepts such as models, parameters, variables, various types of equations 
-        (ordinary, differential, partial differential, discontinuous), state transition networks etc. that can be used as building blocks 
-        for a specific domain
-  \item Example: a reference implementation simulator for NineML (xml-based modelling language for describing networks of spiking neurons)
-  \item The key concepts from NineML are based on DAE Tools concepts: Neurone, Synapse, Population of neurones, Layers, Projections etc
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{DAE Plotter}
-\begin{columns}
-  \begin{column}{0.5\paperwidth}
-    \begin{center}
-      \begin{itemize}
-	\item 2D plots (Matplotlib)
-	\item Animated 2D plots
-	\item 3D plots (Mayavi)
-      \end{itemize}
-    \end{center}
-    \begin{center}
-      \includegraphics[width=0.35\paperwidth]{../_static/daeplotter.png}
-    \end{center}
-  \end{column}
-  \begin{column}{0.5\paperwidth}
-    \begin{center}
-      \includegraphics[width=0.35\paperwidth]{../_static/sample_2d_plot.png}
-    \end{center}
-    \begin{center}
-      \includegraphics[width=0.3\paperwidth]{../_static/sample_3d_plot.png}
-    \end{center}
-  \end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}
-\frametitle{Solvers}
-\begin{block}{}
-Supported DAE solvers@
-\begin{itemize}
-  \item Sundials IDAS ({\small https://computation.llnl.gov/casc/sundials/main.html})
-\end{itemize}
-\end{block}
-
-\begin{block}{}
-Supported FE libraries:
-\begin{itemize}
-  \item deal.II ({\small http://dealii.org})
-\end{itemize}
-\end{block}
-
-\begin{block}{}
-Supported optimization solvers:
-\begin{itemize}
-  \item IPOPT ({\small https://projects.coin-or.org/Ipopt}) 
-  \item Bonmin ({\small https://projects.coin-or.org/Bonmin}) 
-  \item NLOPT ({\small http://ab-initio.mit.edu/wiki/index.php/NLopt}) 
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Solvers}
-\begin{block}{}
-Supported LA solvers:
-\begin{itemize}
-  \item Sundials dense LU, Lapack
-  \item Trilinos Amesos ({\small http://trilinos.sandia.gov/packages/amesos}) 
-  \item Trilinos AztecOO ({\small http://trilinos.sandia.gov/packages/aztecoo}) 
-  \item SuperLU SuperLU-MT ({\small http://crd.lbl.gov/~xiaoye/SuperLU/index.html}) 
-  \item Umfpack ({\small http://www.cise.ufl.edu/research/sparse/umfpack}) 
-  \item MUMPS ({\small http://graal.ens-lyon.fr/MUMPS})
-  \item CUSP ({\small http://code.google.com/p/cusp-library}) 
-  \item Intel Pardiso ({\small http://software.intel.com/en-us/articles/intel-mkl})
-\end{itemize}
-\end{block}
-\end{frame}
-
-
-
-\section{Programming paradigms}
-
-\subsection{General}
-\begin{frame}
-\frametitle{Approaches to process modelling}
-\begin{block}{}
-\begin{itemize}
-  \item Two approaches to process modelling:
-  \begin{itemize}
-    \item Domain Specific Language (DSL)
-    \item General-purpose programming language (such as c, c++, Java or Python)
-  \end{itemize}
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Domain Specific Languages}
-\begin{block}{}
-\begin{itemize}
-  \item Special-purpose programming or specification languages dedicated to a particular problem domain
-  \item Designed to directly support the key concepts from that domain
-  \item Specifically created to solve problems in a particular domain
-  \item (Usually) not intended to solve problems outside that domain (although that may be technically possible in some cases)
-  \item Commonly lack low-level functions for filesystem access, interprocess control, and other functions that characterize 
-	full-featured programming languages, scripting or otherwise
-  \item Examples: Modelica, gPROMS, SpeedUp, Ascend, GAMS ...
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{General-purpose programming languages}
-\begin{block}{}
-\begin{itemize}
-  \item Created to solve problems in a wide variety of application domains
-  \item Do not support key concepts from any domain
-  \item Have low-level functions for filesystem access, interprocess control etc.
-  \item Examples: c, c++, Fortran, Python, Java etc.
-  \item Typical scenario: solving a DAE system
-  \begin{itemize}
-    \item Choose a solver (Sundials IDA, DASSL, RADAU5, DAEPACK etc)
-    \item Implement user functions to manually calculate residuals and derivatives for a Jacobian matrix, apply boundary conditions etc
-    \item Create an executable program
-  \end{itemize}
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{DAE Tools approach}
-\begin{block}{}
-A sort of the hybrid approach:
-\begin{itemize}
-  \item Applies general-purpose programming languages such as c++ and Python
-  \item Offers a class-hierarchy/API that resembles a syntax of a DSL as much as possible. 
-  \item Provides low-level concepts such as parameters, variables, equations, ports, models, state transition networks, discrete events etc.
-  \item Concepts from new application domains can be added on top of its low level concepts (for instance the simulator for biological neural networks - NineML, as it will be shown later in Use Case section)
-  \item Enables an access to the low-level functions and a large number of standard libraries
-  \item Enables access to a large number of state-of-the-art scientific libraries (either free/open-source or proprietary)
-\end{itemize}
-\end{block}
-\end{frame}
-
-\subsection{DSL vs. DAE Tools}
-\begin{frame}
-\frametitle{gPROMS vs. Modelica}
-\begin{columns}[b]
-  \begin{column}{0.5\paperwidth}
-    \begin{center}
-      \includegraphics[width=0.45\paperwidth]{../_static/gPROMS_model.png}
-    \end{center}
-    \begin{center}
-      {\small Model developed in gPROMS\\
-	      http://www.psenterprise.com}
-    \end{center}
-  \end{column}
-  \begin{column}{0.5\paperwidth}
-    \begin{center}
-      \includegraphics[width=0.45\paperwidth]{../_static/modelica_model.png}
-    \end{center}
-    \begin{center}
-      {\small The same model in OpenModelica\\
-	      https://www.openmodelica.org}
-    \end{center}
-  \end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}
-\frametitle{DAE Tools}
-  \begin{center}
-    \includegraphics[width=0.85\paperwidth]{../_static/daetools_model.png}
-  \end{center}
-  \begin{center}
-    {\small The same model in daetools}
-  \end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Key modelling concepts \& grammar}
-\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Domain-specific languages allow solutions to be expressed in the idiom and at the level of abstraction of the problem domain 
-        (direct support for all modelling concepts by the language syntax)
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_red}{DAE Tools}}
-\begin{itemize}
-  \item Modelling concepts cannot be expressed directly in the programming language and have to be emulated in the API or in 
-        some other way
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Verbosity}
-\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Clean, concise, ellegant and natural way of building model descriptions: the code can be self documenting
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_red}{DAE Tools}}
-\begin{itemize}
-  \item The support for modelling concepts is much more verbose and less elegant; however, DAE Tools can generate XML+MathML
-	based model reports that can be either rendered in XHTML format using XSLT transformations (representing the code documentation)
-	or used as an XML-based model exchange language
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Maintainability \& portability}
-\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Domain-specific languages could enhance quality, productivity, reliability, maintainability and portability
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_red}{DAE Tools}}
-\begin{itemize}
-  \item 
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Simulators \& programming languages}
-\begin{block}{\textcolor{light_green}{DSL/Modelling languages}}
-\begin{itemize}
-  \item DSLs could be and often are simulator independent making a model exchange easier
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_red}{DAE Tools}}
-\begin{itemize}
-  \item Programming language dependent; however, a large number of scientific software libraries exposes its functionality
-        to Python via Python wrappers
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Need for a compiler/parser/interpreter}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Cost of designing, implementing, and maintaining a domain-specific language as well as the tools required to develop with it (IDE):
-        a compiler/lexical parser/interpreter must be developed with all burden that comes with it (such as error handling, grammar ambiguities,
-        hidden bugs etc)
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item A compiler/lexical parser/interpreter is an integral part of the programming language (c++, Python) with a robust error handling,
-        universal grammar and massively tested
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Need for a new language syntax}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Cost of learning a new language vs. its limited applicability: users are required to master a new language
-        (yet another language grammar)
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item No learning of a new language required (everything can get done in a favourite programming language)
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Interoperability with the $3^{rd}$ party software}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Increased difficulty of integrating the DSL with other components: calling external functions/libraries and interaction with
-        other software is limited by the existence of wrappers around a simulator engine (for instance some scripting languages like
-        Python or javascript)
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item Calling external functions/libraries is a natural and straightforward Interaction with other software is
-        natural and straightforward
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Runtime generation \& modification}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Models usually cannot be created in the runtime/on the fly (or at least not easily) 
-        and cannot be modified in the runtime
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item Models can be created in the runtime/on the fly and easily modified in the runtime
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Simulation setup}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Setting up a simulation (ie. the values of parameters values, initial conditions, initially active states)
-        is embedded in the language and it is typically difficult to do it on the fly or to obtain the values from some other software
-        (for example to chain several software calls where outputs of previous calls represent inputs to the subsequent ones) 
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item Setting up a simulation is done programmaticaly and the initial values can be obtained from some other software in a natural way
-        (chaining several software calls is easy since a large number of libraries make Python wrappers available)
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Operating procedures}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Simulation operating procedures are not flexible; manipulation of model parameters, variables, equations, simulation results
-        etc is limited to only those operations provided by the language 
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item Operating procedures are completely flexible (within the limits of a programming language itself)
-        and a manipulation of model parameters, variables, equations, simulation results etc can be done in any way which
-        a user cosiders suitable for his/her problem 
-\end{itemize}
-\end{block}
-\end{frame}
-
-\begin{frame}
-\frametitle{Outputs}
-\begin{block}{\textcolor{light_red}{DSL/Modelling languages}}
-\begin{itemize}
-  \item Only the type of results provided by the language/simulator is available; custom processing is usually not possible or
-        if a simulator does provide a way to build extensions it is limited to the functionality made available to them 
-\end{itemize}
-\end{block}
-
-\begin{block}{\textcolor{light_green}{DAE Tools}}
-\begin{itemize}
-  \item The results processing can be done in any way which a user considers suitable(again within the limits
-        of a programming language itself) 
-\end{itemize}
-\end{block}
-\end{frame}
+% \begin{frame}
+% \frametitle{Code generation}
+% \begin{block}{}
+% \begin{itemize}
+%   \item Model export from DAE Tools to other DSL/modelling/programming languages
+%   \begin{itemize}
+%     \item Modelica
+%     \item c99
+%   \end{itemize}
+% \end{itemize}
+% \end{block}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Model Exchange}
+% \begin{block}{}
+% \begin{itemize}
+%   \item Support for Functional Mock-up Interface for Model Exchange and Co-Simulation (FMI): https://www.fmi-standard.org 
+%   \item FMI – a tool independent standard to support both model exchange and co-simulation of dynamic models using a combination of xml-files and compiled C-code
+%   \item Still in experimental phase
+% \end{itemize}
+% \end{block}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Model reports}
+% \begin{block}{}
+% \begin{itemize}
+%   \item Automatic model documentation
+%   \item XML + MathML format
+%   \item XSL transformation used to to generate HTML code and visualize reports 
+%   \item Two types:
+%   \begin{itemize}
+%     \item Model description report (contains model definition)
+%     \item Runtime report with all values and equations expanded (contains definition of the simulation)
+%   \end{itemize}
+% \end{itemize}
+% \end{block}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Model reports (cont'd)}
+% \includegraphics<1>[height=0.7\paperheight]{../_static/model_report.png}
+% \includegraphics<2>[height=0.7\paperheight]{../_static/runtime_model_report.png}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Multi-domain}
+% \begin{block}{}
+% \begin{itemize}
+%   \item From chemical processing industry to biological neural networks
+%   \item DAE Tools is not a DSL but defines the basic modelling concepts such as models, parameters, variables, various types of equations 
+%         (ordinary, differential, partial differential, discontinuous), state transition networks etc. that can be used as building blocks 
+%         for a specific domain
+%   \item Example: a reference implementation simulator for NineML (xml-based modelling language for describing networks of spiking neurons)
+%   \item The key concepts from NineML are based on DAE Tools concepts: Neurone, Synapse, Population of neurones, Layers, Projections etc
+% \end{itemize}
+% \end{block}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{DAE Plotter}
+% \begin{columns}
+%   \begin{column}{0.5\paperwidth}
+%     \begin{center}
+%       \begin{itemize}
+% 	\item 2D plots (Matplotlib)
+% 	\item Animated 2D plots
+% 	\item 3D plots (Mayavi)
+%       \end{itemize}
+%     \end{center}
+%     \begin{center}
+%       \includegraphics[width=0.35\paperwidth]{../_static/daeplotter.png}
+%     \end{center}
+%   \end{column}
+%   \begin{column}{0.5\paperwidth}
+%     \begin{center}
+%       \includegraphics[width=0.35\paperwidth]{../_static/sample_2d_plot.png}
+%     \end{center}
+%     \begin{center}
+%       \includegraphics[width=0.3\paperwidth]{../_static/sample_3d_plot.png}
+%     \end{center}
+%   \end{column}
+% \end{columns}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Solvers}
+% \begin{block}{}
+% Supported DAE solvers@
+% \begin{itemize}
+%   \item Sundials IDAS ({\small https://computation.llnl.gov/casc/sundials/main.html})
+% \end{itemize}
+% \end{block}
+% 
+% \begin{block}{}
+% Supported FE libraries:
+% \begin{itemize}
+%   \item deal.II ({\small http://dealii.org})
+% \end{itemize}
+% \end{block}
+% 
+% \begin{block}{}
+% Supported optimization solvers:
+% \begin{itemize}
+%   \item IPOPT ({\small https://projects.coin-or.org/Ipopt}) 
+%   \item Bonmin ({\small https://projects.coin-or.org/Bonmin}) 
+%   \item NLOPT ({\small http://ab-initio.mit.edu/wiki/index.php/NLopt}) 
+% \end{itemize}
+% \end{block}
+% \end{frame}
+% 
+% \begin{frame}
+% \frametitle{Solvers}
+% \begin{block}{}
+% Supported LA solvers:
+% \begin{itemize}
+%   \item Sundials dense LU, Lapack
+%   \item Trilinos Amesos ({\small http://trilinos.sandia.gov/packages/amesos}) 
+%   \item Trilinos AztecOO ({\small http://trilinos.sandia.gov/packages/aztecoo}) 
+%   \item SuperLU SuperLU-MT ({\small http://crd.lbl.gov/~xiaoye/SuperLU/index.html}) 
+%   \item Umfpack ({\small http://www.cise.ufl.edu/research/sparse/umfpack}) 
+%   \item MUMPS ({\small http://graal.ens-lyon.fr/MUMPS})
+%   \item CUSP ({\small http://code.google.com/p/cusp-library}) 
+%   \item Intel Pardiso ({\small http://software.intel.com/en-us/articles/intel-mkl})
+% \end{itemize}
+% \end{block}
+% \end{frame}
 
 \section{Architecture}
 
-\subsection{Overview}
-\begin{frame}
-\frametitle{Available modules}
-\begin{block}{}
-\begin{itemize}
-  \item pyDAE:
-  \begin{itemize}
-    \item pyCore (key modelling concepts)
-    \item pyActivity (simulation, optimization)
-    \item pyDataReporting (results handling)
-    \item pyIDAS (DAE solver)
-    \item pyUnits ($unit$ and $quantity$ concepts)
-  \end{itemize}
-\end{itemize}
-\end{block}
-\begin{block}{}
-\begin{itemize}
-  \item FE Solvers: 
-  \begin{itemize}
-    \item pyDealII
-  \end{itemize}
-\end{itemize}
-\end{block}
+\begin{frame}[plain]{The fundamental concepts/software interfaces}
+\begin{columns}
+    \begin{column}{0.28\paperwidth}
+        \scriptsize{
+        \begin{itemize}
+            \item Concepts/Interfaces:
+                \begin{itemize}
+                    \tiny{
+                        \item \textcolor{sthlmRed}{daeModel\_t}
+                        \item \textcolor{sthlmRed}{daeSimulation\_t}
+                        \item \textcolor{sthlmRed}{daeOptimization\_t}
+                        \item \textcolor{sthlmRed}{daeBlock\_t}
+                        \item \textcolor{sthlmRed}{daeDAESolver\_t}
+                        \item \textcolor{sthlmRed}{daeLASolver\_t}
+                        \item \textcolor{sthlmRed}{daeDataReporter\_t}
+                        \item \textcolor{sthlmRed}{daeBlock\_t}
+                    }
+                \end{itemize}
+            \item In 6 packages:
+                \begin{itemize}
+                \tiny{
+                        \item \alert{core}
+                        \item \alert{activity}
+                        \item \alert{datareporting}
+                        \item \alert{solvers}
+                        \item \alert{logging}
+                        \item \alert{units}
+                    }
+                \end{itemize}
+        \end{itemize}
+        }
+     \end{column}
+     
+     \begin{column}{0.72\paperwidth}
+         \begin{center}
+             \begin{figure}
+               \includegraphics[width=0.68\paperwidth]{daetools-architecture.png}      
+               \caption{The architecture of \alert{DAE Tools}.}
+            \end{figure}
+         \end{center}
+     \end{column}
+   \end{columns}
 \end{frame}
 
-\begin{frame}
-\frametitle{Available modules (cont'd)}
-\begin{block}{}
-\begin{itemize}
-  \item LA Solvers: 
-  \begin{itemize}
-    \item pySuperLU
-    \item pySuperLU\_MT
-    \item pyTrilinos (Amesos, AztecOO)
-    \item pyIntelPardiso
-  \end{itemize}
-\end{itemize}
-\end{block}
-\begin{block}{}
-\begin{itemize}
-  \item NLP/MINLP Solvers: 
-  \begin{itemize}
-    \item pyIPOPT
-    \item pyBONMIN
-    \item pyNLOPT
-  \end{itemize}
-\end{itemize}
-\end{block}
+\begin{frame}{Package \textsc{core}}
+\scriptsize
+{
+\begin{table}
+  \caption{The key modelling concepts in the \alert{core} package.}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daeVariableType\_t}} & Defines a variable type that has the units, lower and upper bounds, a default value and 
+                                  an absolute tolerance \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeDomain\_t}} & Defines ordinary arrays or spatial distributions such as structured and unstructured grids \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeParameter\_t}} & Defines time invariant quantities that do not change during a simulation \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeVariable\_t}} & Defines time varying quantities that change during a simulation \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daePort\_t}} & Defines connection points between model instances for exchange of continuous quantities \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeEventPort\_t}} & Defines connection points between model instances for exchange of discrete messages/events \tabularnewline
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
 \end{frame}
 
-\begin{frame}
-\frametitle{Available components}
-\begin{block}{}
-\begin{itemize}
-  \item Model
-  \item Simulation
-  \item Optimization
-  \item DAE solver
-  \item LA solver
-  \item NLP solver
-  \item Log
-  \item Data reporter
-  \item Data receiver
-\end{itemize}
-\end{block}
+\begin{frame}{Package \textsc{core} (cont'd)}
+\scriptsize
+{
+\begin{table}
+  \caption{The key modelling concepts in the \alert{core} package (cont'd).}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daePortConnection\_t}} & Defines connections between two ports \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeEventPortConnection\_t}} & Defines connections between two event ports \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeEquation\_t}} & Defines model equations given in an implicit/acausal form \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeSTN\_t}} & Defines state transition networks used to model discontinuous equations \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeOnConditionActions\_t}} & Defines actions to be performed when a specified condition is satisfied \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeOnEventActions\_t}} & Defines actions to be performed when an event is triggered on the specified event port \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeState\_t}} & Defines a state in a state transition network \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeModel\_t}} & Represents a model \tabularnewline
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
 \end{frame}
 
-\begin{frame}
-\frametitle{Available components (cont'd)}
-\begin{center}
-  \includegraphics[height=0.7\paperheight]{../_static/daetools-architecture.png}
-\end{center}
+% \begin{frame}{Package core (cont'd)}
+%     \begin{center}
+%         \includegraphics[width=0.9\paperwidth]{Supplemental_Figure_S1.png}      
+%     \end{center}
+% \end{frame}
+
+\begin{frame}{Package \textsc{core} - interface implementations}
+    \begin{center}
+        \begin{figure}
+            \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S3.png}      
+            %\caption{\alert{core} package interface implementations.}
+        \end{figure}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Package \textsc{activity}}
+\scriptsize
+{
+\begin{table}
+  \caption{The key concepts in the \alert{activity} package.}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daeSimulation\_t}} & Defines ... \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeOptimisation\_t}} &  \tabularnewline
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
+\end{frame}
+
+\begin{frame}{Package \textsc{solvers}}
+\scriptsize
+{
+\begin{table}
+  \caption{The key concepts in the \alert{solvers} package.}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daeDAESolver\_t}} & Defines ... \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeLASolver\_t}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeNLPSolver\_t}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeIDALASolver\_t}} &  \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daeMatrix\_t<typename FLOAT>}} &  \tabularnewline
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
+\end{frame}
+
+\begin{frame}{Package \textsc{solvers} - interface implementations}
+    \begin{center}
+        \begin{figure}
+            \includegraphics[width=0.75\paperwidth]{Supplemental_Figure_S5.png}      
+            %\caption{\alert{solvers} package interface implementations.}
+        \end{figure}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Package \textsc{datareporting}}
+\scriptsize
+{
+\begin{table}
+  \caption{The key concepts in the \alert{datareporting} package.}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daeDataReporter\_t}} & Defines ... \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeDataReceiver\_t}} &  \tabularnewline
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
+\end{frame}
+
+\begin{frame}{Package \textsc{datareporting} - interface implementations}
+    \begin{center}
+        \includegraphics[width=0.8\paperwidth]{Supplemental_Figure_S6.png}      
+    \end{center}
+\end{frame}
+
+\begin{frame}{Package \textsc{log} and its interface implementations}
+\scriptsize
+{
+\begin{table}
+  \caption{The key concepts in the \alert{log} package.}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{daeLog\_t}} & Defines ... \tabularnewline 
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
+    \begin{center}
+        \includegraphics[width=0.6\paperwidth]{Supplemental_Figure_S7.png}      
+    \end{center}
+\end{frame}
+
+\begin{frame}{Package \textsc{units}}
+\scriptsize
+{
+\begin{table}
+  \caption{The key concepts in the \alert{units} package.}
+  \begin{tabularx}{\linewidth}{l>{\raggedright}X}
+    \toprule
+    \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
+    \midrule
+    \textcolor{sthlmRed}{\textit{unit}} & Defines ... \tabularnewline 
+    \textcolor{sthlmRed}{\textit{quantity}} &  \tabularnewline
+    \bottomrule
+  \end{tabularx}
+\end{table}
+}
+\end{frame}
+
+\section{Developing models with DAE Tools} 
+
+\begin{frame}{Overview}
 \end{frame}
 
 \section{Use Cases} 
 
-\subsection{Use Case 1 - High level modelling language}
-\begin{frame}
-\frametitle{}
+\begin{frame}{Use Case 1 - High-Level Modelling Language}
 \end{frame}
 
-\subsection{Use Case 2 - Low level DAE solver}
-\begin{frame}
-\frametitle{}
+\begin{frame}{Use Case 2 - Low-Level DAE Solver}
 \end{frame}
 
-\subsection{Use Case 3 - Embedded simulator (back end)}
-\begin{frame}
-\frametitle{}
+\begin{frame}{Use Case 3 - Embedded Simulator (back end)}
+\end{frame}
+
+\begin{frame}{Use Case 4 - Web Application / Web Service}
 \end{frame}
 
 % \appendix
