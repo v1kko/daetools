@@ -13,12 +13,13 @@
 % \bibliographystyle{apalike}
 \newcommand{\skipcite}[1]{} 
 
+\usepackage{colortbl}
 \usepackage{graphbox}
 \usepackage[absolute,overlay]{textpos}
 \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english,serbian]{babel}
-\usepackage{color}
+\usepackage{xcolor}
 \usepackage{chronology}
 \renewcommand{\event}[3][e]{%
   \pgfmathsetlength\xstop{(#2-\theyearstart)*\unit}%
@@ -39,16 +40,12 @@
 \usepackage{placeins}
 \usepackage{caption}
 \usepackage{listings}
-\usepackage{xcolor}
 % \usepackage{droidmono}
 \usepackage{subscript}
 
 % \usecolortheme{default}
 % \usefonttheme{professionalfonts}
 % \usefonttheme[onlymath]{serif}
-
-\definecolor{light_red}{RGB}{255, 100, 100}
-\definecolor{light_green}{RGB}{100, 255, 100}
 
 %-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 %        BEAMER OPTIONS
@@ -65,6 +62,8 @@
 \definecolor{aogreen}{rgb}{0.0, 0.5, 0.0}
 \definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
 \definecolor{battleshipgrey}{rgb}{0.52, 0.52, 0.51}
+\definecolor{light_red}{RGB}{255, 220, 220}
+\definecolor{light_green}{RGB}{220, 255, 220}
 
 \lstset{
     language=Python,
@@ -213,7 +212,8 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
         \end{itemize}
     \item DAE Tools \alert{is}:
         \begin{itemize}
-            \item A \alert{hybrid approach} between modelling and general-purpose programming languages 
+            \item A \alert{hybrid approach} between \alert{modelling} and \alert{general purpose} programming languages,
+                  \alert{combining the strengths of both approaches} into a single one
             \item An \alert{architectural design of software components}
                   providing an API for:
                 \begin{itemize}
@@ -255,16 +255,16 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
 \end{frame}
 
 \begin{frame}{Types of systems that can be modelled}
-  \alert{Initial value problems of implicit form}, 
-  (described by systems of linear, non-linear, and (partial-)differential algebraic equations).
-\begin{itemize}
-  \item \alert{Continuous} with some elements of \alert{event-driven} systems 
-        (discontinuous equations, state transition networks and discrete events) 
-  \item \alert{Steady-state} or \alert{dynamic}
-  \item With \alert{lumped} or \alert{distributed} parameters 
-        (finite difference, finite volume and finite element methods)
-  \item Only \alert{index-1} DAE systems at the moment
-\end{itemize}
+  \alert{Initial value problems of implicit form}:
+    \begin{itemize}
+      \item Described by \alert{systems of linear, non-linear, and (partial-)differential} algebraic equations
+      \item \alert{Continuous} with some elements of \alert{event-driven} systems 
+            (discontinuous equations, state transition networks and discrete events) 
+      \item \alert{Steady-state} or \alert{dynamic}
+      \item With \alert{lumped} or \alert{distributed} parameters 
+            (finite difference, finite volume and finite element methods)
+      \item Only \alert{index-1} DAE systems at the moment
+    \end{itemize}
 \end{frame}
 
 \section{Motivation}
@@ -294,9 +294,9 @@ In general, two scenarios:
 \begin{frame}{Why \textsc{yet another} modelling software?}
 Currently available options:
 \begin{enumerate}
-   \item \alert{Modelling languages} (domain-specific or multi-domain) 
-         (Modelica \skipcite{Fritzson-and-Engelson-1998}, Ascend \skipcite{Piela-etal-1991}, gPROMS \skipcite{Barton-and-Pantelides-1994}, 
-         GAMS \skipcite{Brook-etal-1988}, Dymola \skipcite{Elmqvist-1978}, APMonitor \skipcite{APMonitor-2014})
+   \item \alert{Modelling languages} (domain-specific or multi-domain):
+         Modelica \skipcite{Fritzson-and-Engelson-1998}, Ascend \skipcite{Piela-etal-1991}, gPROMS \skipcite{Barton-and-Pantelides-1994}, 
+         GAMS \skipcite{Brook-etal-1988}, Dymola \skipcite{Elmqvist-1978}, APMonitor \skipcite{APMonitor-2014}
    \item \alert{General-purpose programming languages}:
       \begin{itemize}
           \item Lower level third-generation languages such as C, C++ and Fortran
@@ -321,8 +321,9 @@ Currently available options:
     \end{enumerate}
 \end{frame}
 
-\begin{frame}{Additional features}
+\begin{frame}{Additional \textsc{DAE Tools} features}
     \begin{itemize}
+        \item Support for \alert{multiple platforms/architectures} 
         \item Support for the \alert{automatic differentiation} (ADOL-C)
         \item Support for the \alert{sensitivity analysis} through the auto-differentiation capabilities
         \item Support for the \alert{parallel} computation (OpenMP, GPGPU, MPI)
@@ -336,59 +337,69 @@ Currently available options:
 
 \begin{frame}{The \textsc{hybrid} approach}
   \begin{itemize}
-    \item DAE Tools approach is a type of a hybrid approach:
-        \begin{itemize}
-            \item Applies general-purpose programming languages such as C++ and Python
-        \end{itemize}
-    \item But provides:
-        \begin{itemize}
-            \item Application Programming Interface (API) that resembles a syntax of modelling languages as much as possible
-        \end{itemize}
-    \item And takes advantage of the higher level languages to:
-        \begin{itemize}
-            \item Access the low-level functions in the operating system
-            \item Access a large number of standard and third-party libraries
-        \end{itemize}
+    \item DAE Tools approach is a \alert{type of a hybrid approach}
+    \item Combines strengths of \alert{modelling} and \alert{general purpose} programming languages:
+        \begin{enumerate}
+            \item \alert{Developed in C++} with the \alert{Python bindings}
+            \item Provides \alert{API} (Application Programming Interface) that \alert{resembles a syntax of modelling languages}
+                  as much as possible
+            \item \alert{Takes advantage of the higher level languages} for:
+                \begin{itemize}
+                    \item Model specification, simulation setup, operating procedures
+                    \item Access to the operating system 
+                    \item Access to the standard/third-party libraries
+                \end{itemize}
+        \end{enumerate}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{The \textsc{hybrid} approach (cont'd)}
-  \begin{itemize}
-     \item To illustrate the \alert{hybrid} approach, consider a comparison between:
-        \begin{itemize}
-            \item Modelica grammar
-            \item gPROMS grammar
-            \item DAE Tools API    
-        \end{itemize}
-     \item for a very simple dynamics model:
-        \begin{itemize}
-            \item A cylindrical tank containing a liquid inside with an inlet and an outlet flow where 
-                  the outlet flowrate depends on the liquid level in the tank
-        \end{itemize}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}[plain]{The \textsc{hybrid} approach (\textsc{Model. lang.} vs. \textsc{DAE Tools})}
+\begin{frame}[plain]{The \textsc{hybrid} approach (cont'd)}
     \begin{columns}[c]
-      \begin{column}{0.5\paperwidth}
-        \begin{center}
-          {\scriptsize \textcolor{sthlmRed}{gPROMS}:} \includegraphics[align=c, width=0.32\paperwidth]{gproms_model.png}
-        \end{center}
+      \begin{column}{0.7\paperwidth}
+        {\small
+         \begin{itemize}
+            \item \textcolor{sthlmRed}{Modelica}/\textcolor{sthlmRed}{gPROMS} grammars vs. \textcolor{sthlmRed}{DAE Tools API} 
+            \item A simple model: \newline
+                    {\scriptsize
+                        Cylindrical tank containing a liquid with an inlet and an outlet flow;  
+                        the outlet flowrate depends on the liquid level in the tank
+                    }
+        \end{itemize}
+        }
       \end{column}
-      \begin{column}{0.5\paperwidth}
+      
+      \begin{column}{0.3\paperwidth}
         \begin{center}
-          {\scriptsize \textcolor{sthlmRed}{Modelica}:} \includegraphics[align=c, width=0.32\paperwidth]{modelica_model.png}
+          \includegraphics[align=c, width=0.17\paperwidth]{buffer_tank.png}
         \end{center}
       \end{column}
     \end{columns}
-    
+
+    \begin{columns}[b]
+      \begin{column}{0.5\paperwidth}
+        \begin{center}
+           \includegraphics[align=c, width=0.35\paperwidth]{gproms_model.png} \par
+           {\scriptsize \textcolor{sthlmRed}{gPROMS grammar}}
+        \end{center}
+      \end{column}
+      \begin{column}{0.5\paperwidth}
+        \begin{center}
+           \includegraphics[align=c, width=0.35\paperwidth]{modelica_model.png} \par
+           {\scriptsize \textcolor{sthlmRed}{Modelica grammar}} 
+        \end{center}
+      \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{The \textsc{hybrid} approach (cont'd)}
     \begin{center}
-      {\scriptsize \textcolor{sthlmRed}{DAE Tools}:} \includegraphics[align=c, width=0.6\paperwidth]{daetools_model.png}
+       \includegraphics[align=c, width=0.70\paperwidth]{daetools_model.png} \par
+       {\scriptsize \textcolor{sthlmRed}{DAE Tools API}}
     \end{center}
 \end{frame}
 
 
-\begin{frame}[plain]{The \textsc{hybrid} approach (\textsc{Model. lang.} vs. \textsc{DAE Tools})}
+\begin{frame}[plain]{The \textsc{hybrid} approach (cont'd)}
 \tiny
 {
 \begin{table}
@@ -396,52 +407,52 @@ Currently available options:
     \toprule
     \textcolor{sthlmRed}{\textbf{Modelling language approach}} & \textcolor{sthlmRed}{\textbf{DAE Tools approach}} \tabularnewline
     \midrule
-    Solutions expressed in the idiom and at the level of abstraction of the problem domain
+    
+    \cellcolor{light_green}Solutions expressed in the idiom and at the level of abstraction of the problem domain
       &
-    Must be emulated in the API or in some other way 
+    \cellcolor{light_red}Must be emulated in the API or in some other way 
     \tabularnewline \midrule
     
-    Clean and concise way of building models
+    \cellcolor{light_green}Clean and concise way of building models
       &
-    Verbose and less elegant
+    \cellcolor{light_red}Verbose and less elegant
     \tabularnewline \midrule
     
-    Could be and often are simulator independent
+    \cellcolor{light_green}Could be and often are simulator independent
       &
-    Programming language dependent 
+    \cellcolor{light_red}Simulator dependent (but with code-generation) 
     \tabularnewline \midrule
     
-    Cost of designing, implementing, and maintaining a language and 
-    a compiler/lexical parser/interpreter
+    \cellcolor{light_red}Cost of designing, implementing, and maintaining a language and 
+    a compiler/lexical parser/interpreter, error handling and grammar ambiguities
       &
-    A compiler/lexical parser/interpreter is an integral part of the programming language (c++, Python) with a
+    \cellcolor{light_green}A compiler/lexical parser/interpreter is an integral part of C++/Python with a
     robust error handling, universal grammar and massively tested 
     \tabularnewline \midrule
     
-    Cost of learning a new language vs. its limited applicability (yet another language grammar)
+    \cellcolor{light_red}Cost of learning a new language vs. its limited applicability (yet another language grammar)
       &
-    No learning of a new language required
+    \cellcolor{light_green}No learning of a new language required
     \tabularnewline \midrule
     
-    Increased difficulty of integrating the DSL with other components
+    \cellcolor{light_red}Difficult to integrate with other components
       &
-    Calling external functions/libraries is a built-in feature 
+    \cellcolor{light_green}Calling external libraries is a built-in feature 
     \tabularnewline \midrule
     
-    Models usually cannot be created/modified in the runtime/on the fly (or at least not easily)
+    \cellcolor{light_red}Models usually cannot be created/modified in the runtime (or at least not easily)
       &
-    Models can be created in the runtime/on the fly and easily modified in the runtime 
+    \cellcolor{light_green}Models can be created/modified in the runtime 
     \tabularnewline \midrule
     
-    Setting up a simulation is embedded in the language and it is typically difficult to do it on the fly 
-    or to obtain the values from other software
+    \cellcolor{light_red}Setting up a simulation embedded in the language; difficult to obtain initial values from other software
       &
-    Setting up a simulation is done programmaticaly and the initial values can be obtained from other software
+    \cellcolor{light_green}Setting up a simulation done programmaticaly and the initial values can be obtained from other software
     \tabularnewline \midrule
     
-    Simulation operating procedures are not flexible
+    \cellcolor{light_red}Simulation operating procedures limited to the options allowed by the langueage grammar
       &
-    Operating procedures are completely flexible (within the limits of a programming language itself)
+    \cellcolor{light_green}Operating procedures completely flexible (within the limits of a programming language itself)
     \tabularnewline
     
     \bottomrule
@@ -452,59 +463,61 @@ Currently available options:
 
 \begin{frame}{The \textsc{object-oriented} approach}
 \begin{itemize}
-  \item Everything is an \alert{object}: models, parameters, variables, equations, simulations, solvers, ... 
+  \item Everything is an \alert{object} (variables, equations, models ...)
+  \item All objects can be \alert{manipulated} in \alert{the runtime}
+  \item \alert{All} C++/Python \alert{object-oriented concepts supported}
+  \item \alert{Exception}: all declared DAE Tools objects \alert{remain public}
   \item Models, simulations, optimisations:
      \begin{itemize}
-        \item Classes derived from the corresponding base classes
-        \item Inherit the common functionality
-        \item Perform the required functionality in overloaded functions
+        \item Classes \alert{derived from} the corresponding \alert{base classes}
+        \item \alert{Inherit} the \alert{common functionality} from the base classes
+        \item Perform the \alert{functionality} in \alert{overloaded functions}
      \end{itemize}
-  \item \alert{Hierarchical model decomposition}:
+  \item The \alert{hierarchical model decomposition} possible:
     \begin{itemize}
         \item Models can contain instances of other models
-        \item Allows creation of complex, re-usable model definitions
-        \item Multi-scale modelling
-    \end{itemize}
-  \item All C++/Python \alert{object-oriented} concepts supported, but:
-    \begin{itemize}
-      \item Derived classes inherit all declared DAE Tools objects  
-      \item All declared DAE Tools objects are public
+        \item Complex, re-usable model definitions can be created
+        \item Models at different scales can be loosely coupled %(multi-scale modelling)
     \end{itemize}
 \end{itemize}
 \end{frame}
 
 \begin{frame}{The \textsc{equation-oriented} (\textsc{acausal}) approach}
 \begin{itemize}
-  \item Equations given in an implicit form (as a residual)
+  \item \alert{Equations given in an implicit form} (as a residual)
     \begin{center}
       $F(\dot {x}, x, y, p) = 0$
     \end{center}
-  \item Input-Output causality is not fixed:
-  \begin{itemize}
-    \item Increased model re-use
-    \item Support for different simulation scenarios (based on a single model) by specifying different degrees of freedom
-  \end{itemize}
-  \item For instance, equation given in the following form:
-    \begin{center}
-      $x_1 + x_2 + x_3 = 0$
-    \end{center}
-    can be used to determine either $x_1$, $x_2$ or $x_3$ depending on what combination of variables is known:
-    \begin{center}
-      $x_1 = -x_2 - x_3 \; or \;  
-      x_2 = -x_1 - x_3 \; or \; 
-      x_3 = -x_1 - x_2$
-    \end{center}
+  \item \alert{Input-Output causality} is \alert{not fixed}:
+    \begin{itemize}
+        \item Increased model re-use
+        \item Support for \alert{different simulation scenarios} (based on a single model) by specifying different degrees of freedom
+    \end{itemize}
+  \item An example:
+    \begin{itemize}
+        \item The equation given in the following form:
+            \begin{center}
+                $x_1 + x_2 + x_3 = 0$
+            \end{center}
+        \item Can be used to determine either $x_1$, $x_2$ or $x_3$ depending on what combination of variables is known:
+            \begin{center}
+                $x_1 = -x_2 - x_3, \;$ \alert{or}  $\;$
+                $x_2 = -x_1 - x_3, \;$ \alert{or}  $\;$
+                $x_3 = -x_1 - x_2$
+            \end{center}
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Separation of the model definition from its applications}
+\begin{frame}{Separation of \textsc{model definition} from its \textsc{applications}}
 \begin{itemize}
-  \item The structure of the model (parameters, variables, equations etc.) given in the model classes ($daeModel$, $daeFiniteElementModel$) 
-  \item The runtime information in the simulation class ($daeSimulation$)
-  \item Single model definition, but:
+  \item \alert{Model structure} specified in the \alert{model class}
+  \item \alert{Runtime information} specified in the \alert{simulation class}
+  \item \alert{Solvers/auxiliary objects} specified in the \alert{main program}
+  \item \alert{Single model definition}, but \alert{one or more}:
   \begin{itemize}
-    \item One or more different simulation scenarios
-    \item One or more optimization scenarios
+    \item Different \alert{simulation scenarios}
+    \item Different \alert{optimization scenarios}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -514,9 +527,9 @@ Currently available options:
 \begin{frame}[plain]{The fundamental concepts/software interfaces}
 \begin{columns}
     \begin{column}{0.28\paperwidth}
-        \scriptsize{
+        \tiny{
         \begin{itemize}
-            \item Concepts/Interfaces:
+            \item The main concepts:
                 \begin{itemize}
                     \tiny{
                         \item \textcolor{sthlmRed}{daeModel\_t}
@@ -588,7 +601,7 @@ Currently available options:
     \midrule
     \textcolor{sthlmRed}{\textit{daePortConnection\_t}} & Defines connections between two ports \tabularnewline 
     \textcolor{sthlmRed}{\textit{daeEventPortConnection\_t}} & Defines connections between two event ports \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeEquation\_t}} & Defines model equations given in an implicit/acausal form \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeEquation\_t}} & Defines model equations given in an implicit form \tabularnewline 
     \textcolor{sthlmRed}{\textit{daeSTN\_t}} & Defines state transition networks used to model discontinuous equations \tabularnewline
     \textcolor{sthlmRed}{\textit{daeOnConditionActions\_t}} & Defines actions to be performed when a specified condition is satisfied \tabularnewline
     \textcolor{sthlmRed}{\textit{daeOnEventActions\_t}} & Defines actions to be performed when an event is triggered on the specified event port \tabularnewline
@@ -624,8 +637,8 @@ Currently available options:
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
     \midrule
-    \textcolor{sthlmRed}{\textit{daeSimulation\_t}} & Defines ... \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeOptimisation\_t}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeSimulation\_t}} & Defines a functionality used to perfom simulations \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeOptimisation\_t}} & Defines a functionality used to perform optimisations \tabularnewline
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -641,12 +654,12 @@ Currently available options:
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
     \midrule
-    \textcolor{sthlmRed}{\textit{daeDAESolver\_t}} & Defines ... \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeLASolver\_t}} &  \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeNLPSolver\_t}} &  \tabularnewline
-    \textcolor{sthlmRed}{\textit{daeIDALASolver\_t}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeDAESolver\_t}} & Defines a functionality for the solution of DAE systems \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeLASolver\_t}} & Defines a functionality for the solution of LA systems \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeNLPSolver\_t}} & Defines a functionality for the solution of (MI)NLP problems \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeIDALASolver\_t}} & Sundials IDAS LA solver interface \tabularnewline
     \midrule
-    \textcolor{sthlmRed}{\textit{daeMatrix\_t<typename FLOAT>}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeMatrix\_t<typename FLOAT>}} & Defines a common matrix functionality \tabularnewline
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -671,8 +684,8 @@ Currently available options:
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
     \midrule
-    \textcolor{sthlmRed}{\textit{daeDataReporter\_t}} & Defines ... \tabularnewline 
-    \textcolor{sthlmRed}{\textit{daeDataReceiver\_t}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{daeDataReporter\_t}} & Defines a functionality/data structures used by a simulation to report the simulation results \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeDataReceiver\_t}} & Defines a functionality/data structures for accessing the simulation results \tabularnewline
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -694,7 +707,7 @@ Currently available options:
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
     \midrule
-    \textcolor{sthlmRed}{\textit{daeLog\_t}} & Defines ... \tabularnewline 
+    \textcolor{sthlmRed}{\textit{daeLog\_t}} & Defines a functionality for sending messages from a simulation \tabularnewline 
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -713,8 +726,8 @@ Currently available options:
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
     \midrule
-    \textcolor{sthlmRed}{\textit{unit}} & Defines ... \tabularnewline 
-    \textcolor{sthlmRed}{\textit{quantity}} &  \tabularnewline
+    \textcolor{sthlmRed}{\textit{unit}} & Defines SI base/derived units \tabularnewline 
+    \textcolor{sthlmRed}{\textit{quantity}} & Defines a numerical value in terms of a unit of measurement \tabularnewline
     \bottomrule
   \end{tabularx}
 \end{table}
