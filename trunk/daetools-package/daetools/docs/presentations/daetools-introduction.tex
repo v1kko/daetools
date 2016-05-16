@@ -152,14 +152,15 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{1 April 2016} 
+\date{16 May 2016} 
 
 \hypersetup{
-pdfauthor = {Dragan D. Nikolić: dnikolic@daetools.com},
-pdfsubject = {},
-pdfkeywords = {},
+pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
+pdfsubject = {Introduction to DAE Tools},
+pdfkeywords = {Modelling, Simulation, Optimisation, Modelling languages, Model exchange, Domain
+               specific languages, Equation-based, DAE, Code generation},
 pdfmoddate= {D:\pdfdate},
-pdfcreator = {}
+pdfcreator = {Dragan Nikolić}
 }
 
 % \titlegraphic{\includegraphics{../[d][a][e]_Tools_project.png}}
@@ -191,11 +192,11 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
 \begin{itemize}
   \item Areas of application:
     \begin{itemize}
-      \item Initially: chemical process industry (mass, heat and momentum transfers, chemical reactions, 
-                                                  separation processes, thermodynamics, electro-chemistry)
+      \item Initially: \alert{chemical process industry} (mass, heat and momentum transfers, chemical reactions, 
+                                                          separation processes, thermodynamics, electro-chemistry)
       \item Nowadays: \alert{multi-domain}
     \end{itemize}
-  \item Free/Open source software (\alert{GNU GPL}) \includegraphics[align=c,height=1.3em]{gnu_gpl3.png}
+  \item \alert{Free/Open source software} (GNU GPL) \includegraphics[align=c,height=1.3em]{gnu_gpl3.png}
   \item \alert{Cross-platform} \includegraphics[align=c,height=1.3em]{linux.png} 
                                \includegraphics[align=c,height=1.3em]{windows.png} 
                                \includegraphics[align=c,height=1.3em]{macos.png}
@@ -205,16 +206,14 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
 
 \begin{frame}{What is DAE Tools? (cont'd)} 
   \begin{itemize}
-    \item DAE Tools \alert{is not}:
+    \item \textsc{DAE Tools} \alert{is not}:
         \begin{itemize}
-            \item A modelling language (such as Modelica, gPROMS, ...)
+            \item A modelling language (such as Modelica)
             \item An integrated software suite of data structures and routines for scientific applications (such as PETSc, Sundials, ...)
         \end{itemize}
-    \item DAE Tools \alert{is}:
+    \item \textsc{DAE Tools} \alert{is}:
         \begin{itemize}
-            \item A \alert{hybrid approach} between \alert{modelling} and \alert{general purpose} programming languages,
-                  \alert{combining the strengths of both approaches} into a single one
-            \item An \alert{architectural design of software components}
+            \item An \alert{architectural design of interdependent software components}
                   providing an API for:
                 \begin{itemize}
                     \item \alert{Model specification}
@@ -224,6 +223,8 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
                     \item \alert{Code generation} and \alert{model exchange}
                 \end{itemize}
         \end{itemize}
+    \item \textsc{DAE Tools} apply a \alert{hybrid approach} between \alert{modelling} and \alert{general purpose} programming languages,
+          \alert{combining the strengths of both approaches} into a single one
   \end{itemize}
 \end{frame}
 
@@ -292,19 +293,27 @@ In general, two scenarios:
 \end{frame}
 
 \begin{frame}{Why \textsc{yet another} modelling software?}
-Currently available options:
+Current approaches to mathematical modelling:
 \begin{enumerate}
-   \item \alert{Modelling languages} (domain-specific or multi-domain):
-         Modelica \skipcite{Fritzson-and-Engelson-1998}, Ascend \skipcite{Piela-etal-1991}, gPROMS \skipcite{Barton-and-Pantelides-1994}, 
-         GAMS \skipcite{Brook-etal-1988}, Dymola \skipcite{Elmqvist-1978}, APMonitor \skipcite{APMonitor-2014}
-   \item \alert{General-purpose programming languages}:
+   \item Use of \alert{modelling languages} (domain-specific or multi-domain):
+         \alert{Modelica}\skipcite{Fritzson-and-Engelson-1998}, 
+         \alert{Ascend}\skipcite{Piela-etal-1991}, 
+         \alert{gPROMS}\skipcite{Barton-and-Pantelides-1994}, 
+         \alert{Dymola}\skipcite{Elmqvist-1978}, 
+         \alert{APMonitor}\skipcite{APMonitor-2014}
+   \item Use of \alert{general-purpose programming languages}:
       \begin{itemize}
           \item Lower level third-generation languages such as C, C++ and Fortran
-                (PETSc \skipcite{petsc}, SUNDIALS \skipcite{Hindmarsh-etal-2005})
-          \item Higher level fourth-generation languages such as Python (NumPy, SciPy, Assimulo \skipcite{Assimulo-2015}), Julia etc.
+                (\alert{PETSc}\skipcite{petsc}, 
+                 \alert{SUNDIALS}\skipcite{Hindmarsh-etal-2005})
+          \item Higher level fourth-generation languages such as \alert{Python} (NumPy, SciPy, Assimulo\skipcite{Assimulo-2015}), 
+                                                                 \alert{Julia} etc.
           \item Multi-paradigm numerical languages 
-                (Matlab \skipcite{matlab}, Mathematica \skipcite{mathematica}, Maple \skipcite{maple}, 
-                Scilab \skipcite{scilab}, and GNU Octave \skipcite{octave})
+                (\alert{Matlab}\skipcite{matlab}, 
+                 \alert{Mathematica}\skipcite{mathematica}, 
+                 \alert{Maple}\skipcite{maple}, 
+                 \alert{Scilab}\skipcite{scilab}, and 
+                 \alert{GNU Octave}\skipcite{octave})
       \end{itemize}
  \end{enumerate}
 \end{frame}
@@ -466,7 +475,9 @@ Currently available options:
   \item Everything is an \alert{object} (variables, equations, models ...)
   \item All objects can be \alert{manipulated} in \alert{the runtime}
   \item \alert{All} C++/Python \alert{object-oriented concepts supported}
-  \item \alert{Exception}: all declared DAE Tools objects \alert{remain public}
+      \begin{itemize}
+          \item \alert{Exception}: all declared DAE Tools objects \alert{remain public}
+      \end{itemize}
   \item Models, simulations, optimisations:
      \begin{itemize}
         \item Classes \alert{derived from} the corresponding \alert{base classes}
@@ -513,7 +524,7 @@ Currently available options:
 \begin{itemize}
   \item \alert{Model structure} specified in the \alert{model class}
   \item \alert{Runtime information} specified in the \alert{simulation class}
-  \item \alert{Solvers/auxiliary objects} specified in the \alert{main program}
+  \item \alert{Solvers/auxiliary objects} declared in the \alert{main program}
   \item \alert{Single model definition}, but \alert{one or more}:
   \begin{itemize}
     \item Different \alert{simulation scenarios}
@@ -734,11 +745,11 @@ Currently available options:
 }
 \end{frame}
 
-\section{Developing models with DAE Tools} 
-
-\begin{frame}{Overview}
-\end{frame}
-
+% \section{Developing models with DAE Tools} 
+% 
+% \begin{frame}{Overview}
+% \end{frame}
+% 
 \section{Use Cases} 
 
 \begin{frame}{Use Case 1 - High-Level Modelling Language}

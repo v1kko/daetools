@@ -33,7 +33,8 @@ Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simula
 Presentations
 =============
 
-`An introduction to DAE Tools <http://www.daetools.com/docs/presentations/daetools-introduction.pdf>`_
+An introduction to DAE Tools `doi:10.13140/rg.2.1.2009.9449 <https://doi.org/10.13140/rg.2.1.2009.9449>`_
+(also available on: `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
 
 Indices and tables
 ==================
