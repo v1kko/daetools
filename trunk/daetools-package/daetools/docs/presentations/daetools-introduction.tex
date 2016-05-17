@@ -189,6 +189,10 @@ pdfcreator = {Dragan Nikolić}
 
 \begin{frame}{What is DAE Tools?} 
 Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
+\footnote{\tiny{Nikolić DD. (2016) \textit{DAE Tools: equation-based object-oriented modelling, simulation and optimisation software}.
+          \href{https://doi.org/10.7717/peerj-cs.54}{PeerJ Computer Science 2:e54}}
+         }
+
 \begin{itemize}
   \item Areas of application:
     \begin{itemize}
@@ -329,6 +333,77 @@ Current approaches to mathematical modelling:
         \item \alert{Code-generation}, \alert{model exchange} and \alert{co-simulation} capabilities  
     \end{enumerate}
 \end{frame}
+% 
+% \begin{frame}{Why \textsc{yet another} modelling software? (cont'd)}
+%     The \alert{shovel metaphor} about cleaning the snow in the winter:
+%     \begin{enumerate}
+%        \item \alert{Pay someone} to do it 
+%        \item \alert{Go shovel}
+%     \end{enumerate}
+% %     \begin{itemize}
+% %         \item Cleaning the snow in the winter - \alert{pay someone} to do it or \alert{go shovel}?
+% %         \begin{itemize}
+% %             \item \alert{Paying someone is expensive} and \alert{easy}
+% %             \item \alert{The shovel is cheap} but \alert{shoveling is hard}
+% %             \item Shoveling is \alert{good for health} and \alert{you can shovel everyday}
+% %         \end{itemize}
+% %     \end{itemize}
+%     
+%     \scriptsize
+%     {
+%     \begin{table}
+%     %\caption{Notate bene:}
+%     \begin{tabularx}{\linewidth}{p{0.46\linewidth}X}
+%         \toprule
+%         \textbf{Paying for the service} & \textbf{Shovelling manually} \tabularnewline
+%         \midrule
+%         
+%         Expensive but easy & The tool (shovel) is cheap but shoveling requires effort and training to do it 
+%         \tabularnewline \midrule
+%         
+%         Depends on external man power & Can be done anytime
+%         \tabularnewline \midrule
+%         
+%         Unavailable or very expensive (during Christmas, weekend, night)  & Can be done anytime 
+%         \tabularnewline \midrule
+%               
+%         Delays from the call until execution & No delays can be done immediately
+%         \tabularnewline \midrule
+% 
+%         Cannot be done urgently (what if a child is ill and has to go to the hospital) & Can be done anytime 
+%         \tabularnewline
+%         
+%         \bottomrule
+%     \end{tabularx}
+%     \end{table}
+%     }
+% %                 Like with shoveling - they do not do it during weekends and bank holidays (or you can, but it costs a lot)
+% \end{frame}
+% 
+% \begin{frame}{Why \textsc{yet another} modelling software? (cont'd)}
+%   \begin{itemize}
+%       \item \alert{Modelling} $\equiv$ \alert{cleaning the snow} in the winter
+%         \begin{enumerate}
+%             \item \alert{Pay someone} to do it 
+%             \item \alert{Go shovel}
+%         \end{enumerate}
+% %       \item Modelling software does not do anything useful (it is just a tool, like a shovel)
+% %       \item Model of a process/product is useful
+% %       \item There are two ways to go:
+% %         \begin{enumerate}
+% %           \item Use one of the available commercial/proprietary software with a range of pre-built model libraries
+% %                 You can pay for development of custom features
+% %                 But once they build an extended library it will soon end up in the main version. 
+% %                 You will essentially pay the development expenses for the modelling company
+% %                 Also, the custom features cannot be built whenever they are needed - some time is required before thay come, make plans and develop it.
+% %                 Like with shoveling - they do not do it during weekends and bank holidays (or you can, but it costs a lot)
+% %           \item Use the free/open-source software to build the models
+% %         \end{enumerate}
+% %       \item Commercial products are like buy an expensive robot that does it autonomously 
+% %             + it requires a mandatory yearly maintanance 
+% %       \item \textsc{DAE Tools} is like buying a cheap shovel and do it manually
+%   \end{itemize}
+% \end{frame}
 
 \begin{frame}{Additional \textsc{DAE Tools} features}
     \begin{itemize}
@@ -752,16 +827,158 @@ Current approaches to mathematical modelling:
 % 
 \section{Use Cases} 
 
-\begin{frame}{Use Case 1 - High-Level Modelling Language}
+\begin{frame}[plain]{Use Case 1 - Multi-scale modelling}
+    \begin{center}
+        \alert{Multi-scale model of phase-separating battery electrodes}
+        \footnote{\tiny{Li et al. (2014) \textit{Current-induced transition
+                    from particle-by-particle to concurrent intercalation in phase-separating battery electrodes}.
+                    Nature Materials 13(12):1149–1156. \href{https://doi.org/10.1038/nmat4084}{doi:10.1038/nmat4084.}}
+                }
+    \end{center}  
+    \begin{columns}[c]
+      \begin{column}{0.6\textwidth}
+        {\small
+         \begin{itemize}
+            \item Approach: \alert{porous electrode theory}
+            \item Lithium transport in:
+            \begin{itemize}
+                \item Particles (small length scale)
+                \item Electrolyte (large length scale)
+            \end{itemize}
+            \item Two phases are coupled via a volume-averaged approach
+            \item Particles act as volumetric source/sink terms as they interact with the
+                  electrolyte via reactions
+        \end{itemize}
+        }
+      \end{column}
+      
+      \begin{column}{0.4\textwidth}
+        \begin{center}
+          \includegraphics[align=c, width=\textwidth]{multi_scale.png}
+        \end{center}
+      \end{column}
+    \end{columns}
 \end{frame}
 
-\begin{frame}{Use Case 2 - Low-Level DAE Solver}
+\begin{frame}{Use Case 1 - Multi-scale modelling (cont'd)}
+    \begin{columns}[c]
+      \begin{column}{0.55\paperwidth}
+        {\scriptsize
+         \begin{itemize}
+            \item Spatial discretisation: finite-volume method
+            \item Large DAE system: 
+                \begin{itemize}
+                    \scriptsize
+                    {
+                        \item Discretised transport eqns.
+                        \item Algebraic constraints (electrostatic eqns.) 
+                        \item Constraints on the current
+                    }
+                \end{itemize}
+            \item Implementations
+                \begin{itemize}
+                    \scriptsize
+                    {
+                        \item MATLAB (ode15s solver)
+                        \item DAE Tools (Sundials IDAS)
+                    }
+                \end{itemize}
+            \item DAE Tools up to 10x faster (average 4.22x) due to:
+                \begin{itemize}
+                    \scriptsize
+                    {
+                        \item Built-in support for auto-differentiation
+                        \item Rapid derivative evaluation
+                        \item Accurate derivatives
+                    }
+                \end{itemize}
+        \end{itemize}
+        }
+      \end{column}
+      
+      \begin{column}{0.40\paperwidth}
+        \begin{center}
+          \includegraphics[align=c, width=\textwidth]{parity_plot.png}
+        \end{center}
+      \end{column}
+    \end{columns}
 \end{frame}
 
-\begin{frame}{Use Case 3 - Embedded Simulator (back end)}
+\begin{frame}[plain]{Use Case 2 - Embedded simulator (back end)}
+    \begin{center}
+        \alert{Network Interchange format for NEuroscience (NineML)}
+    \end{center}   
+    \small{XML-based DSL for modelling of networks of spiking neurones 
+                \href{http://software.incf.org/software/nineml}{\includegraphics[align=b, height=0.8em]{link.png}}
+                } \linebreak
+    \small{DAE Tools embedded into a \alert{reference implementation simulator}}
+    \begin{columns}[c]
+      \begin{column}{0.50\paperwidth}
+        {\scriptsize
+         \begin{itemize}
+            \item \alert{Abstraction Layer (AL)}
+                \begin{itemize}
+                    \scriptsize
+                    {
+                        \item Mathematical description
+                        \item Modelling concepts
+                    }
+                \end{itemize}
+            \item \alert{User Layer (UL)}
+                \begin{itemize}
+                    \scriptsize
+                    {
+                        \item Parameters values
+                        \item Instantiations
+                    }
+                \end{itemize}
+            \item NineML concepts $\rightarrow$ DAE Tools concepts
+                \begin{itemize}
+                    \scriptsize
+                    {
+                        \item Neurone models
+                        \item Synapse models
+                        \item Populations of neurones
+                        \item Layers of neurones
+                    }
+                \end{itemize}
+        \end{itemize}
+        }
+      \end{column}
+      
+      \begin{column}{0.45\paperwidth}
+        \begin{center}
+            \includegraphics[align=c, width=\textwidth]{nineml_ris.png}
+        \end{center}
+      \end{column}
+    \end{columns}
 \end{frame}
 
-\begin{frame}{Use Case 4 - Web Application / Web Service}
+\begin{frame}[plain]{Use Case 3 - Web application / Web service}
+    \begin{center}
+        \alert{Network Interchange format for NEuroscience (NineML)}
+    \end{center}   
+    \small{DAE Tools serves as \alert{AL components validator/report generator}}
+    
+    \begin{itemize}
+        \item Three flavours:
+        \begin{itemize}
+            \item \alert{Desktop application} (Python + Qt GUI)
+            \item \alert{Web application} (jQuery GUI)
+            \item \alert{Web service} with REST API (Apache server + Python WSGI)
+        \end{itemize}
+        \item Inputs:
+            \begin{itemize}
+                \item Abstraction Layer component to test
+                \item Parameters and inlet ports values, initial conditions
+                \item One or more tests (optional)
+            \end{itemize}
+        \item Outputs:
+            \begin{itemize}
+                \item Model report (pdf, html)
+                \item Test(s) results (variable plots)
+            \end{itemize}
+    \end{itemize}
 \end{frame}
 
 % \appendix

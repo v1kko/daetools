@@ -30,8 +30,8 @@ of the :doc:`docs/index` and the following publications:
 - Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
   **PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_
   (preprint available on: `ResearchGate <https://www.researchgate.net/publication/285596842_DAE_Tools_Equation-Based_Object-Oriented_Modelling_Simulation_and_Optimisation_Software>`_).
-- An introduction to DAE Tools `doi:10.13140/rg.2.1.2009.9449 <https://doi.org/10.13140/rg.2.1.2009.9449>`_
-  (also available on: `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
+- `Introduction to DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-introduction>`_
+  (on `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
 
 
 Download
