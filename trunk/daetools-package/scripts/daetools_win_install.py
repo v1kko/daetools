@@ -14,7 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, platform, shutil
 
-daetools_version = '1.4.0'
+daetools_version = '1.5.0'
 python_major = str(sys.version_info[0])
 python_minor = str(sys.version_info[1])
 
@@ -23,6 +23,10 @@ messages = []
 def install():
     try:
         if platform.system() == 'Windows':
+            """
+            # This part is not needed, for the config files are in daetools folder now.
+            # No copy is required anymore.
+
             sys_drive = os.environ['SYSTEMDRIVE']
             config_dir = os.path.join(sys_drive, os.path.sep, 'daetools')
             messages.append('Config files directory: %s' % config_dir)
@@ -53,6 +57,7 @@ def install():
                 file_created(f)
             except Exception as e:
                 messages.append(str(e))
+            """
 
             try:
                 script_folder = os.path.dirname(os.path.abspath(__file__))

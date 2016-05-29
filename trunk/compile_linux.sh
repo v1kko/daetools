@@ -197,7 +197,7 @@ for i; do
 done
 
 # Check if any project is specified
-if [ -z "$@" ]; then
+if [ -z "$1" ]; then
   usage
   exit
 fi

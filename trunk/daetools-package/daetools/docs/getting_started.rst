@@ -119,6 +119,118 @@ The sample output is given in :ref:`Figure-3`:
 
    Shell output from the simulation
 
+Processing the results
+======================
+
+DAE Tools provide a protocol for reporting the simulation results. It uses a concept of **data reporter** and
+**data receiver** interfaces. **Data reporter** interface is used by a simulation to send the data, while the
+**data receiver** interface is used to receive, store and offer the data to the users.
+There are two types of data reporters: local (store data locally) and remote (send data to a server,
+i.e. via TCP/IP protocol).
+
+There are three ways to obtain the results from the simulation:
+
+* Through DAE Tools Plotter GUI
+* Programmatically, using one of many different types of local data reporters
+* Develop a custom user-defined data reporter by creating one of bese classes (daeDataReporter_t,
+  daeDataReporterLocal, daeDataReporterFile)
+
+DAE Tools Plotter
+-----------------
+
+The simulation/optimization results can be easily plotted using the **DAE Tools Plotter** application.
+Three types of plots are supported: 2D, animated 2D and 3D plots.
+After choosing a desired type, a **Choose variable** (given in :ref:`Figure-5`)
+dialog appears where a variable to be plotted can be selected and information about domains
+specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
+(to create a 2D plot one domain must remain free, while for a 3D plot two domains).
+
+.. _Figure-5:
+.. figure:: _static/Screenshot-ChooseVariable.png
+    :width: 350 pt
+    :figwidth: 400 pt
+    :align: center
+
+    Choose variable dialog for a 2D plot
+
+Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
+
+.. _Figure-6:
+.. figure:: _static/Screenshot-2Dplot.png
+    :width: 350 pt
+    :figwidth: 400 pt
+    :align: center
+
+    Example 2D plot (produced by Matplotlib)
+
+.. _Figure-7:
+.. figure:: _static/Screenshot-3Dplot.png
+    :width: 350 pt
+    :figwidth: 400 pt
+    :align: center
+
+    Example 3D plot (produced by Mayavi2)
+
+2D plots can be saved as a teplate (.pt files).
+    .. code-block:: javascript
+
+      {
+        "curves": [
+            [
+            "tutorial4.T",
+            [
+                -1
+            ],
+            [
+                "*"
+            ],
+            "tutorial4.T(*)",
+            {
+                "color": "black",
+                "linestyle": "-",
+                "linewidth": 0.5,
+                "marker": "o",
+                "markeredgecolor": "black",
+                "markerfacecolor": "black",
+                "markersize": 6
+            }
+            ]
+        ],
+        "gridOn": true,
+        "legendOn": true,
+        "plotTitle": "",
+        "updateInterval": 0,
+        "windowTitle": "tutorial4.T(*)",
+        "xlabel": "Time",
+        "xmax": 525.0,
+        "xmin": -25.0,
+        "xscale": "linear",
+        "xtransform": 1.0,
+        "ylabel": "tutorial4.T",
+        "ymax": 361.74772465755922,
+        "ymin": 279.2499308975365,
+        "yscale": "linear",
+        "ytransform": 1.0
+      }
+
+Getting the results programmatically
+------------------------------------
+
+There is a large number of custom data reporters. Some of them are listed below.
+
+* Data reporters that export the results to a specified file format:
+
+ * Matlab .mat file (daeMatlabMATFileDataReporter)
+ * Excell .xls file (daeExcelFileDataReporter)
+ * JSON format (daeJSONFileDataReporter)
+ * XML file (daeXMLFileDataReporter)
+ * HDF5 file (daeHDF5FileDataReporter)
+
+* Other types of data reporters
+
+ * Pandas dataset (daePandasDataReporter)
+ * Quick matplotlib plots (daePlotDataReporter)
+
 
 Models
 ======
@@ -614,73 +726,3 @@ Also, do not forget to have a look on :doc:`tutorials`.
 Starting an optimization
 ------------------------
 Starting the optimization problems is analogous to running a simulation.
-
-Processing the results
-======================
-
-DAE Tools provide a protocol for reporting the simulation results. It uses a concept of **data reporter** and
-**data receiver** interfaces. **Data reporter** interface is used by a simulation to send the data, while the
-**data receiver** interface is used to receive, store and offer the data to users.
-There are two types of data reporters: local (store data locally) and remote (send data to a server,
-i.e. via TCP/IP protocol).
-
-There are three ways to obtain the results from the simulation:
-
-* Through DAE Tools Plotter GUI
-* Programmatically, using one of many different types of local data reporters
-* Develop a custom user-defined data reporter by creating one of bese classes (daeDataReporter_t,
-  daeDataReporterLocal, daeDataReporterFile)
-
-DAE Tools Plotter
------------------
-
-The simulation/optimization results can be easily plotted using the **DAE Tools Plotter** application.
-Three types of plots are supported: 2D, animated 2D and 3D plots.
-After choosing a desired type, a **Choose variable** (given in :ref:`Figure-5`)
-dialog appears where a variable to be plotted can be selected and information about domains
-specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
-(to create a 2D plot one domain must remain free, while for a 3D plot two domains).
-
-.. _Figure-5:
-.. figure:: _static/Screenshot-ChooseVariable.png
-    :width: 350 pt
-    :figwidth: 400 pt
-    :align: center
-
-    Choose variable dialog for a 2D plot
-
-Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
-
-.. _Figure-6:
-.. figure:: _static/Screenshot-2Dplot.png
-    :width: 350 pt
-    :figwidth: 400 pt
-    :align: center
-
-    Example 2D plot (produced by Matplotlib)
-
-.. _Figure-7:
-.. figure:: _static/Screenshot-3Dplot.png
-    :width: 350 pt
-    :figwidth: 400 pt
-    :align: center
-
-    Example 3D plot (produced by Mayavi2)
-
-Getting the results programmatically
-------------------------------------
-
-There is a large number of custom data reporters. Some of them are listed below.
-
-* Data reporters that export the results to a specified file format:
-    
- * Matlab .mat file (daeMatlabMATFileDataReporter)
- * Excell .xls file (daeExcelFileDataReporter)
- * JSON format (daeJSONFileDataReporter)
- * XML file (daeXMLFileDataReporter)
- * HDF5 file (daeHDF5FileDataReporter)
-
-* Other types of data reporters
-
- * Pandas dataset (daePandasDataReporter)
- * Quick matplotlib plots (daePlotDataReporter)

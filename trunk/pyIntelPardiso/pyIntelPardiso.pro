@@ -29,6 +29,7 @@ LIBS += $${SOLIBS_RPATH}
 
 LIBS += $${DAE_INTEL_PARDISO_SOLVER_LIB} \
         $${BOOST_PYTHON_LIB} \
+        $${BOOST_LIBS} \
         $${INTEL_MKL_LIBS}
 
 SOURCES += stdafx.cpp \

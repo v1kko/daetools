@@ -87,7 +87,7 @@ class modTutorial(daeModel):
         # Use dot product (numpy arrays don't behave as matrices)
         # or use numpt.matrix where the operator * performss the dot product.
         dydt = V.dot(D).dot(Vi).dot(y)
-        print dydt
+        print(dydt)
         for i in range(3):
             eq = self.CreateEquation("y(%d)" % i, "")
             eq.Residual = self.y.dt(i) - dydt[i]

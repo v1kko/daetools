@@ -90,7 +90,7 @@ class modTutorial(daeModel):
         eq_types[ -1, : ] = 'r'  # right boundary
         eq_types[ : ,  0] = 'b'  # bottom boundary
         eq_types[ : , -1] = 't'  # top boundary
-        print eq_types
+        print(eq_types)
         for x,y in indexes:
             eq_type = eq_types[x,y]
             #print x,y,eq_type
