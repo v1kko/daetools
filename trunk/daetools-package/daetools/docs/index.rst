@@ -36,6 +36,7 @@ Presentations
 `Introduction to DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-introduction>`_
 (on `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
 
+
 Indices and tables
 ==================
 

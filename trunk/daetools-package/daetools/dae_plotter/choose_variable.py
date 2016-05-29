@@ -46,7 +46,7 @@ images_dir = join(dirname(__file__), 'images')
 
 class daeChooseVariable(QtGui.QDialog):
 
-    (plot2D, plot2DAnimated, plot3D) = list(range(0, 3))
+    (plot2D, plot2DAutoUpdated, plot3D) = list(range(0, 3))
     FREE_DOMAIN = -1
     LAST_TIME   = -2
 
@@ -241,7 +241,7 @@ class daeChooseVariable(QtGui.QDialog):
             else:
                 self.ui.buttonOk.setEnabled(False)
 
-        elif self.plotType == daeChooseVariable.plot2DAnimated:
+        elif self.plotType == daeChooseVariable.plot2DAutoUpdated:
             if freeDomains == 1:
                 self.ui.buttonOk.setEnabled(True)
             else:
@@ -531,7 +531,7 @@ class daeChooseVariable(QtGui.QDialog):
         label, comboBox = self.getComboBoxAndLabel(0)
         label.setText("Time")
         comboBox.addItem("*", daeChooseVariable.FREE_DOMAIN) #QtCore.QVariant(daeChooseVariable.FREE_DOMAIN))
-        if self.plotType == daeChooseVariable.plot2DAnimated:
+        if self.plotType == daeChooseVariable.plot2DAutoUpdated:
             comboBox.addItem("Current time", daeChooseVariable.LAST_TIME) #QtCore.QVariant(daeChooseVariable.LAST_TIME))
         for i in range(0, len(times)):
             comboBox.addItem(str(times[i]), i) #QtCore.QVariant(i))

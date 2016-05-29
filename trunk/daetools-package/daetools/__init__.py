@@ -15,7 +15,7 @@ import os, sys, platform, numpy
 
 # Fix for "IOError: [Errno 9] Bad file descriptor" when in pythonw.exe of Windows
 if sys.platform.find('win') != -1 and sys.executable.find('pythonw') != -1:
-    blackhole = file(os.devnull, 'w')
+    blackhole = open(os.devnull, 'w')
     sys.stdout = sys.stderr = blackhole
     
 # Python version

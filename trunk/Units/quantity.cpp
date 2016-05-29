@@ -281,9 +281,8 @@ std::ostream& operator<<(std::ostream& out, const quantity& q)
 
 bool quantity::operator==(const quantity& other) const
 {
-	if(_units != other.getUnits())
-		throw units_error((boost::format("Units not consistent: %1% == %2%") % _units % other.getUnits()).str());
-		
+    if(_units != other.getUnits())
+      throw units_error((boost::format("Units not consistent: %1% == %2%") % _units % other.getUnits()).str());
 	return (_value == other.scaleTo(*this).getValue());	
 }
 

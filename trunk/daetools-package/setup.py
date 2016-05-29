@@ -28,7 +28,6 @@ Create .tar.gz under GNU/Linux:
 
 import os, sys, platform, shutil
 from distutils.core import setup
-from distutils.util import get_platform
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -201,6 +200,6 @@ setup(name = 'daetools',
                        'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
                      },
       data_files = data_files,
-      scripts = ['scripts/daetools_win_install.py'],
+      scripts = ['scripts/create_shortcuts.js', 'scripts/daetools_win_install.py'],
       requires = ['numpy', 'scipy', 'matplotlib', 'PyQt4']
      )

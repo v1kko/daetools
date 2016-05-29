@@ -8,14 +8,23 @@
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/detail/file_parser_error.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include "Core/definitions.h"
+
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+#include <dlfcn.h>
+#endif
 
 class daeConfig
 {
 public:
     daeConfig(void)
     {
-        configfile = daeConfig::GetConfigFolder() + "daetools.cfg";
+        boost::filesystem::path cfg_file = daeConfig::GetConfigFolder();
+        cfg_file /= "daetools.cfg";
+        configfile = cfg_file.string();
+        //std::cout << "config file: " << cfg_file.string() << std::endl;
         Reload();
     }
 
@@ -42,7 +51,7 @@ public:
             catch(boost::property_tree::file_parser_error& infoe)
             {
                 std::cout << "Cannot load daetools.cfg config file in neither 'json' nor 'info' format. Error: " << jsone.message() << std::endl;
-                std::cout << "Config files are located in /etc/daetools, c:/daetools or $HOME/.daetools directory" << std::endl;
+                std::cout << "Config files are located in: (1)current_exe_directory, (b).../daetools/pyDAE or (c)$HOME/.daetools directory" << std::endl;
                 return;
             }
 
@@ -91,52 +100,121 @@ public:
 
     static std::string GetBONMINOptionsFile()
     {
-        return daeConfig::GetConfigFolder() + "bonmin.cfg";
+        boost::filesystem::path cfg_file = daeConfig::GetConfigFolder();
+        cfg_file /= "bonmin.cfg";
+        return cfg_file.string();
     }
 
     static std::string GetConfigFolder()
     {
-        std::string strConfigFolder;
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-        char* szSysDrive = getenv("SYSTEMDRIVE");
-        if(szSysDrive != NULL)
-        {
-            strConfigFolder = std::string(szSysDrive) + std::string("\\daetools\\");
-            if(daeConfig::folderExists(strConfigFolder + "daetools.cfg"))
-                return strConfigFolder;
-        }
+        boost::filesystem::path cfg_home_folder,
+                                cfg_app_folder,
+                                cfg_python_daetools_folder;
 
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
         char* szUserProfile = getenv("USERPROFILE");
         if(szUserProfile != NULL)
         {
-            strConfigFolder = std::string(szUserProfile) + std::string("\\.daetools\\");
-            if(daeConfig::folderExists(strConfigFolder + "daetools.cfg"))
-                return strConfigFolder;
+            cfg_home_folder = std::string(szUserProfile);
+            cfg_home_folder /= std::string(".daetools");
+        }
+
+        wchar_t szModuleFileName[MAX_PATH];
+        int returned = GetModuleFileName(NULL, szModuleFileName, MAX_PATH);
+        if(returned > 0)
+        {
+            cfg_app_folder = std::string(szModuleFileName); // i.e. app_folder/some_file.exe
+            cfg_app_folder = cfg_app_folder.parent_path();  // i.e. app_folder
+
+            cfg_python_daetools_folder = std::string(szModuleFileName);            // i.e. daetools/pyDAE/Windows_win32_py27/pyCore.pyd
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE/Windows_win32_py27
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
         }
 #else
-        strConfigFolder = "/etc/daetools/";
-        if(daeConfig::folderExists(strConfigFolder + "daetools.cfg"))
-            return strConfigFolder;
-
         char* szUserProfile = getenv("HOME");
         if(szUserProfile != NULL)
         {
-            strConfigFolder = std::string(szUserProfile) + std::string("/.daetools/");
-            if(daeConfig::folderExists(strConfigFolder + "daetools.cfg"))
-                return strConfigFolder;
+            cfg_home_folder = std::string(szUserProfile);
+            cfg_home_folder /= std::string(".daetools");
+        }
+
+        Dl_info dl_info;
+        dladdr((void *)daeConfig::GetConfigFolder, &dl_info);
+        //printf("module %s loaded\n", dl_info.dli_fname);
+        if(dl_info.dli_fname != NULL)
+        {
+            cfg_app_folder = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
+            cfg_app_folder = cfg_app_folder.parent_path();   // i.e. app_folder
+
+            cfg_python_daetools_folder = std::string(dl_info.dli_fname);           // i.e. daetools/pyDAE/Linux_x86_64_py27/pyCore.so
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE/Linux_x86_64_py27
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
         }
 #endif
 
-        // Return an empty string if not found
-        return "";
-    }
+        if(boost::filesystem::exists(cfg_home_folder / std::string("daetools.cfg")))
+            return cfg_home_folder.string();
 
-    static bool folderExists(const std::string& strPath)
-    {
-        std::ifstream infile(strPath.c_str());
-        return infile.good();
-    }
+        else if(boost::filesystem::exists(cfg_app_folder / std::string("daetools.cfg")))
+            return cfg_app_folder.string();
 
+        else if(boost::filesystem::exists(cfg_python_daetools_folder / std::string("daetools.cfg")))
+            return cfg_python_daetools_folder.string();
+
+        else
+            return std::string();
+    }
+/*
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+        char* szUserProfile = getenv("USERPROFILE");
+        if(szUserProfile != NULL)
+        {
+            cfg_folder = std::string(szUserProfile);
+            cfg_folder /= std::string(".daetools");
+            cfg_file = cfg_folder / std::string("daetools.cfg");
+            if(boost::filesystem::exists(cfg_file))
+                return cfg_folder.string();
+        }
+
+        // If not found there, look in the module/exe folder
+        wchar_t szModuleFileName[MAX_PATH];
+        int returned = GetModuleFileName(NULL, szModuleFileName, MAX_PATH);
+        if(returned > 0)
+        {
+            cfg_folder = std::string(szModuleFileName); // i.e. daetools/pyDAE/Windows_win32_py27/pyCore.pyd
+            cfg_folder = cfg_folder.parent_path();      // i.e. daetools/pyDAE/Windows_win32_py27
+            cfg_folder = cfg_folder.parent_path();      // i.e. daetools/pyDAE
+            cfg_file = cfg_folder / std::string("daetools.cfg");
+            if(boost::filesystem::exists(cfg_file))
+                return cfg_folder.string();
+        }
+#else
+        char* szUserProfile = getenv("HOME");
+        if(szUserProfile != NULL)
+        {
+            cfg_folder = std::string(szUserProfile);
+            cfg_folder /= std::string(".daetools");
+            cfg_file = cfg_folder / std::string("daetools.cfg");
+            if(boost::filesystem::exists(cfg_file))
+                return cfg_folder.string();
+        }
+
+        Dl_info dl_info;
+        dladdr((void *)daeConfig::GetConfigFolder, &dl_info);
+        //printf("module %s loaded\n", dl_info.dli_fname);
+        if(dl_info.dli_fname != NULL)
+        {
+            cfg_folder = std::string(dl_info.dli_fname); // i.e. daetools/pyDAE/Linux_x86_64_py27/pyCore.so
+            cfg_folder = cfg_folder.parent_path();       // i.e. daetools/pyDAE/Linux_x86_64_py27
+            cfg_folder = cfg_folder.parent_path();       // i.e. daetools/pyDAE
+            cfg_file = cfg_folder / std::string("daetools.cfg");
+            if(boost::filesystem::exists(cfg_file))
+                return cfg_folder.string();
+        }
+#endif
+*/
     std::string toString(void) const
     {
         std::stringstream ss;
