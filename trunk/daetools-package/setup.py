@@ -99,9 +99,8 @@ if os.path.isdir(shared_libs_dir):
             if dll in f:
                 shared_libs.append(os.path.join(shared_libs_dir, f))
     
-#print 'shared_libs = ', shared_libs
-
 if platform.system() == 'Linux':
+    """
     data_files = [
                     #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
                     ('/usr/share/applications', [
@@ -118,11 +117,8 @@ if platform.system() == 'Linux':
                     #('/usr/bin',                ['usr/bin/daeplotter']),
                     #(usrlib,                    shared_libs)
                  ]
-
-
+    """
     data_files = []
-
-
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
     fmi_solibs = 'fmi/{0}/*.so'.format(platform_solib_dir)
@@ -135,10 +131,10 @@ elif platform.system() == 'Windows':
     # Achtung!! data files dir must be '' in Windows
     data_files = [
                     #('', ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
-                    ('', [
-                           'usr/share/applications/daeExamples.lnk',
-                           'usr/share/applications/daePlotter.lnk'
-                         ] ),
+                    #('', [
+                    #       'usr/share/applications/daeExamples.lnk',
+                    #       'usr/share/applications/daePlotter.lnk'
+                    #     ] ),
                  ]
     solibs = [
                '{0}/*.pyd'.format(platform_solib_dir),
@@ -147,6 +143,7 @@ elif platform.system() == 'Windows':
     fmi_solibs = 'fmi/{0}/*.dll'.format(platform_solib_dir)
 
 elif platform.system() == 'Darwin':
+    """
     data_files = [
                     #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
                     ('/usr/share/applications', [
@@ -163,11 +160,11 @@ elif platform.system() == 'Darwin':
                     #('/usr/bin',                ['usr/bin/daeplotter']),
                     ('/usr/lib',                shared_libs)
                  ]
+    """
+    data_files = []
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
     fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)
-
-#print 'solibs = ', solibs
 
 setup(name = 'daetools',
       version = '1.5.0',
