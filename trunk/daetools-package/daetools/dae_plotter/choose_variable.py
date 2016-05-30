@@ -46,7 +46,7 @@ images_dir = join(dirname(__file__), 'images')
 
 class daeChooseVariable(QtGui.QDialog):
 
-    (plot2D, plot2DAutoUpdated, plot3D) = list(range(0, 3))
+    (plot2D, plot2DAutoUpdated, plot3D, plot2DAnimated) = list(range(0, 4))
     FREE_DOMAIN = -1
     LAST_TIME   = -2
 
@@ -253,6 +253,18 @@ class daeChooseVariable(QtGui.QDialog):
             else:
                 self.ui.buttonOk.setEnabled(False)
 
+        elif self.plotType == daeChooseVariable.plot2DAnimated:
+            if freeDomains == 2:
+                if(self.ui.timeComboBox.isVisible()):
+                    if(str(self.ui.timeComboBox.currentText()) != '*'):
+                        self.ui.buttonOk.setEnabled(False)
+                    else:
+                        self.ui.buttonOk.setEnabled(True)
+                else:
+                    self.ui.buttonOk.setEnabled(False)
+            else:
+                self.ui.buttonOk.setEnabled(False)
+
         else:
             self.ui.buttonOk.setEnabled(False)
 
@@ -331,6 +343,88 @@ class daeChooseVariable(QtGui.QDialog):
         #print times[-1]
 
         return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times[-1]
+
+    def getPlot2DAnimatedData(self):
+        return daeChooseVariable.get2DAnimatedData(self.variable, self.domainIndexes, self.domainPoints)
+
+    @staticmethod
+    def get2DAnimatedData(variable, domainIndexes, domainPoints):
+        # Achtung, achtung!!
+        # It is important to get TimeValues first since the reporter
+        # might add more values to the data receiver (in the meantime)
+        # and the size of xPoints, yPoints and zPoints arrays will not match
+        times   = variable.TimeValues
+        values  = variable.Values
+        domains = variable.Domains
+
+        timePoints = []
+        xPoints = []
+        yPoints = []
+        xAxisLabel = ""
+        yAxisLabel = ""
+
+        # Remove html code marks ('&' and ';')
+        yname = variable.Name
+        yAxisLabel = yname.replace("&", "").replace(";", "");
+
+        # Find 2 domains that are FREE
+        freeDomainIndexes = []
+        for i in range(0, len(domainIndexes)):
+            if domainIndexes[i] == daeChooseVariable.FREE_DOMAIN:
+                freeDomainIndexes.append(i)
+        if len(freeDomainIndexes) != 2:
+            raise RuntimeError('Number of free domains is not 2')
+        if domainIndexes[0] != daeChooseVariable.FREE_DOMAIN:
+            raise RuntimeError('Time domain must be free for the animated 2D plot')
+
+        noTimePoints = len(times)
+
+        # Times
+        timePoints.extend(times[0 : noTimePoints])
+
+        # x axis points
+        for i in range(0, len(domainIndexes)):
+            if domainIndexes[i] == daeChooseVariable.FREE_DOMAIN:
+                if i == 0: # Time domain
+                    pass
+
+                else: # Some other domain
+                    d = domains[i-1] # because Time is not in a domain list
+                    names = d.Name.split(".")
+
+                    # Remove html code marks ('&' and ';')
+                    xname = names[len(names)-1]
+                    xAxisLabel = xname.replace("&", "").replace(";", "")
+                    if d.Type == eUnstructuredGrid:
+                        xPoints.extend([i for i in range(d.NumberOfPoints)])
+                    else:
+                        xPoints.extend(d.Points[0 : d.NumberOfPoints])
+
+                    break
+
+        # y axis points
+        t = []
+        for i in range(0, len(domainIndexes)):
+            domainIndex = domainIndexes[i]
+
+            if domainIndex == daeChooseVariable.FREE_DOMAIN:
+                if i == 0: # Time points
+                    t.append(slice(0, noTimePoints))
+
+                else: # Other domain's points
+                    d = domains[i-1]
+                    t.append(slice(0, d.NumberOfPoints))
+
+            else:
+                t.append(domainIndex)
+
+        yPoints = values[t] # This is 2D array!!
+
+        #print('t = %s' % t)
+        #print('yPoints = %s' % yPoints)
+        #print('values = %s' % values)
+
+        return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, timePoints
 
     def getPlot3DData(self):
         return daeChooseVariable.get3DData(self.variable, self.domainIndexes, self.domainPoints)

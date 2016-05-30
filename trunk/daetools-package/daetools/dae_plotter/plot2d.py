@@ -1,5 +1,5 @@
 """********************************************************************************
-                             plot2d.py
+                            plot2d.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -17,7 +17,8 @@ from PyQt4 import QtCore, QtGui
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.animation as animation
 
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
@@ -90,7 +91,7 @@ class dae2DPlot(QtGui.QDialog):
                     daePlot2dDefaults('k',     0.5, 'dotted', 'd', 6, 'k',     'black'),
                     daePlot2dDefaults('y',     0.5, 'dotted', 'x', 6, 'y',     'black') ]
 
-    def __init__(self, parent, tcpipServer, updateInterval = 0):
+    def __init__(self, parent, tcpipServer, updateInterval = 0, animated = False):
         QtGui.QDialog.__init__(self, parent, QtCore.Qt.Window)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
@@ -99,12 +100,19 @@ class dae2DPlot(QtGui.QDialog):
         self.legendOn = True
         self.gridOn   = True
         self.curves   = []
-        if updateInterval == 0:
+        self.funcAnimation = None
+        self._isAnimating = False
+        self._timer = None
+
+        if animated == True:
+            self.updateInterval = updateInterval
+            self.plotType = daeChooseVariable.plot2DAnimated
+        elif updateInterval == 0:
             self.updateInterval = 0
             self.plotType = daeChooseVariable.plot2D
         else:
             self.updateInterval = int(updateInterval)
-            self.plotType = daeChooseVariable.plot2DAnimated
+            self.plotType = daeChooseVariable.plot2DAutoUpdated
 
         self.setWindowTitle("2D plot")
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'line-chart.png')))
@@ -139,10 +147,10 @@ class dae2DPlot(QtGui.QDialog):
         viewdata.setStatusTip('View tabular data')
         self.connect(viewdata, QtCore.SIGNAL('triggered()'), self.slotViewTabularData)
 
-        csv = QtGui.QAction(QtGui.QIcon(join(images_dir, 'csv.png')), 'Export CSV', self)
-        csv.setShortcut('Ctrl+S')
-        csv.setStatusTip('Export CSV')
-        self.connect(csv, QtCore.SIGNAL('triggered()'), self.slotExportCSV)
+        export_csv = QtGui.QAction(QtGui.QIcon(join(images_dir, 'csv.png')), 'Export CSV', self)
+        export_csv.setShortcut('Ctrl+S')
+        export_csv.setStatusTip('Export CSV')
+        self.connect(export_csv, QtCore.SIGNAL('triggered()'), self.slotExportCSV)
 
         remove_line = QtGui.QAction(QtGui.QIcon(join(images_dir, 'remove.png')), 'Remove line', self)
         remove_line.setShortcut('Ctrl+R')
@@ -154,6 +162,25 @@ class dae2DPlot(QtGui.QDialog):
         new_line.setStatusTip('Add line')
         self.connect(new_line, QtCore.SIGNAL('triggered()'), self.newCurve)
 
+        play_animation = QtGui.QAction(QtGui.QIcon(join(images_dir, 'media-playback-start.png')), 'Start animation', self)
+        play_animation.setShortcut('Ctrl+S')
+        play_animation.setStatusTip('Start animation')
+        self.connect(play_animation, QtCore.SIGNAL('triggered()'), self.playAnimation)
+        self.play_animation = play_animation # save it
+
+        stop_animation = QtGui.QAction(QtGui.QIcon(join(images_dir, 'media-playback-stop.png')), 'Stop animation', self)
+        stop_animation.setShortcut('Ctrl+E')
+        stop_animation.setStatusTip('Stop animation')
+        self.connect(stop_animation, QtCore.SIGNAL('triggered()'), self.stopAnimation)
+        self.stop_animation = stop_animation # save it
+
+        export_video = QtGui.QAction(QtGui.QIcon(join(images_dir, 'save-video.png')), 'Export video', self)
+        export_video.setShortcut('Ctrl+V')
+        export_video.setStatusTip('Export video')
+        self.connect(export_video, QtCore.SIGNAL('triggered()'), self.exportVideo)
+
+        self.actions_to_disable = [export, viewdata, export_csv, grid, legend, new_line, remove_line, properties]
+
         self.toolbar_widget = QtGui.QWidget(self)
         layoutToolbar = QtGui.QVBoxLayout(self.toolbar_widget)
         layoutToolbar.setContentsMargins(0,0,0,0)
@@ -162,7 +189,7 @@ class dae2DPlot(QtGui.QDialog):
 
         layoutPlot = QtGui.QVBoxLayout(self)
         layoutPlot.setContentsMargins(2,2,2,2)
-        self.figure = Figure((6.0, 4.0), dpi=100, facecolor='white')#"#E5E5E5")
+        self.figure = Figure((7.2, 4.8), dpi=100, facecolor='white')#"#E5E5E5")
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setParent(self)
         self.canvas.axes = self.figure.add_subplot(111)
@@ -171,7 +198,7 @@ class dae2DPlot(QtGui.QDialog):
 
         #self.mpl_toolbar.addSeparator()
         self.mpl_toolbar.addAction(export)
-        self.mpl_toolbar.addAction(csv)
+        self.mpl_toolbar.addAction(export_csv)
         self.mpl_toolbar.addAction(viewdata)
         self.mpl_toolbar.addSeparator()
         self.mpl_toolbar.addAction(grid)
@@ -183,32 +210,43 @@ class dae2DPlot(QtGui.QDialog):
         self.mpl_toolbar.addAction(properties)
         #self.mpl_toolbar.addSeparator()
         #self.mpl_toolbar.addAction(exit)
+        if self.plotType == daeChooseVariable.plot2DAnimated:
+            self.mpl_toolbar.addSeparator()
+            self.mpl_toolbar.addAction(play_animation)
+            self.mpl_toolbar.addAction(stop_animation)
+            self.mpl_toolbar.addAction(export_video)
 
-        self.fp8  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
-        self.fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=10)
-        self.fp11 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=12)
+        self.fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
+        self.fp10 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=10)
+        self.fp12 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=12)
 
-        self.textTime = self.figure.text(0.01, 0.01, '', fontproperties = self.fp9)
+        self.textTime = self.figure.text(0.01, 0.01, '', fontproperties = self.fp10)
 
         self.xtransform = 1.0
         self.ytransform = 1.0
 
         for xlabel in self.canvas.axes.get_xticklabels():
-            xlabel.set_fontproperties(self.fp9)
+            xlabel.set_fontproperties(self.fp10)
         for ylabel in self.canvas.axes.get_yticklabels():
-            ylabel.set_fontproperties(self.fp9)
+            ylabel.set_fontproperties(self.fp10)
 
         layoutToolbar.addWidget(self.mpl_toolbar)
         layoutPlot.addWidget(self.canvas)
         layoutPlot.addWidget(self.toolbar_widget)
 
-        if self.updateInterval > 0:
+        if animated == False and self.updateInterval > 0:
             self._timer = QtCore.QTimer()
             QtCore.QObject.connect(self._timer, QtCore.SIGNAL('timeout()'), self.updateCurves)
             self._timer.start(self.updateInterval)
 
     def closeEvent(self, event):
-        print("dae2DPlot.closeEvent")
+        #print("dae2DPlot.closeEvent")
+        if self.funcAnimation:
+            self.funcAnimation.event_source.stop()
+
+        if self._timer:
+            self._timer.stop()
+
         return QtGui.QDialog.closeEvent(self, event)
 
     def updateCurves(self):
@@ -436,14 +474,14 @@ class dae2DPlot(QtGui.QDialog):
                     break
 
         if 'xlabel' in template:
-            self.canvas.axes.set_xlabel(template['xlabel'], fontproperties=self.fp11)
+            self.canvas.axes.set_xlabel(template['xlabel'], fontproperties=self.fp12)
         if 'xmin' in template and 'xmax' in template:
             self.canvas.axes.set_xlim(float(template['xmin']), float(template['xmax']))
         if 'xscale' in template:
             self.canvas.axes.set_xscale(template['xscale'])
 
         if 'ylabel' in template:
-            self.canvas.axes.set_ylabel(template['ylabel'], fontproperties=self.fp11)
+            self.canvas.axes.set_ylabel(template['ylabel'], fontproperties=self.fp12)
         if 'ymin' in template and 'ymax' in template:
             self.canvas.axes.set_ylim(float(template['ymin']), float(template['ymax']))
         if 'yscale' in template:
@@ -456,7 +494,7 @@ class dae2DPlot(QtGui.QDialog):
         if 'legendOn' in template:
             self.legendOn = template['legendOn']
             if self.legendOn:
-                self.canvas.axes.legend(loc = 0, prop=self.fp8, numpoints = 1, fancybox=True)
+                self.canvas.axes.legend(loc = 0, prop=self.fp9, numpoints = 1, fancybox=True)
             else:
                 self.canvas.axes.legend_ = None
 
@@ -492,6 +530,101 @@ class dae2DPlot(QtGui.QDialog):
         else:
             return '', False
 
+    def _updateFrame(self, frame):
+        curve = self.curves[0]
+        line    = curve[0]
+        yPoints = curve[5]
+        times   = curve[4]
+        yData = yPoints[frame]
+        line.set_ydata(yData)
+        time = times[frame]
+        self.canvas.axes.set_title('time = %f s' % time, fontproperties=self.fp10)
+        return line,
+
+    #@QtCore.pyqtSlot()
+    def playAnimation(self):
+        if self.funcAnimation: # animation started - pause/resume it
+            if self._isAnimating: # pause it
+                for action in self.actions_to_disable:
+                    action.setEnabled(True)
+                self.funcAnimation.event_source.stop()
+                self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-start.png')))
+                self.play_animation.setStatusTip('Start animation')
+                self.play_animation.setText('Start animation')
+                self._isAnimating = False
+                self.canvas.draw()
+            else: # restart it
+                for action in self.actions_to_disable:
+                    action.setEnabled(False)
+                self.funcAnimation.event_source.start()
+                self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-pause.png')))
+                self.play_animation.setStatusTip('Pause animation')
+                self.play_animation.setText('Pause animation')
+                self._isAnimating = True
+                self.canvas.draw()
+
+        else: # start animation
+            if len(self.curves) != 1:
+                return
+
+            for action in self.actions_to_disable:
+                action.setEnabled(False)
+
+            # Set properties for the frame 0
+            curve = self.curves[0]
+            line    = curve[0]
+            yPoints = curve[5]
+            times   = curve[4]
+            ymin = numpy.min(yPoints)
+            ymax = numpy.max(yPoints)
+            dy = 0.5 * (ymax-ymin)*0.05
+            self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
+            self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
+
+            #def draw_frame(frame):
+            #    #print('yPoints[%d] = %s' % (frame, str(yPoints[frame])))
+            #    yData = yPoints[frame]
+            #    line.set_ydata(yData)
+            #    time = times[frame]
+            #    axes.set_title('time = %f s' % time, fontproperties=fp)
+            #    return line,
+
+            frames = numpy.arange(1, len(times))
+            self.funcAnimation = animation.FuncAnimation(self.figure, self._updateFrame, frames, interval=self.updateInterval, blit=False)
+            self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-pause.png')))
+            self.play_animation.setStatusTip('Pause animation')
+            self.play_animation.setText('Pause animation')
+            self._isAnimating = True
+            self.canvas.draw()
+
+    #@QtCore.pyqtSlot()
+    def stopAnimation(self):
+        if self.funcAnimation: # animated started - stop it
+            for action in self.actions_to_disable:
+                action.setEnabled(True)
+
+            self.funcAnimation.event_source.stop()
+            del self.funcAnimation
+            self.funcAnimation = None
+
+            # Go back to frame 0
+            self._updateFrame(0)
+
+            self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-start.png')))
+            self.play_animation.setStatusTip('Start animation')
+            self.play_animation.setText('Start animation')
+            self._isAnimating = False
+            self.canvas.draw()
+
+    #@QtCore.pyqtSlot()
+    def exportVideo(self):
+        if not self.funcAnimation:
+            return
+
+        self.funcAnimation.event_source.stop()
+        #    del self.funcAnimation
+        #    self.funcAnimation = None
+
     #@QtCore.pyqtSlot()
     def newCurve(self):
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
@@ -511,6 +644,31 @@ class dae2DPlot(QtGui.QDialog):
         #self.canvas.axes.yaxis.set_major_formatter(fmt)
 
         return True
+
+    #@QtCore.pyqtSlot()
+    def newAnimatedCurve(self):
+        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+
+        cv = daeChooseVariable(processes, self.plotType)
+        cv.setWindowTitle('Choose variable for animated 2D plot')
+        if cv.exec_() != QtGui.QDialog.Accepted:
+            return False
+
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times = cv.getPlot2DAnimatedData()
+        self._addNewAnimatedCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times, None, None)
+
+        return True
+
+    def _addNewAnimatedCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints_2D, times, label = None, pd = None):
+        domains = '(' + ', '.join(domainPoints) + ')'
+
+        if not label:
+            label = yAxisLabel+domains
+
+        line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints_2D[0], label, pd)
+        self.setWindowTitle(label)
+
+        self.curves.append( (line, variable, domainIndexes, domainPoints, times, yPoints_2D) )
 
     def _addNewCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label = None, pd = None):
         domains = "("
@@ -542,12 +700,12 @@ class dae2DPlot(QtGui.QDialog):
                                       markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
         if no_lines == 0: # why this?
-            self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp11)
-            self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp11)
+            self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp12)
+            self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp12)
             t = self.canvas.axes.xaxis.get_offset_text()
-            t.set_fontproperties(self.fp9)
+            t.set_fontproperties(self.fp10)
             t = self.canvas.axes.yaxis.get_offset_text()
-            t.set_fontproperties(self.fp9)
+            t.set_fontproperties(self.fp10)
 
         self.reformatPlot()
         return line
@@ -582,7 +740,7 @@ class dae2DPlot(QtGui.QDialog):
         self.canvas.axes.grid(self.gridOn)
 
         if self.legendOn:
-            self.canvas.axes.legend(loc = 0, prop=self.fp8, numpoints = 1, fancybox=True)
+            self.canvas.axes.legend(loc = 0, prop=self.fp9, numpoints = 1, fancybox=True)
         else:
             self.canvas.axes.legend_ = None
 

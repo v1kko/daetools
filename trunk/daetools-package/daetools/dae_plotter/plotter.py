@@ -70,35 +70,40 @@ class daeMainWindow(QtGui.QMainWindow):
         plot2D.setStatusTip('New 2D plot')
         self.connect(plot2D, QtCore.SIGNAL('triggered()'), self.slotPlot2D)
 
+        autoupdatePlot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-autoupdate-2d.png')), 'New auto update 2D plot...', self)
+        autoupdatePlot2D.setShortcut('Ctrl+U')
+        autoupdatePlot2D.setStatusTip('New auto update 2D plot')
+        self.connect(autoupdatePlot2D, QtCore.SIGNAL('triggered()'), self.slotPlot2DAutoUpdate)
+
         animatedPlot2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-ani-2d.png')), 'New animated 2D plot...', self)
-        animatedPlot2D.setShortcut('Ctrl+4')
+        animatedPlot2D.setShortcut('Ctrl+A')
         animatedPlot2D.setStatusTip('New animated 2D plot')
-        self.connect(animatedPlot2D, QtCore.SIGNAL('triggered()'), self.slotAnimatedPlot2D)
+        self.connect(animatedPlot2D, QtCore.SIGNAL('triggered()'), self.plot2DAnimated)
 
         plot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New Mayavi 3D plot...', self)
         plot3D.setShortcut('Ctrl+3')
         plot3D.setStatusTip('New Mayavi 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)
 
-        MplPlot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New Matplotlib 3D plot...', self)
-        MplPlot3D.setShortcut('Ctrl+3')
-        MplPlot3D.setStatusTip('New Matplotlib 3D plot')
-        self.connect(MplPlot3D, QtCore.SIGNAL('triggered()'), self.slotMplPlot3D)
+        matplotlibSurfacePlot = QtGui.QAction('New matplotlib surface plot...', self)
+        matplotlibSurfacePlot.setShortcut('Ctrl+S')
+        matplotlibSurfacePlot.setStatusTip('New matplotlib surface plot')
+        self.connect(matplotlibSurfacePlot, QtCore.SIGNAL('triggered()'), self.slotMatplotlibSurfacePlot)
 
         plotVTK_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Open 2D VTK plot from file...', self)
-        plotVTK_2D.setShortcut('Ctrl+4')
+        plotVTK_2D.setShortcut('Ctrl+V')
         plotVTK_2D.setStatusTip('Open 2D VTK plot from file')
         self.connect(plotVTK_2D, QtCore.SIGNAL('triggered()'), self.slotOpenVTK_2D)
 
-        saveVTKasImages_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Export 2D VTK files to PNG images...', self)
-        saveVTKasImages_2D.setShortcut('Ctrl+5')
+        saveVTKasImages_2D = QtGui.QAction('Export 2D VTK files to PNG images...', self)
+        saveVTKasImages_2D.setShortcut('Ctrl+P')
         saveVTKasImages_2D.setStatusTip('Export 2D VTK files to PNG images...')
         self.connect(saveVTKasImages_2D, QtCore.SIGNAL('triggered()'), self.slotSaveVTKFilesAsImages_2D)
 
-        animateVTKFiles_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Animate 2D VTK plots...', self)
-        animateVTKFiles_2D.setShortcut('Ctrl+6')
-        animateVTKFiles_2D.setStatusTip('Animate 2D VTK plots...')
-        self.connect(animateVTKFiles_2D, QtCore.SIGNAL('triggered()'), self.slotAnimateVTKFiles_2D)
+        #animateVTKFiles_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Animate 2D VTK plots...', self)
+        #animateVTKFiles_2D.setShortcut('Ctrl+6')
+        #animateVTKFiles_2D.setStatusTip('Animate 2D VTK plots...')
+        #self.connect(animateVTKFiles_2D, QtCore.SIGNAL('triggered()'), self.slotAnimateVTKFiles_2D)
 
         openTemplate = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Open 2D template...', self)
         openTemplate.setShortcut('Ctrl+T')
@@ -121,15 +126,16 @@ class daeMainWindow(QtGui.QMainWindow):
 
         plot = menubar.addMenu('&Plot')
         plot.addAction(plot2D)
+        plot.addAction(autoupdatePlot2D)
         plot.addAction(animatedPlot2D)
         plot.addAction(plot3D)
-        plot.addAction(MplPlot3D)
+        plot.addAction(matplotlibSurfacePlot)
         plot.addSeparator()
         plot.addAction(openTemplate)
         plot.addSeparator()
         plot.addAction(plotVTK_2D)
         plot.addAction(saveVTKasImages_2D)
-        plot.addAction(animateVTKFiles_2D)
+        #plot.addAction(animateVTKFiles_2D)
 
         help = menubar.addMenu('&Help')
         help.addAction(about)
@@ -140,7 +146,6 @@ class daeMainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(plot2D)
         self.toolbar.addAction(animatedPlot2D)
         self.toolbar.addAction(plot3D)
-        self.toolbar.addAction(MplPlot3D)
         self.toolbar.addSeparator()
         self.toolbar.addAction(openTemplate)
         self.toolbar.addSeparator()
@@ -151,7 +156,7 @@ class daeMainWindow(QtGui.QMainWindow):
         self.plot2D()
 
     #@QtCore.pyqtSlot()
-    def slotAnimatedPlot2D(self):
+    def slotPlot2DAutoUpdate(self):
         msecs, ok = QtGui.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 1000, 1, 1E5, 100)
         if ok:
             self.plot2D(msecs) # 1000 ms
@@ -167,10 +172,64 @@ class daeMainWindow(QtGui.QMainWindow):
         if plot2D.newCurve() == False:
             plot2D.close()
             del plot2D
-        else:
-#            plot2D.init()
-            plot2D.show()
-#        plot2D.init()
+            return
+
+        plot2D.show()
+
+    def plot2DAnimated(self):
+        try:
+            from .plot2d import dae2DPlot
+        except Exception as e:
+            QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
+            return
+
+        msecs, ok = QtGui.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 1000, 1, 1E5, 100)
+        if not ok:
+            return
+
+        plot2D = dae2DPlot(self, self.tcpipServer, msecs, True)
+        if plot2D.newAnimatedCurve() == False:
+            plot2D.close()
+            del plot2D
+            return
+
+        plot2D.show()
+
+        """
+        import matplotlib.animation as animation
+
+        axes = plot2D.canvas.axes
+        fp = plot2D.fp10
+        curve = plot2D.curves[0]
+        line = curve[0]
+        yPoints = curve[5]
+        times = curve[4]
+        print('yPoints = %s' % str(yPoints))
+        print('times   = %s' % str(times))
+
+        ymin = numpy.min(yPoints)
+        ymax = numpy.max(yPoints)
+        axes.set_ylim(ymin, ymax)
+        axes.set_title('time = %f s' % times[0], fontproperties=fp)
+
+        def draw_frame(frame):
+            print('yPoints[%d] = %s' % (frame, str(yPoints[frame])))
+            yData = yPoints[frame]
+            line.set_ydata(yData)
+            time = times[frame]
+            axes.set_title('time = %f s' % time, fontproperties=fp)
+            return line,
+
+        # Init only required for blitting to give a clean slate.
+        def init():
+            line.set_ydata(np.ma.array(x, mask=True))
+            return line,
+
+        frames = numpy.arange(1, len(times))
+        ani = animation.FuncAnimation(plot2D.figure, draw_frame, frames, init_func=None, interval=msecs, blit=False)
+        print(dir(ani))
+        plot2D.show()
+        """
 
     #@QtCore.pyqtSlot()
     def slotPlot3D(self):
@@ -184,7 +243,7 @@ class daeMainWindow(QtGui.QMainWindow):
         if plot3D.newSurface() == False:
             del plot3D
 
-    def slotMplPlot3D(self, updateInterval = 0):
+    def slotMatplotlibSurfacePlot(self, updateInterval = 0):
         try:
             from .mpl_plot3d import dae3DPlot
         except Exception as e:
@@ -194,8 +253,8 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D = dae3DPlot(self, self.tcpipServer, updateInterval)
         if plot3D.newSurface() == False:
             del plot3D
-        else:
-            plot3D.show()
+            return
+        plot3D.show()
 
     #@QtCore.pyqtSlot()
     def slotOpenVTK_2D(self):
