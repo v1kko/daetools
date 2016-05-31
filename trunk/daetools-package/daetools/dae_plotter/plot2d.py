@@ -11,7 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import sys, numpy, json
+import os, sys, numpy, json
 from os.path import join, realpath, dirname
 from PyQt4 import QtCore, QtGui
 import matplotlib
@@ -539,7 +539,48 @@ class dae2DPlot(QtGui.QDialog):
         line.set_ydata(yData)
         time = times[frame]
         self.canvas.axes.set_title('time = %f s' % time, fontproperties=self.fp10)
+
+        if frame == len(times)-1: # the last frame
+            for action in self.actions_to_disable:
+                action.setEnabled(True)
+
+            del self.funcAnimation
+            self.funcAnimation = None
+
+            self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-start.png')))
+            self.play_animation.setStatusTip('Start animation')
+            self.play_animation.setText('Start animation')
+            self._isAnimating = False
+
         return line,
+
+    def _startAnimation(self):
+        if len(self.curves) != 1:
+            return
+
+        # Set properties for the frame 0
+        curve = self.curves[0]
+        line    = curve[0]
+        yPoints = curve[5]
+        times   = curve[4]
+        ymin = numpy.min(yPoints)
+        ymax = numpy.max(yPoints)
+        dy = 0.5 * (ymax-ymin)*0.05
+        self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
+        self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
+
+        frames = numpy.arange(1, len(times))
+        self.funcAnimation = animation.FuncAnimation(self.figure,
+                                                     self._updateFrame,
+                                                     frames,
+                                                     interval=self.updateInterval,
+                                                     blit=False,
+                                                     repeat=False)
+        self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-pause.png')))
+        self.play_animation.setStatusTip('Pause animation')
+        self.play_animation.setText('Pause animation')
+        self._isAnimating = True
+        #At the end do not call chow() nor save(), they will be ran by a caller
 
     #@QtCore.pyqtSlot()
     def playAnimation(self):
@@ -564,12 +605,9 @@ class dae2DPlot(QtGui.QDialog):
                 self.canvas.draw()
 
         else: # start animation
-            if len(self.curves) != 1:
-                return
-
             for action in self.actions_to_disable:
                 action.setEnabled(False)
-
+            """
             # Set properties for the frame 0
             curve = self.curves[0]
             line    = curve[0]
@@ -581,20 +619,14 @@ class dae2DPlot(QtGui.QDialog):
             self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
             self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
 
-            #def draw_frame(frame):
-            #    #print('yPoints[%d] = %s' % (frame, str(yPoints[frame])))
-            #    yData = yPoints[frame]
-            #    line.set_ydata(yData)
-            #    time = times[frame]
-            #    axes.set_title('time = %f s' % time, fontproperties=fp)
-            #    return line,
-
             frames = numpy.arange(1, len(times))
             self.funcAnimation = animation.FuncAnimation(self.figure, self._updateFrame, frames, interval=self.updateInterval, blit=False)
             self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-pause.png')))
             self.play_animation.setStatusTip('Pause animation')
             self.play_animation.setText('Pause animation')
             self._isAnimating = True
+            """
+            self._startAnimation()
             self.canvas.draw()
 
     #@QtCore.pyqtSlot()
@@ -607,23 +639,56 @@ class dae2DPlot(QtGui.QDialog):
             del self.funcAnimation
             self.funcAnimation = None
 
-            # Go back to frame 0
-            self._updateFrame(0)
-
             self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-start.png')))
             self.play_animation.setStatusTip('Start animation')
             self.play_animation.setText('Start animation')
             self._isAnimating = False
-            self.canvas.draw()
+
+        # Go back to frame 0
+        self._updateFrame(0)
+        self.canvas.draw()
 
     #@QtCore.pyqtSlot()
     def exportVideo(self):
-        if not self.funcAnimation:
-            return
+        import save_video
+        dlg = save_video.daeSavePlot2DVideo()
+        for enc in sorted(animation.writers.list()):
+            dlg.ui.comboEncoders.addItem(str(enc))
+        dlg.ui.lineeditCodec.setText('')
+        dlg.ui.lineeditFilename.setText(os.path.join(os.path.expanduser('~'), 'video.avi'))
+        dlg.ui.spinFPS.setValue(10)
+        dlg.ui.lineeditExtraArgs.setText(json.dumps([])) # ['-pix_fmt', 'yuv420p']
+        dlg.ui.spinBitrate.setValue(-1)
 
-        self.funcAnimation.event_source.stop()
-        #    del self.funcAnimation
-        #    self.funcAnimation = None
+        if dlg.exec_() != QtGui.QDialog.Accepted:
+            return False
+
+        filename   = str(dlg.ui.lineeditFilename.text())
+        fps        = int(dlg.ui.spinFPS.value())
+        encoder    = str(dlg.ui.comboEncoders.currentText())
+        codec      = str(dlg.ui.lineeditCodec.text())
+        bitrate    = int(dlg.ui.spinBitrate.value())
+        extra_args = []
+        try:
+            extra_args = list(json.loads(str(dlg.ui.lineeditExtraArgs.text())))
+        except:
+            pass
+        if bitrate == -1:
+            bitrate = None
+        if codec == '':
+            codec = None
+        if not extra_args:
+            extra_args = None
+
+        print('%s(fps = %s, codec = %s, bitrate = %s, extra_args = %s) -> %s' % (encoder, fps, codec, bitrate, extra_args, filename))
+
+        # First stop the existing animation, if already started
+        self.stopAnimation()
+
+        Writer = animation.writers[encoder]
+        writer = Writer(fps = fps, codec = codec, bitrate = bitrate, extra_args = extra_args)
+        self._startAnimation()
+        self.funcAnimation.save(filename, writer=writer)
 
     #@QtCore.pyqtSlot()
     def newCurve(self):

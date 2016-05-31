@@ -234,6 +234,9 @@ fi
 PYTHON_VERSION=$PYTHON_MAJOR.$PYTHON_MINOR
 
 SOLIBS_DIR="../daetools-package/daetools/solibs/${PLATFORM}_${HOST_ARCH}"
+if [ ! -e ${SOLIBS_DIR} ]; then
+    mkdir ${SOLIBS_DIR}
+fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
   DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch x86_64"

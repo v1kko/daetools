@@ -183,7 +183,7 @@ class daeMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
             return
 
-        msecs, ok = QtGui.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 1000, 1, 1E5, 100)
+        msecs, ok = QtGui.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 100, 1, 1E5, 100)
         if not ok:
             return
 
