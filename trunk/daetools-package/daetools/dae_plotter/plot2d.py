@@ -174,9 +174,9 @@ class dae2DPlot(QtGui.QDialog):
         self.connect(stop_animation, QtCore.SIGNAL('triggered()'), self.stopAnimation)
         self.stop_animation = stop_animation # save it
 
-        export_video = QtGui.QAction(QtGui.QIcon(join(images_dir, 'save-video.png')), 'Export video', self)
+        export_video = QtGui.QAction(QtGui.QIcon(join(images_dir, 'save-video.png')), 'Export video/sequence of images', self)
         export_video.setShortcut('Ctrl+V')
-        export_video.setStatusTip('Export video')
+        export_video.setStatusTip('Export video/sequence of images')
         self.connect(export_video, QtCore.SIGNAL('triggered()'), self.exportVideo)
 
         self.actions_to_disable = [export, viewdata, export_csv, grid, legend, new_line, remove_line, properties]
@@ -607,25 +607,6 @@ class dae2DPlot(QtGui.QDialog):
         else: # start animation
             for action in self.actions_to_disable:
                 action.setEnabled(False)
-            """
-            # Set properties for the frame 0
-            curve = self.curves[0]
-            line    = curve[0]
-            yPoints = curve[5]
-            times   = curve[4]
-            ymin = numpy.min(yPoints)
-            ymax = numpy.max(yPoints)
-            dy = 0.5 * (ymax-ymin)*0.05
-            self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
-            self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
-
-            frames = numpy.arange(1, len(times))
-            self.funcAnimation = animation.FuncAnimation(self.figure, self._updateFrame, frames, interval=self.updateInterval, blit=False)
-            self.play_animation.setIcon(QtGui.QIcon(join(images_dir, 'media-playback-pause.png')))
-            self.play_animation.setStatusTip('Pause animation')
-            self.play_animation.setText('Pause animation')
-            self._isAnimating = True
-            """
             self._startAnimation()
             self.canvas.draw()
 
@@ -684,7 +665,6 @@ class dae2DPlot(QtGui.QDialog):
 
         # First stop the existing animation, if already started
         self.stopAnimation()
-
         Writer = animation.writers[encoder]
         writer = Writer(fps = fps, codec = codec, bitrate = bitrate, extra_args = extra_args)
         self._startAnimation()

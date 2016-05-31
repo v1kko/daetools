@@ -37,7 +37,8 @@ class daeSavePlot2DVideo(QtGui.QDialog):
         self.connect(self.ui.buttonFilename, QtCore.SIGNAL("clicked()"), self.slotOpenFilename)
 
     def slotOpenFilename(self):
-        filename = QtGui.QFileDialog.getSaveFileName(self, "Save video", self.ui.lineeditFilename.text(), "Videos (*.avi *.flv *.mp4 *.mpg *.ogv *.webm *.wmv);;All Files (*)")
+        filename = QtGui.QFileDialog.getSaveFileName(self, "Save video/sequence of images", self.ui.lineeditFilename.text(),
+                                                     "Videos (*.avi *.flv *.mp4 *.mpg *.ogv *.webm *.wmv);;Images (*.png *.jpeg *.tiff *.bmp);;All Files (*)")
         if filename:
             self.ui.lineeditFilename.setText(filename)
 

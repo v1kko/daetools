@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'save_video.ui'
 #
-# Created: Tue May 31 16:52:10 2016
+# Created: Tue May 31 22:23:59 2016
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_SaveVideo(object):
     def setupUi(self, SaveVideo):
         SaveVideo.setObjectName(_fromUtf8("SaveVideo"))
-        SaveVideo.resize(421, 261)
+        SaveVideo.resize(473, 298)
         SaveVideo.setSizeGripEnabled(True)
         SaveVideo.setModal(True)
         self.verticalLayout = QtGui.QVBoxLayout(SaveVideo)
@@ -45,35 +45,35 @@ class Ui_SaveVideo(object):
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.comboEncoders)
         self.label3 = QtGui.QLabel(SaveVideo)
         self.label3.setObjectName(_fromUtf8("label3"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label3)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.label3)
         self.spinFPS = QtGui.QSpinBox(SaveVideo)
         self.spinFPS.setMinimum(1)
         self.spinFPS.setMaximum(10000)
         self.spinFPS.setProperty("value", 10)
         self.spinFPS.setObjectName(_fromUtf8("spinFPS"))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.spinFPS)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.spinFPS)
         self.label4 = QtGui.QLabel(SaveVideo)
         self.label4.setObjectName(_fromUtf8("label4"))
-        self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.label4)
+        self.formLayout.setWidget(6, QtGui.QFormLayout.LabelRole, self.label4)
         self.lineeditExtraArgs = QtGui.QLineEdit(SaveVideo)
         self.lineeditExtraArgs.setText(_fromUtf8(""))
         self.lineeditExtraArgs.setObjectName(_fromUtf8("lineeditExtraArgs"))
-        self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.lineeditExtraArgs)
+        self.formLayout.setWidget(6, QtGui.QFormLayout.FieldRole, self.lineeditExtraArgs)
         self.label5 = QtGui.QLabel(SaveVideo)
         self.label5.setObjectName(_fromUtf8("label5"))
-        self.formLayout.setWidget(4, QtGui.QFormLayout.LabelRole, self.label5)
+        self.formLayout.setWidget(5, QtGui.QFormLayout.LabelRole, self.label5)
         self.spinBitrate = QtGui.QSpinBox(SaveVideo)
         self.spinBitrate.setMinimum(-1)
         self.spinBitrate.setMaximum(10000000)
         self.spinBitrate.setProperty("value", -1)
         self.spinBitrate.setObjectName(_fromUtf8("spinBitrate"))
-        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.spinBitrate)
+        self.formLayout.setWidget(5, QtGui.QFormLayout.FieldRole, self.spinBitrate)
         self.label6 = QtGui.QLabel(SaveVideo)
         self.label6.setObjectName(_fromUtf8("label6"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label6)
+        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label6)
         self.lineeditCodec = QtGui.QLineEdit(SaveVideo)
         self.lineeditCodec.setObjectName(_fromUtf8("lineeditCodec"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.lineeditCodec)
+        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.lineeditCodec)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.lineeditFilename = QtGui.QLineEdit(SaveVideo)
@@ -86,6 +86,9 @@ class Ui_SaveVideo(object):
         self.buttonFilename.setObjectName(_fromUtf8("buttonFilename"))
         self.horizontalLayout_2.addWidget(self.buttonFilename)
         self.formLayout.setLayout(0, QtGui.QFormLayout.FieldRole, self.horizontalLayout_2)
+        self.videoEncoderOptionsLLabel = QtGui.QLabel(SaveVideo)
+        self.videoEncoderOptionsLLabel.setObjectName(_fromUtf8("videoEncoderOptionsLLabel"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.videoEncoderOptionsLLabel)
         self.verticalLayout.addLayout(self.formLayout)
         self.buttonBox = QtGui.QDialogButtonBox(SaveVideo)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -97,12 +100,13 @@ class Ui_SaveVideo(object):
         QtCore.QMetaObject.connectSlotsByName(SaveVideo)
 
     def retranslateUi(self, SaveVideo):
-        SaveVideo.setWindowTitle(_translate("SaveVideo", "DAE Tools Simulator", None))
+        SaveVideo.setWindowTitle(_translate("SaveVideo", "Export as video/sequence of images", None))
         self.label1.setText(_translate("SaveVideo", "Filename", None))
-        self.label2.setText(_translate("SaveVideo", "Encoder", None))
+        self.label2.setText(_translate("SaveVideo", "Writter", None))
         self.label3.setText(_translate("SaveVideo", "Framerate", None))
         self.label4.setText(_translate("SaveVideo", "Extra args", None))
         self.label5.setText(_translate("SaveVideo", "Bitrate", None))
         self.label6.setText(_translate("SaveVideo", "Codec", None))
         self.buttonFilename.setText(_translate("SaveVideo", "...", None))
+        self.videoEncoderOptionsLLabel.setText(_translate("SaveVideo", "Video encoder optional arguments:", None))
 
