@@ -2153,7 +2153,8 @@ void daeSimulation::Register(daeVariable* pVariable)
     vector<daeDomain_t*> arrDomains;
 
     daeDataReporterVariable var;
-    var.m_strName = m_strIteration + pVariable->GetCanonicalName();
+    var.m_strName  = m_strIteration + pVariable->GetCanonicalName();
+    var.m_strUnits = pVariable->GetVariableType()->GetUnits().toString();
 
     var.m_nNumberOfPoints = pVariable->GetNumberOfPoints();
     pVariable->GetDomains(arrDomains);
@@ -2184,6 +2185,7 @@ void daeSimulation::Register(daeParameter* pParameter)
 
     daeDataReporterVariable var;
     var.m_strName         = m_strIteration + pParameter->GetCanonicalName();
+    var.m_strUnits        = pParameter->GetUnits().toString();
     var.m_nNumberOfPoints = pParameter->GetNumberOfPoints();
     pParameter->GetDomains(arrDomains);
     for(i = 0; i < arrDomains.size(); i++)
@@ -2207,6 +2209,7 @@ void daeSimulation::Register(daeDomain* pDomain)
 
     daeDataReporterDomain domain;
     domain.m_strName            = m_strIteration + pDomain->GetCanonicalName();
+    domain.m_strUnits           = pDomain->GetUnits().toString();
     domain.m_eType				= pDomain->GetType();
     domain.m_nNumberOfPoints	= pDomain->GetNumberOfPoints();
     if(pDomain->GetNumberOfPoints() == 0)

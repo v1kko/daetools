@@ -14,17 +14,18 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import os, sys, numpy, json
 from os.path import join, realpath, dirname
 from PyQt4 import QtCore, QtGui
+
+# Matplotlib imports
 import matplotlib
+matplotlib.use('Qt4Agg')
+matplotlib.rcParams.update({'figure.autolayout': True})
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.animation as animation
 
-from matplotlib import rcParams
-rcParams.update({'figure.autolayout': True})
-
+# daetools imports
 from daetools.pyDAE import *
-
 from .choose_variable import daeChooseVariable, daeTableDialog
 from .plot_options import *
 
@@ -189,7 +190,7 @@ class dae2DPlot(QtGui.QDialog):
 
         layoutPlot = QtGui.QVBoxLayout(self)
         layoutPlot.setContentsMargins(2,2,2,2)
-        self.figure = Figure((7.2, 4.8), dpi=100, facecolor='white')#"#E5E5E5")
+        self.figure = Figure((7.5, 6), dpi=100, facecolor='white')#"#E5E5E5")
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setParent(self)
         self.canvas.axes = self.figure.add_subplot(111)
@@ -708,7 +709,7 @@ class dae2DPlot(QtGui.QDialog):
         domains = '(' + ', '.join(domainPoints) + ')'
 
         if not label:
-            label = yAxisLabel+domains
+            label = variable.Name.replace("&", "").replace(";", "") + domains
 
         line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints_2D[0], label, pd)
         self.setWindowTitle(label)
@@ -724,7 +725,7 @@ class dae2DPlot(QtGui.QDialog):
         domains += ")"
 
         if not label:
-            label = yAxisLabel+domains
+            label = variable.Name.replace("&", "").replace(";", "") + domains
 
         line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints, label, pd)
         self.setWindowTitle(label)

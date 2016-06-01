@@ -285,7 +285,7 @@ class daeChooseVariable(QtGui.QDialog):
 
         # Remove html code marks ('&' and ';')
         yname = variable.Name
-        yAxisLabel = yname.replace("&", "").replace(";", "");
+        yAxisLabel = yname.replace("&", "").replace(";", "") + " (%s)" % variable.Units
         xPoints = []
 
         noTimePoints = len(times)
@@ -295,7 +295,7 @@ class daeChooseVariable(QtGui.QDialog):
         for i in range(0, len(domainIndexes)):
             if domainIndexes[i] == daeChooseVariable.FREE_DOMAIN:
                 if i == 0: # Time domain
-                    xAxisLabel = "Time"
+                    xAxisLabel = "Time (s)"
                     xPoints.extend(times[0 : noTimePoints])
 
                 else: # Some other domain
@@ -304,7 +304,7 @@ class daeChooseVariable(QtGui.QDialog):
 
                     # Remove html code marks ('&' and ';')
                     xname = names[len(names)-1]
-                    xAxisLabel = xname.replace("&", "").replace(";", "")
+                    xAxisLabel = xname.replace("&", "").replace(";", "") + " (%s)" % d.Units
                     if d.Type == eUnstructuredGrid:
                         xPoints.extend([i for i in range(d.NumberOfPoints)])
                     else:
@@ -337,9 +337,9 @@ class daeChooseVariable(QtGui.QDialog):
 
         yPoints = values[t] #.copy()
 
-        print(noTimePoints)
-        print(('Number of x points = {0}'.format(len(xPoints))))
-        print(('Number of y points = {0}'.format(len(yPoints))))
+        #print(noTimePoints)
+        #print(('Number of x points = {0}'.format(len(xPoints))))
+        #print(('Number of y points = {0}'.format(len(yPoints))))
         #print times[-1]
 
         return variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times[-1]
@@ -365,7 +365,7 @@ class daeChooseVariable(QtGui.QDialog):
 
         # Remove html code marks ('&' and ';')
         yname = variable.Name
-        yAxisLabel = yname.replace("&", "").replace(";", "");
+        yAxisLabel = yname.replace("&", "").replace(";", "") + " (%s)" % variable.Units
 
         # Find 2 domains that are FREE
         freeDomainIndexes = []
@@ -394,7 +394,7 @@ class daeChooseVariable(QtGui.QDialog):
 
                     # Remove html code marks ('&' and ';')
                     xname = names[len(names)-1]
-                    xAxisLabel = xname.replace("&", "").replace(";", "")
+                    xAxisLabel = xname.replace("&", "").replace(";", "") + " (%s)" % d.Units
                     if d.Type == eUnstructuredGrid:
                         xPoints.extend([i for i in range(d.NumberOfPoints)])
                     else:
@@ -446,7 +446,7 @@ class daeChooseVariable(QtGui.QDialog):
 
         # Remove html code marks ('&' and ';')
         zname = variable.Name
-        zAxisLabel = zname.replace("&", "").replace(";", "");
+        zAxisLabel = zname.replace("&", "").replace(";", "") + " (%s)" % variable.Units
 
         # Find 2 domains that are FREE
         freeDomainIndexes = []
@@ -461,7 +461,7 @@ class daeChooseVariable(QtGui.QDialog):
         # x axis
         nd = freeDomainIndexes[0]
         if nd == 0: # Time domain
-            xAxisLabel = "Time"
+            xAxisLabel = "Time (s)"
             xPoints.extend(times[0 : noTimePoints])
             #for k in range(0, noTimePoints):
             #    xPoints.append(times[k])
@@ -472,7 +472,7 @@ class daeChooseVariable(QtGui.QDialog):
 
             # Remove html code marks ('&' and ';')
             xname = names[len(names)-1]
-            xAxisLabel = xname.replace("&", "").replace(";", "");
+            xAxisLabel = xname.replace("&", "").replace(";", "") + " (%s)" % d.Units
 
             xPoints.extend(d.Points[0 : d.NumberOfPoints])
             #for k in range(0, d.NumberOfPoints):
@@ -481,7 +481,7 @@ class daeChooseVariable(QtGui.QDialog):
         # y axis
         nd = freeDomainIndexes[1]
         if nd == 0: # Time domain
-            yAxisLabel = "Time"
+            yAxisLabel = "Time (s)"
             yPoints.extend(times[0 : noTimePoints])
             #for k in range(0, noTimePoints):
             #    yPoints.append(times[k])
@@ -492,7 +492,7 @@ class daeChooseVariable(QtGui.QDialog):
 
             # Remove html code marks ('&' and ';')
             yname = names[len(names)-1]
-            yAxisLabel = yname.replace("&", "").replace(";", "");
+            yAxisLabel = yname.replace("&", "").replace(";", "") + " (%s)" % d.Units
 
             yPoints.extend(d.Points[0 : d.NumberOfPoints])
             #for k in range(0, d.NumberOfPoints):

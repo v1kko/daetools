@@ -21,6 +21,7 @@ const char* DOCSTR_daeDataReporterDomain = "";
     const char* DOCSTR_daeDataReporterDomain_Name = "";
     const char* DOCSTR_daeDataReporterDomain_Type = "";
     const char* DOCSTR_daeDataReporterDomain_NumberOfPoints = "";
+    const char* DOCSTR_daeDataReporterDomain_Units = "";
     const char* DOCSTR_daeDataReporterDomain_Points = "";
     const char* DOCSTR_daeDataReporterDomain_getitem = "";
     const char* DOCSTR_daeDataReporterDomain_setitem = "";
@@ -29,6 +30,7 @@ const char* DOCSTR_daeDataReporterVariable = "";
     const char* DOCSTR_daeDataReporterVariable_init = "";
     const char* DOCSTR_daeDataReporterVariable_Name = "";
     const char* DOCSTR_daeDataReporterVariable_NumberOfPoints = "";
+    const char* DOCSTR_daeDataReporterVariable_Units = "";
     const char* DOCSTR_daeDataReporterVariable_NumberOfDomains = "";
     const char* DOCSTR_daeDataReporterVariable_Domains = "";
     const char* DOCSTR_daeDataReporterVariable_AddDomain = "";
@@ -66,7 +68,7 @@ const char* DOCSTR_daeTEXTFileDataReporter_WriteDataToFile = "";
 
 const char* DOCSTR_daeDataReporterRemote = "";
     const char* DOCSTR_daeDataReporterRemote_SendMessage = "";
-    
+
 const char* DOCSTR_daeTCPIPDataReporter = "";
     const char* DOCSTR_daeTCPIPDataReporter_SendMessage = "";
 
@@ -75,6 +77,7 @@ const char* DOCSTR_daeDataReceiverDomain = "";
     const char* DOCSTR_daeDataReceiverDomain_Name = "";
     const char* DOCSTR_daeDataReceiverDomain_Type = "";
     const char* DOCSTR_daeDataReceiverDomain_NumberOfPoints = "";
+    const char* DOCSTR_daeDataReceiverDomain_Units = "";
     const char* DOCSTR_daeDataReceiverDomain_Points = "";
     const char* DOCSTR_daeDataReceiverDomain_Coordinates = "";
     const char* DOCSTR_daeDataReceiverDomain_getitem = "";
@@ -90,12 +93,13 @@ const char* DOCSTR_daeDataReceiverVariable = "";
     const char* DOCSTR_daeDataReceiverVariable_init = "";
     const char* DOCSTR_daeDataReceiverVariable_Name = "";
     const char* DOCSTR_daeDataReceiverVariable_NumberOfPoints = "";
+    const char* DOCSTR_daeDataReceiverVariable_Units = "";
     const char* DOCSTR_daeDataReceiverVariable_Domains = "";
     const char* DOCSTR_daeDataReceiverVariable_TimeValues = "";
     const char* DOCSTR_daeDataReceiverVariable_Values = "";
     const char* DOCSTR_daeDataReceiverVariable_AddDomain = "";
     const char* DOCSTR_daeDataReceiverVariable_AddVariableValue = "";
-    
+
 const char* DOCSTR_daeDataReceiverProcess = "";
     const char* DOCSTR_daeDataReceiverProcess_init = "";
     const char* DOCSTR_daeDataReceiverProcess_Name = "";
@@ -108,8 +112,8 @@ const char* DOCSTR_daeDataReceiverProcess = "";
     const char* DOCSTR_daeDataReceiverProcess_RegisterVariable = "";
     const char* DOCSTR_daeDataReceiverProcess_FindVariable = "";
 
-    
-    
+
+
 const char* DOCSTR_daeDataReceiver_t = "";
     const char* DOCSTR_daeDataReceiver_t_Start = "";
     const char* DOCSTR_daeDataReceiver_t_Stop = "";
@@ -126,5 +130,5 @@ const char* DOCSTR_daeTCPIPDataReceiverServer = "";
     const char* DOCSTR_daeTCPIPDataReceiverServer_Stop = "";
     const char* DOCSTR_daeTCPIPDataReceiverServer_IsConnected = "";
     const char* DOCSTR_daeTCPIPDataReceiverServer_DataReceivers = "";
-    
+
 #endif
