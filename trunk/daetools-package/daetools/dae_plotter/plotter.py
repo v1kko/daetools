@@ -183,11 +183,7 @@ class daeMainWindow(QtGui.QMainWindow):
             QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
             return
 
-        msecs, ok = QtGui.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 100, 1, 1E5, 100)
-        if not ok:
-            return
-
-        plot2D = dae2DPlot(self, self.tcpipServer, msecs, True)
+        plot2D = dae2DPlot(self, self.tcpipServer, 100, True) # 100 is some default, just to mark as animated plot
         if plot2D.newAnimatedCurve() == False:
             plot2D.close()
             del plot2D

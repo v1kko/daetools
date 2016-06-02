@@ -16,25 +16,18 @@ from os.path import join, realpath, dirname
 import numpy
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
-from .save_video_ui import Ui_SaveVideo
+from .animation_params_ui import Ui_AnimationParameters
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeSavePlot2DVideo(QtGui.QDialog):
+class daeAnimationParameters(QtGui.QDialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
-        self.ui = Ui_SaveVideo()
+        self.ui = Ui_AnimationParameters()
         self.ui.setupUi(self)
 
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
         self.ui.buttonBox.accepted.connect(self.accept)
         self.ui.buttonBox.rejected.connect(self.reject)
-        self.connect(self.ui.buttonFilename, QtCore.SIGNAL("clicked()"), self.slotOpenFilename)
-
-    def slotOpenFilename(self):
-        filename = QtGui.QFileDialog.getSaveFileName(self, "Save video/sequence of images", self.ui.lineeditFilename.text(),
-                                                     "Videos (*.avi *.flv *.mp4 *.mpg *.ogv *.webm *.wmv);;Images (*.png *.jpeg *.tiff *.bmp);;All Files (*)")
-        if filename:
-            self.ui.lineeditFilename.setText(filename)
 

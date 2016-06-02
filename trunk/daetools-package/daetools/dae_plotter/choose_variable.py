@@ -50,7 +50,7 @@ class daeChooseVariable(QtGui.QDialog):
     FREE_DOMAIN = -1
     LAST_TIME   = -2
 
-    def __init__(self, processes, plotType):
+    def __init__(self, plotType):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_ChooseVariable()
         self.ui.setupUi(self)
@@ -61,7 +61,7 @@ class daeChooseVariable(QtGui.QDialog):
         self.domainIndexes   = []
         self.domainPoints    = []
         self.plotType        = plotType
-        self.processes       = processes
+        self.processes       = []
 
         self.hideAndClearAll()
 
@@ -76,11 +76,16 @@ class daeChooseVariable(QtGui.QDialog):
         self.connect(self.ui.domain6ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
         self.connect(self.ui.domain7ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
 
-        self.initTree(processes)
-
-    def initTree(self, processes):
-        for process in processes:
-            self.addProcess(process)
+    def updateProcessesList(self, processes):
+        for pnew in processes:
+            found = False
+            for pold in  self.processes:
+                if pold.Name == pnew.Name:
+                    found = True
+                    break
+            if not found:
+                self.addProcess(pnew)
+        self.processes = processes
 
     def addProcess(self, process):
         rootItem = QtGui.QTreeWidgetItem(self.ui.treeWidget)

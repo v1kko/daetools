@@ -36,17 +36,21 @@ def animateVTKFiles(figure, vtkSource, vtkFiles):
 
 class daeMayavi3DPlot:
     def __init__(self, tcpipServer):
-        self.tcpipServer = tcpipServer        
+        self.tcpipServer = tcpipServer
+        self._cv_dlg     = None
                 
     def newSurface(self):
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+        processes.sort(key=lambda process: process.Name)
 
-        cv = daeChooseVariable(processes, daeChooseVariable.plot3D)
-        cv.setWindowTitle('Choose variable for 3D plot')
-        if cv.exec_() != QtGui.QDialog.Accepted:
+        if not self._cv_dlg:
+            self._cv_dlg = daeChooseVariable(daeChooseVariable.plot3D)
+        self._cv_dlg.updateProcessesList(processes)
+        self._cv_dlg.setWindowTitle('Choose variable for 3D plot')
+        if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
             return False
             
-        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints, currentTime = cv.getPlot3DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints, currentTime = self._cv_dlg.getPlot3DData()
         xPoints = numpy.array(xPoints)
         yPoints = numpy.array(yPoints)
 

@@ -102,8 +102,13 @@ class dae2DPlot(QtGui.QDialog):
         self.gridOn   = True
         self.curves   = []
         self.funcAnimation = None
-        self._isAnimating = False
-        self._timer = None
+        self._isAnimating  = False
+        self._timer        = None
+        self._cv_dlg       = None
+        self.xmin_policy = 0
+        self.xmax_policy = 0
+        self.ymin_policy = 1
+        self.ymax_policy = 1
 
         if animated == True:
             self.updateInterval = updateInterval
@@ -180,7 +185,8 @@ class dae2DPlot(QtGui.QDialog):
         export_video.setStatusTip('Export video/sequence of images')
         self.connect(export_video, QtCore.SIGNAL('triggered()'), self.exportVideo)
 
-        self.actions_to_disable = [export, viewdata, export_csv, grid, legend, new_line, remove_line, properties]
+        self.actions_to_disable = [export, viewdata, export_csv, grid, legend, properties]
+        self.actions_to_disable_permanently = [new_line, remove_line]
 
         self.toolbar_widget = QtGui.QWidget(self)
         layoutToolbar = QtGui.QVBoxLayout(self.toolbar_widget)
@@ -534,11 +540,47 @@ class dae2DPlot(QtGui.QDialog):
     def _updateFrame(self, frame):
         curve = self.curves[0]
         line    = curve[0]
-        yPoints = curve[5]
+        xPoints = curve[5]
+        yPoints = curve[6]
         times   = curve[4]
         yData = yPoints[frame]
         line.set_ydata(yData)
         time = times[frame]
+
+        if self.xmin_policy == 0: # From 1st frame
+            xmin = numpy.min(xPoints)
+        elif self.xmin_policy == 1: # Overall min value
+            xmin = numpy.min(xPoints)
+        else: # Adaptive
+            xmin = numpy.min(xPoints)
+
+        if self.xmax_policy == 0: # From 1st frame
+            xmax = numpy.max(xPoints)
+        elif self.xmax_policy == 1: # Overall max value
+            xmax = numpy.max(xPoints)
+        else: # Adaptive
+            xmax = numpy.max(xPoints)
+
+        if self.ymin_policy == 0: # From 1st frame
+            ymin = numpy.min(yPoints[0])
+        elif self.ymin_policy == 1: # Overall min value
+            ymin = numpy.min(yPoints)
+        else: # Adaptive
+            ymin = numpy.min(yPoints[frame])
+
+        if self.ymax_policy == 0: # From 1st frame
+            ymax = numpy.max(yPoints[0])
+        elif self.ymax_policy == 1: # Overall max value
+            ymax = numpy.max(yPoints)
+        else: # Adaptive
+            ymax = numpy.max(yPoints[frame])
+
+        dx = 0.5 * (xmax-xmin)*0.05
+        dy = 0.5 * (ymax-ymin)*0.05
+
+        self.canvas.axes.set_xlim(xmin-dx, xmax+dx)
+        self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
+
         self.canvas.axes.set_title('time = %f s' % time, fontproperties=self.fp10)
 
         if frame == len(times)-1: # the last frame
@@ -562,15 +604,10 @@ class dae2DPlot(QtGui.QDialog):
         # Set properties for the frame 0
         curve = self.curves[0]
         line    = curve[0]
-        yPoints = curve[5]
         times   = curve[4]
-        ymin = numpy.min(yPoints)
-        ymax = numpy.max(yPoints)
-        dy = 0.5 * (ymax-ymin)*0.05
-        self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
-        self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
+        frames = numpy.arange(0, len(times))
 
-        frames = numpy.arange(1, len(times))
+        self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
         self.funcAnimation = animation.FuncAnimation(self.figure,
                                                      self._updateFrame,
                                                      frames,
@@ -674,34 +711,50 @@ class dae2DPlot(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def newCurve(self):
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
-
-        cv = daeChooseVariable(processes, self.plotType)
-        cv.setWindowTitle('Choose variable for 2D plot')
-        if cv.exec_() != QtGui.QDialog.Accepted:
+        processes.sort(key=lambda process: process.Name)
+        
+        if not self._cv_dlg:
+            self._cv_dlg = daeChooseVariable(self.plotType)
+        self._cv_dlg.updateProcessesList(processes)
+        self._cv_dlg.setWindowTitle('Choose variable for 2D plot')
+        if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
             return False
 
-        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = cv.getPlot2DData()
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = self._cv_dlg.getPlot2DData()
         self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, None, None)
-
-        #fmt = matplotlib.ticker.ScalarFormatter(useOffset = False)
-        #fmt.set_scientific(False)
-        #fmt.set_powerlimits((-3, 4))
-        #self.canvas.axes.xaxis.set_major_formatter(fmt)
-        #self.canvas.axes.yaxis.set_major_formatter(fmt)
 
         return True
 
     #@QtCore.pyqtSlot()
     def newAnimatedCurve(self):
         processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+        processes.sort(key=lambda process: process.Name)
 
-        cv = daeChooseVariable(processes, self.plotType)
-        cv.setWindowTitle('Choose variable for animated 2D plot')
-        if cv.exec_() != QtGui.QDialog.Accepted:
+        if not self._cv_dlg:
+            self._cv_dlg = daeChooseVariable(self.plotType)
+        self._cv_dlg.updateProcessesList(processes)
+        self._cv_dlg.setWindowTitle('Choose variable for animated 2D plot')
+        if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
             return False
 
-        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times = cv.getPlot2DAnimatedData()
+        import animation_parameters
+        dlg = animation_parameters.daeAnimationParameters()
+        if dlg.exec_() != QtGui.QDialog.Accepted:
+            return
+
+        self.updateInterval = int(dlg.ui.spinUpdateInterval.value())
+        self.xmin_policy    = dlg.ui.comboXmin.currentIndex()
+        self.xmax_policy    = dlg.ui.comboXmax.currentIndex()
+        self.ymin_policy    = dlg.ui.comboYmin.currentIndex()
+        self.ymax_policy    = dlg.ui.comboYmax.currentIndex()
+
+        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times = self._cv_dlg.getPlot2DAnimatedData()
         self._addNewAnimatedCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times, None, None)
+
+        for action in self.actions_to_disable_permanently:
+            action.setEnabled(False)
+
+        self._updateFrame(0)
 
         return True
 
@@ -714,7 +767,7 @@ class dae2DPlot(QtGui.QDialog):
         line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints_2D[0], label, pd)
         self.setWindowTitle(label)
 
-        self.curves.append( (line, variable, domainIndexes, domainPoints, times, yPoints_2D) )
+        self.curves.append( (line, variable, domainIndexes, domainPoints, times, xPoints, yPoints_2D) )
 
     def _addNewCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label = None, pd = None):
         domains = "("
