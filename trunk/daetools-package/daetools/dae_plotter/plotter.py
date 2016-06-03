@@ -38,6 +38,7 @@ except Exception as e:
     sys.exit()
 
 try:
+    from .choose_variable import daeChooseVariable
     from .about import daeAboutDialog
     from daetools.pyDAE.web_view_dialog import daeWebView
 except Exception as e:
@@ -307,8 +308,9 @@ class daeMainWindow(QtGui.QMainWindow):
             s = f.read(-1)
             template = json.loads(s)
 
-            updateInterval = template['updateInterval']
             curves         = template['curves']
+            plotType       = int(template['plotType'])
+            updateInterval = float(template['updateInterval'])
 
             try:
                 from .plot2d import dae2DPlot
@@ -316,7 +318,13 @@ class daeMainWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
                 return
 
-            plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
+            if plotType == daeChooseVariable.plot2D or plotType == daeChooseVariable.plot2DAutoUpdated:
+                plot2D = dae2DPlot(self, self.tcpipServer, updateInterval, False)
+            elif plotType == daeChooseVariable.plot2DAnimated:
+                plot2D = dae2DPlot(self, self.tcpipServer, updateInterval, True)
+            else:
+                raise RuntimeError('Invalid plot type')
+
             if plot2D.newFromTemplate(template) == False:
                 plot2D.close()
                 del plot2D

@@ -46,7 +46,7 @@ images_dir = join(dirname(__file__), 'images')
 
 class daeChooseVariable(QtGui.QDialog):
 
-    (plot2D, plot2DAutoUpdated, plot3D, plot2DAnimated) = list(range(0, 4))
+    (plot2D, plot2DAutoUpdated, plot2DAnimated, plot3D) = list(range(0, 4))
     FREE_DOMAIN = -1
     LAST_TIME   = -2
 

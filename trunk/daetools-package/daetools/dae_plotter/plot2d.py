@@ -289,6 +289,7 @@ class dae2DPlot(QtGui.QDialog):
         try:
             curves = []
             template = {'curves':          curves,
+                        'plotType':        self.plotType,
                         'updateInterval' : self.updateInterval,
                         'xlabel' :         self.canvas.axes.get_xlabel(),
                         'xmin' :           self.canvas.axes.get_xlim()[0],
@@ -303,10 +304,14 @@ class dae2DPlot(QtGui.QDialog):
                         'legendOn' :       self.legendOn,
                         'gridOn' :         self.gridOn,
                         'plotTitle' :      self.canvas.axes.get_title(),
-                        'windowTitle' :    str(self.windowTitle())
+                        'windowTitle':     str(self.windowTitle()),
+                        'xmin_policy':     int(self.xmin_policy),
+                        'xmax_policy':     int(self.xmax_policy),
+                        'ymin_policy':     int(self.ymin_policy),
+                        'ymax_policy':     int(self.ymax_policy)
                        }
 
-            for line, variable, domainIndexes, domainPoints, fun in self.curves:
+            for (line, variable, domainIndexes, domainPoints, fun, times, xPoints, yPoints_2D) in self.curves:
                 # variableName, indexes, points, linelabel, style = {linecolor, linewidth, linestyle, marker, markersize, markerfacecolor, markeredgecolor}
                 style = daePlot2dDefaults(line.get_color(), line.get_linewidth(), line.get_linestyle(),
                                           line.get_marker(), line.get_markersize(), line.get_markerfacecolor(), line.get_markeredgecolor())
@@ -436,6 +441,10 @@ class dae2DPlot(QtGui.QDialog):
            'gridOn' : Bool,
            'plotTitle' : string,
            'windowTitle' : string
+           'xmin_policy': int,
+           'xmax_policy': int,
+           'ymin_policy': int,
+           'ymax_policy': int
         }
         """
         if len(self.tcpipServer.DataReceivers) == 0:
@@ -449,6 +458,9 @@ class dae2DPlot(QtGui.QDialog):
             return False
 
         curves = template['curves']
+
+        if 'plotType' in template:
+            self.plotType = int(template['plotType'])
 
         if 'xtransform' in template:
             self.xtransform = template['xtransform']
@@ -476,9 +488,20 @@ class dae2DPlot(QtGui.QDialog):
             process = processes[str(processName)]
             for variable in process.Variables:
                 if variableName == variable.Name:
-                    variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = daeChooseVariable.get2DData(variable, domainIndexes, domainPoints)
-                    self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label, pd)
-                    break
+                    if self.plotType == daeChooseVariable.plot2D or self.plotType == daeChooseVariable.plot2DAutoUpdated:
+                        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = daeChooseVariable.get2DData(variable, domainIndexes, domainPoints)
+                        self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label, pd)
+                        break
+
+                    elif self.plotType == daeChooseVariable.plot2DAnimated:
+                        variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times = daeChooseVariable.get2DAnimatedData(variable, domainIndexes, domainPoints)
+                        self._addNewAnimatedCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, times, None, None)
+                        for action in self.actions_to_disable_permanently:
+                            action.setEnabled(False)
+                        break
+
+                    else:
+                        raise RuntimeError('Invalid plot type')
 
         if 'xlabel' in template:
             self.canvas.axes.set_xlabel(template['xlabel'], fontproperties=self.fp12)
@@ -511,6 +534,15 @@ class dae2DPlot(QtGui.QDialog):
         if 'windowTitle' in template:
             self.setWindowTitle(template['windowTitle'])
 
+        if 'xmin_policy' in template:
+            self.xmin_policy = int(template['xmin_policy'])
+        if 'xmax_policy' in template:
+            self.xmax_policy = int(template['xmax_policy'])
+        if 'ymin_policy' in template:
+            self.ymin_policy = int(template['ymin_policy'])
+        if 'ymax_policy' in template:
+            self.ymax_policy = int(template['ymax_policy'])
+
         #fmt = matplotlib.ticker.ScalarFormatter(useOffset = False)
         #fmt.set_scientific(False)
         #fmt.set_powerlimits((-3, 4))
@@ -540,9 +572,9 @@ class dae2DPlot(QtGui.QDialog):
     def _updateFrame(self, frame):
         curve = self.curves[0]
         line    = curve[0]
-        xPoints = curve[5]
-        yPoints = curve[6]
-        times   = curve[4]
+        times   = curve[5]
+        xPoints = curve[6]
+        yPoints = curve[7]
         yData = yPoints[frame]
         line.set_ydata(yData)
         time = times[frame]
@@ -603,8 +635,7 @@ class dae2DPlot(QtGui.QDialog):
 
         # Set properties for the frame 0
         curve = self.curves[0]
-        line    = curve[0]
-        times   = curve[4]
+        times  = curve[5]
         frames = numpy.arange(0, len(times))
 
         self.canvas.axes.set_title('time = %f s' % times[0], fontproperties=self.fp10)
@@ -618,7 +649,7 @@ class dae2DPlot(QtGui.QDialog):
         self.play_animation.setStatusTip('Pause animation')
         self.play_animation.setText('Pause animation')
         self._isAnimating = True
-        #At the end do not call chow() nor save(), they will be ran by a caller
+        #At the end do not call show() nor save(), they will be ran by a caller
 
     #@QtCore.pyqtSlot()
     def playAnimation(self):
@@ -767,7 +798,8 @@ class dae2DPlot(QtGui.QDialog):
         line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints_2D[0], label, pd)
         self.setWindowTitle(label)
 
-        self.curves.append( (line, variable, domainIndexes, domainPoints, times, xPoints, yPoints_2D) )
+        #                                                                 update fun is None
+        self.curves.append( (line, variable, domainIndexes, domainPoints, None, times, xPoints, yPoints_2D) )
 
     def _addNewCurve(self, variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, label = None, pd = None):
         domains = "("
@@ -782,8 +814,8 @@ class dae2DPlot(QtGui.QDialog):
 
         line = self.addLine(xAxisLabel, yAxisLabel, xPoints, yPoints, label, pd)
         self.setWindowTitle(label)
-
-        self.curves.append( (line, variable, domainIndexes, domainPoints, daeChooseVariable.get2DData) )
+        #                                                                                              everything after update fun is none
+        self.curves.append( (line, variable, domainIndexes, domainPoints, daeChooseVariable.get2DData, None, None, None) )
 
     def addLine(self, xAxisLabel, yAxisLabel, xPoints, yPoints, label, pd):
         no_lines = len(self.canvas.axes.get_lines())
