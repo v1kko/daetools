@@ -11,9 +11,8 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import sys
+import sys, numpy
 from os.path import join, realpath, dirname
-import numpy
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
 from .save_video_ui import Ui_SaveVideo

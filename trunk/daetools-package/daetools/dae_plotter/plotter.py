@@ -12,37 +12,18 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, distutils.sysconfig, types, json
+import os, sys, distutils.sysconfig, types, json, numpy, webbrowser
 from os.path import join, realpath, dirname
+from PyQt4 import QtCore, QtGui
+from daetools.pyDAE import *
+from .choose_variable import daeChooseVariable
+from .custom_plots import daeCustomPlots
+from .about import daeAboutDialog
+from .plot2d import dae2DPlot
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
 python_build = sys.version_info[2]
-
-try:
-    from PyQt4 import QtCore, QtGui
-except Exception as e:
-    print(('[daePlotter]: Cannot load pyQt4 modules\n Error: ', str(e)))
-    sys.exit()
-
-try:
-    import numpy
-except Exception as e:
-    print(('[daePlotter]: Cannot load numpy module\n Error: ', str(e)))
-    sys.exit()
-
-try:
-    from daetools.pyDAE import *
-except Exception as e:
-    print(('[daePlotter]: Cannot load daetools.pyDAE module\n Error: ', str(e)))
-    sys.exit()
-
-try:
-    from .choose_variable import daeChooseVariable
-    from .about import daeAboutDialog
-    from daetools.pyDAE.web_view_dialog import daeWebView
-except Exception as e:
-    print(('[daePlotter]: Cannot load daeAbout/daeWebView module\n Error: ', str(e)))
 
 try:
     images_dir = join(dirname(__file__), 'images')
@@ -80,6 +61,11 @@ class daeMainWindow(QtGui.QMainWindow):
         animatedPlot2D.setShortcut('Ctrl+A')
         animatedPlot2D.setStatusTip('New animated 2D plot')
         self.connect(animatedPlot2D, QtCore.SIGNAL('triggered()'), self.plot2DAnimated)
+
+        customPlots = QtGui.QAction('New user-defined plot...', self)
+        customPlots.setShortcut('Ctrl+C')
+        customPlots.setStatusTip('New user-defined plot')
+        self.connect(customPlots, QtCore.SIGNAL('triggered()'), self.slotCustomPlots)
 
         plot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New Mayavi 3D plot...', self)
         plot3D.setShortcut('Ctrl+3')
@@ -131,6 +117,7 @@ class daeMainWindow(QtGui.QMainWindow):
         plot.addAction(animatedPlot2D)
         plot.addAction(plot3D)
         plot.addAction(matplotlibSurfacePlot)
+        plot.addAction(customPlots)
         plot.addSeparator()
         plot.addAction(openTemplate)
         plot.addSeparator()
@@ -153,6 +140,19 @@ class daeMainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(plotVTK_2D)
 
     #@QtCore.pyqtSlot()
+    def slotCustomPlots(self):
+        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+        processes.sort(key=lambda process: process.Name)
+
+        dlg = daeCustomPlots()
+        if dlg.exec_() != QtGui.QDialog.Accepted:
+            return
+
+        exec(dlg.plot_source, globals())
+        if 'make_custom_plot' in globals():
+            make_custom_plot(processes)
+
+    #@QtCore.pyqtSlot()
     def slotPlot2D(self):
         self.plot2D()
 
@@ -163,12 +163,6 @@ class daeMainWindow(QtGui.QMainWindow):
             self.plot2D(msecs) # 1000 ms
 
     def plot2D(self, updateInterval = 0):
-        try:
-            from .plot2d import dae2DPlot
-        except Exception as e:
-            QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
-            return
-
         plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
         if plot2D.newCurve() == False:
             plot2D.close()
@@ -178,12 +172,6 @@ class daeMainWindow(QtGui.QMainWindow):
         plot2D.show()
 
     def plot2DAnimated(self):
-        try:
-            from .plot2d import dae2DPlot
-        except Exception as e:
-            QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
-            return
-
         plot2D = dae2DPlot(self, self.tcpipServer, 100, True) # 100 is some default, just to mark as animated plot
         if plot2D.newAnimatedCurve() == False:
             plot2D.close()
@@ -191,42 +179,6 @@ class daeMainWindow(QtGui.QMainWindow):
             return
 
         plot2D.show()
-
-        """
-        import matplotlib.animation as animation
-
-        axes = plot2D.canvas.axes
-        fp = plot2D.fp10
-        curve = plot2D.curves[0]
-        line = curve[0]
-        yPoints = curve[5]
-        times = curve[4]
-        print('yPoints = %s' % str(yPoints))
-        print('times   = %s' % str(times))
-
-        ymin = numpy.min(yPoints)
-        ymax = numpy.max(yPoints)
-        axes.set_ylim(ymin, ymax)
-        axes.set_title('time = %f s' % times[0], fontproperties=fp)
-
-        def draw_frame(frame):
-            print('yPoints[%d] = %s' % (frame, str(yPoints[frame])))
-            yData = yPoints[frame]
-            line.set_ydata(yData)
-            time = times[frame]
-            axes.set_title('time = %f s' % time, fontproperties=fp)
-            return line,
-
-        # Init only required for blitting to give a clean slate.
-        def init():
-            line.set_ydata(np.ma.array(x, mask=True))
-            return line,
-
-        frames = numpy.arange(1, len(times))
-        ani = animation.FuncAnimation(plot2D.figure, draw_frame, frames, init_func=None, interval=msecs, blit=False)
-        print(dir(ani))
-        plot2D.show()
-        """
 
     #@QtCore.pyqtSlot()
     def slotPlot3D(self):
@@ -312,12 +264,6 @@ class daeMainWindow(QtGui.QMainWindow):
             plotType       = int(template['plotType'])
             updateInterval = float(template['updateInterval'])
 
-            try:
-                from .plot2d import dae2DPlot
-            except Exception as e:
-                QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
-                return
-
             if plotType == daeChooseVariable.plot2D or plotType == daeChooseVariable.plot2DAutoUpdated:
                 plot2D = dae2DPlot(self, self.tcpipServer, updateInterval, False)
             elif plotType == daeChooseVariable.plot2DAnimated:
@@ -336,19 +282,14 @@ class daeMainWindow(QtGui.QMainWindow):
 
     #@QtCore.pyqtSlot()
     def slotAbout(self):
-        about = daeAboutDialog(self)
-        about.exec_()
+        dlg = daeAboutDialog()
+        dlg.exec_()
 
     #@QtCore.pyqtSlot()
     def slotDocumentation(self):
-        #site_packages = distutils.sysconfig.get_python_lib()
         docs_dir = os.path.join(os.path.dirname(__file__), '../docs/html/index.html')
         url = QtCore.QUrl(docs_dir)
-        wv = daeWebView(url)
-        wv.resize(800, 550)
-        #wv.setWindowState(QtCore.Qt.WindowMaximized)
-        wv.setWindowTitle("DAE Tools documentation")
-        wv.exec_()
+        webbrowser.open(url, new=0, autoraise=True)
 
 def daeStartPlotter(port = 0):
     try:

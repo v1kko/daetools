@@ -13,10 +13,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 from PyQt4 import QtCore, QtGui
 from daetools.pyDAE import *
-from about_ui import Ui_About
+from .about_ui import Ui_About
 
 class daeAboutDialog(QtGui.QDialog):
-    def __init__(self, process):
+    def __init__(self):
         QtGui.QDialog.__init__(self)
         self.ui = Ui_About()
         self.ui.setupUi(self)

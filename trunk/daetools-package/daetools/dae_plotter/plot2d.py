@@ -27,7 +27,9 @@ import matplotlib.animation as animation
 # daetools imports
 from daetools.pyDAE import *
 from .choose_variable import daeChooseVariable, daeTableDialog
-from .plot_options import *
+from .plot_options import figure_edit, surface_edit
+from .animation_parameters import daeAnimationParameters
+from .save_video import daeSavePlot2DVideo
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -700,8 +702,7 @@ class dae2DPlot(QtGui.QDialog):
 
     #@QtCore.pyqtSlot()
     def exportVideo(self):
-        import save_video
-        dlg = save_video.daeSavePlot2DVideo()
+        dlg = daeSavePlot2DVideo()
         for enc in sorted(animation.writers.list()):
             dlg.ui.comboEncoders.addItem(str(enc))
         dlg.ui.lineeditCodec.setText('')
@@ -768,8 +769,7 @@ class dae2DPlot(QtGui.QDialog):
         if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
             return False
 
-        import animation_parameters
-        dlg = animation_parameters.daeAnimationParameters()
+        dlg = daeAnimationParameters()
         if dlg.exec_() != QtGui.QDialog.Accepted:
             return
 

@@ -1,6 +1,6 @@
 """
 ***********************************************************************************
-                         simulation_inspector.py
+                            simulation_inspector.py
                  DAE Tools: pyDAE module, www.daetools.com
                  Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************

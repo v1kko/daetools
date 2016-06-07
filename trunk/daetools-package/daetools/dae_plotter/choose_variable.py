@@ -15,26 +15,14 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 October 2012 by Caleb Huttingh:
   - 3D plot bug fix when detecting free domains
 """
-import sys
+import sys, numpy
 from os.path import join, realpath, dirname
+from PyQt4 import QtCore, QtGui
+from daetools.pyDAE import *
+from .choose_variable_ui import Ui_ChooseVariable
+from .table_widget import Ui_tableWidgetDialog
+
 python_major = sys.version_info[0]
-
-try:
-    import numpy
-except ImportError:
-    print('[daeChooseVariable]: Cannot load numpy module')
-
-try:
-    from PyQt4 import QtCore, QtGui
-except ImportError:
-    print('[daeChooseVariable]: Cannot load pyQt4 modules')
-
-try:
-    from daetools.pyDAE import *
-    from .choose_variable_ui import Ui_ChooseVariable
-    from .table_widget import Ui_tableWidgetDialog
-except ImportError:
-    print('[daeChooseVariable]: Cannot load daetools modules')
 
 class daeTableDialog(QtGui.QDialog):
     def __init__(self, parent):
