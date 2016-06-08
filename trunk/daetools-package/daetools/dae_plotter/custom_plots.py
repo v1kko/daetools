@@ -59,6 +59,7 @@ class daeCustomPlots(QtGui.QDialog):
 # User-defined plots must be specified in the make_custom_plot() function
 def make_custom_plot(processes):
     # Common code to get the data for the plot
+    # If other type of data is required use daeChooseVariable.plot3D or daeChooseVariable.plot2DAnimated
     cv_dlg = daeChooseVariable(daeChooseVariable.plot2D)
     cv_dlg.updateProcessesList(processes)
     cv_dlg.setWindowTitle('Choose variable for a user-defined 2D plot')

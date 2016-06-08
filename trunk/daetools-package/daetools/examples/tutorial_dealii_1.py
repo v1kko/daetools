@@ -41,9 +41,9 @@ deal.II classes provided by the python wrapper:
 """
 
 import os, sys, numpy, json, tempfile
+from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import *
-from time import localtime, strftime
 from daetools.solvers.superlu import pySuperLU
 #from daetools.solvers.trilinos import pyTrilinos
 #from daetools.solvers.aztecoo_options import daeAztecOptions

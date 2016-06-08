@@ -71,13 +71,10 @@ The equations are distributed so that the following incidence matrix is obtained
 """
 
 import sys, numpy, itertools
-from daetools.pyDAE import *
 from time import localtime, strftime
-try:
-    from daetools.solvers.trilinos import pyTrilinos
-    from daetools.solvers.aztecoo_options import daeAztecOptions
-except ImportError as e:
-    print(('Unable to import Trilinos LA solver: {0}'.format(e)))
+from daetools.pyDAE import *
+from daetools.solvers.trilinos import pyTrilinos
+from daetools.solvers.aztecoo_options import daeAztecOptions
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W

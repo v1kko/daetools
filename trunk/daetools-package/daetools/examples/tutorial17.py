@@ -25,14 +25,13 @@ Here we introduce:
 
 """
 
-import os, sys
+import os, sys, threading
 from PyQt4 import QtCore, QtGui
-from daetools.pyDAE import *
-from tutorial17_ui import Ui_tcpipLogServerMainWindow
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
-import threading
 from subprocess import Popen, call
+from daetools.pyDAE import *
+from .tutorial17_ui import Ui_tcpipLogServerMainWindow
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kW

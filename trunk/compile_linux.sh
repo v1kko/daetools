@@ -26,7 +26,7 @@ OPTIONS:
    -h | --help                  Show this message.
    
    Python options (if not set use system's default python). One of the following:
-    --with-python-binary        Path to python binary to use.
+    --with-python-binary        Path to the python binary to use.
     --with-python-version       Version of the system's python in the format: major.minor (i.e 2.7).
 
    Cross compiling options:

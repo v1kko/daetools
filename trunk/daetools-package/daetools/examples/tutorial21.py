@@ -56,8 +56,8 @@ Solution:
 """
 
 import sys, numpy
-from daetools.pyDAE import *
 from time import localtime, strftime
+from daetools.pyDAE import *
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W

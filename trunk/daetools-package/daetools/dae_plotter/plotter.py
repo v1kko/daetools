@@ -78,10 +78,10 @@ class daeMainWindow(QtGui.QMainWindow):
         plot3D.setStatusTip('New Mayavi 3D plot')
         self.connect(plot3D, QtCore.SIGNAL('triggered()'), self.slotPlot3D)
 
-        matplotlibSurfacePlot = QtGui.QAction('New matplotlib surface plot...', self)
-        matplotlibSurfacePlot.setShortcut('Ctrl+S')
-        matplotlibSurfacePlot.setStatusTip('New matplotlib surface plot')
-        self.connect(matplotlibSurfacePlot, QtCore.SIGNAL('triggered()'), self.slotMatplotlibSurfacePlot)
+        #matplotlibSurfacePlot = QtGui.QAction('New matplotlib surface plot...', self)
+        #matplotlibSurfacePlot.setShortcut('Ctrl+S')
+        #matplotlibSurfacePlot.setStatusTip('New matplotlib surface plot')
+        #self.connect(matplotlibSurfacePlot, QtCore.SIGNAL('triggered()'), self.slotMatplotlibSurfacePlot)
 
         plotVTK_2D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'vtk.png')), 'Open 2D VTK plot from file...', self)
         plotVTK_2D.setShortcut('Ctrl+V')
@@ -122,7 +122,7 @@ class daeMainWindow(QtGui.QMainWindow):
         plot.addAction(autoupdatePlot2D)
         plot.addAction(animatedPlot2D)
         plot.addAction(plot3D)
-        plot.addAction(matplotlibSurfacePlot)
+        #plot.addAction(matplotlibSurfacePlot)
         plot.addAction(customPlots)
         plot.addAction(fromUserData)
         plot.addSeparator()
@@ -206,18 +206,19 @@ class daeMainWindow(QtGui.QMainWindow):
         try:
             from .mayavi_plot3d import daeMayavi3DPlot
         except Exception as e:
-            QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load 3D Plot module.\nDid you forget to install Mayavi2?\nError: " + str(e))
+            QtGui.QMessageBox.warning(self, "daePlotter", "Cannot load mayavi_plot3d module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
 
         plot3D = daeMayavi3DPlot(self.tcpipServer)
         if plot3D.newSurface() == False:
             del plot3D
 
+    """
     def slotMatplotlibSurfacePlot(self, updateInterval = 0):
         try:
             from .mpl_plot3d import dae3DPlot
         except Exception as e:
-            QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load 2D Plot module.\nDid you forget to install Matplotlib?\nError: " + str(e))
+            QtGui.QMessageBox.warning(None, "daePlotter", "Cannot load mpl_plot3d module.\nError: " + str(e))
             return
 
         plot3D = dae3DPlot(self, self.tcpipServer, updateInterval)
@@ -225,6 +226,7 @@ class daeMainWindow(QtGui.QMainWindow):
             del plot3D
             return
         plot3D.show()
+    """
 
     #@QtCore.pyqtSlot()
     def slotOpenVTK_2D(self):

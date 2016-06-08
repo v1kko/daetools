@@ -15,10 +15,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 
-import os, platform, sys, subprocess, webbrowser, traceback
+import os, platform, sys, subprocess, webbrowser, traceback, numpy
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
+from PyQt4 import QtCore, QtGui
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -28,33 +29,13 @@ if python_major == 2:
 elif python_major == 3:
     from io import StringIO
     
-try:
-    from PyQt4 import QtCore, QtGui
-except Exception as e:
-    print('[daeRunExamples]: Cannot load PyQt4 modules\n Error: ', str(e))
-    sys.exit()
-
-try:
-    import numpy
-except Exception as e:
-    print('[daeRunExamples]: Cannot load numpy module\n Error: ', str(e))
-    sys.exit()
-
-try:
-    from daetools.pyDAE import *
-except Exception as e:
-    print('[daeRunExamples]: Cannot load daetools.pyDAE module\n Error: ', str(e))
-    sys.exit()
-
-try:
-    from daetools.examples.RunExamples_ui import Ui_RunExamplesDialog
-    from daetools.pyDAE.web_view_dialog import daeWebView
-except Exception as e:
-    print('[daeRunExamples]: Cannot load UI modules\n Error: ', str(e))
+from daetools.pyDAE import *
+from .RunExamples_ui import Ui_RunExamplesDialog
+from daetools.pyDAE.web_view_dialog import daeWebView
 
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
-for i in range(1, 22):
+for i in range(1, 24):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 3):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))

@@ -33,18 +33,14 @@ Currently there are 3rd party linear equations solvers:
 """
 
 import sys
-from daetools.pyDAE import *
 from time import localtime, strftime
-
-try:
-    # First import desired solver's module:
-    from daetools.solvers.trilinos import pyTrilinos
-    #from daetools.solvers.superlu import pySuperLU
-    #from daetools.solvers.superlu_mt import pySuperLU_MT
-    #from daetools.solvers.intel_pardiso import pyIntelPardiso
-    #from daetools.solvers.pardiso import pyPardiso
-except ImportError as e:
-    print(('Unable to import LA solver: {0}'.format(e)))
+from daetools.pyDAE import *
+# First import desired solver's module:
+from daetools.solvers.trilinos import pyTrilinos
+#from daetools.solvers.superlu import pySuperLU
+#from daetools.solvers.superlu_mt import pySuperLU_MT
+#from daetools.solvers.intel_pardiso import pyIntelPardiso
+#from daetools.solvers.pardiso import pyPardiso
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, J, W

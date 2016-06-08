@@ -27,8 +27,8 @@ values using scipy.interpolate.interp1d object.
 
 import sys
 import numpy, scipy.interpolate
-from daetools.pyDAE import *
 from time import localtime, strftime
+from daetools.pyDAE import *
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W

@@ -25,16 +25,13 @@ while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lm
 implementing Levenberg-Marquardt algorithm is used to estimate the parameters.
 """
 
-import sys
-from daetools.pyDAE import *
+import sys, numpy
 from time import localtime, strftime
-import numpy
 import matplotlib
 matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
-
-# Standard variable types are defined in variable_types.py
+from daetools.pyDAE import *
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

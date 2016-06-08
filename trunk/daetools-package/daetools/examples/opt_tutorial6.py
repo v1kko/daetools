@@ -21,13 +21,13 @@ daeMinpackLeastSq module test.
 """
 
 import sys, numpy
-from daetools.pyDAE import *
-from daetools.solvers.minpack import daeMinpackLeastSq
 from time import localtime, strftime
 from numpy.linalg import cholesky
 import matplotlib
 matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
+from daetools.pyDAE import *
+from daetools.solvers.minpack import daeMinpackLeastSq
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

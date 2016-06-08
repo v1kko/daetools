@@ -21,11 +21,9 @@ This tutorial introduces Bonmin MINLP solver, its setup and options.
 """
 
 import sys
+from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.bonmin import pyBONMIN
-from time import localtime, strftime
-
-# Standard variable types are defined in variable_types.py
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

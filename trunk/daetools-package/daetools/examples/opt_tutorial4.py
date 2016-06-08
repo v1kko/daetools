@@ -26,11 +26,9 @@ minimum of the Rosenbrock function.
 """
 
 import sys
-from daetools.pyDAE import *
 from time import localtime, strftime
 from scipy.optimize import fmin, fmin_bfgs, fmin_l_bfgs_b
-
-# Standard variable types are defined in variable_types.py
+from daetools.pyDAE import *
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):

@@ -33,8 +33,8 @@ In this example, usage and available options of superlu and superlu_MT are explo
 """
 
 import sys
-from daetools.pyDAE import *
 from time import localtime, strftime
+from daetools.pyDAE import *
 from daetools.solvers.superlu import pySuperLU as superlu
 #from daetools.solvers.superlu_mt import pySuperLU_MT as superlu
 

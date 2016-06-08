@@ -40,9 +40,9 @@ Results:
 """
 
 import sys, numpy
+from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.trilinos import pyTrilinos
-from time import localtime, strftime
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, g, kg, s, K, mol, kmol, J, um

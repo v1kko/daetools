@@ -182,6 +182,8 @@ boost::python::object GetTimeValuesDataReceiverVariable(daeDataReceiverVariable&
 
 	return numpy_array;
 */
+    size_t nSize = self.m_ptrarrValues.size();
+
     // Import numpy
     boost::python::object main_module = import("__main__");
     boost::python::object main_namespace = main_module.attr("__dict__");
@@ -189,11 +191,11 @@ boost::python::object GetTimeValuesDataReceiverVariable(daeDataReceiverVariable&
     boost::python::object numpy = main_namespace["numpy"];
 
     // Create shape
-    boost::python::tuple shape = boost::python::make_tuple(self.m_ptrarrValues.size());
+    boost::python::tuple shape = boost::python::make_tuple(nSize);
 
     // Create a flat list of values
     boost::python::list lvalues;
-    for(size_t k = 0; k < self.m_ptrarrValues.size(); k++)
+    for(size_t k = 0; k < nSize; k++)
         lvalues.append(self.m_ptrarrValues[k]->m_dTime);
 
     // Create a flat ndarray

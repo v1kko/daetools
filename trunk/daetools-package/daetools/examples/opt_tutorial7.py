@@ -21,9 +21,9 @@ This tutorial introduces monitoring optimization progress.
 """
 
 import sys
+from time import localtime, strftime, sleep
 from daetools.pyDAE import *
 from daetools.solvers.ipopt import pyIPOPT
-from time import localtime, strftime, sleep
 from daetools.dae_simulator.optimization_progress_monitor import daeOptimizationProgressMonitor
 
 # Standard variable types are defined in variable_types.py

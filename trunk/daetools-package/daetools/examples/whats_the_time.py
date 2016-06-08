@@ -66,8 +66,8 @@ A typical DAETools simulation requires the following 8 tasks:
 
 # 1. Import the modules
 import sys
-from daetools.pyDAE import *
 from time import localtime, strftime
+from daetools.pyDAE import *
 
 # 2a. Import some unit definitions (if needed) from the pyUnits module
 from pyUnits import m, kg, s, K, Pa, mol, J, W

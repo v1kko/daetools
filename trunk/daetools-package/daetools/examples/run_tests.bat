@@ -19,6 +19,9 @@ python tutorial17.py console
 python tutorial18.py console
 python tutorial19.py console
 python tutorial20.py console
+python tutorial21.py console
+REM python tutorial22.py console
+python tutorial23.py console
 python tutorial_dealii_1.py console
 python tutorial_dealii_2.py console
 
