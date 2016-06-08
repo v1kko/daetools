@@ -95,7 +95,7 @@ def make_custom_plot(processes):
     def slotMakePlot(self):
         self.plot_source = str(self.ui.editSourceCode.toPlainText())
         self.slotSaveSource()
-        self.accept()
+        return self.accept()
 
     def slotSaveSource(self):
         # First save the current source into the list item

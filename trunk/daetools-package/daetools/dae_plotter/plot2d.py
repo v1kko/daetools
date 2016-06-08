@@ -30,6 +30,7 @@ from .choose_variable import daeChooseVariable, daeTableDialog
 from .plot_options import figure_edit, surface_edit
 from .animation_parameters import daeAnimationParameters
 from .save_video import daeSavePlot2DVideo
+from .user_data import daeUserData
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -151,7 +152,7 @@ class dae2DPlot(QtGui.QDialog):
         self.connect(legend, QtCore.SIGNAL('triggered()'), self.slotToggleLegend)
 
         viewdata = QtGui.QAction(QtGui.QIcon(join(images_dir, 'data.png')), 'View tabular data', self)
-        viewdata.setShortcut('Ctrl+D')
+        viewdata.setShortcut('Ctrl+T')
         viewdata.setStatusTip('View tabular data')
         self.connect(viewdata, QtCore.SIGNAL('triggered()'), self.slotViewTabularData)
 
@@ -159,6 +160,11 @@ class dae2DPlot(QtGui.QDialog):
         export_csv.setShortcut('Ctrl+S')
         export_csv.setStatusTip('Export CSV')
         self.connect(export_csv, QtCore.SIGNAL('triggered()'), self.slotExportCSV)
+
+        fromUserData = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-user-data.png')), 'Add line from the user-provided data...', self)
+        fromUserData.setShortcut('Ctrl+D')
+        fromUserData.setStatusTip('Add line from the user-provided data')
+        self.connect(fromUserData, QtCore.SIGNAL('triggered()'), self.slotFromUserData)
 
         remove_line = QtGui.QAction(QtGui.QIcon(join(images_dir, 'remove.png')), 'Remove line', self)
         remove_line.setShortcut('Ctrl+R')
@@ -188,7 +194,7 @@ class dae2DPlot(QtGui.QDialog):
         self.connect(export_video, QtCore.SIGNAL('triggered()'), self.exportVideo)
 
         self.actions_to_disable = [export, viewdata, export_csv, grid, legend, properties]
-        self.actions_to_disable_permanently = [new_line, remove_line]
+        self.actions_to_disable_permanently = [new_line, fromUserData, remove_line]
 
         self.toolbar_widget = QtGui.QWidget(self)
         layoutToolbar = QtGui.QVBoxLayout(self.toolbar_widget)
@@ -198,7 +204,7 @@ class dae2DPlot(QtGui.QDialog):
 
         layoutPlot = QtGui.QVBoxLayout(self)
         layoutPlot.setContentsMargins(2,2,2,2)
-        self.figure = Figure((7.5, 6), dpi=100, facecolor='white')#"#E5E5E5")
+        self.figure = Figure((8, 6.5), dpi=100, facecolor='white')#"#E5E5E5")
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setParent(self)
         self.canvas.axes = self.figure.add_subplot(111)
@@ -214,6 +220,7 @@ class dae2DPlot(QtGui.QDialog):
         self.mpl_toolbar.addAction(legend)
         self.mpl_toolbar.addSeparator()
         self.mpl_toolbar.addAction(new_line)
+        self.mpl_toolbar.addAction(fromUserData)
         self.mpl_toolbar.addAction(remove_line)
         self.mpl_toolbar.addSeparator()
         self.mpl_toolbar.addAction(properties)
@@ -739,6 +746,22 @@ class dae2DPlot(QtGui.QDialog):
         writer = Writer(fps = fps, codec = codec, bitrate = bitrate, extra_args = extra_args)
         self._startAnimation()
         self.funcAnimation.save(filename, writer=writer)
+
+    def slotFromUserData(self):
+        dlg = daeUserData()
+        if dlg.exec_() != QtGui.QDialog.Accepted:
+            return
+
+        self.newCurveFromUserData(dlg.xLabel, dlg.yLabel, dlg.lineLabel, dlg.xPoints, dlg.yPoints)
+
+    def newCurveFromUserData(self, xAxisLabel, yAxisLabel, lineLabel, xPoints, yPoints):
+        class dummyVariable(object):
+            def __init__(self, name = '', units = ''):
+                self.Name  = name
+                self.Units = units
+
+        self._addNewCurve(dummyVariable(lineLabel), [], [], xAxisLabel, yAxisLabel, xPoints, yPoints, None, lineLabel, None)
+        return True
 
     #@QtCore.pyqtSlot()
     def newCurve(self):

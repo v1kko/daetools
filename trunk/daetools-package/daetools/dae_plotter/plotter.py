@@ -20,6 +20,7 @@ from .choose_variable import daeChooseVariable
 from .custom_plots import daeCustomPlots
 from .about import daeAboutDialog
 from .plot2d import dae2DPlot
+from .user_data import daeUserData
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -66,6 +67,11 @@ class daeMainWindow(QtGui.QMainWindow):
         customPlots.setShortcut('Ctrl+C')
         customPlots.setStatusTip('New user-defined plot')
         self.connect(customPlots, QtCore.SIGNAL('triggered()'), self.slotCustomPlots)
+
+        fromUserData = QtGui.QAction('New plot from the user-provided data...', self)
+        fromUserData.setShortcut('Ctrl+D')
+        fromUserData.setStatusTip('New plot from the user-provided data')
+        self.connect(fromUserData, QtCore.SIGNAL('triggered()'), self.slotFromUserData)
 
         plot3D = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-3d.png')), 'New Mayavi 3D plot...', self)
         plot3D.setShortcut('Ctrl+3')
@@ -118,6 +124,7 @@ class daeMainWindow(QtGui.QMainWindow):
         plot.addAction(plot3D)
         plot.addAction(matplotlibSurfacePlot)
         plot.addAction(customPlots)
+        plot.addAction(fromUserData)
         plot.addSeparator()
         plot.addAction(openTemplate)
         plot.addSeparator()
@@ -151,6 +158,20 @@ class daeMainWindow(QtGui.QMainWindow):
         exec(dlg.plot_source, globals())
         if 'make_custom_plot' in globals():
             make_custom_plot(processes)
+
+    def slotFromUserData(self):
+        dlg = daeUserData()
+        if dlg.exec_() != QtGui.QDialog.Accepted:
+            return
+
+        plot2D = dae2DPlot(self, self.tcpipServer, 0.0)
+
+        if plot2D.newCurveFromUserData(dlg.xLabel, dlg.yLabel, dlg.lineLabel, dlg.xPoints, dlg.yPoints) == False:
+            plot2D.close()
+            del plot2D
+            return
+
+        plot2D.show()
 
     #@QtCore.pyqtSlot()
     def slotPlot2D(self):
@@ -288,8 +309,7 @@ class daeMainWindow(QtGui.QMainWindow):
     #@QtCore.pyqtSlot()
     def slotDocumentation(self):
         docs_dir = os.path.join(os.path.dirname(__file__), '../docs/html/index.html')
-        url = QtCore.QUrl(docs_dir)
-        webbrowser.open(url, new=0, autoraise=True)
+        webbrowser.open(docs_dir, new=0, autoraise=True)
 
 def daeStartPlotter(port = 0):
     try:
