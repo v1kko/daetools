@@ -266,7 +266,7 @@ class dae2DPlot(QtGui.QDialog):
         return QtGui.QDialog.closeEvent(self, event)
 
     def updateCurves(self):
-        #try:
+        try:
             #                                                      these three not used
             for (line, variable, domainIndexes, domainPoints, fun, times, xPoints, yPoints_2D) in self.curves:
                 results = fun(variable, domainIndexes, domainPoints)
@@ -291,8 +291,8 @@ class dae2DPlot(QtGui.QDialog):
 
             self.reformatPlot()
 
-        #except Exception as e:
-        #    print((str(e)))
+        except Exception as e:
+            print((str(e)))
 
     #@QtCore.pyqtSlot()
     def slotExportTemplate(self):

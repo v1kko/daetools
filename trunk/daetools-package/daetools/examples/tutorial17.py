@@ -31,7 +31,10 @@ from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 from subprocess import Popen, call
 from daetools.pyDAE import *
-from .tutorial17_ui import Ui_tcpipLogServerMainWindow
+try:
+    from .tutorial17_ui import Ui_tcpipLogServerMainWindow
+except Exception as e:
+    from tutorial17_ui import Ui_tcpipLogServerMainWindow
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kW

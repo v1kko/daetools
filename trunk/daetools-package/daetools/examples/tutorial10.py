@@ -27,7 +27,7 @@ Here we introduce:
 - How to evaluate integrals of a function
 """
 
-import sys
+import os, sys
 from time import localtime, strftime
 from daetools.pyDAE import *
 
@@ -182,7 +182,8 @@ def consoleRun():
     # initial conditions will be copied automatically to DAE solver during SolveInitial call.
     print('T before loading:')
     print(simulation.m.T.npyValues)
-    simulation.LoadInitializationValues("tutorial10.init")
+    init_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'tutorial10.init')
+    simulation.LoadInitializationValues(init_file)
     print('T after loading:')
     print(simulation.m.T.npyValues)
     

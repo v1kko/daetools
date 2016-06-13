@@ -34,7 +34,10 @@ matplotlib.use('Qt4Agg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from daetools.pyDAE import *
-from .tutorial16_ui import Ui_InteractiveRunDialog
+try:
+    from .tutorial16_ui import Ui_InteractiveRunDialog
+except Exception as e:
+    from tutorial16_ui import Ui_InteractiveRunDialog
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kW
