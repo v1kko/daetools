@@ -69,6 +69,7 @@ void daeSimulation::Resume(void)
 // or multiple Resume() calls
     if(m_eActivityAction == eRunActivity)
         return;
+
 // Prevents resuming if the simulation has been finished
     if(m_dCurrentTime >= m_dTimeHorizon)
         return;
@@ -1969,6 +1970,16 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
         if(bPrintInfo)
             std::cout << "      RelativeTolerance = " << RelativeTolerance  << std::endl;
     }
+}
+
+bool daeSimulation::GetIsInitialized(void) const
+{
+    return m_bIsInitialized;
+}
+
+bool daeSimulation::GetIsSolveInitial(void) const
+{
+    return m_bIsSolveInitial;
 }
 
 void daeSimulation::SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings)

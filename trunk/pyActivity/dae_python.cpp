@@ -128,8 +128,8 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("InputVariables",					&daepython::daeDefaultSimulationWrapper::GetInputVariables,         DOCSTR_daeSimulation_InputVariables)
         .add_property("ModelParameters",				&daepython::daeDefaultSimulationWrapper::GetModelParameters,        DOCSTR_daeSimulation_ModelParameters)
 
-        //.def("GetModel",                    &daeSimulation::GetModel, return_internal_reference<>())
-        //.def("SetModel",                    &daeSimulation::SetModel)
+        .add_property("IsInitialized",                  &daeSimulation::GetIsInitialized)
+        .add_property("IsSolveInitial",                 &daeSimulation::GetIsSolveInitial)
 
         .def("SetUpParametersAndDomains",   &daeSimulation::SetUpParametersAndDomains, &daepython::daeDefaultSimulationWrapper::def_SetUpParametersAndDomains,
                                             ( arg("self") ), DOCSTR_daeSimulation_SetUpParametersAndDomains)

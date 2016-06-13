@@ -167,7 +167,7 @@ class daeSimulator(QtGui.QDialog):
             self.simulation.Pause()
         elif self.optimization:
             pass
-        
+
         return QtGui.QDialog.done(self, status)
 
     """
@@ -179,19 +179,21 @@ class daeSimulator(QtGui.QDialog):
         elif self.optimization:
             self.optimization.Finalize()
     """
-    
-    #@QtCore.pyqtSlot()
-    def slotResume(self):
-        self.simulation.Resume()
 
     #@QtCore.pyqtSlot()
     def slotPause(self):
         self.simulation.Pause()
 
     #@QtCore.pyqtSlot()
+    def slotResume(self):
+        self.simulation.Resume()
+        self._AfterRunCalls()
+
+    #@QtCore.pyqtSlot()
     def slotRun(self):
         self.run(False)
-        
+        self._AfterRunCalls()
+
     #@QtCore.pyqtSlot()
     def slotShowExplorerAndRun(self):
         self.run(True)
@@ -277,6 +279,8 @@ class daeSimulator(QtGui.QDialog):
                     self.lasolver_setoptions_fn(self.lasolver)
 
                 self.simulation.SolveInitial()
+                if not self.simulation.IsSolveInitial:
+                    raise RuntimeError('The initial conditions have not been calculated')
 
                 if self.run_before_simulation_begin_fn:
                     self.run_before_simulation_begin_fn(self.simulation, self.log)
@@ -286,11 +290,7 @@ class daeSimulator(QtGui.QDialog):
                     explorer.exec_()
 
                 self.simulation.Run()
-
-                if self.run_after_simulation_end_fn:
-                    self.run_after_simulation_end_fn(self.simulation, self.log)
-
-                self.simulation.Finalize()
+                # Do not do cleanup nor call Finalize for the user may have been paused the simulation/optimisation
 
             else:
                 # If nlpsolver is not sent then create it based on the selection
@@ -303,20 +303,29 @@ class daeSimulator(QtGui.QDialog):
                     self.nlpsolver_setoptions_fn(self.nlpsolver)
 
                 self.optimization.Run()
-
-                if self.run_after_simulation_end_fn:
-                    self.run_after_simulation_end_fn(self.simulation, self.log)
-
-                self.optimization.Finalize()
+                # Do not do cleanup nor call Finalize for the user may have been paused the simulation/optimisation
 
         except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            messages = traceback.format_tb(exc_traceback)
-            self.ui.textEdit.append('\n'.join(messages))
-            self.ui.textEdit.append(str(e))
-            if self.ui.textEdit.isVisible() == True:
-                self.ui.textEdit.update()
-            self.app.processEvents()
+           exc_type, exc_value, exc_traceback = sys.exc_info()
+           messages = traceback.format_tb(exc_traceback)
+           self.ui.textEdit.append('\n'.join(messages))
+           self.ui.textEdit.append(str(e))
+           if self.ui.textEdit.isVisible() == True:
+               self.ui.textEdit.update()
+           self.app.processEvents()
+
+    def _AfterRunCalls(self):
+        if self.optimization == None:
+            if self.simulation.CurrentTime == self.simulation.TimeHorizon: # We reached the end of simulation
+                if self.run_after_simulation_end_fn:
+                    self.run_after_simulation_end_fn(self.simulation, self.log)
+                self.simulation.Finalize()
+
+        else:
+            if self.simulation.CurrentTime == self.simulation.TimeHorizon: # We reached the end of simulation
+                if self.run_after_simulation_end_fn:
+                    self.run_after_simulation_end_fn(self.simulation, self.log)
+                self.optimization.Finalize()
 
     def showMessage(self, msg):
         QtGui.QMessageBox.warning(self, "daeSimulator", str(msg))

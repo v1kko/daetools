@@ -133,6 +133,9 @@ public:
     void	Report(daeVariable* pVariable, real_t time);
     void	Report(daeParameter* pParameter, real_t time);
 
+    bool GetIsInitialized(void) const;
+    bool GetIsSolveInitial(void) const;
+
 protected:
 //	void	SetInitialConditionsToZero(void);
     void	CheckSystem(void) const;
