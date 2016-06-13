@@ -55,7 +55,7 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
                              oned_as='row')
                              
         except Exception as e:
-            print(('Cannot write results in .mat format; is scipy package installed?\n' + str(e)))
+            print(('Cannot write results in .mat format:\n' + str(e)))
 
 
 class daeJSONFileDataReporter(daeDataReporterLocal):
@@ -80,10 +80,11 @@ class daeJSONFileDataReporter(daeDataReporterLocal):
 
     def WriteDataToFile(self):
         mdict = {}
-        for variable_name, (ndarr_values, ndarr_times, l_domains) in self.Process.dictVariableValues.items():
-            mdict[daeGetStrippedName(variable_name)] = {'Value'   : ndarr_values.tolist(),
+        for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
+            mdict[daeGetStrippedName(variable_name)] = {'Values'  : ndarr_values.tolist(),
                                                         'Times'   : ndarr_times.tolist(),
-                                                        'Domains' : l_domains
+                                                        'Domains' : l_domains,
+                                                        'Units'   : s_units
                                                        }
 
         try:
@@ -119,11 +120,12 @@ class daeHDF5FileDataReporter(daeDataReporterLocal):
         try:
             import h5py
             f = h5py.File(self.ConnectString, "w")
-            for variable_name, (ndarr_values, ndarr_times, l_domains) in self.Process.dictVariableValues.items():
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
                 grp = f.create_group(daeGetStrippedName(variable_name))
-                dsv = grp.create_dataset("Value",   data = ndarr_values)
+                dsv = grp.create_dataset("Values",  data = ndarr_values)
                 dst = grp.create_dataset("Times",   data = ndarr_times)
-                dst = grp.create_dataset("Domains", data = l_domains)
+                dsd = grp.create_dataset("Domains", data = l_domains)
+                dsu = grp.create_dataset("Units",   data = s_units)
 
             f.close()
 
@@ -183,7 +185,7 @@ class daeXMLFileDataReporter(daeDataReporterLocal):
                     """
 
                     if isinstance(x, dict):
-                        return XmlDictObject((k, XmlDictObject.Wrap(v)) for (k, v) in x.iteritems())
+                        return XmlDictObject((k, XmlDictObject.Wrap(v)) for (k, v) in x.items())
                     elif isinstance(x, list):
                         return [XmlDictObject.Wrap(v) for v in x]
                     else:
@@ -192,7 +194,7 @@ class daeXMLFileDataReporter(daeDataReporterLocal):
                 @staticmethod
                 def _UnWrap(x):
                     if isinstance(x, dict):
-                        return dict((k, XmlDictObject._UnWrap(v)) for (k, v) in x.iteritems())
+                        return dict((k, XmlDictObject._UnWrap(v)) for (k, v) in x.items())
                     elif isinstance(x, list):
                         return [XmlDictObject._UnWrap(v) for v in x]
                     else:
@@ -209,7 +211,7 @@ class daeXMLFileDataReporter(daeDataReporterLocal):
                 assert type(dictitem) is not type([])
 
                 if isinstance(dictitem, dict):
-                    for (tag, child) in dictitem.iteritems():
+                    for (tag, child) in dictitem.items():
                         if str(tag) == '_text':
                             parent.text = str(child)
                         elif type(child) is type([]):
@@ -230,19 +232,23 @@ class daeXMLFileDataReporter(daeDataReporterLocal):
                 Converts a dictionary to an XML ElementTree Element
                 """
 
-                roottag = xmldict.keys()[0]
+                roottag = list(xmldict.keys())[0]
                 root = ElementTree.Element(roottag)
                 _ConvertDictToXmlRecurse(root, xmldict[roottag])
                 return root
 
             mdict = XmlDictObject()
             variables = {}
+
             for var in self.Process.Variables:
                 variable = {}
-                variable['Times'] = var.TimeValues.tolist()
+                variable['Units'] = var.Units
+                variable['Times'] = {}
+                variable['Times']['item'] = var.TimeValues.tolist()
                 # ConvertDictToXml complains about multi-dimensional arrays
                 # Hence, flatten nd_array before exporting to xml
-                variable['Value'] = numpy.ravel(var.Values).tolist()
+                variable['Values'] = {}
+                variable['Values']['item'] = numpy.ravel(var.Values).tolist()
                 variables[daeGetStrippedName(var.Name)] = variable
             mdict['Simulation'] = variables
 
@@ -281,11 +287,11 @@ class daeExcelFileDataReporter(daeDataReporterLocal):
 
             wb = xlwt.Workbook()
             # Uses a new property (dictVariableValues) in daeDataReporterLocal to process the data
-            for variable_name, (ndarr_values, ndarr_times, l_domains) in self.Process.dictVariableValues.items():
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
                 ws = wb.add_sheet(variable_name)
 
                 ws.write(0, 0, 'Times')
-                ws.write(0, 1, 'Value')
+                ws.write(0, 1, 'Values [%s]' % s_units)
                 for (t,), time in numpy.ndenumerate(ndarr_times):
                     ws.write(t+1, 0, time)
                     v = 0
@@ -296,7 +302,7 @@ class daeExcelFileDataReporter(daeDataReporterLocal):
             wb.save(self.ConnectString)
             
         except Exception as e:
-            print(('Cannot save excel file; is python-xlwt package installed?\n' + str(e)))
+            print(('Cannot write data to an excel file:\n' + str(e)))
 
 class daePandasDataReporter(daeDataReporterLocal):
     """
@@ -327,15 +333,18 @@ class daePandasDataReporter(daeDataReporterLocal):
             names = []
             data  = []
             times = []
+            units = []
             for name, var in self.Process.dictVariables.items():
                 names.append(name)
+                units.append(var.Units)
                 times.append(var.TimeValues)
                 data.append(var.Values)
 
-            self.data_frame = DataFrame(data = zip(times, data), columns = ['Times', 'Value'], index = names)
+            _data = list(zip(units, times, data))
+            self.data_frame = DataFrame(data = _data, columns = ['Units', 'Times', 'Values'], index = names)
 
         except Exception as e:
-            print(('Cannot generate Pandas DataFrame; is python-pandas package installed?\n' + str(e)))
+            print(('Cannot generate Pandas DataFrame:\n' + str(e)))
 
 class daePlotDataReporter(daeDataReporterLocal):
     """
@@ -429,7 +438,7 @@ class daePlotDataReporter(daeDataReporterLocal):
                 lookup[processVar.Name] = processVar
 
             def varLabel(daeVar):
-                return '${0} {1}$'.format(daeVar.Name, str(daeVar.VariableType.Units))
+                return '{0} ({1})'.format(daeVar.Name, str(daeVar.VariableType.Units))
 
             def larger_axlim(axlim):
                 """ This function enlarges the y-axis range so that data
@@ -490,4 +499,4 @@ class daePlotDataReporter(daeDataReporterLocal):
 
         except Exception as e:
             import traceback
-            print(('Error: \n' + traceback.format_exc()))
+            print(('Cannot generate matplotlib plots:\n' + traceback.format_exc()))

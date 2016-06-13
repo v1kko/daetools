@@ -5,44 +5,44 @@
 using namespace std;
 using namespace boost;
 using namespace boost::python;
-  
+
 namespace daepython
 {
 /*******************************************************
-	daeDataReporterVariable
+    daeDataReporterVariable
 *******************************************************/
 boost::python::list GetDataReporterDomains(daeDataReporterVariable& Variable)
 {
-	boost::python::list l;
+    boost::python::list l;
 
-	for(size_t i = 0; i < Variable.m_strarrDomains.size(); i++)
-		l.append(Variable.m_strarrDomains[i]);
-	return l;
+    for(size_t i = 0; i < Variable.m_strarrDomains.size(); i++)
+        l.append(Variable.m_strarrDomains[i]);
+    return l;
 }
 
 boost::python::list GetDataReporterDomainPoints(daeDataReporterDomain& Domain)
 {
-	boost::python::list l;
+    boost::python::list l;
 
-	for(size_t i = 0; i < Domain.m_nNumberOfPoints; i++)
+    for(size_t i = 0; i < Domain.m_nNumberOfPoints; i++)
         l.append(Domain.m_arrPoints[i]);
-	return l;
+    return l;
 }
 
 boost::python::object GetNumPyArrayDataReporterVariableValue(daeDataReporterVariableValue& self)
 {
 /* NUMPY
- 	size_t i, nType;
-	npy_intp dimensions;
+    size_t i, nType;
+    npy_intp dimensions;
 
-	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
-	dimensions = var.m_nNumberOfPoints;
-	
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
-	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
-	memcpy(values, var.m_pValues, sizeof(real_t)*var.m_nNumberOfPoints);
+    nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
+    dimensions = var.m_nNumberOfPoints;
 
-	return numpy_array;
+    python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+    real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+    memcpy(values, var.m_pValues, sizeof(real_t)*var.m_nNumberOfPoints);
+
+    return numpy_array;
 */
     // Import numpy
     boost::python::object main_module = import("__main__");
@@ -72,14 +72,14 @@ boost::python::object GetNumPyArrayDataReporterVariableValue(daeDataReporterVari
 }
 
 /*******************************************************
-	daeDataReceiverDomain
+    daeDataReceiverDomain
 *******************************************************/
 boost::python::list GetDataReceiverDomainPoints(daeDataReceiverDomain& domain)
 {
-	python::list l;
-	for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
+    python::list l;
+    for(size_t i = 0; i < domain.m_nNumberOfPoints; i++)
         l.append(domain.m_arrPoints[i]);
-	return l;
+    return l;
 }
 
 boost::python::list GetDataReceiverDomainCoordinates(daeDataReceiverDomain& domain)
@@ -97,39 +97,39 @@ boost::python::list GetDataReceiverDomainCoordinates(daeDataReceiverDomain& doma
 }
 
 /*******************************************************
-	daeDataReceiverVariable
+    daeDataReceiverVariable
 *******************************************************/
 boost::python::object GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable& self)
 {
 /* NUMPY
-	size_t i, nType, nDomains, nTotalSize, nTimeSize;
-	npy_intp* dimensions;
+    size_t i, nType, nDomains, nTotalSize, nTimeSize;
+    npy_intp* dimensions;
 
-	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
-	nDomains = var.m_ptrarrDomains.size();
-	dimensions = new npy_intp[nDomains + 1];
-	nTimeSize = var.m_ptrarrValues.size();
-	nTotalSize = nTimeSize;
-	dimensions[0] = nTimeSize;
-	for(i = 0; i < nDomains; i++)
-	{
-		dimensions[i+1] = var.m_ptrarrDomains[i]->m_nNumberOfPoints;
-		nTotalSize *= dimensions[i+1];
-	}
-	
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains+1, dimensions, nType))));
-	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
-	for(i = 0; i < nTimeSize; i++)
-	{
-		memcpy(values, var.m_ptrarrValues[i]->m_pValues, sizeof(real_t)*var.m_nNumberOfPoints);
-		values += var.m_nNumberOfPoints;
-	}
+    nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
+    nDomains = var.m_ptrarrDomains.size();
+    dimensions = new npy_intp[nDomains + 1];
+    nTimeSize = var.m_ptrarrValues.size();
+    nTotalSize = nTimeSize;
+    dimensions[0] = nTimeSize;
+    for(i = 0; i < nDomains; i++)
+    {
+        dimensions[i+1] = var.m_ptrarrDomains[i]->m_nNumberOfPoints;
+        nTotalSize *= dimensions[i+1];
+    }
 
-	delete[] dimensions;
-	return numpy_array;
+    python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(nDomains+1, dimensions, nType))));
+    real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+    for(i = 0; i < nTimeSize; i++)
+    {
+        memcpy(values, var.m_ptrarrValues[i]->m_pValues, sizeof(real_t)*var.m_nNumberOfPoints);
+        values += var.m_nNumberOfPoints;
+    }
+
+    delete[] dimensions;
+    return numpy_array;
 */
     size_t nDomains  = self.m_ptrarrDomains.size();
-	size_t nTimeSize = self.m_ptrarrValues.size();
+    size_t nTimeSize = self.m_ptrarrValues.size();
 
     // Import numpy
     boost::python::object main_module = import("__main__");
@@ -169,18 +169,18 @@ boost::python::object GetNumPyArrayDataReceiverVariable(daeDataReceiverVariable&
 boost::python::object GetTimeValuesDataReceiverVariable(daeDataReceiverVariable& self)
 {
 /* NUMPY
-	size_t nType;
-	npy_intp dimensions;
+    size_t nType;
+    npy_intp dimensions;
 
-	nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
-	dimensions = var.m_ptrarrValues.size();
-	
-	python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
-	real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
-	for(size_t k = 0; k < (size_t)dimensions; k++)
-		values[k] = var.m_ptrarrValues[k]->m_dTime;
+    nType = (typeid(real_t) == typeid(double) ? NPY_DOUBLE : NPY_FLOAT);
+    dimensions = var.m_ptrarrValues.size();
 
-	return numpy_array;
+    python::numeric::array numpy_array(static_cast<python::numeric::array>(handle<>(PyArray_SimpleNew(1, &dimensions, nType))));
+    real_t* values = static_cast<real_t*> PyArray_DATA(numpy_array.ptr());
+    for(size_t k = 0; k < (size_t)dimensions; k++)
+        values[k] = var.m_ptrarrValues[k]->m_dTime;
+
+    return numpy_array;
 */
     size_t nSize = self.m_ptrarrValues.size();
 
@@ -213,73 +213,73 @@ boost::python::object GetTimeValuesDataReceiverVariable(daeDataReceiverVariable&
 
 python::list GetDomainsDataReceiverVariable(daeDataReceiverVariable& var)
 {
-	python::list l;
-	daeDataReceiverDomain* obj;
-	size_t i, nDomains;
+    python::list l;
+    daeDataReceiverDomain* obj;
+    size_t i, nDomains;
 
-	nDomains = var.m_ptrarrDomains.size();
-	
-	for(i = 0; i < nDomains; i++)
-	{
-		obj = var.m_ptrarrDomains[i];
-		l.append(boost::ref(obj));
-	}
-	return l;
+    nDomains = var.m_ptrarrDomains.size();
+
+    for(i = 0; i < nDomains; i++)
+    {
+        obj = var.m_ptrarrDomains[i];
+        l.append(boost::ref(obj));
+    }
+    return l;
 }
 
 /*******************************************************
-	daeDataReceiverProcess
+    daeDataReceiverProcess
 *******************************************************/
 python::list GetDomainsDataReporterProcess(daeDataReceiverProcess& process)
 {
-	python::list l;
-	daeDataReceiverDomain* obj;
+    python::list l;
+    daeDataReceiverDomain* obj;
 
-	for(size_t i = 0; i < process.m_ptrarrRegisteredDomains.size(); i++)
-	{
-		obj = process.m_ptrarrRegisteredDomains[i];
-		l.append(boost::ref(obj));
-	}
-	return l;
+    for(size_t i = 0; i < process.m_ptrarrRegisteredDomains.size(); i++)
+    {
+        obj = process.m_ptrarrRegisteredDomains[i];
+        l.append(boost::ref(obj));
+    }
+    return l;
 }
 
 python::list GetVariablesDataReporterProcess(daeDataReceiverProcess& process)
 {
-	python::list l;
-	daeDataReceiverVariable* obj;
+    python::list l;
+    daeDataReceiverVariable* obj;
 
-	map<string, daeDataReceiverVariable*>::const_iterator iter;
-	for(iter = process.m_ptrmapRegisteredVariables.begin(); iter != process.m_ptrmapRegisteredVariables.end(); iter++)
-	{
-		obj = (*iter).second;
-		l.append(boost::ref(obj));
-	}
+    map<string, daeDataReceiverVariable*>::const_iterator iter;
+    for(iter = process.m_ptrmapRegisteredVariables.begin(); iter != process.m_ptrmapRegisteredVariables.end(); iter++)
+    {
+        obj = (*iter).second;
+        l.append(boost::ref(obj));
+    }
 
-	return l;
+    return l;
 }
 
 boost::python::dict GetDomainsAsDictDataReporterProcess(daeDataReceiverProcess& process)
 {
     python::dict d;
-	daeDataReceiverDomain* obj;
+    daeDataReceiverDomain* obj;
 
-	for(size_t i = 0; i < process.m_ptrarrRegisteredDomains.size(); i++)
-	{
-		obj = process.m_ptrarrRegisteredDomains[i];
-		d[obj->m_strName] = boost::ref(obj);
-	}
-	return d;
+    for(size_t i = 0; i < process.m_ptrarrRegisteredDomains.size(); i++)
+    {
+        obj = process.m_ptrarrRegisteredDomains[i];
+        d[obj->m_strName] = boost::ref(obj);
+    }
+    return d;
 }
 
 boost::python::dict GetVariablesAsDictDataReporterProcess(daeDataReceiverProcess& process)
 {
     boost::python::dict d;
     map<string, daeDataReceiverVariable*>::const_iterator iter;
-    
+
     for(iter = process.m_ptrmapRegisteredVariables.begin(); iter != process.m_ptrmapRegisteredVariables.end(); iter++)
         d[ (*iter).first ] = boost::ref( (*iter).second );
 
-    return d;    
+    return d;
 }
 
 boost::python::dict GetDictOfVariableValuesAsNumpyArraysDataReporterProcess(daeDataReceiverProcess& process)
@@ -298,6 +298,7 @@ boost::python::dict GetDictOfVariableValuesAsNumpyArraysDataReporterProcess(daeD
         daeDataReceiverVariable* pVariable = iter->second;
         boost::python::object ndvalues     = GetNumPyArrayDataReceiverVariable(*pVariable);
         boost::python::object ndtimes      = GetTimeValuesDataReceiverVariable(*pVariable);
+        string strUnits                    = pVariable->m_strUnits;
 
         boost::python::list domains;
         for(size_t i = 0; i < pVariable->m_ptrarrDomains.size(); i++)
@@ -320,7 +321,7 @@ boost::python::dict GetDictOfVariableValuesAsNumpyArraysDataReporterProcess(daeD
             domains.append(ndarray);
         }
 
-        d[strName] = boost::python::make_tuple(ndvalues, ndtimes, domains);
+        d[strName] = boost::python::make_tuple(ndvalues, ndtimes, domains, strUnits);
     }
 
     return d;

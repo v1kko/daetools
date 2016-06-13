@@ -91,12 +91,13 @@ class MyDataReporter(daeDataReporterLocal):
             domains = var.Domains
             times   = var.TimeValues
             s += " - Variable: " + var.Name + "\n"
+            s += "    - Units: " + var.Units + "\n"
             s += "    - Domains:" + "\n"
             for domain in domains:
                 s += "       - " + domain.Name + "\n"
             s += "    - Values:" + "\n"
             for i in range(len(times)):
-                s += "      - Time: " + str(times[i]) + "\n"
+                s += "      - Time: " + str(times[i]) + "s\n"
                 s += "        " + str(values[i, ...]) + "\n"
 
         return s
@@ -267,7 +268,8 @@ def consoleRun():
     try:
         # All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter
         # classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class
-        # contains dictVariableValues property which represents a dictionary 'variable_name':(ndarr_times, ndarr_values)
+        # contains dictVariableValues property which represents a dictionary
+        # 'variable_name':(ndarr_times, ndarr_values, list_domains, s_units)
         # First print the contents of the abovementioned dictionary:
         import pprint
         pprint.pprint(simulation.dr1.Process.dictVariableValues)
@@ -275,15 +277,15 @@ def consoleRun():
         # Get the dictionary
         dvals = simulation.dr1.Process.dictVariableValues
         # Plot some variables
-        values,times,domains = dvals['tutorial8.T']
+        values,times,domains,units = dvals['tutorial8.T']
         import matplotlib
         matplotlib.pyplot.plot(times,values)
+        matplotlib.pyplot.title('tutorial8.T (%s)' % units)
         matplotlib.pyplot.show()
 
         # Pandas dataset
         print('pandas dataset')
         print(simulation.dr9.data_frame)
-        print(simulation.dr9.data_frame['Value']['tutorial8.T'])
     except Exception as e:
         print(str(e))
     
