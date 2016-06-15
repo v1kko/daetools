@@ -269,7 +269,7 @@ def consoleRun():
         # All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter
         # classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class
         # contains dictVariableValues property which represents a dictionary
-        # 'variable_name':(ndarr_times, ndarr_values, list_domains, s_units)
+        # 'variable_name':(ndarr_times, ndarr_values, list_domains, string_units)
         # First print the contents of the abovementioned dictionary:
         import pprint
         pprint.pprint(simulation.dr1.Process.dictVariableValues)

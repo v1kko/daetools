@@ -413,12 +413,12 @@ DAE_CORE_API const adouble_array operator -(const adouble& a, const adouble_arra
 DAE_CORE_API const adouble_array operator *(const adouble& a, const adouble_array& arr);
 DAE_CORE_API const adouble_array operator /(const adouble& a, const adouble_array& arr);
 
-DAE_CORE_API const adouble_array dt_array(const adouble_array& adarr);
-DAE_CORE_API const adouble_array d_array(const adouble_array&                      adarr,
+DAE_CORE_API const adouble_array dt_array(adouble_array& adarr);
+DAE_CORE_API const adouble_array d_array(adouble_array&                            adarr,
                                          daeDomain&                                domain,
                                          daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
                                          const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
-DAE_CORE_API const adouble_array d2_array(const adouble_array&                      adarr,
+DAE_CORE_API const adouble_array d2_array(adouble_array&                            adarr,
                                           daeDomain&                                domain,
                                           daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
                                           const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());

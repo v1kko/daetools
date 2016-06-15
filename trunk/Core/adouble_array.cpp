@@ -591,45 +591,102 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 /*********************************************************************************************
   d_array, d2_array, dt_array
 **********************************************************************************************/
-const adouble_array dt_array(const adouble_array& adarr)
+const adouble_array dt_array(adouble_array& adarr)
 {
-    daeDeclareAndThrowException(exNotImplemented);
-
     adouble_array tmp;
     tmp.setGatherInfo(true);
+
+    adNodeArrayPtr a = adarr.node;
+    if( dynamic_cast<adSetupVariableNodeArray*>(a.get()) )
+    {
+        adSetupVariableNodeArray* node_array = dynamic_cast<adSetupVariableNodeArray*>(a.get());
+        tmp.node = adNodeArrayPtr(new adSetupTimeDerivativeNodeArray(node_array->m_pVariable,
+                                                                     1,
+                                                                     node_array->m_arrRanges));
+    }
+    else
+    {
+        daeDeclareException(exNotImplemented);
+        e << "At the moment, dt_array function accepts only variable array arguments only";
+        throw e;
+    }
+
     return tmp;
 }
 
-const adouble_array d_array(const adouble_array&                      adarr,
+const adouble_array d_array(adouble_array&                            adarr,
                             daeDomain&                                domain,
                             daeeDiscretizationMethod                  eDiscretizationMethod,
                             const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
     adouble_array tmp;
     tmp.setGatherInfo(true);
+
+    adNodeArrayPtr a = adarr.node;
+    if( dynamic_cast<adSetupVariableNodeArray*>(a.get()) )
+    {
+        adSetupVariableNodeArray* node_array = dynamic_cast<adSetupVariableNodeArray*>(a.get());
+        tmp.node = adNodeArrayPtr(new adSetupPartialDerivativeNodeArray(node_array->m_pVariable,
+                                                                        1,
+                                                                        node_array->m_arrRanges,
+                                                                        &domain,
+                                                                        eDiscretizationMethod,
+                                                                        mapDiscretizationOptions));
+    }
+    else
+    {
+        daeDeclareException(exNotImplemented);
+        e << "At the moment, dt_array function accepts only variable array arguments only";
+        throw e;
+    }
+
+    return tmp;
+
+/* Old, not working code
     tmp.node = adNodeArrayPtr(new adSetupExpressionPartialDerivativeNodeArray(&domain,
                                                                               1,
                                                                               eDiscretizationMethod,
                                                                               mapDiscretizationOptions,
                                                                               adarr.node));
-    return tmp;
+*/
 }
 
-const adouble_array d2_array(const adouble_array&                      adarr,
+const adouble_array d2_array(adouble_array&                            adarr,
                              daeDomain&                                domain,
                              daeeDiscretizationMethod                  eDiscretizationMethod,
                              const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
     adouble_array tmp;
     tmp.setGatherInfo(true);
+
+    adNodeArrayPtr a = adarr.node;
+    if( dynamic_cast<adSetupVariableNodeArray*>(a.get()) )
+    {
+        adSetupVariableNodeArray* node_array = dynamic_cast<adSetupVariableNodeArray*>(a.get());
+        tmp.node = adNodeArrayPtr(new adSetupPartialDerivativeNodeArray(node_array->m_pVariable,
+                                                                        2,
+                                                                        node_array->m_arrRanges,
+                                                                        &domain,
+                                                                        eDiscretizationMethod,
+                                                                        mapDiscretizationOptions));
+    }
+    else
+    {
+        daeDeclareException(exNotImplemented);
+        e << "At the moment, dt_array function accepts only variable array arguments only";
+        throw e;
+    }
+
+    return tmp;
+
+/* Old, not working code
     tmp.node = adNodeArrayPtr(new adSetupExpressionPartialDerivativeNodeArray(&domain,
                                                                               2,
                                                                               eDiscretizationMethod,
                                                                               mapDiscretizationOptions,
                                                                               adarr.node));
-    return tmp;
+*/
 }
-
 /*********************************************************************************************
  sum, product, integral, min, max, average
 **********************************************************************************************/

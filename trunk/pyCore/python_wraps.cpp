@@ -15,14 +15,20 @@ namespace daepython
 *******************************************************/
 daeDomainIndex CreateDomainIndex(object& o)
 {
-    extract<size_t>          size(o);
+    extract<int>             integer(o);
     extract<daeDEDI*>        DEDI(o);
     extract<daeDomainIndex>  domainIndex(o);
 
-    if(size.check())
+    if(integer.check())
     {
-        size_t n = size();
-        return daeDomainIndex(n);
+        int iIndex = integer();
+        if(iIndex < 0)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid argument (must be a positive integer)" ;
+            throw e;
+        }
+        return daeDomainIndex(size_t(iIndex));
     }
     else if(DEDI.check())
     {
@@ -62,18 +68,13 @@ daeArrayRange CreateArrayRange(object& o, daeDomain* pDomain)
     else if(get_int.check())
     {
         int iIndex = get_int();
-
-    // If < 0 get ALL points
-    // Otherwise take the point defined with iIndex
-        if(iIndex < 0)
+        if(iIndex < 0 || iIndex > pDomain->GetNumberOfPoints()-1)
         {
-            daeIndexRange ir(pDomain);
-            return daeArrayRange(ir);
+            daeDeclareException(exInvalidCall);
+            e << "Invalid argument of the array_xxx function (must be a positive integer and within the domain bounds)" ;
+            throw e;
         }
-        else
-        {
-            return daeArrayRange(size_t(iIndex));
-        }
+        return daeArrayRange(size_t(iIndex));
     }
     else if(get_IndexRange.check())
     {
@@ -1305,12 +1306,12 @@ const adouble ad_d2(const adouble& a,
     return d2(a, domain, method, mapOptions);
 }
 
-const adouble_array ad_dt_array(const adouble_array& adarr)
+const adouble_array ad_dt_array(adouble_array& adarr)
 {
     return dt_array(adarr);
 }
 
-const adouble_array ad_d_array(const adouble_array&     adarr,
+const adouble_array ad_d_array(adouble_array&           adarr,
                                daeDomain&               domain,
                                daeeDiscretizationMethod method,
                                boost::python::dict      options)
@@ -1320,7 +1321,7 @@ const adouble_array ad_d_array(const adouble_array&     adarr,
     return d_array(adarr, domain, method, mapOptions);
 }
 
-const adouble_array ad_d2_array(const adouble_array&     adarr,
+const adouble_array ad_d2_array(adouble_array&           adarr,
                                 daeDomain&               domain,
                                 daeeDiscretizationMethod method,
                                 boost::python::dict      options)

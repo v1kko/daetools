@@ -87,16 +87,15 @@ class modTutorial(daeModel):
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = d(self.T(x,y), self.x)
 
-        # There are several function that return arrays of values (or time- or partial-derivatives)
-        # such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values
+        # There are several functions that return arrays of values (or time- or partial-derivatives)
+        # such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values.
         # To obtain the array of values it is necessary to define points from all domains that the parameter
         # or variable is distributed on. Functions that return array of values accept the following arguments:
         #  - daeIndexRange objects
         #  - plain integers (to select a single index from a domain)
-        #  - python lists (to select a list of indexes from a domain)
+        #  - python lists (to select a list of indexes from a domain),
         #  - python slices (to select a range of indexes from a domain: start_index, end_index, step)
         #  - character '*' (to select all points from a domain)
-        #  - integer -1 (to select all points from a domain)
         #  - empty python list [] (to select all points from a domain)
         #
         # daeIndexRange constructor has three variants:
@@ -125,20 +124,25 @@ class modTutorial(daeModel):
         #   a) xr = daeIndexRange(self.x)
         #      yr = daeIndexRange(self.y)
         #      eq.Residual = self.Tave() - Average( self.T.array( xr, yr ) )
-        #   b) eq.Residual = self.Tave() - Average( self.T.array( '*', -1 ) )
+        #   b) eq.Residual = self.Tave() - Average( self.T.array( '*', '*' ) )
         #   c) eq.Residual = self.Tave() - Average( self.T.array( [], '*' ) )
-        #   d) eq.Residual = self.Tave() - Average( self.T.array( -1, slice(0, -1) ) )
+        #   d) eq.Residual = self.Tave() - Average( self.T.array( '*', slice(0,-1) ) )
+        #   e) eq.Residual = self.Tave() - Average( self.T.array( [],  slice(0,-1) ) )
         #
         # To select only certain points from a domain we can use a list or a slice:
-        #   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1, 3, 7 from domain y 
-        #   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3, 5, 7 from domain y 
+        #   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1,3,7 from domain y
+        #   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3,9,2 from domain y
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
-        eq.Residual = self.Qsum() + self.k() * Sum( d_array(self.T.array('*', 0), self.y) )
+        Tarray = self.T.array('*', 0) # array of T values along x axis and for y = 0 (adouble_array object)
+        eq.Residual = self.Qsum() + self.k() * Sum( d_array(Tarray, self.y) )
         
         Nx = self.x.NumberOfPoints
-        # These equations are just a mental gymnastics to illustrate various functions (array, Constant, Array)
-        #  - The function Constant() creates a constant quantity that contains a value and units 
+        # These equations are just a mental gymnastics to illustrate various functions such as
+        # daeVariable's array() and d_array() and global functions Constant() and Array().
+        #  - daeVariable.array() creates an array of values stored in a adouble_array object
+        #  - daeVariable.d_array() creates an array of partial derivatives stored in a adouble_array object
+        #  - The function Constant() creates a constant quantity that contains a value and units
         #  - The function Array() creates an array of constant quantities that contain a value and units
         # Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)
         #
@@ -146,16 +150,18 @@ class modTutorial(daeModel):
         #                                          ∂T(*, 0)
         #             [2K, 2K, 2K, ..., 2K] * k * ----------
         #                                             ∂y          2K         ∂T(0, 0)           2K         ∂T(xn, 0)
-        # Qmul = -∑ ------------------------------------------ = ---- * k * ---------- + ... + ---- * k * -----------
+        # Qsum1 = -∑ ------------------------------------------ = ---- * k * ---------- + ... + ---- * k * -----------
         #                             2K                          2K           ∂y               2K            ∂y
         #
-        # Achtung: the value of Qmul must be identical to Qsum!
+        # Achtung: the value of Qsum1 must be identical to Qsum!
         eq = self.CreateEquation("Q_mul", "Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)")
-        values = [2 * K for i in range(Nx)] # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
-        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * self.T.d_array('*', 0, self.y) / Constant(2 * K) )
+        values = [2 * K for i in range(Nx)]  # creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints
+        Tarray = self.T.array('*', 0)        # array of T values along x axis and for y = 0 (adouble_array object)
+        dTdy_array = d_array(Tarray, self.y) # array of dT/dy partial derivatives (adouble_array object)
+        eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * dTdy_array / Constant(2 * K) )
 
         # Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.
-        # In those cases the functions suxh as array(), d_array(), dt_array(), Array() etc
+        # In those cases the functions such as array(), d_array(), dt_array(), Array() etc
         # are NOT applicable since they return adouble_array objects.
         # However, we can create a numpy array of adouble objects, apply numpy functions on them
         # and finally create adouble_array object from resulting numpy arrays of adouble objects, if necessary.
@@ -171,7 +177,7 @@ class modTutorial(daeModel):
         #      - all items at once
         #      - item by item
         #    In this case, we populate all items at once
-        Qbottom[:] = [self.k() * self.T.d(self.y, x, 0) for x in range(Nx)]
+        Qbottom[:] = [self.k() * d(self.T(x,0), self.y) for x in range(Nx)]
         # 3. Finally, create an equation
         eq = self.CreateEquation("Q_sum2", "The sum of heat fluxes at the bottom edge of the plate (numpy version)")
         eq.Residual = self.Qsum2() + numpy.sum(Qbottom)

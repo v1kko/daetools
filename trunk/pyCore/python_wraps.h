@@ -62,7 +62,7 @@ template<typename ITEM>
 boost::python::list getListFromVector(const std::vector<ITEM>& arrItems)
 {
     boost::python::list l;
-   
+
     for(size_t i = 0; i < arrItems.size(); i++)
         l.append(boost::ref(arrItems[i]));
 
@@ -74,7 +74,7 @@ boost::python::list getListFromVectorAndCastPointer(const std::vector<ITEM>& arr
 {
     CAST pObject;
     boost::python::list l;
-   
+
     for(size_t i = 0; i < arrItems.size(); i++)
     {
         pObject = dynamic_cast<CAST>(arrItems[i]);
@@ -87,7 +87,7 @@ template<typename ITEM>
 boost::python::list getListFromVectorByValue(const std::vector<ITEM>& arrItems)
 {
     boost::python::list l;
-   
+
     for(size_t i = 0; i < arrItems.size(); i++)
         l.append(arrItems[i]);
 
@@ -101,8 +101,8 @@ std::string getVector__repr__(const std::vector<ITEM*>& arrItems, std::string (*
     for(size_t i = 0; i < arrItems.size(); i++)
         str += (i == 0 ? "" : ", ") + __repr__(*arrItems[i]);
     str += "]";
-    
-    return str;    
+
+    return str;
 }
 
 template<typename ITEM, typename CAST>
@@ -115,12 +115,12 @@ std::string getVectorWithCast__repr__(const std::vector<ITEM*>& arrItems, std::s
         str += (i == 0 ? "" : ", ") + __repr__(*ptr);
     }
     str += "]";
-    
-    return str;    
+
+    return str;
 }
 
 /*******************************************************
-	String functions
+    String functions
 *******************************************************/
 string daeVariableType__repr__(const daeVariableType& self);
 string daeDomainIndex__repr__(const daeDomainIndex& self);
@@ -192,7 +192,7 @@ string daeVectorExternalFunction__str__(daeVectorExternalFunction& self);
 string daeVectorExternalFunction__repr__(daeVectorExternalFunction& self);
 
 /*******************************************************
-	Common functions
+    Common functions
 *******************************************************/
 daeDomainIndex CreateDomainIndex(boost::python::object& o);
 daeArrayRange  CreateArrayRange(boost::python::object& o, daeDomain* pDomain);
@@ -223,7 +223,7 @@ boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::objec
 void                  daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::python::object value);
 
 /*******************************************************
-	adNode...
+    adNode...
 *******************************************************/
 daeParameter* adSetupParameterNode_Parameter(adSetupParameterNode& node);
 boost::python::list adSetupParameterNode_Domains(adSetupParameterNode& node);
@@ -260,7 +260,7 @@ real_t adFEMatrixItemNode_Value(adFEMatrixItemNode& self);
 real_t adFEVectorItemNode_Value(adFEVectorItemNode& self);
 
 /*******************************************************
-	adouble
+    adouble
 *******************************************************/
 const adouble ad_true_divide1(const adouble &a, const adouble &b);
 const adouble ad_true_divide2(const adouble &a, const real_t v);
@@ -304,7 +304,6 @@ const adouble ad_min2(real_t v, const adouble &a);
 const adouble ad_min3(const adouble &a, real_t v);
 
 const adouble ad_dt(const adouble& a);
-const adouble_array ad_dt_array(const adouble_array& adarr);
 
 const adouble ad_d(const adouble&           a,
                    daeDomain&               domain,
@@ -315,11 +314,12 @@ const adouble ad_d2(const adouble&           a,
                     daeeDiscretizationMethod method  = eCFDM,
                     boost::python::dict      options = boost::python::dict());
 
-const adouble_array ad_d_array(const adouble_array&     adarr,
+const adouble_array ad_dt_array(adouble_array& adarr);
+const adouble_array ad_d_array(adouble_array&           adarr,
                                daeDomain&               domain,
                                daeeDiscretizationMethod method  = eCFDM,
                                boost::python::dict      options = boost::python::dict());
-const adouble_array ad_d2_array(const adouble_array&     adarr,
+const adouble_array ad_d2_array(adouble_array&           adarr,
                                 daeDomain&               domain,
                                 daeeDiscretizationMethod method  = eCFDM,
                                 boost::python::dict      options = boost::python::dict());
@@ -331,7 +331,7 @@ const adouble_array adarr_FromNumpyArray(boost::python::object ndValues);
 const adouble_array adarr_FromList(boost::python::list lValues);
 
 /*******************************************************
-	adouble_array
+    adouble_array
 *******************************************************/
 const adouble_array adarr_exp(const adouble_array& a);
 const adouble_array adarr_sqrt(const adouble_array& a);
@@ -366,7 +366,7 @@ const adouble adarr_integral(const adouble_array& a);
 adouble adouble_array__call__(adouble_array& a, boost::python::object index);
 
 /*******************************************************
-	adouble_array
+    adouble_array
 *******************************************************/
 boost::python::list daeCondition_GetExpressions(daeCondition& self);
 
@@ -378,14 +378,14 @@ daeVariable*  daeFMI2Object_t_variable(daeFMI2Object_t& self);
 daeSTN*       daeFMI2Object_t_stn(daeFMI2Object_t& self);
 
 /*******************************************************
-	daeObject
+    daeObject
 *******************************************************/
 daeObject* daeObject_GetModel(daeObject& self);
 string daeGetRelativeName_1(const daeObject* parent, const daeObject* child);
 string daeGetRelativeName_2(const string& strParent, const string& strChild);
 
 /*******************************************************
-	daeDomain
+    daeDomain
 *******************************************************/
 //boost::python::object GetNumPyArrayDomain(daeDomain& domain);
 //daeIndexRange FunctionCallDomain1(daeDomain& domain, int start, int end, int step);
@@ -403,49 +403,49 @@ daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list Cus
 daeDomain* daeIndexRange_GetDomain(daeIndexRange& self);
 
 /*******************************************************
-	daeParameter
+    daeParameter
 *******************************************************/
 /*
 class daeParameterWrapper : public daeParameter,
-	                        public boost::python::wrapper<daeParameter>
+                            public boost::python::wrapper<daeParameter>
 {
 public:
-	daeParameterWrapper(void)
-	{
-	}
+    daeParameterWrapper(void)
+    {
+    }
 
-	daeParameterWrapper(string strName, const unit& units, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
-		: daeParameter(strName, units, pModel, strDescription)
-	{
-		daeDomain* pDomain;
-		boost::python::ssize_t n = boost::python::len(domains);
-		m_ptrDomains.resize(n);
-		for(boost::python::ssize_t i = 0; i < n; i++)
-		{
-			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains[i] = pDomain;
-		}
-	}
+    daeParameterWrapper(string strName, const unit& units, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
+        : daeParameter(strName, units, pModel, strDescription)
+    {
+        daeDomain* pDomain;
+        boost::python::ssize_t n = boost::python::len(domains);
+        m_ptrDomains.resize(n);
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            pDomain = boost::python::extract<daeDomain*>(domains[i]);
+            m_ptrDomains[i] = pDomain;
+        }
+    }
 
-	daeParameterWrapper(string strName, const unit& units, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
-		: daeParameter(strName, units, pPort, strDescription)
-	{
-		daeDomain* pDomain;
-		boost::python::ssize_t n = boost::python::len(domains);
-		m_ptrDomains.resize(n);
-		for(boost::python::ssize_t i = 0; i < n; i++)
-		{
-			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains[i] = pDomain;
-		}
-	}
+    daeParameterWrapper(string strName, const unit& units, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
+        : daeParameter(strName, units, pPort, strDescription)
+    {
+        daeDomain* pDomain;
+        boost::python::ssize_t n = boost::python::len(domains);
+        m_ptrDomains.resize(n);
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            pDomain = boost::python::extract<daeDomain*>(domains[i]);
+            m_ptrDomains[i] = pDomain;
+        }
+    }
 
 public:
-	boost::python::list GetDomains(void)
-	{
+    boost::python::list GetDomains(void)
+    {
         return getListFromVector(m_ptrDomains);
-	}
-    
+    }
+
     boost::python::dict GetDomainsIndexesMap1(size_t nIndexBase)
     {
        // Returns dictionary {integer : [list of integers]}
@@ -454,11 +454,11 @@ public:
         typedef std::map<size_t, std::vector<size_t> >::iterator c_iterator;
 
         daeParameter::GetDomainsIndexesMap(mapIndexes, nIndexBase);
-        
+
         for(c_iterator iter = mapIndexes.begin(); iter != mapIndexes.end(); iter++)
             d[iter->first] = getListFromVectorByValue<size_t>(iter->second);
-    
-        return d;        
+
+        return d;
     }
 
     real_t lGetParameterValue(boost::python::list indexes)
@@ -505,95 +505,95 @@ public:
         return GetQuantity(narrIndexes);
     }
 
-	real_t GetParameterValue0()
-	{
-		return GetValue();
-	}
+    real_t GetParameterValue0()
+    {
+        return GetValue();
+    }
 
-	real_t GetParameterValue1(size_t n1)
-	{
-		return GetValue(n1);
-	}
+    real_t GetParameterValue1(size_t n1)
+    {
+        return GetValue(n1);
+    }
 
-	real_t GetParameterValue2(size_t n1, size_t n2)
-	{
-		return GetValue(n1, n2);
-	}
+    real_t GetParameterValue2(size_t n1, size_t n2)
+    {
+        return GetValue(n1, n2);
+    }
 
-	real_t GetParameterValue3(size_t n1, size_t n2, size_t n3)
-	{
-		return GetValue(n1, n2, n3);
-	}
+    real_t GetParameterValue3(size_t n1, size_t n2, size_t n3)
+    {
+        return GetValue(n1, n2, n3);
+    }
 
-	real_t GetParameterValue4(size_t n1, size_t n2, size_t n3, size_t n4)
-	{
-		return GetValue(n1, n2, n3, n4);
-	}
+    real_t GetParameterValue4(size_t n1, size_t n2, size_t n3, size_t n4)
+    {
+        return GetValue(n1, n2, n3, n4);
+    }
 
-	real_t GetParameterValue5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
-	{
-		return GetValue(n1, n2, n3, n4, n5);
-	}
+    real_t GetParameterValue5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+    {
+        return GetValue(n1, n2, n3, n4, n5);
+    }
 
-	real_t GetParameterValue6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
-	{
-		return GetValue(n1, n2, n3, n4, n5, n6);
-	}
+    real_t GetParameterValue6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+    {
+        return GetValue(n1, n2, n3, n4, n5, n6);
+    }
 
-	real_t GetParameterValue7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
-	{
-		return GetValue(n1, n2, n3, n4, n5, n6, n7);
-	}
+    real_t GetParameterValue7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+    {
+        return GetValue(n1, n2, n3, n4, n5, n6, n7);
+    }
 
-	real_t GetParameterValue8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
-	{
-		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
-	}
+    real_t GetParameterValue8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+    {
+        return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
+    }
 
-	quantity GetParameterQuantity0()
-	{
-		return GetQuantity();
-	}
+    quantity GetParameterQuantity0()
+    {
+        return GetQuantity();
+    }
 
-	quantity GetParameterQuantity1(size_t n1)
-	{
-		return GetQuantity(n1);
-	}
+    quantity GetParameterQuantity1(size_t n1)
+    {
+        return GetQuantity(n1);
+    }
 
-	quantity GetParameterQuantity2(size_t n1, size_t n2)
-	{
-		return GetQuantity(n1, n2);
-	}
+    quantity GetParameterQuantity2(size_t n1, size_t n2)
+    {
+        return GetQuantity(n1, n2);
+    }
 
-	quantity GetParameterQuantity3(size_t n1, size_t n2, size_t n3)
-	{
-		return GetQuantity(n1, n2, n3);
-	}
+    quantity GetParameterQuantity3(size_t n1, size_t n2, size_t n3)
+    {
+        return GetQuantity(n1, n2, n3);
+    }
 
-	quantity GetParameterQuantity4(size_t n1, size_t n2, size_t n3, size_t n4)
-	{
-		return GetQuantity(n1, n2, n3, n4);
-	}
+    quantity GetParameterQuantity4(size_t n1, size_t n2, size_t n3, size_t n4)
+    {
+        return GetQuantity(n1, n2, n3, n4);
+    }
 
-	quantity GetParameterQuantity5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5);
-	}
+    quantity GetParameterQuantity5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5);
+    }
 
-	quantity GetParameterQuantity6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5, n6);
-	}
+    quantity GetParameterQuantity6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5, n6);
+    }
 
-	quantity GetParameterQuantity7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5, n6, n7);
-	}
+    quantity GetParameterQuantity7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5, n6, n7);
+    }
 
-	quantity GetParameterQuantity8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
-	}
+    quantity GetParameterQuantity8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
+    }
 };
 */
 
@@ -672,53 +672,53 @@ adouble_array ParameterArray7(daeParameter& param, boost::python::object o1, boo
 adouble_array ParameterArray8(daeParameter& param, boost::python::object o1, boost::python::object o2, boost::python::object o3, boost::python::object o4, boost::python::object o5, boost::python::object o6, boost::python::object o7, boost::python::object o8);
 
 /*******************************************************
-	daeVariable_Wrapper
+    daeVariable_Wrapper
 *******************************************************/
 /*
 class daeVariable_Wrapper : public daeVariable,
-	                        public boost::python::wrapper<daeVariable>
+                            public boost::python::wrapper<daeVariable>
 {
 public:
-	daeVariable_Wrapper(void)
-	{
-	}
+    daeVariable_Wrapper(void)
+    {
+    }
 
-	daeVariable_Wrapper(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
-		: daeVariable(strName, varType, pModel, strDescription)
-	{
-		daeDomain* pDomain;
-		boost::python::ssize_t n = boost::python::len(domains);
-		m_ptrDomains.resize(n);
-		for(boost::python::ssize_t i = 0; i < n; i++)
-		{
-			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains[i] = pDomain;
-		}
-	}
+    daeVariable_Wrapper(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list())
+        : daeVariable(strName, varType, pModel, strDescription)
+    {
+        daeDomain* pDomain;
+        boost::python::ssize_t n = boost::python::len(domains);
+        m_ptrDomains.resize(n);
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            pDomain = boost::python::extract<daeDomain*>(domains[i]);
+            m_ptrDomains[i] = pDomain;
+        }
+    }
 
-	daeVariable_Wrapper(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
-		: daeVariable(strName, varType, pPort, strDescription)
-	{
-		daeDomain* pDomain;
-		boost::python::ssize_t n = boost::python::len(domains);
-		m_ptrDomains.resize(n);
-		for(boost::python::ssize_t i = 0; i < n; i++)
-		{
-			pDomain = boost::python::extract<daeDomain*>(domains[i]);
-			m_ptrDomains[i] = pDomain;
-		}
-	}
+    daeVariable_Wrapper(string strName, const daeVariableType& varType, daePort* pPort, string strDescription = "", boost::python::list domains = boost::python::list())
+        : daeVariable(strName, varType, pPort, strDescription)
+    {
+        daeDomain* pDomain;
+        boost::python::ssize_t n = boost::python::len(domains);
+        m_ptrDomains.resize(n);
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            pDomain = boost::python::extract<daeDomain*>(domains[i]);
+            m_ptrDomains[i] = pDomain;
+        }
+    }
 
 public:
-	boost::python::list GetDomains(void)
-	{
+    boost::python::list GetDomains(void)
+    {
         return getListFromVector(m_ptrDomains);
-	}
+    }
 
-	daeVariableType* GetVariableType(void)
-	{
-		return &this->m_VariableType;
-	}
+    daeVariableType* GetVariableType(void)
+    {
+        return &this->m_VariableType;
+    }
 
     real_t lGetVariableValue(boost::python::list indexes)
     {
@@ -765,95 +765,95 @@ public:
     }
 
     real_t GetVariableValue0(void)
-	{
-		return GetValue();
-	}
+    {
+        return GetValue();
+    }
 
-	real_t GetVariableValue1(size_t n1)
-	{
-		return GetValue(n1);
-	}
+    real_t GetVariableValue1(size_t n1)
+    {
+        return GetValue(n1);
+    }
 
-	real_t GetVariableValue2(size_t n1, size_t n2)
-	{
-		return GetValue(n1, n2);
-	}
+    real_t GetVariableValue2(size_t n1, size_t n2)
+    {
+        return GetValue(n1, n2);
+    }
 
-	real_t GetVariableValue3(size_t n1, size_t n2, size_t n3)
-	{
-		return GetValue(n1, n2, n3);
-	}
+    real_t GetVariableValue3(size_t n1, size_t n2, size_t n3)
+    {
+        return GetValue(n1, n2, n3);
+    }
 
-	real_t GetVariableValue4(size_t n1, size_t n2, size_t n3, size_t n4)
-	{
-		return GetValue(n1, n2, n3, n4);
-	}
+    real_t GetVariableValue4(size_t n1, size_t n2, size_t n3, size_t n4)
+    {
+        return GetValue(n1, n2, n3, n4);
+    }
 
-	real_t GetVariableValue5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
-	{
-		return GetValue(n1, n2, n3, n4, n5);
-	}
+    real_t GetVariableValue5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+    {
+        return GetValue(n1, n2, n3, n4, n5);
+    }
 
-	real_t GetVariableValue6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
-	{
-		return GetValue(n1, n2, n3, n4, n5, n6);
-	}
+    real_t GetVariableValue6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+    {
+        return GetValue(n1, n2, n3, n4, n5, n6);
+    }
 
-	real_t GetVariableValue7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
-	{
-		return GetValue(n1, n2, n3, n4, n5, n6, n7);
-	}
+    real_t GetVariableValue7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+    {
+        return GetValue(n1, n2, n3, n4, n5, n6, n7);
+    }
 
-	real_t GetVariableValue8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
-	{
-		return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
-	}
+    real_t GetVariableValue8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+    {
+        return GetValue(n1, n2, n3, n4, n5, n6, n7, n8);
+    }
 
-	quantity GetVariableQuantity0()
-	{
-		return GetQuantity();
-	}
+    quantity GetVariableQuantity0()
+    {
+        return GetQuantity();
+    }
 
-	quantity GetVariableQuantity1(size_t n1)
-	{
-		return GetQuantity(n1);
-	}
+    quantity GetVariableQuantity1(size_t n1)
+    {
+        return GetQuantity(n1);
+    }
 
-	quantity GetVariableQuantity2(size_t n1, size_t n2)
-	{
-		return GetQuantity(n1, n2);
-	}
+    quantity GetVariableQuantity2(size_t n1, size_t n2)
+    {
+        return GetQuantity(n1, n2);
+    }
 
-	quantity GetVariableQuantity3(size_t n1, size_t n2, size_t n3)
-	{
-		return GetQuantity(n1, n2, n3);
-	}
+    quantity GetVariableQuantity3(size_t n1, size_t n2, size_t n3)
+    {
+        return GetQuantity(n1, n2, n3);
+    }
 
-	quantity GetVariableQuantity4(size_t n1, size_t n2, size_t n3, size_t n4)
-	{
-		return GetQuantity(n1, n2, n3, n4);
-	}
+    quantity GetVariableQuantity4(size_t n1, size_t n2, size_t n3, size_t n4)
+    {
+        return GetQuantity(n1, n2, n3, n4);
+    }
 
-	quantity GetVariableQuantity5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5);
-	}
+    quantity GetVariableQuantity5(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5);
+    }
 
-	quantity GetVariableQuantity6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5, n6);
-	}
+    quantity GetVariableQuantity6(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5, n6);
+    }
 
-	quantity GetVariableQuantity7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5, n6, n7);
-	}
+    quantity GetVariableQuantity7(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5, n6, n7);
+    }
 
-	quantity GetVariableQuantity8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
-	{
-		return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
-	}
-    
+    quantity GetVariableQuantity8(size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8)
+    {
+        return GetQuantity(n1, n2, n3, n4, n5, n6, n7, n8);
+    }
+
 };
 */
 daeVariable* daeVariable_init1(string strName, const daeVariableType& varType, daeModel* pModel, string strDescription = "", boost::python::list domains = boost::python::list());
@@ -1116,50 +1116,50 @@ void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values);
 void qSetInitialGuesses(daeVariable& var, const quantity& q);
 
 /*******************************************************
-	daeActionWrapper
+    daeActionWrapper
 *******************************************************/
 class daeActionWrapper : public daeAction,
                          public boost::python::wrapper<daeAction>
 {
 public:
-	daeActionWrapper(void)
-	{
-		m_eActionType = eUserDefinedAction;
-	}
+    daeActionWrapper(void)
+    {
+        m_eActionType = eUserDefinedAction;
+    }
 
-	void Execute(void)
-	{
+    void Execute(void)
+    {
         this->get_override("Execute")();
-	}
+    }
 };
 
 /*******************************************************
-	daePort
+    daePort
 *******************************************************/
 /*
 class daePortWrapper : public daePort,
-	                   public boost::python::wrapper<daePort>
+                       public boost::python::wrapper<daePort>
 {
 public:
-	daePortWrapper(void)
-	{
-	}
+    daePortWrapper(void)
+    {
+    }
 
-	daePortWrapper(string strName, daeePortType eType, daeModel* parent, string strDescription = "")
-		: daePort(strName, eType, parent, strDescription)
-	{
-	}
+    daePortWrapper(string strName, daeePortType eType, daeModel* parent, string strDescription = "")
+        : daePort(strName, eType, parent, strDescription)
+    {
+    }
 
 public:
-	std::string GetObjectClassName(void) const
-	{
-		boost::python::reference_existing_object::apply<const daePort*>::type converter;
-		PyObject* pyobj = converter( this );
-		boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
-		boost::python::object o_class = obj.attr("__class__");
-		string name = boost::python::extract<string>(o_class.attr("__name__"));
-		return name;
-	}
+    std::string GetObjectClassName(void) const
+    {
+        boost::python::reference_existing_object::apply<const daePort*>::type converter;
+        PyObject* pyobj = converter( this );
+        boost::python::object obj = boost::python::object( boost::python::handle<>( pyobj ) );
+        boost::python::object o_class = obj.attr("__class__");
+        string name = boost::python::extract<string>(o_class.attr("__name__"));
+        return name;
+    }
 };
 */
 
@@ -1172,12 +1172,12 @@ boost::python::dict daePort_dictParameters(daePort& self);
 boost::python::dict daePort_dictVariables(daePort& self);
 
 /*******************************************************
-	daeEventPort
+    daeEventPort
 *******************************************************/
 boost::python::list GetEventPortEventsList(daeEventPort& self);
 
 /*******************************************************
-	daeEquation
+    daeEquation
 *******************************************************/
 daeDEDI* daeEquation_DistributeOnDomain1(daeEquation& self, daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
 daeDEDI* daeEquation_DistributeOnDomain2(daeEquation& self, daeDomain& rDomain, boost::python::list l, const string& strName = string(""));
@@ -1185,27 +1185,27 @@ boost::python::list daeEquation_GetEquationExecutionInfos(daeEquation& self);
 boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self);
 
 /*******************************************************
-	daeEquationExecutionInfo
+    daeEquationExecutionInfo
 *******************************************************/
 adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self);
 boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
 boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
 
 /*******************************************************
-	daeDEDI
+    daeDEDI
 *******************************************************/
 daeDomain* daeDEDI_GetDomain(daeDEDI& self);
 boost::python::list daeDEDI_GetDomainPoints(daeDEDI& self);
 
 /*******************************************************
-	daePortConnection
+    daePortConnection
 *******************************************************/
 daeObject* daePortConnection_GetPortFrom(daePortConnection& self);
 daeObject* daePortConnection_GetPortTo(daePortConnection& self);
 boost::python::list daePortConnection_GetEquations(daePortConnection& self);
 
 /*******************************************************
-	daeSTN
+    daeSTN
 *******************************************************/
 boost::python::list daeSTN_States(daeSTN& self);
 boost::python::dict daeSTN_dictStates(daeSTN& self);
@@ -1213,25 +1213,25 @@ std::string daeSTN_GetActiveState(daeSTN& self);
 void daeSTN_SetActiveState(daeSTN& self, const std::string& strActiveState);
 
 /*******************************************************
-	daeOnEventActions
+    daeOnEventActions
 *******************************************************/
 boost::python::list daeOnEventActions_Actions(const daeOnEventActions& self);
 boost::python::list daeOnEventActions_UserDefinedActions(const daeOnEventActions& self);
 
 /*******************************************************
-	daeModel
+    daeModel
 *******************************************************/
 class daeModelWrapper : public daeModel,
-	                    public boost::python::wrapper<daeModel>
+                        public boost::python::wrapper<daeModel>
 {
 public:
-	daeModelWrapper(void)
-	{
-	}
+    daeModelWrapper(void)
+    {
+    }
 
     daeModelWrapper(string strName, daeModel* pModel = NULL, string strDescription = "") : daeModel(strName, pModel, strDescription)
-	{
-	}
+    {
+    }
 
     void DeclareEquations(void)
     {
@@ -1519,7 +1519,7 @@ public:
 };
 
 /*******************************************************
-	daeState
+    daeState
 *******************************************************/
 boost::python::list daeState_GetEquations(daeState& self);
 boost::python::list daeState_GetNestedSTNs(daeState& self);
@@ -1527,374 +1527,374 @@ boost::python::list daeState_GetOnEventActions(daeState& self);
 boost::python::list daeState_GetOnConditionActions(daeState& self);
 
 /*******************************************************
-	daeSTN
+    daeSTN
 *******************************************************/
 boost::python::list GetStatesSTN(daeSTN& stn);
 
 /*******************************************************
-	daeIF
+    daeIF
 *******************************************************/
 
 /*******************************************************
-	daeScalarExternalFunctionWrapper
+    daeScalarExternalFunctionWrapper
 *******************************************************/
 class daeScalarExternalFunctionWrapper : public daeScalarExternalFunction,
                                          public boost::python::wrapper<daeScalarExternalFunction>
 {
 public:
-	daeScalarExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, boost::python::dict arguments)
-	    : daeScalarExternalFunction(strName, pModel, units)
-	{
-		string name;
-		boost::python::ssize_t i, n;
-		boost::python::tuple t;
-		daeExternalFunctionArgumentMap_t mapArguments;
-		
-		boost::python::list items = arguments.items();
-		n = boost::python::len(items);
-		
-		for(i = 0; i < n; i++)
-		{
-			t = boost::python::extract<boost::python::tuple>(items[i]);
-			name  = boost::python::extract<string>(t[0]);
-			boost::python::extract<adouble> get_adouble(t[1]);
-			boost::python::extract<adouble_array> get_adouble_array(t[1]);
-			
-			if(get_adouble.check())
-				mapArguments[name] = get_adouble();
-			else if(get_adouble_array.check())
-				mapArguments[name] = get_adouble_array();
-		}
-		SetArguments(mapArguments);
-	}
-	
-	boost::python::object Calculate_(boost::python::dict values)
-	{
-		daeDeclareAndThrowException(exNotImplemented);
-		return boost::python::object();
-	}
+    daeScalarExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, boost::python::dict arguments)
+        : daeScalarExternalFunction(strName, pModel, units)
+    {
+        string name;
+        boost::python::ssize_t i, n;
+        boost::python::tuple t;
+        daeExternalFunctionArgumentMap_t mapArguments;
 
-	adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
-	{
-		boost::python::dict values;
+        boost::python::list items = arguments.items();
+        n = boost::python::len(items);
+
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(items[i]);
+            name  = boost::python::extract<string>(t[0]);
+            boost::python::extract<adouble> get_adouble(t[1]);
+            boost::python::extract<adouble_array> get_adouble_array(t[1]);
+
+            if(get_adouble.check())
+                mapArguments[name] = get_adouble();
+            else if(get_adouble_array.check())
+                mapArguments[name] = get_adouble_array();
+        }
+        SetArguments(mapArguments);
+    }
+
+    boost::python::object Calculate_(boost::python::dict values)
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+        return boost::python::object();
+    }
+
+    adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
+    {
+        boost::python::dict values;
 
         if(boost::python::override f = this->get_override("Calculate"))
         {
             for(daeExternalFunctionArgumentValueMap_t::iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
-			{
-				adouble*              ad    = boost::get<adouble>              (&iter->second);
-				std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
-				
-				if(ad)
+            {
+                adouble*              ad    = boost::get<adouble>              (&iter->second);
+                std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
+
+                if(ad)
                 {
-					values[iter->first] = *ad;
+                    values[iter->first] = *ad;
                 }
-				else if(adarr)
+                else if(adarr)
                 {
-					values[iter->first] = getListFromVector(*adarr);
+                    values[iter->first] = getListFromVector(*adarr);
                 }
-				else
+                else
                 {
-					daeDeclareAndThrowException(exInvalidCall);
+                    daeDeclareAndThrowException(exInvalidCall);
                 }
-			}
-			
-			boost::python::object res = f(values);
-			boost::python::extract<adouble> get_adouble(res);
-			if(get_adouble.check())
-			{
-				return get_adouble();
-			}
-			else
-			{
-				daeDeclareAndThrowException(exInvalidCall);
-				return adouble();
-			}			
-		}
-		else
-		{
-			daeDeclareAndThrowException(exInvalidCall);
+            }
+
+            boost::python::object res = f(values);
+            boost::python::extract<adouble> get_adouble(res);
+            if(get_adouble.check())
+            {
+                return get_adouble();
+            }
+            else
+            {
+                daeDeclareAndThrowException(exInvalidCall);
+                return adouble();
+            }
+        }
+        else
+        {
+            daeDeclareAndThrowException(exInvalidCall);
             return adouble();
-		}
-	}
+        }
+    }
 };
 
 /*******************************************************
-	daeVectorExternalFunctionWrapper
+    daeVectorExternalFunctionWrapper
 *******************************************************/
 class daeVectorExternalFunctionWrapper : public daeVectorExternalFunction,
                                          public boost::python::wrapper<daeVectorExternalFunction>
 {
 public:
-	daeVectorExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, size_t nNumberofArguments, boost::python::dict arguments)
-	    : daeVectorExternalFunction(strName, pModel, units, nNumberofArguments)
-	{
-		string name;
-		boost::python::ssize_t i, n;
-		boost::python::tuple t;
-		daeExternalFunctionArgumentMap_t mapArguments;
-		
-		boost::python::list items = arguments.items();
-		n = boost::python::len(items);
-		
-		for(i = 0; i < n; i++)
-		{
-			t = boost::python::extract<boost::python::tuple>(items[i]);
-			name  = boost::python::extract<string>(t[0]);
-			boost::python::extract<adouble> get_adouble(t[1]);
-			boost::python::extract<adouble_array> get_adouble_array(t[1]);
-			
-			if(get_adouble.check())
-				mapArguments[name] = get_adouble();
-			else if(get_adouble_array.check())
-				mapArguments[name] = get_adouble_array();
-		}
-		SetArguments(mapArguments);
-	}
-	
-	boost::python::object Calculate_(boost::python::dict values)
-	{
-		daeDeclareAndThrowException(exNotImplemented);
-		return boost::python::list();
-	}
+    daeVectorExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, size_t nNumberofArguments, boost::python::dict arguments)
+        : daeVectorExternalFunction(strName, pModel, units, nNumberofArguments)
+    {
+        string name;
+        boost::python::ssize_t i, n;
+        boost::python::tuple t;
+        daeExternalFunctionArgumentMap_t mapArguments;
 
-	std::vector<adouble> Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
-	{
-		std::vector<adouble> arrResults;
-		boost::python::list results;
-		boost::python::dict values;
-        
-		if(boost::python::override f = this->get_override("Calculate"))
+        boost::python::list items = arguments.items();
+        n = boost::python::len(items);
+
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(items[i]);
+            name  = boost::python::extract<string>(t[0]);
+            boost::python::extract<adouble> get_adouble(t[1]);
+            boost::python::extract<adouble_array> get_adouble_array(t[1]);
+
+            if(get_adouble.check())
+                mapArguments[name] = get_adouble();
+            else if(get_adouble_array.check())
+                mapArguments[name] = get_adouble_array();
+        }
+        SetArguments(mapArguments);
+    }
+
+    boost::python::object Calculate_(boost::python::dict values)
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+        return boost::python::list();
+    }
+
+    std::vector<adouble> Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
+    {
+        std::vector<adouble> arrResults;
+        boost::python::list results;
+        boost::python::dict values;
+
+        if(boost::python::override f = this->get_override("Calculate"))
         {
             for(daeExternalFunctionArgumentValueMap_t::iterator iter = mapValues.begin(); iter != mapValues.end(); iter++)
-			{
-				adouble*              ad    = boost::get<adouble>              (&iter->second);
-				std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
-				
-				if(ad)
-					values[iter->first] = *ad;
-				else if(adarr)
-					values[iter->first] = getListFromVector(*adarr);
-				else
-					daeDeclareAndThrowException(exInvalidCall);
-			}
-			
-			boost::python::object res = f(values);
+            {
+                adouble*              ad    = boost::get<adouble>              (&iter->second);
+                std::vector<adouble>* adarr = boost::get<std::vector<adouble> >(&iter->second);
+
+                if(ad)
+                    values[iter->first] = *ad;
+                else if(adarr)
+                    values[iter->first] = getListFromVector(*adarr);
+                else
+                    daeDeclareAndThrowException(exInvalidCall);
+            }
+
+            boost::python::object res = f(values);
             results = boost::python::extract<boost::python::list>(res);
 
-			boost::python::ssize_t n = boost::python::len(results);
-			arrResults.resize(n);
-			
-			for(boost::python::ssize_t i = 0; i < n; i++)
-			{
-				boost::python::extract<adouble> get_adouble(results[i]);
-				if(get_adouble.check())
-					arrResults[i] = get_adouble();
-				else
-					daeDeclareAndThrowException(exInvalidCall);
-			}
-			return arrResults;
-		}
-		else
-		{
+            boost::python::ssize_t n = boost::python::len(results);
+            arrResults.resize(n);
+
+            for(boost::python::ssize_t i = 0; i < n; i++)
+            {
+                boost::python::extract<adouble> get_adouble(results[i]);
+                if(get_adouble.check())
+                    arrResults[i] = get_adouble();
+                else
+                    daeDeclareAndThrowException(exInvalidCall);
+            }
+            return arrResults;
+        }
+        else
+        {
             daeDeclareAndThrowException(exInvalidCall);
             return arrResults;
-		}
-	}
+        }
+    }
 };
 
 
 /*******************************************************
-	daeOnConditionActions
+    daeOnConditionActions
 *******************************************************/
 daeCondition* daeOnConditionActions_Condition(daeOnConditionActions& self);
 boost::python::list daeOnConditionActions_Actions(daeOnConditionActions& self);
 boost::python::list daeOnConditionActions_UserDefinedActions(daeOnConditionActions& self);
 
 /*******************************************************
-	daeObjectiveFunction, daeOptimizationConstraint
+    daeObjectiveFunction, daeOptimizationConstraint
 *******************************************************/
 boost::python::object GetGradientsObjectiveFunction(daeObjectiveFunction& o);
 boost::python::object GetGradientsOptimizationConstraint(daeOptimizationConstraint& o);
 boost::python::object GetGradientsMeasuredVariable(daeMeasuredVariable& o);
 
 /*******************************************************
-	daeLog
+    daeLog
 *******************************************************/
 class daeLogWrapper : public daeLog_t,
-	                  public boost::python::wrapper<daeLog_t>
+                      public boost::python::wrapper<daeLog_t>
 {
 public:
-	void Message(const string& strMessage, size_t nSeverity)
-	{
-		this->get_override("Message")(strMessage, nSeverity);
-	}
+    void Message(const string& strMessage, size_t nSeverity)
+    {
+        this->get_override("Message")(strMessage, nSeverity);
+    }
 };
 
 class daeBaseLogWrapper : public daeBaseLog,
-	                      public boost::python::wrapper<daeBaseLog>
+                          public boost::python::wrapper<daeBaseLog>
 {
 public:
-	daeBaseLogWrapper(void)
-	{
-	}
+    daeBaseLogWrapper(void)
+    {
+    }
 
-	void Message(const string& strMessage, size_t nSeverity)
-	{
+    void Message(const string& strMessage, size_t nSeverity)
+    {
         if(boost::python::override f = this->get_override("Message"))
             f(strMessage, nSeverity);
-		else
-			this->daeBaseLog::Message(strMessage, nSeverity);
-	}
+        else
+            this->daeBaseLog::Message(strMessage, nSeverity);
+    }
 
-	void def_Message(const string& strMessage, size_t nSeverity)
-	{
+    void def_Message(const string& strMessage, size_t nSeverity)
+    {
         this->daeBaseLog::Message(strMessage, nSeverity);
-	}
+    }
 
-	void SetProgress(real_t dProgress)
-	{
+    void SetProgress(real_t dProgress)
+    {
         if(boost::python::override f = this->get_override("SetProgress"))
             f(dProgress);
-		else
-			this->daeBaseLog::SetProgress(dProgress);
-	}
+        else
+            this->daeBaseLog::SetProgress(dProgress);
+    }
 
-	void def_SetProgress(real_t dProgress)
-	{
+    void def_SetProgress(real_t dProgress)
+    {
         this->daeBaseLog::SetProgress(dProgress);
-	}
+    }
 };
 
 class daeDelegateLogWrapper : public daeDelegateLog,
-	                          public boost::python::wrapper<daeDelegateLog>
+                              public boost::python::wrapper<daeDelegateLog>
 {
 public:
-	daeDelegateLogWrapper()
-	{
-	}
+    daeDelegateLogWrapper()
+    {
+    }
 
-	void Message(const string& strMessage, size_t nSeverity)
-	{
+    void Message(const string& strMessage, size_t nSeverity)
+    {
         if(boost::python::override f = this->get_override("Message"))
             f(strMessage, nSeverity);
-		else
-			this->daeDelegateLog::Message(strMessage, nSeverity);
-	}
+        else
+            this->daeDelegateLog::Message(strMessage, nSeverity);
+    }
 
-	void def_Message(const string& strMessage, size_t nSeverity)
-	{
+    void def_Message(const string& strMessage, size_t nSeverity)
+    {
         this->daeDelegateLog::Message(strMessage, nSeverity);
-	}
-    
+    }
+
     boost::python::list GetLogs()
     {
-        return getListFromVector(m_ptrarrLogs);        
+        return getListFromVector(m_ptrarrLogs);
     }
 };
 
 class daeFileLogWrapper : public daeFileLog,
-	                      public boost::python::wrapper<daeFileLog>
+                          public boost::python::wrapper<daeFileLog>
 {
 public:
-	daeFileLogWrapper(string strFileName) : daeFileLog(strFileName)
-	{
-	}
+    daeFileLogWrapper(string strFileName) : daeFileLog(strFileName)
+    {
+    }
 
-	void Message(const string& strMessage, size_t nSeverity)
-	{
+    void Message(const string& strMessage, size_t nSeverity)
+    {
         if(boost::python::override f = this->get_override("Message"))
             f(strMessage, nSeverity);
-		else
-			this->daeFileLog::Message(strMessage, nSeverity);
-	}
+        else
+            this->daeFileLog::Message(strMessage, nSeverity);
+    }
 
-	void def_Message(const string& strMessage, size_t nSeverity)
-	{
+    void def_Message(const string& strMessage, size_t nSeverity)
+    {
         this->daeFileLog::Message(strMessage, nSeverity);
-	}
+    }
 };
 
 class daeStdOutLogWrapper : public daeStdOutLog,
-	                        public boost::python::wrapper<daeStdOutLog>
+                            public boost::python::wrapper<daeStdOutLog>
 {
 public:
-	daeStdOutLogWrapper(void){}
+    daeStdOutLogWrapper(void){}
 
-	void Message(const string& strMessage, size_t nSeverity)
-	{
+    void Message(const string& strMessage, size_t nSeverity)
+    {
         if(boost::python::override f = this->get_override("Message"))
             f(strMessage, nSeverity);
-		else
-			this->daeStdOutLog::Message(strMessage, nSeverity);
-	}
+        else
+            this->daeStdOutLog::Message(strMessage, nSeverity);
+    }
 
-	void def_Message(const string& strMessage, size_t nSeverity)
-	{
+    void def_Message(const string& strMessage, size_t nSeverity)
+    {
         this->daeStdOutLog::Message(strMessage, nSeverity);
-	}
+    }
 };
 
 class daeTCPIPLogWrapper : public daeTCPIPLog,
-	                       public boost::python::wrapper<daeTCPIPLog>
+                           public boost::python::wrapper<daeTCPIPLog>
 {
 public:
-	daeTCPIPLogWrapper()
-	{
-	}
+    daeTCPIPLogWrapper()
+    {
+    }
 
-	void Message(const string& strMessage, size_t nSeverity)
-	{
+    void Message(const string& strMessage, size_t nSeverity)
+    {
         if(boost::python::override f = this->get_override("Message"))
             f(strMessage, nSeverity);
-		else
-			this->daeTCPIPLog::Message(strMessage, nSeverity);
-	}
+        else
+            this->daeTCPIPLog::Message(strMessage, nSeverity);
+    }
 
-	void def_Message(const string& strMessage, size_t nSeverity)
-	{
+    void def_Message(const string& strMessage, size_t nSeverity)
+    {
         this->daeTCPIPLog::Message(strMessage, nSeverity);
-	}
+    }
 };
 
 class thread_locker
 {
 public:
-	thread_locker()
-	{
-	//	if(thread_support::enabled())
-			m_gstate = PyGILState_Ensure();
-	}
+    thread_locker()
+    {
+    //	if(thread_support::enabled())
+            m_gstate = PyGILState_Ensure();
+    }
 
-	~thread_locker()
-	{
-	//	if(boost::thread_support::enabled())
-			PyGILState_Release(m_gstate);
-	}
-	PyGILState_STATE m_gstate;
+    ~thread_locker()
+    {
+    //	if(boost::thread_support::enabled())
+            PyGILState_Release(m_gstate);
+    }
+    PyGILState_STATE m_gstate;
 };
 
 class daeTCPIPLogServerWrapper : public daeTCPIPLogServer,
-	                             public boost::python::wrapper<daeTCPIPLogServer>
+                                 public boost::python::wrapper<daeTCPIPLogServer>
 {
 public:
-	daeTCPIPLogServerWrapper(int nPort) : daeTCPIPLogServer(nPort)
-	{
-	}
+    daeTCPIPLogServerWrapper(int nPort) : daeTCPIPLogServer(nPort)
+    {
+    }
 
-	virtual void MessageReceived(const char* szMessage)
-	{
-		thread_locker lock;
-		if(boost::python::override f = this->get_override("MessageReceived"))
-			f(szMessage);
-		else
+    virtual void MessageReceived(const char* szMessage)
+    {
+        thread_locker lock;
+        if(boost::python::override f = this->get_override("MessageReceived"))
+            f(szMessage);
+        else
             daeTCPIPLogServer::MessageReceived(szMessage);
-	}
-    
+    }
+
     void def_MessageReceived(const char* szMessage)
-	{
-		daeTCPIPLogServer::MessageReceived(szMessage);
-	}
+    {
+        daeTCPIPLogServer::MessageReceived(szMessage);
+    }
 };
 
 }
