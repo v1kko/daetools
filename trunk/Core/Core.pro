@@ -10,7 +10,8 @@ INCLUDEPATH += $${BOOSTDIR} \
 
 LIBS +=	$${MPI_LIBS}
 
-SOURCES += xmlreadstream.cpp \
+SOURCES += nodes.cpp \
+    xmlreadstream.cpp \
     xmlfunctions.cpp \
     xmlfile.cpp \
     variablearray.cpp \
@@ -28,7 +29,6 @@ SOURCES += xmlreadstream.cpp \
     partial.cpp \
     parameter.cpp \
     object.cpp \
-    nodes.cpp \
     model_port_arrays.cpp \
     model.cpp \
     finite_element_model.cpp \

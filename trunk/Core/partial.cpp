@@ -111,6 +111,8 @@ adouble pd_upwindCCFV(daePartialDerivativeVariable& /*pdv*/)
 
 adouble pd_BFD(daePartialDerivativeVariable& pdv)
 {
+    daeDeclareAndThrowException(exNotImplemented);
+
     adouble pardev;
 // Index for which we are calculating partial derivative
     const size_t n = pdv.GetPoint();
@@ -203,6 +205,8 @@ adouble pd_BFD(daePartialDerivativeVariable& pdv)
 
 adouble pd_FFD(daePartialDerivativeVariable& pdv)
 {
+    daeDeclareAndThrowException(exNotImplemented);
+
     adouble pardev;
 // Index for which we are calculating partial derivative
     const size_t n = pdv.GetPoint();

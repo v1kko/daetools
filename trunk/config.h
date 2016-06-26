@@ -123,10 +123,12 @@ public:
         int returned = GetModuleFileName(NULL, szModuleFileName, MAX_PATH);
         if(returned > 0)
         {
-            cfg_app_folder = std::string(szModuleFileName); // i.e. app_folder/some_file.exe
+            std::wstring w_cfg_app_folder(szModuleFileName); // i.e. app_folder/some_file.exe
+
+            cfg_app_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end());
             cfg_app_folder = cfg_app_folder.parent_path();  // i.e. app_folder
 
-            cfg_python_daetools_folder = std::string(szModuleFileName);            // i.e. daetools/pyDAE/Windows_win32_py27/pyCore.pyd
+            cfg_python_daetools_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end()); // i.e. daetools/pyDAE/Windows_win32_py27/pyCore.pyd
             cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE/Windows_win32_py27
             cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE
             cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools

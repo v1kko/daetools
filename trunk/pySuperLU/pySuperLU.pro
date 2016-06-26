@@ -32,9 +32,6 @@ INCLUDEPATH += $${BOOSTDIR} \
 
 QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 
-LIBS += $${SOLIBS_RPATH}
-LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
-
 SOURCES += stdafx.cpp \
     dllmain.cpp \
     dae_python.cpp
@@ -50,6 +47,8 @@ CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) {
 QMAKE_CXXFLAGS += -DdaeSuperLU
 LIBS += $${DAE_SUPERLU_SOLVER_LIB} \
         $${SUPERLU_LIBS} $${BLAS_LAPACK_LIBS} #-lbtf
+LIBS += $${SOLIBS_RPATH}
+LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
 INCLUDEPATH += $${SUPERLU_INCLUDE}
 pyObject = pySuperLU
 message(SUPERLU_LIBS: $${SUPERLU_LIBS})
@@ -63,6 +62,8 @@ CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) {
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
 LIBS += $${DAE_SUPERLU_MT_SOLVER_LIB} \
         $${SUPERLU_MT_LIBS} $${BLAS_LAPACK_LIBS}
+LIBS += $${SOLIBS_RPATH}
+LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
 INCLUDEPATH += $${SUPERLU_MT_INCLUDE}
 pyObject = pySuperLU_MT
 }
@@ -77,6 +78,8 @@ QMAKE_CXXFLAGS += -DdaeSuperLU_CUDA
 LIBS += $${SUPERLU_CUDA_LIBS} \
         $${CUDA_LIBS} \
         $${DAE_SUPERLU_CUDA_SOLVER_LIB}
+LIBS += $${SOLIBS_RPATH}
+LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
 INCLUDEPATH += $${SUPERLU_CUDA_INCLUDE}
 pyObject = pySuperLU_CUDA
 }

@@ -88,14 +88,14 @@ crossCompile{
     PYTHON = ""
 
     PYTHON_MAJOR = 3
-    PYTHON_MINOR = 5
+    PYTHON_MINOR = 4
     PYTHON_ABI   = 
     
     # System := {'Windows'}
     DAE_SYSTEM   = Windows
 
     # Machine := {'i386', ..., 'i686', 'AMD64'}
-    DAE_MACHINE = win64
+    DAE_MACHINE = win32
 
     RT =
 
@@ -161,14 +161,14 @@ crossCompile{
 
 # RPATH for python extension modules
 win32-msvc2008::SOLIBS_RPATH =
-win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 
 # RPATH for the simulation_loader
 win32-msvc2008::SOLIBS_RPATH_SL =
-win32-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
+win32-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\'
 win64-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
 linux-g++::SOLIBS_RPATH_SL      = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
 macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
@@ -250,7 +250,8 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 
 # On some low-RAM machines certain boost.python modules cannot compile
 # The workaround is to set the following flags:
-#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=0 --param ggc-min-heapsize=8192
+#unix::QMAKE_CXXFLAGS += --param ggc-min-expand=0 --param ggc-min-heapsize=8192 -fno-var-tracking-assignments
+win32-g++-*::QMAKE_CXXFLAGS += -fno-var-tracking-assignments
 
 # Use SSE for x86 32 bit machines (not used by default)
 # When building for Mac-OS we build for all architectures and SSE flags should go away
