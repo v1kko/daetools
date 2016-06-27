@@ -21,6 +21,7 @@ INCLUDEPATH += $${BOOSTDIR}
 
 LIBS += $${SOLIBS_RPATH_SL}
 LIBS += $${DAE_SIMULATION_LOADER_LIB}
+LIBS += $${BOOST_LIBS}
 
 # Achtung, Achtung!!
 # It uses daetools/solibs for linking

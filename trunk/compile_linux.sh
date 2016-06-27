@@ -109,7 +109,7 @@ compile()
   echo "${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile ${CONFIG_CROSS_COMPILING} customPython="${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}"
   
   ${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile ${CONFIG_CROSS_COMPILING} customPython="${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}
-  
+
   echo ""
   echo "[*] Cleaning the project..."
   echo ""
@@ -150,6 +150,7 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
+Ncpu=1
 
 cd "${TRUNK}"
 

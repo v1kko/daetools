@@ -284,7 +284,7 @@ vSUPERLU=4.1
 vSUPERLU_MT=2.0
 vNLOPT=2.4.1
 vIDAS=1.1.0
-vTRILINOS=12.6.1
+vTRILINOS=10.8.0
 vUMFPACK=5.6.2
 vAMD=2.3.1
 vMETIS=5.1.0
@@ -294,8 +294,7 @@ vCOLAMD=2.8.0
 vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
-vLIBMESH=0.9.2.2
-vDEALII=8.2.0
+vDEALII=8.0.0
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
@@ -440,7 +439,7 @@ compile_boost()
            --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread \
            toolset=gcc target-os=windows threadapi=win32 \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
-    
+
     cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ${SOLIBS_DIR}
     cp -a stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
     cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*   ${SOLIBS_DIR}
