@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            opt_tutorial4.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -36,11 +36,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 <span style='color:#0000ff;'>from</span> scipy.optimize <span style='color:#0000ff;'>import</span> fmin, fmin_bfgs, fmin_l_bfgs_b
-
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
@@ -77,9 +75,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.m.x5.AssignValue(<span style='color:#c000c0;'>1</span>)
 
     <b>def</b> SetUpSensitivityAnalysis(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x2() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x1()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x1())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> \
-                                          <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x3() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x2()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x2())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> \
-                                          <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x3() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x3()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x3())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> \
+        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x2() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x1()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x1())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                          <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x3() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x2()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x2())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                          <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x3() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x3()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x3())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
                                           <span style='color:#c000c0;'>100</span> <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.m.x5() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x4()<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.x4())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span> 
         
         <span style='color:#0000ff;'>self</span>.ov1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.x1, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>1.3</span>)<b><span style='color:#0000ff;'>;</span></b>
@@ -124,11 +122,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <span style='color:#008000;'>#    Objective function and constraints have Value (float) and Gradients (numpy array) properties where</span>
     <span style='color:#008000;'>#    their values and gradients in respect to optimization variables are stored. Here, as the example,</span>
     <span style='color:#008000;'>#    the value and gradients of the objective function are printed (since no constraints are involved).</span>
-    <b>print</b>(<span style='color:#c00000;'>'Objective function inputs: '</span>)
-    <b>print</b>(<span style='color:#c00000;'>'   Inputs: {0}'</span>.<span style='color:#0000ff;'>format</span>(x))
-    <b>print</b>(<span style='color:#c00000;'>'   Value     = {0}'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Value))
-    <b>print</b>(<span style='color:#c00000;'>'   Gradients = {0}'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Gradients))
-    <b>print</b>(<span style='color:#c00000;'>''</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Objective function inputs: '</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'   Inputs: </span><span style='color:#0057ae;'>{0}</span><span style='color:#c00000;'>'</span>.<span style='color:#0000ff;'>format</span>(x))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'   Value     = </span><span style='color:#0057ae;'>{0}</span><span style='color:#c00000;'>'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Value))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'   Gradients = </span><span style='color:#0057ae;'>{0}</span><span style='color:#c00000;'>'</span>.<span style='color:#0000ff;'>format</span>(simulation.ObjectiveFunction.Gradients))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>''</span>)
     <b>return</b> simulation.ObjectiveFunction.Value
 
 <b>def</b> run():
@@ -164,7 +162,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
           simulation.ov4.StartingPoint,
           simulation.ov5.StartingPoint]
 
-    <b>print</b>(fmin(ObjectiveFunction, x0, args<b><span style='color:#0000ff;'>=</span></b>(simulation,), xtol<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1e-8</span>))
+    <span style='color:#0000ff;'>print</span>(fmin(ObjectiveFunction, x0, args<b><span style='color:#0000ff;'>=</span></b>(simulation,), xtol<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1e-8</span>))
 
 <b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
     run()

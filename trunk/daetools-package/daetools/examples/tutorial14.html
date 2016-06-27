@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial14.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -37,8 +37,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
 <span style='color:#0000ff;'>import</span> sys
 <span style='color:#0000ff;'>import</span> numpy, scipy.interpolate
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
@@ -192,7 +192,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Value_interp&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Value_interp() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.interp1d()
 
-        <span style='color:#008000;'>#################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+        <span style='color:#008000;'>#################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
         <span style='color:#0000ff;'>self</span>.stnRegulator <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.STN(<span style='color:#c00000;'>&quot;Regulator&quot;</span>)
 
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;Heating&quot;</span>)
@@ -260,7 +260,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.5</span>
     simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
 
     <span style='color:#008000;'># Connect data reporter</span>
@@ -282,8 +282,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     simulation.Run()
     simulation.Finalize()
 
-    <b>print</b>(<span style='color:#c00000;'>'</span><span style='color:#c00000;'>\n\n</span><span style='color:#c00000;'>scipy.interp1d statistics:'</span>)
-    <b>print</b>(<span style='color:#c00000;'>'  interp1d called </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> times (cache value used </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> times)'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.m.interp1d.counter, simulation.m.interp1d.cache_counter))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'</span><span style='color:#c00000;'>\n\n</span><span style='color:#c00000;'>scipy.interp1d statistics:'</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  interp1d called </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> times (cache value used </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> times)'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.m.interp1d.counter, simulation.m.interp1d.cache_counter))
 
 <b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
     <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):

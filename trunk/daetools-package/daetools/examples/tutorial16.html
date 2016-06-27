@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial16.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -36,14 +36,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime, sleep
 <span style='color:#0000ff;'>from</span> os.path <span style='color:#0000ff;'>import</span> join, realpath, dirname
 <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-<span style='color:#0000ff;'>from</span> .tutorial16_ui <span style='color:#0000ff;'>import</span> Ui_InteractiveRunDialog
 <span style='color:#0000ff;'>import</span> matplotlib
+matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
 <span style='color:#0000ff;'>from</span> matplotlib.figure <span style='color:#0000ff;'>import</span> Figure
 <span style='color:#0000ff;'>from</span> matplotlib.backends.backend_qt4agg <span style='color:#0000ff;'>import</span> FigureCanvasQTAgg <span style='color:#0000ff;'>as</span> FigureCanvas
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<b>try</b>:
+    <span style='color:#0000ff;'>from</span> .tutorial16_ui <span style='color:#0000ff;'>import</span> Ui_InteractiveRunDialog
+<b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
+    <span style='color:#0000ff;'>from</span> tutorial16_ui <span style='color:#0000ff;'>import</span> Ui_InteractiveRunDialog
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kW
@@ -151,7 +155,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
             <span style='color:#008000;'># Integrate for ReportingInterval until the TimeHorizon is reached</span>
             <span style='color:#008000;'># After each integration call update the plot with the new data</span>
             <span style='color:#008000;'># Sleep for 0.1 seconds after each integration to give some real-time impression</span>
-            time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.IntegrateForTimeInterval(<span style='color:#0000ff;'>self</span>.simulation.ReportingInterval)
+            time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.IntegrateForTimeInterval(<span style='color:#0000ff;'>self</span>.simulation.ReportingInterval, eDoNotStopAtDiscontinuity)
             <span style='color:#0000ff;'>self</span>.simulation.ReportData(<span style='color:#0000ff;'>self</span>.simulation.CurrentTime)
             <span style='color:#0000ff;'>self</span>._updatePlot()
             sleep(<span style='color:#c000c0;'>0.1</span>)
@@ -162,7 +166,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
                 <b>else</b>:
                     interval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.ReportingInterval
 
-                time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.IntegrateForTimeInterval(interval)
+                time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.IntegrateForTimeInterval(interval, eDoNotStopAtDiscontinuity)
                 <span style='color:#0000ff;'>self</span>.simulation.ReportData(<span style='color:#0000ff;'>self</span>.simulation.CurrentTime)
                 <span style='color:#0000ff;'>self</span>._updatePlot()
                 sleep(<span style='color:#c000c0;'>0.1</span>)

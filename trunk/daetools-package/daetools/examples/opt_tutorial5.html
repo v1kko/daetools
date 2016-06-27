@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            opt_tutorial5.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -35,16 +35,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>implementing Levenberg-Marquardt algorithm is used to estimate the parameters.</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>import</span> sys, numpy
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>import</span> numpy
 <span style='color:#0000ff;'>import</span> matplotlib
 matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
 <span style='color:#0000ff;'>import</span> matplotlib.pyplot <span style='color:#0000ff;'>as</span> plt
 <span style='color:#0000ff;'>from</span> scipy.optimize <span style='color:#0000ff;'>import</span> leastsq
-
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
@@ -117,13 +114,13 @@ matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
         values[e]    <b><span style='color:#0000ff;'>=</span></b> simulation.ObjectiveFunction.Value <b><span style='color:#0000ff;'>-</span></b> ymeas[e]
         derivs[e][:] <b><span style='color:#0000ff;'>=</span></b> simulation.ObjectiveFunction.Gradients
         
-    <b>print</b>(<span style='color:#c00000;'>'A ='</span>, simulation.A.Value, <span style='color:#c00000;'>', k ='</span>, simulation.k.Value, <span style='color:#c00000;'>', theta ='</span>, simulation.theta.Value)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'A ='</span>, simulation.A.Value, <span style='color:#c00000;'>', k ='</span>, simulation.k.Value, <span style='color:#c00000;'>', theta ='</span>, simulation.theta.Value)
     <b>if</b> calc_values:
-        <b>print</b>(<span style='color:#c00000;'>'  Residuals:'</span>)
-        <b>print</b>(values)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  Residuals:'</span>)
+        <span style='color:#0000ff;'>print</span>(values)
     <b>else</b>:
-        <b>print</b>(<span style='color:#c00000;'>'  Derivatives:'</span>)
-        <b>print</b>(derivs)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  Derivatives:'</span>)
+        <span style='color:#0000ff;'>print</span>(derivs)
     
     <b>if</b> calc_values:
         <b>return</b> values
@@ -201,25 +198,25 @@ matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
                                            full_output<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'># Print the results</span>
-    <b>print</b>(<span style='color:#c00000;'>'------------------------------------------------------'</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'------------------------------------------------------'</span>)
     <b>if</b> ier <b><span style='color:#0000ff;'>in</span></b> [<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>3</span>, <span style='color:#c000c0;'>4</span>]:
-        <b>print</b>(<span style='color:#c00000;'>'Solution found!'</span>)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Solution found!'</span>)
     <b>else</b>:
-        <b>print</b>(<span style='color:#c00000;'>'Least square method failed!'</span>)
-    <b>print</b>(<span style='color:#c00000;'>'Status:'</span>, msg)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Least square method failed!'</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Status:'</span>, msg)
 
-    <b>print</b>(<span style='color:#c00000;'>'Number of function evaluations ='</span>, infodict[<span style='color:#c00000;'>'nfev'</span>])
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Number of function evaluations ='</span>, infodict[<span style='color:#c00000;'>'nfev'</span>])
     chisq <b><span style='color:#0000ff;'>=</span></b> (infodict[<span style='color:#c00000;'>'fvec'</span>]<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>).<span style='color:#0000ff;'>sum</span>()
     dof <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(x) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>len</span>(p0)
     rmse <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt(chisq <b><span style='color:#0000ff;'>/</span></b> dof)
-    <b>print</b>(<span style='color:#c00000;'>'Root mean square deviation ='</span>, rmse)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Root mean square deviation ='</span>, rmse)
 
     A, k, theta <b><span style='color:#0000ff;'>=</span></b> p
-    <b>print</b>(<span style='color:#c00000;'>'Estimated parameters values:'</span>)
-    <b>print</b>(<span style='color:#c00000;'>'    A     ='</span>, A)
-    <b>print</b>(<span style='color:#c00000;'>'    k     ='</span>, k)
-    <b>print</b>(<span style='color:#c00000;'>'    theta ='</span>, theta)
-    <b>print</b>(<span style='color:#c00000;'>'------------------------------------------------------'</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Estimated parameters values:'</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    A     ='</span>, A)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    k     ='</span>, k)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    theta ='</span>, theta)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'------------------------------------------------------'</span>)
 
     <span style='color:#008000;'># Plot the comparison between the exact values, measured and fitted data</span>
     plt.plot(x, peval(x, p), x, y_meas, <span style='color:#c00000;'>'o'</span>, x, y_true)

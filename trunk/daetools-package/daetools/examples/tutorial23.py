@@ -140,39 +140,28 @@ class simTutorial(daeSimulation):
         #print [str(key_value) for key_value in mapOverallBlockIndexes]
         pass
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 1000
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
+def run_code_generators(simulation, log):
+    # Demonstration of daetools c++/MPI code-generator:
+    import tempfile
+    tmp_folder = tempfile.mkdtemp(prefix = 'daetools-code_generator-cxx-')
+    msg = 'Generated c++/MPI code will be located in: \n%s' % tmp_folder
+    log.Message(msg, 0)
 
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    try:
+        from PyQt4 import QtCore, QtGui
+        if not QtGui.QApplication.instance():
+            app_ = QtGui.QApplication(sys.argv)
+        QtGui.QMessageBox.warning(None, "tutorial23", msg)
+    except Exception as e:
+        log.Message(str(e), 0)
 
+    # Generate c++ MPI code for 4 nodes
+    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+    cg = daeCodeGenerator_cxx_mpi()
+    cg.generateSimulation(simulation, tmp_folder, 4)
+
+def setupLASolver():
     lasolver = pyTrilinos.daeCreateTrilinosSolver("AztecOO", "")
-    #lasolver = pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-    daesolver.RelativeTolerance = 1e-3
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
 
     paramListAztec = lasolver.AztecOOOptions
     lasolver.NumIters  = 1000
@@ -192,6 +181,45 @@ def consoleRun():
 
     paramListAztec.Print()
 
+    return lasolver
+
+# Use daeSimulator class
+def guiRun(app):
+    sim = simTutorial()
+    lasolver = setupLASolver()
+    daesolver = daeIDAS()
+    daesolver.RelativeTolerance = 1e-3
+
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 10
+    sim.TimeHorizon       = 1000
+    simulator  = daeSimulator(app, simulation=sim, lasolver = lasolver, run_before_simulation_begin_fn = run_code_generators)
+    simulator.exec_()
+
+# Setup everything manually and run in a console
+def consoleRun():
+    # Create Log, Solver, DataReporter and Simulation object
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
+
+    lasolver = setupLASolver()
+    daesolver.SetLASolver(lasolver)
+    daesolver.RelativeTolerance = 1e-3
+
+    # Enable reporting of all variables
+    simulation.m.SetReportingOn(True)
+
+    # Set the time horizon and the reporting interval
+    simulation.ReportingInterval = 10
+    simulation.TimeHorizon = 1000
+
+    # Connect data reporter
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("", simName) == False):
+        sys.exit()
+
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
@@ -202,14 +230,9 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
-    #fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
-    #lasolver.SaveAsXPM(str(fileName))
+    # Run code-generator
+    run_code_generators(simulation, log)
 
-    # Generate code
-    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-    cg = daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, '/home/ciroki/Data/daetools/trunk/code_gen_tests/cxx-tutorial23-old', 4)
-    
     # Run
     simulation.Run()
 

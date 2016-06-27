@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            opt_tutorial6.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -31,13 +31,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> daetools.solvers.minpack <span style='color:#0000ff;'>import</span> daeMinpackLeastSq
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 <span style='color:#0000ff;'>from</span> numpy.linalg <span style='color:#0000ff;'>import</span> cholesky
 <span style='color:#0000ff;'>import</span> matplotlib
 matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
 <span style='color:#0000ff;'>import</span> matplotlib.pyplot <span style='color:#0000ff;'>as</span> plt
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> daetools.solvers.minpack <span style='color:#0000ff;'>import</span> daeMinpackLeastSq
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
@@ -265,14 +265,14 @@ matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
     minpack.Run()
 
     <span style='color:#008000;'># Print the results</span>
-    <b>print</b>(<span style='color:#c00000;'>'Status:'</span>, minpack.msg)
-    <b>print</b>(<span style='color:#c00000;'>'Number of function evaluations ='</span>, minpack.infodict[<span style='color:#c00000;'>'nfev'</span>])
-    <b>print</b>(<span style='color:#c00000;'>'Estimated parameters</span><span style='color:#c00000;'>\'</span><span style='color:#c00000;'> values:'</span>, minpack.p_estimated)
-    <b>print</b>(<span style='color:#c00000;'>'The real parameters</span><span style='color:#c00000;'>\'</span><span style='color:#c00000;'> values:'</span>, [<span style='color:#c00000;'>'10.0'</span>, <span style='color:#c00000;'>'33.33333333'</span>, <span style='color:#c00000;'>'0.523598333'</span>])
-    <b>print</b>(<span style='color:#c00000;'>'chi2 ='</span>, minpack.x2)
-    <b>print</b>(<span style='color:#c00000;'>'Standard deviation ='</span>, minpack.sigma)
-    <b>print</b>(<span style='color:#c00000;'>'Covariance matrix:'</span>)
-    <b>print</b>(minpack.cov_x)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Status:'</span>, minpack.msg)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Number of function evaluations ='</span>, minpack.infodict[<span style='color:#c00000;'>'nfev'</span>])
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Estimated parameters</span><span style='color:#c00000;'>\'</span><span style='color:#c00000;'> values:'</span>, minpack.p_estimated)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The real parameters</span><span style='color:#c00000;'>\'</span><span style='color:#c00000;'> values:'</span>, [<span style='color:#c00000;'>'10.0'</span>, <span style='color:#c00000;'>'33.33333333'</span>, <span style='color:#c00000;'>'0.523598333'</span>])
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'chi2 ='</span>, minpack.x2)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Standard deviation ='</span>, minpack.sigma)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Covariance matrix:'</span>)
+    <span style='color:#0000ff;'>print</span>(minpack.cov_x)
     
     <span style='color:#008000;'># Plot 90, 95, and 99% confidence ellipsoids</span>
     plotConfidenceEllipsoid(minpack, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>95</span>, <span style='color:#c00000;'>'A'</span>, <span style='color:#c00000;'>'k'</span>)

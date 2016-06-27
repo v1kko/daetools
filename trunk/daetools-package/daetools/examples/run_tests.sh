@@ -19,7 +19,7 @@ echo tutorial2.py
 $PYTHON $ROOT/tutorial2.py console
 
 echo tutorial3.py
-#$PYTHON $ROOT/tutorial3.py console
+$PYTHON $ROOT/tutorial3.py console
 
 echo tutorial4.py
 $PYTHON $ROOT/tutorial4.py console

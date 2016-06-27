@@ -411,8 +411,8 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
         shutil.copy2(os.path.join(cxx_dir, 'auxiliary.h'),       os.path.join(directory, 'auxiliary.h'))
         shutil.copy2(os.path.join(cxx_dir, 'auxiliary.cpp'),     os.path.join(directory, 'auxiliary.cpp'))
         shutil.copy2(os.path.join(cxx_dir, 'Makefile-gcc'),      os.path.join(directory, 'Makefile'))
-        shutil.copy2(os.path.join(cxx_dir, 'vc++2008.vcproj'),   os.path.join(directory, '%s.vcproj' % dirName))
-        shutil.copy2(os.path.join(cxx_dir, 'qt_project.pro'),    os.path.join(directory, '%s.pro' % dirName))
+        shutil.copy2(os.path.join(cxx_dir, 'vc++2008.vcproj'),   os.path.join(directory, 'daetools-simulation.vcproj'))
+        shutil.copy2(os.path.join(cxx_dir, 'qt_project.pro'),    os.path.join(directory, 'daetools-simulation.pro'))
 
         f = open(os.path.join(directory, 'model.h'), "w")
         f.write(daetools_model_h_contents)

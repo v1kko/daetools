@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                        tutorial_dealii_1.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -51,9 +51,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> os, sys, numpy, json, tempfile
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> daetools.solvers.deal_II <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 <span style='color:#0000ff;'>from</span> daetools.solvers.superlu <span style='color:#0000ff;'>import</span> pySuperLU
 <span style='color:#008000;'>#from daetools.solvers.trilinos import pyTrilinos</span>
 <span style='color:#008000;'>#from daetools.solvers.aztecoo_options import daeAztecOptions</span>
@@ -125,13 +125,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'># Achtung, Achtung!!</span>
         <span style='color:#008000;'># Finite element equations must not go out of scope for deal.II FE model keeps only weak references to them.</span>
         <span style='color:#0000ff;'>self</span>.cdr1 <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation(<span style='color:#c00000;'>'U'</span>, <span style='color:#c00000;'>'U description'</span>, <span style='color:#0000ff;'>self</span>.dirichletBC, <span style='color:#0000ff;'>self</span>.neumannBC)
-        <b>print</b>(<span style='color:#c00000;'>'Convection-Diffusion equation:'</span>)
-        <b>print</b>(<span style='color:#c00000;'>'    VariableName         ='</span>, <span style='color:#0000ff;'>self</span>.cdr1.VariableName)
-        <b>print</b>(<span style='color:#c00000;'>'    VariableDescription  ='</span>, <span style='color:#0000ff;'>self</span>.cdr1.VariableDescription)
-        <b>print</b>(<span style='color:#c00000;'>'    Multiplicity         ='</span>, <span style='color:#0000ff;'>self</span>.cdr1.Multiplicity)
-        <b>print</b>(<span style='color:#c00000;'>'    ElementMatrix        ='</span>, <span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.cdr1.Alocal))
-        <b>print</b>(<span style='color:#c00000;'>'    ElementMatrix_dt     ='</span>, <span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.cdr1.Mlocal))
-        <b>print</b>(<span style='color:#c00000;'>'    ElementRHS           ='</span>, <span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.cdr1.Flocal))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Convection-Diffusion equation:'</span>)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    VariableName         ='</span>, <span style='color:#0000ff;'>self</span>.cdr1.VariableName)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    VariableDescription  ='</span>, <span style='color:#0000ff;'>self</span>.cdr1.VariableDescription)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Multiplicity         ='</span>, <span style='color:#0000ff;'>self</span>.cdr1.Multiplicity)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    ElementMatrix        ='</span>, <span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.cdr1.Alocal))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    ElementMatrix_dt     ='</span>, <span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.cdr1.Mlocal))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    ElementRHS           ='</span>, <span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.cdr1.Flocal))
         <span style='color:#008000;'>#print('    FunctionsDirichletBC =', self.cdr1.FunctionsDirichletBC)</span>
         <span style='color:#008000;'>#print('    FunctionsNeumannBC   =', self.cdr1.FunctionsNeumannBC)</span>
         equations <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.cdr1]
@@ -185,7 +185,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
                 <b>if</b> m_dt(row, column) <b><span style='color:#0000ff;'>!=</span></b> <span style='color:#c000c0;'>0</span>:
                     variable, index, ic <b><span style='color:#0000ff;'>=</span></b> dofIndexesMap[column]
                     variable.SetInitialCondition(index, ic)
-                    <b>print</b>(<span style='color:#c00000;'>'</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>) initial condition = </span><span style='color:#0057ae;'>%f</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (variable.Name, column, ic))
+                    <span style='color:#008000;'>#print('%s(%d) initial condition = %f' % (variable.Name, column, ic))</span>
     
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
@@ -206,7 +206,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
         QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;deal.II&quot;</span>, <span style='color:#c00000;'>&quot;The simulation results will be located in: </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results_folder)
     <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-        <b>print</b>(<span style='color:#0000ff;'>str</span>(e))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#0000ff;'>str</span>(e))
     
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
     simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
@@ -241,7 +241,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_graph_fill&quot;,      1)</span>
 <span style='color:#008000;'>    paramListAztec.Print()</span>
 <span style='color:#008000;'>    daesolver.SetLASolver(lasolver)</span>
-<span style='color:#008000;'>    &quot;&quot;&quot;</span>
+<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
 
     <span style='color:#008000;'># Create two data reporters: TCP/IP and DealII</span>
     tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()

@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial20.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -66,11 +66,88 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>1. Inlet ports must be DOFs (that is to have their values asssigned),</span>
 <span style='color:#c00000;'>   for they can't be connected when the model is simulated outside of daetools context.</span>
 <span style='color:#c00000;'>2. Only scalar output ports are supported at the moment!! (Simulink issue)</span>
+
+<span style='color:#c00000;'>FMI Cross-Check results:</span>
+<span style='color:#c00000;'>1. Start the DAEPlotter (or change the data reporter below).</span>
+<span style='color:#c00000;'>2. Execute:</span>
+<span style='color:#c00000;'>    ./fmuCheck.linux64 -n 10 tutorial20.fmu</span>
+<span style='color:#c00000;'>3. Results:</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Will process FMU tutorial20.fmu</span>
+<span style='color:#c00000;'>    [INFO][FMILIB] XML specifies FMI standard version 2.0</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Model name: tutorial20</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Model GUID: e9654532-0998-11e6-957b-9cb70d5dfdfc</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Model version:</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] FMU kind: CoSimulation</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] The FMU contains:</span>
+<span style='color:#c00000;'>    0 constants</span>
+<span style='color:#c00000;'>    3 parameters</span>
+<span style='color:#c00000;'>    0 discrete variables</span>
+<span style='color:#c00000;'>    4 continuous variables</span>
+<span style='color:#c00000;'>    2 inputs</span>
+<span style='color:#c00000;'>    2 outputs</span>
+<span style='color:#c00000;'>    0 local variables</span>
+<span style='color:#c00000;'>    0 independent variables</span>
+<span style='color:#c00000;'>    0 calculated parameters</span>
+<span style='color:#c00000;'>    6 real variables</span>
+<span style='color:#c00000;'>    0 integer variables</span>
+<span style='color:#c00000;'>    0 enumeration variables</span>
+<span style='color:#c00000;'>    0 boolean variables</span>
+<span style='color:#c00000;'>    1 string variables</span>
+
+<span style='color:#c00000;'>    [INFO][FMUCHK] Printing output file header</span>
+<span style='color:#c00000;'>    time,out_1.y,out_2.y</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial20</span>
+<span style='color:#c00000;'>    [INFO][FMILIB] Loading 'linux64' binary with 'default' platform types</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Version returned from CS FMU:   2.0</span>
+<span style='color:#c00000;'>    ***********************************************************************</span>
+<span style='color:#c00000;'>                                     Version:   1.5.0</span>
+<span style='color:#c00000;'>                                     Copyright: Dragan Nikolic, 2016</span>
+<span style='color:#c00000;'>                                     Homepage:  http://www.daetools.com</span>
+<span style='color:#c00000;'>           @                       @</span>
+<span style='color:#c00000;'>           @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@</span>
+<span style='color:#c00000;'>      @@@@@@        @   @     @    @     @     @  @     @  @     @</span>
+<span style='color:#c00000;'>     @     @   @@@@@@   @@@@@@     @     @     @  @     @  @      @@@@@</span>
+<span style='color:#c00000;'>     @     @  @     @   @          @     @     @  @     @  @           @</span>
+<span style='color:#c00000;'>      @@@@@@   @@@@@@    @@@@@      @@@   @@@@@    @@@@@    @@@@  @@@@@</span>
+<span style='color:#c00000;'>    ***********************************************************************</span>
+<span style='color:#c00000;'>    DAE Tools is free software: you can redistribute it and/or modify</span>
+<span style='color:#c00000;'>    it under the terms of the GNU General Public License version 3</span>
+<span style='color:#c00000;'>    as published by the Free Software Foundation.</span>
+<span style='color:#c00000;'>    DAE Tools is distributed in the hope that it will be useful,</span>
+<span style='color:#c00000;'>    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span style='color:#c00000;'>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span style='color:#c00000;'>    General Public License for more details.</span>
+<span style='color:#c00000;'>    You should have received a copy of the GNU General Public License</span>
+<span style='color:#c00000;'>    along with this program. If not, see &lt;http://www.gnu.org/licenses&gt;.</span>
+<span style='color:#c00000;'>    ***********************************************************************</span>
+<span style='color:#c00000;'>    Creating the system...</span>
+<span style='color:#c00000;'>    The system created successfully in: 0.002 s</span>
+<span style='color:#c00000;'>    Starting the initialization of the system... Done.</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Initialized FMU for simulation starting at time 0</span>
+<span style='color:#c00000;'>    0,1.0000000010000001E+00,2.0000000039999999E+00</span>
+<span style='color:#c00000;'>    10,1.0100000000000001E+02,4.0200000000000006E+02</span>
+<span style='color:#c00000;'>    20,2.0099999999999994E+02,8.0199999999999977E+02</span>
+<span style='color:#c00000;'>    30,3.0100000000000000E+02,1.2020000000000000E+03</span>
+<span style='color:#c00000;'>    40,4.0100000000000000E+02,1.6020000000000000E+03</span>
+<span style='color:#c00000;'>    50,5.0099999999999989E+02,2.0019999999999995E+03</span>
+<span style='color:#c00000;'>    60,6.0100000000000000E+02,2.4020000000000000E+03</span>
+<span style='color:#c00000;'>    70,7.0100000000000000E+02,2.8020000000000000E+03</span>
+<span style='color:#c00000;'>    80,8.0100000000000000E+02,3.2020000000000000E+03</span>
+<span style='color:#c00000;'>    90,9.0099999999999977E+02,3.6019999999999991E+03</span>
+<span style='color:#c00000;'>    100,1.0009999999999998E+03,4.0019999999999991E+03</span>
+<span style='color:#c00000;'>    [INFO][FMUCHK] Simulation finished successfully at time 100</span>
+<span style='color:#c00000;'>    FMU check summary:</span>
+<span style='color:#c00000;'>    FMU reported:</span>
+<span style='color:#c00000;'>            0 warning(s) and error(s)</span>
+<span style='color:#c00000;'>    Checker reported:</span>
+<span style='color:#c00000;'>            0 Warning(s)</span>
+<span style='color:#c00000;'>            0 Error(s)</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
