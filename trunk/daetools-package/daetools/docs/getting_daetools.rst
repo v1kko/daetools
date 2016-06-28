@@ -12,8 +12,7 @@ Getting DAE Tools
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 **DAE Tools** (pyDAE module) is installed in ``daetools`` folder within ``site-packages`` (or ``dist-packages``)
-folder under python (tipically ``/usr/local/lib/pythonXY/Lib`` or ``C:\PythonX.Y\Lib``).
-The structure of the folders is the following:
+folder under python. The structure of the folders is the following:
 
 * ``daetools``
 
@@ -24,6 +23,7 @@ The structure of the folders is the following:
   * ``examples``
   * ``pyDAE``
   * ``solvers``
+  * ``solibs``
   * ``unit_tests``
 
 System requirements
@@ -35,18 +35,23 @@ Supported platforms:
 * Windows (32 bit and 32 bit version of DAE Tools on 64 bit)
 * MacOS (x86, x86_64)
 
-Supported python versions:
-
-* 2.7
-* 3.3, 3.4
+The software works on both python 2 and 3. The binaries are provided for 2.7 and 3.4
 
 Mandatory packages:
 
-* Python (2.7, 3.3, 3.4): `<http://www.python.org>`_
+* Python (2.x, 3.x): `<http://www.python.org>`_
 * Numpy (1.4\ :sup:`+`): `<http://numpy.scipy.org>`_
 * Scipy (0.12\ :sup:`+`): `<http://www.scipy.org>`_
 * Matplotlib (1.2\ :sup:`+`): `<http://matplotlib.sourceforge.net>`_
 * pyQt4 (4.x): `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
+* mayavi2
+* python-lxml
+
+Optional packages:
+
+* python-xlwt
+* python-h5py
+* python-pandas
 
 Optional packages (proprietary):
 
@@ -73,14 +78,14 @@ The naming convention of the installation files:
 
 ``daetools-major.minor.build-platform-architecture-python_version.tar.gz``
 
-where ``major.minor.build`` represents the version (``1.2.1`` for instance), ``architecture`` could be ``i686``, ``x86_64``
+where ``major.minor.build`` represents the version (``1.5.0`` for instance), ``architecture`` could be ``i686``, ``x86_64``
 or ``universal``, and ``python_version`` can be ``py27``, ``py34`` etc. An example:
-``daetools-1.4.0-gnu_linux-x86_64-py27.tar.gz`` is the version 1.4.0 for 64 bit GNU/Linux with python 2.7.
+``daetools-1.5.0-gnu_linux-x86_64-py27.tar.gz`` is the version 1.5.0 for 64 bit GNU/Linux with python 2.7.
 
 For the other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the folder with a particular version
-(``daetools-1.4.0-source.tar.gz`` for instance).
+(``daetools-1.5.0-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -193,7 +198,7 @@ By hand
 ########
 **DAE Tools** is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use **DAE Tools** on
 64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
-First install the mandatory packages: python 2.7, numpy 1.6/1.7, scipy, matplotlib and pyqt4.
+First install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
 * Python 2.7: `<http://www.python.org/ftp/python/2.7.9/python-2.7.9.msi>`_

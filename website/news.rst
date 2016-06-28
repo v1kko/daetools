@@ -15,8 +15,41 @@ News
 
 .. end-command
 
-08.04.2016.
+v1.5.0, 29.06.2016.
 -------------------
+The new 1.5.0 version has been released.
+
+- The new c++/MPI code generator. It can generate the c++ source code that contains the exported simulation,
+  data partitioning and interprocess communication using MPI. At the moment it is in the prrof of the concept stage.
+- Updated other code generators. FMI code generator tested using the available tests.
+- New types of plots in the DAE Plotter: animated 2D plot (including the video export), user-defined plots
+  (through user-specified python source code) and plotting of user specified data.
+- Fixed bugs in calculation of initial conditions in daeSimulation.SolveInitial() and daeSimulation.Reinitialize() functions.
+- Added global dt, d, d2, dt_array, d_array and d2_array functions that calculate time/partial derivatives.
+- Fixed LastSatisfiedCondition (was not always set)
+- boost thread uses win32 threadapi
+- All tutorials updated to work with python 3
+- Config files (daetools.cfg and bonmin.cfg) are located in daetools root directory. However, the user-defined files
+  can be specified in the directories with the following search order:
+  1) $HOME/.daetools, 2) application folder, and 3) daetools folder in the python install.
+- Installation into the python virtual environments is supported.
+  in addition, daetools can be used just by adding the daetools folder to python root.
+- All shared livraries are now in daetools/solibs directory and python extension modules use -rpath to locate them
+  relative to the $ORIGIN.
+- Added units to data reporters/receivers and to the DAE Plotter plots.
+- Added new types of variables.
+- ChooseVariable dialog now keeps the current position in the tree for easier plotting of multiple variables.
+- install_dependencies_linux does not install python modules anymore. A new script has been added for that purpose
+  (install_python_dependencies_linux.sh).
+- Fixed some module imports to work with both python 2 and 3.
+- Fixed bug in daeReceiverVariable.Times
+- daeSimulation.Pause() and daeSimulation.Resume() fixed.
+- daeVariable.d_array/d2_array are now deprecated.
+- A number of other small fixes and updates
+
+
+08.04.2016.
+-----------
 The first article on DAE Tools has been published in *PeerJ Computer Science*:
      Nikolić DD. (2016) *DAE Tools: equation-based object-oriented modelling, simulation and optimisation software*.
      **PeerJ Computer Science** 2:e54. `doi:10.7717/peerj-cs.54 <https://doi.org/10.7717/peerj-cs.54>`_.
