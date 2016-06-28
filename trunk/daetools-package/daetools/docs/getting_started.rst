@@ -41,7 +41,7 @@ Running tutorials
 
   * Windows:
 
-    Run ``Start/Programs/DAE Tools/daetools Plotter`` from the Start menu.
+    Run ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
 
   The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-1`)
 
@@ -73,7 +73,7 @@ Running tutorials
 
   * Windows:
 
-    Run ``Start/Programs/DAE Tools/DAE Tools Examples`` from the Start menu.
+    Run ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
 
 The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-2a` while
 the output from the simulation run in :ref:`Figure-2b`. There, tutorials can be run, their source code

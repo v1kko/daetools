@@ -453,6 +453,23 @@ Source code             `tutorial20.py <../../examples/tutorial20.html>`_
   Source code             `tutorial21.py <../../examples/tutorial21.html>`_
   =====================   =================================================================
 
+  Tutorial 23
+  ===========
+  .. rubric:: Description
+
+  .. automodule:: daetools.examples.tutorial23
+     :no-members:
+     :no-undoc-members:
+
+  .. rubric:: Files
+
+  =====================   =================================================================
+  =====================   =================================================================
+  Model report            `tutorial23.xml <../../examples/tutorial23.xml>`_
+  Runtime model report    `tutorial23-rt.xml <../../examples/tutorial23-rt.xml>`_
+  Source code             `tutorial23.py <../../examples/tutorial23.html>`_
+  =====================   =================================================================
+
 
 .. _opt_tutorial_1:
 

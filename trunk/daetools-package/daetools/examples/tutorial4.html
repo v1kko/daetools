@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial4.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -46,11 +46,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kW
+<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
@@ -176,12 +176,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#0000ff;'>import</span> pprint
     <b>for</b> eq <b><span style='color:#0000ff;'>in</span></b> simulation.m.Equations:
-        <b>print</b>(eq.CanonicalName, <span style='color:#c00000;'>':'</span>)
+        <span style='color:#0000ff;'>print</span>(eq.CanonicalName, <span style='color:#c00000;'>':'</span>)
         <b>for</b> eei <b><span style='color:#0000ff;'>in</span></b> eq.EquationExecutionInfos:
-            <b>print</b>(<span style='color:#c00000;'>'    </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>:'</span> <b><span style='color:#0000ff;'>%</span></b> eei.Name)
+            <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>:'</span> <b><span style='color:#0000ff;'>%</span></b> eei.Name)
             <span style='color:#008000;'># dictionary {overall_index : (block_index,derivative_node)}</span>
             <b>for</b> oi, (bi,node) <b><span style='color:#0000ff;'>in</span></b> eei.JacobianExpressions.items():
-                <b>print</b>(<span style='color:#c00000;'>'        </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> : </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (bi, node))
+                <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'        </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> : </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (bi, node))
             
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)

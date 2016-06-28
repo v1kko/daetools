@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial12.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -43,8 +43,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> daetools.solvers.superlu <span style='color:#0000ff;'>import</span> pySuperLU <span style='color:#0000ff;'>as</span> superlu
 <span style='color:#008000;'>#from daetools.solvers.superlu_mt import pySuperLU_MT as superlu</span>
 
@@ -74,7 +74,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Heat balance equation. Valid on the open x and y domains&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> \
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <b><span style='color:#0000ff;'>\</span></b>
                      (<span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.x, x, y) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.y, x, y))
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
@@ -106,8 +106,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>20</span>
 
-        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))

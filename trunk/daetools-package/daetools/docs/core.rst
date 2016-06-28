@@ -380,8 +380,12 @@ Functions
 .. autosummary::
     :nosignatures:
 
-    d
     dt
+    d
+    d2
+    dt_array
+    d_array
+    d2_array
     Time
     Constant
     Array
@@ -390,8 +394,12 @@ Functions
     Integral
     Average
 
-.. autofunction:: pyCore.d
 .. autofunction:: pyCore.dt
+.. autofunction:: pyCore.d
+.. autofunction:: pyCore.d2
+.. autofunction:: pyCore.dt_array
+.. autofunction:: pyCore.d_array
+.. autofunction:: pyCore.d2_array
 .. autofunction:: pyCore.Time
 .. autofunction:: pyCore.Constant
 .. autofunction:: pyCore.Array

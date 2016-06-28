@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial1.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -113,8 +113,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
@@ -178,13 +178,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Heat balance equation. Valid on open x and y domains&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        <span style='color:#008000;'># In this example we use the default center-finite difference method (eCFDM) of 2nd order</span>
+        <span style='color:#008000;'># In this example we use (the default) center-finite difference method (eCFDM) of 2nd order</span>
         <span style='color:#008000;'># to discretize the domains x and y. Other available methods are:</span>
         <span style='color:#008000;'>#  - eBFDM: backward-finite difference method,</span>
         <span style='color:#008000;'>#  - eFFDM: forward-finite difference method</span>
         <span style='color:#008000;'>#  - eUpwindCCFV: cell-centered finite-volume method with flux limiter</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> \
-                     (<span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.x, x, y) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.y, x, y))
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                      <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> (d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM) <b><span style='color:#0000ff;'>+</span></b> d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM))
 
         <span style='color:#008000;'># Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags</span>
         <span style='color:#008000;'># are used to define the position of the boundary.</span>
@@ -192,25 +192,25 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eLowerBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qb()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qb()
 
         <span style='color:#008000;'># The top edge is placed at y = Ly coordinate, thus we use eUpperBound for the y domain:</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_top&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the top edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eUpperBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qt()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qt()
 
         <span style='color:#008000;'># The left edge is placed at x = 0 coordinate, thus we use eLowerBound for the x domain:</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_left&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions at the left edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eLowerBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM)
 
         <span style='color:#008000;'># The right edge is placed at x = Lx coordinate, thus we use eUpperBound for the x domain:</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_right&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the right edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eUpperBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM)
         
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
@@ -284,6 +284,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Run</span>
     simulation.Run()
+
     simulation.Finalize()
 
 <b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:

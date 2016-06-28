@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial11.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -27,24 +27,64 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial shows the use of Trilinos group of solvers: Amesos and AztecOO iterative</span>
-<span style='color:#c00000;'>linear equation solvers with different preconditioners (built-in AztecOO, Ifpack or ML)</span>
-<span style='color:#c00000;'>and corresponding linear solver options.</span>
+<span style='color:#c00000;'>This tutorial shows the use of iterative linear solvers (AztecOO from the Trilinos project)</span>
+<span style='color:#c00000;'>with different preconditioners (built-in AztecOO, Ifpack or ML) and corresponding solver options.</span>
+<span style='color:#c00000;'>Also, the range of Trilins Amesos solver options are shown.</span>
 
-<span style='color:#c00000;'>**ACHTUNG, ACHTUNG!!**</span>
+<span style='color:#c00000;'>The model is identical to the model in tutorial 1, except that the equations are written in</span>
+<span style='color:#c00000;'>a different way to maximize the number of items around the diagonal (creating the problem</span>
+<span style='color:#c00000;'>with the diagonally dominant matrix). These type of systems can be solved using very simple</span>
+<span style='color:#c00000;'>preconditioners such as Jacobi. To do so, the interoperability with the NumPy package</span>
+<span style='color:#c00000;'>has been exploited and the package itertools used to iterate through the distribution</span>
+<span style='color:#c00000;'>domains in x and y directions.</span>
 
-<span style='color:#c00000;'>Iterative solvers are not fully working yet and this example is given just as a showcase</span>
-<span style='color:#c00000;'>and for preconditioner options experimenting purposes.</span>
+<span style='color:#c00000;'>The equations are distributed so that the following incidence matrix is obtained:</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>    |XXX                                 |</span>
+<span style='color:#c00000;'>    | X     X     X                      |</span>
+<span style='color:#c00000;'>    |  X     X     X                     |</span>
+<span style='color:#c00000;'>    |   X     X     X                    |</span>
+<span style='color:#c00000;'>    |    X     X     X                   |</span>
+<span style='color:#c00000;'>    |   XXX                              |</span>
+<span style='color:#c00000;'>    |      XXX                           |</span>
+<span style='color:#c00000;'>    | X    XXX    X                      |</span>
+<span style='color:#c00000;'>    |  X    XXX    X                     |</span>
+<span style='color:#c00000;'>    |   X    XXX    X                    |</span>
+<span style='color:#c00000;'>    |    X    XXX    X                   |</span>
+<span style='color:#c00000;'>    |         XXX                        |</span>
+<span style='color:#c00000;'>    |            XXX                     |</span>
+<span style='color:#c00000;'>    |       X    XXX    X                |</span>
+<span style='color:#c00000;'>    |        X    XXX    X               |</span>
+<span style='color:#c00000;'>    |         X    XXX    X              |</span>
+<span style='color:#c00000;'>    |          X    XXX    X             |</span>
+<span style='color:#c00000;'>    |               XXX                  |</span>
+<span style='color:#c00000;'>    |                  XXX               |</span>
+<span style='color:#c00000;'>    |             X    XXX    X          |</span>
+<span style='color:#c00000;'>    |              X    XXX    X         |</span>
+<span style='color:#c00000;'>    |               X    XXX    X        |</span>
+<span style='color:#c00000;'>    |                X    XXX    X       |</span>
+<span style='color:#c00000;'>    |                     XXX            |</span>
+<span style='color:#c00000;'>    |                        XXX         |</span>
+<span style='color:#c00000;'>    |                   X    XXX    X    |</span>
+<span style='color:#c00000;'>    |                    X    XXX    X   |</span>
+<span style='color:#c00000;'>    |                     X    XXX    X  |</span>
+<span style='color:#c00000;'>    |                      X    XXX    X |</span>
+<span style='color:#c00000;'>    |                           XXX      |</span>
+<span style='color:#c00000;'>    |                              XXX   |</span>
+<span style='color:#c00000;'>    |                   X     X     X    |</span>
+<span style='color:#c00000;'>    |                    X     X     X   |</span>
+<span style='color:#c00000;'>    |                     X     X     X  |</span>
+<span style='color:#c00000;'>    |                      X     X     X |</span>
+<span style='color:#c00000;'>    |                                 XXX|</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>import</span> sys, numpy, itertools
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<b>try</b>:
-    <span style='color:#0000ff;'>from</span> daetools.solvers.trilinos <span style='color:#0000ff;'>import</span> pyTrilinos
-    <span style='color:#0000ff;'>from</span> daetools.solvers.aztecoo_options <span style='color:#0000ff;'>import</span> daeAztecOptions
-<b>except</b> <b><span style='color:#054d00;'>ImportError</span></b> <span style='color:#0000ff;'>as</span> e:
-    <b>print</b>((<span style='color:#c00000;'>'Unable to import Trilinos LA solver: {0}'</span>.<span style='color:#0000ff;'>format</span>(e)))
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> daetools.solvers.trilinos <span style='color:#0000ff;'>import</span> pyTrilinos
+<span style='color:#0000ff;'>from</span> daetools.solvers.aztecoo_options <span style='color:#0000ff;'>import</span> daeAztecOptions
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
@@ -70,31 +110,95 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Heat balance equation. Valid on the open x and y domains&quot;</span>)
-        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)
-        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span> <b><span style='color:#0000ff;'>*</span></b> (  <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> \
-                               (<span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.x, x, y) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.y, x, y))  )
+        <span style='color:#008000;'># For readibility, get the adouble objects from parameters/variables</span>
+        <span style='color:#008000;'># and create numpy arrays for T and its derivatives in tim and space</span>
+        <span style='color:#008000;'># This will also save a lot of memory (no duplicate adouble objects in equations)</span>
+        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.x.NumberOfPoints
+        Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y.NumberOfPoints
+        ro <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro()
+        cp <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.cp()
+        k  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k()
+        Qb <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qb()
+        Qt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qt()
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
-        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
-        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eLowerBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span> <b><span style='color:#0000ff;'>*</span></b> ( <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qb()  )
+        <span style='color:#008000;'># Create numpy ndarrays to keep daetools adouble objects:</span>
+        <span style='color:#008000;'>#   T, dT/dt, dT/dx, d2T/dx2, dT/dy and d2T/dy2</span>
+        T      <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
+        dTdt   <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
+        dTdx   <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
+        dTdy   <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
+        d2Tdx2 <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
+        d2Tdy2 <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_top&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the top edge&quot;</span>)
-        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
-        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eUpperBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span> <b><span style='color:#0000ff;'>*</span></b> ( <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qt()  )
+        <span style='color:#008000;'># Fill the ndarrays with daetools adouble objects:</span>
+        <b>for</b> x <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nx):
+            <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Ny):
+                T[x,y]      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T(x,y)
+                dTdt[x,y]   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.T(x,y))
+                dTdx[x,y]   <b><span style='color:#0000ff;'>=</span></b> d (<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM)
+                dTdy[x,y]   <b><span style='color:#0000ff;'>=</span></b> d (<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM)
+                d2Tdx2[x,y] <b><span style='color:#0000ff;'>=</span></b> d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM)
+                d2Tdy2[x,y] <b><span style='color:#0000ff;'>=</span></b> d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_left&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions at the left edge&quot;</span>)
-        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eLowerBound)
-        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        <span style='color:#008000;'># Get the flat list of indexes from the ranges of indexes in x and y domains</span>
+        indexes <b><span style='color:#0000ff;'>=</span></b> [(x,y) <b>for</b> x,y <b><span style='color:#0000ff;'>in</span></b> itertools.product(<span style='color:#0000ff;'>range</span>(Nx), <span style='color:#0000ff;'>range</span>(Ny))]
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_righ&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the right edge&quot;</span>)
-        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eUpperBound)
-        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>        Populate the equation types based on the location in the 2D domain:</span>
+
+<span style='color:#008000;'>          Y axis</span>
+<span style='color:#008000;'>            ^</span>
+<span style='color:#008000;'>            |</span>
+<span style='color:#008000;'>        Ly -| T T T T T T T T T T T</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>            | L i i i i i i i i i R</span>
+<span style='color:#008000;'>         0 -| B B B B B B B B B B B</span>
+<span style='color:#008000;'>            --|-------------------|-------&gt; X axis</span>
+<span style='color:#008000;'>              0                   Lx</span>
+<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
+        eq_types <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
+        eq_types[ : , : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'i'</span>  <span style='color:#008000;'># inner region</span>
+        eq_types[  <span style='color:#c000c0;'>0</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'L'</span>  <span style='color:#008000;'># left boundary</span>
+        eq_types[ <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'R'</span>  <span style='color:#008000;'># right boundary</span>
+        eq_types[ : ,  <span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'B'</span>  <span style='color:#008000;'># bottom boundary</span>
+        eq_types[ : , <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'T'</span>  <span style='color:#008000;'># top boundary</span>
+        <span style='color:#0000ff;'>print</span>(eq_types)
+
+        <span style='color:#008000;'># Finally, create equations based on the equation type</span>
+        <b>for</b> x,y <b><span style='color:#0000ff;'>in</span></b> indexes:
+            eq_type <b><span style='color:#0000ff;'>=</span></b> eq_types[x,y]
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+            <b>if</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'i'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> ro<b><span style='color:#0000ff;'>*</span></b>cp<b><span style='color:#0000ff;'>*</span></b>dTdt[x,y] <b><span style='color:#0000ff;'>-</span></b> k<b><span style='color:#0000ff;'>*</span></b>(d2Tdx2[x,y] <b><span style='color:#0000ff;'>+</span></b> d2Tdy2[x,y])
+                eq.Name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'HeatBalance(inner)'</span>
+
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'L'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> dTdx[x,y]
+                eq.Name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'BC(left)'</span>
+
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'R'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> dTdx[x,y]
+                eq.Name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'BC(right)'</span>
+
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'T'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>k<b><span style='color:#0000ff;'>*</span></b>dTdy[x,y] <b><span style='color:#0000ff;'>-</span></b> Qt
+                eq.Name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'BC(top)'</span>
+
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'B'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>k<b><span style='color:#0000ff;'>*</span></b>dTdy[x,y] <b><span style='color:#0000ff;'>-</span></b> Qb
+                eq.Name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'BC(bottom)'</span>
+
+            <b>else</b>:
+                <b>raise</b> <b><span style='color:#054d00;'>RuntimeError</span></b>(<span style='color:#c00000;'>'Invalid equation type: </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> eq_type)
+
+            eq.Name <b><span style='color:#0000ff;'>=</span></b> eq.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>'(</span><span style='color:#0057ae;'>%02d</span><span style='color:#c00000;'>,</span><span style='color:#0057ae;'>%02d</span><span style='color:#c00000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (x,y)
 
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
@@ -103,9 +207,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
-        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
@@ -121,19 +225,19 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#008000;'># Function to create the Trilinos linear equation solver.</span>
 <span style='color:#008000;'># AztecOO solvers do not work well yet</span>
 <b>def</b> createLASolver():
-    <b>print</b>(<span style='color:#c00000;'>&quot;Supported Trilinos solvers:&quot;</span>, <span style='color:#0000ff;'>str</span>(pyTrilinos.daeTrilinosSupportedSolvers()))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>&quot;Supported Trilinos solvers:&quot;</span>, <span style='color:#0000ff;'>str</span>(pyTrilinos.daeTrilinosSupportedSolvers()))
     
     <span style='color:#008000;'># Amesos SuperLU solver</span>
     <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Superlu&quot;, &quot;&quot;)</span>
-    
+
     <span style='color:#008000;'># AztecOO built-in preconditioners are specified through AZ_precond option</span>
-    <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;AztecOO&quot;, &quot;&quot;)</span>
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;AztecOO&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
 
     <span style='color:#008000;'># Ifpack preconditioner can be one of: [ILU, ILUT, PointRelaxation, BlockRelaxation, IC, ICT]</span>
     <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;AztecOO_Ifpack&quot;, &quot;PointRelaxation&quot;)</span>
     
     <span style='color:#008000;'># ML preconditioner can be one of: [SA, DD, DD-ML, DD-ML-LU, maxwell, NSSA]</span>
-    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;AztecOO_ML&quot;</span>, <span style='color:#c00000;'>&quot;maxwell&quot;</span>)
+    <span style='color:#008000;'>#lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;AztecOO_ML&quot;, &quot;maxwell&quot;)</span>
     
     <b>return</b> lasolver
 
@@ -141,9 +245,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#008000;'>#  - Direct: {Amesos_KLU, Amesos_Superlu, Amesos_Umfpack, Amesos_Lapack}</span>
 <span style='color:#008000;'>#  - Iterative: {AztecOO, AztecOO_Ifpack, AztecOO_ML}</span>
 <b>def</b> setOptions(lasolver):
-    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
     <span style='color:#008000;'># Amesos_Superlu solver</span>
-    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
     <b>if</b> lasolver.Name <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;Amesos_Superlu&quot;</span>:
         paramListAmesos <b><span style='color:#0000ff;'>=</span></b> lasolver.AmesosOptions
 
@@ -165,28 +269,28 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         paramListAmesos.set_int(<span style='color:#c00000;'>&quot;ScaleMethod&quot;</span>, <span style='color:#c000c0;'>0</span>)<b><span style='color:#0000ff;'>;</span></b>
         paramListAmesos.set_bool(<span style='color:#c00000;'>&quot;Reindex&quot;</span>, <span style='color:#0000ff;'>False</span>)
 
-    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
     <span style='color:#008000;'># AztecOO solver options consist of:</span>
     <span style='color:#008000;'>#  - solver options (given below)</span>
     <span style='color:#008000;'>#  - preconditioner options given</span>
-    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
     <b>if</b> (<span style='color:#c00000;'>&quot;AztecOO&quot;</span> <b><span style='color:#0000ff;'>in</span></b> lasolver.Name) <b><span style='color:#0000ff;'>or</span></b> (<span style='color:#c00000;'>&quot;AztecOO_Ifpack&quot;</span> <b><span style='color:#0000ff;'>in</span></b> lasolver.Name) <b><span style='color:#0000ff;'>or</span></b> (<span style='color:#c00000;'>&quot;AztecOO_ML&quot;</span> <b><span style='color:#0000ff;'>in</span></b> lasolver.Name):
         paramListAztec <b><span style='color:#0000ff;'>=</span></b> lasolver.AztecOOOptions
 
         lasolver.NumIters  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
-        lasolver.Tolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+        lasolver.Tolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-3</span>
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#c000c0;'>500</span>)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#c000c0;'>0</span>)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#c000c0;'>1</span>)
-        paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_all) <span style='color:#008000;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
+        paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_warnings) <span style='color:#008000;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
         paramListAztec.Print()
 
-    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
     <span style='color:#008000;'># AztecOO preconditioner options</span>
-    <span style='color:#008000;'>####################################################</span><b><span style='color:#bf0303;background:#f7e6e6;'>###</span></b>
+    <span style='color:#008000;'>####################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
     <b>if</b> <span style='color:#c00000;'>&quot;AztecOO_Ifpack&quot;</span> <b><span style='color:#0000ff;'>in</span></b> lasolver.Name:
         <span style='color:#008000;'># 2b) Ifpack preconditioner:</span>
         paramListIfpack <b><span style='color:#0000ff;'>=</span></b> lasolver.IfpackOptions
@@ -207,7 +311,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>elif</b> <span style='color:#c00000;'>&quot;AztecOO&quot;</span> <b><span style='color:#0000ff;'>in</span></b> lasolver.Name:
         <span style='color:#008000;'># 2a) AztecOO built-in preconditioner:</span>
         paramListAztec <b><span style='color:#0000ff;'>=</span></b> lasolver.AztecOOOptions
-        paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_dom_decomp)
+        paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_Jacobi)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_subdomain_solve&quot;</span>, daeAztecOptions.AZ_ilut)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_overlap&quot;</span>,         daeAztecOptions.AZ_none)
         paramListAztec.set_int(<span style='color:#c00000;'>&quot;AZ_graph_fill&quot;</span>,      <span style='color:#c000c0;'>1</span>)
@@ -259,6 +363,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
     simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+
+    fileName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'/home/ciroki/'</span> <b><span style='color:#0000ff;'>+</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>'.xpm'</span>
+    lasolver.SaveAsXPM(<span style='color:#0000ff;'>str</span>(fileName))
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

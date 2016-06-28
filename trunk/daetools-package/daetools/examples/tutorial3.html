@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial3.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2014</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -38,8 +38,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
@@ -70,42 +70,42 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Heat balance equation. Valid on the open x and y domains&quot;</span>)
+        <span style='color:#008000;'># All equations use the default discretisation method (central finite difference)</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Heat balance equation. Valid on open x and y domains&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> \
-                     (<span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.x, x, y) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.y, x, y))
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                      <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> (d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x) <b><span style='color:#0000ff;'>+</span></b> d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y))
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eLowerBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qb()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qb()
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_top&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the top edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eUpperBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qt()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qt()
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_left&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions at the left edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eLowerBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x)
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_right&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the right edge&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eUpperBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.x, x, y)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x)
 
-        <span style='color:#008000;'># There are several function that return arrays of values (or time- or partial-derivatives)</span>
-        <span style='color:#008000;'># such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values</span>
+        <span style='color:#008000;'># There are several functions that return arrays of values (or time- or partial-derivatives)</span>
+        <span style='color:#008000;'># such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values.</span>
         <span style='color:#008000;'># To obtain the array of values it is necessary to define points from all domains that the parameter</span>
         <span style='color:#008000;'># or variable is distributed on. Functions that return array of values accept the following arguments:</span>
         <span style='color:#008000;'>#  - daeIndexRange objects</span>
         <span style='color:#008000;'>#  - plain integers (to select a single index from a domain)</span>
-        <span style='color:#008000;'>#  - python lists (to select a list of indexes from a domain)</span>
+        <span style='color:#008000;'>#  - python lists (to select a list of indexes from a domain),</span>
         <span style='color:#008000;'>#  - python slices (to select a range of indexes from a domain: start_index, end_index, step)</span>
         <span style='color:#008000;'>#  - character '*' (to select all points from a domain)</span>
-        <span style='color:#008000;'>#  - integer -1 (to select all points from a domain)</span>
         <span style='color:#008000;'>#  - empty python list [] (to select all points from a domain)</span>
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'># daeIndexRange constructor has three variants:</span>
@@ -134,20 +134,25 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#   a) xr = daeIndexRange(self.x)</span>
         <span style='color:#008000;'>#      yr = daeIndexRange(self.y)</span>
         <span style='color:#008000;'>#      eq.Residual = self.Tave() - Average( self.T.array( xr, yr ) )</span>
-        <span style='color:#008000;'>#   b) eq.Residual = self.Tave() - Average( self.T.array( '*', -1 ) )</span>
+        <span style='color:#008000;'>#   b) eq.Residual = self.Tave() - Average( self.T.array( '*', '*' ) )</span>
         <span style='color:#008000;'>#   c) eq.Residual = self.Tave() - Average( self.T.array( [], '*' ) )</span>
-        <span style='color:#008000;'>#   d) eq.Residual = self.Tave() - Average( self.T.array( -1, slice(0, -1) ) )</span>
+        <span style='color:#008000;'>#   d) eq.Residual = self.Tave() - Average( self.T.array( '*', slice(0,-1) ) )</span>
+        <span style='color:#008000;'>#   e) eq.Residual = self.Tave() - Average( self.T.array( [],  slice(0,-1) ) )</span>
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'># To select only certain points from a domain we can use a list or a slice:</span>
-        <span style='color:#008000;'>#   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1, 3, 7 from domain y </span>
-        <span style='color:#008000;'>#   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3, 5, 7 from domain y </span>
+        <span style='color:#008000;'>#   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1,3,7 from domain y</span>
+        <span style='color:#008000;'>#   - self.T.array( '*', slice(3, 9, 2) )  returns all points from domain x and points 3,9,2 from domain y</span>
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Q_sum&quot;</span>, <span style='color:#c00000;'>&quot;The sum of heat fluxes at the bottom edge of the plate&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> Sum( <span style='color:#0000ff;'>self</span>.T.d_array(<span style='color:#0000ff;'>self</span>.y, <span style='color:#c00000;'>'*'</span>, <span style='color:#c000c0;'>0</span>) )
+        Tarray <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.array(<span style='color:#c00000;'>'*'</span>, <span style='color:#c000c0;'>0</span>) <span style='color:#008000;'># array of T values along x axis and for y = 0 (adouble_array object)</span>
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> Sum( d_array(Tarray, <span style='color:#0000ff;'>self</span>.y) )
         
         Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.x.NumberOfPoints
-        <span style='color:#008000;'># These equations are just a mental gymnastics to illustrate various functions (array, Constant, Array)</span>
-        <span style='color:#008000;'>#  - The function Constant() creates a constant quantity that contains a value and units </span>
+        <span style='color:#008000;'># These equations are just a mental gymnastics to illustrate various functions such as</span>
+        <span style='color:#008000;'># daeVariable's array() and d_array() and global functions Constant() and Array().</span>
+        <span style='color:#008000;'>#  - daeVariable.array() creates an array of values stored in a adouble_array object</span>
+        <span style='color:#008000;'>#  - daeVariable.d_array() creates an array of partial derivatives stored in a adouble_array object</span>
+        <span style='color:#008000;'>#  - The function Constant() creates a constant quantity that contains a value and units</span>
         <span style='color:#008000;'>#  - The function Array() creates an array of constant quantities that contain a value and units</span>
         <span style='color:#008000;'># Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)</span>
         <span style='color:#008000;'>#</span>
@@ -155,16 +160,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#                                          ∂T(*, 0)</span>
         <span style='color:#008000;'>#             [2K, 2K, 2K, ..., 2K] * k * ----------</span>
         <span style='color:#008000;'>#                                             ∂y          2K         ∂T(0, 0)           2K         ∂T(xn, 0)</span>
-        <span style='color:#008000;'># Qmul = -∑ ------------------------------------------ = ---- * k * ---------- + ... + ---- * k * -----------</span>
+        <span style='color:#008000;'># Qsum1 = -∑ ------------------------------------------ = ---- * k * ---------- + ... + ---- * k * -----------</span>
         <span style='color:#008000;'>#                             2K                          2K           ∂y               2K            ∂y</span>
         <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'># Achtung: the value of Qmul must be identical to Qsum!</span>
+        <span style='color:#008000;'># Achtung: the value of Qsum1 must be identical to Qsum!</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Q_mul&quot;</span>, <span style='color:#c00000;'>&quot;Heat flux multiplied by a vector (units: K) and divided by a constant (units: K)&quot;</span>)
-        values <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> K <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nx)] <span style='color:#008000;'># creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum1() <b><span style='color:#0000ff;'>+</span></b> Sum( Array(values) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d_array(<span style='color:#0000ff;'>self</span>.y, <span style='color:#c00000;'>'*'</span>, <span style='color:#c000c0;'>0</span>) <b><span style='color:#0000ff;'>/</span></b> Constant(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> K) )
+        values <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> K <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nx)]  <span style='color:#008000;'># creates list: [2K, 2K, 2K, ..., 2K] with length of x.NumberOfPoints</span>
+        Tarray <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.array(<span style='color:#c00000;'>'*'</span>, <span style='color:#c000c0;'>0</span>)        <span style='color:#008000;'># array of T values along x axis and for y = 0 (adouble_array object)</span>
+        dTdy_array <b><span style='color:#0000ff;'>=</span></b> d_array(Tarray, <span style='color:#0000ff;'>self</span>.y) <span style='color:#008000;'># array of dT/dy partial derivatives (adouble_array object)</span>
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum1() <b><span style='color:#0000ff;'>+</span></b> Sum( Array(values) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> dTdy_array <b><span style='color:#0000ff;'>/</span></b> Constant(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> K) )
 
         <span style='color:#008000;'># Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.</span>
-        <span style='color:#008000;'># In those cases the functions suxh as array(), d_array(), dt_array(), Array() etc</span>
+        <span style='color:#008000;'># In those cases the functions such as array(), d_array(), dt_array(), Array() etc</span>
         <span style='color:#008000;'># are NOT applicable since they return adouble_array objects.</span>
         <span style='color:#008000;'># However, we can create a numpy array of adouble objects, apply numpy functions on them</span>
         <span style='color:#008000;'># and finally create adouble_array object from resulting numpy arrays of adouble objects, if necessary.</span>
@@ -180,7 +187,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#      - all items at once</span>
         <span style='color:#008000;'>#      - item by item</span>
         <span style='color:#008000;'>#    In this case, we populate all items at once</span>
-        Qbottom[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.d(<span style='color:#0000ff;'>self</span>.y, x, <span style='color:#c000c0;'>0</span>) <b>for</b> x <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nx)]
+        Qbottom[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,<span style='color:#c000c0;'>0</span>), <span style='color:#0000ff;'>self</span>.y) <b>for</b> x <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nx)]
         <span style='color:#008000;'># 3. Finally, create an equation</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Q_sum2&quot;</span>, <span style='color:#c00000;'>&quot;The sum of heat fluxes at the bottom edge of the plate (numpy version)&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum2() <b><span style='color:#0000ff;'>+</span></b> numpy.<span style='color:#0000ff;'>sum</span>(Qbottom)
@@ -190,8 +197,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#   b) static function adouble_array.FromNumpyArray(numpy-array)</span>
         <span style='color:#008000;'># Both return an adouble_array object.</span>
         ad_arr_Qbottom <b><span style='color:#0000ff;'>=</span></b> adouble_array.FromNumpyArray(Qbottom)
-        <b>print</b>(<span style='color:#c00000;'>'ad_arr_Qbottom:'</span>)
-        <b>print</b>(ad_arr_Qbottom)
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'ad_arr_Qbottom:'</span>)
+        <span style='color:#0000ff;'>print</span>(ad_arr_Qbottom)
         
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
@@ -202,10 +209,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
 
-        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(eCFDM, <span style='color:#c000c0;'>2</span>, n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
-        <span style='color:#008000;'># Points of structured grids can be changed after the domain is defined by the CreateDistributed function.</span>
+        <span style='color:#008000;'># Points of structured grids can be changed after the domain is defined by the CreateStructuredGrid function.</span>
         <span style='color:#008000;'># In certain situations it is desired to create a non-uniform grid within the given interval (LB, UB).</span>
         <span style='color:#008000;'># In these cases, a non-uniform grid can be specified by changing the daeDomain.Points property.</span>
         <span style='color:#008000;'># Good candidates for non-uniform grids are cases where there is a stiff front at one side of a domain.</span>
