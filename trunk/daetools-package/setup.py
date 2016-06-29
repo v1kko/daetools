@@ -19,7 +19,7 @@ Installation instructions
   python setup.py install
 
 - Windows (.exe):
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.4.0" --bitmap wininst.bmp
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.5.0" --bitmap wininst.bmp
 
 Create .tar.gz under GNU/Linux:
   python setup.py sdist --formats=gztar
@@ -73,57 +73,59 @@ if daetools_machine == 'x86_64':
 else:
     usrlib = '/usr/lib'
 
-#boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
-#boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
-#boost_thread     = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
-#boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
-#deal_II          = 'deal_II-daetools'
-sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
-if platform.system() == 'Windows':
-    mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
+if 'envs' not in sys.prefix:
+    inside_venv = True
 else:
-    mingw_dlls   = []
-    
-shared_libs = []
+    inside_venv = False
 
-if os.path.isdir(shared_libs_dir):
-    boost_files = os.listdir(shared_libs_dir)
-
-    for f in boost_files:
-        #if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (deal_II in f):
-        #    shared_libs.append(os.path.join(shared_libs_dir, f))
-        if (sim_loader in f):
-            shared_libs.append(os.path.join(shared_libs_dir, f))
-
-        for dll in mingw_dlls:
-            if dll in f:
-                shared_libs.append(os.path.join(shared_libs_dir, f))
-    
 if platform.system() == 'Linux':
-    """
-    data_files = [
-                    #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
-                    ('/usr/share/applications', [
-                                                'usr/share/applications/daetools-daeExamples.desktop',
-                                                'usr/share/applications/daetools-daePlotter.desktop'
-                                                ] ),
-                    ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz']),
-                    ('/usr/share/menu',         [
-                                                'usr/share/menu/daetools-plotter',
-                                                'usr/share/menu/daetools-examples'
-                                                ] ),
-                    ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
-                    #('/usr/bin',                ['usr/bin/daeexamples']),
-                    #('/usr/bin',                ['usr/bin/daeplotter']),
-                    #(usrlib,                    shared_libs)
-                 ]
-    """
-    data_files = []
+    if not inside_venv:
+        data_files = [
+                        #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
+                        ('/usr/share/applications', [
+                                                    'usr/share/applications/daetools-daeExamples.desktop',
+                                                    'usr/share/applications/daetools-daePlotter.desktop'
+                                                    ] ),
+                        ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz']),
+                        ('/usr/share/menu',         [
+                                                    'usr/share/menu/daetools-plotter',
+                                                    'usr/share/menu/daetools-examples'
+                                                    ] ),
+                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
+                        #('/usr/bin',                ['usr/bin/daeexamples']),
+                        #('/usr/bin',                ['usr/bin/daeplotter'])
+                    ]
+    else:
+        data_files = []
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
     fmi_solibs = 'fmi/{0}/*.so'.format(platform_solib_dir)
 
 elif platform.system() == 'Windows':
+    boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_thread     = 'boost_thread-win32-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
+    #deal_II          = 'deal_II-daetools'
+    #sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
+    #fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
+    mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
+
+    shared_libs = []
+
+    if os.path.isdir(shared_libs_dir):
+        shared_libs_files = os.listdir(shared_libs_dir)
+
+        for f in shared_libs_files:
+            if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f):
+                shared_libs.append(os.path.join(shared_libs_dir, f))
+
+            #if (sim_loader in f) or (fmu_so in f):
+            #    shared_libs.append(os.path.join(shared_libs_dir, f))
+
+            for dll in mingw_dlls:
+                if dll in f:
+                    shared_libs.append(os.path.join(shared_libs_dir, f))
     for f in shared_libs:
         shutil.copy(f, 'daetools/pyDAE/{0}'.format(platform_solib_dir))
         shutil.copy(f, 'daetools/solvers/{0}'.format(platform_solib_dir))
@@ -143,25 +145,24 @@ elif platform.system() == 'Windows':
     fmi_solibs = 'fmi/{0}/*.dll'.format(platform_solib_dir)
 
 elif platform.system() == 'Darwin':
-    """
-    data_files = [
-                    #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
-                    ('/usr/share/applications', [
-                                                'usr/share/applications/daetools-daeExamples.desktop',
-                                                'usr/share/applications/daetools-daePlotter.desktop'
-                                                ] ),
-                    ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz']),
-                    ('/usr/share/menu',         [
-                                                'usr/share/menu/daetools-plotter',
-                                                'usr/share/menu/daetools-examples'
-                                                ] ),
-                    ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
-                    #('/usr/bin',                ['usr/bin/daeexamples']),
-                    #('/usr/bin',                ['usr/bin/daeplotter']),
-                    ('/usr/lib',                shared_libs)
-                 ]
-    """
-    data_files = []
+    if not inside_venv:
+        data_files = [
+                        #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
+                        ('/usr/share/applications', [
+                                                    'usr/share/applications/daetools-daeExamples.desktop',
+                                                    'usr/share/applications/daetools-daePlotter.desktop'
+                                                    ] ),
+                        ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz']),
+                        ('/usr/share/menu',         [
+                                                    'usr/share/menu/daetools-plotter',
+                                                    'usr/share/menu/daetools-examples'
+                                                    ] ),
+                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
+                        #('/usr/bin',                ['usr/bin/daeexamples']),
+                        #('/usr/bin',                ['usr/bin/daeplotter'])
+                    ]
+    else:
+        data_files = []
 
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
     fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)

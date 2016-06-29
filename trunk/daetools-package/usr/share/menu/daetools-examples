@@ -3,4 +3,4 @@
     section="Applications/Development" \
     title="DAE Tools Examples" \
     icon="daetools-48x48" \
-    command="/usr/bin/daeexamples"
+    command="daeexamples"

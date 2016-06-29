@@ -25,13 +25,9 @@ Short Biography
 ===============
 
 Dr. Dragan Nikolic is a chemical engineer specialized in process systems engineering and scientific software development.
-He graduated at the Department of Chemical Engineering, University of Belgrade, Serbia and received his PhD in the area
-of mechanical engineering from the Department of Mechanical Engineering, University of Western Macedonia, Greece.
-His research interests include process systems engineering, scientific software development, scale-up, crystallization,
-Computational Fluid Dynamics, Smoothed Particle Hydrodynamics,
-heat transfer and heat exchangers, adsorption and membrane systems for gas separations, hydrogen storage
-reactors, high performance computing and numerical methods.
-
-Currently works as a Research Fellow at the Synthesis and `Solid State Pharmaceutical Centre (SSPC) <http://www.sspc.ie>`_ and
-`MABE, Faculty of Scence & Engineering, University of Limerick, Ireland <https://www2.ul.ie/web/WWW/Faculties/Science_&_Engineering/Departments/Mechanical_&_Aeronautical_Engineering>`_,
-and leads the `DAE Tools Project <www.daetools.com>`_.
+He graduated at the Department of Chemical Engineering, University of Belgrade, Serbia and received his PhD
+from the Department of Mechanical Engineering, University of Western Macedonia, Greece.
+His research interests include process systems engineering, scientific software development,
+high performance computing, numerical methods, scale-up, crystallization,
+Computational Fluid Dynamics, Smoothed Particle Hydrodynamics, heat transfer and heat exchangers,
+adsorption and membrane systems for gas separations, and hydrogen storage reactors.

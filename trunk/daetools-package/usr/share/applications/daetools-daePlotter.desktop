@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=GNOME;Development;
 Comment=DAE Tools Plotter
-Exec=/usr/bin/daeplotter
+Exec=daeplotter
 GenericName=Equation-Oriented modelling tool
 Icon=daetools-48x48
 MimeType=

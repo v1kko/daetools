@@ -3,4 +3,4 @@
     section="Applications/Development" \
     title="DAE Tools Plotter" \
     icon="daetools-48x48" \
-    command="/usr/bin/daeplotter"
+    command="daeplotter"
