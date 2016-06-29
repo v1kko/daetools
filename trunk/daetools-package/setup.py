@@ -53,10 +53,9 @@ else:
 # (Platform/Python)-dependent shared libraries directory
 # Now with removed compile-time dependency on numpy
 platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
-#print 'platform_solib_dir = ', platform_solib_dir
 
 shared_libs_dir = os.path.realpath('daetools/solibs')
-#print 'shared_libs_dir = ', shared_libs_dir
+shared_libs_dir = os.path.join(shared_libs_dir, '%s_%s' % (daetools_system, daetools_machine))
 
 if daetools_machine == 'x86_64':
     if os.path.exists('/usr/lib') and os.path.exists('/usr/lib64'):
@@ -103,8 +102,9 @@ if platform.system() == 'Linux':
 
 elif platform.system() == 'Windows':
     boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_thread     = 'boost_thread-win32-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
     #deal_II          = 'deal_II-daetools'
     #sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
@@ -113,11 +113,12 @@ elif platform.system() == 'Windows':
 
     shared_libs = []
 
+    print('shared_libs_dir = ', shared_libs_dir)
     if os.path.isdir(shared_libs_dir):
         shared_libs_files = os.listdir(shared_libs_dir)
 
         for f in shared_libs_files:
-            if (boost_python in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f):
+            if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f):
                 shared_libs.append(os.path.join(shared_libs_dir, f))
 
             #if (sim_loader in f) or (fmu_so in f):
@@ -126,6 +127,9 @@ elif platform.system() == 'Windows':
             for dll in mingw_dlls:
                 if dll in f:
                     shared_libs.append(os.path.join(shared_libs_dir, f))
+    #print('shared_libs = ', shared_libs)
+    #raise RuntimeError('')
+
     for f in shared_libs:
         shutil.copy(f, 'daetools/pyDAE/{0}'.format(platform_solib_dir))
         shutil.copy(f, 'daetools/solvers/{0}'.format(platform_solib_dir))
@@ -203,9 +207,12 @@ setup(name = 'daetools',
                        'daetools.solvers':         solibs,
                        'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)], # ?????
                        'daetools.dae_plotter':     ['images/*.png'],
-                       'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*', fmi_solibs],
+                       'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*',
+                                                    'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
+                                                    fmi_solibs
+                                                   ],
                        'daetools.dae_simulator':   ['images/*.png'],
-                       'daetools.examples' :       ['*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
+                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
                      },
       data_files = data_files,
       scripts = ['scripts/create_shortcuts.js',

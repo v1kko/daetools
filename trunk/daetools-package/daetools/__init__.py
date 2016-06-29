@@ -40,7 +40,7 @@ else:
     daetools_machine = str(platform.machine())
 
 # daetools root directory
-daetools_dir = os.path.join(os.path.dirname(__file__))
+daetools_dir = os.path.dirname(os.path.realpath(__file__))
 
 # pyDAE platform-dependant extension modules directory
 # Now with removed compile-time dependency on numpy

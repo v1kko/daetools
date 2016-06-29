@@ -433,42 +433,41 @@ Runtime model report    `tutorial20-rt.xml <../../examples/tutorial20-rt.xml>`_
 Source code             `tutorial20.py <../../examples/tutorial20.html>`_
 =====================   =================================================================
 
-..
-  .. _tutorial_21:
+.. _tutorial_21:
 
-  Tutorial 21
-  ===========
-  .. rubric:: Description
+Tutorial 21
+===========
+.. rubric:: Description
 
-  .. automodule:: daetools.examples.tutorial21
-     :no-members:
-     :no-undoc-members:
+.. automodule:: daetools.examples.tutorial21
+    :no-members:
+    :no-undoc-members:
 
-  .. rubric:: Files
+.. rubric:: Files
 
-  =====================   =================================================================
-  =====================   =================================================================
-  Model report            `tutorial21.xml <../../examples/tutorial21.xml>`_
-  Runtime model report    `tutorial21-rt.xml <../../examples/tutorial21-rt.xml>`_
-  Source code             `tutorial21.py <../../examples/tutorial21.html>`_
-  =====================   =================================================================
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial21.xml <../../examples/tutorial21.xml>`_
+Runtime model report    `tutorial21-rt.xml <../../examples/tutorial21-rt.xml>`_
+Source code             `tutorial21.py <../../examples/tutorial21.html>`_
+=====================   =================================================================
 
-  Tutorial 23
-  ===========
-  .. rubric:: Description
+Tutorial 23
+===========
+.. rubric:: Description
 
-  .. automodule:: daetools.examples.tutorial23
-     :no-members:
-     :no-undoc-members:
+.. automodule:: daetools.examples.tutorial23
+    :no-members:
+    :no-undoc-members:
 
-  .. rubric:: Files
+.. rubric:: Files
 
-  =====================   =================================================================
-  =====================   =================================================================
-  Model report            `tutorial23.xml <../../examples/tutorial23.xml>`_
-  Runtime model report    `tutorial23-rt.xml <../../examples/tutorial23-rt.xml>`_
-  Source code             `tutorial23.py <../../examples/tutorial23.html>`_
-  =====================   =================================================================
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial23.xml <../../examples/tutorial23.xml>`_
+Runtime model report    `tutorial23-rt.xml <../../examples/tutorial23-rt.xml>`_
+Source code             `tutorial23.py <../../examples/tutorial23.html>`_
+=====================   =================================================================
 
 
 .. _opt_tutorial_1:

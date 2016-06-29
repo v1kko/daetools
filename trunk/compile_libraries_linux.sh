@@ -459,7 +459,11 @@ compile_boost()
     export CPPFLAGS=
     export CPLUS_INCLUDE_PATH=
     
-    cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
+    LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
+    if [ "${PYTHON_MAJOR}" = "2" ]; then
+      LIBBOOST_PYTHON_SUF=""
+    fi
+    cp -a stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
   
   else # regular compiler (not a cross-compiler)
     
@@ -481,10 +485,15 @@ compile_boost()
            --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-    cp -a stage/lib/libboost_python-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*     ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
+    LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
+    if [ "${PYTHON_MAJOR}" = "2" ]; then
+      LIBBOOST_PYTHON_SUF=""
+    fi
+
+    cp -a stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
+    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                    ${SOLIBS_DIR}
 
   fi
   
