@@ -305,7 +305,8 @@ DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
 SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
-TRILINOS_HTTP=http://trilinos.csbsju.edu/download/files
+#TRILINOS_HTTP=http://trilinos.csbsju.edu/download/files
+TRILINOS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
 METIS_HTTP=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
 UMFPACK_HTTP=http://www.cise.ufl.edu/research/sparse/umfpack
@@ -1156,6 +1157,7 @@ configure_trilinos()
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
     wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
   fi
+  exit
   tar -xzf trilinos-${vTRILINOS}-Source.tar.gz
   mv trilinos-${vTRILINOS}-Source trilinos
   cd trilinos

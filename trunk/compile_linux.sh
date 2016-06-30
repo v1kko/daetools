@@ -138,6 +138,7 @@ if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   # If there are problems with memory and speed of compilation set:
   # Ncpu=1
+  QMAKE="qmake"
   QMAKE_SPEC=macx-g++
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
