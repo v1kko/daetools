@@ -1157,7 +1157,7 @@ configure_trilinos()
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
     wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
   fi
-  exit
+
   tar -xzf trilinos-${vTRILINOS}-Source.tar.gz
   mv trilinos-${vTRILINOS}-Source trilinos
   cd trilinos
