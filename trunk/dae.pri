@@ -164,14 +164,14 @@ win32-msvc2008::SOLIBS_RPATH =
 win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
-macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@executable_path/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 
 # RPATH for the simulation_loader
 win32-msvc2008::SOLIBS_RPATH_SL =
 win32-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\'
 win64-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
 linux-g++::SOLIBS_RPATH_SL      = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
-macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
+macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'@executable_path\'
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -202,6 +202,8 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 
 # Unresolved _gethostname problem in MinGW
 #win32-g++-*::QMAKE_LFLAGS += -Wl,--enable-stdcall-fixup
+
+macx-g++::QMAKE_LFLAGS += -mmacosx-version-min=10.5
 
 QMAKE_CXXFLAGS += -DDAE_PYTHON_MAJOR=$${PYTHON_MAJOR} -DDAE_PYTHON_MINOR=$${PYTHON_MINOR}
 

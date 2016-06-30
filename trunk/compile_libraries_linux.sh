@@ -1288,7 +1288,10 @@ configure_dealii()
   fi
   
   tar -xzf dealii-${vDEALII}.tar.gz
-  mv dealii-${vDEALII} deal.II
+
+  # The line below should be enabled for newer versions of deal.ii
+  #mv dealii-${vDEALII} deal.II
+
   cd deal.II
   mkdir build
   cmake \

@@ -10,8 +10,7 @@ INCLUDEPATH += $${BOOSTDIR} \
 
 LIBS +=	$${MPI_LIBS}
 
-SOURCES += nodes.cpp \
-    xmlreadstream.cpp \
+SOURCES += xmlreadstream.cpp \
     xmlfunctions.cpp \
     xmlfile.cpp \
     variablearray.cpp \
@@ -22,10 +21,10 @@ SOURCES += nodes.cpp \
     state.cpp \
     stdafx.cpp \
     ports.cpp \
-	event_port.cpp \
-	action.cpp \
-	on_event_actions.cpp \
-	on_condition_actions.cpp \
+    event_port.cpp \
+    action.cpp \
+    on_event_actions.cpp \
+    on_condition_actions.cpp \
     partial.cpp \
     parameter.cpp \
     object.cpp \
@@ -54,7 +53,8 @@ SOURCES += nodes.cpp \
     tcpiplog.cpp \
     objfun_constraints.cpp \
     external_function.cpp \
-    event_handling.cpp
+    event_handling.cpp \
+    nodes.cpp
 
 HEADERS += xmlfunctions.h \
     xmlfile.h \
