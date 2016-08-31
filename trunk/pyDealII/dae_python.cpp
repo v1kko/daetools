@@ -513,7 +513,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("quadrature_point",        &FEValuesBase<1>::quadrature_point,         return_internal_reference<>())
         .def("JxW",                     &FEValuesBase<1>::JxW)
         .def("normal_vector",           &FEValuesBase<1>::normal_vector,            return_internal_reference<>())
-        .def("cell_normal_vector",      &FEValuesBase<1>::cell_normal_vector,       return_internal_reference<>())
     ;
 
     class_<FEValuesBase<2>, boost::noncopyable>("FEValuesBase_2D", no_init)
@@ -528,7 +527,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("quadrature_point",        &FEValuesBase<2>::quadrature_point,         return_internal_reference<>())
         .def("JxW",                     &FEValuesBase<2>::JxW)
         .def("normal_vector",           &FEValuesBase<2>::normal_vector,            return_internal_reference<>())
-        .def("cell_normal_vector",      &FEValuesBase<2>::cell_normal_vector,       return_internal_reference<>())
     ;
 
     class_<FEValuesBase<3>, boost::noncopyable>("FEValuesBase_3D", no_init)
@@ -543,7 +541,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("quadrature_point",        &FEValuesBase<3>::quadrature_point,         return_internal_reference<>())
         .def("JxW",                     &FEValuesBase<3>::JxW)
         .def("normal_vector",           &FEValuesBase<3>::normal_vector,            return_internal_reference<>())
-        .def("cell_normal_vector",      &FEValuesBase<3>::cell_normal_vector,       return_internal_reference<>())
     ;
 
 

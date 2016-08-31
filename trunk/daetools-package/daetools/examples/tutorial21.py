@@ -17,16 +17,30 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """Another example of using daetools and numpy.
-This problem is from the Sundials ARKODE (ark_analytic_sys.cpp):
-The following is a simple example problem with analytical solution,
-    dy/dt = A*y
-where A = V*D*Vi,
+This problem is from the Sundials ARKODE (ark_analytic_sys.cpp).
+The following is a simple example problem with analytical solution:
+
+.. code-block:: none
+
+   dy/dt = A*y
+   where A = V*D*Vi,
+
+.. code-block:: none
+
     V = [1 -1 1; -1 2 1; 0 -1 2];
     Vi = 0.25*[5 1 -3; 2 2 -2; 1 1 1];
     D = [-0.5 0 0; 0 -0.1 0; 0 0 lam];
-where lam is a large negative number. The analytical solution to this problem is
+
+where lam is a large negative number. The analytical solution to this problem is:
+
+.. code-block:: none
+
     Y(t) = V*exp(D*t)*Vi*Y0
+
 for t in the interval [0.0, 0.05], with initial condition:
+
+.. code-block:: none
+
     y(0) = [1,1,1]'.
 
 The stiffness of the problem is directly proportional to the value of "lamda".
@@ -36,10 +50,14 @@ for values with magnitude larger than 100 the problem becomes quite stiff.
 In this example, we choose lamda = -100.
 
 Solution:
-    lamda = -100
+
+.. code-block:: none
+
+   lamda = -100
    reltol = 1e-06
    abstol = 1e-10
 
+   --------------------------------------
       t        y0        y1        y2
    --------------------------------------
     0.0050   0.70327   0.70627   0.41004

@@ -17,6 +17,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
+.. code-block:: none
+
                                                       -->
     Sun (45 degrees), heat flux = 1 kW/m**2, direction n = (1, -1)
       \ \ \ \ \ \ \

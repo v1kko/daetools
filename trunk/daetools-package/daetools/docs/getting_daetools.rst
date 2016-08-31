@@ -72,6 +72,13 @@ Getting the packages
 
 The instalation files can be downloaded from: `<https://sourceforge.net/projects/daetools/files>`_
 
+**If the SourceForge website is temporarily down, please use the following links until it becomes available:**
+
+- `Windows 32-bit python 2.7 <http://www.daetools.com/daetools-1.5.0-win32-py27.exe>`_
+- `Windows 32-bit python 3.4 <http://www.daetools.com/daetools-1.5.0-win32-py34.exe>`_
+- `GNU/Linux 64-bit python 2.7/3.4 <http://www.daetools.com/daetools-1.5.0-gnu_linux-x86_64.tar.gz>`_
+- `MacOS X universal python 2.7 <http://www.daetools.com/daetools-1.5.0-macosx-universal-py27.zip>`_
+
 .. note:: From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
 
 The naming convention of the installation files:

@@ -76,6 +76,14 @@ Download
 
 **The current release is 1.5.0**.
 
+..
+    **SourceForge website is temporarily down. Until it becomes available the following links can be used for download:**
+
+    - `Windows 32-bit python 2.7 <http://www.daetools.com/daetools-1.5.0-win32-py27.exe>`_
+    - `Windows 32-bit python 3.4 <http://www.daetools.com/daetools-1.5.0-win32-py34.exe>`_
+    - `GNU/Linux 64-bit python 2.7/3.4 <http://www.daetools.com/daetools-1.5.0-gnu_linux-x86_64.tar.gz>`_
+    - `MacOS X universal python 2.7 <http://www.daetools.com/daetools-1.5.0-macosx-universal-py27.zip>`_
+    
 Installation files can be found in the SourceForge website
 `download section <https://sourceforge.net/projects/daetools/files/1.5.0>`_,
 and the source code in the SourceForge

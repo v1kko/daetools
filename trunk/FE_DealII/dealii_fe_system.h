@@ -188,7 +188,7 @@ public:
         return m_fe_values.JxW(q);
     }
 
-    virtual const Point<dim>& normal_vector(const unsigned int q) const
+    virtual const Tensor<1,dim>& normal_vector(const unsigned int q) const
     {
         return m_fe_values.normal_vector(q);
     }

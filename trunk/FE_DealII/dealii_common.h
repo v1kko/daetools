@@ -904,7 +904,7 @@ public:
 
     virtual const Point<dim>& quadrature_point (const unsigned int q) const = 0;
     virtual double JxW (const unsigned int q) const = 0;
-    virtual const Point<dim>& normal_vector (const unsigned int q) const = 0;
+    virtual const Tensor<1,dim>& normal_vector (const unsigned int q) const = 0;
 
     virtual const Function<dim>& function (const std::string& functionName) const = 0;
 

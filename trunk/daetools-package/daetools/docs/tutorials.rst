@@ -469,6 +469,40 @@ Runtime model report    `tutorial23-rt.xml <../../examples/tutorial23-rt.xml>`_
 Source code             `tutorial23.py <../../examples/tutorial23.html>`_
 =====================   =================================================================
 
+Tutorial deal.II 1
+==================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_dealii_1
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial_dealii_1.xml <../../examples/tutorial_dealii_1.xml>`_
+Runtime model report    `tutorial_dealii_1-rt.xml <../../examples/tutorial_dealii_1-rt.xml>`_
+Source code             `tutorial_dealii_1.py <../../examples/tutorial_dealii_1.html>`_
+=====================   =================================================================
+
+Tutorial deal.II 2
+==================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_dealii_2
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+=====================   =================================================================
+Model report            `tutorial_dealii_2.xml <../../examples/tutorial_dealii_2.xml>`_
+Runtime model report    `tutorial_dealii_2-rt.xml <../../examples/tutorial_dealii_2-rt.xml>`_
+Source code             `tutorial_dealii_2.py <../../examples/tutorial_dealii_2.html>`_
+=====================   =================================================================
+
 
 .. _opt_tutorial_1:
 
