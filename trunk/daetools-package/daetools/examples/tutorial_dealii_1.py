@@ -127,7 +127,7 @@ class modTutorial(daeModel):
         equations = [self.cdr1]
         
         self.fe_dealII = feObject(meshFilename,     # path to mesh
-                                  1,                # polinomial order
+                                  1,                # polynomial order
                                   QGauss_2D(3),     # quadrature formula
                                   QGauss_1D(3),     # face quadrature formula
                                   self.functions,   # dictionary {'Name':Function<dim>} used during assemble

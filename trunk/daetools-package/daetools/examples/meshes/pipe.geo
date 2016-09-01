@@ -70,4 +70,3 @@ Physical Surface(2) = 204;
 //Field[1].hwall_t = 0.010;
 //Field[1].thickness = 0.05;
 //Background Field = 1;
-

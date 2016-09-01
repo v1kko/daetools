@@ -450,10 +450,7 @@ class dealiiFiniteElementEquationWrapper : public dealiiFiniteElementEquation<di
                                            public boost::python::wrapper< dealiiFiniteElementEquation<dim> >
 {
 public:
-    dealiiFiniteElementEquationWrapper(const std::string&       variableName,
-                                       const std::string&       variableDescription,
-                                       unsigned int             multiplicity,
-                                       const feExpression<dim>& Alocal, // Local contribution to the stiffness matrix
+    dealiiFiniteElementEquationWrapper(const feExpression<dim>& Alocal, // Local contribution to the stiffness matrix
                                        const feExpression<dim>& Mlocal, // Local contribution to the mass matrix
                                        const feExpression<dim>& Flocal, // Local contribution to the load vector
                                        boost::python::dict      dictFunctionsDirichletBC,
@@ -466,9 +463,6 @@ public:
         this->m_matAlocal                 = Alocal;
         this->m_matMlocal                 = Mlocal;
         this->m_vecFlocal                 = Flocal;
-        this->m_strVariableName           = variableName;
-        this->m_strVariableDescription    = variableDescription;
-        this->m_nMultiplicity             = multiplicity;
 
         keys = dictFunctionsDirichletBC.keys();
         for(int i = 0; i < len(keys); ++i)
@@ -526,40 +520,41 @@ public:
     {
     }
 
-    static
-    dealiiFiniteElementEquationWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
-                                                                         const std::string&  variableDescription,
-                                                                         boost::python::dict dictFunctionsDirichletBC,
-                                                                         boost::python::dict dictFunctionsNeumannBC,
-                                                                         boost::python::dict dictElementBoundary = boost::python::dict(),
-                                                                         boost::python::dict dictElementNeumann  = boost::python::dict())
-    {
-        /* Available functions:
-           - feExpression
-           - constant
-           - phi, dphi, d2phi
-           - phi_vec, dphi_vec, d2phi_vec
-           - JxW, xyz, normal
-           - fvalue, fgrad
-           - feExpression.sqrt, feExpression.exp, feExpression.log, feExpression.log10, feExpression.abs
-             feExpression.sin, feExpression.cos, feExpression.tan, feExpression.asin, feExpression.acos, feExpression.atan
-        */
+//    static
+//    dealiiFiniteElementEquationWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
+//                                                                         const std::string&  variableDescription,
+//                                                                         boost::python::dict dictFunctionsDirichletBC,
+//                                                                         boost::python::dict dictFunctionsNeumannBC,
+//                                                                         boost::python::dict dictElementBoundary = boost::python::dict(),
+//                                                                         boost::python::dict dictElementNeumann  = boost::python::dict())
+//    {
+//        /* Available functions:
+//           - feExpression
+//           - constant
+//           - phi, dphi, d2phi
+//           - phi_vec, dphi_vec, d2phi_vec
+//           - div_phi
+//           - JxW, xyz, normal
+//           - fvalue, fgrad
+//           - feExpression.sqrt, feExpression.exp, feExpression.log, feExpression.log10, feExpression.abs
+//             feExpression.sin, feExpression.cos, feExpression.tan, feExpression.asin, feExpression.acos, feExpression.atan
+//        */
 
-        feExpression<dim> Alocal = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-        feExpression<dim> Mlocal = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
-        feExpression<dim> Flocal = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+//        feExpression<dim> Alocal = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
+//        feExpression<dim> Mlocal = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
+//        feExpression<dim> Flocal = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
 
-        return new dealiiFiniteElementEquationWrapper<dim>(variableName,             // Name
-                                                           variableDescription,      // Description
-                                                           1,                        // Multiplicity
-                                                           Alocal,                   // Contribution to the element stiffness matrix
-                                                           Mlocal,                   // Contribution to the element mass matrix (dt)
-                                                           Flocal,                   // Contribution to the element load vector (rhs)
-                                                           dictFunctionsDirichletBC, // Functions for Dirichlet boundary conditions
-                                                           dictFunctionsNeumannBC,   // Functions for Neumann boundary conditions
-                                                           dictElementBoundary,      // Contribution to the element cell_matrix (but at the boundaries)
-                                                           dictElementNeumann);      // User-defined expression for Neumann boundary conditions (overrides dictFunctionsNeumannBC)
-    }
+//        return new dealiiFiniteElementEquationWrapper<dim>(variableName,             // Name
+//                                                           variableDescription,      // Description
+//                                                           1,                        // Multiplicity
+//                                                           Alocal,                   // Contribution to the element stiffness matrix
+//                                                           Mlocal,                   // Contribution to the element mass matrix (dt)
+//                                                           Flocal,                   // Contribution to the element load vector (rhs)
+//                                                           dictFunctionsDirichletBC, // Functions for Dirichlet boundary conditions
+//                                                           dictFunctionsNeumannBC,   // Functions for Neumann boundary conditions
+//                                                           dictElementBoundary,      // Contribution to the element cell_matrix (but at the boundaries)
+//                                                           dictElementNeumann);      // User-defined expression for Neumann boundary conditions (overrides dictFunctionsNeumannBC)
+//    }
 
 };
 
@@ -572,12 +567,13 @@ public:
                                      unsigned int                               polynomialOrder,
                                      const Quadrature<dim>&                     quadrature,
                                      const Quadrature<dim-1>&                   faceQuadrature,
-                                     boost::python::dict                        dictFunctions,
-                                     boost::python::list                        listEquations)
+                                     boost::python::list                        listDOFs,
+                                     const dealiiFiniteElementEquation<dim>&    feEquation,
+                                     boost::python::dict                        dictFunctions)
     {
         boost::python::list keys;
         std::map<std::string,  const Function<dim>*> mapFunctions;
-        std::vector< dealiiFiniteElementEquation<dim>* > arrEquations;
+        std::vector< dealiiFiniteElementDOF* > arrDOFs;
 
         keys = dictFunctions.keys();
         for(int i = 0; i < len(keys); ++i)
@@ -591,13 +587,13 @@ public:
             mapFunctions[key] = fn;
         }
 
-        for(int i = 0; i < len(listEquations); ++i)
+        for(int i = 0; i < len(listDOFs); ++i)
         {
-            dealiiFiniteElementEquation<dim>* eq = boost::python::extract< dealiiFiniteElementEquation<dim>* >(listEquations[i]);
-            arrEquations.push_back(eq);
+            dealiiFiniteElementDOF* dof = boost::python::extract< dealiiFiniteElementDOF* >(listDOFs[i]);
+            arrDOFs.push_back(dof);
         }
 
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, mapFunctions, arrEquations);
+        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, arrDOFs, feEquation, mapFunctions);
     }
 
     ~dealiiFiniteElementSystemWrapper()

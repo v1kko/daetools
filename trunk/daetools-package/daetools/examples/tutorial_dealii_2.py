@@ -72,7 +72,7 @@ class BottomGradientFunction_2D(Function_2D):
         Function_2D.__init__(self, n_components)
         self.m_gradient = gradient
         
-    def value(self, point, component = 1):
+    def value(self, point, component = 0):
         if point.y < -0.5:
             return self.m_gradient
         else:
