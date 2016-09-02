@@ -16,7 +16,8 @@ namespace fe_solver
 using namespace dealii;
 using namespace dae::datareporting;
 
-typedef boost::function<void (const std::string&, const std::string&, double*, unsigned int)>  fnProcessSolution;
+typedef boost::function<void (unsigned int, double*, unsigned int)>  fnUpdateBlock;
+typedef boost::function<void (const std::string&)>                   fnWriteSolution;
 
 /*********************************************************************
    dealIIDataReporter
@@ -24,8 +25,13 @@ typedef boost::function<void (const std::string&, const std::string&, double*, u
 class dealIIDataReporter : public daeDataReporter_t
 {
 public:
-    dealIIDataReporter(const fnProcessSolution& callback, const std::map<std::string, size_t>& mapVariables)
-        : m_callback(callback), m_outputCounter(0), m_mapVariables(mapVariables)
+    dealIIDataReporter(const fnUpdateBlock& update_block_callback,
+                       const fnWriteSolution& write_solution_callback,
+                       const std::map<std::string, size_t>& mapVariables)
+        : m_update_block_callback(update_block_callback),
+          m_write_solution_callback(write_solution_callback),
+          m_outputCounter(0),
+          m_mapVariables(mapVariables)
     {
     }
 
@@ -107,6 +113,7 @@ public:
 
     bool RegisterVariable(const daeDataReporterVariable* pVariable)
     {
+    /*
         std::vector<std::string> names;
         boost::algorithm::split(names, pVariable->m_strName, boost::algorithm::is_any_of("."));
         std::string strVariableName = names[names.size()-1];
@@ -124,7 +131,7 @@ public:
                 throw e;
             }
         }
-
+    */
         return true;
     }
 
@@ -135,6 +142,9 @@ public:
 
     bool StartNewResultSet(real_t dTime)
     {
+        // Before starting the new set output the data
+        dealiiSaveData();
+
         m_dCurrentTime = dTime;
         m_outputCounter++;
         return true;
@@ -142,6 +152,9 @@ public:
 
     bool EndOfData(void)
     {
+        // Before ending the process output the last data
+        dealiiSaveData();
+
         return true;
     }
 
@@ -155,23 +168,29 @@ public:
         if(m_mapVariables.find(strVariableName) == m_mapVariables.end())
             return true;
 
-        // Build the new file name
-        boost::filesystem::path vtkFilename((boost::format("%05d.%s(t=%f).vtk") % m_outputCounter % strVariableName % m_dCurrentTime).str());
-        boost::filesystem::path vtkPath(m_strOutputDirectory);
-        boost::filesystem::path variableFolder(strVariableName);
-        vtkPath /= variableFolder;
-        vtkPath /= vtkFilename;
+        unsigned int block_index = m_mapVariables[strVariableName];
 
         // Call function in the finite element object to perform some processing and to save values in a file
-        m_callback(vtkPath.string().c_str(), strVariableName, pVariableValue->m_pValues, pVariableValue->m_nNumberOfPoints);
+        m_update_block_callback(block_index, pVariableValue->m_pValues, pVariableValue->m_nNumberOfPoints);
 
         return true;
+    }
+
+    void dealiiSaveData(void)
+    {
+        // Build the new file name
+        boost::filesystem::path vtkFilename((boost::format("solution-%05d(t=%f).vtk") % m_outputCounter % m_dCurrentTime).str());
+        boost::filesystem::path vtkPath(m_strOutputDirectory);
+        vtkPath /= vtkFilename;
+
+        m_write_solution_callback(vtkPath.string().c_str());
     }
 
 public:
     real_t                          m_dCurrentTime;
     int                             m_outputCounter;
-    fnProcessSolution               m_callback;
+    fnWriteSolution                 m_write_solution_callback;
+    fnUpdateBlock                   m_update_block_callback;
     std::string                     m_strOutputDirectory;
     std::string                     m_strProcessName;
     std::map<std::string, size_t>   m_mapVariables;

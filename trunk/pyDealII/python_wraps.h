@@ -450,69 +450,69 @@ class dealiiFiniteElementEquationWrapper : public dealiiFiniteElementEquation<di
                                            public boost::python::wrapper< dealiiFiniteElementEquation<dim> >
 {
 public:
-    dealiiFiniteElementEquationWrapper(const feExpression<dim>& Alocal, // Local contribution to the stiffness matrix
-                                       const feExpression<dim>& Mlocal, // Local contribution to the mass matrix
-                                       const feExpression<dim>& Flocal, // Local contribution to the load vector
-                                       boost::python::dict      dictFunctionsDirichletBC,
-                                       boost::python::dict      dictFunctionsNeumannBC,
-                                       boost::python::dict      dictElementBoundary = boost::python::dict(),
-                                       boost::python::dict      dictElementNeumann  = boost::python::dict())
+    dealiiFiniteElementEquationWrapper(const feExpression<dim>& Aij, // Local contribution to the stiffness matrix
+                                       const feExpression<dim>& Mij, // Local contribution to the mass matrix
+                                       const feExpression<dim>& Fi,  // Local contribution to the load vector
+                                       boost::python::dict      dictFaceAij              = boost::python::dict(),
+                                       boost::python::dict      dictFaceFi               = boost::python::dict(),
+                                       boost::python::dict      dictFunctions            = boost::python::dict(),
+                                       boost::python::dict      dictFunctionsDirichletBC = boost::python::dict())
     {
         boost::python::list keys;
 
-        this->m_matAlocal                 = Alocal;
-        this->m_matMlocal                 = Mlocal;
-        this->m_vecFlocal                 = Flocal;
+        this->m_Aij = Aij;
+        this->m_Mij = Mij;
+        this->m_Fi  = Fi;
 
         keys = dictFunctionsDirichletBC.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFunctionsDirichletBC[key_];
+            boost::python::tuple  var_fn_t = boost::python::extract<boost::python::tuple>(dictFunctionsDirichletBC[key_]);
+            boost::python::object o_var = var_fn_t[0];
+            boost::python::object o_fn  = var_fn_t[1];
 
             unsigned int         key = boost::python::extract<unsigned int>(key_);
+            std::string          var = boost::python::extract<std::string>(o_var);
+            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(o_fn);
+
+            this->m_functionsDirichletBC[key] = std::pair<std::string, const Function<dim>*>(var,fn);
+        }
+
+        keys = dictFunctions.keys();
+        for(int i = 0; i < len(keys); ++i)
+        {
+            boost::python::object key_ = keys[i];
+            boost::python::object val_ = dictFunctions[key_];
+
+            std::string          key = boost::python::extract<std::string>(key_);
             const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
 
-            this->m_functionsDirichletBC[key] = fn;
+            this->m_functions[key] = fn;
         }
 
-        keys = dictFunctionsNeumannBC.keys();
+        keys = dictFaceAij.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFunctionsNeumannBC[key_];
-
-            unsigned int         key = boost::python::extract<unsigned int>(key_);
-            boost::python::tuple t   = boost::python::extract<boost::python::tuple>(val_);
-
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(t[0]);
-            dealiiFluxType       ft  = boost::python::extract<dealiiFluxType>(t[1]);
-
-            this->m_functionsNeumannBC[key] = std::pair<const Function<dim>*, dealiiFluxType>(fn, ft);
-        }
-
-        keys = dictElementBoundary.keys();
-        for(int i = 0; i < len(keys); ++i)
-        {
-            boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictElementBoundary[key_];
+            boost::python::object val_ = dictFaceAij[key_];
 
             unsigned int      key  = boost::python::extract<unsigned int>(key_);
             feExpression<dim> expr = boost::python::extract< feExpression<dim> >(val_);
 
-            this->m_elementBoundary[key] = expr;
+            this->m_faceAij[key] = expr;
         }
 
-        keys = dictElementNeumann.keys();
+        keys = dictFaceFi.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictElementNeumann[key_];
+            boost::python::object val_ = dictFaceFi[key_];
 
             unsigned int      key  = boost::python::extract<unsigned int>(key_);
             feExpression<dim> expr = boost::python::extract< feExpression<dim> >(val_);
 
-            this->m_elementBoundary[key] = expr;
+            this->m_faceFi[key] = expr;
         }
     }
 
@@ -568,32 +568,16 @@ public:
                                      const Quadrature<dim>&                     quadrature,
                                      const Quadrature<dim-1>&                   faceQuadrature,
                                      boost::python::list                        listDOFs,
-                                     const dealiiFiniteElementEquation<dim>&    feEquation,
-                                     boost::python::dict                        dictFunctions)
+                                     const dealiiFiniteElementEquation<dim>&    feEquation)
     {
-        boost::python::list keys;
-        std::map<std::string,  const Function<dim>*> mapFunctions;
-        std::vector< dealiiFiniteElementDOF* > arrDOFs;
-
-        keys = dictFunctions.keys();
-        for(int i = 0; i < len(keys); ++i)
-        {
-            boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFunctions[key_];
-
-            std::string          key = boost::python::extract<std::string>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
-
-            mapFunctions[key] = fn;
-        }
-
+        std::vector< dealiiFiniteElementDOF<dim>* > arrDOFs;
         for(int i = 0; i < len(listDOFs); ++i)
         {
-            dealiiFiniteElementDOF* dof = boost::python::extract< dealiiFiniteElementDOF* >(listDOFs[i]);
+            dealiiFiniteElementDOF<dim>* dof = boost::python::extract< dealiiFiniteElementDOF<dim>* >(listDOFs[i]);
             arrDOFs.push_back(dof);
         }
 
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, arrDOFs, feEquation, mapFunctions);
+        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, arrDOFs, feEquation);
     }
 
     ~dealiiFiniteElementSystemWrapper()

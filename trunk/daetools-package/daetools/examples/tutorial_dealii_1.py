@@ -105,7 +105,7 @@ class modTutorial(daeModel):
         self.neumannBC[2]   = (ConstantFunction_2D(3E6/(8960*385)), eConstantFlux)
         
         self.dirichletBC    = {}
-        self.dirichletBC[0] = fnConstantFunction(200)
+        self.dirichletBC[0] = ('U', fnConstantFunction(200))
         #self.dirichletBC[1] = fnConstantFunction(200)
         #self.dirichletBC[2] = fnConstantFunction(250)
         
@@ -114,24 +114,20 @@ class modTutorial(daeModel):
         
         # Achtung, Achtung!!
         # Finite element equations must not go out of scope for deal.II FE model keeps only weak references to them.
-        self.cdr1 = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
+        self.equation = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
+        #                          self.functions,   # dictionary {'Name':Function<dim>} used during assemble
         print('Convection-Diffusion equation:')
-        print('    VariableName         =', self.cdr1.VariableName)
-        print('    VariableDescription  =', self.cdr1.VariableDescription)
-        print('    Multiplicity         =', self.cdr1.Multiplicity)
-        print('    ElementMatrix        =', str(self.cdr1.Alocal))
-        print('    ElementMatrix_dt     =', str(self.cdr1.Mlocal))
-        print('    ElementRHS           =', str(self.cdr1.Flocal))
-        #print('    FunctionsDirichletBC =', self.cdr1.FunctionsDirichletBC)
-        #print('    FunctionsNeumannBC   =', self.cdr1.FunctionsNeumannBC)
-        equations = [self.cdr1]
+        print('    Aij     =', str(self.equation.Aij))
+        print('    Mij     =', str(self.equation.Mij))
+        print('    Fi      =', str(self.equation.Fi))
+        print('    faceAij =', str(self.equation.faceAij))
+        print('    faceFi  =', str(self.equation.faceFi))
         
         self.fe_dealII = feObject(meshFilename,     # path to mesh
                                   1,                # polynomial order
                                   QGauss_2D(3),     # quadrature formula
                                   QGauss_1D(3),     # face quadrature formula
-                                  self.functions,   # dictionary {'Name':Function<dim>} used during assemble
-                                  equations         # Equations (contributions to the cell_matrix, cell_matrix_dt, cell_rhs, BCs etc.)
+                                  self.equation     # FE equation (contributions to the Mij, Aij, Fi, BCs etc.)
                                  )
           
         self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)

@@ -229,6 +229,7 @@ public:
 /******************************************************************
     dealiiFiniteElementEquation<dim>
 *******************************************************************/
+template <int dim>
 class dealiiFiniteElementDOF
 {
 public:
@@ -257,10 +258,10 @@ template <int dim>
 class dealiiFiniteElementEquation
 {
 public:
-    typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
-    typedef typename std::map<unsigned int, std::pair<const Function<dim>*, dealiiFluxType> > map_Uint_FunctionPtr_FunctionCall;
-    typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
-    typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
+    typedef typename std::map<unsigned int, const Function<dim>*>                          map_Uint_FunctionPtr;
+    typedef typename std::map<unsigned int, std::pair<std::string, const Function<dim>*> > map_Uint_String_FunctionPtr;
+    typedef typename std::map<unsigned int, feExpression<dim> >                            map_Uint_Expression;
+    typedef typename std::map<std::string,  const Function<dim>*>                          map_String_FunctionPtr;
 
     dealiiFiniteElementEquation()
     {
@@ -268,13 +269,13 @@ public:
 
 public:
     bool                                m_bNeedsUpdate;
-    feExpression<dim>                   m_matAlocal; // Stiffness matrix
-    feExpression<dim>                   m_matMlocal; // Mass matrix (dt)
-    feExpression<dim>                   m_vecFlocal; // Load vector (rhs)
-    map_Uint_Expression                 m_elementBoundary;
-    map_Uint_Expression                 m_elementNeumann;
-    map_Uint_FunctionPtr_FunctionCall   m_functionsNeumannBC;
-    map_Uint_FunctionPtr                m_functionsDirichletBC;
+    feExpression<dim>                   m_Aij;  // Stiffness matrix
+    feExpression<dim>                   m_Mij;  // Mass matrix (dt)
+    feExpression<dim>                   m_Fi;   // Load vector (rhs)
+    map_Uint_Expression                 m_faceAij;
+    map_Uint_Expression                 m_faceFi;
+    map_String_FunctionPtr              m_functions;
+    map_Uint_String_FunctionPtr         m_functionsDirichletBC;
 };
 
 /******************************************************************
@@ -284,12 +285,14 @@ template <int dim>
 class dealiiFiniteElementSystem : public daeFiniteElementObject
 {
 typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
+typedef typename std::map<unsigned int, std::pair<std::string, const Function<dim>*> > map_Uint_String_FunctionPtr;
 typedef typename std::map<unsigned int, std::pair<const Function<dim>*, dealiiFluxType> > map_Uint_FunctionPtr_FunctionCall;
 typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
 typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
 typedef typename std::vector< dealiiFiniteElementEquation<dim>* > vector_Equations;
-typedef typename std::vector< dealiiFiniteElementDOF* > vector_DOFs;
+typedef typename std::vector< dealiiFiniteElementDOF<dim>* > vector_DOFs;
 typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
+typedef typename std::map<std::string, ComponentMask> map_string_ComponentMask;
 
 public:
     dealiiFiniteElementSystem();
@@ -313,13 +316,13 @@ public:
                     const Quadrature<dim>&                  quadrature,
                     const Quadrature<dim-1>&                faceQuadrature,
                     const vector_DOFs&                      DOFs,
-                    const dealiiFiniteElementEquation<dim>& equation,
-                    const map_String_FunctionPtr&           functions);
+                    const dealiiFiniteElementEquation<dim>& equation);
 
 protected:
     void setup_system();
     void assemble_system();
-    void process_solution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n);
+    void update_block(unsigned int block_index, double* values, unsigned int n);
+    void write_solution(const std::string& strFilename);
 
 public:
     // Additional deal.II specific data
@@ -338,10 +341,10 @@ public:
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
 
     // Model-specific data
-    map_String_FunctionPtr              m_functions;
-    dealiiFiniteElementEquation<dim>*   m_equation;
-    std::vector<dealiiFiniteElementDOF> m_DOFs;
-    unsigned int                        m_no_equations;
+    dealiiFiniteElementEquation<dim>*         m_equation;
+    std::vector<dealiiFiniteElementDOF<dim> > m_DOFs;
+    unsigned int                              m_no_equations;
+    std::vector<std::string>                  m_solutionNames;
 };
 
 template <int dim>
@@ -356,25 +359,30 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
                                                 const Quadrature<dim>&                  quadrature,
                                                 const Quadrature<dim-1>&                faceQuadrature,
                                                 const vector_DOFs&                      DOFs,
-                                                const dealiiFiniteElementEquation<dim>& equation,
-                                                const map_String_FunctionPtr&           functions)
+                                                const dealiiFiniteElementEquation<dim>& equation)
 {
-    if(equations.size() == 0)
-        throw std::runtime_error("At least one equation must be specified");
-
     m_DOFs      = DOFs;
     m_equation  = &equation;
-    m_functions = functions;
 
     // Create FESystem
     std::vector<const FiniteElement<dim>*> arrFEs;
     std::vector<unsigned int> arrMultiplicities;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        m_DOFs[i]->m_fe_q = SmartPointer< FE_Q<dim> >( new FE_Q<dim>(polynomialOrder) );
+        m_DOFs[i].m_fe_q = SmartPointer< FE_Q<dim> >( new FE_Q<dim>(polynomialOrder) );
 
-        arrFEs.push_back(m_DOFs[i]->m_fe_q);
-        arrMultiplicities.push_back(m_DOFs[i]->m_nMultiplicity);
+        arrFEs.push_back(m_DOFs[i].m_fe_q);
+        arrMultiplicities.push_back(m_DOFs[i].m_nMultiplicity);
+
+        if(m_DOFs[i].m_nMultiplicity == 1)
+        {
+            m_solutionNames.push_back(m_DOFs[i].m_strName);
+        }
+        else
+        {
+            for(unsigned n = 0; n < m_DOFs[i].m_nMultiplicity; n++)
+                m_solutionNames.push_back(m_DOFs[i].m_strName + std::to_string(n));
+        }
     }
 
     fe = SmartPointer< FESystem<dim> >(new FESystem<dim>(arrFEs, arrMultiplicities));
@@ -413,7 +421,7 @@ void dealiiFiniteElementSystem<dim>::setup_system()
 
     m_no_equations = 0;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
-        m_no_equations += m_DOFs[i]->m_nMultiplicity;
+        m_no_equations += m_DOFs[i].m_nMultiplicity;
 
     std::vector<types::global_dof_index> dofs_per_component (m_no_equations);
     DoFTools::count_dofs_per_component (dof_handler, dofs_per_component);
@@ -494,33 +502,30 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     map_String_FEValuesExtractor mapExtractors;
 
     // Used to identify DOFs that belong to a particular equation
-    std::vector<ComponentMask> componentMasks;
-
-    componentMasks.resize(m_no_equations);
-
+    map_string_ComponentMask mapComponentMasks;
     int currentIndex = 0;
     for(unsigned int k = 0; k < m_DOFs.size(); k++)
     {
-        const dealiiFiniteElementDOF& dof = m_DOFs[k];
+        const dealiiFiniteElementDOF<dim>& dof = m_DOFs[k];
 
         if(dof.m_nMultiplicity == 1)
         {
-            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strVariableName % currentIndex).str() << std::endl;
-            mapExtractors[dof.m_strVariableName] = FEValuesExtractors::Scalar(currentIndex);
-            componentMasks[k] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
+            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            mapExtractors[dof.m_strName] = FEValuesExtractors::Scalar(currentIndex);
+            mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
         }
         else
         {
-            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strVariableName % currentIndex).str() << std::endl;
-            mapExtractors[dof.m_strVariableName] = FEValuesExtractors::Vector(currentIndex);
-            componentMasks[k] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
+            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            mapExtractors[dof.m_strName] = FEValuesExtractors::Vector(currentIndex);
+            mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
         }
 
         currentIndex += dof.m_nMultiplicity;
     }
 
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_functions, mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_functions, mapExtractors);
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_equation->m_functions, mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_equation->m_functions, mapExtractors);
 
     typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
                                                    endc = dof_handler.end();
@@ -547,12 +552,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     cellContext.m_j = j;
 
                     /* Stifness matrix (Aij) */
-                    if(m_equation.m_matAlocal.m_node)
+                    if(m_equation->m_Aij.m_node)
                     {
-                        feRuntimeNumber<dim> result = m_equation.m_matAlocal.m_node->Evaluate(&cellContext);
+                        feRuntimeNumber<dim> result = m_equation->m_Aij.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
-                            throw std::runtime_error(std::string("Invalid element matrix contribution expression specified: ") +
-                                                     std::string(" (it must be a scalar value)"));
+                            throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value)"));
 
                         cell_matrix(i,j) += result.m_value;
 
@@ -560,29 +564,30 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     }
 
                     /* Mass matrix (Mij) */
-                    if(m_equation.m_matMlocal.m_node)
+                    if(m_equation->m_Mij.m_node)
                     {
-                        feRuntimeNumber<dim> result = m_equation.m_matMlocal.m_node->Evaluate(&cellContext);
+                        feRuntimeNumber<dim> result = m_equation->m_Mij.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
-                            throw std::runtime_error(std::string("Invalid element matrix_dt contribution expression specified: ") +
-                                                     std::string(" (it must be a scalar value)"));
+                            throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value)"));
 
                         cell_matrix_dt(i,j) += result.m_value;
                     }
                 }
 
                 /* Load vector (Fi) */
-                if(m_equation.m_vecFlocal.m_node)
+                if(m_equation->m_Fi.m_node)
                 {
-                    feRuntimeNumber<dim> result = m_equation.m_vecFlocal.m_node->Evaluate(&cellContext);
+                    cellContext.m_j = -1; // Set the unphysical value since it must not be used in Fi contributions
+
+                    feRuntimeNumber<dim> result = m_equation->m_Fi.m_node->Evaluate(&cellContext);
                     if(result.m_eType != eFEScalar)
-                        throw std::runtime_error(std::string("Invalid element rhs contribution expression specified: ") +
-                                                 std::string(" (it must be a scalar value)"));
+                        throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value)"));
                     cell_rhs(i) += result.m_value;
                 }
             }
         }
 
+        /* Boundary conditions of the Neumann or Robin type. */
         for(unsigned int face = 0; face<GeometryInfo<dim>::faces_per_cell; ++face)
         {
             if(cell->face(face)->at_boundary())
@@ -591,97 +596,59 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
                 const unsigned int id = cell->face(face)->boundary_indicator();
 
-                // Neumann BC
-                typename map_Uint_FunctionPtr_FunctionCall::const_iterator itFunction   = m_equation.m_functionsNeumannBC.find(id);
-                typename map_Uint_Expression::const_iterator               itExpression = m_equation.m_elementNeumann.find(id);
+                typename map_Uint_Expression::const_iterator itAij = m_equation->m_faceAij.find(id);
+                typename map_Uint_Expression::const_iterator itFi  = m_equation->m_faceFi.find(id);
 
-                if(itExpression != m_equation.m_elementNeumann.end())
+                // If there is face Aij or Fi (or both)
+                if(itAij != m_equation->m_faceAij.end() || itFi != m_equation->m_faceFi.end())
                 {
-                    const feExpression<dim>& elementNeumann = itExpression->second;
-
                     for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                     {
+                        cellFaceContext.m_q = q_point;
+
                         for (unsigned int i = 0; i < dofs_per_cell; ++i)
                         {
-                            feRuntimeNumber<dim> result = elementNeumann.m_node->Evaluate(&cellFaceContext);
-                            if(result.m_eType != eFEScalar)
-                                throw std::runtime_error(std::string("Invalid element neumann boundary condition expression specified for equation: ") +
-                                                         m_equation.m_strVariableName + std::string(" (it must be a scalar value)"));
+                            cellFaceContext.m_i = i;
 
-                            cell_rhs(i) += result.m_value;
+                            for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                            {
+                                cellFaceContext.m_j = j;
+
+                                if(itAij != m_equation->m_faceAij.end())
+                                {
+                                    const feExpression<dim>& faceAij = itAij->second;
+                                    if(!faceAij.m_node)
+                                        throw std::runtime_error(std::string("Empty faceAij expression specified"));
+
+                                    feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
+                                    if(result.m_eType != eFEScalar)
+                                        throw std::runtime_error(std::string("Invalid faceAij expression specified (it must be a scalar value)"));
+
+                                    cell_matrix(i,j) += result.m_value;
+                                }
+                            }
+
+                            if(itFi != m_equation->m_faceFi.end())
+                            {
+                                const feExpression<dim>& faceFi = itFi->second;
+                                if(!faceFi.m_node)
+                                    throw std::runtime_error(std::string("Empty faceFi expression specified"));
+
+                                cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
+
+                                feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
+                                if(result.m_eType != eFEScalar)
+                                    throw std::runtime_error(std::string("Invalid faceFi expression specified (it must be a scalar value)"));
+
+                                cell_rhs(i) += result.m_value;
+                            }
                         }
                     }
-                }
-                else if(itFunction != m_equation.m_functionsNeumannBC.end())
-                {
-                    double Neumann_value;
-                    std::pair<const Function<dim>*, dealiiFluxType> pairNeumann = itFunction->second;
-                    const Function<dim>& Fneumann = *pairNeumann.first;
-                    const dealiiFluxType fluxType =  pairNeumann.second;
-
-                    FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&mapExtractors[m_equation.m_strVariableName]);
-                    FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&mapExtractors[m_equation.m_strVariableName]);
-
-                    for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
-                    {
-                        for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                        {
-                            if(extractorScalar)
-                            {
-                                if(fluxType == eConstantFlux)
-                                    Neumann_value = Fneumann.value(fe_face_values.quadrature_point(q_point));
-                                else if(fluxType == eGradientFlux)
-                                    Neumann_value = Fneumann.gradient(fe_face_values.quadrature_point(q_point)) *
-                                                    fe_face_values.normal_vector(q_point);
-                                else
-                                    throw std::runtime_error("Invalid NeumannBC function call type");
-
-                                /*
-                                std::cout << (boost::format("  Setting NeumanBC (cell=%d, point=(%d, %d), id=%d)[%d] = %f")  % cellCounter
-                                                                                                                             % fe_face_values.quadrature_point(q_point)(0)
-                                                                                                                             % fe_face_values.quadrature_point(q_point)(1)
-                                                                                                                             % id
-                                                                                                                             % i
-                                                                                                                             % (Neumann_value
-                                                                                                                                * fe_face_values[*extractorScalar].value(i, q_point)
-                                                                                                                                * fe_face_values.JxW(q_point))
-                                             ).str() << std::endl;
-                                */
-
-                                cell_rhs(i) += Neumann_value
-                                               *
-                                               fe_face_values[*extractorScalar].value(i, q_point)
-                                               *
-                                               fe_face_values.JxW(q_point);
-                            }
-                            else if(extractorVector)
-                            {
-                                throw std::runtime_error("Not implemented");
-                                /*
-                                cell_rhs(i) += -Fneumann.value(fe_face_values.quadrature_point(q_point))
-                                               *
-                                               (
-                                                  fe_face_values[*extractorVector].value(i, q_point)
-                                                  *
-                                                  fe_face_values.normal_vector(q_point)
-                                               )
-                                               *
-                                               fe_face_values.JxW(q_point);
-                                */
-                            }
-                            else
-                                throw std::runtime_error("Invalid FEValuesExtractor type");
-                        }
-                    }
-                }
-                else
-                {
-                    // Not found
-                    // Do nothing or do some default action (perhaps zero gradient?)
                 }
             }
         }
 
+        /* This is some voodoo-mojo mumbo-jumbo uncomprehensible crap... What to do with it? */
         types::global_dof_index id;
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
         {
@@ -704,7 +671,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             }
         }
 
-        // Add to the system matrices/vector
+        // Add local contributions Aij, Mij, Fi to the system matrices/vector
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
         {
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
@@ -714,7 +681,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             }
             system_rhs(local_dof_indices[i]) += cell_rhs(i);
         }
-    }
+    } // End cell iteration
 
     // If using refined grids condense hanging nodes
     hanging_node_constraints.condense(system_matrix);
@@ -724,19 +691,21 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     //hanging_node_constraints.condense(system_matrix_dt);
 
     // Apply Dirichlet boundary conditions on the system matrix and rhs
-    for(typename map_Uint_FunctionPtr::const_iterator it = m_equation.m_functionsDirichletBC.begin(); it != m_equation.m_functionsDirichletBC.end(); it++)
+    for(typename map_Uint_String_FunctionPtr::const_iterator it = m_equation->m_functionsDirichletBC.begin(); it != m_equation->m_functionsDirichletBC.end(); it++)
     {
-        const unsigned int    id =  it->first;
-        const Function<dim>& fun = *it->second;
+        const unsigned int    id       =  it->first;
+        const std::string variableName = (it->second).first;
+        const Function<dim>& fun       = *(it->second).second;
 
-        std::cout << "Setting DirichletBC at id " << id << " with sample value " << fun.value(Point<dim>(0,0,0)) << std::endl;
+
+        std::cout << "Setting DirichletBC at id: " << id << " with sample value at point (0,0,0): " << fun.value(Point<dim>(0,0,0)) << std::endl;
 
         std::map<types::global_dof_index, double> boundary_values;
         VectorTools::interpolate_boundary_values (dof_handler,
                                                   id,
                                                   fun,
                                                   boundary_values,
-                                                  componentMasks[eq]);
+                                                  mapComponentMasks[variableName]);
         MatrixTools::apply_boundary_values (boundary_values,
                                             system_matrix,
                                             solution,
@@ -745,42 +714,42 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 }
 
 template <int dim>
-void dealiiFiniteElementSystem<dim>::process_solution(const std::string& strFilename, const std::string& strVariableName, double* values, unsigned int n)
+void dealiiFiniteElementSystem<dim>::update_block(unsigned int block_index, double* values, unsigned int n)
 {
-    for(unsigned int i = 0; i < m_equations.size(); i++)
+    Vector<double>& block_i = solution.block(block_index);
+    if(block_i.size() != n)
+        throw std::runtime_error("The size of the variable value does not match the size of the solution");
+
+    for(size_t k = 0; k < n; k++)
+        block_i[k] = values[k];
+}
+
+// solution vector must be updated with values of all blocks/variables
+template <int dim>
+void dealiiFiniteElementSystem<dim>::write_solution(const std::string& strFilename)
+{
+    std::vector<std::string> solution_names;
+    std::vector<DataComponentInterpretation::DataComponentInterpretation> data_component_interpretation;
+    for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        if(m_equations[i]->m_strVariableName == strVariableName)
+        if(m_DOFs[i].m_nMultiplicity == 1)
         {
-            Vector<double>& block_i = solution.block(i);
-            if(block_i.size() != n)
-                throw std::runtime_error("The size of the variable value does not match the size of the solution");
-
-            for(size_t k = 0; k < n; k++)
-                block_i[k] = values[k];
-
-            DataOut<dim> data_out;
-            data_out.attach_dof_handler(dof_handler);
-            data_out.add_data_vector(block_i, strVariableName);
-            data_out.build_patches(fe->degree);
-            std::ofstream output(strFilename.c_str());
-            data_out.write_vtk(output);
+            solution_names.push_back(m_DOFs[i].m_strName);
+            data_component_interpretation.push_back(DataComponentInterpretation::component_is_scalar);
+        }
+        else
+        {
+            solution_names.insert(solution_names.begin(), m_DOFs[i].m_nMultiplicity, m_DOFs[i].m_strName);
+            data_component_interpretation.insert(data_component_interpretation.begin(), m_DOFs[i].m_nMultiplicity, DataComponentInterpretation::component_is_part_of_vector);
         }
     }
-/*
-    //std::cout << "solution after solve:" << solution << std::endl;
-
-    // We may call distribute() on solution to fix hanging nodes
-    hanging_node_constraints.distribute(solution);
-
-    //std::cout << "solution after distribute:" << solution << std::endl;
 
     DataOut<dim> data_out;
     data_out.attach_dof_handler(dof_handler);
-    data_out.add_data_vector(solution, strVariableName);
+    data_out.add_data_vector (solution, solution_names, DataOut<dim>::type_dof_data, data_component_interpretation);
     data_out.build_patches(fe->degree);
-    std::ofstream output(strFilename);
+    std::ofstream output(strFilename.c_str());
     data_out.write_vtk(output);
-*/
 }
 
 template <int dim>
@@ -788,7 +757,7 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
 {
     daeFiniteElementObjectInfo feObjectInfo;
 
-    feObjectInfo.m_VariableInfos.resize(m_no_equations);
+    feObjectInfo.m_VariableInfos.resize(m_DOFs.size());
 
     std::vector<types::global_dof_index> dofs_per_component (m_no_equations);
     DoFTools::count_dofs_per_component (dof_handler, dofs_per_component);
@@ -800,15 +769,15 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
     feObjectInfo.m_nTotalNumberDOFs         = dof_handler.n_dofs();
 
     unsigned int component_counter = 0;
-    for(unsigned int i = 0; i < m_no_equations; i++)
+    for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        feObjectInfo.m_VariableInfos[i].m_strName              = m_equations[i]->m_strVariableName;
-        feObjectInfo.m_VariableInfos[i].m_strDescription       = m_equations[i]->m_strVariableDescription;
-        feObjectInfo.m_VariableInfos[i].m_nMultiplicity        = m_equations[i]->m_nMultiplicity;
-        for(unsigned int j = 0; j < m_equations[i]->m_nMultiplicity; j++)
+        feObjectInfo.m_VariableInfos[i].m_strName              = m_DOFs[i].m_strName;
+        feObjectInfo.m_VariableInfos[i].m_strDescription       = m_DOFs[i].m_strDescription;
+        feObjectInfo.m_VariableInfos[i].m_nMultiplicity        = m_DOFs[i].m_nMultiplicity;
+        for(unsigned int j = 0; j < m_DOFs[i].m_nMultiplicity; j++)
             feObjectInfo.m_VariableInfos[i].m_narrDOFsPerComponent.push_back(dofs_per_component[component_counter + j]);
 
-        component_counter += m_equations[i]->m_nMultiplicity;
+        component_counter += m_DOFs[i].m_nMultiplicity;
     }
 
     return feObjectInfo;
@@ -899,12 +868,29 @@ std::vector<unsigned int> dealiiFiniteElementSystem<dim>::GetDOFtoBoundaryMap()
 template <int dim>
 dealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
 {
+    // map<name:block_index>
     std::map<std::string, size_t> mapVariables;
-    for(unsigned int i = 0; i < m_no_equations; i++)
-        mapVariables[m_equations[i]->m_strVariableName] = i;
+    unsigned int block_index = 0;
+    for(unsigned int i = 0; i < m_DOFs.size(); i++)
+    {
+        if(m_DOFs[i].m_nMultiplicity == 1)
+        {
+            mapVariables[m_DOFs[i].m_strName] = block_index;
+            block_index++;
+        }
+        else
+        {
+            for(unsigned n = 0; n < m_DOFs[i].m_nMultiplicity; n++)
+            {
+                mapVariables[m_DOFs[i].m_strName + std::to_string(n)] = block_index;
+                block_index++;
+            }
+        }
+    }
 
-    fnProcessSolution callback(boost::bind(&dealiiFiniteElementSystem<dim>::process_solution, this, _1, _2, _3, _4));
-    return new dealIIDataReporter(callback, mapVariables);
+    fnUpdateBlock   update_block_callback(boost::bind(&dealiiFiniteElementSystem<dim>::update_block, this, _1, _2, _3));
+    fnWriteSolution write_solution_callback(boost::bind(&dealiiFiniteElementSystem<dim>::write_solution, this, _1));
+    return new dealIIDataReporter(update_block_callback, write_solution_callback, mapVariables);
 }
 
 
