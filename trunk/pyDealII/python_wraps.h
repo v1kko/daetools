@@ -446,11 +446,11 @@ typedef Function_wrapper<2> Function_wrapper_2D;
 typedef Function_wrapper<3> Function_wrapper_3D;
 
 template<int dim>
-class dealiiFiniteElementEquationWrapper : public dealiiFiniteElementEquation<dim>,
-                                           public boost::python::wrapper< dealiiFiniteElementEquation<dim> >
+class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<dim>,
+                                           public boost::python::wrapper< dealiiFiniteElementWeakForm<dim> >
 {
 public:
-    dealiiFiniteElementEquationWrapper(const feExpression<dim>& Aij, // Local contribution to the stiffness matrix
+    dealiiFiniteElementWeakFormWrapper(const feExpression<dim>& Aij, // Local contribution to the stiffness matrix
                                        const feExpression<dim>& Mij, // Local contribution to the mass matrix
                                        const feExpression<dim>& Fi,  // Local contribution to the load vector
                                        boost::python::dict      dictFaceAij              = boost::python::dict(),
@@ -460,9 +460,16 @@ public:
     {
         boost::python::list keys;
 
+	// These terms get copied using the copy constructor and do need to be stored internally
         this->m_Aij = Aij;
         this->m_Mij = Mij;
         this->m_Fi  = Fi;
+	
+        // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
+        this->m_dictFaceAij              = dictFaceAij;
+        this->m_dictFaceFi               = dictFaceFi;
+        this->m_dictFunctions            = dictFunctions;
+        this->m_dictFunctionsDirichletBC = dictFunctionsDirichletBC;
 
         keys = dictFunctionsDirichletBC.keys();
         for(int i = 0; i < len(keys); ++i)
@@ -516,12 +523,19 @@ public:
         }
     }
 
-    ~dealiiFiniteElementEquationWrapper()
+    ~dealiiFiniteElementWeakFormWrapper()
     {
     }
 
+public:
+    // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
+    boost::python::object m_dictFaceAij;
+    boost::python::object m_dictFaceFi;
+    boost::python::object m_dictFunctions;
+    boost::python::object m_dictFunctionsDirichletBC;
+    
 //    static
-//    dealiiFiniteElementEquationWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
+//    dealiiFiniteElementWeakFormWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
 //                                                                         const std::string&  variableDescription,
 //                                                                         boost::python::dict dictFunctionsDirichletBC,
 //                                                                         boost::python::dict dictFunctionsNeumannBC,
@@ -544,7 +558,7 @@ public:
 //        feExpression<dim> Mlocal = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
 //        feExpression<dim> Flocal = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
 
-//        return new dealiiFiniteElementEquationWrapper<dim>(variableName,             // Name
+//        return new dealiiFiniteElementWeakFormWrapper<dim>(variableName,             // Name
 //                                                           variableDescription,      // Description
 //                                                           1,                        // Multiplicity
 //                                                           Alocal,                   // Contribution to the element stiffness matrix
@@ -563,12 +577,12 @@ class dealiiFiniteElementSystemWrapper : public dealiiFiniteElementSystem<dim>,
                                          public boost::python::wrapper< dealiiFiniteElementSystem<dim> >
 {
 public:
-    dealiiFiniteElementSystemWrapper(std::string                                meshFilename,
-                                     unsigned int                               polynomialOrder,
-                                     const Quadrature<dim>&                     quadrature,
-                                     const Quadrature<dim-1>&                   faceQuadrature,
-                                     boost::python::list                        listDOFs,
-                                     const dealiiFiniteElementEquation<dim>&    feEquation)
+    dealiiFiniteElementSystemWrapper(std::string               meshFilename,
+                                     unsigned int              polynomialOrder,
+                                     const Quadrature<dim>&    quadrature,
+                                     const Quadrature<dim-1>&  faceQuadrature,
+                                     boost::python::list       listDOFs,
+                                     boost::python::object     weakForm)
     {
         std::vector< dealiiFiniteElementDOF<dim>* > arrDOFs;
         for(int i = 0; i < len(listDOFs); ++i)
@@ -576,8 +590,13 @@ public:
             dealiiFiniteElementDOF<dim>* dof = boost::python::extract< dealiiFiniteElementDOF<dim>* >(listDOFs[i]);
             arrDOFs.push_back(dof);
         }
+        
+        // Keep this object so it does not go out of scope and gets destroyed while still in use by daetools
+        this->m_weakForm = weakForm;
+	
+        dealiiFiniteElementWeakForm<dim>* cweakForm  = boost::python::extract<dealiiFiniteElementWeakForm<dim>*>(weakForm);
 
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, arrDOFs, feEquation);
+        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, arrDOFs, *cweakForm);
     }
 
     ~dealiiFiniteElementSystemWrapper()
@@ -627,6 +646,9 @@ public:
         this->RowIndices(row, narrIndices);
         return getListFromVectorByValue(narrIndices);
     }
+    
+public:
+    boost::python::object m_weakForm;
 };
 
 

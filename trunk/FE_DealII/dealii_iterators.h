@@ -88,7 +88,7 @@ public:
     {
         if(!m_cell)
             daeDeclareAndThrowException(exInvalidPointer);
-        return m_cell->current_active_cell_iterator->face(m_face_no)->boundary_indicator();
+        return m_cell->current_active_cell_iterator->face(m_face_no)->boundary_id();
     }
 
 public:

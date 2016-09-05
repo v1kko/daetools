@@ -17,27 +17,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-deal.II classes provided by the python wrapper: 
- - Tensors of rank 1 up to three dimensions (Tensor<rank,dim,double> template): 
-    * Tensor_1_1D
-    * Tensor_1_2D
-    * Tensor_1_3D
- - Points up to three dimensions (Point<dim,double> template):
-    * Point_1D
-    * Point_2D
-    * Point_3D
- - Functions up to three dimensions (Function<dim> template):
-    * Function_1D
-    * Function_2D
-    * Function_3D    
- - Solvers for scalar transport equations:
-    * Convection-Diffusion Equation up to three dimensions (daeConvectionDiffusion<dim> template):
-       + daeConvectionDiffusion_1D
-       + daeConvectionDiffusion_2D
-       + daeConvectionDiffusion_3D
-    * Laplace Equation up to three dimensions
-    * Poisson Equation up to three dimensions
-    * Helmholtz Equation up to three dimensions
 """
 
 import os, sys, numpy, json, tempfile
@@ -72,22 +51,6 @@ class fnConstantFunction(Function_2D):
     def vector_gradient(self, point):
         return [0.0]
        
-class feObject(dealiiFiniteElementSystem_2D):
-    def __init__(self, meshFilename, polynomialOrder, quadratureFormula, 
-                       faceQuadratureFormula, functions, equations):
-        dealiiFiniteElementSystem_2D.__init__(self, meshFilename, 
-                                                    polynomialOrder,
-                                                    quadratureFormula,
-                                                    faceQuadratureFormula,
-                                                    functions,
-                                                    equations)
-        
-    def AssembleSystem(self):
-        dealiiFiniteElementSystem_2D.AssembleSystem(self)
-    
-    def NeedsReAssembling(self):
-        return False
-        
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -95,42 +58,46 @@ class modTutorial(daeModel):
         # Achtung, Achtung!!
         # Diffusivity, velocity, generation, dirichletBC and neumannBC must not go out of scope
         # for deal.II FE model keeps only weak references to them.
-        self.functions    = {}
-        self.functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
-        self.functions['Generation']  = ConstantFunction_2D(0.0)
+        functions    = {}
+        functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
+        functions['Generation']  = ConstantFunction_2D(0.0)
         
-        self.neumannBC      = {}
-        #self.neumannBC[0]   = (ConstantFunction_2D(0.0),            eConstantFlux)
-        self.neumannBC[1]   = (ConstantFunction_2D(2E6/(8960*385)), eConstantFlux)
-        self.neumannBC[2]   = (ConstantFunction_2D(3E6/(8960*385)), eConstantFlux)
-        
-        self.dirichletBC    = {}
-        self.dirichletBC[0] = ('U', fnConstantFunction(200))
-        #self.dirichletBC[1] = fnConstantFunction(200)
-        #self.dirichletBC[2] = fnConstantFunction(250)
+        dirichletBC    = {}
+        dirichletBC[0] = ('T', fnConstantFunction(200)) # outer boundary
+        dirichletBC[1] = ('T', fnConstantFunction(300)) # inner ellipse
+        dirichletBC[2] = ('T', fnConstantFunction(250)) # inner rectangle
         
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        meshFilename = os.path.join(meshes_dir, 'step-49.msh')
+        mesh_file  = os.path.join(meshes_dir, 'step-49.msh')
         
-        # Achtung, Achtung!!
-        # Finite element equations must not go out of scope for deal.II FE model keeps only weak references to them.
-        self.equation = dealiiFiniteElementEquation_2D.ConvectionDiffusionEquation('U', 'U description', self.dirichletBC, self.neumannBC)
-        #                          self.functions,   # dictionary {'Name':Function<dim>} used during assemble
-        print('Convection-Diffusion equation:')
-        print('    Aij     =', str(self.equation.Aij))
-        print('    Mij     =', str(self.equation.Mij))
-        print('    Fi      =', str(self.equation.Fi))
-        print('    faceAij =', str(self.equation.faceAij))
-        print('    faceFi  =', str(self.equation.faceFi))
-        
-        self.fe_dealII = feObject(meshFilename,     # path to mesh
-                                  1,                # polynomial order
-                                  QGauss_2D(3),     # quadrature formula
-                                  QGauss_1D(3),     # face quadrature formula
-                                  self.equation     # FE equation (contributions to the Mij, Aij, Fi, BCs etc.)
-                                 )
+        dofs = [dealiiFiniteElementDOF_2D(name='T',
+                                          description='Temperature',
+                                          multiplicity=1)]
+
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
+                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
+                                                  Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
+                                                  faceAij = {},
+                                                  faceFi  = {},
+                                                  functions = functions,
+                                                  functionsDirichletBC = dirichletBC)
+
+        print('Heat conduction equation:')
+        print('    Aij = %s' % str(weakForm.Aij))
+        print('    Mij = %s' % str(weakForm.Mij))
+        print('    Fi  = %s' % str(weakForm.Fi))
+        print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
+        print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
+
+        # Store the object so it does not go out of scope while still in use by daetools
+        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
+                                                      polynomialOrder = 1,             # polynomial order
+                                                      quadrature      = QGauss_2D(3),  # quadrature formula
+                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
+                                                      dofs            = dofs,          # degrees of freedom
+                                                      weakForm        = weakForm)      # FE system in weak form
           
-        self.fe = daeFiniteElementModel('Helmholtz', self, 'Modified deal.II step-7 example (s-s Helmholtz equation)', self.fe_dealII)
+        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction equation', self.fe_dealII)
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -156,7 +123,7 @@ class simTutorial(daeSimulation):
         # Todo: use a function from daeSimulation
         dofIndexesMap = {}
         for variable in self.m.fe.Variables:
-            if variable.Name == 'U':
+            if variable.Name == 'T':
                 ic = 300
             else:
                 raise RuntimeError('Unknown variable [%s] found' % variable.Name)
@@ -186,7 +153,7 @@ def guiRun(app):
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
         sys.exit()        
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'daetools-deal.II-')
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_1-')
     feDataReporter.Connect(results_folder, simName)
     try:
         from PyQt4 import QtCore, QtGui
@@ -239,7 +206,7 @@ def consoleRun():
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
         sys.exit()
-    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'results'), simName)
+    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results'), simName)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

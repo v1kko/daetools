@@ -30,9 +30,10 @@ public:
                        const std::map<std::string, size_t>& mapVariables)
         : m_update_block_callback(update_block_callback),
           m_write_solution_callback(write_solution_callback),
-          m_outputCounter(0),
           m_mapVariables(mapVariables)
     {
+        m_outputCounter = 0;
+        m_dCurrentTime  = 0;
     }
 
     virtual ~dealIIDataReporter(void)
@@ -142,11 +143,14 @@ public:
 
     bool StartNewResultSet(real_t dTime)
     {
-        // Before starting the new set output the data
-        dealiiSaveData();
-
-        m_dCurrentTime = dTime;
+        // Output the data before starting the new set
+        // Nota bene: if outputCounter = 0 then do not output for it is called for the first time and there are no results
+        if(m_outputCounter > 0)
+            dealiiSaveData();
+        
         m_outputCounter++;
+        m_dCurrentTime = dTime;
+        
         return true;
     }
 
@@ -187,13 +191,13 @@ public:
     }
 
 public:
+    fnUpdateBlock                   m_update_block_callback;
+    fnWriteSolution                 m_write_solution_callback;
+    std::map<std::string, size_t>   m_mapVariables;
     real_t                          m_dCurrentTime;
     int                             m_outputCounter;
-    fnWriteSolution                 m_write_solution_callback;
-    fnUpdateBlock                   m_update_block_callback;
     std::string                     m_strOutputDirectory;
     std::string                     m_strProcessName;
-    std::map<std::string, size_t>   m_mapVariables;
 };
 
 

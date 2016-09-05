@@ -227,7 +227,7 @@ public:
 };
 
 /******************************************************************
-    dealiiFiniteElementEquation<dim>
+    dealiiFiniteElementDOF<dim>
 *******************************************************************/
 template <int dim>
 class dealiiFiniteElementDOF
@@ -252,10 +252,10 @@ public:
 };
 
 /******************************************************************
-    dealiiFiniteElementEquation<dim>
+    dealiiFiniteElementWeakForm<dim>
 *******************************************************************/
 template <int dim>
-class dealiiFiniteElementEquation
+class dealiiFiniteElementWeakForm
 {
 public:
     typedef typename std::map<unsigned int, const Function<dim>*>                          map_Uint_FunctionPtr;
@@ -263,7 +263,7 @@ public:
     typedef typename std::map<unsigned int, feExpression<dim> >                            map_Uint_Expression;
     typedef typename std::map<std::string,  const Function<dim>*>                          map_String_FunctionPtr;
 
-    dealiiFiniteElementEquation()
+    dealiiFiniteElementWeakForm()
     {
     }
 
@@ -289,7 +289,6 @@ typedef typename std::map<unsigned int, std::pair<std::string, const Function<di
 typedef typename std::map<unsigned int, std::pair<const Function<dim>*, dealiiFluxType> > map_Uint_FunctionPtr_FunctionCall;
 typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
 typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
-typedef typename std::vector< dealiiFiniteElementEquation<dim>* > vector_Equations;
 typedef typename std::vector< dealiiFiniteElementDOF<dim>* > vector_DOFs;
 typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
 typedef typename std::map<std::string, ComponentMask> map_string_ComponentMask;
@@ -311,12 +310,12 @@ public:
     virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
     virtual dealIIDataReporter*         CreateDataReporter();
 
-    void Initialize(const std::string&                      meshFilename,
-                    unsigned int                            polynomialOrder,
-                    const Quadrature<dim>&                  quadrature,
-                    const Quadrature<dim-1>&                faceQuadrature,
-                    const vector_DOFs&                      DOFs,
-                    const dealiiFiniteElementEquation<dim>& equation);
+    void Initialize(const std::string&                meshFilename,
+                    unsigned int                      polynomialOrder,
+                    const Quadrature<dim>&            quadrature,
+                    const Quadrature<dim-1>&          faceQuadrature,
+                    vector_DOFs&                      DOFs,
+                    dealiiFiniteElementWeakForm<dim>& weakForm);
 
 protected:
     void setup_system();
@@ -341,7 +340,7 @@ public:
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
 
     // Model-specific data
-    dealiiFiniteElementEquation<dim>*         m_equation;
+    dealiiFiniteElementWeakForm<dim>*         m_weakForm;
     std::vector<dealiiFiniteElementDOF<dim> > m_DOFs;
     unsigned int                              m_no_equations;
     std::vector<std::string>                  m_solutionNames;
@@ -354,15 +353,16 @@ dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
 }
 
 template <int dim>
-void dealiiFiniteElementSystem<dim>::Initialize(const std::string&                      meshFilename,
-                                                unsigned int                            polynomialOrder,
-                                                const Quadrature<dim>&                  quadrature,
-                                                const Quadrature<dim-1>&                faceQuadrature,
-                                                const vector_DOFs&                      DOFs,
-                                                const dealiiFiniteElementEquation<dim>& equation)
+void dealiiFiniteElementSystem<dim>::Initialize(const std::string&                meshFilename,
+                                                unsigned int                      polynomialOrder,
+                                                const Quadrature<dim>&            quadrature,
+                                                const Quadrature<dim-1>&          faceQuadrature,
+                                                vector_DOFs&                      DOFs,
+                                                dealiiFiniteElementWeakForm<dim>& weakForm)
 {
-    m_DOFs      = DOFs;
-    m_equation  = &equation;
+    m_weakForm = &weakForm;
+    for(unsigned int i = 0; i < DOFs.size(); i++)
+        m_DOFs.push_back(*DOFs[i]);
 
     // Create FESystem
     std::vector<const FiniteElement<dim>*> arrFEs;
@@ -524,8 +524,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         currentIndex += dof.m_nMultiplicity;
     }
 
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_equation->m_functions, mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_equation->m_functions, mapExtractors);
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_weakForm->m_functions, mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_weakForm->m_functions, mapExtractors);
 
     typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
                                                    endc = dof_handler.end();
@@ -552,21 +552,21 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     cellContext.m_j = j;
 
                     /* Stifness matrix (Aij) */
-                    if(m_equation->m_Aij.m_node)
+                    if(m_weakForm->m_Aij.m_node)
                     {
-                        feRuntimeNumber<dim> result = m_equation->m_Aij.m_node->Evaluate(&cellContext);
+                        feRuntimeNumber<dim> result = m_weakForm->m_Aij.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
                             throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value)"));
 
                         cell_matrix(i,j) += result.m_value;
 
-                        //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % m_equation.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
+                        //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % m_weakForm.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
                     }
 
                     /* Mass matrix (Mij) */
-                    if(m_equation->m_Mij.m_node)
+                    if(m_weakForm->m_Mij.m_node)
                     {
-                        feRuntimeNumber<dim> result = m_equation->m_Mij.m_node->Evaluate(&cellContext);
+                        feRuntimeNumber<dim> result = m_weakForm->m_Mij.m_node->Evaluate(&cellContext);
                         if(result.m_eType != eFEScalar)
                             throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value)"));
 
@@ -575,11 +575,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 }
 
                 /* Load vector (Fi) */
-                if(m_equation->m_Fi.m_node)
+                if(m_weakForm->m_Fi.m_node)
                 {
                     cellContext.m_j = -1; // Set the unphysical value since it must not be used in Fi contributions
 
-                    feRuntimeNumber<dim> result = m_equation->m_Fi.m_node->Evaluate(&cellContext);
+                    feRuntimeNumber<dim> result = m_weakForm->m_Fi.m_node->Evaluate(&cellContext);
                     if(result.m_eType != eFEScalar)
                         throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value)"));
                     cell_rhs(i) += result.m_value;
@@ -594,13 +594,13 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             {
                 fe_face_values.reinit (cell, face);
 
-                const unsigned int id = cell->face(face)->boundary_indicator();
+                const unsigned int id = cell->face(face)->boundary_id();
 
-                typename map_Uint_Expression::const_iterator itAij = m_equation->m_faceAij.find(id);
-                typename map_Uint_Expression::const_iterator itFi  = m_equation->m_faceFi.find(id);
+                typename map_Uint_Expression::const_iterator itAij = m_weakForm->m_faceAij.find(id);
+                typename map_Uint_Expression::const_iterator itFi  = m_weakForm->m_faceFi.find(id);
 
                 // If there is face Aij or Fi (or both)
-                if(itAij != m_equation->m_faceAij.end() || itFi != m_equation->m_faceFi.end())
+                if(itAij != m_weakForm->m_faceAij.end() || itFi != m_weakForm->m_faceFi.end())
                 {
                     for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                     {
@@ -614,7 +614,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                             {
                                 cellFaceContext.m_j = j;
 
-                                if(itAij != m_equation->m_faceAij.end())
+                                if(itAij != m_weakForm->m_faceAij.end())
                                 {
                                     const feExpression<dim>& faceAij = itAij->second;
                                     if(!faceAij.m_node)
@@ -628,7 +628,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                 }
                             }
 
-                            if(itFi != m_equation->m_faceFi.end())
+                            if(itFi != m_weakForm->m_faceFi.end())
                             {
                                 const feExpression<dim>& faceFi = itFi->second;
                                 if(!faceFi.m_node)
@@ -691,7 +691,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     //hanging_node_constraints.condense(system_matrix_dt);
 
     // Apply Dirichlet boundary conditions on the system matrix and rhs
-    for(typename map_Uint_String_FunctionPtr::const_iterator it = m_equation->m_functionsDirichletBC.begin(); it != m_equation->m_functionsDirichletBC.end(); it++)
+    for(typename map_Uint_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
     {
         const unsigned int    id       =  it->first;
         const std::string variableName = (it->second).first;

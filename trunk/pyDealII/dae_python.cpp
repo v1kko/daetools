@@ -828,34 +828,45 @@ BOOST_PYTHON_MODULE(pyDealII)
     //    .value("eGradientFlux", dae::fe_solver::eGradientFlux)
     //    .export_values()
     //;
+    
+    class_< std::map< unsigned int, feExpression<1> > >("map_Uint_Expression_1D")
+        .def(map_indexing_suite< std::map< unsigned int, feExpression<1> > >())
+    ;
+    class_< std::map< unsigned int, feExpression<2> > >("map_Uint_Expression_2D")
+        .def(map_indexing_suite< std::map< unsigned int, feExpression<2> > >())
+    ;
+    class_< std::map< unsigned int, feExpression<3> > >("map_Uint_Expression_3D")
+        .def(map_indexing_suite< std::map< unsigned int, feExpression<3> > >())
+    ;
+    
 
     class_<dealiiFiniteElementDOF<1>, boost::noncopyable>("dealiiFiniteElementDOF_1D", no_init)
         .def(init<const std::string&,
                   const std::string&,
-                  unsigned int>((arg("variableName"),
-                                 arg("variableDescription"),
+                  unsigned int>((arg("name"),
+                                 arg("description"),
                                  arg("multiplicity")
                                 )))
         .def_readonly("Name",          &dealiiFiniteElementDOF<1>::m_strName)
         .def_readonly("Description",   &dealiiFiniteElementDOF<1>::m_strDescription)
         .def_readonly("Multiplicity",  &dealiiFiniteElementDOF<1>::m_nMultiplicity)
     ;
-    class_<dealiiFiniteElementDOF<2>, boost::noncopyable>("dealiiFiniteElementDOF_1D", no_init)
+    class_<dealiiFiniteElementDOF<2>, boost::noncopyable>("dealiiFiniteElementDOF_2D", no_init)
         .def(init<const std::string&,
                   const std::string&,
-                  unsigned int>((arg("variableName"),
-                                 arg("variableDescription"),
+                  unsigned int>((arg("name"),
+                                 arg("description"),
                                  arg("multiplicity")
                                 )))
         .def_readonly("Name",          &dealiiFiniteElementDOF<2>::m_strName)
         .def_readonly("Description",   &dealiiFiniteElementDOF<2>::m_strDescription)
         .def_readonly("Multiplicity",  &dealiiFiniteElementDOF<2>::m_nMultiplicity)
     ;
-    class_<dealiiFiniteElementDOF<3>, boost::noncopyable>("dealiiFiniteElementDOF_1D", no_init)
+    class_<dealiiFiniteElementDOF<3>, boost::noncopyable>("dealiiFiniteElementDOF_3D", no_init)
         .def(init<const std::string&,
                   const std::string&,
-                  unsigned int>((arg("variableName"),
-                                 arg("variableDescription"),
+                  unsigned int>((arg("name"),
+                                 arg("description"),
                                  arg("multiplicity")
                                 )))
         .def_readonly("Name",          &dealiiFiniteElementDOF<3>::m_strName)
@@ -863,7 +874,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("Multiplicity",  &dealiiFiniteElementDOF<3>::m_nMultiplicity)
     ;
 
-    class_<daepython::dealiiFiniteElementEquationWrapper<1>, boost::noncopyable>("dealiiFiniteElementEquation_1D", no_init)
+    class_<daepython::dealiiFiniteElementWeakFormWrapper<1>, boost::noncopyable>("dealiiFiniteElementWeakForm_1D", no_init)
         .def(init<const feExpression<1>&,
                   const feExpression<1>&,
                   const feExpression<1>&,
@@ -879,25 +890,16 @@ BOOST_PYTHON_MODULE(pyDealII)
                                          arg("functionsDirichletBC") = boost::python::dict()
                                       )))
 
-        .def_readonly("Aij",                   &dealiiFiniteElementEquation<1>::m_Aij)
-        .def_readonly("Mij",                   &dealiiFiniteElementEquation<1>::m_Mij)
-        .def_readonly("Fi",                    &dealiiFiniteElementEquation<1>::m_Fi)
-        .def_readonly("faceAij",               &dealiiFiniteElementEquation<1>::m_faceAij)
-        .def_readonly("faceFi",                &dealiiFiniteElementEquation<1>::m_faceFi)
-        .def_readonly("Functions",             &dealiiFiniteElementEquation<1>::m_functions)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementEquation<1>::m_functionsDirichletBC)
-
-//        .def("ConvectionDiffusionEquation",    &daepython::dealiiFiniteElementEquationWrapper<1>::ConvectionDiffusionEquation,
-//                                               return_value_policy<manage_new_object>(), ( arg("variableName"),
-//                                                                                           arg("variableDescription"),
-//                                                                                           arg("functionsDirichletBC"),
-//                                                                                           arg("functionsNeumannBC"),
-//                                                                                           arg("elementBoundary") = boost::python::dict(),
-//                                                                                           arg("elementNeumann")  = boost::python::dict() ))
-//        .staticmethod("ConvectionDiffusionEquation")
+        .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<1>::m_Aij)
+        .def_readonly("Mij",                   &dealiiFiniteElementWeakForm<1>::m_Mij)
+        .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<1>::m_Fi)
+        .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<1>::m_faceAij)
+        .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<1>::m_faceFi)
+        .def_readonly("Functions",             &dealiiFiniteElementWeakForm<1>::m_functions)
+        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_functionsDirichletBC)
     ;
 
-    class_<daepython::dealiiFiniteElementEquationWrapper<2>, boost::noncopyable>("dealiiFiniteElementEquation_2D", no_init)
+    class_<daepython::dealiiFiniteElementWeakFormWrapper<2>, boost::noncopyable>("dealiiFiniteElementWeakForm_2D", no_init)
         .def(init<const feExpression<2>&,
                   const feExpression<2>&,
                   const feExpression<2>&,
@@ -913,25 +915,16 @@ BOOST_PYTHON_MODULE(pyDealII)
                                          arg("functionsDirichletBC") = boost::python::dict()
                                       )))
 
-        .def_readonly("Aij",                   &dealiiFiniteElementEquation<2>::m_Aij)
-        .def_readonly("Mij",                   &dealiiFiniteElementEquation<2>::m_Mij)
-        .def_readonly("Fi",                    &dealiiFiniteElementEquation<2>::m_Fi)
-        .def_readonly("faceAij",               &dealiiFiniteElementEquation<2>::m_faceAij)
-        .def_readonly("faceFi",                &dealiiFiniteElementEquation<2>::m_faceFi)
-        .def_readonly("Functions",             &dealiiFiniteElementEquation<2>::m_functions)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementEquation<2>::m_functionsDirichletBC)
-
-//        .def("ConvectionDiffusionEquation",    &daepython::dealiiFiniteElementEquationWrapper<2>::ConvectionDiffusionEquation,
-//                                               return_value_policy<manage_new_object>(), ( arg("variableName"),
-//                                                                                           arg("variableDescription"),
-//                                                                                           arg("functionsDirichletBC"),
-//                                                                                           arg("functionsNeumannBC"),
-//                                                                                           arg("elementBoundary") = boost::python::dict(),
-//                                                                                           arg("elementNeumann")  = boost::python::dict() ))
-//        .staticmethod("ConvectionDiffusionEquation")
+        .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<2>::m_Aij)
+        .def_readonly("Mij",                   &dealiiFiniteElementWeakForm<2>::m_Mij)
+        .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<2>::m_Fi)
+        .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<2>::m_faceAij)
+        .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<2>::m_faceFi)
+        .def_readonly("Functions",             &dealiiFiniteElementWeakForm<2>::m_functions)
+        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_functionsDirichletBC)
     ;
 
-    class_<daepython::dealiiFiniteElementEquationWrapper<3>, boost::noncopyable>("dealiiFiniteElementEquation_3D", no_init)
+    class_<daepython::dealiiFiniteElementWeakFormWrapper<3>, boost::noncopyable>("dealiiFiniteElementWeakForm_3D", no_init)
         .def(init<const feExpression<3>&,
                   const feExpression<3>&,
                   const feExpression<3>&,
@@ -947,22 +940,13 @@ BOOST_PYTHON_MODULE(pyDealII)
                                          arg("functionsDirichletBC") = boost::python::dict()
                                       )))
 
-        .def_readonly("Aij",                   &dealiiFiniteElementEquation<3>::m_Aij)
-        .def_readonly("Mij",                   &dealiiFiniteElementEquation<3>::m_Mij)
-        .def_readonly("Fi",                    &dealiiFiniteElementEquation<3>::m_Fi)
-        .def_readonly("faceAij",               &dealiiFiniteElementEquation<3>::m_faceAij)
-        .def_readonly("faceFi",                &dealiiFiniteElementEquation<3>::m_faceFi)
-        .def_readonly("Functions",             &dealiiFiniteElementEquation<3>::m_functions)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementEquation<3>::m_functionsDirichletBC)
-
-//        .def("ConvectionDiffusionEquation",    &daepython::dealiiFiniteElementEquationWrapper<3>::ConvectionDiffusionEquation,
-//                                               return_value_policy<manage_new_object>(), ( arg("variableName"),
-//                                                                                           arg("variableDescription"),
-//                                                                                           arg("functionsDirichletBC"),
-//                                                                                           arg("functionsNeumannBC"),
-//                                                                                           arg("elementBoundary") = boost::python::dict(),
-//                                                                                           arg("elementNeumann")  = boost::python::dict() ))
-//        .staticmethod("ConvectionDiffusionEquation")
+        .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<3>::m_Aij)
+        .def_readonly("Mij",                   &dealiiFiniteElementWeakForm<3>::m_Mij)
+        .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<3>::m_Fi)
+        .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<3>::m_faceAij)
+        .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<3>::m_faceFi)
+        .def_readonly("Functions",             &dealiiFiniteElementWeakForm<3>::m_functions)
+        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<3>::m_functionsDirichletBC)
     ;
 
     class_<dealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("dealIIDataReporter", no_init)
@@ -984,13 +968,13 @@ BOOST_PYTHON_MODULE(pyDealII)
                   const Quadrature<1>&,
                   const Quadrature<0>&,
                   boost::python::list,
-                  const daepython::dealiiFiniteElementEquationWrapper<1>& >((arg("meshFilename"),
-                                                                             arg("polynomialOrder"),
-                                                                             arg("quadrature"),
-                                                                             arg("faceQuadrature"),
-                                                                             arg("DOFs"),
-                                                                             arg("equation")
-                                                                           )))
+                  boost::python::object>((arg("meshFilename"),
+                                          arg("polynomialOrder"),
+                                          arg("quadrature"),
+                                          arg("faceQuadrature"),
+                                          arg("dofs"),
+                                          arg("weakForm")
+                                        )))
 
         .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<1>::AssembleSystem,
                                     &daepython::dealiiFiniteElementSystemWrapper<1>::def_AssembleSystem, ( arg("self") ))
@@ -1010,13 +994,13 @@ BOOST_PYTHON_MODULE(pyDealII)
                   const Quadrature<2>&,
                   const Quadrature<1>&,
                   boost::python::list,
-                  const daepython::dealiiFiniteElementEquationWrapper<2>& >((arg("meshFilename"),
-                                                                             arg("polynomialOrder"),
-                                                                             arg("quadrature"),
-                                                                             arg("faceQuadrature"),
-                                                                             arg("DOFs"),
-                                                                             arg("equation")
-                                                                           )))
+                  boost::python::object>((arg("meshFilename"),
+                                          arg("polynomialOrder"),
+                                          arg("quadrature"),
+                                          arg("faceQuadrature"),
+                                          arg("dofs"),
+                                          arg("weakForm")
+                                        )))
 
         .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<2>::AssembleSystem,
                                     &daepython::dealiiFiniteElementSystemWrapper<2>::def_AssembleSystem, ( arg("self") ))
@@ -1035,13 +1019,13 @@ BOOST_PYTHON_MODULE(pyDealII)
                   const Quadrature<3>&,
                   const Quadrature<2>&,
                   boost::python::list,
-                  const daepython::dealiiFiniteElementEquationWrapper<3>& >((arg("meshFilename"),
-                                                                             arg("polynomialOrder"),
-                                                                             arg("quadrature"),
-                                                                             arg("faceQuadrature"),
-                                                                             arg("DOFs"),
-                                                                             arg("equation")
-                                                                           )))
+                  boost::python::object>((arg("meshFilename"),
+                                          arg("polynomialOrder"),
+                                          arg("quadrature"),
+                                          arg("faceQuadrature"),
+                                          arg("dofs"),
+                                          arg("weakForm")
+                                        )))
 
         .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<3>::AssembleSystem,
                                     &daepython::dealiiFiniteElementSystemWrapper<3>::def_AssembleSystem, ( arg("self") ))
