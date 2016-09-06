@@ -536,7 +536,7 @@ struct daeFiniteElementVariableInfo
     std::string         m_strName;
     std::string         m_strDescription;
     unsigned int        m_nMultiplicity;
-    std::vector<size_t> m_narrDOFsPerComponent;
+    unsigned int        m_nNumberOfDOFs;
 };
 
 /******************************************************************
@@ -544,8 +544,8 @@ struct daeFiniteElementVariableInfo
 *******************************************************************/
 struct daeFiniteElementObjectInfo
 {
-    unsigned int                                m_nNumberOfDOFsPerVariable;
     unsigned int                                m_nTotalNumberDOFs;
+    unsigned int                                m_nNumberOfDOFsPerVariable;
     std::vector<daeFiniteElementVariableInfo>   m_VariableInfos;
 };
 

@@ -78,7 +78,11 @@ public:
                          const unsigned int i,
                          const unsigned int q) const
     {
-        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
             throw std::runtime_error("Invalid call to phi() for the non-scalar variable: " + variableName);
 
@@ -89,7 +93,11 @@ public:
                             const unsigned int i,
                             const unsigned int q) const
     {
-        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
             throw std::runtime_error("Invalid call to dphi() for the non-scalar variable: " + variableName);
 
@@ -100,7 +108,11 @@ public:
                            const unsigned int i,
                            const unsigned int q) const
     {
-        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
             throw std::runtime_error("Invalid call to d2phi() for the non-scalar variable: " + variableName);
 
@@ -114,7 +126,11 @@ public:
                                const unsigned int i,
                                const unsigned int q) const
     {
-        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
             throw std::runtime_error("Invalid call to phi_vec() for the non-vector variable: " + variableName);
 
@@ -125,7 +141,11 @@ public:
                                    const unsigned int i,
                                    const unsigned int q) const
     {
-        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
             throw std::runtime_error("Invalid call to dphi_vec() for the non-vector variable: " + variableName);
 
@@ -136,7 +156,11 @@ public:
                                   const unsigned int i,
                                   const unsigned int q) const
     {
-        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
             throw std::runtime_error("Invalid call to d2phi_vec() for the non-vector variable: " + variableName);
 
@@ -147,7 +171,11 @@ public:
                       const unsigned int i,
                       const unsigned int q) const
     {
-        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
             throw std::runtime_error("Invalid call to div() for the non-vector variable: " + variableName);
 
@@ -159,7 +187,11 @@ public:
                         const unsigned int i,
                         const unsigned int q) const
     {
-        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
             throw std::runtime_error("Invalid call to curl() for the non-vector variable: " + variableName);
 
@@ -170,7 +202,11 @@ public:
                         const unsigned int i,
                         const unsigned int q) const
     {
-        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&m_mapExtractors[variableName]);
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
             throw std::runtime_error("Invalid call to curl() for the non-vector variable: " + variableName);
 
@@ -342,8 +378,9 @@ public:
     // Model-specific data
     dealiiFiniteElementWeakForm<dim>*         m_weakForm;
     std::vector<dealiiFiniteElementDOF<dim> > m_DOFs;
-    unsigned int                              m_no_equations;
-    std::vector<std::string>                  m_solutionNames;
+    unsigned int                              m_no_components;
+    std::vector<unsigned int>                 m_block_component;
+    std::vector<types::global_dof_index>      m_dofs_per_block;
 };
 
 template <int dim>
@@ -364,7 +401,7 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
     for(unsigned int i = 0; i < DOFs.size(); i++)
         m_DOFs.push_back(*DOFs[i]);
 
-    // Create FESystem
+    // Create FESystem using one FE<dim> per dof (for multicomponent dofs too)
     std::vector<const FiniteElement<dim>*> arrFEs;
     std::vector<unsigned int> arrMultiplicities;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
@@ -373,16 +410,6 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
 
         arrFEs.push_back(m_DOFs[i].m_fe_q);
         arrMultiplicities.push_back(m_DOFs[i].m_nMultiplicity);
-
-        if(m_DOFs[i].m_nMultiplicity == 1)
-        {
-            m_solutionNames.push_back(m_DOFs[i].m_strName);
-        }
-        else
-        {
-            for(unsigned n = 0; n < m_DOFs[i].m_nMultiplicity; n++)
-                m_solutionNames.push_back(m_DOFs[i].m_strName + std::to_string(n));
-        }
     }
 
     fe = SmartPointer< FESystem<dim> >(new FESystem<dim>(arrFEs, arrMultiplicities));
@@ -417,21 +444,33 @@ template <int dim>
 void dealiiFiniteElementSystem<dim>::setup_system()
 {
     dof_handler.distribute_dofs (*fe);
-    DoFRenumbering::component_wise (dof_handler);
 
-    m_no_equations = 0;
+    size_t n_dofs = m_DOFs.size();
+
+    m_no_components = 0;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
-        m_no_equations += m_DOFs[i].m_nMultiplicity;
+        m_no_components += m_DOFs[i].m_nMultiplicity;
 
-    std::vector<types::global_dof_index> dofs_per_component (m_no_equations);
-    DoFTools::count_dofs_per_component (dof_handler, dofs_per_component);
+    m_block_component.clear();
+    for(unsigned int i = 0; i < n_dofs; i++)
+        m_block_component.insert(m_block_component.end(), m_DOFs[i].m_nMultiplicity, i);
+
+    DoFRenumbering::component_wise(dof_handler, m_block_component);
+
+    m_dofs_per_block.resize(n_dofs);
+    DoFTools::count_dofs_per_block (dof_handler, m_dofs_per_block, m_block_component);
+
+    for(unsigned int i = 0; i < m_no_components; i++)
+        printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
 
     const unsigned int n_couplings = dof_handler.max_couplings_between_dofs();
 
-    sparsity_pattern.reinit (m_no_equations, m_no_equations);
-    for(unsigned int i = 0; i < m_no_equations; i++)
-        for(unsigned int j = 0; j < m_no_equations; j++)
-            sparsity_pattern.block(i, j).reinit (dofs_per_component[i], dofs_per_component[j], n_couplings);
+    sparsity_pattern.reinit (n_dofs, n_dofs);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        for(unsigned int j = 0; j < n_dofs; j++)
+            sparsity_pattern.block(i, j).reinit (m_dofs_per_block[i], m_dofs_per_block[j], n_couplings);
 
     sparsity_pattern.collect_sizes();
 
@@ -439,17 +478,17 @@ void dealiiFiniteElementSystem<dim>::setup_system()
     sparsity_pattern.compress();
 
     system_matrix.reinit (sparsity_pattern);
-    system_matrix_dt.reinit (sparsity_pattern);
+    system_matrix_dt.reinit(sparsity_pattern);
 
-    solution.reinit (m_no_equations);
-    for(unsigned int i = 0; i < m_no_equations; i++)
-        solution.block(i).reinit (dofs_per_component[i]);
-    solution.collect_sizes ();
+    solution.reinit (n_dofs);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        solution.block(i).reinit(m_dofs_per_block[i]);
+    solution.collect_sizes();
 
-    system_rhs.reinit (m_no_equations);
-    for(unsigned int i = 0; i < m_no_equations; i++)
-        system_rhs.block(i).reinit (dofs_per_component[i]);
-    system_rhs.collect_sizes ();
+    system_rhs.reinit (n_dofs);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        system_rhs.block(i).reinit(m_dofs_per_block[i]);
+    system_rhs.collect_sizes();
 }
 
 template <int dim>
@@ -693,19 +732,22 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     // Apply Dirichlet boundary conditions on the system matrix and rhs
     for(typename map_Uint_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
     {
-        const unsigned int    id       =  it->first;
-        const std::string variableName = (it->second).first;
-        const Function<dim>& fun       = *(it->second).second;
+        const unsigned int   id           =  it->first;
+        const std::string    variableName = (it->second).first;
+        const Function<dim>& fun          = *(it->second).second;
 
+        typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
+        if(iter == mapComponentMasks.end())
+            throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
 
-        std::cout << "Setting DirichletBC at id: " << id << " with sample value at point (0,0,0): " << fun.value(Point<dim>(0,0,0)) << std::endl;
+        std::cout << "Setting DirichletBC at id: " << id << " for variable " << variableName << " with sample value at point (0,0,0): " << fun.value(Point<dim>(0,0,0)) << std::endl;
 
         std::map<types::global_dof_index, double> boundary_values;
         VectorTools::interpolate_boundary_values (dof_handler,
                                                   id,
                                                   fun,
                                                   boundary_values,
-                                                  mapComponentMasks[variableName]);
+                                                  iter->second);
         MatrixTools::apply_boundary_values (boundary_values,
                                             system_matrix,
                                             solution,
@@ -739,8 +781,8 @@ void dealiiFiniteElementSystem<dim>::write_solution(const std::string& strFilena
         }
         else
         {
-            solution_names.insert(solution_names.begin(), m_DOFs[i].m_nMultiplicity, m_DOFs[i].m_strName);
-            data_component_interpretation.insert(data_component_interpretation.begin(), m_DOFs[i].m_nMultiplicity, DataComponentInterpretation::component_is_part_of_vector);
+            solution_names.insert(solution_names.end(), m_DOFs[i].m_nMultiplicity, m_DOFs[i].m_strName);
+            data_component_interpretation.insert(data_component_interpretation.end(), m_DOFs[i].m_nMultiplicity, DataComponentInterpretation::component_is_part_of_vector);
         }
     }
 
@@ -759,25 +801,21 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
 
     feObjectInfo.m_VariableInfos.resize(m_DOFs.size());
 
-    std::vector<types::global_dof_index> dofs_per_component (m_no_equations);
-    DoFTools::count_dofs_per_component (dof_handler, dofs_per_component);
-
-    if(std::min(dofs_per_component.begin(), dofs_per_component.end()) != std::max(dofs_per_component.begin(), dofs_per_component.end()))
-        std::runtime_error("Number of DOFs pre each component must be equal");
-
-    feObjectInfo.m_nNumberOfDOFsPerVariable = dofs_per_component[0];
     feObjectInfo.m_nTotalNumberDOFs         = dof_handler.n_dofs();
+    feObjectInfo.m_nNumberOfDOFsPerVariable = dof_handler.n_dofs() / m_no_components;
 
-    unsigned int component_counter = 0;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        feObjectInfo.m_VariableInfos[i].m_strName              = m_DOFs[i].m_strName;
-        feObjectInfo.m_VariableInfos[i].m_strDescription       = m_DOFs[i].m_strDescription;
-        feObjectInfo.m_VariableInfos[i].m_nMultiplicity        = m_DOFs[i].m_nMultiplicity;
-        for(unsigned int j = 0; j < m_DOFs[i].m_nMultiplicity; j++)
-            feObjectInfo.m_VariableInfos[i].m_narrDOFsPerComponent.push_back(dofs_per_component[component_counter + j]);
+        if(m_dofs_per_block[i] / m_DOFs[i].m_nMultiplicity != feObjectInfo.m_nNumberOfDOFsPerVariable)
+            std::runtime_error("Number of DOFs per each component must be equal (for dof " + std::to_string(i) + ")");
+    }
 
-        component_counter += m_DOFs[i].m_nMultiplicity;
+    for(unsigned int i = 0; i < m_DOFs.size(); i++)
+    {
+        feObjectInfo.m_VariableInfos[i].m_strName        = m_DOFs[i].m_strName;
+        feObjectInfo.m_VariableInfos[i].m_strDescription = m_DOFs[i].m_strDescription;
+        feObjectInfo.m_VariableInfos[i].m_nMultiplicity  = m_DOFs[i].m_nMultiplicity;
+        feObjectInfo.m_VariableInfos[i].m_nNumberOfDOFs  = m_dofs_per_block[i];
     }
 
     return feObjectInfo;
@@ -803,40 +841,30 @@ void dealiiFiniteElementSystem<dim>::RowIndices(unsigned int row, std::vector<un
              :                 :
     */
 
-    unsigned int block_row = -1;
-    unsigned int local_row = -1;
-    unsigned int crow = 0;
-    for(unsigned int i = 0; i < sparsity_pattern.n_block_rows(); i++)
-    {
-        // If row is less than of the rows in the blocks looped over so far then it belongs to that block_row
-        if(row < crow + sparsity_pattern.block(i, 0).n_rows())
-        {
-            block_row = i;
-            local_row = row - crow;
-            break;
-        }
-        crow += sparsity_pattern.block(i, 0).n_rows();
-    }
-    if(block_row == -1)
-        throw std::runtime_error((boost::format("Cannot locate a block-row for the row %d") % row).str());
+    // First locate the block where row belongs: block_index and the local row index within that block: local_row
+    // This can be done by using sparsity_pattern.row_indices().global_to_local(row)!!
 
-    //std::cout << "block_row = " << block_row << std::endl;
+    //    std::pair<block_row_index, local_row_index_in_block>
+    const std::pair<size_t,          BlockIndices::size_type> row_index = sparsity_pattern.get_row_indices().global_to_local(row);
+    unsigned int block_row_index = row_index.first;  // block index
+    unsigned int local_row       = row_index.second; // local row index in the above block
+
+    //std::cout << "block_row_index = " << block_row_index << std::endl;
     //std::cout << "local_row = " << local_row << std::endl;
     //std::cout << "row = " << row << std::endl;
     //std::cout << "sparsity_pattern.row_length(row) = " << sparsity_pattern.row_length(row) << std::endl;
 
     const BlockIndices& column_indices = sparsity_pattern.get_column_indices();
     narrIndices.reserve(sparsity_pattern.row_length(row));
-    for(unsigned int block_column = 0; block_column < sparsity_pattern.n_block_cols(); block_column++)
+
+    for(unsigned int block_column_index = 0; block_column_index < sparsity_pattern.n_block_cols(); block_column_index++)
     {
-        const SparsityPattern& block = sparsity_pattern.block(block_row, block_column);
+        const SparsityPattern& block = sparsity_pattern.block(block_row_index, block_column_index);
         SparsityPattern::iterator it     = block.begin(local_row);
         SparsityPattern::iterator it_end = block.end(local_row);
         for(; it != it_end; it++)
-            narrIndices.push_back(column_indices.local_to_global(block_column, it->column()));
+            narrIndices.push_back(column_indices.local_to_global(block_column_index, it->column()));
     }
-
-    //std::cout << "narrIndices = " << toString(narrIndices) << std::endl;
 }
 
 template <int dim>
@@ -870,23 +898,8 @@ dealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
 {
     // map<name:block_index>
     std::map<std::string, size_t> mapVariables;
-    unsigned int block_index = 0;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
-    {
-        if(m_DOFs[i].m_nMultiplicity == 1)
-        {
-            mapVariables[m_DOFs[i].m_strName] = block_index;
-            block_index++;
-        }
-        else
-        {
-            for(unsigned n = 0; n < m_DOFs[i].m_nMultiplicity; n++)
-            {
-                mapVariables[m_DOFs[i].m_strName + std::to_string(n)] = block_index;
-                block_index++;
-            }
-        }
-    }
+        mapVariables[m_DOFs[i].m_strName] = i; // here i represents the block_index
 
     fnUpdateBlock   update_block_callback(boost::bind(&dealiiFiniteElementSystem<dim>::update_block, this, _1, _2, _3));
     fnWriteSolution write_solution_callback(boost::bind(&dealiiFiniteElementSystem<dim>::write_solution, this, _1));

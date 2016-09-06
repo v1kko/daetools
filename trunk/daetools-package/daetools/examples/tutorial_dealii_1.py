@@ -33,31 +33,23 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
 # Neumann BC use either value or gradient
 # Dirichlet BC use vector_value with n_component = multiplicity of the equation
 # Other functions use value
+# In this example we have only a single scalar DOF and do not care about n_components
 class fnConstantFunction(Function_2D):
     def __init__(self, val, n_components = 1):
         Function_2D.__init__(self, n_components)
         self.m_value = float(val)
         
-    def value(self, point, component = 1):
+    def value(self, point, component = 0):
         #print('Point%s = %f' % (point, self.m_value))
         return self.m_value
     
-    def gradient(self, point, component = 1):
-        return 0.0
-    
     def vector_value(self, point):
-        return [self.m_value]
-       
-    def vector_gradient(self, point):
-        return [0.0]
+        return [self.value(point)]
        
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
-        # Achtung, Achtung!!
-        # Diffusivity, velocity, generation, dirichletBC and neumannBC must not go out of scope
-        # for deal.II FE model keeps only weak references to them.
         functions    = {}
         functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
         functions['Generation']  = ConstantFunction_2D(0.0)
@@ -97,7 +89,7 @@ class modTutorial(daeModel):
                                                       dofs            = dofs,          # degrees of freedom
                                                       weakForm        = weakForm)      # FE system in weak form
           
-        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction equation', self.fe_dealII)
+        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction FE problem', self.fe_dealII)
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)

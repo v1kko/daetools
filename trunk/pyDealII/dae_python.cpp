@@ -823,12 +823,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("curl_3D", &curl<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     */
 
-    //enum_<dealiiFluxType>("dealiiFluxType")
-    //    .value("eConstantFlux",	dae::fe_solver::eConstantFlux)
-    //    .value("eGradientFlux", dae::fe_solver::eGradientFlux)
-    //    .export_values()
-    //;
-    
     class_< std::map< unsigned int, feExpression<1> > >("map_Uint_Expression_1D")
         .def(map_indexing_suite< std::map< unsigned int, feExpression<1> > >())
     ;

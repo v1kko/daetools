@@ -21,40 +21,50 @@ daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pMod
         daeDeclareAndThrowException(exInvalidPointer);
 
     // Initialize daetools wrapper matrices and arrays that will be used by adFEMatrixItem/VectorItem nodes
-    m_matA.reset(m_fe->Asystem());
-    m_matM.reset(m_fe->Msystem());
-    m_vecF.reset(m_fe->Fload());
+    m_Aij.reset(m_fe->Asystem());
+    m_Mij.reset(m_fe->Msystem());
+    m_Fi.reset(m_fe->Fload());
 
     daeFiniteElementObjectInfo feObjectInfo = m_fe->GetObjectInfo();
 
     // Initialize domains and parameters
-    std::vector<daePoint> coords(feObjectInfo.m_nNumberOfDOFsPerVariable);
+    std::vector<daePoint> coords(feObjectInfo.m_nTotalNumberDOFs);
     m_omega.CreateUnstructuredGrid(coords);
 
-    std::cout << "feObjectInfo.m_nNumberOfDOFsPerVariable = " << feObjectInfo.m_nNumberOfDOFsPerVariable << std::endl;
+    std::cout << "feObjectInfo.m_nTotalNumberDOFs = " << feObjectInfo.m_nTotalNumberDOFs << std::endl;
 
     for(size_t i = 0; i < feObjectInfo.m_VariableInfos.size(); i++)
     {
         const daeFiniteElementVariableInfo& feVarInfo = feObjectInfo.m_VariableInfos[i];
 
-        //std::cout << "  m_strName = " << feVarInfo.m_strName << std::endl;
-        //std::cout << "  m_strDescription = " << feVarInfo.m_strDescription << std::endl;
-        //std::cout << "  m_nMultiplicity = " << feVarInfo.m_nMultiplicity << std::endl;
-        //std::cout << "  m_narrDOFsPerComponent = " << toString(feVarInfo.m_narrDOFsPerComponent) << std::endl;
+        std::cout << "  m_strName        = " << feVarInfo.m_strName        << std::endl;
+        std::cout << "  m_strDescription = " << feVarInfo.m_strDescription << std::endl;
+        std::cout << "  m_nMultiplicity  = " << feVarInfo.m_nMultiplicity  << std::endl;
+        std::cout << "  m_nNumberOfDOFs  = " << feVarInfo.m_nNumberOfDOFs  << std::endl;
 
+        daeDomain* omega_i = new daeDomain("&Omega;_"+toString(i), this, unit(), "FE sub domain " + toString(i));
+        omega_i->CreateArray(feVarInfo.m_nNumberOfDOFs);
+        m_ptrarrFESubDomains.push_back(omega_i);
+
+        pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, omega_i);
+        m_ptrarrFEVariables.push_back(pVariable);
+
+        /*
         if(feVarInfo.m_nMultiplicity == 1)
         {
-            pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, &m_omega);
+            pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, &m_omega_c);
             m_ptrarrFEVariables.push_back(pVariable);
         }
         else
         {
-            for(size_t j = 0; j < feVarInfo.m_nMultiplicity; j++)
-            {
-                pVariable = new daeVariable(feVarInfo.m_strName + "_" + toString(j), variable_types::no_t, this, feVarInfo.m_strDescription, &m_omega);
-                m_ptrarrFEVariables.push_back(pVariable);
-            }
+            daeDomain* pd = new daeDomain("FED_" + toString(m_ptrarrFEDomains.size()), this, unit(), "FE Domain " + toString(m_ptrarrFEDomains.size()));
+            pd->CreateArray(feVarInfo.m_nMultiplicity);
+            m_ptrarrFEDomains.push_back(pd);
+
+            pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, pd, &m_omega_c);
+            m_ptrarrFEVariables.push_back(pVariable);
         }
+        */
    }
 }
 
@@ -67,31 +77,31 @@ void daeFiniteElementModel::DeclareEquations(void)
 
     m_fe->AssembleSystem();
 
-    size_t start = 0, end = 0;
     daeFiniteElementObjectInfo feObjectInfo = m_fe->GetObjectInfo();
 
-    for(size_t i = 0; i < feObjectInfo.m_VariableInfos.size(); i++)
-    {
-        const daeFiniteElementVariableInfo& feVarInfo = feObjectInfo.m_VariableInfos[i];
+    size_t startRow = 0;
+    size_t endRow   = feObjectInfo.m_nTotalNumberDOFs;
 
-        if(feVarInfo.m_nMultiplicity == 1)
-        {
-            end = start + feVarInfo.m_narrDOFsPerComponent[0];
-            daeFiniteElementEquation* eq = CreateFiniteElementEquation(feVarInfo.m_strName, &m_omega, start, end);
-            eq->SetResidual(Constant(0.0));
-            start = end;
-        }
-        else
-        {
-            for(size_t j = 0; j < feVarInfo.m_nMultiplicity; j++)
-            {
-                end = start + feVarInfo.m_narrDOFsPerComponent[j];
-                daeFiniteElementEquation* eq = CreateFiniteElementEquation(feVarInfo.m_strName + "_" + toString(j), &m_omega, start, end);
-                eq->SetResidual(Constant(0.0));
-                start = end;
-            }
-        }
+    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());
+    daeFiniteElementEquation* pEquation = new daeFiniteElementEquation(*this, m_ptrarrFEVariables, startRow, endRow);
+
+    if(!pCurrentState)
+    {
+        string strEqName = "dealIIFESystem_" + toString<size_t>(m_ptrarrEquations.size());
+        pEquation->SetName(strEqName);
+        AddEquation(pEquation);
     }
+    else
+    {
+        string strEqName = "dealIIFESystem_" + toString<size_t>(pCurrentState->m_ptrarrEquations.size());
+        pEquation->SetName(strEqName);
+        pCurrentState->AddEquation(pEquation);
+    }
+
+    pEquation->SetDescription("");
+    pEquation->SetScaling(1.0);
+    pEquation->daeEquation::DistributeOnDomain(m_omega, eClosedClosed);
+    pEquation->SetResidual(Constant(0.0));
 }
 
 void daeFiniteElementModel::UpdateEquations(const daeExecutionContext* pExecutionContext)
@@ -104,44 +114,6 @@ void daeFiniteElementModel::UpdateEquations(const daeExecutionContext* pExecutio
         std::cout << "daeFiniteElementModel: re-assembling the system" << std::endl;
         m_fe->ReAssembleSystem();
     }
-}
-
-daeFiniteElementEquation* daeFiniteElementModel::CreateFiniteElementEquation(const string& strName, daeDomain* pDomain, size_t startRow, size_t endRow,
-                                                                             string strDescription, real_t dScaling)
-{
-    string strEqName;
-
-    if(!pDomain)
-        daeDeclareAndThrowException(exInvalidPointer);
-
-    if(pDomain->GetType() != eUnstructuredGrid)
-    {
-        daeDeclareException(exInvalidCall);
-        e << "FiniteElement functions can only be distributed on unstructured grid domain (domain " << pDomain->GetCanonicalName()
-          << " is " << dae::io::g_EnumTypesCollection->esmap_daeDomainType.GetString(pDomain->GetType()) << ") ";
-        throw e;
-    }
-
-    daeState* pCurrentState = (m_ptrarrStackStates.empty() ? NULL : m_ptrarrStackStates.top());
-    daeFiniteElementEquation* pEquation = new daeFiniteElementEquation(*this, m_ptrarrFEVariables, startRow, endRow);
-
-    if(!pCurrentState)
-    {
-        strEqName = (strName.empty() ? "FiniteEquation_" + toString<size_t>(m_ptrarrEquations.size()) : strName);
-        pEquation->SetName(strEqName);
-        AddEquation(pEquation);
-    }
-    else
-    {
-        strEqName = (strName.empty() ? "FiniteEquation_" + toString<size_t>(pCurrentState->m_ptrarrEquations.size()) : strName);
-        pEquation->SetName(strEqName);
-        pCurrentState->AddEquation(pEquation);
-    }
-
-    pEquation->SetDescription(strDescription);
-    pEquation->SetScaling(dScaling);
-    pEquation->daeEquation::DistributeOnDomain(*pDomain, eClosedClosed);
-    return pEquation;
 }
 
 /******************************************************************
@@ -173,16 +145,21 @@ inline adouble create_adouble(adNode* n)
     return adouble(0.0, 0.0, true, n);
 }
 
+struct feVariableInfo
+{
+
+};
+
 void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel)
 {
     daeVariable* variable;
     size_t indexes[1], counter;
     size_t nNoDomains, nIndex, column, internalVariableIndex;
-    adouble a_K, a_Kdt, a_f;
+    adouble a_Aij, a_Mij, a_Fi;
     daeFiniteElementObject* fe ;
     daeEquationExecutionInfo* pEquationExecutionInfo;
     std::vector<unsigned int> narrRowIndices;
-    std::map< size_t, std::pair<size_t, daeVariable*> > mapGlobalDOFToVariablePoint;
+    std::vector< std::pair<size_t, daeVariable*> > arrGlobalDOFToVariablePoint;
 
     if(!pModel)
         daeDeclareAndThrowException(exInvalidPointer);
@@ -214,7 +191,6 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     EC.m_eEquationCalculationMode	= eGatherInfo;
 
     bool bPrintInfo = pModel->m_pDataProxy->PrintInfo();
-
     if(bPrintInfo)
         std::cout << "FEEquation start = " << m_startRow << " end = " << m_endRow << std::endl;
 
@@ -223,18 +199,19 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         daeDeclareAndThrowException(exInvalidPointer);
 
     counter = 0;
+    arrGlobalDOFToVariablePoint.resize(NoEqns);
     for(size_t i = 0; i < m_ptrarrVariables.size(); i++)
     {
         variable = m_ptrarrVariables[i];
         for(size_t j = 0; j < variable->GetNumberOfPoints(); j++)
         {
-            mapGlobalDOFToVariablePoint[counter] = std::pair<size_t, daeVariable*>(j, variable);
+            arrGlobalDOFToVariablePoint[counter] = std::pair<size_t, daeVariable*>(j, variable);
             counter++;
             if(bPrintInfo)
                 std::cout << (boost::format("%d : (%d : %s)") % counter % j % variable->GetName()).str() << std::endl;
         }
     }
-    if(counter != m_FEModel.m_matA->GetNrows())
+    if(counter != m_FEModel.m_Aij->GetNrows())
         daeDeclareAndThrowException(exInvalidCall);
 
     counter = 0;
@@ -247,11 +224,11 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         pEquationExecutionInfo->m_narrDomainIndexes[0] = counter++;
 
         // Reset equation's contributions
-        a_K   = 0;
-        a_Kdt = 0;
+        a_Aij = 0;
+        a_Mij = 0;
 
         // RHS
-        a_f = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_vecF, row, unit()));
+        a_Fi = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_Fi, row, unit()));
 
         narrRowIndices.clear();
         fe->RowIndices(row, narrRowIndices);
@@ -261,35 +238,35 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             column = narrRowIndices[i];
 
             // internalVariableIndex is a local index (within a variable) that matches variable's global DOF index
-            internalVariableIndex = mapGlobalDOFToVariablePoint[column].first;
-            variable              = mapGlobalDOFToVariablePoint[column].second;
+            internalVariableIndex = arrGlobalDOFToVariablePoint[column].first;
+            variable              = arrGlobalDOFToVariablePoint[column].second;
 
             // Set it to be the variable's local index (we need it to create adoubles with runtime nodes)
             indexes[0] = internalVariableIndex;
 
-            if(!a_K.node)
-                a_K =       create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
+            if(!a_Aij.node)
+                a_Aij =         create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
             else
-                a_K = a_K + create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_matA, row, column, unit())) * variable->Create_adouble(indexes, 1);
+                a_Aij = a_Aij + create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
 
             /* ACHTUNG, ACHTUNG!!
                The mass matrix M is not going to change - wherever we have an item in M equal to zero it is going to stay zero
                (meaning that the FiniteElement object cannot suddenly sneak in differential variables into the system AFTER initialization).
                Therefore, skip an item if we encounter a zero.
             */
-            if(m_FEModel.m_matM->GetItem(row, column) != 0)
+            if(m_FEModel.m_Mij->GetItem(row, column) != 0)
             {
-                if(!a_Kdt.node)
-                    a_Kdt =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                if(!a_Mij.node)
+                    a_Mij =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
                 else
-                    a_Kdt = a_Kdt + create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_matM, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                    a_Mij = a_Mij + create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
 
                 nIndex = variable->GetOverallIndex() + internalVariableIndex;
                 m_pModel->m_pDataProxy->SetVariableTypeGathered(nIndex, cnDifferential);
             }
         }
 
-        pEquationExecutionInfo->m_EquationEvaluationNode = (a_Kdt + a_K - a_f).node;
+        pEquationExecutionInfo->m_EquationEvaluationNode = (a_Mij + a_Aij - a_Fi).node;
 
         /* ACHTUNG, ACHTUNG!!
            We already have m_EquationEvaluationNode and a call to GatherInfo() seems unnecesary.

@@ -119,7 +119,7 @@ compile()
   echo "[*] Compiling the project..."
   echo ""
   make ${MAKEARG} -w
-  
+
   echo ""
   echo "[*] Done!"
   cd "${TRUNK}"
@@ -151,7 +151,7 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
-Ncpu=1
+#Ncpu=3
 
 cd "${TRUNK}"
 

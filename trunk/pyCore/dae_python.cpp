@@ -1644,7 +1644,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("VariableName",          &daeFiniteElementVariableInfo::m_strName)
         .def_readonly("VariableDescription",   &daeFiniteElementVariableInfo::m_strDescription)
         .def_readonly("Multiplicity",          &daeFiniteElementVariableInfo::m_nMultiplicity)
-        .def_readonly("DOFsPerComponent",      &daeFiniteElementVariableInfo::m_narrDOFsPerComponent)
+        .def_readonly("m_nNumberOfDOFs",       &daeFiniteElementVariableInfo::m_nNumberOfDOFs)
     ;
 
     //class_< std::vector<daeFiniteElementVariableInfo> >("vector_daeFiniteElementVariableInfo")

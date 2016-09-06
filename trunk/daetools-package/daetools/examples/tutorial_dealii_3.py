@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                        tutorial_dealii_2.py
+                           tutorial_dealii_3.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -17,31 +17,9 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-.. code-block:: none
-                                                                       -->
-    ID=0: Sun (45 degrees), gradient heat flux = 2 kW/m**2 in direction n = (1,-1)
-      \ \ \ \ \ \ \
-       \ \ \ \ \ \ \         ID=2: Inner tube: constant temperature of 300 K
-        \ \ \ \ \ \ \       /
-         \ \ \ \ \ \ \     /
-          \ \ \ \ \ \ \   /
-           \ \ \ \ \ ****/
-            \ \ \ **    / **
-             \ \**    **    **
-              \ *    *  *    *
-    ____________**    **    **_____________
-                  **      **                y = -0.5
-                 /   ****
-                /
-               /
-             ID=1: Outer surface below y=-0.5, constant flux of 2 kW/m**2
-
-    dT                                             
-   ---- - ∇κ∇Τ = g, in Ω
-    dt
 """
 
-import os, sys, numpy, json, math, tempfile
+import os, sys, numpy, json, tempfile
 from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import *
@@ -55,74 +33,55 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
 # Neumann BC use either value or gradient
 # Dirichlet BC use vector_value with n_component = multiplicity of the equation
 # Other functions use value
-class GradientFunction_2D(Function_2D):
-    def __init__(self, gradient, direction, n_components = 1):
+class fnConstantFunction(Function_2D):
+    def __init__(self, val, n_components = 1, active_component = 0):
         Function_2D.__init__(self, n_components)
-        self.m_gradient = Tensor_1_2D()
-        self.m_gradient[0] = gradient * direction[0]
-        self.m_gradient[1] = gradient * direction[1]
-        
-    def gradient(self, point, component = 0):
-        if point.x < 0 and point.y > 0:
-            return self.m_gradient
-        else:
-            return Tensor_1_2D()
+        self.m_value            = float(val)
+        self.m_active_component = int(active_component)
 
-    def vector_gradient(self, point):
-        return [self.gradient(point)]
-
-class BottomGradientFunction_2D(Function_2D):
-    def __init__(self, gradient, n_components = 1):
-        Function_2D.__init__(self, n_components)
-        self.m_gradient = gradient
-        
     def value(self, point, component = 0):
-        if point.y < -0.5:
-            return self.m_gradient
-        else:
-            return 0.0
+        res = 0.0
+        if component == self.m_active_component:
+            res = self.m_value
+        #print('value at %s = %s (component = %d)' % (point, res, component))
+        return res
 
     def vector_value(self, point):
-        return [self.value(point)]
+        res = [self.value(point, c) for c in range(self.n_components)]
+        #print('vector_value at %s = %s' % (point, res))
+        return res
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-        
-        rho = 8960.0  # kg/m**3
-        cp  =  385.0  # J/(kg*K)
-        k   =  401.0  # W/(m*K)
-        
-        flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) = 
-        flux_beneath = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        diffusivity  = k / (rho*cp)   # m**2/s
-        
-        print('Thermal diffusivity = %f' % diffusivity)
-        print('Beneath source flux = %f' % flux_beneath)
-        print('Above source flux = %f x (1,-1)' % flux_above)
-
-        functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(diffusivity)
-        functions['Generation']  = ConstantFunction_2D(0.0)
-        functions['Flux_a']      = GradientFunction_2D(flux_above, direction = (-1, 1)) # Gradient flux at boundary id=0 (Sun)
-        functions['Flux_b']      = BottomGradientFunction_2D(flux_beneath)              # Constant flux at boundary id=1 (outer tube where y < -0.5)
-        
-        dirichletBC    = {}
-        dirichletBC[2] = ('T', ConstantFunction_2D(300)) # at boundary id=2 (inner tube)
-        
-        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'pipe.msh')
 
         dofs = [dealiiFiniteElementDOF_2D(name='T',
                                           description='Temperature',
+                                          multiplicity=1),
+                dealiiFiniteElementDOF_2D(name='T2',
+                                          description='Temperature 2',
                                           multiplicity=1)]
+        n_components = len(dofs)
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
+        functions    = {}
+        functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
+        functions['Generation']  = ConstantFunction_2D(0.0)
+
+        dirichletBC    = {}
+        dirichletBC[0] = ('T',  fnConstantFunction(200, n_components, 0)) # left edge
+        dirichletBC[1] = ('T',  fnConstantFunction(350, n_components, 0)) # top edge
+        dirichletBC[2] = ('T2', fnConstantFunction(250, n_components, 1)) # right edge
+
+        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
+        mesh_file  = os.path.join(meshes_dir, 'square.msh')
+
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q) \
+                                                      + (dphi_2D('T2', fe_i, fe_q) * dphi_2D('T2', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
+                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) \
+                                                      + (phi_2D('T2', fe_i, fe_q) * phi_2D('T2', fe_j, fe_q)) * JxW_2D(fe_q),
                                                   Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   faceAij = {},
-                                                  faceFi  = {0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
-                                                             1: phi_2D('T', fe_i, fe_q) * function_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)},
+                                                  faceFi  = {},
                                                   functions = functions,
                                                   functionsDirichletBC = dirichletBC)
 
@@ -141,32 +100,42 @@ class modTutorial(daeModel):
                                                       dofs            = dofs,          # degrees of freedom
                                                       weakForm        = weakForm)      # FE system in weak form
 
-        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction through a pipe wall with an external heat flux', self.fe_dealII)
-       
+        self.fe = daeFiniteElementModel('HeatConduction', self, 'Multi-scalar transient heat conduction FE problem', self.fe_dealII)
+
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
-        
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_deal_II_2")
+        self.m = modTutorial("tutorial_deal_II_3")
         self.m.Description = __doc__
-        
+
     def SetUpParametersAndDomains(self):
         pass
 
     def SetUpVariables(self):
         m_dt = self.m.fe_dealII.Msystem()
-        T    = self.m.fe.dictVariables['T']
-        
+
+        # Vector where every item marks the boundar
+        #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
+        #print list(dof_to_boundary)
+
         # dofIndexesMap relates global DOF indexes to points within daetools variables
+
+        # Todo: use a function from daeSimulation
         dofIndexesMap = {}
         for variable in self.m.fe.Variables:
             if variable.Name == 'T':
-                ic = 273
+                ic = 300
+            elif variable.Name == 'T2':
+                ic = 200
+            else:
+                raise RuntimeError('Unknown variable [%s] found' % variable.Name)
+
             for i in range(variable.NumberOfPoints):
                 dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
-        
+
         for row in range(m_dt.n):
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
@@ -174,12 +143,12 @@ class simTutorial(daeSimulation):
                 if m_dt(row, column) != 0:
                     variable, index, ic = dofIndexesMap[column]
                     variable.SetInitialCondition(index, ic)
-                    #print '%s(%d) initial condition = %f' % (variable.Name, column, ic)
-    
+                    #print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
+
 # Use daeSimulator class
 def guiRun(app):
-    simulation = simTutorial()
     datareporter = daeDelegateDataReporter()
+    simulation = simTutorial()
     tcpipDataReporter = daeTCPIPDataReporter()
     feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
@@ -189,7 +158,7 @@ def guiRun(app):
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
         sys.exit()
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
     feDataReporter.Connect(results_folder, simName)
     try:
         from PyQt4 import QtCore, QtGui
@@ -198,8 +167,8 @@ def guiRun(app):
         print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 60    # 1 minute
-    simulation.TimeHorizon       = 60*60 # 1 hour
+    simulation.ReportingInterval = 10
+    simulation.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter)
     simulator.exec_()
 
@@ -242,21 +211,21 @@ def consoleRun():
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(tcpipDataReporter.Connect("", simName) == False):
         sys.exit()
-    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results'), simName)
+    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results'), simName)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 60    # 1 minute
-    simulation.TimeHorizon       = 60*60 # 1 hour
+    simulation.ReportingInterval = 10
+    simulation.TimeHorizon = 500
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    
+
     # Save the model report and the runtime model report
-    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
+    #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
