@@ -43,9 +43,11 @@ class modTutorial(daeModel):
 
         dofs = [dealiiFiniteElementDOF_2D(name='T',
                                           description='Temperature',
+                                          fe = FE_Q_2D(1),
                                           multiplicity=1),
                 dealiiFiniteElementDOF_2D(name='T2',
                                           description='Temperature 2',
+                                          fe = FE_Q_2D(1),
                                           multiplicity=1)]
         n_components = len(dofs)
 
@@ -104,7 +106,6 @@ class modTutorial(daeModel):
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
-                                                      polynomialOrder = 1,             # polynomial order
                                                       quadrature      = QGauss_2D(3),  # quadrature formula
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs,          # degrees of freedom

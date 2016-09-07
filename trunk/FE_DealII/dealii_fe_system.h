@@ -29,7 +29,17 @@
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/dofs/dof_accessor.h>
 #include <deal.II/dofs/dof_tools.h>
+
 #include <deal.II/fe/fe_q.h>
+#include <deal.II/fe/fe_raviart_thomas.h>
+#include <deal.II/fe/fe_dg_vector.h>
+#include <deal.II/fe/fe_dgq.h>
+#include <deal.II/fe/fe_dgp.h>
+#include <deal.II/fe/fe_bdm.h>
+#include <deal.II/fe/fe_abf.h>
+#include <deal.II/fe/fe_nedelec.h>
+#include <deal.II/fe/fe_bernstein.h>
+
 #include <deal.II/numerics/matrix_tools.h>
 #include <deal.II/numerics/error_estimator.h>
 #include <deal.II/numerics/data_out.h>
@@ -269,22 +279,36 @@ template <int dim>
 class dealiiFiniteElementDOF
 {
 public:
-    dealiiFiniteElementDOF(const std::string&  strName,
-                           const std::string&  strDescription,
-                           unsigned int        nMultiplicity)
+    dealiiFiniteElementDOF(const std::string&                      strName,
+                           const std::string&                      strDescription,
+                           boost::shared_ptr< FiniteElement<dim> > fe,
+                           unsigned int                            nMultiplicity)
     {
         m_strName        = strName;
         m_strDescription = strDescription;
+        m_fe             = fe;
         m_nMultiplicity  = nMultiplicity;
+
+        // For vector-valued FE spaces use 1, and for the others the normal multiplicity
+        m_nMultiplicityForFESystem = m_nMultiplicity;
+        if(dynamic_cast< FE_RaviartThomas<dim>*   >(m_fe.get()) ||
+           dynamic_cast< FE_DGRaviartThomas<dim>* >(m_fe.get()) ||
+           dynamic_cast< FE_ABF<dim>*             >(m_fe.get()) ||
+           dynamic_cast< FE_Nedelec<dim>*         >(m_fe.get()) ||
+           dynamic_cast< FE_DGNedelec<dim>*       >(m_fe.get()) ||
+           dynamic_cast< FE_BDM<dim>*             >(m_fe.get()) ||
+           dynamic_cast< FE_DGBDM<dim>*           >(m_fe.get()))
+            m_nMultiplicityForFESystem = 1;
     }
 
 public:
     std::string  m_strName;
     std::string  m_strDescription;
     unsigned int m_nMultiplicity;
+    unsigned int m_nMultiplicityForFESystem;
 
 // Internal data
-    SmartPointer< FE_Q<dim> >   m_fe_q;
+    boost::shared_ptr< FiniteElement<dim> > m_fe;
 };
 
 /******************************************************************
@@ -348,7 +372,6 @@ public:
     virtual dealIIDataReporter*         CreateDataReporter();
 
     void Initialize(const std::string&                meshFilename,
-                    unsigned int                      polynomialOrder,
                     const Quadrature<dim>&            quadrature,
                     const Quadrature<dim-1>&          faceQuadrature,
                     vector_DOFs&                      DOFs,
@@ -378,7 +401,7 @@ public:
 
     // Model-specific data
     dealiiFiniteElementWeakForm<dim>*         m_weakForm;
-    std::vector<dealiiFiniteElementDOF<dim> > m_DOFs;
+    std::vector<dealiiFiniteElementDOF<dim>*> m_DOFs;
     unsigned int                              m_no_components;
     std::vector<unsigned int>                 m_block_component;
     std::vector<types::global_dof_index>      m_dofs_per_block;
@@ -392,25 +415,21 @@ dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
 
 template <int dim>
 void dealiiFiniteElementSystem<dim>::Initialize(const std::string&                meshFilename,
-                                                unsigned int                      polynomialOrder,
                                                 const Quadrature<dim>&            quadrature,
                                                 const Quadrature<dim-1>&          faceQuadrature,
                                                 vector_DOFs&                      DOFs,
                                                 dealiiFiniteElementWeakForm<dim>& weakForm)
 {
     m_weakForm = &weakForm;
-    for(unsigned int i = 0; i < DOFs.size(); i++)
-        m_DOFs.push_back(*DOFs[i]);
+    m_DOFs     = DOFs;
 
     // Create FESystem using one FE<dim> per dof (for multicomponent dofs too)
     std::vector<const FiniteElement<dim>*> arrFEs;
     std::vector<unsigned int> arrMultiplicities;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        m_DOFs[i].m_fe_q = SmartPointer< FE_Q<dim> >( new FE_Q<dim>(polynomialOrder) );
-
-        arrFEs.push_back(m_DOFs[i].m_fe_q);
-        arrMultiplicities.push_back(m_DOFs[i].m_nMultiplicity);
+        arrFEs.push_back(m_DOFs[i]->m_fe.get());
+        arrMultiplicities.push_back(m_DOFs[i]->m_nMultiplicityForFESystem);
     }
 
     fe = SmartPointer< FESystem<dim> >(new FESystem<dim>(arrFEs, arrMultiplicities));
@@ -450,11 +469,11 @@ void dealiiFiniteElementSystem<dim>::setup_system()
 
     m_no_components = 0;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
-        m_no_components += m_DOFs[i].m_nMultiplicity;
+        m_no_components += m_DOFs[i]->m_nMultiplicity;
 
     m_block_component.clear();
     for(unsigned int i = 0; i < n_dofs; i++)
-        m_block_component.insert(m_block_component.end(), m_DOFs[i].m_nMultiplicity, i);
+        m_block_component.insert(m_block_component.end(), m_DOFs[i]->m_nMultiplicity, i);
 
     DoFRenumbering::component_wise(dof_handler, m_block_component);
 
@@ -546,7 +565,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     int currentIndex = 0;
     for(unsigned int k = 0; k < m_DOFs.size(); k++)
     {
-        const dealiiFiniteElementDOF<dim>& dof = m_DOFs[k];
+        const dealiiFiniteElementDOF<dim>& dof = *m_DOFs[k];
 
         if(dof.m_nMultiplicity == 1)
         {
@@ -783,15 +802,15 @@ void dealiiFiniteElementSystem<dim>::write_solution(const std::string& strFilena
     std::vector<DataComponentInterpretation::DataComponentInterpretation> data_component_interpretation;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        if(m_DOFs[i].m_nMultiplicity == 1)
+        if(m_DOFs[i]->m_nMultiplicity == 1)
         {
-            solution_names.push_back(m_DOFs[i].m_strName);
+            solution_names.push_back(m_DOFs[i]->m_strName);
             data_component_interpretation.push_back(DataComponentInterpretation::component_is_scalar);
         }
         else
         {
-            solution_names.insert(solution_names.end(), m_DOFs[i].m_nMultiplicity, m_DOFs[i].m_strName);
-            data_component_interpretation.insert(data_component_interpretation.end(), m_DOFs[i].m_nMultiplicity, DataComponentInterpretation::component_is_part_of_vector);
+            solution_names.insert(solution_names.end(), m_DOFs[i]->m_nMultiplicity, m_DOFs[i]->m_strName);
+            data_component_interpretation.insert(data_component_interpretation.end(), m_DOFs[i]->m_nMultiplicity, DataComponentInterpretation::component_is_part_of_vector);
         }
     }
 
@@ -815,15 +834,15 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
 
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        if(m_dofs_per_block[i] / m_DOFs[i].m_nMultiplicity != feObjectInfo.m_nNumberOfDOFsPerVariable)
+        if(m_dofs_per_block[i] / m_DOFs[i]->m_nMultiplicity != feObjectInfo.m_nNumberOfDOFsPerVariable)
             std::runtime_error("Number of DOFs per each component must be equal (for dof " + std::to_string(i) + ")");
     }
 
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
-        feObjectInfo.m_VariableInfos[i].m_strName        = m_DOFs[i].m_strName;
-        feObjectInfo.m_VariableInfos[i].m_strDescription = m_DOFs[i].m_strDescription;
-        feObjectInfo.m_VariableInfos[i].m_nMultiplicity  = m_DOFs[i].m_nMultiplicity;
+        feObjectInfo.m_VariableInfos[i].m_strName        = m_DOFs[i]->m_strName;
+        feObjectInfo.m_VariableInfos[i].m_strDescription = m_DOFs[i]->m_strDescription;
+        feObjectInfo.m_VariableInfos[i].m_nMultiplicity  = m_DOFs[i]->m_nMultiplicity;
         feObjectInfo.m_VariableInfos[i].m_nNumberOfDOFs  = m_dofs_per_block[i];
     }
 
@@ -908,7 +927,7 @@ dealIIDataReporter* dealiiFiniteElementSystem<dim>::CreateDataReporter()
     // map<name:block_index>
     std::map<std::string, size_t> mapVariables;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
-        mapVariables[m_DOFs[i].m_strName] = i; // here i represents the block_index
+        mapVariables[m_DOFs[i]->m_strName] = i; // here i represents the block_index
 
     fnUpdateBlock   update_block_callback(boost::bind(&dealiiFiniteElementSystem<dim>::update_block, this, _1, _2, _3));
     fnWriteSolution write_solution_callback(boost::bind(&dealiiFiniteElementSystem<dim>::write_solution, this, _1));

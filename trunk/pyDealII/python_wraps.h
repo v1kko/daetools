@@ -434,7 +434,6 @@ ConstantFunction<dim>* ConstantFunction_init(boost::python::list l_values)
     return new ConstantFunction<dim>(values);
 }
 
-
 template<int dim>
 class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<dim>,
                                            public boost::python::wrapper< dealiiFiniteElementWeakForm<dim> >
@@ -540,7 +539,6 @@ class dealiiFiniteElementSystemWrapper : public dealiiFiniteElementSystem<dim>,
 {
 public:
     dealiiFiniteElementSystemWrapper(std::string               meshFilename,
-                                     unsigned int              polynomialOrder,
                                      const Quadrature<dim>&    quadrature,
                                      const Quadrature<dim-1>&  faceQuadrature,
                                      boost::python::list       listDOFs,
@@ -553,12 +551,13 @@ public:
             arrDOFs.push_back(dof);
         }
         
-        // Keep this object so it does not go out of scope and gets destroyed while still in use by daetools
+        // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
         this->m_weakForm = weakForm;
-	
+        this->m_DOFs     = listDOFs;
+
         dealiiFiniteElementWeakForm<dim>* cweakForm  = boost::python::extract<dealiiFiniteElementWeakForm<dim>*>(weakForm);
 
-        this->Initialize(meshFilename, polynomialOrder, quadrature, faceQuadrature, arrDOFs, *cweakForm);
+        this->Initialize(meshFilename, quadrature, faceQuadrature, arrDOFs, *cweakForm);
     }
 
     ~dealiiFiniteElementSystemWrapper()
@@ -611,6 +610,7 @@ public:
     
 public:
     boost::python::object m_weakForm;
+    boost::python::object m_DOFs;
 };
 
 
