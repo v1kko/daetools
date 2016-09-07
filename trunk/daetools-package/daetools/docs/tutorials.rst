@@ -496,6 +496,16 @@ Tutorial deal.II 2
 
 .. rubric:: Files
 
+Tutorial deal.II 3
+==================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_dealii_3
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
 =====================   =================================================================
 =====================   =================================================================
 Model report            `tutorial_dealii_2.xml <../../examples/tutorial_dealii_2.xml>`_

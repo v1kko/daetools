@@ -39,7 +39,5 @@ SOURCES += stdafx.cpp \
 
 HEADERS += stdafx.h \
            dealii_common.h \
-           dealii_fe_object.h \
            dealii_fe_system.h \
-           dealii_datareporter.h \
-           dealii_iterators.h
+           dealii_datareporter.h

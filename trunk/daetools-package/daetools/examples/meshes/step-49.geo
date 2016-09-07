@@ -73,7 +73,7 @@ Transfinite Line{23} = 17 Using Progression 1;
 Transfinite Line{24} = 17 Using Progression 1;
 
 // these define the boundary indicators in deal.II:
-Physical Line(0) = {1, 2, 4, 3};
+Physical Line(0) = {1, 2, 4, 3, 4, 5, 6, 7, 8};
 Physical Line(1) = {61, 51, 81, 71};
 Physical Line(2) = {91, 101, 111, 121};
 

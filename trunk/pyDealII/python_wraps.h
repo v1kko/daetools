@@ -14,9 +14,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
-#include "../FE_DealII/dealii_fe_object.h"
 #include "../FE_DealII/dealii_fe_system.h"
-#include "../FE_DealII/dealii_iterators.h"
 #include "../dae_develop.h"
 using namespace dae::fe_solver;
 
@@ -137,11 +135,6 @@ string Tensor_1_3D_repr(Tensor_1_3D& self)
     return s.str();
 }
 
-
-
-
-
-
 unsigned int Tensor_2_1D_rank(Tensor_2_1D& self)
 {
     return Tensor_2_1D::rank;
@@ -241,12 +234,6 @@ string Tensor_2_3D_repr(Tensor_2_3D& self)
 }
 
 
-
-
-
-
-
-
 string Point_1D_repr(Point_1D& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
@@ -292,7 +279,6 @@ double Point_3D_z(Point_3D& self)
 {
     return self[2];
 }
-
 
 // Indices must be int because python complains about wrong argument types:
 // it cannot convert from int to unsigned int for some reasons
@@ -348,22 +334,10 @@ class Function_wrapper : public Function<dim>,
 public:
     Function_wrapper(unsigned int n_components = 1) : Function<dim>(n_components)
     {
-
     }
 
     virtual ~Function_wrapper()
     {
-
-    }
-
-    unsigned int dimension() const
-    {
-        return Function<dim>::dimension;
-    }
-
-    unsigned int n_components() const
-    {
-        return Function<dim>::n_components;
     }
 
     double value(const Point<dim> &p, const unsigned int component = 0) const
@@ -445,6 +419,22 @@ typedef Function_wrapper<1> Function_wrapper_1D;
 typedef Function_wrapper<2> Function_wrapper_2D;
 typedef Function_wrapper<3> Function_wrapper_3D;
 
+
+template<int dim>
+ConstantFunction<dim>* ConstantFunction_init(boost::python::list l_values)
+{
+    std::vector<double> values;
+
+    for(boost::python::ssize_t i = 0; i < boost::python::len(l_values); i++)
+    {
+        double item_value = boost::python::extract<double>(l_values[i]);
+        values.push_back(item_value);
+    }
+
+    return new ConstantFunction<dim>(values);
+}
+
+
 template<int dim>
 class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<dim>,
                                            public boost::python::wrapper< dealiiFiniteElementWeakForm<dim> >
@@ -472,18 +462,27 @@ public:
         this->m_dictFunctionsDirichletBC = dictFunctionsDirichletBC;
 
         keys = dictFunctionsDirichletBC.keys();
-        for(int i = 0; i < len(keys); ++i)
+        for(int i = 0; i < len(keys); i++)
         {
-            boost::python::object key_ = keys[i];
-            boost::python::tuple  var_fn_t = boost::python::extract<boost::python::tuple>(dictFunctionsDirichletBC[key_]);
-            boost::python::object o_var = var_fn_t[0];
-            boost::python::object o_fn  = var_fn_t[1];
+            boost::python::object key_  = keys[i];
+            boost::python::list   vals_ = boost::python::extract<boost::python::list>(dictFunctionsDirichletBC[key_]);
 
-            unsigned int         key = boost::python::extract<unsigned int>(key_);
-            std::string          var = boost::python::extract<std::string>(o_var);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(o_fn);
+            unsigned int key = boost::python::extract<unsigned int>(key_);
 
-            this->m_functionsDirichletBC[key] = std::pair<std::string, const Function<dim>*>(var,fn);
+            std::vector< std::pair<std::string, const Function<dim>*> > bcs;
+            for(int k = 0; k < len(vals_); k++)
+            {
+                boost::python::tuple  t_var_fn = boost::python::extract<boost::python::tuple>(vals_[k]);
+                boost::python::object o_var = t_var_fn[0];
+                boost::python::object o_fn  = t_var_fn[1];
+
+                std::string          var = boost::python::extract<std::string>(o_var);
+                const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(o_fn);
+
+                bcs.push_back( std::pair<std::string, const Function<dim>*>(var,fn) );
+            }
+
+            this->m_functionsDirichletBC[key] = bcs;
         }
 
         keys = dictFunctions.keys();
@@ -533,43 +532,6 @@ public:
     boost::python::object m_dictFaceFi;
     boost::python::object m_dictFunctions;
     boost::python::object m_dictFunctionsDirichletBC;
-    
-//    static
-//    dealiiFiniteElementWeakFormWrapper<dim>* ConvectionDiffusionEquation(const std::string&  variableName,
-//                                                                         const std::string&  variableDescription,
-//                                                                         boost::python::dict dictFunctionsDirichletBC,
-//                                                                         boost::python::dict dictFunctionsNeumannBC,
-//                                                                         boost::python::dict dictElementBoundary = boost::python::dict(),
-//                                                                         boost::python::dict dictElementNeumann  = boost::python::dict())
-//    {
-//        /* Available functions:
-//           - feExpression
-//           - constant
-//           - phi, dphi, d2phi
-//           - phi_vec, dphi_vec, d2phi_vec
-//           - div_phi
-//           - JxW, xyz, normal
-//           - fvalue, fgrad
-//           - feExpression.sqrt, feExpression.exp, feExpression.log, feExpression.log10, feExpression.abs
-//             feExpression.sin, feExpression.cos, feExpression.tan, feExpression.asin, feExpression.acos, feExpression.atan
-//        */
-
-//        feExpression<dim> Alocal = (dphi<dim>(variableName, fe_i, fe_q) * dphi<dim>(variableName, fe_j, fe_q)) * function_value<dim>("Diffusivity", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-//        feExpression<dim> Mlocal = phi<dim>(variableName, fe_i, fe_q) * phi<dim>(variableName, fe_j, fe_q) * JxW<dim>(fe_q);
-//        feExpression<dim> Flocal = phi<dim>(variableName, fe_i, fe_q) * function_value<dim>("Generation", xyz<dim>(fe_q)) * JxW<dim>(fe_q);
-
-//        return new dealiiFiniteElementWeakFormWrapper<dim>(variableName,             // Name
-//                                                           variableDescription,      // Description
-//                                                           1,                        // Multiplicity
-//                                                           Alocal,                   // Contribution to the element stiffness matrix
-//                                                           Mlocal,                   // Contribution to the element mass matrix (dt)
-//                                                           Flocal,                   // Contribution to the element load vector (rhs)
-//                                                           dictFunctionsDirichletBC, // Functions for Dirichlet boundary conditions
-//                                                           dictFunctionsNeumannBC,   // Functions for Neumann boundary conditions
-//                                                           dictElementBoundary,      // Contribution to the element cell_matrix (but at the boundaries)
-//                                                           dictElementNeumann);      // User-defined expression for Neumann boundary conditions (overrides dictFunctionsNeumannBC)
-//    }
-
 };
 
 template<int dim>

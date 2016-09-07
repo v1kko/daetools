@@ -261,8 +261,8 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::Function_wrapper<1>, boost::noncopyable>("Function_1D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .add_property("dimension",      &daepython::Function_wrapper_1D::dimension)
-        .add_property("n_components",   &daepython::Function_wrapper_1D::n_components)
+        .def_readonly("dimension",	   &Function<1>::dimension)
+        .def_readonly("n_components",  &Function<1>::n_components)
 
         .def("value",           pure_virtual(&daepython::Function_wrapper_1D::value),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
@@ -278,8 +278,8 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::Function_wrapper<2>, boost::noncopyable>("Function_2D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .add_property("dimension",      &daepython::Function_wrapper_2D::dimension)
-        .add_property("n_components",   &daepython::Function_wrapper_2D::n_components)
+        .def_readonly("dimension",	   &Function<2>::dimension)
+        .def_readonly("n_components",  &Function<2>::n_components)
 
         .def("value",           pure_virtual(&daepython::Function_wrapper_2D::value),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
@@ -295,8 +295,8 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::Function_wrapper<3>, boost::noncopyable>("Function_3D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .add_property("dimension",      &daepython::Function_wrapper_3D::dimension)
-        .add_property("n_components",   &daepython::Function_wrapper_3D::n_components)
+        .def_readonly("dimension",	   &Function<3>::dimension)
+        .def_readonly("n_components",  &Function<3>::n_components)
 
         .def("value",           pure_virtual(&daepython::Function_wrapper_3D::value),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
@@ -311,22 +311,40 @@ BOOST_PYTHON_MODULE(pyDealII)
 
     class_<ConstantFunction<1>, bases< Function<1> >, boost::noncopyable>("ConstantFunction_1D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<1>, default_call_policies(), ( arg("values") ) ))
     ;
     class_<ConstantFunction<2>, bases< Function<2> >, boost::noncopyable>("ConstantFunction_2D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<2>, default_call_policies(), ( arg("values") ) ))
     ;
     class_<ConstantFunction<3>, bases< Function<3> >, boost::noncopyable>("ConstantFunction_3D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<3>, default_call_policies(), ( arg("values") ) ))
     ;
 
-    class_<ZeroFunction<1>, boost::noncopyable>("ZeroFunction_1D", no_init)
+    class_<ZeroFunction<1>, bases< Function<1> >, boost::noncopyable>("ZeroFunction_1D", no_init)
         .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
     ;
-    class_<ZeroFunction<2>, boost::noncopyable>("ZeroFunction_2D", no_init)
+    class_<ZeroFunction<2>, bases< Function<2> >, boost::noncopyable>("ZeroFunction_2D", no_init)
         .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
     ;
-    class_<ZeroFunction<3>, boost::noncopyable>("ZeroFunction_3D", no_init)
+    class_<ZeroFunction<3>, bases< Function<3> >, boost::noncopyable>("ZeroFunction_3D", no_init)
         .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
+    ;
+
+    class_<ComponentSelectFunction<1>, bases< Function<1> >, boost::noncopyable>("ComponentSelectFunction_1D", no_init)
+        .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
+        .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
+    ;
+
+    class_<ComponentSelectFunction<2>, bases< Function<2> >, boost::noncopyable>("ComponentSelectFunction_2D", no_init)
+        .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
+        .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
+    ;
+
+    class_<ComponentSelectFunction<3>, bases< Function<3> >, boost::noncopyable>("ComponentSelectFunction_3D", no_init)
+        .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
+        .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
     ;
 
 
@@ -499,149 +517,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<QGaussOneOverR<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussOneOverR_3D", no_init)
         .def(init<const unsigned int, const Point<3>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
     ;
-    */
-
-    class_<FEValuesBase<1>, boost::noncopyable>("FEValuesBase_1D", no_init)
-        .def("shape_value",             &FEValuesBase<1>::shape_value,              return_value_policy<copy_const_reference>())
-        .def("shape_value_component",	&FEValuesBase<1>::shape_value_component)
-        .def("shape_grad",              &FEValuesBase<1>::shape_grad,               return_internal_reference<>())
-        .def("shape_grad_component",	&FEValuesBase<1>::shape_grad_component)
-        .def("shape_hessian",           &FEValuesBase<1>::shape_hessian,            return_internal_reference<>())
-        .def("shape_hessian_component",	&FEValuesBase<1>::shape_hessian_component)
-        .def("get_quadrature_points",	&FEValuesBase<1>::get_quadrature_points,    return_internal_reference<>())
-        .def("get_JxW_values",          &FEValuesBase<1>::get_JxW_values,           return_internal_reference<>())
-        .def("quadrature_point",        &FEValuesBase<1>::quadrature_point,         return_internal_reference<>())
-        .def("JxW",                     &FEValuesBase<1>::JxW)
-        .def("normal_vector",           &FEValuesBase<1>::normal_vector,            return_internal_reference<>())
-    ;
-
-    class_<FEValuesBase<2>, boost::noncopyable>("FEValuesBase_2D", no_init)
-        .def("shape_value",             &FEValuesBase<2>::shape_value,              return_value_policy<copy_const_reference>())
-        .def("shape_value_component",	&FEValuesBase<2>::shape_value_component)
-        .def("shape_grad",              &FEValuesBase<2>::shape_grad,               return_internal_reference<>())
-        .def("shape_grad_component",	&FEValuesBase<2>::shape_grad_component)
-        .def("shape_hessian",           &FEValuesBase<2>::shape_hessian,            return_internal_reference<>())
-        .def("shape_hessian_component",	&FEValuesBase<2>::shape_hessian_component)
-        .def("get_quadrature_points",	&FEValuesBase<2>::get_quadrature_points,    return_internal_reference<>())
-        .def("get_JxW_values",          &FEValuesBase<2>::get_JxW_values,           return_internal_reference<>())
-        .def("quadrature_point",        &FEValuesBase<2>::quadrature_point,         return_internal_reference<>())
-        .def("JxW",                     &FEValuesBase<2>::JxW)
-        .def("normal_vector",           &FEValuesBase<2>::normal_vector,            return_internal_reference<>())
-    ;
-
-    class_<FEValuesBase<3>, boost::noncopyable>("FEValuesBase_3D", no_init)
-        .def("shape_value",             &FEValuesBase<3>::shape_value,              return_value_policy<copy_const_reference>())
-        .def("shape_value_component",	&FEValuesBase<3>::shape_value_component)
-        .def("shape_grad",              &FEValuesBase<3>::shape_grad,               return_internal_reference<>())
-        .def("shape_grad_component",	&FEValuesBase<3>::shape_grad_component)
-        .def("shape_hessian",           &FEValuesBase<3>::shape_hessian,            return_internal_reference<>())
-        .def("shape_hessian_component",	&FEValuesBase<3>::shape_hessian_component)
-        .def("get_quadrature_points",	&FEValuesBase<3>::get_quadrature_points,    return_internal_reference<>())
-        .def("get_JxW_values",          &FEValuesBase<3>::get_JxW_values,           return_internal_reference<>())
-        .def("quadrature_point",        &FEValuesBase<3>::quadrature_point,         return_internal_reference<>())
-        .def("JxW",                     &FEValuesBase<3>::JxW)
-        .def("normal_vector",           &FEValuesBase<3>::normal_vector,            return_internal_reference<>())
-    ;
-
-
-    class_<FEValues<1>, bases< FEValuesBase<1> >, boost::noncopyable>("FEValues_1D", no_init)
-    ;
-    class_<FEValues<2>, bases< FEValuesBase<2> >, boost::noncopyable>("FEValues_2D", no_init)
-    ;
-    class_<FEValues<3>, bases< FEValuesBase<3> >, boost::noncopyable>("FEValues_3D", no_init)
-    ;
-
-    class_<FEFaceValues<1>, bases< FEValuesBase<1> >, boost::noncopyable>("FEFaceValues_1D", no_init)
-    ;
-    class_<FEFaceValues<2>, bases< FEValuesBase<2> >, boost::noncopyable>("FEFaceValues_2D", no_init)
-    ;
-    class_<FEFaceValues<3>, bases< FEValuesBase<3> >, boost::noncopyable>("FEFaceValues_3D", no_init)
-    ;
-
-    class_<dealiiFace<1>, boost::noncopyable>("dealiiFace_1D", no_init)
-        .add_property("fe_values",     make_function(&dealiiFace_1D::get_fe_values, return_internal_reference<>()))
-        .add_property("n_q_points",    &dealiiFace_1D::get_n_q_points)
-        .add_property("at_boundary",   &dealiiFace_1D::get_at_boundary)
-        .add_property("boundary_id",   &dealiiFace_1D::get_boundary_id)
-    ;
-
-    class_<dealiiFace<2>, boost::noncopyable>("dealiiFace_2D", no_init)
-        .add_property("fe_values",     make_function(&dealiiFace_2D::get_fe_values, return_internal_reference<>()))
-        .add_property("n_q_points",    &dealiiFace_2D::get_n_q_points)
-        .add_property("at_boundary",   &dealiiFace_2D::get_at_boundary)
-        .add_property("boundary_id",   &dealiiFace_2D::get_boundary_id)
-    ;
-
-    class_<dealiiFace<3>, boost::noncopyable>("dealiiFace_3D", no_init)
-        .add_property("fe_values",     make_function(&dealiiFace_3D::get_fe_values, return_internal_reference<>()))
-        .add_property("n_q_points",    &dealiiFace_3D::get_n_q_points)
-        .add_property("at_boundary",   &dealiiFace_3D::get_at_boundary)
-        .add_property("boundary_id",   &dealiiFace_3D::get_boundary_id)
-    ;
-
-    class_<dealiiCell<1>, boost::noncopyable>("dealiiCell_1D", no_init)
-        .def_readonly("dofs_per_cell",      &dealiiCell_1D::dofs_per_cell)
-        .def_readonly("faces_per_cell",     &dealiiCell_1D::faces_per_cell)
-        .def_readonly("n_q_points",         &dealiiCell_1D::n_q_points)
-        .def_readonly("n_face_q_points",    &dealiiCell_1D::n_face_q_points)
-        .def_readonly("local_dof_indices",  &dealiiCell_1D::local_dof_indices)
-        .def_readonly("fe_values",          &dealiiCell_1D::fe_values)
-        .def_readonly("cell_matrix",        &dealiiCell_1D::cell_matrix)
-        .def_readonly("cell_matrix_dt",     &dealiiCell_1D::cell_matrix_dt)
-        .def_readonly("cell_rhs",           &dealiiCell_1D::cell_rhs)
-        .add_property("system_matrix",      make_function(&dealiiCell_1D::get_system_matrix,    return_internal_reference<>()))
-        .add_property("system_matrix_dt",   make_function(&dealiiCell_1D::get_system_matrix_dt, return_internal_reference<>()))
-        .add_property("system_rhs",         make_function(&dealiiCell_1D::get_system_rhs,       return_internal_reference<>()))
-        .add_property("faces",              range< return_value_policy<reference_existing_object> >(&dealiiCell_1D::begin_faces, &dealiiCell_1D::end_faces))
-    ;
-
-    class_<dealiiCell<2>, boost::noncopyable>("dealiiCell_2D", no_init)
-        .def_readonly("dofs_per_cell",      &dealiiCell_2D::dofs_per_cell)
-        .def_readonly("faces_per_cell",     &dealiiCell_2D::faces_per_cell)
-        .def_readonly("n_q_points",         &dealiiCell_2D::n_q_points)
-        .def_readonly("n_face_q_points",    &dealiiCell_2D::n_face_q_points)
-        .def_readonly("local_dof_indices",  &dealiiCell_2D::local_dof_indices)
-        .def_readonly("fe_values",          &dealiiCell_2D::fe_values)
-        .def_readonly("cell_matrix",        &dealiiCell_2D::cell_matrix)
-        .def_readonly("cell_matrix_dt",     &dealiiCell_2D::cell_matrix_dt)
-        .def_readonly("cell_rhs",           &dealiiCell_2D::cell_rhs)
-        .add_property("system_matrix",      make_function(&dealiiCell_2D::get_system_matrix,    return_internal_reference<>()))
-        .add_property("system_matrix_dt",   make_function(&dealiiCell_2D::get_system_matrix_dt, return_internal_reference<>()))
-        .add_property("system_rhs",         make_function(&dealiiCell_2D::get_system_rhs,       return_internal_reference<>()))
-        .add_property("faces",              range< return_value_policy<reference_existing_object> >(&dealiiCell_2D::begin_faces, &dealiiCell_2D::end_faces))
-    ;
-
-    class_<dealiiCell<3>, boost::noncopyable>("dealiiCell_3D", no_init)
-        .def_readonly("dofs_per_cell",      &dealiiCell_3D::dofs_per_cell)
-        .def_readonly("faces_per_cell",     &dealiiCell_3D::faces_per_cell)
-        .def_readonly("n_q_points",         &dealiiCell_3D::n_q_points)
-        .def_readonly("n_face_q_points",    &dealiiCell_3D::n_face_q_points)
-        .def_readonly("local_dof_indices",  &dealiiCell_3D::local_dof_indices)
-        .def_readonly("fe_values",          &dealiiCell_3D::fe_values)
-        .def_readonly("cell_matrix",        &dealiiCell_3D::cell_matrix)
-        .def_readonly("cell_matrix_dt",     &dealiiCell_3D::cell_matrix_dt)
-        .def_readonly("cell_rhs",           &dealiiCell_3D::cell_rhs)
-        .add_property("system_matrix",      make_function(&dealiiCell_3D::get_system_matrix,    return_internal_reference<>()))
-        .add_property("system_matrix_dt",   make_function(&dealiiCell_3D::get_system_matrix_dt, return_internal_reference<>()))
-        .add_property("system_rhs",         make_function(&dealiiCell_3D::get_system_rhs,       return_internal_reference<>()))
-        .add_property("faces",              range< return_value_policy<reference_existing_object> >(&dealiiCell_3D::begin_faces, &dealiiCell_3D::end_faces))
-    ;
-
-    class_< feCellContext<1>, boost::noncopyable>("feCellContext_1D", no_init)
-    ;
-    class_< feCellContext<2>, boost::noncopyable>("feCellContext_2D", no_init)
-    ;
-    class_< feCellContext<3>, boost::noncopyable>("feCellContext_3D", no_init)
-    ;
-
-    /*
-    def("getDummyCellContext_1D", &getDummyCellContext<1>, return_value_policy<manage_new_object>());
-    def("getDummyCellContext_2D", &getDummyCellContext<2>, return_value_policy<manage_new_object>());
-    def("getDummyCellContext_3D", &getDummyCellContext<3>, return_value_policy<manage_new_object>());
-
-    def("Evaluate_1D", &Evaluate<1>);
-    def("Evaluate_2D", &Evaluate<2>);
-    def("Evaluate_3D", &Evaluate<3>);
     */
 
     class_< feRuntimeNumber<1> >("feRuntimeNumber_1D", no_init)

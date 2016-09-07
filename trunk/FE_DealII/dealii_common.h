@@ -47,11 +47,11 @@ typedef Point<2, double> Point_2D;
 typedef Point<3, double> Point_3D;
 
 // Used in NeumannBC to choose between a constant flux and gradient
-enum dealiiFluxType
-{
-    eConstantFlux = 0,
-    eGradientFlux
-};
+//enum dealiiFluxType
+//{
+//    eConstantFlux = 0,
+//    eGradientFlux
+//};
 
 /*********************************************************
  * daeFEMatrix

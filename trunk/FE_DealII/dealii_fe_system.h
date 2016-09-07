@@ -294,24 +294,25 @@ template <int dim>
 class dealiiFiniteElementWeakForm
 {
 public:
-    typedef typename std::map<unsigned int, const Function<dim>*>                          map_Uint_FunctionPtr;
-    typedef typename std::map<unsigned int, std::pair<std::string, const Function<dim>*> > map_Uint_String_FunctionPtr;
-    typedef typename std::map<unsigned int, feExpression<dim> >                            map_Uint_Expression;
-    typedef typename std::map<std::string,  const Function<dim>*>                          map_String_FunctionPtr;
+    typedef typename std::map<unsigned int, const Function<dim>*>                  map_Uint_FunctionPtr;
+    typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
+    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
+    typedef typename std::map<unsigned int, feExpression<dim> >                    map_Uint_Expression;
+    typedef typename std::map<std::string,  const Function<dim>*>                  map_String_FunctionPtr;
 
     dealiiFiniteElementWeakForm()
     {
     }
 
 public:
-    bool                                m_bNeedsUpdate;
-    feExpression<dim>                   m_Aij;  // Stiffness matrix
-    feExpression<dim>                   m_Mij;  // Mass matrix (dt)
-    feExpression<dim>                   m_Fi;   // Load vector (rhs)
-    map_Uint_Expression                 m_faceAij;
-    map_Uint_Expression                 m_faceFi;
-    map_String_FunctionPtr              m_functions;
-    map_Uint_String_FunctionPtr         m_functionsDirichletBC;
+    bool                                    m_bNeedsUpdate;
+    feExpression<dim>                       m_Aij;  // Stiffness matrix
+    feExpression<dim>                       m_Mij;  // Mass matrix (dt)
+    feExpression<dim>                       m_Fi;   // Load vector (rhs)
+    map_Uint_Expression                     m_faceAij;
+    map_Uint_Expression                     m_faceFi;
+    map_String_FunctionPtr                  m_functions;
+    map_Uint_vector_pair_String_FunctionPtr m_functionsDirichletBC;
 };
 
 /******************************************************************
@@ -321,8 +322,8 @@ template <int dim>
 class dealiiFiniteElementSystem : public daeFiniteElementObject
 {
 typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
-typedef typename std::map<unsigned int, std::pair<std::string, const Function<dim>*> > map_Uint_String_FunctionPtr;
-typedef typename std::map<unsigned int, std::pair<const Function<dim>*, dealiiFluxType> > map_Uint_FunctionPtr_FunctionCall;
+typedef typename std::pair<std::string, const Function<dim>*> pair_String_FunctionPtr;
+typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
 typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
 typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
 typedef typename std::vector< dealiiFiniteElementDOF<dim>* > vector_DOFs;
@@ -730,28 +731,36 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     //hanging_node_constraints.condense(system_matrix_dt);
 
     // Apply Dirichlet boundary conditions on the system matrix and rhs
-    for(typename map_Uint_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
+    typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
+    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
+    for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
     {
-        const unsigned int   id           =  it->first;
-        const std::string    variableName = (it->second).first;
-        const Function<dim>& fun          = *(it->second).second;
+        const unsigned int   id                         = it->first;
+        const std::vector<pair_String_FunctionPtr>& bcs = it->second;
 
-        typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
-        if(iter == mapComponentMasks.end())
-            throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
+        for(int k = 0; k < bcs.size(); k++)
+        {
+            pair_String_FunctionPtr p = bcs[k];
+            const std::string    variableName =  p.first;
+            const Function<dim>& fun          = *p.second;
 
-        std::cout << "Setting DirichletBC at id: " << id << " for variable " << variableName << " with sample value at point (0,0,0): " << fun.value(Point<dim>(0,0,0)) << std::endl;
+            typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
+            if(iter == mapComponentMasks.end())
+                throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
 
-        std::map<types::global_dof_index, double> boundary_values;
-        VectorTools::interpolate_boundary_values (dof_handler,
-                                                  id,
-                                                  fun,
-                                                  boundary_values,
-                                                  iter->second);
-        MatrixTools::apply_boundary_values (boundary_values,
-                                            system_matrix,
-                                            solution,
-                                            system_rhs);
+            std::cout << "Setting DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
+
+            std::map<types::global_dof_index, double> boundary_values;
+            VectorTools::interpolate_boundary_values (dof_handler,
+                                                      id,
+                                                      fun,
+                                                      boundary_values,
+                                                      iter->second);
+            MatrixTools::apply_boundary_values (boundary_values,
+                                                system_matrix,
+                                                solution,
+                                                system_rhs);
+        }
     }
 }
 
