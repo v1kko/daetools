@@ -413,7 +413,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<QGaussLobatto<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussLobatto_3D", no_init)
         .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
     ;
-    /*
+
     class_<QMidpoint<0>, bases< Quadrature<0> >, boost::noncopyable>("QMidpoint_0D", no_init)
         .def(init<>((arg("self"))))
     ;
@@ -480,23 +480,23 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_<QGaussLog<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLog_0D", no_init)
-        .def(init<const unsigned int, optional<bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
+        .def(init<const unsigned int, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
     ;
     class_<QGaussLog<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLog_1D", no_init)
-        .def(init<const unsigned int, bool>((arg("self"), arg("n_quadrature_points"), arg("revert"))))
+        .def(init<const unsigned int, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
     ;
     class_<QGaussLog<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussLog_2D", no_init)
-        .def(init<const unsigned int, optional<bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
+        .def(init<const unsigned int, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
     ;
     class_<QGaussLog<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussLog_3D", no_init)
-        .def(init<const unsigned int, optional<bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
+        .def(init<const unsigned int, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("revert") = false)))
     ;
 
     class_<QGaussLogR<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLogR_0D", no_init)
         .def(init<const unsigned int, optional<const Point<0>, const double, const bool> >((arg("self"), arg("n_quadrature_points"), arg("x0") = Point<0>(), arg("alpha") = 1.0, arg("factor_out_singular_weight") = false)))
     ;
     class_<QGaussLogR<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLogR_1D", no_init)
-        .def(init<const unsigned int, const Point<1>, const double, const bool>((arg("self"), arg("n_quadrature_points"), arg("x0"), arg("alpha"), arg("factor_out_singular_weight"))))
+        .def(init<const unsigned int, optional<const Point<1>, const double, const bool> >((arg("self"), arg("n_quadrature_points"), arg("x0") = Point<2>(), arg("alpha") = 1.0, arg("factor_out_singular_weight") = false)))
     ;
     class_<QGaussLogR<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussLogR_2D", no_init)
         .def(init<const unsigned int, optional<const Point<2>, const double, const bool> >((arg("self"), arg("n_quadrature_points"), arg("x0") = Point<2>(), arg("alpha") = 1.0, arg("factor_out_singular_weight") = false)))
@@ -512,12 +512,38 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const unsigned int, const Point<1>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
     ;
     class_<QGaussOneOverR<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussOneOverR_2D", no_init)
-        .def(init<const unsigned int, const Point<2>, const bool>((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight"))))
+        .def(init<const unsigned int, const Point<2>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
     ;
     class_<QGaussOneOverR<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussOneOverR_3D", no_init)
         .def(init<const unsigned int, const Point<3>, optional<const bool> >((arg("self"), arg("n_quadrature_points"), arg("singularity"), arg("factor_out_singular_weight") = false)))
     ;
-    */
+
+    class_<QGaussChebyshev<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussChebyshev_0D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussChebyshev<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussChebyshev_1D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussChebyshev<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussChebyshev_2D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussChebyshev<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussChebyshev_3D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+
+    class_<QGaussLobattoChebyshev<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLobattoChebyshev_0D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussLobattoChebyshev<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLobattoChebyshev_1D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussLobattoChebyshev<2>, bases< Quadrature<2> >, boost::noncopyable>("QGaussLobattoChebyshev_2D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+    class_<QGaussLobattoChebyshev<3>, bases< Quadrature<3> >, boost::noncopyable>("QGaussLobattoChebyshev_3D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
+
 
     class_< feRuntimeNumber<1> >("feRuntimeNumber_1D", no_init)
         .def("__str__",   &feRuntimeNumber<1>::ToString)
