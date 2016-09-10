@@ -1341,14 +1341,15 @@ compile_dealii()
   make expand_instantiations_exe
   make -j${Ncpu} install
   
-  if [ ${PLATFORM} = "Darwin" ]; then
-    cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
-  elif [ ${PLATFORM} = "Linux" ]; then
-    cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
-  else
-    echo "..."
-  fi
-
+  # Nota bene:
+  #   No need to copy anything since we are producing a static lib (.a)
+  #if [ ${PLATFORM} = "Darwin" ]; then
+  #  cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
+  #elif [ ${PLATFORM} = "Linux" ]; then
+  #  cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
+  #else
+  #  echo "..."
+  #fi
   cd "${TRUNK}"
 }
 
