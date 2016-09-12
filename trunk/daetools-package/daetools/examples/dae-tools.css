@@ -117,6 +117,10 @@ tfoot td {
 /* end - table */
 
 
+.MathJax {
+    font-size: 9pt;
+}
+
 /***********************
       LAYOUT
 ************************/

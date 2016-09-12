@@ -3335,7 +3335,8 @@ protected:
 	void SetJacobianItem(size_t nEquationIndex, size_t nVariableIndex, real_t dJacobValue, daeBlock* pBlock);
 	
 	void SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const;
-    
+    void SaveNodeAsLatex(io::xmlTag_t* pTag, const string& strObjectName) const;
+
 protected:
 	real_t												m_dScaling;
     bool                                                m_bCheckUnitsConsistency;
@@ -3584,9 +3585,9 @@ protected:
     daeDomain                               m_omega;
     daePtrVector<daeDomain*>                m_ptrarrFESubDomains;
     daePtrVector<daeVariable*>              m_ptrarrFEVariables;
-    boost::shared_ptr< daeMatrix<double> >  m_Aij; // Stiffness matrix
-    boost::shared_ptr< daeMatrix<double> >  m_Mij; // Mass matrix
-    boost::shared_ptr< daeArray<double>  >  m_Fi;  // Load vector
+    boost::shared_ptr< daeMatrix<double> > m_Aij; // Stiffness matrix
+    boost::shared_ptr< daeMatrix<double> > m_Mij; // Mass matrix
+    boost::shared_ptr< daeArray<double> >  m_Fi;  // Load vector
 
     friend class daeFiniteElementEquation;
 };

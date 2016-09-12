@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "xmlfunctions.h"
 #include "helpers.h"
+#include <boost/algorithm/string/replace.hpp>
 
 namespace dae 
 {
@@ -701,6 +702,41 @@ string textCreator::PartialDerivative(size_t order,
 /*********************************************************************************************
     latexCreator
 *********************************************************************************************/
+inline std::string greek_html_to_latex(std::string str)
+{
+    std::string greek_names_latex[41] = {
+    "\\alpha",        "\\theta",       "\\o",           "\\tau",
+    "\\beta",         "\\vartheta",    "\\pi",          "\\upsilon",
+    "\\gamma",        "\\gamma",       "\\varpi",       "\\phi",
+    "\\delta",        "\\kappa",       "\\rho",         "\\varphi",
+    "\\epsilon",      "\\lambda",      "\\varrho",      "\\chi",
+    "\\varepsilon",   "\\mu",          "\\sigma",       "\\psi",
+    "\\zeta",         "\\nu",          "\\varsigma",    "\\omega",
+    "\\eta",          "\\xi",
+
+    "\\Gamma",        "\\Lambda",      "\\Sigma",       "\\Psi",
+    "\\Delta",        "\\Xi",          "\\Upsilon",     "\\Omega",
+    "\\Theta",        "\\Pi",          "\\Phi"};
+
+    std::string greek_names_html[41] = {
+    "&alpha;",        "&theta;",       "&omicron;",     "&tau;",
+    "&beta;",         "&thetasym;",    "&pi;",          "&upsilon;",
+    "&gamma;",        "&gamma;",       "&pi;",       "&phi;",
+    "&delta;",        "&kappa;",       "&rho;",         "&phi;",
+    "&epsilon;",      "&lambda;",      "&rho;",      "&chi;",
+    "&epsilon;",      "&mu;",          "&sigma;",       "&psi;",
+    "&zeta;",         "&nu;",          "&sigmaf;",      "&omega;",
+    "&eta;",          "&xi;",
+
+    "&Gamma;",        "&Lambda;",      "&Sigma;",       "&Psi;",
+    "&Delta;",        "&Xi;",          "&Upsilon;",     "&Omega;",
+    "&Theta;",        "&Pi;",          "&Phi;"};
+
+    for(int i = 0; i < 41; i++)
+        boost::replace_all(str, greek_names_html[i], greek_names_latex[i]);
+    return str;
+}
+
 string latexCreator::Constant(real_t value)
 {
 	string strResult;
@@ -726,7 +762,7 @@ string latexCreator::Variable(string name,
 {
 	string strResult;
 	strResult  = "{ ";
-	strResult += name;
+    strResult += greek_html_to_latex(name);
 	if(domains.size() > 0)
 	{
 		strResult += " \\left( ";
@@ -735,7 +771,7 @@ string latexCreator::Variable(string name,
 		{
 			if(i != 0)
 				strResult += ", ";
-			strResult += domains[i];
+            strResult += greek_html_to_latex(domains[i]);
 		}
 		strResult += " } ";
 		strResult += "\\right)";
@@ -749,8 +785,8 @@ string latexCreator::Domain(string name,
 {
 	string strResult;
 	strResult  = "{ ";
-		strResult += name;
-		strResult += " \\left( ";
+        strResult += greek_html_to_latex(name);
+        strResult += " \\left( ";
 			strResult += strIndex;
 		strResult += " \\right) ";
 	strResult  += " } ";
@@ -773,7 +809,7 @@ string latexCreator::TimeDerivative(size_t order,
 			
 			if(bBracketsAroundName)
 				strResult += "\\left( ";
-			strResult += name;
+            strResult += greek_html_to_latex(name);
 			if(bBracketsAroundName)
 				strResult += " \\right)";
 
@@ -785,7 +821,7 @@ string latexCreator::TimeDerivative(size_t order,
 				{
 					if(i != 0)
 						strResult += ", ";
-					strResult += domains[i];
+                    strResult += greek_html_to_latex(domains[i]);
 				}
 				strResult += "} "; // Indexes
 				strResult += "\\right)";
@@ -822,7 +858,7 @@ string latexCreator::PartialDerivative(size_t order,
 
 			if(bBracketsAroundName)
 				strResult += "\\left( ";
-			strResult += name;
+            strResult += greek_html_to_latex(name);
 			if(bBracketsAroundName)
 				strResult += " \\right)";
 
@@ -834,7 +870,7 @@ string latexCreator::PartialDerivative(size_t order,
 				{
 					if(i != 0)
 						strResult += ", ";
-					strResult += domains[i];
+                    strResult += greek_html_to_latex(domains[i]);
 				}
 				strResult += "} "; // Indexes
 				strResult += "\\right)";
@@ -846,7 +882,7 @@ string latexCreator::PartialDerivative(size_t order,
 		strResult += "\\over ";
 
 		strResult += "{ \\partial {";
-		strResult += domain;
+        strResult += greek_html_to_latex(domain);
 		strResult += (order == 1 ? "" : " ^2");
 		strResult += "} } ";
 

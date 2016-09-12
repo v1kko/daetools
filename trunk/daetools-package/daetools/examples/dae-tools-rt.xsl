@@ -4,6 +4,8 @@
     <html>
       <head>
         <link rel="stylesheet" href="dae-tools.css" type="text/css" media="all" />
+        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
         <title>
             DAE Tools (www.daetools.com) Model Report: <xsl:value-of select="Model/Name"/>
         </title>
@@ -508,7 +510,7 @@
               </p>
 
               <p style="padding-left:15px">
-                 <xsl:copy-of select="MathML"/>
+                 <xsl:copy-of select="Residual"/>
                  <br></br>
                 
                  <i>     
@@ -536,7 +538,7 @@
 
           <xsl:for-each select="Object">
              <p>
-                <xsl:copy-of select="MathML"/>
+                <xsl:copy-of select="EquationEvaluationNode"/>
                 <br/>
                 Equation is: 
                 <xsl:if test="IsLinear = 'True'">

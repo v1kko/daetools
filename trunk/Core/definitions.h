@@ -557,16 +557,15 @@ class daeFiniteElementObject
 public:
     virtual ~daeFiniteElementObject() {}
 
-    virtual void                        AssembleSystem()   = 0;
-    virtual bool                        NeedsReAssembling() = 0;
-    virtual void                        ReAssembleSystem() = 0;
+    virtual void AssembleSystem()   = 0;
+    virtual bool NeedsReAssembling() = 0;
+    virtual void ReAssembleSystem() = 0;
 
-    virtual void                        RowIndices(unsigned int row,
-                                                   std::vector<unsigned int>& narrIndices) const = 0;
+    virtual void RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const = 0;
 
     virtual dae::daeMatrix<real_t>*     Asystem() const = 0;
     virtual dae::daeMatrix<real_t>*     Msystem() const = 0;
-    virtual dae::daeArray<real_t>*      Fload() const = 0;
+    virtual dae::daeArray<real_t>*      Fload()   const = 0;
 
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const = 0;
 };

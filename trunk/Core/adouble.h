@@ -569,6 +569,11 @@ public:
                                      const adNode* node,
                                      const daeNodeSaveAsContext* c,
                                      bool bAppendEqualToZero = false);
+    static void		SaveNodeAsLatex(io::xmlTag_t* pTag,
+                                    const string& strObjectName,
+                                    const adNode* node,
+                                    const daeNodeSaveAsContext* c,
+                                    bool bAppendEqualToZero = false);
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
 };
 

@@ -126,8 +126,9 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 	daeNodeSaveAsContext c(NULL); //m_pModel);
 
 	strName = "EquationEvaluationNode";
-	adNode::SaveNodeAsMathML(pTag, string("MathML"), m_EquationEvaluationNode.get(), &c, true);
-	
+    //adNode::SaveNodeAsMathML(pTag, strName, m_EquationEvaluationNode.get(), &c, true);
+    adNode::SaveNodeAsLatex(pTag, strName, m_EquationEvaluationNode.get(), &c, true);
+
 	strName = "IsLinear";
 	pTag->Save(strName, m_EquationEvaluationNode->IsLinear());
 }
@@ -915,8 +916,9 @@ void daeEquation::Save(io::xmlTag_t* pTag) const
     strName = "Expression";
     adNode::SaveNode(pTag, strName, m_pResidualNode.get());
 
-    strName = "MathML";
-    SaveNodeAsMathML(pTag, strName);
+    strName = "Residual";
+    //SaveNodeAsMathML(pTag, strName);
+    SaveNodeAsLatex(pTag, strName);
 
 	strName = "DistributedDomainInfos";
 	pTag->SaveObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
@@ -1056,14 +1058,106 @@ void daeEquation::SaveRuntime(io::xmlTag_t* pTag) const
 //	strName = "EquationEvaluationMode";
 //	SaveEnum(pTag, strName, m_eEquationEvaluationMode);
 
-	strName = "MathML";
-	SaveNodeAsMathML(pTag, strName);
+    strName = "Residual";
+    //SaveNodeAsMathML(pTag, strName);
+    SaveNodeAsLatex(pTag, strName);
 
 //	strName = "DistributedDomainInfos";
 //	pTag->SaveRuntimeObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
 			
 	strName = "EquationExecutionInfos";
 	pTag->SaveRuntimeObjectArray(strName, m_ptrarrEquationExecutionInfos);
+}
+
+void daeEquation::SaveNodeAsLatex(io::xmlTag_t* pTag, const string& strObjectName) const
+{
+    string strValue, strDEDI, strDomain;
+    daeNodeSaveAsContext c(m_pModel);
+    adNode* node = m_pResidualNode.get();
+
+    io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
+    if(!pChildTag)
+        daeDeclareAndThrowException(exXMLIOError);
+
+    strValue  = "$$";
+    strValue += node->SaveAsLatex(&c);
+    strValue += " = 0";
+
+    if(m_ptrarrDistributedEquationDomainInfos.size() > 0)
+    {
+        strValue += "; ";
+
+        for(size_t i = 0; i < m_ptrarrDistributedEquationDomainInfos.size(); i++)
+        {
+            daeDEDI* pDedi = m_ptrarrDistributedEquationDomainInfos[i];
+            if(!pDedi)
+                daeDeclareAndThrowException(exXMLIOError);
+
+            if(i != 0)
+                strValue += ", ";
+
+            std::vector<string> empty;
+            strDEDI   = dae::xml::latexCreator::Variable(pDedi->GetName(), empty);
+            strDomain = dae::xml::latexCreator::Variable(pDedi->GetDomain()->GetName(), empty);
+
+            if(pDedi->m_eDomainBounds == eLowerBound ||
+               pDedi->m_eDomainBounds == eUpperBound)
+            {
+                if(pDedi->m_eDomainBounds == eLowerBound)
+                {
+                    strValue += (boost::format("{%s = %s_{0}}") % strDEDI % strDomain).str();
+                }
+                else
+                {
+                    strValue += (boost::format("{%s = %s_{n}}") % strDEDI % strDomain).str();
+                }
+            }
+            else
+            {
+                if(pDedi->m_eDomainBounds == eOpenOpen)
+                {
+                    strValue += (boost::format("{\\forall %s \\in \\left( %s_{0}, %s_{n} \\right) }") % strDEDI % strDomain % strDomain).str();
+                }
+                else if(pDedi->m_eDomainBounds == eOpenClosed)
+                {
+                    strValue += (boost::format("{\\forall %s \\in \\left( %s_{0}, %s_{n} \\right] }") % strDEDI % strDomain % strDomain).str();
+                }
+                else if(pDedi->m_eDomainBounds == eClosedOpen)
+                {
+                    strValue += (boost::format("{\\forall %s \\in \\left[ %s_{0}, %s_{n} \\right) }") % strDEDI % strDomain % strDomain).str();
+                }
+                else if(pDedi->m_eDomainBounds == eClosedClosed)
+                {
+                    strValue += (boost::format("{\\forall %s \\in \\left[ %s_{0}, %s_{n} \\right] }") % strDEDI % strDomain % strDomain).str();
+                }
+                else if(pDedi->m_eDomainBounds == eFunctor)
+                {
+                    daeDeclareAndThrowException(exXMLIOError);
+                }
+                else if(pDedi->m_eDomainBounds == eCustomBound)
+                {
+                    std::string strPoints;
+                    vector<size_t> narrPoints;
+                    pDedi->GetDomainPoints(narrPoints);
+                    for(size_t k = 0; k < narrPoints.size(); k++)
+                    {
+                        if(k != 0)
+                            strPoints += ",";
+
+                        strPoints += toString<size_t>(narrPoints[k]);
+                    }
+                    strValue += (boost::format("{\\forall %s \\in \\left{ %s \\right} }") % strDEDI % strPoints).str();
+                }
+                else
+                {
+                    daeDeclareAndThrowException(exXMLIOError);
+                }
+            }
+        }
+    }
+
+    strValue += "$$";
+    pChildTag->SetValue(strValue);
 }
 
 void daeEquation::SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName) const

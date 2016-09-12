@@ -292,7 +292,27 @@ adNode* adNode::OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::da
 	return node;
 }
 
-void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag, 
+void adNode::SaveNodeAsLatex(io::xmlTag_t* pTag,
+                             const string& strObjectName,
+                             const adNode* node,
+                             const daeNodeSaveAsContext* c,
+                             bool bAppendEqualToZero)
+{
+    string strValue;
+    io::xmlTag_t* pChildTag = pTag->AddTag(strObjectName);
+    if(!pChildTag)
+        daeDeclareAndThrowException(exXMLIOError);
+
+    strValue  = "$$";
+    strValue += node->SaveAsLatex(c);
+    if(bAppendEqualToZero)
+        strValue += " = 0";
+    strValue += "$$";
+
+    pChildTag->SetValue(strValue);
+}
+
+void adNode::SaveNodeAsMathML(io::xmlTag_t* pTag,
 							  const string& strObjectName, 
 							  const adNode* node,
 							  const daeNodeSaveAsContext* c,
@@ -3404,7 +3424,7 @@ string adBinaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 		break;
 	case eMulti:
 		strResult += strLeft;
-		strResult += " \\times ";
+        strResult += " \\cdot ";
 		strResult += strRight;
 		break;
 	case eDivide:
