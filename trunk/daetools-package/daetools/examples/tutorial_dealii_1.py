@@ -100,6 +100,8 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         m_dt = self.m.fe_dealII.Msystem()
+        m_Aij = self.m.fe_dealII.Asystem()
+        #m_Fi = self.m.fe_dealII.Fload()
         
         # Vector where every item marks the boundar
         #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
@@ -122,10 +124,21 @@ class simTutorial(daeSimulation):
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
             for column in self.m.fe_dealII.RowIndices(row):
-                if m_dt(row, column) != 0:
+                if m_dt(row, column).Node or m_dt(row, column).Value != 0:
                     variable, index, ic = dofIndexesMap[column]
                     variable.SetInitialCondition(index, ic)
                     #print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
+
+        #fi_values = []
+        #for row in range(m_Aij.n):
+        #    print('row = %d' % row)
+        #    #fi_values.append(m_Fi[row])
+        #    row_values = []
+        #    for column in self.m.fe_dealII.RowIndices(row):
+        #        if m_Aij(row, column).Value != 0:
+        #            row_values.append(m_Aij(row, column))
+        #    print('row[%d] %s' % (row, row_values))
+        #print('Fi = %s' % (fi_values))
     
 # Use daeSimulator class
 def guiRun(app):
@@ -188,8 +201,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
     
     # Save the model report and the runtime model report
-    #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

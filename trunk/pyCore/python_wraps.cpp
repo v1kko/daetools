@@ -1000,12 +1000,12 @@ daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVecto
     return node.m_pExternalFunction;
 }
 
-real_t adFEMatrixItemNode_Value(adFEMatrixItemNode& self)
+adouble adFEMatrixItemNode_Value(adFEMatrixItemNode& self)
 {
     return self.m_matrix.GetItem(self.m_row, self.m_column);
 }
 
-real_t adFEVectorItemNode_Value(adFEVectorItemNode& self)
+adouble adFEVectorItemNode_Value(adFEVectorItemNode& self)
 {
     return self.m_vector.GetItem(self.m_row);
 }

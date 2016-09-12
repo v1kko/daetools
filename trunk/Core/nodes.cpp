@@ -4032,7 +4032,7 @@ bool adScalarExternalFunctionNode::IsDifferential(void) const
 /*********************************************************************************************
     adFEMatrixItemNode
 **********************************************************************************************/
-adFEMatrixItemNode::adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<real_t>& matrix, size_t row, size_t column, const unit& units)
+adFEMatrixItemNode::adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<adouble>& matrix, size_t row, size_t column, const unit& units)
                   : m_strMatrixName(strMatrixName),
                     m_matrix(matrix),
                     m_row(row),
@@ -4055,7 +4055,7 @@ adouble adFEMatrixItemNode::Evaluate(const daeExecutionContext* pExecutionContex
         return tmp;
     }
 
-    tmp.setValue(m_matrix.GetItem(m_row, m_column));
+    tmp = m_matrix.GetItem(m_row, m_column);
     return tmp;
 }
 
@@ -4154,7 +4154,7 @@ bool adFEMatrixItemNode::IsDifferential(void) const
 /*********************************************************************************************
     adFEVectorItemNode
 **********************************************************************************************/
-adFEVectorItemNode::adFEVectorItemNode(const string& strVectorName, const dae::daeArray<real_t>& array, size_t row, const unit& units)
+adFEVectorItemNode::adFEVectorItemNode(const string& strVectorName, const dae::daeArray<adouble>& array, size_t row, const unit& units)
                   : m_strVectorName(strVectorName),
                     m_vector(array),
                     m_row(row),
@@ -4176,7 +4176,7 @@ adouble adFEVectorItemNode::Evaluate(const daeExecutionContext* pExecutionContex
         return tmp;
     }
 
-    tmp.setValue(m_vector.GetItem(m_row));
+    tmp = m_vector.GetItem(m_row);
     return tmp;
 }
 

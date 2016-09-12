@@ -40,4 +40,5 @@ SOURCES += stdafx.cpp \
 HEADERS += stdafx.h \
            dealii_common.h \
            dealii_fe_system.h \
+           adouble_template_inst.h \
            dealii_datareporter.h

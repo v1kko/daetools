@@ -254,7 +254,8 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
                (meaning that the FiniteElement object cannot suddenly sneak in differential variables into the system AFTER initialization).
                Therefore, skip an item if we encounter a zero.
             */
-            if(m_FEModel.m_Mij->GetItem(row, column) != 0)
+            if(m_FEModel.m_Mij->GetItem(row, column).node ||
+               m_FEModel.m_Mij->GetItem(row, column).getValue() != 0)
             {
                 if(!a_Mij.node)
                     a_Mij =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);

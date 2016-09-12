@@ -15,6 +15,7 @@
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
 #include <deal.II/base/logstream.h>
+
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/block_vector.h>
 #include <deal.II/lac/full_matrix.h>
@@ -52,11 +53,31 @@
 #include <deal.II/fe/fe_system.h>
 #include <deal.II/fe/fe_values.h>
 
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+
+#include "adouble_template_inst.h"
+
+//namespace dealii
+//{
+//template
+//void MatrixTools::apply_boundary_values<adouble> (const std::map<types::global_dof_index,double> &boundary_values,
+//                                                 BlockSparseMatrix< adouble > &matrix,
+//                                                 BlockVector< adouble > &solution,
+//                                                 BlockVector< adouble > &right_hand_side,
+//                                                 const bool eliminate_columns);
+//}
+
 namespace dae
 {
 namespace fe_solver
 {
 using namespace dealii;
+
+BlockVector<adouble>         abv;
+BlockSparseMatrix<adouble>   absm;
+Vector<adouble>              av;
+FullMatrix<adouble>          afm;
 
 /******************************************************************
     feCellContextImpl<dim>
@@ -364,9 +385,9 @@ public:
     virtual void ReAssembleSystem();
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
-    virtual dae::daeMatrix<real_t>*     Asystem() const; // Stiffness matrix
-    virtual dae::daeMatrix<real_t>*     Msystem() const; // Mass matrix (dt)
-    virtual dae::daeArray<real_t>*      Fload() const;   // Load vector
+    virtual dae::daeMatrix<adouble>*     Asystem() const; // Stiffness matrix
+    virtual dae::daeMatrix<adouble>*     Msystem() const; // Mass matrix (dt)
+    virtual dae::daeArray<adouble>*      Fload() const;   // Load vector
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
     virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
     virtual dealIIDataReporter*         CreateDataReporter();
@@ -391,10 +412,11 @@ public:
     ConstraintMatrix                hanging_node_constraints;
 
     BlockSparsityPattern        sparsity_pattern;
-    BlockSparseMatrix<double>   system_matrix;
-    BlockSparseMatrix<double>   system_matrix_dt;
-    BlockVector<double>         system_rhs;
-    BlockVector<double>         solution;
+    BlockSparseMatrix<adouble>  system_matrix;
+    BlockSparseMatrix<adouble>  system_matrix_dt;
+    BlockVector<adouble>        system_rhs;
+    BlockVector<adouble>        solution;
+    BlockVector<double>         datareporter_solution;
 
     SmartPointer< Quadrature<dim>   >  m_quadrature_formula;
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
@@ -505,6 +527,11 @@ void dealiiFiniteElementSystem<dim>::setup_system()
         solution.block(i).reinit(m_dofs_per_block[i]);
     solution.collect_sizes();
 
+    datareporter_solution.reinit (n_dofs);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        datareporter_solution.block(i).reinit(m_dofs_per_block[i]);
+    datareporter_solution.collect_sizes();
+
     system_rhs.reinit (n_dofs);
     for(unsigned int i = 0; i < n_dofs; i++)
         system_rhs.block(i).reinit(m_dofs_per_block[i]);
@@ -540,9 +567,15 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
     const unsigned int dofs_per_cell = fe->dofs_per_cell;
 
-    FullMatrix<double>  cell_matrix(dofs_per_cell, dofs_per_cell);
-    FullMatrix<double>  cell_matrix_dt(dofs_per_cell, dofs_per_cell);
-    Vector<double>      cell_rhs(dofs_per_cell);
+//    FullMatrix<adouble>  cell_matrix(dofs_per_cell, dofs_per_cell);
+//    printf("assemble_system 02 \n");
+//    FullMatrix<adouble>  cell_matrix_dt(dofs_per_cell, dofs_per_cell);
+//    printf("assemble_system 03 \n");
+//    Vector<adouble>      cell_rhs(dofs_per_cell);
+
+    boost::numeric::ublas::matrix<adouble> cell_matrix   (dofs_per_cell, dofs_per_cell);
+    boost::numeric::ublas::matrix<adouble> cell_matrix_dt(dofs_per_cell, dofs_per_cell);
+    std::vector<adouble>                   cell_rhs      (dofs_per_cell);
 
     std::vector<unsigned int> local_dof_indices (dofs_per_cell);
 
@@ -586,17 +619,59 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_weakForm->m_functions, mapExtractors);
     feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_weakForm->m_functions, mapExtractors);
 
+    // Interpolate Dirichlet boundary conditions on the system matrix and rhs
+    std::vector< std::map<types::global_dof_index, double> > arr_boundary_values_map;
+
+    typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
+    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
+    for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
+    {
+        const unsigned int   id                         = it->first;
+        const std::vector<pair_String_FunctionPtr>& bcs = it->second;
+
+        for(int k = 0; k < bcs.size(); k++)
+        {
+            pair_String_FunctionPtr p = bcs[k];
+            const std::string    variableName =  p.first;
+            const Function<dim>& fun          = *p.second;
+
+            typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
+            if(iter == mapComponentMasks.end())
+                throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
+
+            std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
+
+            std::map<types::global_dof_index, double> boundary_values;
+            VectorTools::interpolate_boundary_values (dof_handler,
+                                                      id,
+                                                      fun,
+                                                      boundary_values,
+                                                      iter->second);
+            arr_boundary_values_map.push_back(boundary_values);
+
+            //printf("bc[%d] = [", id);
+            //for(std::map<types::global_dof_index, double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
+            //    printf("(%d,%f) ", it->first, it->second);
+            //printf("]\n");
+        }
+    }
+
+
     typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
                                                    endc = dof_handler.end();
     for(int cellCounter = 0; cell != endc; ++cell, ++cellCounter)
     {
-        cell_matrix    = 0;
-        cell_matrix_dt = 0;
-        cell_rhs       = 0;
+        // This cannot work with boost::matrix and std::vector
+        //cell_matrix    = adouble(0.0);
+        //cell_matrix_dt = adouble(0.0);
+        //cell_rhs       = adouble(0.0);
+
+        cell_matrix.clear();
+        cell_matrix_dt.clear();
+        std::fill(cell_rhs.begin(), cell_rhs.end(), adouble(0.0));
 
         fe_values.reinit(cell);
         cell->get_dof_indices(local_dof_indices);
-        //std::cout << (boost::format("local_dof_indices = %s") % dae::toString(local_dof_indices)).str() << std::endl;
 
         for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
         {
@@ -617,7 +692,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         if(result.m_eType != eFEScalar)
                             throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value)"));
 
+                        //std::cout << "  cell_matrix 1 = " << cell_matrix(i,j).getValue() << ", +value " << result.m_value << std::endl;
                         cell_matrix(i,j) += result.m_value;
+                        //std::cout << "  cell_matrix 2 = " << cell_matrix(i,j).getValue() << std::endl;
 
                         //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % m_weakForm.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
                     }
@@ -641,7 +718,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     feRuntimeNumber<dim> result = m_weakForm->m_Fi.m_node->Evaluate(&cellContext);
                     if(result.m_eType != eFEScalar)
                         throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value)"));
-                    cell_rhs(i) += result.m_value;
+
+                    //std::cout << "cell rhs 1 = " << cell_rhs[i] << ", +value " << result.m_value << std::endl;
+                    cell_rhs[i] = cell_rhs[i] + result.m_value;
+                    //std::cout << "cell rhs 2 = " << cell_rhs[i] << std::endl;
                 }
             }
         }
@@ -699,13 +779,59 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                 if(result.m_eType != eFEScalar)
                                     throw std::runtime_error(std::string("Invalid faceFi expression specified (it must be a scalar value)"));
 
-                                cell_rhs(i) += result.m_value;
+                                cell_rhs[i] += result.m_value;
                             }
                         }
                     }
                 }
             }
         }
+
+   /*
+        printf("cell_matrix before bcs:\n");
+        for(int x = 0; x < cell_matrix.size1(); x++)
+        {
+            printf("[");
+            for(int y = 0; y < cell_matrix.size2(); y++)
+                printf("%+f ", cell_matrix(x,y).getValue());
+            printf("]\n");
+        }
+        printf("\n");
+
+        printf("cell_rhs before bcs:\n");
+        printf("[");
+        for(int x = 0; x < cell_rhs.size(); x++)
+            printf("%+f ", cell_rhs[x].getValue());
+        printf("]\n");
+        printf("\n");
+    */
+        // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
+        for(size_t i = 0; i < arr_boundary_values_map.size(); i++)
+        {
+            std::map<types::global_dof_index, double>& boundary_values = arr_boundary_values_map[i];
+            MatrixTools::local_apply_boundary_values(boundary_values,
+                                                     local_dof_indices,
+                                                     cell_matrix,
+                                                     cell_rhs);
+        }
+    /*
+        printf("cell_matrix after bcs:\n");
+        for(int x = 0; x < cell_matrix.size1(); x++)
+        {
+            printf("[");
+            for(int y = 0; y < cell_matrix.size2(); y++)
+                printf("%+f ", cell_matrix(x,y).getValue());
+            printf("]\n");
+        }
+        printf("\n");
+
+        printf("cell_rhs after bcs:\n");
+        printf("[");
+        for(int x = 0; x < cell_rhs.size(); x++)
+            printf("%+f ", cell_rhs[x].getValue());
+        printf("]\n");
+        printf("\n");
+    */
 
         /* This is some voodoo-mojo mumbo-jumbo uncomprehensible crap... What to do with it? */
         types::global_dof_index id;
@@ -735,58 +861,28 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         {
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
             {
-                system_matrix.add   (local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
+                system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
                 system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
             }
-            system_rhs(local_dof_indices[i]) += cell_rhs(i);
+            if(cell_rhs[i].node || cell_rhs[i].getValue() != 0.0)
+                system_rhs(local_dof_indices[i]) += cell_rhs[i];
         }
     } // End cell iteration
 
+    // Hanging nodes are NOT supported!! There must be a way to stop simulation if hanging nodes are detected
+
     // If using refined grids condense hanging nodes
-    hanging_node_constraints.condense(system_matrix);
-    hanging_node_constraints.condense(system_rhs);
+    //hanging_node_constraints.condense(system_matrix);
+    //hanging_node_constraints.condense(system_rhs);
 
     // What about this matrix? Should it also be condensed?
     //hanging_node_constraints.condense(system_matrix_dt);
-
-    // Apply Dirichlet boundary conditions on the system matrix and rhs
-    typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
-    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
-    for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
-    {
-        const unsigned int   id                         = it->first;
-        const std::vector<pair_String_FunctionPtr>& bcs = it->second;
-
-        for(int k = 0; k < bcs.size(); k++)
-        {
-            pair_String_FunctionPtr p = bcs[k];
-            const std::string    variableName =  p.first;
-            const Function<dim>& fun          = *p.second;
-
-            typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
-            if(iter == mapComponentMasks.end())
-                throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
-
-            std::cout << "Setting DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
-
-            std::map<types::global_dof_index, double> boundary_values;
-            VectorTools::interpolate_boundary_values (dof_handler,
-                                                      id,
-                                                      fun,
-                                                      boundary_values,
-                                                      iter->second);
-            MatrixTools::apply_boundary_values (boundary_values,
-                                                system_matrix,
-                                                solution,
-                                                system_rhs);
-        }
-    }
 }
 
 template <int dim>
 void dealiiFiniteElementSystem<dim>::update_block(unsigned int block_index, double* values, unsigned int n)
 {
-    Vector<double>& block_i = solution.block(block_index);
+    Vector<double>& block_i = datareporter_solution.block(block_index);
     if(block_i.size() != n)
         throw std::runtime_error("The size of the variable value does not match the size of the solution");
 
@@ -816,7 +912,7 @@ void dealiiFiniteElementSystem<dim>::write_solution(const std::string& strFilena
 
     DataOut<dim> data_out;
     data_out.attach_dof_handler(dof_handler);
-    data_out.add_data_vector (solution, solution_names, DataOut<dim>::type_dof_data, data_component_interpretation);
+    data_out.add_data_vector (datareporter_solution, solution_names, DataOut<dim>::type_dof_data, data_component_interpretation);
     data_out.build_patches(fe->degree);
     std::ofstream output(strFilename.c_str());
     data_out.write_vtk(output);
@@ -896,21 +992,22 @@ void dealiiFiniteElementSystem<dim>::RowIndices(unsigned int row, std::vector<un
 }
 
 template <int dim>
-dae::daeMatrix<double>* dealiiFiniteElementSystem<dim>::Asystem() const
+dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Asystem() const
 {
-    return new daeFEBlockMatrix<double>(system_matrix);
+    dae::daeMatrix<adouble>* p = new daeFEBlockMatrix<adouble>(system_matrix);
+    return p;
 }
 
 template <int dim>
-dae::daeMatrix<double>* dealiiFiniteElementSystem<dim>::Msystem() const
+dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Msystem() const
 {
-    return new daeFEBlockMatrix<double>(system_matrix_dt);
+    return new daeFEBlockMatrix<adouble>(system_matrix_dt);
 }
 
 template <int dim>
-dae::daeArray<double>* dealiiFiniteElementSystem<dim>::Fload() const
+dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 {
-    return new daeFEBlockArray<double>(system_rhs);
+    return new daeFEBlockArray<adouble>(system_rhs);
 }
 
 template <int dim>

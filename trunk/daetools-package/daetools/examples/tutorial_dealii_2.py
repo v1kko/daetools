@@ -180,7 +180,7 @@ class simTutorial(daeSimulation):
             # Iterate over columns and set initial conditions.
             # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
             for column in self.m.fe_dealII.RowIndices(row):
-                if m_dt(row, column) != 0:
+                if m_dt(row, column).Node or m_dt(row, column).Value != 0:
                     variable, index, ic = dofIndexesMap[column]
                     variable.SetInitialCondition(index, ic)
                     #print '%s(%d) initial condition = %f' % (variable.Name, column, ic)

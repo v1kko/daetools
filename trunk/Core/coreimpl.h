@@ -3585,9 +3585,9 @@ protected:
     daeDomain                               m_omega;
     daePtrVector<daeDomain*>                m_ptrarrFESubDomains;
     daePtrVector<daeVariable*>              m_ptrarrFEVariables;
-    boost::shared_ptr< daeMatrix<double> > m_Aij; // Stiffness matrix
-    boost::shared_ptr< daeMatrix<double> > m_Mij; // Mass matrix
-    boost::shared_ptr< daeArray<double> >  m_Fi;  // Load vector
+    boost::shared_ptr< daeMatrix<adouble> > m_Aij; // Stiffness matrix
+    boost::shared_ptr< daeMatrix<adouble> > m_Mij; // Mass matrix
+    boost::shared_ptr< daeArray<adouble> >  m_Fi;  // Load vector
 
     friend class daeFiniteElementEquation;
 };

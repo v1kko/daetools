@@ -256,8 +256,8 @@ boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRu
 daeScalarExternalFunction* adScalarExternalFunctionNode_ExternalFunction(adScalarExternalFunctionNode& node);
 daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVectorExternalFunctionNode& node);
 
-real_t adFEMatrixItemNode_Value(adFEMatrixItemNode& self);
-real_t adFEVectorItemNode_Value(adFEVectorItemNode& self);
+adouble adFEMatrixItemNode_Value(adFEMatrixItemNode& self);
+adouble adFEVectorItemNode_Value(adFEVectorItemNode& self);
 
 /*******************************************************
     adouble
@@ -1320,7 +1320,6 @@ boost::python::dict daeModel_dictEquations(daeModel& self);
 boost::python::dict daeModel_dictPortConnections(daeModel& self);
 boost::python::dict daeModel_dictEventPortConnections(daeModel& self);
 
-
 class daeArrayWrapper : public daeArray<real_t>,
                         public boost::python::wrapper< daeArray<real_t> >
 {
@@ -1357,6 +1356,57 @@ public:
     }
 
     void SetItem(size_t row, size_t col, real_t value)
+    {
+        this->get_override("SetItem")(row, col, value);
+    }
+
+    size_t GetNrows(void) const
+    {
+        return this->get_override("GetNrows")();
+    }
+
+    size_t GetNcols(void) const
+    {
+        return this->get_override("GetNcols")();
+    }
+};
+
+class daeArrayWrapper_adouble : public daeArray<adouble>,
+                                public boost::python::wrapper< daeArray<adouble> >
+{
+public:
+    virtual ~daeArrayWrapper_adouble(void){}
+
+public:
+    adouble GetItem(size_t i) const
+    {
+        return this->get_override("GetItem")(i);
+    }
+
+    void SetItem(size_t i, adouble value)
+    {
+        this->get_override("SetItem")(i, value);
+    }
+
+    size_t GetSize(void) const
+    {
+        return this->get_override("GetSize")();
+    }
+};
+
+class daeMatrixWrapper_adouble : public daeMatrix<adouble>,
+                                 public boost::python::wrapper< daeMatrix<adouble> >
+{
+public:
+    virtual ~daeMatrixWrapper_adouble(void){}
+
+public:
+    adouble GetItem(size_t row, size_t col) const
+    {
+        return this->get_override("GetItem")(row, col);
+    }
+
+    void SetItem(size_t row, size_t col, adouble value)
     {
         this->get_override("SetItem")(row, col, value);
     }

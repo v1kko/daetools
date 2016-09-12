@@ -848,7 +848,7 @@ class DAE_CORE_API adFEMatrixItemNode : public adNodeImpl
 public:
     daeDeclareDynamicClass(adFEMatrixItemNode)
     adFEMatrixItemNode(void);
-    adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<real_t>& matrix, size_t row, size_t column, const unit& units);
+    adFEMatrixItemNode(const string& strMatrixName, const dae::daeMatrix<adouble>& matrix, size_t row, size_t column, const unit& units);
     virtual ~adFEMatrixItemNode(void);
 
 public:
@@ -868,7 +868,7 @@ public:
 
 public:
     string                          m_strMatrixName;
-    const dae::daeMatrix<real_t>&   m_matrix;
+    const dae::daeMatrix<adouble>&  m_matrix;
     size_t                          m_row;
     size_t                          m_column;
     unit                            m_units;
@@ -882,7 +882,7 @@ class DAE_CORE_API adFEVectorItemNode : public adNodeImpl
 public:
     daeDeclareDynamicClass(adFEVectorItemNode)
     adFEVectorItemNode(void);
-    adFEVectorItemNode(const string& strVectorName, const dae::daeArray<real_t>& array, size_t row, const unit& units);
+    adFEVectorItemNode(const string& strVectorName, const dae::daeArray<adouble>& array, size_t row, const unit& units);
     virtual ~adFEVectorItemNode(void);
 
 public:
@@ -902,7 +902,7 @@ public:
 
 public:
     string                          m_strVectorName;
-    const dae::daeArray<real_t>&    m_vector;
+    const dae::daeArray<adouble>&   m_vector;
     size_t                          m_row;
     unit                            m_units;
 };

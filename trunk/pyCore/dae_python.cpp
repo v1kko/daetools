@@ -1595,7 +1595,7 @@ BOOST_PYTHON_MODULE(pyCore)
         */
     ;
 
-    class_<daepython::daeMatrixWrapper, boost::noncopyable>("daeMatrix", DOCSTR_daeMatrix, no_init)
+    class_<daepython::daeMatrixWrapper, boost::noncopyable>("daeMatrix_real", DOCSTR_daeMatrix, no_init)
         .add_property("n",	 &daeMatrix<real_t>::GetNrows)
         .add_property("m",	 &daeMatrix<real_t>::GetNcols)
         .def("__call__",     &daeMatrix<real_t>::GetItem,                ( arg("self"), arg("row"), arg("column") ))
@@ -1606,7 +1606,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("GetNcols",     pure_virtual(&daeMatrix<real_t>::GetNcols), ( arg("self") ))
     ;
 
-    class_<daepython::daeArrayWrapper, boost::noncopyable>("daeArray", DOCSTR_daeArray, no_init)
+    class_<daepython::daeArrayWrapper, boost::noncopyable>("daeArray_real", DOCSTR_daeArray, no_init)
         .add_property("n",	 &daeArray<real_t>::GetSize)
         .def("__call__",     &daeArray<real_t>::GetItem,                 ( arg("self"), arg("item") ))
         .def("__getitem__",  &daeArray<real_t>::GetItem,                 ( arg("self"), arg("item") ))
@@ -1614,6 +1614,27 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("GetItem",      pure_virtual(&daeArray<real_t>::GetItem),   ( arg("self"), arg("item") ))
         .def("SetItem",      pure_virtual(&daeArray<real_t>::SetItem),   ( arg("self"), arg("item"), arg("value") ))
         .def("GetSize",      pure_virtual(&daeArray<real_t>::GetSize),   ( arg("self") ))
+    ;
+
+    class_<daepython::daeMatrixWrapper_adouble, boost::noncopyable>("daeMatrix_adouble", DOCSTR_daeMatrix, no_init)
+        .add_property("n",	 &daeMatrix<adouble>::GetNrows)
+        .add_property("m",	 &daeMatrix<adouble>::GetNcols)
+        .def("__call__",     &daeMatrix<adouble>::GetItem,                ( arg("self"), arg("row"), arg("column") ))
+        .def("SetItem",      pure_virtual(&daeMatrix<adouble>::SetItem),  ( arg("self"), arg("row"), arg("column"), arg("value") ))
+        .def("GetItem",      pure_virtual(&daeMatrix<adouble>::GetItem),  ( arg("self"), arg("row"), arg("column") ))
+        .def("SetItem",      pure_virtual(&daeMatrix<adouble>::SetItem),  ( arg("self"), arg("row"), arg("column"), arg("value") ))
+        .def("GetNrows",     pure_virtual(&daeMatrix<adouble>::GetNrows), ( arg("self") ))
+        .def("GetNcols",     pure_virtual(&daeMatrix<adouble>::GetNcols), ( arg("self") ))
+    ;
+
+    class_<daepython::daeArrayWrapper_adouble, boost::noncopyable>("daeArray_adouble", DOCSTR_daeArray, no_init)
+        .add_property("n",	 &daeArray<adouble>::GetSize)
+        .def("__call__",     &daeArray<adouble>::GetItem,                 ( arg("self"), arg("item") ))
+        .def("__getitem__",  &daeArray<adouble>::GetItem,                 ( arg("self"), arg("item") ))
+        .def("__setitem__",  &daeArray<adouble>::SetItem,                 ( arg("self"), arg("item"), arg("value") ))
+        .def("GetItem",      pure_virtual(&daeArray<adouble>::GetItem),   ( arg("self"), arg("item") ))
+        .def("SetItem",      pure_virtual(&daeArray<adouble>::SetItem),   ( arg("self"), arg("item"), arg("value") ))
+        .def("GetSize",      pure_virtual(&daeArray<adouble>::GetSize),   ( arg("self") ))
     ;
 
     class_<daepython::daeSparseMatrixRowIteratorWrapper, boost::noncopyable>("daeSparseMatrixRowIterator", DOCSTR_daeSparseMatrixRowIterator, no_init)
