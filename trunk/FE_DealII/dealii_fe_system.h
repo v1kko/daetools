@@ -58,26 +58,11 @@
 
 #include "adouble_template_inst.h"
 
-//namespace dealii
-//{
-//template
-//void MatrixTools::apply_boundary_values<adouble> (const std::map<types::global_dof_index,double> &boundary_values,
-//                                                 BlockSparseMatrix< adouble > &matrix,
-//                                                 BlockVector< adouble > &solution,
-//                                                 BlockVector< adouble > &right_hand_side,
-//                                                 const bool eliminate_columns);
-//}
-
 namespace dae
 {
 namespace fe_solver
 {
 using namespace dealii;
-
-BlockVector<adouble>         abv;
-BlockSparseMatrix<adouble>   absm;
-Vector<adouble>              av;
-FullMatrix<adouble>          afm;
 
 /******************************************************************
     feCellContextImpl<dim>
@@ -86,14 +71,17 @@ template<int dim, typename FE_VALUES>
 class feCellContextImpl : public feCellContext<dim>
 {
 public:
-    typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
+    typedef typename std::map<std::string,  const Function<dim,double>*>  map_String_FunctionPtr;
+    typedef typename std::map<std::string,  const Function<dim,adouble>*> map_String_adoubleFunctionPtr;
     typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
 
     feCellContextImpl(FE_VALUES&                      fe_values,
                       map_String_FunctionPtr&         mapFunctions,
+                      map_String_adoubleFunctionPtr&  mapAdoubleFunctions,
                       map_String_FEValuesExtractor&   mapExtractors):
         m_fe_values(fe_values),
         m_mapFunctions(mapFunctions),
+        m_mapAdoubleFunctions(mapAdoubleFunctions),
         m_mapExtractors(mapExtractors),
         m_i(-1),
         m_j(-1),
@@ -260,11 +248,20 @@ public:
         return m_fe_values.normal_vector(q);
     }
 
-    virtual const Function<dim>& function(const std::string& functionName) const
+    virtual const Function<dim,double>& function(const std::string& functionName) const
     {
         typename map_String_FunctionPtr::iterator iter = m_mapFunctions.find(functionName);
         if(iter == m_mapFunctions.end())
             throw std::runtime_error(std::string("Cannot find Function<dim> with the name ") + functionName);
+
+        return *(iter->second);
+    }
+
+    virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const
+    {
+        typename map_String_adoubleFunctionPtr::iterator iter = m_mapAdoubleFunctions.find(functionName);
+        if(iter == m_mapAdoubleFunctions.end())
+            throw std::runtime_error(std::string("Cannot find Function<dim,adouble> with the name ") + functionName);
 
         return *(iter->second);
     }
@@ -287,6 +284,7 @@ public:
 public:
     FE_VALUES&                      m_fe_values;
     map_String_FunctionPtr&         m_mapFunctions;
+    map_String_adoubleFunctionPtr&  m_mapAdoubleFunctions;
     map_String_FEValuesExtractor&   m_mapExtractors;
     unsigned int                    m_i;
     int                             m_j;
@@ -343,7 +341,8 @@ public:
     typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
     typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
     typedef typename std::map<unsigned int, feExpression<dim> >                    map_Uint_Expression;
-    typedef typename std::map<std::string,  const Function<dim>*>                  map_String_FunctionPtr;
+    typedef typename std::map<std::string,  const Function<dim,double>*>           map_String_FunctionPtr;
+    typedef typename std::map<std::string,  const Function<dim,adouble>*>          map_String_adoubleFunctionPtr;
 
     dealiiFiniteElementWeakForm()
     {
@@ -357,6 +356,7 @@ public:
     map_Uint_Expression                     m_faceAij;
     map_Uint_Expression                     m_faceFi;
     map_String_FunctionPtr                  m_functions;
+    map_String_adoubleFunctionPtr           m_adouble_functions;
     map_Uint_vector_pair_String_FunctionPtr m_functionsDirichletBC;
 };
 
@@ -370,7 +370,8 @@ typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionP
 typedef typename std::pair<std::string, const Function<dim>*> pair_String_FunctionPtr;
 typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
 typedef typename std::map<unsigned int, feExpression<dim> >   map_Uint_Expression;
-typedef typename std::map<std::string,  const Function<dim>*> map_String_FunctionPtr;
+typedef typename std::map<std::string,  const Function<dim,double>*>  map_String_FunctionPtr;
+typedef typename std::map<std::string,  const Function<dim,adouble>*> map_String_adoubleFunctionPtr;
 typedef typename std::vector< dealiiFiniteElementDOF<dim>* > vector_DOFs;
 typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
 typedef typename std::map<std::string, ComponentMask> map_string_ComponentMask;
@@ -567,12 +568,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
     const unsigned int dofs_per_cell = fe->dofs_per_cell;
 
-//    FullMatrix<adouble>  cell_matrix(dofs_per_cell, dofs_per_cell);
-//    printf("assemble_system 02 \n");
-//    FullMatrix<adouble>  cell_matrix_dt(dofs_per_cell, dofs_per_cell);
-//    printf("assemble_system 03 \n");
-//    Vector<adouble>      cell_rhs(dofs_per_cell);
-
     boost::numeric::ublas::matrix<adouble> cell_matrix   (dofs_per_cell, dofs_per_cell);
     boost::numeric::ublas::matrix<adouble> cell_matrix_dt(dofs_per_cell, dofs_per_cell);
     std::vector<adouble>                   cell_rhs      (dofs_per_cell);
@@ -616,8 +611,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         currentIndex += dof.m_nMultiplicity;
     }
 
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_weakForm->m_functions, mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_weakForm->m_functions, mapExtractors);
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
 
     // Interpolate Dirichlet boundary conditions on the system matrix and rhs
     std::vector< std::map<types::global_dof_index, double> > arr_boundary_values_map;
@@ -656,16 +651,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         }
     }
 
-
     typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
                                                    endc = dof_handler.end();
     for(int cellCounter = 0; cell != endc; ++cell, ++cellCounter)
     {
-        // This cannot work with boost::matrix and std::vector
-        //cell_matrix    = adouble(0.0);
-        //cell_matrix_dt = adouble(0.0);
-        //cell_rhs       = adouble(0.0);
-
         cell_matrix.clear();
         cell_matrix_dt.clear();
         std::fill(cell_rhs.begin(), cell_rhs.end(), adouble(0.0));

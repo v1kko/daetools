@@ -11,6 +11,7 @@
 #include <deal.II/lac/sparse_matrix.h>
 #include <deal.II/lac/sparsity_pattern.h>
 #include "../Core/definitions.h"
+#include "../Core/coreimpl.h"
 #include <typeinfo>
 
 namespace dae
@@ -906,7 +907,8 @@ public:
     virtual double JxW (const unsigned int q) const = 0;
     virtual const Tensor<1,dim>& normal_vector (const unsigned int q) const = 0;
 
-    virtual const Function<dim>& function (const std::string& functionName) const = 0;
+    virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
+    virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;

@@ -26,10 +26,12 @@ adouble sqrt(const adouble& a);
 
 adouble abs(const adouble& a)
 {
+    throw std::runtime_error("function std::abs(adouble) called");
     return a;
 }
 adouble sqrt(const adouble& a)
 {
+    throw std::runtime_error("function std::sqrt(adouble) called");
     return a;
 }
 }
@@ -39,6 +41,8 @@ adouble sqrt(const adouble& a)
 #include <deal.II/lac/sparse_matrix.templates.h>
 #include <deal.II/lac/full_matrix.templates.h>
 #include <deal.II/lac/block_sparse_matrix.templates.h>
+#include <deal.II/base/function_time.templates.h>
+#include <deal.II/base/function.templates.h>
 
 namespace dealii
 {
@@ -49,6 +53,7 @@ namespace numbers
     typename NumberTraits<adouble>::real_type
     NumberTraits<adouble>::abs (const adouble &x)
     {
+        throw std::runtime_error("function NumberTraits<adouble>::abs(adouble) called");
         return x;
     }
 }
@@ -219,6 +224,17 @@ template class SparseMatrix<adouble>;
 template class BlockVector<adouble>;
 template class BlockSparseMatrix<adouble>;
 
+template class FunctionTime<adouble>;
+template class Function<1, adouble>;
+template class Function<2, adouble>;
+template class Function<3, adouble>;
+template class ZeroFunction<1, adouble>;
+template class ZeroFunction<2, adouble>;
+template class ZeroFunction<3, adouble>;
+template class ConstantFunction<1, adouble>;
+template class ConstantFunction<2, adouble>;
+template class ConstantFunction<3, adouble>;
+
 namespace MatrixTools
 {
 namespace
@@ -350,8 +366,10 @@ inline void local_apply_boundary_values (const std::map<types::global_dof_index,
     }
 }
 
-// Specialization for Number=adouble (not used anymore - the local_apply_boundary_values is used now)!
-// Not sure if it works at all!
+/*
+ * Specialization for Number=adouble (not used anymore - the local_apply_boundary_values is used now)!
+ * Not sure if it works at all!
+ */
 //template<>
 //void apply_boundary_values (const std::map<types::global_dof_index,double> &boundary_values,
 //                            BlockSparseMatrix< adouble > &matrix,

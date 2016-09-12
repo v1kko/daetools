@@ -309,6 +309,57 @@ BOOST_PYTHON_MODULE(pyDealII)
                                 ( arg("self"), arg("point") ) )
     ;
 
+    class_<daepython::adoubleFunction_wrapper<1>, boost::noncopyable>("adoubleFunction_1D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def_readonly("dimension",	   &Function<1,adouble>::dimension)
+        .def_readonly("n_components",  &Function<1,adouble>::n_components)
+
+        .def("value",           pure_virtual(&daepython::adoubleFunction_wrapper_1D::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_value",    pure_virtual(&daepython::adoubleFunction_wrapper_1D::vector_value),
+                                ( arg("self"), arg("point") ) )
+
+        .def("gradient",        pure_virtual(&daepython::adoubleFunction_wrapper_1D::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_gradient",	pure_virtual(&daepython::adoubleFunction_wrapper_1D::vector_gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+    class_<daepython::adoubleFunction_wrapper<2>, boost::noncopyable>("adoubleFunction_2D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def_readonly("dimension",	   &Function<2,adouble>::dimension)
+        .def_readonly("n_components",  &Function<2,adouble>::n_components)
+
+        .def("value",           pure_virtual(&daepython::adoubleFunction_wrapper_2D::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_value",    pure_virtual(&daepython::adoubleFunction_wrapper_2D::vector_value),
+                                ( arg("self"), arg("point") ) )
+
+        .def("gradient",        pure_virtual(&daepython::adoubleFunction_wrapper_2D::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_gradient",	pure_virtual(&daepython::adoubleFunction_wrapper_2D::vector_gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+    class_<daepython::adoubleFunction_wrapper<3>, boost::noncopyable>("adoubleFunction_3D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def_readonly("dimension",	   &Function<3,adouble>::dimension)
+        .def_readonly("n_components",  &Function<3,adouble>::n_components)
+
+        .def("value",           pure_virtual(&daepython::adoubleFunction_wrapper_3D::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_value",    pure_virtual(&daepython::adoubleFunction_wrapper_3D::vector_value),
+                                ( arg("self"), arg("point") ) )
+
+        .def("gradient",        pure_virtual(&daepython::adoubleFunction_wrapper_3D::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_gradient",	pure_virtual(&daepython::adoubleFunction_wrapper_3D::vector_gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
     class_<ConstantFunction<1>, bases< Function<1> >, boost::noncopyable>("ConstantFunction_1D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
         .def("__init__", make_constructor(&daepython::ConstantFunction_init<1>, default_call_policies(), ( arg("values") ) ))
@@ -320,6 +371,19 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<ConstantFunction<3>, bases< Function<3> >, boost::noncopyable>("ConstantFunction_3D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
         .def("__init__", make_constructor(&daepython::ConstantFunction_init<3>, default_call_policies(), ( arg("values") ) ))
+    ;
+
+    class_<ConstantFunction<1,adouble>, bases< Function<1,adouble> >, boost::noncopyable>("adoubleConstantFunction_1D", no_init)
+        .def(init<const adouble, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+        .def("__init__", make_constructor(&daepython::adoubleConstantFunction_init<1>, default_call_policies(), ( arg("values") ) ))
+    ;
+    class_<ConstantFunction<2,adouble>, bases< Function<2,adouble> >, boost::noncopyable>("adoubleConstantFunction_2D", no_init)
+        .def(init<const adouble, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+        .def("__init__", make_constructor(&daepython::adoubleConstantFunction_init<2>, default_call_policies(), ( arg("values") ) ))
+    ;
+    class_<ConstantFunction<3,adouble>, bases< Function<3,adouble> >, boost::noncopyable>("adoubleConstantFunction_3D", no_init)
+        .def(init<const adouble, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
+        .def("__init__", make_constructor(&daepython::adoubleConstantFunction_init<3>, default_call_policies(), ( arg("values") ) ))
     ;
 
     class_<ZeroFunction<1>, bases< Function<1> >, boost::noncopyable>("ZeroFunction_1D", no_init)

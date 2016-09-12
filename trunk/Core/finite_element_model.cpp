@@ -145,11 +145,6 @@ inline adouble create_adouble(adNode* n)
     return adouble(0.0, 0.0, true, n);
 }
 
-struct feVariableInfo
-{
-
-};
-
 void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel)
 {
     daeVariable* variable;
@@ -223,12 +218,23 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         pEquationExecutionInfo->m_narrDomainIndexes.resize(1);
         pEquationExecutionInfo->m_narrDomainIndexes[0] = counter++;
 
+        // Set EEI for the forthcoming calls to adNode::Evaluate()
+        EC.m_pEquationExecutionInfo = pEquationExecutionInfo;
+        pModel->PropagateGlobalExecutionContext(&EC);
+
         // Reset equation's contributions
         a_Aij = 0;
         a_Mij = 0;
 
         // RHS
-        a_Fi = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_Fi, row, unit()));
+
+        // If existing, evaluate Setup adNode from the matrix into a Runtime adNode
+        //a_Fi = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_Fi, row, unit()));
+        adouble adFi_item = m_FEModel.m_Fi->GetItem(row);
+        if(adFi_item.node)
+            a_Fi = adFi_item.node->Evaluate(&EC);
+        else
+            a_Fi = create_adouble(new adConstantNode(adFi_item.getValue()));
 
         narrRowIndices.clear();
         fe->RowIndices(row, narrRowIndices);
@@ -244,23 +250,65 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             // Set it to be the variable's local index (we need it to create adoubles with runtime nodes)
             indexes[0] = internalVariableIndex;
 
-            if(!a_Aij.node)
-                a_Aij =         create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
+            //if(!a_Aij.node)
+            //    a_Aij =         create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
+            //else
+            //    a_Aij = a_Aij + create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
+
+            adouble adAij_item = m_FEModel.m_Aij->GetItem(row, column);
+            if(adAij_item.node)
+            {
+                adouble ad = adAij_item.node->Evaluate(&EC) * variable->Create_adouble(indexes, 1);
+                if(!a_Aij.node)
+                    a_Aij = ad;
+                else
+                    a_Aij = a_Aij + ad;
+            }
             else
-                a_Aij = a_Aij + create_adouble(new adFEMatrixItemNode("A", *m_FEModel.m_Aij, row, column, unit())) * variable->Create_adouble(indexes, 1);
+            {
+                if(adAij_item.getValue() != 0.0)
+                {
+                    adouble ad = create_adouble(new adConstantNode(adAij_item.getValue())) * variable->Create_adouble(indexes, 1);
+                    if(!a_Aij.node)
+                        a_Aij = ad;
+                    else
+                        a_Aij = a_Aij + ad;
+                }
+            }
 
             /* ACHTUNG, ACHTUNG!!
                The mass matrix M is not going to change - wherever we have an item in M equal to zero it is going to stay zero
                (meaning that the FiniteElement object cannot suddenly sneak in differential variables into the system AFTER initialization).
                Therefore, skip an item if we encounter a zero.
             */
-            if(m_FEModel.m_Mij->GetItem(row, column).node ||
-               m_FEModel.m_Mij->GetItem(row, column).getValue() != 0)
+            adouble adMij_item = m_FEModel.m_Mij->GetItem(row, column);
+            if(adMij_item.node || adMij_item.getValue() != 0.0)
             {
-                if(!a_Mij.node)
-                    a_Mij =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                //if(!a_Mij.node)
+                //    a_Mij =         create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                //else
+                //    a_Mij = a_Mij + create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+
+                if(adMij_item.node)
+                {
+
+                    adouble ad = adMij_item.node->Evaluate(&EC) * variable->Calculate_dt(indexes, 1);
+                    if(!a_Mij.node)
+                        a_Mij = ad;
+                    else
+                        a_Mij = a_Mij + ad;
+                }
                 else
-                    a_Mij = a_Mij + create_adouble(new adFEMatrixItemNode("M", *m_FEModel.m_Mij, row, column, unit())) * variable->Calculate_dt(indexes, 1);
+                {
+                    if(adMij_item.getValue() != 0.0)
+                    {
+                        adouble ad = create_adouble(new adConstantNode(adMij_item.getValue())) * variable->Calculate_dt(indexes, 1);
+                        if(!a_Mij.node)
+                            a_Mij = ad;
+                        else
+                            a_Mij = a_Mij + ad;
+                    }
+                }
 
                 nIndex = variable->GetOverallIndex() + internalVariableIndex;
                 m_pModel->m_pDataProxy->SetVariableTypeGathered(nIndex, cnDifferential);
@@ -293,6 +341,71 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         // However, daeEquation owns the pointers.
         this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
     }
+
+    pModel->PropagateGlobalExecutionContext(NULL);
+}
+
+void daeFiniteElementEquation::Open(io::xmlTag_t* pTag)
+{
+    string strName;
+
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    daeObject::Open(pTag);
+}
+
+void daeFiniteElementEquation::Save(io::xmlTag_t* pTag) const
+{
+    string strName, strValue;
+
+    daeObject::Save(pTag);
+
+    strName = "EquationType";
+    SaveEnum(pTag, strName, GetEquationType());
+
+    strName = "Expression";
+    adNode::SaveNode(pTag, strName, m_pResidualNode.get());
+
+    strName = "Residual";
+    io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+    if(!pChildTag)
+        daeDeclareAndThrowException(exXMLIOError);
+    strValue = "$${ \\left [ \\mathbf{M_{ij}} \\right ] \\left \\{ \\frac{\\partial x_j}{\\partial t} \\right \\} } + { \\left [ \\mathbf{A_{ij}} \\right ] \\left \\{ {x_j} \\right \\} } = \\left \\{ f_i\\right \\}$$";
+    pChildTag->SetValue(strValue);
+
+    strName = "DistributedDomainInfos";
+    pTag->SaveObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
+}
+
+void daeFiniteElementEquation::OpenRuntime(io::xmlTag_t* pTag)
+{
+}
+
+void daeFiniteElementEquation::SaveRuntime(io::xmlTag_t* pTag) const
+{
+    string strName, strValue;
+
+    daeObject::SaveRuntime(pTag);
+
+//	strName = "EquationDefinitionMode";
+//	SaveEnum(pTag, strName, m_eEquationType);
+
+//	strName = "EquationEvaluationMode";
+//	SaveEnum(pTag, strName, m_eEquationEvaluationMode);
+
+    strName = "Residual";
+    io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+    if(!pChildTag)
+        daeDeclareAndThrowException(exXMLIOError);
+    strValue = "$${ \\left [ \\mathbf{M_{ij}} \\right ] \\left \\{ \\frac{\\partial x_j}{\\partial t} \\right \\} } + { \\left [ \\mathbf{A_{ij}} \\right ] \\left \\{ {x_j} \\right \\} } = \\left \\{ f_i\\right \\}$$";
+    pChildTag->SetValue(strValue);
+
+//	strName = "DistributedDomainInfos";
+//	pTag->SaveRuntimeObjectArray(strName, m_ptrarrDistributedEquationDomainInfos);
+
+    strName = "EquationExecutionInfos";
+    pTag->SaveRuntimeObjectArray(strName, m_ptrarrEquationExecutionInfos);
 }
 
 bool daeFiniteElementEquation::CheckObject(std::vector<string>& strarrErrors) const

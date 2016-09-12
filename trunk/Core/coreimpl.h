@@ -3577,10 +3577,6 @@ public:
     void UpdateEquations(const daeExecutionContext* pExecutionContext);
 
 protected:
-    daeFiniteElementEquation* CreateFiniteElementEquation(const string& strName, daeDomain* pDomain, size_t startRow, size_t endRow,
-                                                          string strDescription = "", real_t dScaling = 1.0);
-
-protected:
     daeFiniteElementObject*                 m_fe;
     daeDomain                               m_omega;
     daePtrVector<daeDomain*>                m_ptrarrFESubDomains;
@@ -3605,6 +3601,11 @@ public:
 public:
     void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
     bool CheckObject(std::vector<string>& strarrErrors) const;
+
+    void Open(io::xmlTag_t* pTag);
+    void Save(io::xmlTag_t* pTag) const;
+    void OpenRuntime(io::xmlTag_t* pTag);
+    void SaveRuntime(io::xmlTag_t* pTag) const;
 
     virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
     virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));

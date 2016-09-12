@@ -45,9 +45,12 @@ class modTutorial(daeModel):
         # We use deal.II ConstantFunction class to specify a constant value.
         # Since we have only one DOF we do not need to specify n_components in the constructor
         # (the default value is 1) and do not need to handle values of multiple components.
-        functions    = {}
+        functions = {}
         functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
         functions['Generation']  = ConstantFunction_2D(0.0)
+        # Dummy constant function that returns adouble as a value.
+        # It can be used to couple deal.II with daetools 
+        functions['adouble_fn']  = adoubleConstantFunction_2D(adouble(0.0))
         
         dirichletBC    = {}
         dirichletBC[0] = [('T', ConstantFunction_2D(200))] # outer boundary

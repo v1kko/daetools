@@ -328,8 +328,8 @@ void SparseMatrix_add(SparseMatrix<double>& self, unsigned int i, unsigned int j
 
 
 template<int dim>
-class Function_wrapper : public Function<dim>,
-                         public boost::python::wrapper< Function<dim> >
+class Function_wrapper : public Function<dim,double>,
+                         public boost::python::wrapper< Function<dim,double> >
 {
 public:
     Function_wrapper(unsigned int n_components = 1) : Function<dim>(n_components)
@@ -419,7 +419,6 @@ typedef Function_wrapper<1> Function_wrapper_1D;
 typedef Function_wrapper<2> Function_wrapper_2D;
 typedef Function_wrapper<3> Function_wrapper_3D;
 
-
 template<int dim>
 ConstantFunction<dim>* ConstantFunction_init(boost::python::list l_values)
 {
@@ -433,6 +432,76 @@ ConstantFunction<dim>* ConstantFunction_init(boost::python::list l_values)
 
     return new ConstantFunction<dim>(values);
 }
+
+
+template<int dim>
+class adoubleFunction_wrapper : public Function<dim,adouble>,
+                                public boost::python::wrapper< Function<dim,adouble> >
+{
+public:
+    adoubleFunction_wrapper(unsigned int n_components = 1) : Function<dim,adouble>(n_components)
+    {
+    }
+
+    virtual ~adoubleFunction_wrapper()
+    {
+    }
+
+    adouble value(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        boost::python::override f = this->get_override("value");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'value' not implemented in the python adoubleFunction_xD-derived class";
+            throw e;
+        }
+        return f(p, component);
+    }
+
+    void vector_value(const Point<dim> &p, Vector<adouble>& values) const
+    {
+        boost::python::override f = this->get_override("vector_value");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'vector_value' not implemented in the python adoubleFunction_xD-derived class";
+            throw e;
+        }
+
+        boost::python::list lvalues = f(p);
+
+        boost::python::ssize_t i, n;
+        n = boost::python::len(lvalues);
+        if(n != Function<dim,adouble>::n_components)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The number of items (" << n << ") returned from the Function<" << Function<dim>::dimension
+              << ">::vector_value call must be " << Function<dim,adouble>::n_components;
+            throw e;
+        }
+        for(i = 0; i < n; i++)
+            values[i] = boost::python::extract<adouble>(lvalues[i]);
+    }
+};
+typedef adoubleFunction_wrapper<1> adoubleFunction_wrapper_1D;
+typedef adoubleFunction_wrapper<2> adoubleFunction_wrapper_2D;
+typedef adoubleFunction_wrapper<3> adoubleFunction_wrapper_3D;
+
+template<int dim>
+ConstantFunction<dim,adouble>* adoubleConstantFunction_init(boost::python::list l_values)
+{
+    std::vector<adouble> values;
+
+    for(boost::python::ssize_t i = 0; i < boost::python::len(l_values); i++)
+    {
+        adouble item_value = boost::python::extract<adouble>(l_values[i]);
+        values.push_back(item_value);
+    }
+
+    return new ConstantFunction<dim,adouble>(values);
+}
+
 
 template<int dim>
 class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<dim>,
@@ -490,10 +559,25 @@ public:
             boost::python::object key_ = keys[i];
             boost::python::object val_ = dictFunctions[key_];
 
-            std::string          key = boost::python::extract<std::string>(key_);
-            const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(val_);
+            std::string key = boost::python::extract<std::string>(key_);
 
-            this->m_functions[key] = fn;
+            boost::python::extract<const Function<dim,double >*> get_double_fn (val_);
+            boost::python::extract<const Function<dim,adouble>*> get_adouble_fn(val_);
+
+            if(get_double_fn.check())
+            {
+                this->m_functions[key] = get_double_fn();
+            }
+            else if(get_adouble_fn.check())
+            {
+                this->m_adouble_functions[key] = get_adouble_fn();
+            }
+            else
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Invalid function " << key << " in the functions dictionary";
+                throw e;
+            }
         }
 
         keys = dictFaceAij.keys();
