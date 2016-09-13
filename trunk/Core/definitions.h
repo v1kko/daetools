@@ -555,21 +555,24 @@ struct daeFiniteElementObjectInfo
 namespace core
 {
 class adouble;
+class daeModel;
 }
 class daeFiniteElementObject
 {
 public:
     virtual ~daeFiniteElementObject() {}
 
-    virtual void AssembleSystem()   = 0;
+    virtual void SetModel(core::daeModel* pModel) = 0;
+
+    virtual void AssembleSystem()    = 0;
     virtual bool NeedsReAssembling() = 0;
-    virtual void ReAssembleSystem() = 0;
+    virtual void ReAssembleSystem()  = 0;
 
     virtual void RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const = 0;
 
-    virtual dae::daeMatrix<core::adouble>*     Asystem() const = 0;
-    virtual dae::daeMatrix<core::adouble>*     Msystem() const = 0;
-    virtual dae::daeArray<core::adouble>*      Fload()   const = 0;
+    virtual dae::daeMatrix<core::adouble>* Asystem() const = 0;
+    virtual dae::daeMatrix<core::adouble>* Msystem() const = 0;
+    virtual dae::daeArray<core::adouble>*  Fload()   const = 0;
 
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const = 0;
 };

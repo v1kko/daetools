@@ -88,11 +88,17 @@ public:
     typedef typename std::map<std::string,  const Function<dim,adouble>*> map_String_adoubleFunctionPtr;
     typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
 
-    feCellContextImpl(FE_VALUES&                      fe_values,
-                      map_String_FunctionPtr&         mapFunctions,
-                      map_String_adoubleFunctionPtr&  mapAdoubleFunctions,
-                      map_String_FEValuesExtractor&   mapExtractors):
+    feCellContextImpl(FE_VALUES&                        fe_values,
+                      daeModel*                         model,
+                      BlockSparsityPattern&             sparsity_pattern,
+                      std::vector<unsigned int>&        local_dof_indices,
+                      map_String_FunctionPtr&           mapFunctions,
+                      map_String_adoubleFunctionPtr&    mapAdoubleFunctions,
+                      map_String_FEValuesExtractor&     mapExtractors):
         m_fe_values(fe_values),
+        m_model(model),
+        m_sparsity_pattern(sparsity_pattern),
+        m_local_dof_indices(local_dof_indices),
         m_mapFunctions(mapFunctions),
         m_mapAdoubleFunctions(mapAdoubleFunctions),
         m_mapExtractors(mapExtractors),
@@ -100,6 +106,8 @@ public:
         m_j(-1),
         m_q(-1)
     {
+        if(!m_model)
+            throw std::runtime_error(std::string("Model not set in feCellContext<dim>"));
     }
 
 public:
@@ -279,6 +287,43 @@ public:
         return *(iter->second);
     }
 
+    virtual adouble daeVariable_value(const std::string& variableName, unsigned int localIndex) const
+    {
+        // a) Find the index within block using the local cell dof index
+        int global_dof_index = m_local_dof_indices[localIndex];
+        const BlockIndices & index_mapping = m_sparsity_pattern.get_column_indices();
+        //             <block_index,  index_in_block>
+        std::pair<unsigned int, BlockIndices::size_type> block_index = index_mapping.global_to_local(global_dof_index);
+        unsigned int index_in_block = block_index.second;
+
+        //printf("dof_number = %d -> (block=%d, block_index = %d) \n", global_dof_index, block_index.first, block_index.second);
+
+        // b) Find variable in the parent model using its name
+        daeVariable* variable = NULL;
+        std::vector<daeVariable_t*> arrVariables;
+        m_model->GetVariables(arrVariables);
+        for(int i = 0; i < arrVariables.size(); i++)
+        {
+            daeVariable* pVariable = dynamic_cast<daeVariable*>(arrVariables[i]);
+            if(pVariable && pVariable->GetName() == variableName)
+            {
+                variable = pVariable;
+                break;
+            }
+        }
+        if(!variable)
+            throw std::runtime_error(std::string("Cannot find DOF ") + variableName);
+
+        // c) Create adouble
+        size_t n = variable->GetNumberOfPoints();
+        if(index_in_block >= n)
+            throw std::runtime_error(std::string("DOF ") + variableName + std::string(" index out of bounds: ") +
+                                     toString(localIndex) + std::string(" >= ") + toString(n));
+
+        return (*variable)(index_in_block);
+
+    }
+
     virtual unsigned int q() const
     {
         return m_q;
@@ -296,6 +341,9 @@ public:
 
 public:
     FE_VALUES&                      m_fe_values;
+    daeModel*                       m_model;
+    BlockSparsityPattern&           m_sparsity_pattern;
+    std::vector<unsigned int>&      m_local_dof_indices;
     map_String_FunctionPtr&         m_mapFunctions;
     map_String_adoubleFunctionPtr&  m_mapAdoubleFunctions;
     map_String_FEValuesExtractor&   m_mapExtractors;
@@ -394,14 +442,15 @@ public:
     virtual ~dealiiFiniteElementSystem();
 
 public:
+    virtual void SetModel(daeModel* pModel);
     virtual void AssembleSystem();
     virtual bool NeedsReAssembling();
     virtual void ReAssembleSystem();
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
-    virtual dae::daeMatrix<adouble>*     Asystem() const; // Stiffness matrix
-    virtual dae::daeMatrix<adouble>*     Msystem() const; // Mass matrix (dt)
-    virtual dae::daeArray<adouble>*      Fload() const;   // Load vector
+    virtual dae::daeMatrix<adouble>*    Asystem() const; // Stiffness matrix
+    virtual dae::daeMatrix<adouble>*    Msystem() const; // Mass matrix (dt)
+    virtual dae::daeArray<adouble>*     Fload() const;   // Load vector
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
     virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
     virtual dealIIDataReporter*         CreateDataReporter();
@@ -436,6 +485,7 @@ public:
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
 
     // Model-specific data
+    daeModel*                                 m_model;
     dealiiFiniteElementWeakForm<dim>*         m_weakForm;
     std::vector<dealiiFiniteElementDOF<dim>*> m_DOFs;
     unsigned int                              m_no_components;
@@ -447,6 +497,16 @@ template <int dim>
 dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
     dof_handler (triangulation)
 {
+    m_model    = NULL;
+    m_weakForm = NULL;
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::SetModel(daeModel* pModel)
+{
+    m_model = pModel;
+    if(!m_model)
+        throw std::runtime_error(std::string("Model not set"));
 }
 
 template <int dim>
@@ -624,8 +684,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         currentIndex += dof.m_nMultiplicity;
     }
 
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_model, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_model, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
 
     // Interpolate Dirichlet boundary conditions on the system matrix and rhs
     std::vector< std::map<types::global_dof_index, double> > arr_boundary_values_map;

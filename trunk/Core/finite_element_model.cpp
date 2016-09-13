@@ -20,6 +20,8 @@ daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pMod
     if(!m_fe)
         daeDeclareAndThrowException(exInvalidPointer);
 
+    m_fe->SetModel(this);
+
     // Initialize daetools wrapper matrices and arrays that will be used by adFEMatrixItem/VectorItem nodes
     m_Aij.reset(m_fe->Asystem());
     m_Mij.reset(m_fe->Msystem());

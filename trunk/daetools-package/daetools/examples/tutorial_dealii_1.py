@@ -65,9 +65,10 @@ class modTutorial(daeModel):
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)              * function_adouble_value_2D("adouble_fn", xyz_2D(fe_q)),
-                                                  Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D('Diffusivity', xyz_2D(fe_q)) * JxW_2D(fe_q),
+                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)              
+                                                         * function_adouble_value_2D('adouble_fn', xyz_2D(fe_q)), # to test adouble Function<dim> use the constant function that returns 1
+                                                  Fi  = dof_adouble_2D('T', fe_i) * 0, # as a test get the value of T(i), but the term evaluates to zero so it is neglected
                                                   faceAij = {},
                                                   faceFi  = {},
                                                   functions = functions,

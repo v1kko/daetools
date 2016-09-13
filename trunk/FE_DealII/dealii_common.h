@@ -1046,6 +1046,8 @@ public:
     virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
     virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
+    virtual adouble daeVariable_value(const std::string& variableName, unsigned int localIndex) const = 0;
+
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
     virtual unsigned int j() const = 0;
@@ -1583,16 +1585,16 @@ public:
         if(m_call == eFunctionValue)
         {
             if(m_component == -1)
-                return (boost::format("fvalue_adouble('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
+                return (boost::format("fvalue_adouble('%s', %s)") % m_name % m_xyz_node->ToString()).str();
             else
-                return (boost::format("fvalue_adouble('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+                return (boost::format("fvalue_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else if(m_call == eFunctionGradient)
         {
             if(m_component == -1)
-                return (boost::format("fgrad_adouble('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
+                return (boost::format("fgrad_adouble('%s', %s)") % m_name % m_xyz_node->ToString()).str();
             else
-                return (boost::format("fgrad_adouble('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+                return (boost::format("fgrad_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -1604,6 +1606,34 @@ public:
     efeFunctionCall m_call;
     unsigned int    m_component;
 };
+
+template<int dim>
+class feNode_dof : public feNode<dim>
+{
+public:
+    feNode_dof(const std::string& dofName, int i)
+    {
+        m_dofName  = dofName;
+        m_i        = i;
+    }
+    
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int index = getIndex<dim>(m_i, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->daeVariable_value(m_dofName, index) );
+    }
+    
+    std::string ToString() const
+    {
+        return (boost::format("dof('%s', %s)") % m_dofName % getIndex(m_i)).str();
+    }
+    
+public:
+    std::string  m_dofName;
+    int          m_i;
+};
+
 
 enum efeUnaryFunction
 {
@@ -2055,6 +2085,12 @@ template<int dim>
 feExpression<dim> function_adouble_value2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
+}
+
+template<int dim>
+feExpression<dim> dof_adouble(const std::string& variableName, int i)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dof<dim>(variableName, i) ) );
 }
 
 
