@@ -50,7 +50,7 @@ class modTutorial(daeModel):
         functions['Generation']  = ConstantFunction_2D(0.0)
         # Dummy constant function that returns adouble as a value.
         # It can be used to couple deal.II with daetools 
-        functions['adouble_fn']  = adoubleConstantFunction_2D(adouble(0.0))
+        functions['adouble_fn']  = adoubleConstantFunction_2D(adouble(1.0))
         
         dirichletBC    = {}
         dirichletBC[0] = [('T', ConstantFunction_2D(200))] # outer boundary
@@ -66,7 +66,7 @@ class modTutorial(daeModel):
                                           multiplicity=1)]
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
+                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)              * function_adouble_value_2D("adouble_fn", xyz_2D(fe_q)),
                                                   Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   faceAij = {},
                                                   faceFi  = {},
@@ -147,15 +147,11 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
     simulation = simTutorial()
-    tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
 
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()        
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_1-')
     feDataReporter.Connect(results_folder, simName)
     try:
@@ -182,15 +178,10 @@ def consoleRun():
     daesolver.SetLASolver(lasolver)
 
     # Create two data reporters: TCP/IP and DealII
-    tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
     feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results'), simName)
 
     # Enable reporting of all variables
@@ -204,8 +195,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
     
     # Save the model report and the runtime model report
-    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

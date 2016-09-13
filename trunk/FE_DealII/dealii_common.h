@@ -266,6 +266,7 @@ public:
 enum efeNumberType
 {
     eFEScalar = 0,
+    eFEScalar_adouble,
     eFECurl2D,
     eFETensor1,
     eFETensor2,
@@ -327,6 +328,12 @@ public:
         m_value = v;
     }
 
+    feRuntimeNumber(const adouble& a)
+    {
+        m_eType = eFEScalar_adouble;
+        m_adouble_value = a;
+    }
+
     /* CURL
     feRuntimeNumber(const Tensor<1, 1, double>& t)
     {
@@ -364,6 +371,10 @@ public:
         if(m_eType == eFEScalar)
         {
             return (boost::format("%f") % m_value).str();
+        }
+        else if(m_eType == eFEScalar_adouble)
+        {
+            return (boost::format("(%f,%f,%p)") % m_adouble_value.getValue() % m_adouble_value.getDerivative() % (void*)m_adouble_value.node.get()).str();
         }
         /* CURL
         else if(m_eType == eFECurl2D)
@@ -422,6 +433,7 @@ public:
     Tensor<2, dim, double> m_tensor2;
     Tensor<3, dim, double> m_tensor3;
     double                 m_value;
+    adouble                m_adouble_value;
 };
 
 template<int dim>
@@ -432,6 +444,11 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = -fe.m_value;
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = -fe.m_adouble_value;
     }
     /* CURL
     else if(fe.m_eType == eFECurl2D)
@@ -474,6 +491,22 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value + r.m_value;
     }
+    else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        
+        adouble lad, rad;
+        if(l.m_eType == eFEScalar)
+            lad = l.m_value;
+        else if(l.m_eType == eFEScalar_adouble)
+            lad = l.m_adouble_value;
+        if(r.m_eType == eFEScalar)
+            rad = r.m_value;
+        else if(r.m_eType == eFEScalar_adouble)
+            rad = r.m_adouble_value;
+        
+        tmp.m_adouble_value = lad + rad;
+    }
     /* CURL
     else if(l.m_eType == eFECurl2D && r.m_eType == eFECurl2D)
     {
@@ -515,6 +548,22 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value - r.m_value;
     }
+    else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        
+        adouble lad, rad;
+        if(l.m_eType == eFEScalar)
+            lad = l.m_value;
+        else if(l.m_eType == eFEScalar_adouble)
+            lad = l.m_adouble_value;
+        if(r.m_eType == eFEScalar)
+            rad = r.m_value;
+        else if(r.m_eType == eFEScalar_adouble)
+            rad = r.m_adouble_value;
+        
+        tmp.m_adouble_value = lad - rad;
+    }
     /* CURL
     else if(l.m_eType == eFECurl2D && r.m_eType == eFECurl2D)
     {
@@ -555,6 +604,22 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value * r.m_value;
+    }
+    else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        
+        adouble lad, rad;
+        if(l.m_eType == eFEScalar)
+            lad = l.m_value;
+        else if(l.m_eType == eFEScalar_adouble)
+            lad = l.m_adouble_value;
+        if(r.m_eType == eFEScalar)
+            rad = r.m_value;
+        else if(r.m_eType == eFEScalar_adouble)
+            rad = r.m_adouble_value;
+        
+        tmp.m_adouble_value = lad * rad;
     }
     /* CURL
     else if(l.m_eType == eFECurl2D && r.m_eType == eFECurl2D)
@@ -659,7 +724,23 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
     if(l.m_eType == eFEScalar && r.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = l.m_value + r.m_value;
+        tmp.m_value = l.m_value / r.m_value;
+    }
+    else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        
+        adouble lad, rad;
+        if(l.m_eType == eFEScalar)
+            lad = l.m_value;
+        else if(l.m_eType == eFEScalar_adouble)
+            lad = l.m_adouble_value;
+        if(r.m_eType == eFEScalar)
+            rad = r.m_value;
+        else if(r.m_eType == eFEScalar_adouble)
+            rad = r.m_adouble_value;
+        
+        tmp.m_adouble_value = lad / rad;
     }
     /* CURL
     else if(l.m_eType == eFECurl2D && r.m_eType == eFEScalar)
@@ -717,6 +798,11 @@ feRuntimeNumber<dim> sin_(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = sin(fe.m_value);
     }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = sin(fe.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation sin(") + typeid(fe).name() + ")");
     return tmp;
@@ -730,6 +816,11 @@ feRuntimeNumber<dim> cos_(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = cos(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = cos(fe.m_adouble_value);
     }
     else
         throw std::runtime_error(std::string("Invalid operation cos(") + typeid(fe).name() + ")");
@@ -745,6 +836,11 @@ feRuntimeNumber<dim> tan_(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = tan(fe.m_value);
     }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = tan(fe.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation tan(") + typeid(fe).name() + ")");
     return tmp;
@@ -758,6 +854,11 @@ feRuntimeNumber<dim> asin_(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = asin(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = asin(fe.m_adouble_value);
     }
     else
         throw std::runtime_error(std::string("Invalid operation asin(") + typeid(fe).name() + ")");
@@ -773,6 +874,11 @@ feRuntimeNumber<dim> acos_(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = acos(fe.m_value);
     }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = acos(fe.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation acos(") + typeid(fe).name() + ")");
     return tmp;
@@ -786,6 +892,11 @@ feRuntimeNumber<dim> atan_(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = atan(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = atan(fe.m_adouble_value);
     }
     else
         throw std::runtime_error(std::string("Invalid operation atan(") + typeid(fe).name() + ")");
@@ -801,6 +912,11 @@ feRuntimeNumber<dim> sqrt_(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = sqrt(fe.m_value);
     }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = sqrt(fe.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation sqrt(") + typeid(fe).name() + ")");
     return tmp;
@@ -814,6 +930,11 @@ feRuntimeNumber<dim> log_(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = log(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = log(fe.m_adouble_value);
     }
     else
         throw std::runtime_error(std::string("Invalid operation log(") + typeid(fe).name() + ")");
@@ -829,6 +950,11 @@ feRuntimeNumber<dim> log10_(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = log10(fe.m_value);
     }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = log10(fe.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation log10(") + typeid(fe).name() + ")");
     return tmp;
@@ -843,6 +969,11 @@ feRuntimeNumber<dim> exp_(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFEScalar;
         tmp.m_value = exp(fe.m_value);
     }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = exp(fe.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation exp(") + typeid(fe).name() + ")");
     return tmp;
@@ -856,6 +987,11 @@ feRuntimeNumber<dim> abs_(const feRuntimeNumber<dim>& fe)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = abs(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = abs(fe.m_adouble_value);
     }
     else
         throw std::runtime_error(std::string("Invalid operation abs(") + typeid(fe).name() + ")");
@@ -1394,6 +1530,81 @@ public:
     unsigned int    m_component;
 };
 
+template<int dim>
+class feNode_adouble_function : public feNode<dim>
+{
+public:
+    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+
+    feNode_adouble_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = -1)
+    {
+        if(!dynamic_cast<feNode_xyz<dim>*>(xyz_node.get()))
+            throw std::runtime_error(std::string("An argument to the Function must be a point"));
+
+        if(call == eFunctionGradient)
+            throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
+
+        m_xyz_node = xyz_node;
+        m_name = name;
+        m_call = call;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        feRuntimeNumber<dim> node = m_xyz_node->Evaluate(pCellContext);
+
+        if(node.m_eType != eFEPoint)
+            throw std::runtime_error(std::string("An argument to the Function must be a point"));
+
+        if(m_call == eFunctionValue)
+        {
+            if(m_component == -1)
+                return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point) );
+            else
+                return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point, m_component) );
+
+        }
+        else if(m_call == eFunctionGradient)
+        {
+            throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
+        }
+        else
+        {
+            throw std::runtime_error(std::string("Invalid Function call type"));
+        }
+
+        return feRuntimeNumber<dim>();
+    }
+
+    std::string ToString() const
+    {
+        if(m_call == eFunctionValue)
+        {
+            if(m_component == -1)
+                return (boost::format("fvalue_adouble('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
+            else
+                return (boost::format("fvalue_adouble('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+        }
+        else if(m_call == eFunctionGradient)
+        {
+            if(m_component == -1)
+                return (boost::format("fgrad_adouble('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
+            else
+                return (boost::format("fgrad_adouble('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+        }
+        else
+            throw std::runtime_error(std::string("Invalid Function call type"));
+    }
+
+public:
+    feNodePtr       m_xyz_node;
+    std::string     m_name;
+    efeFunctionCall m_call;
+    unsigned int    m_component;
+};
+
 enum efeUnaryFunction
 {
     eSign,
@@ -1830,6 +2041,20 @@ template<int dim>
 feExpression<dim> function_gradient2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
+}
+
+
+
+template<int dim>
+feExpression<dim> function_adouble_value(const std::string& name, const feExpression<dim>& xyz)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionValue, xyz.m_node, -1) ) );
+}
+
+template<int dim>
+feExpression<dim> function_adouble_value2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
 }
 
 

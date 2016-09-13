@@ -64,6 +64,9 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
 # Neumann BC use either value() or gradient() functions.
 # Dirichlet BC use vector_value() with n_component = multiplicity of the equation.
 # Other functions use just the value().
+#
+# Nota bene:
+#   This function is derived from Function_2D class and returns "double" value/gradient
 class GradientFunction_2D(Function_2D):
     def __init__(self, gradient, direction, n_components = 1):
         Function_2D.__init__(self, n_components)
@@ -80,16 +83,23 @@ class GradientFunction_2D(Function_2D):
     def vector_gradient(self, point):
         return [self.gradient(point, c) for c in range(self.n_components)]
 
-class BottomGradientFunction_2D(Function_2D):
-    def __init__(self, gradient, n_components = 1):
-        Function_2D.__init__(self, n_components)
-        self.m_gradient = gradient
+# Nota bene:
+#   This function is derived from adoubleFunction_2D class and returns "adouble" value
+#   In this case, it is a function of daetools parameters/variables
+class BottomGradientFunction_2D(adoubleFunction_2D):
+    def __init__(self, model, n_components = 1):
+        adoubleFunction_2D.__init__(self, n_components)
+        self.model = model
         
     def value(self, point, component = 0):
+        # Actual adouble expression can only be evaluated here in value function
+        # which is called during DeclareEquations phase
+        gradient = self.model.flux1() + self.model.flux2()
+        
         if point.y < -0.5:
-            return self.m_gradient
+            return gradient
         else:
-            return 0.0
+            return adouble(0.0)
 
     def vector_value(self, point):
         return [self.value(point, c) for c in range(self.n_components)]
@@ -98,23 +108,28 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
+        # Used only to set the Neumann BC at the bottom to illustrate the use of adouble functions 
+        # and coupling between daetools and deal.ii
+        self.flux1 = daeParameter("flux1", unit(), self, "Flux as a parameter (half of the gradient)")
+        self.flux2 = daeVariable ("flux2",   no_t, self, "Flux as a variable (half of the gradient)")
+
         rho = 8960.0  # kg/m**3
         cp  =  385.0  # J/(kg*K)
         k   =  401.0  # W/(m*K)
         
-        flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) = 
-        flux_beneath = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        diffusivity  = k / (rho*cp)   # m**2/s
+        self.flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) = 
+        self.flux_beneath = 5.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
+        self.diffusivity  = k / (rho*cp)   # m**2/s
         
-        print('Thermal diffusivity = %f' % diffusivity)
-        print('Beneath source flux = %f' % flux_beneath)
-        print('Above source flux = %f x (1,-1)' % flux_above)
+        print('Thermal diffusivity = %f' % self.diffusivity)
+        print('Beneath source flux = %f' % self.flux_beneath)
+        print('Above source flux = %f x (1,-1)' % self.flux_above)
 
         functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(diffusivity)
+        functions['Diffusivity'] = ConstantFunction_2D(self.diffusivity)
         functions['Generation']  = ConstantFunction_2D(0.0)
-        functions['Flux_a']      = GradientFunction_2D(flux_above, direction = (-1, 1)) # Gradient flux at boundary id=0 (Sun)
-        functions['Flux_b']      = BottomGradientFunction_2D(flux_beneath)              # Constant flux at boundary id=1 (outer tube where y < -0.5)
+        functions['Flux_a']      = GradientFunction_2D(self.flux_above, direction = (-1, 1)) # Gradient flux at boundary id=0 (Sun)
+        functions['Flux_b']      = BottomGradientFunction_2D(self)                           # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
         
         dirichletBC    = {}
         dirichletBC[2] = [('T', ConstantFunction_2D(300))] # at boundary id=2 (inner tube)
@@ -132,7 +147,7 @@ class modTutorial(daeModel):
                                                   Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   faceAij = {},
                                                   faceFi  = {0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
-                                                             1: phi_2D('T', fe_i, fe_q) * function_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)},
+                                                             1: phi_2D('T', fe_i, fe_q) * function_adouble_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)},
                                                   functions = functions,
                                                   functionsDirichletBC = dirichletBC)
 
@@ -162,9 +177,11 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
-        pass
+        self.m.flux1.SetValue(self.m.flux_beneath / 2.0)
 
     def SetUpVariables(self):
+        self.m.flux2.AssignValue(self.m.flux_beneath / 2.0)
+        
         m_dt = self.m.fe_dealII.Msystem()
         T    = self.m.fe.dictVariables['T']
         
@@ -187,17 +204,13 @@ class simTutorial(daeSimulation):
     
 # Use daeSimulator class
 def guiRun(app):
-    simulation = simTutorial()
     datareporter = daeDelegateDataReporter()
-    tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
+    simulation = simTutorial()
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
 
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
     feDataReporter.Connect(results_folder, simName)
     try:
@@ -224,15 +237,10 @@ def consoleRun():
     daesolver.SetLASolver(lasolver)
 
     # Create two data reporters: TCP/IP and DealII
-    tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
     feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results'), simName)
 
     # Enable reporting of all variables
@@ -246,8 +254,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
     
     # Save the model report and the runtime model report
-    simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

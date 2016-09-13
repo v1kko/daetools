@@ -179,10 +179,10 @@ public:
 
 // Local interface
 public:	
-	void Open(io::xmlTag_t* pTag);
-	void Save(io::xmlTag_t* pTag) const;
-	void OpenRuntime(io::xmlTag_t* pTag);
-	void SaveRuntime(io::xmlTag_t* pTag) const;
+    virtual void Open(io::xmlTag_t* pTag);
+    virtual void Save(io::xmlTag_t* pTag) const;
+    virtual void OpenRuntime(io::xmlTag_t* pTag);
+    virtual void SaveRuntime(io::xmlTag_t* pTag) const;
 	
 	void Clone(const daeObject& rObject);
 	

@@ -160,15 +160,11 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
     simulation = simTutorial()
-    tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
 
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
     feDataReporter.Connect(results_folder, simName)
     try:
@@ -195,15 +191,10 @@ def consoleRun():
     daesolver.SetLASolver(lasolver)
 
     # Create two data reporters: TCP/IP and DealII
-    tcpipDataReporter = daeTCPIPDataReporter()
-    feDataReporter    = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-
     # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(tcpipDataReporter.Connect("", simName) == False):
-        sys.exit()
     feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results'), simName)
 
     # Enable reporting of all variables
@@ -217,8 +208,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    #simulation.m.fe.SaveModelReport(simulation.m.fe.Name + ".xml")
-    #simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + "-rt.xml")
+    simulation.m.fe.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

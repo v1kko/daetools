@@ -64,6 +64,19 @@ namespace fe_solver
 {
 using namespace dealii;
 
+template<int dim>
+adouble getValueFromNumber(const feRuntimeNumber<dim>& fe_number)
+{
+    if(fe_number.m_eType == eFEScalar)
+        return adouble(fe_number.m_value);
+    else if(fe_number.m_eType == eFEScalar_adouble)
+        return fe_number.m_adouble_value;
+    else
+        throw std::runtime_error(std::string("Invalid expression return type"));
+
+    return adouble();
+}
+
 /******************************************************************
     feCellContextImpl<dim>
 *******************************************************************/
@@ -678,11 +691,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     if(m_weakForm->m_Aij.m_node)
                     {
                         feRuntimeNumber<dim> result = m_weakForm->m_Aij.m_node->Evaluate(&cellContext);
-                        if(result.m_eType != eFEScalar)
-                            throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value)"));
+                        if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                            throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
 
                         //std::cout << "  cell_matrix 1 = " << cell_matrix(i,j).getValue() << ", +value " << result.m_value << std::endl;
-                        cell_matrix(i,j) += result.m_value;
+                        cell_matrix(i,j) += getValueFromNumber<dim>(result);
                         //std::cout << "  cell_matrix 2 = " << cell_matrix(i,j).getValue() << std::endl;
 
                         //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % m_weakForm.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
@@ -692,10 +705,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     if(m_weakForm->m_Mij.m_node)
                     {
                         feRuntimeNumber<dim> result = m_weakForm->m_Mij.m_node->Evaluate(&cellContext);
-                        if(result.m_eType != eFEScalar)
-                            throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value)"));
+                        if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                            throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value or adouble)"));
 
-                        cell_matrix_dt(i,j) += result.m_value;
+                        cell_matrix_dt(i,j) += getValueFromNumber<dim>(result);
                     }
                 }
 
@@ -705,11 +718,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     cellContext.m_j = -1; // Set the unphysical value since it must not be used in Fi contributions
 
                     feRuntimeNumber<dim> result = m_weakForm->m_Fi.m_node->Evaluate(&cellContext);
-                    if(result.m_eType != eFEScalar)
-                        throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value)"));
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value or adouble)"));
 
                     //std::cout << "cell rhs 1 = " << cell_rhs[i] << ", +value " << result.m_value << std::endl;
-                    cell_rhs[i] = cell_rhs[i] + result.m_value;
+                    cell_rhs[i] += getValueFromNumber<dim>(result);
                     //std::cout << "cell rhs 2 = " << cell_rhs[i] << std::endl;
                 }
             }
@@ -749,10 +762,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                         throw std::runtime_error(std::string("Empty faceAij expression specified"));
 
                                     feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
-                                    if(result.m_eType != eFEScalar)
-                                        throw std::runtime_error(std::string("Invalid faceAij expression specified (it must be a scalar value)"));
+                                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                                        throw std::runtime_error(std::string("Invalid faceAij expression specified (it must be a scalar value or adouble)"));
 
-                                    cell_matrix(i,j) += result.m_value;
+                                    cell_matrix(i,j) += getValueFromNumber<dim>(result);
                                 }
                             }
 
@@ -765,10 +778,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                 cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
 
                                 feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
-                                if(result.m_eType != eFEScalar)
-                                    throw std::runtime_error(std::string("Invalid faceFi expression specified (it must be a scalar value)"));
+                                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                                    throw std::runtime_error(std::string("Invalid faceFi expression specified (it must be a scalar value or adouble)"));
 
-                                cell_rhs[i] += result.m_value;
+                                cell_rhs[i] += getValueFromNumber<dim>(result);
                             }
                         }
                     }

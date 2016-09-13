@@ -702,6 +702,14 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("function_value_2D", &function_value2<2>, ( arg("functionName"), arg("point"), arg("component") ));
     def("function_value_3D", &function_value2<3>, ( arg("functionName"), arg("point"), arg("component") ));
 
+    def("function_adouble_value_1D", &function_adouble_value<1>, ( arg("functionName"), arg("point") ));
+    def("function_adouble_value_2D", &function_adouble_value<2>, ( arg("functionName"), arg("point") ));
+    def("function_adouble_value_3D", &function_adouble_value<3>, ( arg("functionName"), arg("point") ));
+
+    def("function_adouble_value_1D", &function_adouble_value2<1>, ( arg("functionName"), arg("point"), arg("component") ));
+    def("function_adouble_value_2D", &function_adouble_value2<2>, ( arg("functionName"), arg("point"), arg("component") ));
+    def("function_adouble_value_3D", &function_adouble_value2<3>, ( arg("functionName"), arg("point"), arg("component") ));
+
     def("function_gradient_1D", &function_gradient<1>, ( arg("functionName"), arg("point") ));
     def("function_gradient_2D", &function_gradient<2>, ( arg("functionName"), arg("point") ));
     def("function_gradient_3D", &function_gradient<3>, ( arg("functionName"), arg("point") ));
