@@ -1817,6 +1817,17 @@ feExpression<dim> operator /(const feExpression<dim>& l, const feExpression<dim>
     return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eDivide, l.m_node, r.m_node) ));
 }
 
+template<int dim>
+feExpression<dim> operator -(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eSign, fe.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> operator +(const feExpression<dim>& fe)
+{
+    return fe;
+}
 
 template<int dim>
 feExpression<dim> operator +(const feExpression<dim>& l, double r)
@@ -1889,12 +1900,6 @@ feExpression<dim> operator /(double l, const feExpression<dim>& r)
     return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eDivide, lnode, r.m_node) ));
 }
 
-
-template<int dim>
-feExpression<dim> operator -(const feExpression<dim>& fe)
-{
-    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eSign, fe.m_node) ));
-}
 
 template<int dim>
 feExpression<dim> sqrt(const feExpression<dim>& fe)

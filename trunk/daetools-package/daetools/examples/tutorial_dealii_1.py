@@ -48,9 +48,6 @@ class modTutorial(daeModel):
         functions = {}
         functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
         functions['Generation']  = ConstantFunction_2D(0.0)
-        # Dummy constant function that returns adouble as a value.
-        # It can be used to couple deal.II with daetools 
-        functions['adouble_fn']  = adoubleConstantFunction_2D(adouble(1.0))
         
         dirichletBC    = {}
         dirichletBC[0] = [('T', ConstantFunction_2D(200))] # outer boundary
@@ -66,9 +63,8 @@ class modTutorial(daeModel):
                                           multiplicity=1)]
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D('Diffusivity', xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)              
-                                                         * function_adouble_value_2D('adouble_fn', xyz_2D(fe_q)), # to test adouble Function<dim> use the constant function that returns 1
-                                                  Fi  = dof_adouble_2D('T', fe_i) * 0, # as a test get the value of T(i), but the term evaluates to zero so it is neglected
+                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
+                                                  Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   faceAij = {},
                                                   faceFi  = {},
                                                   functions = functions,

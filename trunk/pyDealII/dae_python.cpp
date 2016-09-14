@@ -567,6 +567,9 @@ BOOST_PYTHON_MODULE(pyDealII)
 
 
     class_< feExpression<1> >("feExpression_1D", no_init)
+        .def(- self)
+        .def(+ self)
+
         .def(self + self)
         .def(self - self)
         .def(self * self)
@@ -599,6 +602,9 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_< feExpression<2> >("feExpression_2D", no_init)
+        .def(- self)
+        .def(+ self)
+
         .def(self + self)
         .def(self - self)
         .def(self * self)
@@ -631,6 +637,9 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_< feExpression<3> >("feExpression_3D", no_init)
+        .def(- self)
+        .def(+ self)
+
         .def(self + self)
         .def(self - self)
         .def(self * self)
