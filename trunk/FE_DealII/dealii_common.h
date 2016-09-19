@@ -496,15 +496,21 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar_adouble;
         
         adouble lad, rad;
+
         if(l.m_eType == eFEScalar)
             lad = l.m_value;
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " + " + typeid(r).name());
+
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
-        
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " + " + typeid(r).name());
+
         tmp.m_adouble_value = lad + rad;
     }
     /* CURL
@@ -553,15 +559,21 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar_adouble;
         
         adouble lad, rad;
+
         if(l.m_eType == eFEScalar)
             lad = l.m_value;
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " - " + typeid(r).name());
+
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
-        
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " - " + typeid(r).name());
+
         tmp.m_adouble_value = lad - rad;
     }
     /* CURL
@@ -614,11 +626,16 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
             lad = l.m_value;
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " * " + typeid(r).name());
+
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
-        
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " * " + typeid(r).name());
+
         tmp.m_adouble_value = lad * rad;
     }
     /* CURL
@@ -735,11 +752,16 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
             lad = l.m_value;
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " / " + typeid(r).name());
+
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
-        
+        else
+            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " / " + typeid(r).name());
+
         tmp.m_adouble_value = lad / rad;
     }
     /* CURL
@@ -1047,6 +1069,8 @@ public:
     virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
     virtual adouble daeVariable_value(const std::string& variableName, unsigned int localIndex) const = 0;
+
+    virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
@@ -1634,6 +1658,33 @@ public:
     int          m_i;
 };
 
+template<int dim>
+class feNode_dof_approximation : public feNode<dim>
+{
+public:
+    feNode_dof_approximation(const std::string& dofName, int q)
+    {
+        m_dofName  = dofName;
+        m_q        = q;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int index = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->dof_approximation(m_dofName, index) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("dof_approximation('%s', %s)") % m_dofName % getIndex(m_q)).str();
+    }
+
+public:
+    std::string  m_dofName;
+    int          m_q;
+};
+
 
 enum efeUnaryFunction
 {
@@ -2093,9 +2144,15 @@ feExpression<dim> function_adouble_value2(const std::string& name, const feExpre
 }
 
 template<int dim>
-feExpression<dim> dof_adouble(const std::string& variableName, int i)
+feExpression<dim> dof(const std::string& variableName, int i)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dof<dim>(variableName, i) ) );
+}
+
+template<int dim>
+feExpression<dim> dof_approximation(const std::string& variableName, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dof_approximation<dim>(variableName, q) ) );
 }
 
 

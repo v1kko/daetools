@@ -366,6 +366,45 @@ inline void local_apply_boundary_values (const std::map<types::global_dof_index,
     }
 }
 
+// This is my version of the local_apply_boundary_values function (NOT a specialization)!
+inline void local_process_mass_matrix(const std::map<types::global_dof_index,double> &boundary_values,
+                                      const std::vector<types::global_dof_index> &local_dof_indices,
+                                      boost::numeric::ublas::matrix<adouble>& local_mass_matrix,
+                                      const bool eliminate_columns = true)
+{
+  Assert (local_dof_indices.size() == local_mass_matrix.m(),
+          ExcDimensionMismatch(local_dof_indices.size(),
+                               local_mass_matrix.m()));
+  Assert (local_dof_indices.size() == local_mass_matrix.n(),
+          ExcDimensionMismatch(local_dof_indices.size(),
+                               local_mass_matrix.n()));
+
+  // if there is nothing to do, then exit
+  // right away
+  if (boundary_values.size() == 0)
+    return;
+
+  const unsigned int n_local_dofs = local_dof_indices.size();
+  for (unsigned int i=0; i<n_local_dofs; ++i)
+    {
+      const std::map<types::global_dof_index, double>::const_iterator boundary_value = boundary_values.find (local_dof_indices[i]);
+      if (boundary_value != boundary_values.end())
+        {
+          // remove this row, and the diagonal element
+          for (unsigned int j=0; j<n_local_dofs; ++j)
+              local_mass_matrix(i,j) = 0;
+
+          // finally do the elimination step
+          // if requested
+          if (eliminate_columns == true)
+          {
+              for (unsigned int row=0; row<n_local_dofs; ++row)
+                  local_mass_matrix(row,i) = 0;
+          }
+        }
+    }
+}
+
 /*
  * Specialization for Number=adouble (not used anymore - the local_apply_boundary_values is used now)!
  * Not sure if it works at all!

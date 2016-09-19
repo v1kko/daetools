@@ -19,7 +19,7 @@ Installation instructions
   python setup.py install
 
 - Windows (.exe):
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.5.0" --bitmap wininst.bmp
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.6.0" --bitmap wininst.bmp
 
 Create .tar.gz under GNU/Linux:
   python setup.py sdist --formats=gztar
@@ -172,7 +172,7 @@ elif platform.system() == 'Darwin':
     fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)
 
 setup(name = 'daetools',
-      version = '1.5.0',
+      version = '1.6.0',
       description = 'DAE Tools',
       long_description = 'Object-oriented equation-baseds modelling, simulation and optimisation software.',
       author = 'Dragan Nikolic',

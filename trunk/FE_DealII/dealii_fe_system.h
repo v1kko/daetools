@@ -11,6 +11,7 @@
 
 #include "dealii_common.h"
 #include "dealii_datareporter.h"
+#include "../Core/nodes.h"
 
 #include <deal.II/base/quadrature_lib.h>
 #include <deal.II/base/function.h>
@@ -324,6 +325,30 @@ public:
 
     }
 
+    virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error("Cannot find variable " + variableName);
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
+        if(!extractorScalar)
+            throw std::runtime_error("Invalid call to phi() for the non-scalar variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        adouble ad_approximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            adouble dof   = daeVariable_value(variableName, j);
+            double  phi_j = m_fe_values[*extractorScalar].value(j, q);
+
+            ad_approximation = ad_approximation + dof * phi_j;
+        }
+
+        return ad_approximation;
+    }
+
     virtual unsigned int q() const
     {
         return m_q;
@@ -398,27 +423,30 @@ template <int dim>
 class dealiiFiniteElementWeakForm
 {
 public:
-    typedef typename std::map<unsigned int, const Function<dim>*>                  map_Uint_FunctionPtr;
-    typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
-    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
-    typedef typename std::map<unsigned int, feExpression<dim> >                    map_Uint_Expression;
-    typedef typename std::map<std::string,  const Function<dim,double>*>           map_String_FunctionPtr;
-    typedef typename std::map<std::string,  const Function<dim,adouble>*>          map_String_adoubleFunctionPtr;
+    typedef typename std::map<unsigned int, const Function<dim,double>*>                    map_Uint_FunctionPtr;
+    typedef typename std::pair<std::string, const Function<dim,double>*>                    pair_String_FunctionPtr;
+    typedef typename std::pair<std::string, const Function<dim,adouble>*>                   pair_String_adoubleFunctionPtr;
+    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> >          map_Uint_vector_pair_String_FunctionPtr;
+    typedef typename std::map<unsigned int, std::vector<pair_String_adoubleFunctionPtr> >   map_Uint_vector_pair_String_adoubleFunctionPtr;
+    typedef typename std::map<unsigned int, feExpression<dim> >                             map_Uint_Expression;
+    typedef typename std::map<std::string,  const Function<dim,double>*>                    map_String_FunctionPtr;
+    typedef typename std::map<std::string,  const Function<dim,adouble>*>                   map_String_adoubleFunctionPtr;
 
     dealiiFiniteElementWeakForm()
     {
     }
 
 public:
-    bool                                    m_bNeedsUpdate;
-    feExpression<dim>                       m_Aij;  // Stiffness matrix
-    feExpression<dim>                       m_Mij;  // Mass matrix (dt)
-    feExpression<dim>                       m_Fi;   // Load vector (rhs)
-    map_Uint_Expression                     m_faceAij;
-    map_Uint_Expression                     m_faceFi;
-    map_String_FunctionPtr                  m_functions;
-    map_String_adoubleFunctionPtr           m_adouble_functions;
-    map_Uint_vector_pair_String_FunctionPtr m_functionsDirichletBC;
+    bool                                            m_bNeedsUpdate; // Not used at the moment
+    feExpression<dim>                               m_Aij;  // Stiffness matrix
+    feExpression<dim>                               m_Mij;  // Mass matrix (dt)
+    feExpression<dim>                               m_Fi;   // Load vector (rhs)
+    map_Uint_Expression                             m_faceAij;
+    map_Uint_Expression                             m_faceFi;
+    map_String_FunctionPtr                          m_functions;
+    map_String_adoubleFunctionPtr                   m_adouble_functions;
+    map_Uint_vector_pair_String_FunctionPtr         m_functionsDirichletBC;
+    map_Uint_vector_pair_String_adoubleFunctionPtr  m_adoubleFunctionsDirichletBC;
 };
 
 /******************************************************************
@@ -630,6 +658,68 @@ void dealiiFiniteElementSystem<dim>::AssembleSystem()
     this->assemble_system();
 }
 
+adNodePtr simplify(adNodePtr node);
+
+adNodePtr simplify(adNodePtr node)
+{
+    if(dynamic_cast<adUnaryNode*>(node.get()))
+    {
+        return node;
+    }
+    else if(dynamic_cast<adBinaryNode*>(node.get()))
+    {
+        adBinaryNode* bn = dynamic_cast<adBinaryNode*>(node.get());
+        adNodePtr left_s  = simplify(bn->left);
+        adNodePtr right_s = simplify(bn->right);
+
+        adNode* left  = left_s.get();
+        adNode* right = right_s.get();
+
+        if(dynamic_cast<adConstantNode*>(left) && dynamic_cast<adConstantNode*>(right)) // c OP c => return a value
+        {
+            adConstantNode* cleft  = dynamic_cast<adConstantNode*>(left);
+            adConstantNode* cright = dynamic_cast<adConstantNode*>(right);
+
+            if(bn->eFunction == dae::core::ePlus)
+                return adNodePtr(new adConstantNode(cleft->m_quantity + cright->m_quantity));
+            else if(bn->eFunction == dae::core::eMinus)
+                return adNodePtr(new  adConstantNode(cleft->m_quantity - cright->m_quantity));
+            else if(bn->eFunction == dae::core::eMulti)
+                return adNodePtr(new  adConstantNode(cleft->m_quantity * cright->m_quantity));
+            else if(bn->eFunction == dae::core::eDivide)
+                return adNodePtr(new  adConstantNode(cleft->m_quantity / cright->m_quantity));
+        }
+        else if(dynamic_cast<adConstantNode*>(left)) // if left == 0
+        {
+            adConstantNode* cn = dynamic_cast<adConstantNode*>(left);
+            if(cn->m_quantity.getValue() == 0)
+            {
+                if(bn->eFunction == dae::core::ePlus) // 0 + right => right
+                    return right_s;
+                else if(bn->eFunction == dae::core::eMulti) // 0 * right => 0 (that is left)
+                    return left_s;
+            }
+        }
+        else if(dynamic_cast<adConstantNode*>(right)) // if right == 0
+        {
+            adConstantNode* cn = dynamic_cast<adConstantNode*>(right);
+            if(cn->m_quantity.getValue() == 0)
+            {
+                if(bn->eFunction == dae::core::ePlus) // left + 0 => left
+                    return left_s;
+                else if(bn->eFunction == dae::core::eMulti) // left * 0 => 0 (that is right)
+                    return right_s;
+            }
+        }
+
+        return node;
+    }
+    else
+    {
+        return node;
+    }
+}
+
 template <int dim>
 void dealiiFiniteElementSystem<dim>::assemble_system()
 {
@@ -755,7 +845,17 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                             throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
 
                         //std::cout << "  cell_matrix 1 = " << cell_matrix(i,j).getValue() << ", +value " << result.m_value << std::endl;
-                        cell_matrix(i,j) += getValueFromNumber<dim>(result);
+
+                        //daeNodeSaveAsContext c(m_model);
+                        adouble res = getValueFromNumber<dim>(result);
+                        if(res.node)
+                        {
+                            //std::cout << "Before: $" << res.node->SaveAsLatex(&c) << "$" << std::endl;
+                            res.node = simplify(res.node);
+                            //std::cout << "After: $" << res.node->SaveAsLatex(&c) << "$" << std::endl;
+                        }
+
+                        cell_matrix(i,j) += res;
                         //std::cout << "  cell_matrix 2 = " << cell_matrix(i,j).getValue() << std::endl;
 
                         //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % m_weakForm.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
@@ -768,7 +868,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                             throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value or adouble)"));
 
-                        cell_matrix_dt(i,j) += getValueFromNumber<dim>(result);
+                        adouble res = getValueFromNumber<dim>(result);
+                        if(res.node)
+                            res.node = simplify(res.node);
+
+                        cell_matrix_dt(i,j) += res;
                     }
                 }
 
@@ -781,9 +885,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                         throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value or adouble)"));
 
-                    //std::cout << "cell rhs 1 = " << cell_rhs[i] << ", +value " << result.m_value << std::endl;
-                    cell_rhs[i] += getValueFromNumber<dim>(result);
-                    //std::cout << "cell rhs 2 = " << cell_rhs[i] << std::endl;
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = simplify(res.node);
+
+                    cell_rhs[i] += res;
                 }
             }
         }
@@ -825,7 +931,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                                         throw std::runtime_error(std::string("Invalid faceAij expression specified (it must be a scalar value or adouble)"));
 
-                                    cell_matrix(i,j) += getValueFromNumber<dim>(result);
+                                    adouble res = getValueFromNumber<dim>(result);
+                                    if(res.node)
+                                        res.node = simplify(res.node);
+
+                                    cell_matrix(i,j) += res;
                                 }
                             }
 
@@ -841,7 +951,11 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                 if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                                     throw std::runtime_error(std::string("Invalid faceFi expression specified (it must be a scalar value or adouble)"));
 
-                                cell_rhs[i] += getValueFromNumber<dim>(result);
+                                adouble res = getValueFromNumber<dim>(result);
+                                if(res.node)
+                                    res.node = simplify(res.node);
+
+                                cell_rhs[i] += res;
                             }
                         }
                     }
@@ -867,14 +981,20 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         printf("]\n");
         printf("\n");
     */
-        // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
         for(size_t i = 0; i < arr_boundary_values_map.size(); i++)
         {
             std::map<types::global_dof_index, double>& boundary_values = arr_boundary_values_map[i];
+
+            // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
             MatrixTools::local_apply_boundary_values(boundary_values,
                                                      local_dof_indices,
                                                      cell_matrix,
                                                      cell_rhs);
+
+            // Modify the local mass atrix for those nodes that have Dirichlet boundary conditions set
+            MatrixTools::local_process_mass_matrix(boundary_values,
+                                                   local_dof_indices,
+                                                   cell_matrix_dt);
         }
     /*
         printf("cell_matrix after bcs:\n");
@@ -909,12 +1029,12 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 // This dof IS on one of boundaries; therefore, remove its contributions to the cell_matrix_dt
 
                 // 1. Reset the whole row 'i'
-                for(unsigned int j = 0; j < dofs_per_cell; ++j)
-                    cell_matrix_dt(i, j) = 0;
+//                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+//                    cell_matrix_dt(i, j) = 0;
 
                 // 2. Reset the whole column 'i'
-                for(unsigned int j = 0; j < dofs_per_cell; ++j)
-                    cell_matrix_dt(j, i) = 0;
+//                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+//                    cell_matrix_dt(j, i) = 0;
             }
         }
 

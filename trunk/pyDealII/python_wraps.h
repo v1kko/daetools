@@ -537,20 +537,42 @@ public:
 
             unsigned int key = boost::python::extract<unsigned int>(key_);
 
-            std::vector< std::pair<std::string, const Function<dim>*> > bcs;
+            std::vector< std::pair<std::string, const Function<dim,double>*> >  bcs_double;
+            std::vector< std::pair<std::string, const Function<dim,adouble>*> > bcs_adouble;
             for(int k = 0; k < len(vals_); k++)
             {
                 boost::python::tuple  t_var_fn = boost::python::extract<boost::python::tuple>(vals_[k]);
                 boost::python::object o_var = t_var_fn[0];
                 boost::python::object o_fn  = t_var_fn[1];
 
-                std::string          var = boost::python::extract<std::string>(o_var);
-                const Function<dim>* fn  = boost::python::extract<const Function<dim>*>(o_fn);
+                std::string var = boost::python::extract<std::string>(o_var);
 
-                bcs.push_back( std::pair<std::string, const Function<dim>*>(var,fn) );
+                boost::python::extract<const Function<dim,double >*> get_double_fn (o_fn);
+                boost::python::extract<const Function<dim,adouble>*> get_adouble_fn(o_fn);
+
+                if(get_double_fn.check())
+                {
+                    const Function<dim,double>* fn = get_double_fn();
+                    bcs_double.push_back( std::pair<std::string, const Function<dim,double>*>(var,fn) );
+                }
+                else if(get_adouble_fn.check())
+                {
+                    const Function<dim,adouble>* fn = get_adouble_fn();
+                    bcs_adouble.push_back( std::pair<std::string, const Function<dim,adouble>*>(var,fn) );
+                }
+                else
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "Invalid function " << key << " in the functions dictionary";
+                    throw e;
+                }
+
             }
 
-            this->m_functionsDirichletBC[key] = bcs;
+            if(bcs_double.size() > 0)
+                this->m_functionsDirichletBC[key] = bcs_double;
+            if(bcs_adouble.size() > 0)
+                this->m_adoubleFunctionsDirichletBC[key] = bcs_adouble;
         }
 
         keys = dictFunctions.keys();

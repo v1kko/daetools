@@ -743,9 +743,13 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("div_phi_2D", &div_phi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("div_phi_3D", &div_phi<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
-    def("dof_adouble_1D", &dof_adouble<1>, ( arg("variableName"), arg("shapeFunction") ));
-    def("dof_adouble_2D", &dof_adouble<2>, ( arg("variableName"), arg("shapeFunction") ));
-    def("dof_adouble_3D", &dof_adouble<3>, ( arg("variableName"), arg("shapeFunction") ));
+    def("dof_1D", &dof<1>, ( arg("variableName"), arg("shapeFunction") ));
+    def("dof_2D", &dof<2>, ( arg("variableName"), arg("shapeFunction") ));
+    def("dof_3D", &dof<3>, ( arg("variableName"), arg("shapeFunction") ));
+
+    def("dof_approximation_1D", &dof_approximation<1>, ( arg("variableName"), arg("quadraturePoint") ));
+    def("dof_approximation_2D", &dof_approximation<2>, ( arg("variableName"), arg("quadraturePoint") ));
+    def("dof_approximation_3D", &dof_approximation<3>, ( arg("variableName"), arg("quadraturePoint") ));
 
     /* CURL
     def("curl_2D", &curl<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
