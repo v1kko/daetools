@@ -745,7 +745,14 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
-		adRuntimeVariableNode* node = new adRuntimeVariableNode();
+        std::map<size_t, adouble>::const_iterator it = m_mapRuntimeVariableNodes.find(nIndex);
+        if(it != m_mapRuntimeVariableNodes.end()) // if found
+        {
+            //std::cout << "Found runtime variable " << GetName() << "[" << nIndex << "] in the map" << std::endl;
+            return it->second;
+        }
+        
+        adRuntimeVariableNode* node = new adRuntimeVariableNode();
 		node->m_pVariable     = const_cast<daeVariable*>(this);
 		node->m_nOverallIndex = nIndex;
 		if(N > 0)
@@ -756,7 +763,13 @@ adouble daeVariable::Create_adouble(const size_t* indexes, const size_t N) const
 		}
 		tmp.node = adNodePtr(node);
 		tmp.setGatherInfo(true);
-	}
+        
+        // Add it to the map for it has not been added yet
+        daeVariable* self = const_cast<daeVariable*>(this);
+        self->m_mapRuntimeVariableNodes[nIndex] = tmp;
+        //std::cout << "Added runtime variable " << GetName() << "[" << nIndex << "] to the map" << std::endl;
+    }
+	
 	return tmp;
 }
 
@@ -804,19 +817,53 @@ adouble daeVariable::CreateSetupVariable(const daeDomainIndex* indexes, const si
 		}
 	}
 
-	adouble tmp;
-	adSetupVariableNode* node = new adSetupVariableNode();
-	node->m_pVariable = const_cast<daeVariable*>(this);
+    // If all daeDomainIndexes are integers store the adNodePtr in the map
+    std::vector<size_t> int_indexes;
+    if(N > 0)
+        int_indexes.reserve(N);
+    for(size_t i = 0; i < N; i++)
+    {
+        if(indexes[i].m_eType == eConstantIndex)
+            int_indexes.push_back(indexes[i].m_nIndex);
+        else
+            break;
+    }
 
-	if(N > 0)
-	{
-		node->m_arrDomains.resize(N);
-		for(size_t i = 0; i < N; i++)
-			node->m_arrDomains[i] = indexes[i];
-	}
-	tmp.node = adNodePtr(node);
-	tmp.setGatherInfo(true);
-	return tmp;
+    size_t nOverallIndex = -1;
+    if(int_indexes.size() == N) // all indexes are constant indexes
+    {
+        nOverallIndex = CalculateIndex(int_indexes);
+        std::map<size_t, adouble>::const_iterator it = m_mapSetupVariableNodes.find(nOverallIndex);
+        if(it != m_mapSetupVariableNodes.end()) // if found
+        {
+            //std::cout << "Found variable " << GetName() << "(" << int_indexes[0] << ") in the map" << std::endl;
+            return it->second;
+        }
+    }
+
+    // Not found in the map: create a new one
+    adouble tmp;
+    adSetupVariableNode* node = new adSetupVariableNode();
+    node->m_pVariable = const_cast<daeVariable*>(this);
+
+    if(N > 0)
+    {
+        node->m_arrDomains.resize(N);
+        for(size_t i = 0; i < N; i++)
+            node->m_arrDomains[i] = indexes[i];
+    }
+    tmp.node = adNodePtr(node);
+    tmp.setGatherInfo(true);
+
+    // If all indexes are constant indexes and overall index found add it to the map
+    if(int_indexes.size() == N && nOverallIndex != -1)
+    {
+        //std::cout << "Added variable " << GetName() << "(" << int_indexes[0] << ") to the map" << std::endl;
+        daeVariable* self = const_cast<daeVariable*>(this);
+        self->m_mapSetupVariableNodes[nOverallIndex] = tmp;
+    }
+
+    return tmp;
 }
 
 adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
@@ -945,7 +992,11 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 	
 	if(m_pModel->m_pDataProxy->GetGatherInfo())
 	{
-		adRuntimeTimeDerivativeNode* node = new adRuntimeTimeDerivativeNode();
+        std::map<size_t, adouble>::const_iterator it = m_mapRuntimeTimeDerivativeNodes.find(nIndex);
+        if(it != m_mapRuntimeTimeDerivativeNodes.end()) // if found
+            return it->second;
+        
+        adRuntimeTimeDerivativeNode* node = new adRuntimeTimeDerivativeNode();
 		node->m_pVariable = const_cast<daeVariable*>(this);
 		node->m_nOverallIndex = nIndex;
         node->m_nOrder = 1;
@@ -957,7 +1008,11 @@ adouble daeVariable::Calculate_dt(const size_t* indexes, const size_t N) const
 		}
 		tmp.node = adNodePtr(node);
 		tmp.setGatherInfo(true);
-	}
+        
+        // Add it to the map for it has not been added yet
+        daeVariable* self = const_cast<daeVariable*>(this);
+        self->m_mapRuntimeTimeDerivativeNodes[nIndex] = tmp;
+    }
 	return tmp;
 }
 
@@ -1005,7 +1060,29 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 		}
 	}
 
-	adouble tmp;
+	// If all daeDomainIndexes are integers store the adNodePtr in the map
+	std::vector<size_t> int_indexes;
+    if(N > 0)
+        int_indexes.reserve(N);
+    for(size_t i = 0; i < N; i++)
+    {
+        if(indexes[i].m_eType == eConstantIndex)
+            int_indexes.push_back(indexes[i].m_nIndex);
+        else
+            break;
+    }
+    
+    size_t nOverallIndex = -1;
+    if(int_indexes.size() == N) // all indexes are constant indexes
+    {
+        nOverallIndex = CalculateIndex(int_indexes);
+        std::map<size_t, adouble>::const_iterator it = m_mapSetupTimeDerivativeNodes.find(nOverallIndex);
+        if(it != m_mapSetupTimeDerivativeNodes.end()) // if found
+            return it->second;
+    }
+    
+    // Not found in the map: create a new one
+    adouble tmp;
 	adSetupTimeDerivativeNode* node = new adSetupTimeDerivativeNode();
 	node->m_pVariable = const_cast<daeVariable*>(this);
     node->m_nOrder = 1;
@@ -1018,7 +1095,15 @@ adouble daeVariable::CreateSetupTimeDerivative(const daeDomainIndex* indexes, co
 	}
 	tmp.node = adNodePtr(node);
 	tmp.setGatherInfo(true);
-	return tmp;
+    
+    // If all indexes are constant indexes and overall index found add it to the map
+    if(int_indexes.size() == N && nOverallIndex != -1)
+    {
+        daeVariable* self = const_cast<daeVariable*>(this);
+        self->m_mapSetupTimeDerivativeNodes[nOverallIndex] = tmp;
+    }
+    
+    return tmp;
 }
 
 adouble daeVariable::partial(const size_t nOrder,

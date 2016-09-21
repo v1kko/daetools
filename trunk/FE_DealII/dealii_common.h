@@ -1922,6 +1922,15 @@ feExpression<dim> pow(const feExpression<dim>& l, double r)
     return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePower, l.m_node, rnode) ));
 }
 
+template<int dim>
+feExpression<dim> pow(const feExpression<dim>& l, const feExpression<dim>& r)
+{
+    if( !dynamic_cast<feNode_constant<dim>*>(r.m_node.get()) )
+        throw std::runtime_error(std::string("pow function accepts only float powers"));
+
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(ePower, l.m_node, r.m_node) ));
+}
+
 
 template<int dim>
 feExpression<dim> operator +(double l, const feExpression<dim>& r)

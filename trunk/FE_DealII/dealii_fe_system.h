@@ -664,6 +664,64 @@ adNodePtr simplify(adNodePtr node)
 {
     if(dynamic_cast<adUnaryNode*>(node.get()))
     {
+        adUnaryNode* un = dynamic_cast<adUnaryNode*>(node.get());
+        adNodePtr n_s  = simplify(un->node);
+
+        adNode* n = n_s.get();
+
+        if(dynamic_cast<adConstantNode*>(n)) // transform i.e. exp(constant node) into the value of exp(node.value)
+        {
+            adConstantNode* val = dynamic_cast<adConstantNode*>(n);
+            quantity& q = val->m_quantity;
+
+            switch(un->eFunction)
+            {
+                case dae::core::eSign:
+                    return adNodePtr(new adConstantNode(-q));
+                case dae::core::eSin:
+                    return adNodePtr(new adConstantNode(sin(q)));
+                case dae::core::eCos:
+                    return adNodePtr(new adConstantNode(cos(q)));
+                case dae::core::eTan:
+                    return adNodePtr(new adConstantNode(tan(q)));
+                case dae::core::eArcSin:
+                    return adNodePtr(new adConstantNode(asin(q)));
+                case dae::core::eArcCos:
+                    return adNodePtr(new adConstantNode(acos(q)));
+                case dae::core::eArcTan:
+                    return adNodePtr(new adConstantNode(atan(q)));
+                case dae::core::eSqrt:
+                    return adNodePtr(new adConstantNode(sqrt(q)));
+                case dae::core::eExp:
+                    return adNodePtr(new adConstantNode(exp(q)));
+                case dae::core::eLn:
+                    return adNodePtr(new adConstantNode(log(q)));
+                case dae::core::eLog:
+                    return adNodePtr(new adConstantNode(log10(q)));
+                case dae::core::eAbs:
+                    return adNodePtr(new adConstantNode(abs(q)));
+                case dae::core::eCeil:
+                    return adNodePtr(new adConstantNode(ceil(q)));
+                case dae::core::eFloor:
+                    return adNodePtr(new adConstantNode(floor(q)));
+                case dae::core::eSinh:
+                    return adNodePtr(new adConstantNode(sinh(q)));
+                case dae::core::eCosh:
+                    return adNodePtr(new adConstantNode(cosh(q)));
+                case dae::core::eTanh:
+                    return adNodePtr(new adConstantNode(tanh(q)));
+                case dae::core::eArcSinh:
+                    return adNodePtr(new adConstantNode(asinh(q)));
+                case dae::core::eArcCosh:
+                    return adNodePtr(new adConstantNode(acosh(q)));
+                case dae::core::eArcTanh:
+                    return adNodePtr(new adConstantNode(atanh(q)));
+                case dae::core::eErf:
+                    return adNodePtr(new adConstantNode(erf(q)));
+                default:
+                    return node;
+            }
+        }
         return node;
     }
     else if(dynamic_cast<adBinaryNode*>(node.get()))
@@ -697,6 +755,8 @@ adNodePtr simplify(adNodePtr node)
                 if(bn->eFunction == dae::core::ePlus) // 0 + right => right
                     return right_s;
                 else if(bn->eFunction == dae::core::eMulti) // 0 * right => 0 (that is left)
+                    return left_s;
+                else if(bn->eFunction == dae::core::eDivide) // 0 / right => 0 (that is left)
                     return left_s;
             }
         }
@@ -844,8 +904,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                             throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
 
-                        //std::cout << "  cell_matrix 1 = " << cell_matrix(i,j).getValue() << ", +value " << result.m_value << std::endl;
-
                         //daeNodeSaveAsContext c(m_model);
                         adouble res = getValueFromNumber<dim>(result);
                         if(res.node)
@@ -856,9 +914,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         }
 
                         cell_matrix(i,j) += res;
-                        //std::cout << "  cell_matrix 2 = " << cell_matrix(i,j).getValue() << std::endl;
-
-                        //std::cout << (boost::format("cell_matrix[%s](q=%d, i=%d, j=%d) = %f") % m_weakForm.m_strVariableName % q_point % i % j % result.m_value).str() << std::endl;
                     }
 
                     /* Mass matrix (Mij) */
@@ -1014,29 +1069,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         printf("]\n");
         printf("\n");
     */
-
-        /* This is some voodoo-mojo mumbo-jumbo uncomprehensible crap... What to do with it? */
-        types::global_dof_index id;
-        for(unsigned int i = 0; i < dofs_per_cell; ++i)
-        {
-            id = mapGlobalDOFtoBoundary[ local_dof_indices[i] ];
-            if(id != numbers::invalid_dof_index)
-            {
-                /* Achtung, Achtung!!
-                 * We assume here that if a DOF is on a boundary that it has no system_matrix__dt contribution.
-                 * What if someone wants to have it on the boundary? */
-
-                // This dof IS on one of boundaries; therefore, remove its contributions to the cell_matrix_dt
-
-                // 1. Reset the whole row 'i'
-//                for(unsigned int j = 0; j < dofs_per_cell; ++j)
-//                    cell_matrix_dt(i, j) = 0;
-
-                // 2. Reset the whole column 'i'
-//                for(unsigned int j = 0; j < dofs_per_cell; ++j)
-//                    cell_matrix_dt(j, i) = 0;
-            }
-        }
 
         // Add local contributions Aij, Mij, Fi to the system matrices/vector
         for(unsigned int i = 0; i < dofs_per_cell; ++i)

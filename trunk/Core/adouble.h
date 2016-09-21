@@ -577,7 +577,9 @@ public:
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
 };
 
-#define CLONE_NODE(NODE, VALUE) (  adNodePtr(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
+// Originally, it has been cloning nodes every time. Now it just returns the existing node.
+//#define CLONE_NODE(NODE, VALUE) (  adNodePtr(  (NODE ? NODE->Clone() : new adConstantNode(VALUE))  )  )
+#define CLONE_NODE(NODE, VALUE) ( NODE ? NODE : adNodePtr(new adConstantNode(VALUE)) )
 
 // UNITS is used to create adConstantNone/adConstantNoneArray; they should be dimensionless if created on simple float numbers!!
 // #define UNITS(NODE) ( NODE ? NODE->GetQuantity().getUnits() : unit() )

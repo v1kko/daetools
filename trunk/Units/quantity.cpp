@@ -568,65 +568,65 @@ const quantity sqrt(const quantity &q)
 
 const quantity sin(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: sin(%1%)") % q).str());
-	return quantity(::sin(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: sin(%1%)") % q).str());
+    return quantity(::sin(q.getValue()), unit());
 }
 
 const quantity cos(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: cos(%1%)") % q).str());
-	return quantity(::cos(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: cos(%1%)") % q).str());
+    return quantity(::cos(q.getValue()), unit());
 }
 
 const quantity tan(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: tan(%1%)") % q).str());
-	return quantity(::tan(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: tan(%1%)") % q).str());
+    return quantity(::tan(q.getValue()), unit());
 }
 
 const quantity asin(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: asin(%1%)") % q).str());
-	return quantity(::asin(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: asin(%1%)") % q).str());
+    return quantity(::asin(q.getValue()), unit());
 }
 
 const quantity acos(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: acos(%1%)") % q).str());
-	return quantity(::acos(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: acos(%1%)") % q).str());
+    return quantity(::acos(q.getValue()), unit());
 }
 
 const quantity atan(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: atan(%1%)") % q).str());
-	return quantity(::atan(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: atan(%1%)") % q).str());
+    return quantity(::atan(q.getValue()), unit());
 }
 
 const quantity sinh(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: sinh(%1%)") % q).str());
-	return quantity(::sinh(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: sinh(%1%)") % q).str());
+    return quantity(::sinh(q.getValue()), unit());
 }
 
 const quantity cosh(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: cosh(%1%)") % q).str());
-	return quantity(::cosh(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: cosh(%1%)") % q).str());
+    return quantity(::cosh(q.getValue()), unit());
 }
 
 const quantity tanh(const quantity &q)
 {
-	if(q.getUnits() != unit())	
-		throw units_error((boost::format("Invalid units in function: tanh(%1%)") % q).str());
-	return quantity(::tanh(q.getValue()), unit());
+    if(q.getUnits() != unit())
+        throw units_error((boost::format("Invalid units in function: tanh(%1%)") % q).str());
+    return quantity(::tanh(q.getValue()), unit());
 }
 
 // Some versions of stupid MS <math.h> do not have asinh, acosh, atanh

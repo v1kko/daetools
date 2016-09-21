@@ -44,7 +44,7 @@ adouble::adouble(real_t value/* = 0.0*/,
     m_bGatherInfo = gatherInfo;
 
     if(gatherInfo)
-        node = adNodePtr( (node_ ? node_ : new adConstantNode(value)) );
+        node = adNodePtr( (node_ ? node_ : new adConstantNode(value)) ); // take ownership of the raw pointer, if it exists
 }
 
 adouble::adouble(const adouble& a)
@@ -53,7 +53,9 @@ adouble::adouble(const adouble& a)
     if(a.getGatherInfo())
     {
         m_bGatherInfo = true;
-        node  = adNodePtr( (a.node ? a.node->Clone() : new adConstantNode(a.m_dValue)) );
+        // Do not clone node whenever we have a copy constructor
+        //node = adNodePtr( (a.node ? a.node->Clone() : new adConstantNode(a.m_dValue)) );
+        node = CLONE_NODE(a.node, a.m_dValue);
     }
     m_dValue = a.m_dValue;
     m_dDeriv = a.m_dDeriv;
@@ -1180,7 +1182,9 @@ adouble& adouble::operator =(const adouble& a)
     if(m_bGatherInfo || a.getGatherInfo())
     {
         m_bGatherInfo = true;
-        node = adNodePtr(  (a.node ? a.node->Clone() : new adConstantNode(a.getValue()))  );
+        // Do not clone node whenever we have a copy constructor
+        //node = adNodePtr(  (a.node ? a.node->Clone() : new adConstantNode(a.getValue()))  );
+        node = CLONE_NODE(a.node, a.m_dValue);
     }
     m_dValue = a.m_dValue;
     m_dDeriv = a.m_dDeriv;

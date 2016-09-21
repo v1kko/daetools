@@ -2159,7 +2159,13 @@ protected:
 	bool					m_bReportingOn;
 	std::vector<daeDomain*>	m_ptrDomains;
 	daePort*				m_pParentPort;
-	friend class daePort;
+
+    std::map<size_t, adouble> m_mapSetupVariableNodes;
+    std::map<size_t, adouble> m_mapSetupTimeDerivativeNodes;
+    std::map<size_t, adouble> m_mapRuntimeVariableNodes;
+    std::map<size_t, adouble> m_mapRuntimeTimeDerivativeNodes;
+
+    friend class daePort;
 	friend class daeModel;
     friend class daeFiniteElementEquation;
     friend class daeAction;

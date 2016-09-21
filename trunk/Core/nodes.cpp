@@ -368,7 +368,8 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
     {
         adRuntimeVariableNode* node = dynamic_cast<adRuntimeVariableNode*>(n);
 
-        val_ = adNodePtr(node_->Clone());
+        // No need to clone it for it is the same as the original node
+        val_ = node_; //adNodePtr(node_->Clone());
         if(node->m_nOverallIndex == nOverallVariableIndex)
             deriv_ = adNodePtr(new adConstantNode(1.0));
         else
@@ -378,7 +379,8 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
     {
         adRuntimeTimeDerivativeNode* node = dynamic_cast<adRuntimeTimeDerivativeNode*>(n);
 
-        val_ = adNodePtr(node_->Clone());
+        // No need to clone it for it is the same as the original node
+        val_ = node_; //adNodePtr(node_->Clone());
         if(node->m_nOverallIndex == nOverallVariableIndex)
             deriv_ = adNodePtr(new adInverseTimeStepNode());
         else
@@ -517,6 +519,12 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
         {
             daeDeclareException(exNotImplemented);
             e << "Jacobian derivative expressions for the function Max are not available";
+            throw e;
+        }
+        else if(node->eFunction == eArcTan2)
+        {
+            daeDeclareException(exNotImplemented);
+            e << "Jacobian derivative expressions for the function ArcTan2 are not available";
             throw e;
         }
         else
@@ -680,7 +688,7 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
            )
     {
     // Here a derivative is always 0 (NULL)
-        val_   = adNodePtr(node_->Clone());
+        val_   = node_; //adNodePtr(node_->Clone());
         deriv_ = adNodePtr();
     }
     else if(dynamic_cast<adScalarExternalFunctionNode*>(n))
@@ -1372,6 +1380,7 @@ bool adDomainIndexNode::IsFunctionOfVariables(void) const
 /*********************************************************************************************
 	adRuntimeVariableNode
 **********************************************************************************************/
+//static int __no_of_runtime_vars = 0;
 adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable, 
 											 size_t nOverallIndex, 
 											 vector<size_t>& narrDomains) 
@@ -1382,6 +1391,9 @@ adRuntimeVariableNode::adRuntimeVariableNode(daeVariable* pVariable,
 // This will be calculated at runtime (if needed; it is used only for sensitivity calculation)
 	m_nBlockIndex = ULONG_MAX;
 	m_bIsAssigned = false;
+
+//    __no_of_runtime_vars++;
+//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
 }
 
 adRuntimeVariableNode::adRuntimeVariableNode()
@@ -1390,10 +1402,15 @@ adRuntimeVariableNode::adRuntimeVariableNode()
 	m_nBlockIndex   = ULONG_MAX;
 	m_nOverallIndex = ULONG_MAX;
 	m_bIsAssigned   = false;
+
+//    __no_of_runtime_vars++;
+//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
 }
 
 adRuntimeVariableNode::~adRuntimeVariableNode()
 {
+//    __no_of_runtime_vars--;
+//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
 }
 
 adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionContext) const
@@ -1511,7 +1528,10 @@ const quantity adRuntimeVariableNode::GetQuantity(void) const
 
 adNode* adRuntimeVariableNode::Clone(void) const
 {
-	return new adRuntimeVariableNode(*this);
+//    __no_of_runtime_vars++;
+//    std::cout << "nv = " << __no_of_runtime_vars << std::endl;
+
+    return new adRuntimeVariableNode(*this);
 }
 
 void adRuntimeVariableNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
