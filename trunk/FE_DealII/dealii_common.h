@@ -10,7 +10,6 @@
 #include <deal.II/lac/block_sparse_matrix.h>
 #include <deal.II/lac/sparse_matrix.h>
 #include <deal.II/lac/sparsity_pattern.h>
-#include "../Core/definitions.h"
 #include "../Core/coreimpl.h"
 #include <typeinfo>
 
@@ -301,6 +300,18 @@ public:
 
     feExpression(feNodePtr node) : m_node(node)
     {
+    }
+
+    bool operator ==(const feExpression<dim>& other) const
+    {
+        throw std::runtime_error(std::string("not implemented"));
+
+        if(!m_node && !other.m_node)
+            return true;
+        if((m_node && !other.m_node) || (!m_node && other.m_node))
+            return false;
+
+        return false;
     }
 
     std::string ToString() const

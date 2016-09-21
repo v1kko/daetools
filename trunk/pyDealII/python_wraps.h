@@ -514,7 +514,8 @@ public:
                                        boost::python::dict      dictFaceAij              = boost::python::dict(),
                                        boost::python::dict      dictFaceFi               = boost::python::dict(),
                                        boost::python::dict      dictFunctions            = boost::python::dict(),
-                                       boost::python::dict      dictFunctionsDirichletBC = boost::python::dict())
+                                       boost::python::dict      dictFunctionsDirichletBC = boost::python::dict(),
+                                       boost::python::dict      dictBoundaryIntegrals    = boost::python::dict())
     {
         boost::python::list keys;
 
@@ -522,12 +523,41 @@ public:
         this->m_Aij = Aij;
         this->m_Mij = Mij;
         this->m_Fi  = Fi;
-	
+
         // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
         this->m_dictFaceAij              = dictFaceAij;
         this->m_dictFaceFi               = dictFaceFi;
         this->m_dictFunctions            = dictFunctions;
         this->m_dictFunctionsDirichletBC = dictFunctionsDirichletBC;
+        this->m_dictBoundaryIntegrals    = dictBoundaryIntegrals;
+
+        keys = dictBoundaryIntegrals.keys();
+        for(int i = 0; i < len(keys); i++)
+        {
+            boost::python::object key_  = keys[i];
+            boost::python::list   vals_ = boost::python::extract<boost::python::list>(dictBoundaryIntegrals[key_]);
+
+            unsigned int key = boost::python::extract<unsigned int>(key_);
+
+            std::vector< std::pair<adouble, feExpression<dim> > >  pairs;
+            for(int k = 0; k < len(vals_); k++)
+            {
+                boost::python::tuple  t_var_expr = boost::python::extract<boost::python::tuple>(vals_[k]);
+                boost::python::object o_variable   = t_var_expr[0];
+                boost::python::object o_expression = t_var_expr[1];
+
+                adouble           advar  = boost::python::extract<adouble>(o_variable);
+                feExpression<dim> expr  = boost::python::extract< feExpression<dim> >(o_expression);
+                
+                if(!advar.node || !dynamic_cast<adSetupVariableNode*>(advar.node.get()))
+                    throw std::runtime_error(std::string("Invalid variable node in the boundary integrals dictionary (must be adSetupVariableNode)"));
+
+                pairs.push_back(std::pair< adouble, feExpression<dim> >(advar, expr));
+            }
+
+            if(pairs.size() > 0)
+                this->m_mapBoundaryIntegrals[key] = pairs;
+        }
 
         keys = dictFunctionsDirichletBC.keys();
         for(int i = 0; i < len(keys); i++)
@@ -637,6 +667,7 @@ public:
     boost::python::object m_dictFaceFi;
     boost::python::object m_dictFunctions;
     boost::python::object m_dictFunctionsDirichletBC;
+    boost::python::object m_dictBoundaryIntegrals;
 };
 
 template<int dim>

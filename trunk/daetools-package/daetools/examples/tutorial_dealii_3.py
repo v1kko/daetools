@@ -126,35 +126,8 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        m_dt = self.m.fe_dealII.Msystem()
-
-        # Vector where every item marks the boundar
-        #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
-        #print list(dof_to_boundary)
-
-        # dofIndexesMap relates global DOF indexes to points within daetools variables
-
-        # Todo: use a function from daeSimulation
-        dofIndexesMap = {}
-        for variable in self.m.fe.Variables:
-            if variable.Name == 'T':
-                ic = 100
-            elif variable.Name == 'T2':
-                ic = 10
-            else:
-                raise RuntimeError('Unknown variable [%s] found' % variable.Name)
-
-            for i in range(variable.NumberOfPoints):
-                dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
-
-        for row in range(m_dt.n):
-            # Iterate over columns and set initial conditions.
-            # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
-            for column in self.m.fe_dealII.RowIndices(row):
-                if m_dt(row, column).Node or m_dt(row, column).Value != 0:
-                    variable, index, ic = dofIndexesMap[column]
-                    variable.SetInitialCondition(index, ic)
-                    #print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
+        setFEInitialConditions(self.m.fe, self.m.fe_dealII,  'T', 100)
+        setFEInitialConditions(self.m.fe, self.m.fe_dealII, 'T2',  10)
 
 # Use daeSimulator class
 def guiRun(app):

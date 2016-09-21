@@ -87,17 +87,13 @@ class GradientFunction_2D(Function_2D):
 #   This function is derived from adoubleFunction_2D class and returns "adouble" value
 #   In this case, it is a function of daetools parameters/variables
 class BottomGradientFunction_2D(adoubleFunction_2D):
-    def __init__(self, model, n_components = 1):
+    def __init__(self, gradient, n_components = 1):
         adoubleFunction_2D.__init__(self, n_components)
-        self.model = model
+        self.gradient = adouble(gradient)
         
     def value(self, point, component = 0):
-        # Actual adouble expression can only be evaluated here in value function
-        # which is called during DeclareEquations phase
-        gradient = self.model.flux1() + self.model.flux2()
-        
         if point.y < -0.5:
-            return gradient
+            return self.gradient
         else:
             return adouble(0.0)
 
@@ -110,26 +106,28 @@ class modTutorial(daeModel):
         
         # Used only to set the Neumann BC at the bottom to illustrate the use of adouble functions 
         # and coupling between daetools and deal.ii
-        self.flux1 = daeParameter("flux1", unit(), self, "Flux as a parameter (half of the gradient)")
-        self.flux2 = daeVariable ("flux2",   no_t, self, "Flux as a variable (half of the gradient)")
+        #self.flux1 = daeParameter("flux1", unit(), self, "Flux as a parameter (half of the gradient)")
+        #self.flux2 = daeVariable ("flux2",   no_t, self, "Flux as a variable (half of the gradient)")
 
         rho = 8960.0  # kg/m**3
         cp  =  385.0  # J/(kg*K)
         k   =  401.0  # W/(m*K)
         
-        self.flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) = 
-        self.flux_beneath = 5.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        self.diffusivity  = k / (rho*cp)   # m**2/s
+        flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
+        flux_beneath = 5.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
+        diffusivity  = k / (rho*cp)   # m**2/s
         
-        print('Thermal diffusivity = %f' % self.diffusivity)
-        print('Beneath source flux = %f' % self.flux_beneath)
-        print('Above source flux = %f x (1,-1)' % self.flux_above)
+        print('Thermal diffusivity = %f' % diffusivity)
+        print('Beneath source flux = %f' % flux_beneath)
+        print('Above source flux = %f x (1,-1)' % flux_above)
 
         functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(self.diffusivity)
+        functions['Diffusivity'] = ConstantFunction_2D(diffusivity)
         functions['Generation']  = ConstantFunction_2D(0.0)
-        functions['Flux_a']      = GradientFunction_2D(self.flux_above, direction = (-1, 1)) # Gradient flux at boundary id=0 (Sun)
-        functions['Flux_b']      = BottomGradientFunction_2D(self)                           # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
+        # Gradient flux at boundary id=0 (Sun)
+        functions['Flux_a'] = GradientFunction_2D(flux_above, direction = (-1, 1))
+        # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
+        functions['Flux_b'] = BottomGradientFunction_2D(flux_beneath)
         
         dirichletBC    = {}
         dirichletBC[2] = [('T', ConstantFunction_2D(300))] # at boundary id=2 (inner tube)
@@ -177,31 +175,12 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
-        self.m.flux1.SetValue(self.m.flux_beneath / 2.0)
+        pass
 
     def SetUpVariables(self):
-        self.m.flux2.AssignValue(self.m.flux_beneath / 2.0)
-        
-        m_dt = self.m.fe_dealII.Msystem()
-        T    = self.m.fe.dictVariables['T']
-        
-        # dofIndexesMap relates global DOF indexes to points within daetools variables
-        dofIndexesMap = {}
-        for variable in self.m.fe.Variables:
-            if variable.Name == 'T':
-                ic = 273
-            for i in range(variable.NumberOfPoints):
-                dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
-        
-        for row in range(m_dt.n):
-            # Iterate over columns and set initial conditions.
-            # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
-            for column in self.m.fe_dealII.RowIndices(row):
-                if m_dt(row, column).Node or m_dt(row, column).Value != 0:
-                    variable, index, ic = dofIndexesMap[column]
-                    variable.SetInitialCondition(index, ic)
-                    #print '%s(%d) initial condition = %f' % (variable.Name, column, ic)
-    
+        # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
+        setFEInitialConditions(self.m.fe, self.m.fe_dealII, 'T', 273)
+
 # Use daeSimulator class
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
@@ -247,8 +226,8 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 60    # 1 minute
-    simulation.TimeHorizon       = 60*60 # 1 hour
+    simulation.ReportingInterval = 60      # 1 minute
+    simulation.TimeHorizon       = 2*60*60 # 2 hours
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)

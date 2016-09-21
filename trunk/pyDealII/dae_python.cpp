@@ -789,7 +789,34 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_< std::map< unsigned int, feExpression<3> > >("map_Uint_Expression_3D")
         .def(map_indexing_suite< std::map< unsigned int, feExpression<3> > >())
     ;
-    
+
+    class_< dealiiFiniteElementWeakForm<1>::pair_Variable_Expression >("pair_Variable_Expression_1D")
+    ;
+    class_< dealiiFiniteElementWeakForm<2>::pair_Variable_Expression >("pair_Variable_Expression_2D")
+    ;
+    class_< dealiiFiniteElementWeakForm<3>::pair_Variable_Expression >("pair_Variable_Expression_3D")
+    ;
+
+    class_< dealiiFiniteElementWeakForm<1>::vector_pair_Variable_Expression >("vector_Uint_Expression_1D")
+        .def(vector_indexing_suite< dealiiFiniteElementWeakForm<1>::vector_pair_Variable_Expression >())
+    ;
+    class_< dealiiFiniteElementWeakForm<2>::vector_pair_Variable_Expression >("vector_Uint_Expression_2D")
+        .def(vector_indexing_suite< dealiiFiniteElementWeakForm<2>::vector_pair_Variable_Expression >())
+    ;
+    class_< dealiiFiniteElementWeakForm<3>::vector_pair_Variable_Expression >("vector_Uint_Expression_3D")
+        .def(vector_indexing_suite< dealiiFiniteElementWeakForm<3>::vector_pair_Variable_Expression >())
+    ;
+
+    class_< dealiiFiniteElementWeakForm<1>::map_Uint_vector_pair_Variable_Expression >("map_Uint_pair_Variable_Expression_1D")
+        .def(map_indexing_suite< dealiiFiniteElementWeakForm<1>::map_Uint_vector_pair_Variable_Expression >())
+    ;
+    class_< dealiiFiniteElementWeakForm<2>::map_Uint_vector_pair_Variable_Expression >("map_Uint_pair_Variable_Expression_2D")
+        .def(map_indexing_suite< dealiiFiniteElementWeakForm<2>::map_Uint_vector_pair_Variable_Expression >())
+    ;
+    class_< dealiiFiniteElementWeakForm<3>::map_Uint_vector_pair_Variable_Expression >("map_Uint_pair_Variable_Expression_3D")
+        .def(map_indexing_suite< dealiiFiniteElementWeakForm<3>::map_Uint_vector_pair_Variable_Expression >())
+    ;
+
     /* Scalar finite elements:
         FE_Q, FE_Bernstein
 
@@ -972,13 +999,16 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict>(( arg("Aij"),
+                  boost::python::dict,
+                  boost::python::dict>(( arg("self"),
+                                         arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
                                          arg("faceAij")              = boost::python::dict(),
                                          arg("faceFi")               = boost::python::dict(),
                                          arg("functions")            = boost::python::dict(),
-                                         arg("functionsDirichletBC") = boost::python::dict()
+                                         arg("functionsDirichletBC") = boost::python::dict(),
+                                         arg("boundaryIntegrals")    = boost::python::dict()
                                       )))
 
         .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<1>::m_Aij)
@@ -988,6 +1018,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<1>::m_faceFi)
         .def_readonly("Functions",             &dealiiFiniteElementWeakForm<1>::m_functions)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_functionsDirichletBC)
+        .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<1>::m_mapBoundaryIntegrals)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<2>, boost::noncopyable>("dealiiFiniteElementWeakForm_2D", no_init)
@@ -997,13 +1028,16 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict>(( arg("Aij"),
+                  boost::python::dict,
+                  boost::python::dict>(( arg("self"),
+                                         arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
                                          arg("faceAij")              = boost::python::dict(),
                                          arg("faceFi")               = boost::python::dict(),
                                          arg("functions")            = boost::python::dict(),
-                                         arg("functionsDirichletBC") = boost::python::dict()
+                                         arg("functionsDirichletBC") = boost::python::dict(),
+                                         arg("boundaryIntegrals")    = boost::python::dict()
                                       )))
 
         .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<2>::m_Aij)
@@ -1013,6 +1047,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<2>::m_faceFi)
         .def_readonly("Functions",             &dealiiFiniteElementWeakForm<2>::m_functions)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_functionsDirichletBC)
+        .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<2>::m_mapBoundaryIntegrals)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<3>, boost::noncopyable>("dealiiFiniteElementWeakForm_3D", no_init)
@@ -1022,13 +1057,16 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict>(( arg("Aij"),
+                  boost::python::dict,
+                  boost::python::dict>(( arg("self"),
+                                         arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
                                          arg("faceAij")              = boost::python::dict(),
                                          arg("faceFi")               = boost::python::dict(),
                                          arg("functions")            = boost::python::dict(),
-                                         arg("functionsDirichletBC") = boost::python::dict()
+                                         arg("functionsDirichletBC") = boost::python::dict(),
+                                         arg("boundaryIntegrals")    = boost::python::dict()
                                       )))
 
         .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<3>::m_Aij)
@@ -1038,6 +1076,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<3>::m_faceFi)
         .def_readonly("Functions",             &dealiiFiniteElementWeakForm<3>::m_functions)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<3>::m_functionsDirichletBC)
+        .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<3>::m_mapBoundaryIntegrals)
     ;
 
     class_<dealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("dealIIDataReporter", no_init)

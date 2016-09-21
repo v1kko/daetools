@@ -431,6 +431,9 @@ public:
     typedef typename std::map<unsigned int, feExpression<dim> >                             map_Uint_Expression;
     typedef typename std::map<std::string,  const Function<dim,double>*>                    map_String_FunctionPtr;
     typedef typename std::map<std::string,  const Function<dim,adouble>*>                   map_String_adoubleFunctionPtr;
+    typedef typename std::pair< adouble,feExpression<dim> >                                 pair_Variable_Expression;
+    typedef typename std::vector<pair_Variable_Expression>                                  vector_pair_Variable_Expression;
+    typedef typename std::map<unsigned int, vector_pair_Variable_Expression>                map_Uint_vector_pair_Variable_Expression;
 
     dealiiFiniteElementWeakForm()
     {
@@ -447,6 +450,7 @@ public:
     map_String_adoubleFunctionPtr                   m_adouble_functions;
     map_Uint_vector_pair_String_FunctionPtr         m_functionsDirichletBC;
     map_Uint_vector_pair_String_adoubleFunctionPtr  m_adoubleFunctionsDirichletBC;
+    map_Uint_vector_pair_Variable_Expression        m_mapBoundaryIntegrals;
 };
 
 /******************************************************************
@@ -464,6 +468,9 @@ typedef typename std::map<std::string,  const Function<dim,adouble>*> map_String
 typedef typename std::vector< dealiiFiniteElementDOF<dim>* > vector_DOFs;
 typedef typename std::map< std::string, boost::variant<FEValuesExtractors::Scalar, FEValuesExtractors::Vector> > map_String_FEValuesExtractor;
 typedef typename std::map<std::string, ComponentMask> map_string_ComponentMask;
+typedef typename std::pair< adouble,feExpression<dim> >  pair_Variable_Expression;
+typedef typename std::vector<pair_Variable_Expression>   vector_pair_Variable_Expression;
+typedef typename std::map<unsigned int, vector_pair_Variable_Expression> map_Uint_vector_pair_Variable_Expression;
 
 public:
     dealiiFiniteElementSystem();
@@ -475,10 +482,12 @@ public:
     virtual bool NeedsReAssembling();
     virtual void ReAssembleSystem();
 
+    virtual dae::daeMatrix<adouble>*                                     Asystem() const; // Stiffness matrix
+    virtual dae::daeMatrix<adouble>*                                     Msystem() const; // Mass matrix (dt)
+    virtual dae::daeArray<adouble>*                                      Fload() const;   // Load vector
+    virtual const std::map< unsigned int, std::pair<adouble,adouble> >*  BoundaryIntegrals() const;
+
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
-    virtual dae::daeMatrix<adouble>*    Asystem() const; // Stiffness matrix
-    virtual dae::daeMatrix<adouble>*    Msystem() const; // Mass matrix (dt)
-    virtual dae::daeArray<adouble>*     Fload() const;   // Load vector
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
     virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
     virtual dealIIDataReporter*         CreateDataReporter();
@@ -508,6 +517,8 @@ public:
     BlockVector<adouble>        system_rhs;
     BlockVector<adouble>        solution;
     BlockVector<double>         datareporter_solution;
+
+    std::map< unsigned int, std::pair<adouble,adouble> > m_mapBoundaryIntegrals;
 
     SmartPointer< Quadrature<dim>   >  m_quadrature_formula;
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
@@ -802,7 +813,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                               update_quadrature_points | update_JxW_values);
 
     FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
-                                      update_values         | update_quadrature_points  |
+                                      update_values | update_gradients | update_quadrature_points  |
                                       update_normal_vectors | update_JxW_values);
 
     std::vector<types::global_dof_index> mapGlobalDOFtoBoundary;
@@ -1015,6 +1026,69 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         }
                     }
                 }
+
+
+
+                typename map_Uint_vector_pair_Variable_Expression::const_iterator itboundaryIntegral = m_weakForm->m_mapBoundaryIntegrals.find(id);
+
+                // If there is face Aij or Fi (or both)
+                if(itboundaryIntegral != m_weakForm->m_mapBoundaryIntegrals.end())
+                {
+                    const std::vector<pair_Variable_Expression>& arrExpressions = itboundaryIntegral->second;
+
+                    for(int v = 0; v < arrExpressions.size(); v++)
+                    {
+                        const std::pair< adouble, feExpression<dim> >& pve = arrExpressions[v];
+
+                        const adouble&           variable     = pve.first;
+                        const feExpression<dim>& biExpression = pve.second;
+
+                        adouble adIntegral;
+                        printf("n_face_q_points = %d\n", n_face_q_points);
+                        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
+                        {
+                            cellFaceContext.m_q = q_point;
+
+                            for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                            {
+                                cellFaceContext.m_i = i;
+
+                                cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in boundaryIntegral contributions
+
+                                if(!biExpression.m_node)
+                                    continue;
+
+                                printf("biExpression.node = %s\n", biExpression.m_node->ToString().c_str());
+
+                                feRuntimeNumber<dim> result = biExpression.m_node->Evaluate(&cellFaceContext);
+                                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                                    throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
+
+                                adouble res = getValueFromNumber<dim>(result);
+                                if(res.node)
+                                    res.node = simplify(res.node);
+
+                                adIntegral += res;
+                            }
+                        }
+
+                        daeNodeSaveAsContext c(m_model);
+                        std::cout << "Cell boundary Integral: $" << adIntegral.node->SaveAsLatex(&c) << "$" << std::endl;
+
+                        // Finally, add the sum to the map
+                        std::map< unsigned int, std::pair<adouble,adouble> >::iterator itbi = m_mapBoundaryIntegrals.find(id);
+                        if(itbi == m_mapBoundaryIntegrals.end())
+                        {
+                            m_mapBoundaryIntegrals[id] = std::pair<adouble,adouble>(variable, adIntegral);
+                        }
+                        else
+                        {
+                            std::pair<adouble,adouble>& p = m_mapBoundaryIntegrals[id];
+                            p.second += adIntegral;
+                            std::cout << "\n\nBoundary Integral: $" << p.second.node->SaveAsLatex(&c) << "$\n\n" << std::endl;
+                        }
+                    }
+                }
             }
         }
 
@@ -1223,6 +1297,13 @@ dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 {
     return new daeFEBlockArray<adouble>(system_rhs);
 }
+
+template <int dim>
+const std::map< unsigned int, std::pair<adouble,adouble> >*  dealiiFiniteElementSystem<dim>::BoundaryIntegrals() const
+{
+    return &m_mapBoundaryIntegrals;
+}
+
 
 template <int dim>
 std::vector<unsigned int> dealiiFiniteElementSystem<dim>::GetDOFtoBoundaryMap()

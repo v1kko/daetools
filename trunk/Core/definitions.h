@@ -528,54 +528,6 @@ public:
     virtual unsigned int currentItem() = 0;
 };
 
-/******************************************************************
-    daeFiniteElementVariable
-*******************************************************************/
-struct daeFiniteElementVariableInfo
-{
-    std::string         m_strName;
-    std::string         m_strDescription;
-    unsigned int        m_nMultiplicity;
-    unsigned int        m_nNumberOfDOFs;
-};
-
-/******************************************************************
-    daeFiniteElementObjectInfo
-*******************************************************************/
-struct daeFiniteElementObjectInfo
-{
-    unsigned int                                m_nTotalNumberDOFs;
-    unsigned int                                m_nNumberOfDOFsPerVariable;
-    std::vector<daeFiniteElementVariableInfo>   m_VariableInfos;
-};
-
-/******************************************************************
-    daeFiniteElementObject
-*******************************************************************/
-namespace core
-{
-class adouble;
-class daeModel;
-}
-class daeFiniteElementObject
-{
-public:
-    virtual ~daeFiniteElementObject() {}
-
-    virtual void SetModel(core::daeModel* pModel) = 0;
-
-    virtual void AssembleSystem()    = 0;
-    virtual bool NeedsReAssembling() = 0;
-    virtual void ReAssembleSystem()  = 0;
-
-    virtual void RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const = 0;
-
-    virtual dae::daeMatrix<core::adouble>* Asystem() const = 0;
-    virtual dae::daeMatrix<core::adouble>* Msystem() const = 0;
-    virtual dae::daeArray<core::adouble>*  Fload()   const = 0;
-
-    virtual daeFiniteElementObjectInfo  GetObjectInfo() const = 0;
-};
 
 }
 

@@ -17,6 +17,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
+In this tutorial the DAE Tools support for finite element method is presented.
+
+
+n implementation
+
 Mesh:
 
 .. image:: _static/step-49.png
@@ -42,6 +47,10 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
+        # The starting point is the daeFiniteElementModel class that contains an implementation
+        # of the daeFiniteElementObject class: dealiiFiniteElementSystem which is a wrapper
+        # around deal.II FESystem<dim> class and handles all finite element related details.
+
         # We use deal.II ConstantFunction class to specify a constant value.
         # Since we have only one DOF we do not need to specify n_components in the constructor
         # (the default value is 1) and do not need to handle values of multiple components.
@@ -99,47 +108,9 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        m_dt = self.m.fe_dealII.Msystem()
-        m_Aij = self.m.fe_dealII.Asystem()
-        #m_Fi = self.m.fe_dealII.Fload()
-        
-        # Vector where every item marks the boundar
-        #dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()
-        #print list(dof_to_boundary)
-        
-        # dofIndexesMap relates global DOF indexes to points within daetools variables
+        # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
+        setFEInitialConditions(self.m.fe, self.m.fe_dealII, 'T', 300)
 
-        # Todo: use a function from daeSimulation
-        dofIndexesMap = {}
-        for variable in self.m.fe.Variables:
-            if variable.Name == 'T':
-                ic = 300
-            else:
-                raise RuntimeError('Unknown variable [%s] found' % variable.Name)
-            
-            for i in range(variable.NumberOfPoints):
-                dofIndexesMap[variable.OverallIndex + i] = (variable, i, ic)
-        
-        for row in range(m_dt.n):
-            # Iterate over columns and set initial conditions.
-            # If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).
-            for column in self.m.fe_dealII.RowIndices(row):
-                if m_dt(row, column).Node or m_dt(row, column).Value != 0:
-                    variable, index, ic = dofIndexesMap[column]
-                    variable.SetInitialCondition(index, ic)
-                    #print('%s(%d) initial condition = %f' % (variable.Name, column, ic))
-
-        #fi_values = []
-        #for row in range(m_Aij.n):
-        #    print('row = %d' % row)
-        #    #fi_values.append(m_Fi[row])
-        #    row_values = []
-        #    for column in self.m.fe_dealII.RowIndices(row):
-        #        if m_Aij(row, column).Value != 0:
-        #            row_values.append(m_Aij(row, column))
-        #    print('row[%d] %s' % (row, row_values))
-        #print('Fi = %s' % (fi_values))
-    
 # Use daeSimulator class
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
