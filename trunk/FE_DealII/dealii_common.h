@@ -805,11 +805,26 @@ feRuntimeNumber<dim> operator ^(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = pow(l.m_value, r.m_value);
     }
+    else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType         = eFEScalar_adouble;
+        tmp.m_adouble_value = pow(l.m_adouble_value, r.m_value);
+    }
+    else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType         = eFEScalar_adouble;
+        tmp.m_adouble_value = pow(l.m_adouble_value, r.m_adouble_value);
+    }
     else
         throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " ** " + typeid(r).name());
     return tmp;
 }
 
+template<int dim>
+feRuntimeNumber<dim> pow(const feRuntimeNumber<dim>& l, const feRuntimeNumber<dim>& r)
+{
+    return l ^ r;
+}
 
 template<int dim>
 feRuntimeNumber<dim> sin_(const feRuntimeNumber<dim>& fe)
@@ -1019,6 +1034,141 @@ feRuntimeNumber<dim> abs_(const feRuntimeNumber<dim>& fe)
         throw std::runtime_error(std::string("Invalid operation abs(") + typeid(fe).name() + ")");
     return tmp;
 }
+
+template<int dim>
+feRuntimeNumber<dim> sinh_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = sinh(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = sinh(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation sinh(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> cosh_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = cosh(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = cosh(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation cosh(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> tanh_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = tanh(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = tanh(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation tanh(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> asinh_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = asinh(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = asinh(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation asinh(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> acosh_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = acosh(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = acosh(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation acosh(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> atanh_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = atanh(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = atanh(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation atanh(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> erf_(const feRuntimeNumber<dim>& fe)
+{
+    feRuntimeNumber<dim> tmp;
+    if(fe.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = erf(fe.m_value);
+    }
+    else if(fe.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = erf(fe.m_adouble_value);
+    }
+    else
+        throw std::runtime_error(std::string("Invalid operation erf(") + typeid(fe).name() + ")");
+    return tmp;
+}
+
+
 
 
 template<int dim>
@@ -1697,9 +1847,16 @@ enum efeUnaryFunction
     eSin,
     eCos,
     eTan,
-    eASin,
-    eACos,
-    eATan
+    eArcSin,
+    eArcCos,
+    eArcTan,
+    eSinh,
+    eCosh,
+    eTanh,
+    eArcSinh,
+    eArcCosh,
+    eArcTanh,
+    eErf
 };
 
 enum efeBinaryFunction
@@ -1745,12 +1902,26 @@ public:
             return cos_(node);
         else if(m_function == eTan)
             return tan_(node);
-        else if(m_function == eASin)
+        else if(m_function == eArcSin)
             return asin_(node);
-        else if(m_function == eACos)
+        else if(m_function == eArcCos)
             return acos_(node);
-        else if(m_function == eATan)
+        else if(m_function == eArcTan)
             return atan_(node);
+        else if(m_function == eSinh)
+            return sinh_(node);
+        else if(m_function == eCosh)
+            return cosh_(node);
+        else if(m_function == eTanh)
+            return tanh_(node);
+        else if(m_function == eArcSinh)
+            return asinh_(node);
+        else if(m_function == eArcCosh)
+            return acosh_(node);
+        else if(m_function == eArcTanh)
+            return atanh_(node);
+        else if(m_function == eErf)
+            return erf_(node);
         else
             throw std::runtime_error(std::string("Invalid unary function"));
     }
@@ -1775,12 +1946,26 @@ public:
             return (boost::format("cos(%s)") % m_node->ToString()).str();
         else if(m_function == eTan)
             return (boost::format("tan(%s)") % m_node->ToString()).str();
-        else if(m_function == eASin)
+        else if(m_function == eArcSin)
             return (boost::format("asin(%s)") % m_node->ToString()).str();
-        else if(m_function == eACos)
+        else if(m_function == eArcCos)
             return (boost::format("acos(%s)") % m_node->ToString()).str();
-        else if(m_function == eATan)
+        else if(m_function == eArcTan)
             return (boost::format("atan(%s)") % m_node->ToString()).str();
+        else if(m_function == eSinh)
+            return (boost::format("sinh(%s)") % m_node->ToString()).str();
+        else if(m_function == eCosh)
+            return (boost::format("cosh(%s)") % m_node->ToString()).str();
+        else if(m_function == eTanh)
+            return (boost::format("tanh(%s)") % m_node->ToString()).str();
+        else if(m_function == eArcSinh)
+            return (boost::format("asinh(%s)") % m_node->ToString()).str();
+        else if(m_function == eArcCosh)
+            return (boost::format("acosh(%s)") % m_node->ToString()).str();
+        else if(m_function == eArcTanh)
+            return (boost::format("atanh(%s)") % m_node->ToString()).str();
+        else if(m_function == eErf)
+            return (boost::format("erf(%s)") % m_node->ToString()).str();
         else
             throw std::runtime_error(std::string("Invalid unary function"));
     }
@@ -1817,7 +2002,7 @@ public:
         else if(m_function == eDivide)
             return left / right;
         else if(m_function == ePower)
-            return left ^ right;
+            return pow(left, right);
 
         throw std::runtime_error(std::string("Invalid binary function"));
     }
@@ -2012,24 +2197,66 @@ feExpression<dim> tan(const feExpression<dim>& fe)
 template<int dim>
 feExpression<dim> asin(const feExpression<dim>& fe)
 {
-    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eASin, fe.m_node) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eArcSin, fe.m_node) ));
 }
 
 template<int dim>
 feExpression<dim> acos(const feExpression<dim>& fe)
 {
-    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eACos, fe.m_node) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eArcCos, fe.m_node) ));
 }
 
 template<int dim>
 feExpression<dim> atan(const feExpression<dim>& fe)
 {
-    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eATan, fe.m_node) ));
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eArcTan, fe.m_node) ));
 }
 
 
 
+template<int dim>
+feExpression<dim> sinh(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eSinh, fe.m_node) ));
+}
 
+template<int dim>
+feExpression<dim> cosh(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eCosh, fe.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> tanh(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eTanh, fe.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> asinh(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eArcSinh, fe.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> acosh(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eArcCosh, fe.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> atanh(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eArcTanh, fe.m_node) ));
+}
+
+
+
+template<int dim>
+feExpression<dim> erf(const feExpression<dim>& fe)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_unary<dim>(eErf, fe.m_node) ));
+}
 
 
 
