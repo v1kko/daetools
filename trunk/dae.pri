@@ -162,7 +162,7 @@ crossCompile{
 # RPATH for python extension modules
 win32-msvc2008::SOLIBS_RPATH =
 win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
-win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@executable_path/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
 

@@ -158,6 +158,15 @@ public:
     {
         // Before ending the process output the last data
         dealiiSaveData();
+        
+        // Also, save the vtk.visit file for easier anumation in the VisIt
+        boost::filesystem::path vtkFilename("vtk.visit");
+        boost::filesystem::path vtkPath(m_strOutputDirectory);
+        vtkPath /= vtkFilename;
+        
+        std::ofstream vtk_visit(vtkPath.string().c_str());
+        for(int i = 0; i < m_arrSavedFiles.size(); i++)
+            vtk_visit << m_arrSavedFiles[i] << std::endl;
 
         return true;
     }
@@ -188,6 +197,8 @@ public:
         vtkPath /= vtkFilename;
 
         m_write_solution_callback(vtkPath.string().c_str());
+        
+        m_arrSavedFiles.push_back(vtkFilename.string());
     }
 
 public:
@@ -198,6 +209,7 @@ public:
     int                             m_outputCounter;
     std::string                     m_strOutputDirectory;
     std::string                     m_strProcessName;
+    std::vector<std::string>        m_arrSavedFiles;
 };
 
 

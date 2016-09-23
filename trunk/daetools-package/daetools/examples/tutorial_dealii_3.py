@@ -49,7 +49,21 @@ class modTutorial(daeModel):
                                           description='Temperature 2',
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
-        n_components = len(dofs)
+        self.n_components = len(dofs)
+
+        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
+        mesh_file  = os.path.join(meshes_dir, 'square.msh')
+
+        # Store the object so it does not go out of scope while still in use by daetools
+        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
+                                                      quadrature      = QGauss_2D(3),  # quadrature formula
+                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
+                                                      dofs            = dofs)          # degrees of freedom
+
+        self.fe = daeFiniteElementModel('HeatConduction', self, 'Multi-scalar transient heat conduction FE problem', self.fe_dealII)
+
+    def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
 
         functions    = {}
         functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
@@ -68,24 +82,21 @@ class modTutorial(daeModel):
         #   Therefore, it is safe to return values for all components.
         dirichletBC = {}
         dirichletBC[left_edge]   = [
-                                    ('T',  ConstantFunction_2D(200, n_components)),
-                                    ('T2', ConstantFunction_2D( 20, n_components))
+                                    ('T',  ConstantFunction_2D(200, self.n_components)),
+                                    ('T2', ConstantFunction_2D( 20, self.n_components))
                                    ]
         dirichletBC[top_edge]    = [
-                                    ('T',  ConstantFunction_2D(300, n_components)),
-                                    ('T2', ConstantFunction_2D( 30, n_components))
+                                    ('T',  ConstantFunction_2D(300, self.n_components)),
+                                    ('T2', ConstantFunction_2D( 30, self.n_components))
                                    ]
         dirichletBC[right_edge]  = [
-                                    ('T',  ConstantFunction_2D(400, n_components)),
-                                    ('T2', ConstantFunction_2D( 40, n_components))
+                                    ('T',  ConstantFunction_2D(400, self.n_components)),
+                                    ('T2', ConstantFunction_2D( 40, self.n_components))
                                    ]
         dirichletBC[bottom_edge] = [
-                                    ('T',  ConstantFunction_2D(500, n_components)),
-                                    ('T2', ConstantFunction_2D( 50, n_components))
+                                    ('T',  ConstantFunction_2D(500, self.n_components)),
+                                    ('T2', ConstantFunction_2D( 50, self.n_components))
                                    ]
-
-        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'square.msh')
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q) \
                                                       + (dphi_2D('T2', fe_i, fe_q) * dphi_2D('T2', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
@@ -104,17 +115,9 @@ class modTutorial(daeModel):
         print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
         print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
 
-        # Store the object so it does not go out of scope while still in use by daetools
-        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
-                                                      quadrature      = QGauss_2D(3),  # quadrature formula
-                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
-                                                      dofs            = dofs,          # degrees of freedom
-                                                      weakForm        = weakForm)      # FE system in weak form
-
-        self.fe = daeFiniteElementModel('HeatConduction', self, 'Multi-scalar transient heat conduction FE problem', self.fe_dealII)
-
-    def DeclareEquations(self):
-        daeModel.DeclareEquations(self)
+        # Setting the weak form of the FE system will declare a set of equations:
+        # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
+        self.fe_dealII.WeakForm = weakForm
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -132,14 +135,24 @@ class simTutorial(daeSimulation):
 # Use daeSimulator class
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
-    simulation = simTutorial()
+    simulation   = simTutorial()
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
+
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
+
+    # Create two data reporters:
+    # 1. DealII
     feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
+    if not feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+    # 2. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
+        sys.exit()
 
-    # Connect datareporters
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
-    feDataReporter.Connect(results_folder, simName)
     try:
         from PyQt4 import QtCore, QtGui
         QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
@@ -147,9 +160,9 @@ def guiRun(app):
         print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon       = 500
-    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter)
+    simulation.ReportingInterval = 20
+    simulation.TimeHorizon       = 2000
+    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -163,19 +176,27 @@ def consoleRun():
     lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
 
-    # Create two data reporters: TCP/IP and DealII
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results')
+
+    # Create two data reporters:
+    # 1. DealII
     feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-    # Connect datareporters
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results'), simName)
+    if not feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+    # 2. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
+        sys.exit()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 500
+    simulation.ReportingInterval = 20
+    simulation.TimeHorizon = 2000
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)

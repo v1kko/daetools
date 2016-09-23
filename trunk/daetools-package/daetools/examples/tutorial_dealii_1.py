@@ -47,22 +47,14 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
+        self.Q0_total = daeVariable("Q0_total", no_t, self, "Total heat passing through the boundary with id=0")
+        self.Q1_total = daeVariable("Q1_total", no_t, self, "Total heat passing through the boundary with id=1")
+        self.Q2_total = daeVariable("Q2_total", no_t, self, "Total heat passing through the boundary with id=2")
+
         # The starting point is the daeFiniteElementModel class that contains an implementation
         # of the daeFiniteElementObject class: dealiiFiniteElementSystem which is a wrapper
         # around deal.II FESystem<dim> class and handles all finite element related details.
 
-        # We use deal.II ConstantFunction class to specify a constant value.
-        # Since we have only one DOF we do not need to specify n_components in the constructor
-        # (the default value is 1) and do not need to handle values of multiple components.
-        functions = {}
-        functions['Diffusivity'] = ConstantFunction_2D(401.0/(8960*385))
-        functions['Generation']  = ConstantFunction_2D(0.0)
-        
-        dirichletBC    = {}
-        dirichletBC[0] = [('T', ConstantFunction_2D(200))] # outer boundary
-        dirichletBC[1] = [('T', ConstantFunction_2D(350))] # inner ellipse
-        dirichletBC[2] = [('T', ConstantFunction_2D(250))] # inner rectangle
-        
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         mesh_file  = os.path.join(meshes_dir, 'step-49.msh')
         
@@ -71,13 +63,50 @@ class modTutorial(daeModel):
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
 
+
+        # Store the object so it does not go out of scope while still in use by daetools
+        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
+                                                      quadrature      = QGauss_2D(3),  # quadrature formula
+                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
+                                                      dofs            = dofs)          # degrees of freedom
+          
+        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction FE problem', self.fe_dealII)
+       
+    def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
+        rho = 8960.0  # kg/m**3
+        cp  =  385.0  # J/(kg*K)
+        k   =  401.0  # W/(m*K)
+
+        alpha = kappa/(rho * cp)
+
+        # We use deal.II ConstantFunction class to specify a constant value.
+        # Since we have only one DOF we do not need to specify n_components in the constructor
+        # (the default value is 1) and do not need to handle values of multiple components.
+        functions = {}
+        functions['Diffusivity'] = ConstantFunction_2D(alpha)
+        functions['Generation']  = ConstantFunction_2D(0.0)
+
+        dirichletBC    = {}
+        dirichletBC[0] = [('T', ConstantFunction_2D(200))] # outer boundary
+        dirichletBC[1] = [('T', ConstantFunction_2D(350))] # inner ellipse
+        dirichletBC[2] = [('T', ConstantFunction_2D(250))] # inner rectangle
+
+        boundaryIntegrals = {
+                               0 : [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
+                               1 : [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
+                               2 : [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+                            }
+
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D('Diffusivity', xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
                                                   Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   faceAij = {},
                                                   faceFi  = {},
                                                   functions = functions,
-                                                  functionsDirichletBC = dirichletBC)
+                                                  functionsDirichletBC = dirichletBC,
+                                                  boundaryIntegrals = boundaryIntegrals)
 
         print('Heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
@@ -86,18 +115,10 @@ class modTutorial(daeModel):
         print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
         print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
 
-        # Store the object so it does not go out of scope while still in use by daetools
-        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
-                                                      quadrature      = QGauss_2D(3),  # quadrature formula
-                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
-                                                      dofs            = dofs,          # degrees of freedom
-                                                      weakForm        = weakForm)      # FE system in weak form
-          
-        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction FE problem', self.fe_dealII)
-       
-    def DeclareEquations(self):
-        daeModel.DeclareEquations(self)
-        
+        # Setting the weak form of the FE system will declare a set of equations:
+        # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
+        self.fe_dealII.WeakForm = weakForm
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
@@ -114,14 +135,24 @@ class simTutorial(daeSimulation):
 # Use daeSimulator class
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
-    simulation = simTutorial()
-    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(feDataReporter)
+    simulation   = simTutorial()
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
 
-    # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_1-')
-    feDataReporter.Connect(results_folder, simName)
+
+    # Create two data reporters:
+    # 1. DealII
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
+    datareporter.AddDataReporter(feDataReporter)
+    if not feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+    # 2. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
+        sys.exit()
+
     try:
         from PyQt4 import QtCore, QtGui
         QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
@@ -131,7 +162,7 @@ def guiRun(app):
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 10
     simulation.TimeHorizon       = 500
-    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter)
+    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
     
 # Setup everything manually and run in a console
@@ -145,12 +176,20 @@ def consoleRun():
     lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
 
-    # Create two data reporters: TCP/IP and DealII
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results')
+
+    # Create two data reporters:
+    # 1. DealII
     feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-    # Connect datareporters
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results'), simName)
+    if not feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+    # 2. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
+        sys.exit()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

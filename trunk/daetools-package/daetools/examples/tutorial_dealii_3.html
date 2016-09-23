@@ -27,6 +27,15 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#c00000;'>Mesh:</span>
+
+<span style='color:#c00000;'>.. image:: _static/square.png</span>
+<span style='color:#c00000;'>   :width: 300 px</span>
+
+<span style='color:#c00000;'>Results at t = 500s:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_dealii_3-results.png</span>
+<span style='color:#c00000;'>   :width: 500 px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> os, sys, numpy, json, tempfile
@@ -34,32 +43,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> daetools.solvers.deal_II <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> daetools.solvers.superlu <span style='color:#0000ff;'>import</span> pySuperLU
-<span style='color:#008000;'>#from daetools.solvers.trilinos import pyTrilinos</span>
-<span style='color:#008000;'>#from daetools.solvers.aztecoo_options import daeAztecOptions</span>
 
 <span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
-
-<span style='color:#008000;'># Neumann BC use either value or gradient</span>
-<span style='color:#008000;'># Dirichlet BC use vector_value with n_component = multiplicity of the equation</span>
-<span style='color:#008000;'># Other functions use value</span>
-<b>class</b> fnConstantFunction(Function_2D):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, val, n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>, active_component <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>):
-        Function_2D.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, n_components)
-        <span style='color:#0000ff;'>self</span>.m_value            <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>float</span>(val)
-        <span style='color:#0000ff;'>self</span>.m_active_component <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>int</span>(active_component)
-
-    <b>def</b> value(<span style='color:#0000ff;'>self</span>, point, component <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>):
-        res <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
-        <b>if</b> component <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>self</span>.m_active_component:
-            res <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m_value
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'value at </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'> = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'> (component = </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (point, res, component))
-        <b>return</b> res
-
-    <b>def</b> vector_value(<span style='color:#0000ff;'>self</span>, point):
-        res <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.value(point, c) <b>for</b> c <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#0000ff;'>self</span>.n_components)]
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'vector_value at </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'> = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (point, res))
-        <b>return</b> res
 
 <b>class</b> modTutorial(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
@@ -67,23 +53,60 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
         dofs <b><span style='color:#0000ff;'>=</span></b> [dealiiFiniteElementDOF_2D(name<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'T'</span>,
                                           description<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'Temperature'</span>,
+                                          fe <b><span style='color:#0000ff;'>=</span></b> FE_Q_2D(<span style='color:#c000c0;'>1</span>),
                                           multiplicity<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1</span>),
                 dealiiFiniteElementDOF_2D(name<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'T2'</span>,
                                           description<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'Temperature 2'</span>,
+                                          fe <b><span style='color:#0000ff;'>=</span></b> FE_Q_2D(<span style='color:#c000c0;'>1</span>),
                                           multiplicity<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1</span>)]
-        n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(dofs)
+        <span style='color:#0000ff;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(dofs)
+
+        meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'meshes'</span>)
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#c00000;'>'square.msh'</span>)
+
+        <span style='color:#008000;'># Store the object so it does not go out of scope while still in use by daetools</span>
+        <span style='color:#0000ff;'>self</span>.fe_dealII <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#008000;'># path to mesh</span>
+                                                      quadrature      <b><span style='color:#0000ff;'>=</span></b> QGauss_2D(<span style='color:#c000c0;'>3</span>),  <span style='color:#008000;'># quadrature formula</span>
+                                                      faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(<span style='color:#c000c0;'>3</span>),  <span style='color:#008000;'># face quadrature formula</span>
+                                                      dofs            <b><span style='color:#0000ff;'>=</span></b> dofs)          <span style='color:#008000;'># degrees of freedom</span>
+
+        <span style='color:#0000ff;'>self</span>.fe <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#c00000;'>'HeatConduction'</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>'Multi-scalar transient heat conduction FE problem'</span>, <span style='color:#0000ff;'>self</span>.fe_dealII)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
         functions    <b><span style='color:#0000ff;'>=</span></b> {}
         functions[<span style='color:#c00000;'>'Diffusivity'</span>] <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(<span style='color:#c000c0;'>401.0</span><b><span style='color:#0000ff;'>/</span></b>(<span style='color:#c000c0;'>8960</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>385</span>))
         functions[<span style='color:#c00000;'>'Generation'</span>]  <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(<span style='color:#c000c0;'>0.0</span>)
 
-        dirichletBC    <b><span style='color:#0000ff;'>=</span></b> {}
-        dirichletBC[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c00000;'>'T'</span>,  fnConstantFunction(<span style='color:#c000c0;'>200</span>, n_components, <span style='color:#c000c0;'>0</span>)) <span style='color:#008000;'># left edge</span>
-        dirichletBC[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c00000;'>'T'</span>,  fnConstantFunction(<span style='color:#c000c0;'>350</span>, n_components, <span style='color:#c000c0;'>0</span>)) <span style='color:#008000;'># top edge</span>
-        dirichletBC[<span style='color:#c000c0;'>2</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c00000;'>'T2'</span>, fnConstantFunction(<span style='color:#c000c0;'>250</span>, n_components, <span style='color:#c000c0;'>1</span>)) <span style='color:#008000;'># right edge</span>
+        <span style='color:#008000;'># Boundary IDs</span>
+        left_edge   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
+        top_edge    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
+        right_edge  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>
+        bottom_edge <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>3</span>
 
-        meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#c00000;'>'square.msh'</span>)
+        <span style='color:#008000;'># Set Dirichlet BCs for each edge and for both DOFs ('T' and 'T2').</span>
+        <span style='color:#008000;'># Nota bene:</span>
+        <span style='color:#008000;'>#   ConstantFunction will return an array with values for both DOFS, i.e. [200, 200],</span>
+        <span style='color:#008000;'>#   but we internally use the ComponentMask to select a DOF we want to set Dirichlet BCs.</span>
+        <span style='color:#008000;'>#   Therefore, it is safe to return values for all components.</span>
+        dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
+        dirichletBC[left_edge]   <b><span style='color:#0000ff;'>=</span></b> [
+                                    (<span style='color:#c00000;'>'T'</span>,  ConstantFunction_2D(<span style='color:#c000c0;'>200</span>, <span style='color:#0000ff;'>self</span>.n_components)),
+                                    (<span style='color:#c00000;'>'T2'</span>, ConstantFunction_2D( <span style='color:#c000c0;'>20</span>, <span style='color:#0000ff;'>self</span>.n_components))
+                                   ]
+        dirichletBC[top_edge]    <b><span style='color:#0000ff;'>=</span></b> [
+                                    (<span style='color:#c00000;'>'T'</span>,  ConstantFunction_2D(<span style='color:#c000c0;'>300</span>, <span style='color:#0000ff;'>self</span>.n_components)),
+                                    (<span style='color:#c00000;'>'T2'</span>, ConstantFunction_2D( <span style='color:#c000c0;'>30</span>, <span style='color:#0000ff;'>self</span>.n_components))
+                                   ]
+        dirichletBC[right_edge]  <b><span style='color:#0000ff;'>=</span></b> [
+                                    (<span style='color:#c00000;'>'T'</span>,  ConstantFunction_2D(<span style='color:#c000c0;'>400</span>, <span style='color:#0000ff;'>self</span>.n_components)),
+                                    (<span style='color:#c00000;'>'T2'</span>, ConstantFunction_2D( <span style='color:#c000c0;'>40</span>, <span style='color:#0000ff;'>self</span>.n_components))
+                                   ]
+        dirichletBC[bottom_edge] <b><span style='color:#0000ff;'>=</span></b> [
+                                    (<span style='color:#c00000;'>'T'</span>,  ConstantFunction_2D(<span style='color:#c000c0;'>500</span>, <span style='color:#0000ff;'>self</span>.n_components)),
+                                    (<span style='color:#c00000;'>'T2'</span>, ConstantFunction_2D( <span style='color:#c000c0;'>50</span>, <span style='color:#0000ff;'>self</span>.n_components))
+                                   ]
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> (dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> function_value_2D(<span style='color:#c00000;'>&quot;Diffusivity&quot;</span>, xyz_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q) <b><span style='color:#0000ff;'>\</span></b>
                                                       <b><span style='color:#0000ff;'>+</span></b> (dphi_2D(<span style='color:#c00000;'>'T2'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#c00000;'>'T2'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> function_value_2D(<span style='color:#c00000;'>&quot;Diffusivity&quot;</span>, xyz_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q),
@@ -102,74 +125,44 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    faceAij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.faceAij]))
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    faceFi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.faceFi]))
 
-        <span style='color:#008000;'># Store the object so it does not go out of scope while still in use by daetools</span>
-        <span style='color:#0000ff;'>self</span>.fe_dealII <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#008000;'># path to mesh</span>
-                                                      polynomialOrder <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>,             <span style='color:#008000;'># polynomial order</span>
-                                                      quadrature      <b><span style='color:#0000ff;'>=</span></b> QGauss_2D(<span style='color:#c000c0;'>3</span>),  <span style='color:#008000;'># quadrature formula</span>
-                                                      faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(<span style='color:#c000c0;'>3</span>),  <span style='color:#008000;'># face quadrature formula</span>
-                                                      dofs            <b><span style='color:#0000ff;'>=</span></b> dofs,          <span style='color:#008000;'># degrees of freedom</span>
-                                                      weakForm        <b><span style='color:#0000ff;'>=</span></b> weakForm)      <span style='color:#008000;'># FE system in weak form</span>
-
-        <span style='color:#0000ff;'>self</span>.fe <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#c00000;'>'HeatConduction'</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>'Transient heat conduction equation'</span>, <span style='color:#0000ff;'>self</span>.fe_dealII)
-
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#008000;'># Setting the weak form of the FE system will declare a set of equations:</span>
+        <span style='color:#008000;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>
+        <span style='color:#0000ff;'>self</span>.fe_dealII.WeakForm <b><span style='color:#0000ff;'>=</span></b> weakForm
 
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_dealii_3&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_deal_II_3&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        m_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.fe_dealII.Msystem()
-
-        <span style='color:#008000;'># Vector where every item marks the boundar</span>
-        <span style='color:#008000;'>#dof_to_boundary = self.m.fe_dealII.GetDOFtoBoundaryMap()</span>
-        <span style='color:#008000;'>#print list(dof_to_boundary)</span>
-
-        <span style='color:#008000;'># dofIndexesMap relates global DOF indexes to points within daetools variables</span>
-
-        <span style='color:#008000;'># Todo: use a function from daeSimulation</span>
-        dofIndexesMap <b><span style='color:#0000ff;'>=</span></b> {}
-        <b>for</b> variable <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>self</span>.m.fe.Variables:
-            <b>if</b> variable.Name <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'T'</span>:
-                ic <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>300</span>
-            <b>elif</b> variable.Name <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'T2'</span>:
-                ic <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>200</span>
-            <b>else</b>:
-                <b>raise</b> <b><span style='color:#054d00;'>RuntimeError</span></b>(<span style='color:#c00000;'>'Unknown variable [</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>] found'</span> <b><span style='color:#0000ff;'>%</span></b> variable.Name)
-
-            <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(variable.NumberOfPoints):
-                dofIndexesMap[variable.OverallIndex <b><span style='color:#0000ff;'>+</span></b> i] <b><span style='color:#0000ff;'>=</span></b> (variable, i, ic)
-
-        <b>for</b> row <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(m_dt.n):
-            <span style='color:#008000;'># Iterate over columns and set initial conditions.</span>
-            <span style='color:#008000;'># If an item in the dt matrix is zero skip it (it is at the boundary - not a diff. variable).</span>
-            <b>for</b> column <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>self</span>.m.fe_dealII.RowIndices(row):
-                <b>if</b> m_dt(row, column) <b><span style='color:#0000ff;'>!=</span></b> <span style='color:#c000c0;'>0</span>:
-                    variable, index, ic <b><span style='color:#0000ff;'>=</span></b> dofIndexesMap[column]
-                    variable.SetInitialCondition(index, ic)
-                    <span style='color:#008000;'>#print('%s(%d) initial condition = %f' % (variable.Name, column, ic))</span>
+        setFEInitialConditions(<span style='color:#0000ff;'>self</span>.m.fe, <span style='color:#0000ff;'>self</span>.m.fe_dealII,  <span style='color:#c00000;'>'T'</span>, <span style='color:#c000c0;'>100</span>)
+        setFEInitialConditions(<span style='color:#0000ff;'>self</span>.m.fe, <span style='color:#0000ff;'>self</span>.m.fe_dealII, <span style='color:#c00000;'>'T2'</span>,  <span style='color:#c000c0;'>10</span>)
 
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    feDataReporter    <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
-    datareporter.AddDataReporter(feDataReporter)
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
 
-    <span style='color:#008000;'># Connect datareporters</span>
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(tcpipDataReporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    results_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'-results'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'tutorial_deal_II_2-'</span>)
+
+    <span style='color:#008000;'># Create two data reporters:</span>
+    <span style='color:#008000;'># 1. DealII</span>
+    feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_dealII.CreateDataReporter()
+    datareporter.AddDataReporter(feDataReporter)
+    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> feDataReporter.Connect(results_folder, simName):
         sys.exit()
-    results_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'-results'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'tutorial_dealii_3-'</span>)
-    feDataReporter.Connect(results_folder, simName)
+    <span style='color:#008000;'># 2. TCP/IP</span>
+    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> tcpipDataReporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName):
+        sys.exit()
+
     <b>try</b>:
         <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
         QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;deal.II&quot;</span>, <span style='color:#c00000;'>&quot;The simulation results will be located in: </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results_folder)
@@ -177,9 +170,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>print</span>(<span style='color:#0000ff;'>str</span>(e))
 
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>simulation, datareporter <b><span style='color:#0000ff;'>=</span></b> datareporter)
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>20</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2000</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>simulation, datareporter <b><span style='color:#0000ff;'>=</span></b> datareporter, lasolver<b><span style='color:#0000ff;'>=</span></b>lasolver)
     simulator.exec_()
 
 <span style='color:#008000;'># Setup everything manually and run in a console</span>
@@ -189,53 +182,38 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
     lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    lasolver = pyTrilinos.daeCreateTrilinosSolver(&quot;AztecOO&quot;, &quot;&quot;)</span>
-<span style='color:#008000;'>    lasolver.NumIters  = 500</span>
-<span style='color:#008000;'>    lasolver.Tolerance = 1e-6</span>
-<span style='color:#008000;'>    paramListAztec = lasolver.AztecOOOptions</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_solver&quot;,    daeAztecOptions.AZ_gmres)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_kspace&quot;,    500)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_scaling&quot;,   daeAztecOptions.AZ_none)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_reorder&quot;,   0)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_conv&quot;,      daeAztecOptions.AZ_r0)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_keep_info&quot;, 1)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_output&quot;,    daeAztecOptions.AZ_all) # {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_precond&quot;,         daeAztecOptions.AZ_dom_decomp)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_subdomain_solve&quot;, daeAztecOptions.AZ_ilut)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_overlap&quot;,         daeAztecOptions.AZ_none)</span>
-<span style='color:#008000;'>    paramListAztec.set_int(&quot;AZ_graph_fill&quot;,      1)</span>
-<span style='color:#008000;'>    paramListAztec.Print()</span>
-<span style='color:#008000;'>    daesolver.SetLASolver(lasolver)</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
 
-    <span style='color:#008000;'># Create two data reporters: TCP/IP and DealII</span>
-    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    feDataReporter    <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
-    datareporter.AddDataReporter(feDataReporter)
-
-    <span style='color:#008000;'># Connect datareporters</span>
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(tcpipDataReporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'tutorial_deal_II_3-results'</span>)
+
+    <span style='color:#008000;'># Create two data reporters:</span>
+    <span style='color:#008000;'># 1. DealII</span>
+    feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_dealII.CreateDataReporter()
+    datareporter.AddDataReporter(feDataReporter)
+    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> feDataReporter.Connect(results_folder, simName):
         sys.exit()
-    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'tutorial_dealii_3-results'</span>), simName)
+    <span style='color:#008000;'># 2. TCP/IP</span>
+    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> tcpipDataReporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName):
+        sys.exit()
 
     <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>20</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2000</span>
 
     <span style='color:#008000;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    <span style='color:#008000;'>#simulation.m.fe.SaveModelReport(simulation.m.fe.Name + &quot;.xml&quot;)</span>
-    <span style='color:#008000;'>#simulation.m.fe.SaveRuntimeModelReport(simulation.m.fe.Name + &quot;-rt.xml&quot;)</span>
+    simulation.m.fe.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
+    simulation.m.fe.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

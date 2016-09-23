@@ -103,35 +103,11 @@ class BottomGradientFunction_2D(adoubleFunction_2D):
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-        
-        # Used only to set the Neumann BC at the bottom to illustrate the use of adouble functions 
-        # and coupling between daetools and deal.ii
-        #self.flux1 = daeParameter("flux1", unit(), self, "Flux as a parameter (half of the gradient)")
-        #self.flux2 = daeVariable ("flux2",   no_t, self, "Flux as a variable (half of the gradient)")
 
-        rho = 8960.0  # kg/m**3
-        cp  =  385.0  # J/(kg*K)
-        k   =  401.0  # W/(m*K)
-        
-        flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        flux_beneath = 5.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        diffusivity  = k / (rho*cp)   # m**2/s
-        
-        print('Thermal diffusivity = %f' % diffusivity)
-        print('Beneath source flux = %f' % flux_beneath)
-        print('Above source flux = %f x (1,-1)' % flux_above)
+        self.Q0_total = daeVariable("Q0_total", no_t, self, "Total heat passing through the boundary with id=0")
+        self.Q1_total = daeVariable("Q1_total", no_t, self, "Total heat passing through the boundary with id=1")
+        self.Q2_total = daeVariable("Q2_total", no_t, self, "Total heat passing through the boundary with id=2")
 
-        functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(diffusivity)
-        functions['Generation']  = ConstantFunction_2D(0.0)
-        # Gradient flux at boundary id=0 (Sun)
-        functions['Flux_a'] = GradientFunction_2D(flux_above, direction = (-1, 1))
-        # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
-        functions['Flux_b'] = BottomGradientFunction_2D(flux_beneath)
-        
-        dirichletBC    = {}
-        dirichletBC[2] = [('T', ConstantFunction_2D(300))] # at boundary id=2 (inner tube)
-        
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         mesh_file  = os.path.join(meshes_dir, 'pipe.msh')
 
@@ -140,6 +116,46 @@ class modTutorial(daeModel):
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
 
+        # Store the object so it does not go out of scope while still in use by daetools
+        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
+                                                      quadrature      = QGauss_2D(3),  # quadrature formula
+                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
+                                                      dofs            = dofs)          # degrees of freedom
+
+        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction through a pipe wall with an external heat flux', self.fe_dealII)
+       
+    def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
+        rho   = 8960.0  # kg/m**3
+        cp    =  385.0  # J/(kg*K)
+        kappa =  401.0  # W/(m*K)
+
+        flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
+        flux_beneath = 5.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
+        alpha        = kappa / (rho*cp)   # m**2/s
+
+        print('Thermal diffusivity = %f' % alpha)
+        print('Beneath source flux = %f' % flux_beneath)
+        print('Above source flux = %f x (1,-1)' % flux_above)
+
+        functions    = {}
+        functions['Diffusivity'] = ConstantFunction_2D(alpha)
+        functions['Generation']  = ConstantFunction_2D(0.0)
+        # Gradient flux at boundary id=0 (Sun)
+        functions['Flux_a'] = GradientFunction_2D(flux_above, direction = (-1, 1))
+        # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
+        functions['Flux_b'] = BottomGradientFunction_2D(flux_beneath)
+
+        dirichletBC    = {}
+        dirichletBC[2] = [ ('T', ConstantFunction_2D(300)) ] # at boundary id=2 (inner tube)
+
+        boundaryIntegrals = {
+                               0 : [(self.Q0_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
+                               1 : [(self.Q1_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
+                               2 : [(self.Q2_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+                            }
+
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
                                                   Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
                                                   Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
@@ -147,7 +163,8 @@ class modTutorial(daeModel):
                                                   faceFi  = {0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
                                                              1: phi_2D('T', fe_i, fe_q) * function_adouble_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)},
                                                   functions = functions,
-                                                  functionsDirichletBC = dirichletBC)
+                                                  functionsDirichletBC = dirichletBC,
+                                                  boundaryIntegrals = boundaryIntegrals)
 
         print('Heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
@@ -156,18 +173,10 @@ class modTutorial(daeModel):
         print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
         print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
 
-        # Store the object so it does not go out of scope while still in use by daetools
-        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
-                                                      quadrature      = QGauss_2D(3),  # quadrature formula
-                                                      faceQuadrature  = QGauss_1D(3),  # face quadrature formula
-                                                      dofs            = dofs,          # degrees of freedom
-                                                      weakForm        = weakForm)      # FE system in weak form
+        # Setting the weak form of the FE system will declare a set of equations:
+        # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
+        self.fe_dealII.WeakForm = weakForm
 
-        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction through a pipe wall with an external heat flux', self.fe_dealII)
-       
-    def DeclareEquations(self):
-        daeModel.DeclareEquations(self)
-        
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
@@ -179,19 +188,29 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
-        setFEInitialConditions(self.m.fe, self.m.fe_dealII, 'T', 273)
+        setFEInitialConditions(self.m.fe, self.m.fe_dealII, 'T', 293)
 
 # Use daeSimulator class
 def guiRun(app):
     datareporter = daeDelegateDataReporter()
-    simulation = simTutorial()
-    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
-    datareporter.AddDataReporter(feDataReporter)
+    simulation   = simTutorial()
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
 
-    # Connect datareporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
-    feDataReporter.Connect(results_folder, simName)
+
+    # Create two data reporters:
+    # 1. DealII
+    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
+    datareporter.AddDataReporter(feDataReporter)
+    if not feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+    # 2. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
+        sys.exit()
+
     try:
         from PyQt4 import QtCore, QtGui
         QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
@@ -199,9 +218,9 @@ def guiRun(app):
         print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 60    # 1 minute
-    simulation.TimeHorizon       = 60*60 # 1 hour
-    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter)
+    simulation.ReportingInterval = 60      # 1 minute
+    simulation.TimeHorizon       = 2*60*60 # 2 hours
+    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -213,14 +232,21 @@ def consoleRun():
     simulation   = simTutorial()
 
     lasolver = pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
 
-    # Create two data reporters: TCP/IP and DealII
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results')
+
+    # Create two data reporters:
+    # 1. DealII
     feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-    # Connect datareporters
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    feDataReporter.Connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results'), simName)
+    if not feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+    # 2. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
+        sys.exit()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)

@@ -126,10 +126,10 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
             throw e;
         }
 
-        daeNodeSaveAsContext c(this);
-        adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
-        printf("ad_variable = %s (%s)\n", ad_variable.node->SaveAsLatex(&c).c_str(), (psvn ? psvn->GetObjectClassName().c_str() : "nullptr"));
-        printf("ad_integral = %s\n", ad_integral.node->SaveAsLatex(&c).c_str());
+        //daeNodeSaveAsContext c(this);
+        //adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
+        //printf("ad_variable = %s (%s)\n", ad_variable.node->SaveAsLatex(&c).c_str(), (psvn ? psvn->GetObjectClassName().c_str() : "nullptr"));
+        //printf("ad_integral = %s\n", ad_integral.node->SaveAsLatex(&c).c_str());
 
         pEq->SetResidual(ad_variable - ad_integral);
     }

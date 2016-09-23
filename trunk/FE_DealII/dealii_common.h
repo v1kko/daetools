@@ -1229,7 +1229,7 @@ public:
     virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
     virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
-    virtual adouble daeVariable_value(const std::string& variableName, unsigned int localIndex) const = 0;
+    virtual adouble daeVariable_value(const std::string& variableName, unsigned int i) const = 0;
 
     virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
 

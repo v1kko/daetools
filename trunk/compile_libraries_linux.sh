@@ -1297,7 +1297,7 @@ configure_dealii()
   cmake \
     -DCMAKE_BUILD_TYPE:STRING=Release \
     -DDEAL_II_PACKAGE_NAME:STRING=deal.II-daetools \
-    -DBUILD_SHARED_LIBS:BOOL=OFF \
+    -DBUILD_SHARED_LIBS:BOOL=ON \
     -DDEAL_II_ALLOW_AUTODETECTION=OFF \
     -DDEAL_II_PREFER_STATIC_LIBS:BOOL=ON \
     -DDEAL_II_COMPONENT_EXAMPLES:BOOL=ON \
@@ -1343,13 +1343,14 @@ compile_dealii()
   
   # Nota bene:
   #   No need to copy anything since we are producing a static lib (.a)
-  #if [ ${PLATFORM} = "Darwin" ]; then
-  #  cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
-  #elif [ ${PLATFORM} = "Linux" ]; then
-  #  cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
-  #else
-  #  echo "..."
-  #fi
+  # Not anymore!
+  if [ ${PLATFORM} = "Darwin" ]; then
+    cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
+  elif [ ${PLATFORM} = "Linux" ]; then
+    cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
+  else
+    echo "..."
+  fi
   cd "${TRUNK}"
 }
 

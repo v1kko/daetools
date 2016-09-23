@@ -841,7 +841,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
                                       update_values | update_gradients | update_quadrature_points  |
                                       update_normal_vectors | update_JxW_values);
-
+    
     std::vector<types::global_dof_index> mapGlobalDOFtoBoundary;
     DoFTools::map_dof_to_boundary_indices(dof_handler, mapGlobalDOFtoBoundary);
 
@@ -1056,8 +1056,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
 
                 typename map_Uint_vector_pair_Variable_Expression::const_iterator itboundaryIntegral = m_weakForm->m_mapBoundaryIntegrals.find(id);
-
-                // If there is face Aij or Fi (or both)
                 if(itboundaryIntegral != m_weakForm->m_mapBoundaryIntegrals.end())
                 {
                     const std::vector<pair_Variable_Expression>& arrExpressions = itboundaryIntegral->second;
@@ -1069,6 +1067,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         const adouble&           variable     = pve.first;
                         const feExpression<dim>& biExpression = pve.second;
 
+                        if(!biExpression.m_node)
+                            continue;
+
                         adouble adIntegral;
                         for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                         {
@@ -1077,11 +1078,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                             for (unsigned int i = 0; i < dofs_per_cell; ++i)
                             {
                                 cellFaceContext.m_i = i;
-
-                                cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in boundaryIntegral contributions
-
-                                if(!biExpression.m_node)
-                                    continue;
+                                cellFaceContext.m_j = -1;
 
                                 feRuntimeNumber<dim> result = biExpression.m_node->Evaluate(&cellFaceContext);
                                 if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
