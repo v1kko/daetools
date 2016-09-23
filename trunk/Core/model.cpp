@@ -1865,7 +1865,8 @@ void daeModel::BuildExpressions(daeBlock* pBlock)
     EC.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
 
 // I have to set this since Create_adouble called from adSetup nodes needs it
-    PropagateGlobalExecutionContext(&EC);
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
     size_t nIndexInModel = 0;
     for(k = 0; k < m_ptrarrOnConditionActions.size(); k++)
@@ -1893,7 +1894,7 @@ void daeModel::BuildExpressions(daeBlock* pBlock)
     }
 
 // Restore it to NULL
-    PropagateGlobalExecutionContext(NULL);
+    pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 
 // Next, BuildExpressions in each child-model
     for(i = 0; i < m_ptrarrComponents.size(); i++)
@@ -2501,7 +2502,9 @@ void daeModel::BuildUpSTNsAndEquations()
     EC.m_eEquationCalculationMode = eCreateFunctionsIFsSTNs;
 
     m_pDataProxy->SetGatherInfo(true);
-    PropagateGlobalExecutionContext(&EC);
+
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
+    pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
         if(m_ptrarrStackSTNs.size() > 0)
             daeDeclareAndThrowException(exInvalidCall);
@@ -2527,7 +2530,7 @@ void daeModel::BuildUpSTNsAndEquations()
         InitializeOnEventAndOnConditionActions();
 
     m_pDataProxy->SetGatherInfo(false);
-    PropagateGlobalExecutionContext(NULL);
+    pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }
 
 void daeModel::InitializeDEDIs(void)
@@ -3229,6 +3232,7 @@ daeBlock* daeModel::DoBlockDecomposition(void)
     for(i = 0; i < nNoEquations; i++)
     {
         pEquationExec = ptrarrAllEquationExecutionInfosInModel[i];
+
         pBlock->AddVariables(pEquationExec->m_mapIndexes);
     }
 

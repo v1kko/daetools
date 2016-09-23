@@ -171,7 +171,10 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pMo
 
 // We need to propagate this as a global execution context for it will be used to add variable indexes
 	EC.m_pEquationExecutionInfo = this;
-	pModel->PropagateGlobalExecutionContext(&EC);
+
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pDataProxy->GetTopLevelModel());
+    pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
 // Get a runtime node by evaluating the equation's setup node
     size_t nNumberOfDomains = m_pEquation->m_ptrarrDistributedEquationDomainInfos.size();
@@ -188,7 +191,7 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pMo
     m_EquationEvaluationNode = m_pEquation->m_pResidualNode->Evaluate(&EC).node;
 
 // Restore NULL as a global execution context
-	pModel->PropagateGlobalExecutionContext(NULL);
+    pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }
 
 void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)

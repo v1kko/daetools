@@ -10,7 +10,7 @@ namespace core
 /*********************************************************
     daeFiniteElementModel
 *********************************************************/
-daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pModel, std::string strDescription, daeFiniteElementObject* fe):
+daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pModel, std::string strDescription, daeFiniteElementObject_t* fe):
       daeModel(strName, pModel, strDescription),
       m_fe(fe),
       m_omega("&Omega;", this, unit(), "Omega")
@@ -50,30 +50,16 @@ daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pMod
 
         pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, omega_i);
         m_ptrarrFEVariables.push_back(pVariable);
-
-        /*
-        if(feVarInfo.m_nMultiplicity == 1)
-        {
-            pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, &m_omega_c);
-            m_ptrarrFEVariables.push_back(pVariable);
-        }
-        else
-        {
-            daeDomain* pd = new daeDomain("FED_" + toString(m_ptrarrFEDomains.size()), this, unit(), "FE Domain " + toString(m_ptrarrFEDomains.size()));
-            pd->CreateArray(feVarInfo.m_nMultiplicity);
-            m_ptrarrFEDomains.push_back(pd);
-
-            pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, pd, &m_omega_c);
-            m_ptrarrFEVariables.push_back(pVariable);
-        }
-        */
    }
 }
 
 void daeFiniteElementModel::DeclareEquations(void)
 {
     daeModel::DeclareEquations();
+}
 
+void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
+{
     if(!m_fe)
         daeDeclareAndThrowException(exInvalidPointer);
 
@@ -104,6 +90,50 @@ void daeFiniteElementModel::DeclareEquations(void)
     pEquation->SetScaling(1.0);
     pEquation->daeEquation::DistributeOnDomain(m_omega, eClosedClosed);
     pEquation->SetResidual(Constant(0.0));
+
+
+    // Add boundary integral equations
+    const std::map< unsigned int, std::pair<adouble,adouble> >* mapBI = m_fe->BoundaryIntegrals();
+    std::map< unsigned int, std::pair<adouble,adouble> >::const_iterator cit = mapBI->begin();
+    for(int counter=0; cit != mapBI->end(); counter++, cit++)
+    {
+        daeEquation* pEq = new daeEquation();
+
+        if(!pCurrentState)
+        {
+            string strEqName = "dealIIFEBoundaryIntegral_" + toString<size_t>(counter);
+            pEq->SetName(strEqName);
+            AddEquation(pEq);
+        }
+        else
+        {
+            string strEqName = "dealIIFEBoundaryIntegral_" + toString<size_t>(counter);
+            pEq->SetName(strEqName);
+            pCurrentState->AddEquation(pEq);
+        }
+
+        pEq->SetDescription("");
+        pEq->SetScaling(1.0);
+
+        const std::pair<adouble,adouble>& p = cit->second;
+        const adouble& ad_variable = p.first;
+        const adouble& ad_integral = p.second;
+
+        if(!ad_variable.node)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The variable to store the result of the boundary integral is not specified";
+            throw e;
+        }
+
+        daeNodeSaveAsContext c(this);
+        adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
+        printf("ad_variable = %s (%s)\n", ad_variable.node->SaveAsLatex(&c).c_str(), (psvn ? psvn->GetObjectClassName().c_str() : "nullptr"));
+        printf("ad_integral = %s\n", ad_integral.node->SaveAsLatex(&c).c_str());
+
+        pEq->SetResidual(ad_variable - ad_integral);
+    }
+
 }
 
 void daeFiniteElementModel::UpdateEquations(const daeExecutionContext* pExecutionContext)
@@ -153,7 +183,7 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     size_t indexes[1], counter;
     size_t nNoDomains, nIndex, column, internalVariableIndex;
     adouble a_Aij, a_Mij, a_Fi;
-    daeFiniteElementObject* fe ;
+    daeFiniteElementObject_t* fe ;
     daeEquationExecutionInfo* pEquationExecutionInfo;
     std::vector<unsigned int> narrRowIndices;
     std::vector< std::pair<size_t, daeVariable*> > arrGlobalDOFToVariablePoint;
@@ -186,6 +216,10 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
     EC.m_pDataProxy					= pModel->m_pDataProxy.get();
     EC.m_pEquationExecutionInfo		= NULL;
     EC.m_eEquationCalculationMode	= eGatherInfo;
+
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = pModel->GetDataProxy();
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pDataProxy->GetTopLevelModel());
+    pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
     bool bPrintInfo = pModel->m_pDataProxy->PrintInfo();
     if(bPrintInfo)
@@ -222,7 +256,6 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
 
         // Set EEI for the forthcoming calls to adNode::Evaluate()
         EC.m_pEquationExecutionInfo = pEquationExecutionInfo;
-        pModel->PropagateGlobalExecutionContext(&EC);
 
         // Reset equation's contributions
         a_Aij = 0;
@@ -344,7 +377,7 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
     }
 
-    pModel->PropagateGlobalExecutionContext(NULL);
+    pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }
 
 void daeFiniteElementEquation::Open(io::xmlTag_t* pTag)

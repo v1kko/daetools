@@ -3413,14 +3413,15 @@ struct daeFiniteElementObjectInfo
 };
 
 /******************************************************************
-    daeFiniteElementObject
+    daeFiniteElementObject_t
 *******************************************************************/
-class daeFiniteElementObject
+class daeFiniteElementModel;
+class daeFiniteElementObject_t
 {
 public:
-    virtual ~daeFiniteElementObject() {}
+    virtual ~daeFiniteElementObject_t() {}
 
-    virtual void SetModel(daeModel* pModel) = 0;
+    virtual void SetModel(daeFiniteElementModel* pFEModel) = 0;
 
     virtual void AssembleSystem()    = 0;
     virtual bool NeedsReAssembling() = 0;
@@ -3435,7 +3436,68 @@ public:
     virtual daeFiniteElementObjectInfo                                   GetObjectInfo() const = 0;
 };
 
+/******************************************************************
+    daeFiniteElementModel
+******************************************************************/
+class daeFiniteElementEquation;
+class DAE_CORE_API daeFiniteElementModel : public daeModel
+{
+public:
+    daeFiniteElementModel(std::string               strName,
+                          daeModel*                 pModel,
+                          std::string               strDescription,
+                          daeFiniteElementObject_t* fe);
 
+public:
+    void DeclareEquations(void);
+    void DeclareEquationsForWeakForm(void);
+    void UpdateEquations(const daeExecutionContext* pExecutionContext);
+
+protected:
+    daeFiniteElementObject_t*               m_fe;
+    daeDomain                               m_omega;
+    daePtrVector<daeDomain*>                m_ptrarrFESubDomains;
+    daePtrVector<daeVariable*>              m_ptrarrFEVariables;
+    boost::shared_ptr< daeMatrix<adouble> > m_Aij; // Stiffness matrix
+    boost::shared_ptr< daeMatrix<adouble> > m_Mij; // Mass matrix
+    boost::shared_ptr< daeArray<adouble> >  m_Fi;  // Load vector
+
+    friend class daeFiniteElementEquation;
+};
+
+/******************************************************************
+    daeFiniteElementEquation
+*******************************************************************/
+class DAE_CORE_API daeFiniteElementEquation : public daeEquation
+{
+public:
+    daeDeclareDynamicClass(daeFiniteElementEquation)
+    daeFiniteElementEquation(const daeFiniteElementModel& feModel, const std::vector<daeVariable*>& arrVariables, size_t startRow, size_t endRow);
+    virtual ~daeFiniteElementEquation(void);
+
+public:
+    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
+    bool CheckObject(std::vector<string>& strarrErrors) const;
+
+    void Open(io::xmlTag_t* pTag);
+    void Save(io::xmlTag_t* pTag) const;
+    void OpenRuntime(io::xmlTag_t* pTag);
+    void SaveRuntime(io::xmlTag_t* pTag) const;
+
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
+    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
+
+public:
+    const daeFiniteElementModel&     m_FEModel;
+    const std::vector<daeVariable*>& m_ptrarrVariables;
+    const size_t                     m_startRow;
+    const size_t                     m_endRow;
+
+    friend class daeModel;
+    friend class daeFiniteElementModel;
+    friend class daeEquationExecutionInfo;
+};
 
 
 /******************************************************************
@@ -3614,68 +3676,6 @@ public:
 						size_t nEquationIndex, 
 						const string& strDescription);
 	virtual ~daeMeasuredVariable(void);
-};
-
-/******************************************************************
-    daeFiniteElementModel
-******************************************************************/
-class daeFiniteElementEquation;
-class DAE_CORE_API daeFiniteElementModel : public daeModel
-{
-public:
-    daeFiniteElementModel(std::string             strName,
-                          daeModel*               pModel,
-                          std::string             strDescription,
-                          daeFiniteElementObject* fe);
-
-public:
-    void DeclareEquations(void);
-    void UpdateEquations(const daeExecutionContext* pExecutionContext);
-
-protected:
-    daeFiniteElementObject*                 m_fe;
-    daeDomain                               m_omega;
-    daePtrVector<daeDomain*>                m_ptrarrFESubDomains;
-    daePtrVector<daeVariable*>              m_ptrarrFEVariables;
-    boost::shared_ptr< daeMatrix<adouble> > m_Aij; // Stiffness matrix
-    boost::shared_ptr< daeMatrix<adouble> > m_Mij; // Mass matrix
-    boost::shared_ptr< daeArray<adouble> >  m_Fi;  // Load vector
-
-    friend class daeFiniteElementEquation;
-};
-
-/******************************************************************
-    daeFiniteElementEquation
-*******************************************************************/
-class DAE_CORE_API daeFiniteElementEquation : public daeEquation
-{
-public:
-    daeDeclareDynamicClass(daeFiniteElementEquation)
-    daeFiniteElementEquation(const daeFiniteElementModel& feModel, const std::vector<daeVariable*>& arrVariables, size_t startRow, size_t endRow);
-    virtual ~daeFiniteElementEquation(void);
-
-public:
-    void CreateEquationExecutionInfos(daeModel* pModel, std::vector<daeEquationExecutionInfo*>& ptrarrEqnExecutionInfosCreated, bool bAddToTheModel);
-    bool CheckObject(std::vector<string>& strarrErrors) const;
-
-    void Open(io::xmlTag_t* pTag);
-    void Save(io::xmlTag_t* pTag) const;
-    void OpenRuntime(io::xmlTag_t* pTag);
-    void SaveRuntime(io::xmlTag_t* pTag) const;
-
-    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, daeeDomainBounds eDomainBounds, const string& strName = string(""));
-    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const std::vector<size_t>& narrDomainIndexes, const string& strName = string(""));
-    virtual daeDEDI* DistributeOnDomain(daeDomain& rDomain, const size_t* pnarrDomainIndexes, size_t n, const string& strName = string(""));
-
-public:
-    const daeFiniteElementModel&     m_FEModel;
-    const std::vector<daeVariable*>& m_ptrarrVariables;
-    const size_t                     m_startRow;
-    const size_t                     m_endRow;
-
-    friend class daeModel;
-    friend class daeFiniteElementModel;
-    friend class daeEquationExecutionInfo;
 };
 
 /******************************************************************

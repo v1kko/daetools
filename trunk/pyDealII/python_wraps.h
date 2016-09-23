@@ -678,8 +678,7 @@ public:
     dealiiFiniteElementSystemWrapper(std::string               meshFilename,
                                      const Quadrature<dim>&    quadrature,
                                      const Quadrature<dim-1>&  faceQuadrature,
-                                     boost::python::list       listDOFs,
-                                     boost::python::object     weakForm)
+                                     boost::python::list       listDOFs)
     {
         std::vector< dealiiFiniteElementDOF<dim>* > arrDOFs;
         for(int i = 0; i < len(listDOFs); ++i)
@@ -689,12 +688,9 @@ public:
         }
         
         // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
-        this->m_weakForm = weakForm;
-        this->m_DOFs     = listDOFs;
+        this->m_oDOFs = listDOFs;
 
-        dealiiFiniteElementWeakForm<dim>* cweakForm  = boost::python::extract<dealiiFiniteElementWeakForm<dim>*>(weakForm);
-
-        this->Initialize(meshFilename, quadrature, faceQuadrature, arrDOFs, *cweakForm);
+        this->Initialize(meshFilename, quadrature, faceQuadrature, arrDOFs);
     }
 
     ~dealiiFiniteElementSystemWrapper()
@@ -702,6 +698,21 @@ public:
     }
 
 public:
+    dealiiFiniteElementWeakForm<dim>* GetWeakForm() const
+    {
+        return this->dealiiFiniteElementSystem<dim>::GetWeakForm();
+    }
+
+    void SetWeakForm(boost::python::object weakForm)
+    {
+        // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
+        this->m_oWeakForm = weakForm;
+
+        dealiiFiniteElementWeakForm<dim>* cweakForm  = boost::python::extract<dealiiFiniteElementWeakForm<dim>*>(weakForm);
+
+        this->dealiiFiniteElementSystem<dim>::SetWeakForm(cweakForm);
+    }
+
     void AssembleSystem()
     {
         if(boost::python::override f = this->get_override("AssembleSystem"))
@@ -746,8 +757,8 @@ public:
     }
     
 public:
-    boost::python::object m_weakForm;
-    boost::python::object m_DOFs;
+    boost::python::object m_oWeakForm;
+    boost::python::object m_oDOFs;
 };
 
 

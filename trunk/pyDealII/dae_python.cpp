@@ -1092,17 +1092,18 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("SendVariable",	  	&dealIIDataReporter::SendVariable)
     ;
 
-    class_<daepython::dealiiFiniteElementSystemWrapper<1>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementSystem_1D", no_init)
+    class_<daepython::dealiiFiniteElementSystemWrapper<1>, bases<daeFiniteElementObject_t>, boost::noncopyable>("dealiiFiniteElementSystem_1D", no_init)
         .def(init<std::string,
                   const Quadrature<1>&,
                   const Quadrature<0>&,
-                  boost::python::list,
-                  boost::python::object>((arg("meshFilename"),
-                                          arg("quadrature"),
-                                          arg("faceQuadrature"),
-                                          arg("dofs"),
-                                          arg("weakForm")
-                                        )))
+                  boost::python::list>((arg("meshFilename"),
+                                        arg("quadrature"),
+                                        arg("faceQuadrature"),
+                                        arg("dofs")
+                                      )))
+
+        .add_property("WeakForm",   make_function(&daepython::dealiiFiniteElementSystemWrapper<1>::GetWeakForm, return_internal_reference<>()),
+                                    &daepython::dealiiFiniteElementSystemWrapper<1>::SetWeakForm)
 
         .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<1>::AssembleSystem,
                                     &daepython::dealiiFiniteElementSystemWrapper<1>::def_AssembleSystem, ( arg("self") ))
@@ -1116,17 +1117,18 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
 
-    class_<daepython::dealiiFiniteElementSystemWrapper<2>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementSystem_2D", no_init)
+    class_<daepython::dealiiFiniteElementSystemWrapper<2>, bases<daeFiniteElementObject_t>, boost::noncopyable>("dealiiFiniteElementSystem_2D", no_init)
         .def(init<std::string,
                   const Quadrature<2>&,
                   const Quadrature<1>&,
-                  boost::python::list,
-                  boost::python::object>((arg("meshFilename"),
-                                          arg("quadrature"),
-                                          arg("faceQuadrature"),
-                                          arg("dofs"),
-                                          arg("weakForm")
-                                        )))
+                  boost::python::list>((arg("meshFilename"),
+                                        arg("quadrature"),
+                                        arg("faceQuadrature"),
+                                        arg("dofs")
+                                      )))
+
+        .add_property("WeakForm",   make_function(&daepython::dealiiFiniteElementSystemWrapper<2>::GetWeakForm, return_internal_reference<>()),
+                                    &daepython::dealiiFiniteElementSystemWrapper<2>::SetWeakForm)
 
         .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<2>::AssembleSystem,
                                     &daepython::dealiiFiniteElementSystemWrapper<2>::def_AssembleSystem, ( arg("self") ))
@@ -1139,17 +1141,18 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("GetDOFtoBoundaryMap", &dealiiFiniteElementSystem<2>::GetDOFtoBoundaryMap, ( arg("self") ))
     ;
 
-    class_<daepython::dealiiFiniteElementSystemWrapper<3>, bases<daeFiniteElementObject>, boost::noncopyable>("dealiiFiniteElementSystem_3D", no_init)
+    class_<daepython::dealiiFiniteElementSystemWrapper<3>, bases<daeFiniteElementObject_t>, boost::noncopyable>("dealiiFiniteElementSystem_3D", no_init)
         .def(init<std::string,
                   const Quadrature<3>&,
                   const Quadrature<2>&,
-                  boost::python::list,
-                  boost::python::object>((arg("meshFilename"),
-                                          arg("quadrature"),
-                                          arg("faceQuadrature"),
-                                          arg("dofs"),
-                                          arg("weakForm")
-                                        )))
+                  boost::python::list>((arg("meshFilename"),
+                                        arg("quadrature"),
+                                        arg("faceQuadrature"),
+                                        arg("dofs")
+                                      )))
+
+        .add_property("WeakForm",   make_function(&daepython::dealiiFiniteElementSystemWrapper<3>::GetWeakForm, return_internal_reference<>()),
+                                    &daepython::dealiiFiniteElementSystemWrapper<3>::SetWeakForm)
 
         .def("AssembleSystem",      &daepython::dealiiFiniteElementSystemWrapper<3>::AssembleSystem,
                                     &daepython::dealiiFiniteElementSystemWrapper<3>::def_AssembleSystem, ( arg("self") ))

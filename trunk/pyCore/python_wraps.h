@@ -1487,8 +1487,8 @@ daeSparseMatrixRowIterator__iter__* daeSparseMatrixRowIterator_iter(daeSparseMat
 /*******************************************************
     daeFiniteElementObjectWrapper
 *******************************************************/
-class daeFiniteElementObjectWrapper : public daeFiniteElementObject,
-                                      public boost::python::wrapper<daeFiniteElementObject>
+class daeFiniteElementObjectWrapper : public daeFiniteElementObject_t,
+                                      public boost::python::wrapper<daeFiniteElementObject_t>
 {
 public:
     daeFiniteElementObjectWrapper(void)

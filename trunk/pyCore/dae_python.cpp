@@ -1650,12 +1650,12 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daeFiniteElementModel, bases<daeModel>, boost::noncopyable>("daeFiniteElementModel", DOCSTR_daeFiniteElementModel, no_init)
-        .def(init<string, daeModel*, string, daeFiniteElementObject* >(( arg("self"),
-                                                                         arg("name"),
-                                                                         arg("parentModel"),
-                                                                         arg("description"),
-                                                                         arg("feObject")
-                                                                      ), DOCSTR_daeModel_init))
+        .def(init<string, daeModel*, string, daeFiniteElementObject_t* >(( arg("self"),
+                                                                           arg("name"),
+                                                                           arg("parentModel"),
+                                                                           arg("description"),
+                                                                           arg("feObject")
+                                                                        ), DOCSTR_daeModel_init))
 
         .def("UpdateEquations",  &daeFiniteElementModel::UpdateEquations, ( arg("self"), arg("executionContext") ), DOCSTR_daeModel_UpdateEquations)
         .def("DeclareEquations", &daeFiniteElementModel::DeclareEquations, ( arg("self") ), DOCSTR_daeModel_DeclareEquations)
@@ -1678,24 +1678,24 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("VariableInfos",              &daeFiniteElementObjectInfo::m_VariableInfos)
     ;
 
-    class_<daepython::daeFiniteElementObjectWrapper, boost::noncopyable>("daeFiniteElementObject", DOCSTR_daeFiniteElementObject, no_init)
-        .def("AssembleSystem",      pure_virtual(&daeFiniteElementObject::AssembleSystem),    ( arg("self") ), DOCSTR_daeFiniteElementObject_AssembleSystem)
-        .def("ReAssembleSystem",    pure_virtual(&daeFiniteElementObject::ReAssembleSystem),  ( arg("self") ), DOCSTR_daeFiniteElementObject_ReAssembleSystem)
-        .def("NeedsReAssembling",   pure_virtual(&daeFiniteElementObject::NeedsReAssembling), ( arg("self") ), DOCSTR_daeFiniteElementObject_NeedsReAssembling)
+    class_<daepython::daeFiniteElementObjectWrapper, boost::noncopyable>("daeFiniteElementObject_t", DOCSTR_daeFiniteElementObject, no_init)
+        .def("AssembleSystem",      pure_virtual(&daeFiniteElementObject_t::AssembleSystem),    ( arg("self") ), DOCSTR_daeFiniteElementObject_AssembleSystem)
+        .def("ReAssembleSystem",    pure_virtual(&daeFiniteElementObject_t::ReAssembleSystem),  ( arg("self") ), DOCSTR_daeFiniteElementObject_ReAssembleSystem)
+        .def("NeedsReAssembling",   pure_virtual(&daeFiniteElementObject_t::NeedsReAssembling), ( arg("self") ), DOCSTR_daeFiniteElementObject_NeedsReAssembling)
 
-        .def("RowIndices",          pure_virtual(&daeFiniteElementObject::RowIndices), return_value_policy<manage_new_object>(),
+        .def("RowIndices",          pure_virtual(&daeFiniteElementObject_t::RowIndices), return_value_policy<manage_new_object>(),
                                     ( arg("self"), arg("row") ), DOCSTR_daeFiniteElementObject_RowIndices)
 
-        .def("Asystem",             pure_virtual(&daeFiniteElementObject::Asystem), return_value_policy<manage_new_object>(),
+        .def("Asystem",             pure_virtual(&daeFiniteElementObject_t::Asystem), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix)
 
-        .def("Msystem",             pure_virtual(&daeFiniteElementObject::Msystem), return_value_policy<manage_new_object>(),
+        .def("Msystem",             pure_virtual(&daeFiniteElementObject_t::Msystem), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemMatrix_dt)
 
-        .def("Fload",               pure_virtual(&daeFiniteElementObject::Fload), return_value_policy<manage_new_object>(),
+        .def("Fload",               pure_virtual(&daeFiniteElementObject_t::Fload), return_value_policy<manage_new_object>(),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_SystemRHS)
 
-        .def("GetObjectInfo",       pure_virtual(&daeFiniteElementObject::GetObjectInfo),
+        .def("GetObjectInfo",       pure_virtual(&daeFiniteElementObject_t::GetObjectInfo),
                                     ( arg("self") ), DOCSTR_daeFiniteElementObject_GetObjectInfo)
     ;
 

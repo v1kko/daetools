@@ -555,7 +555,9 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
 	EC.m_eEquationCalculationMode	= eCreateFunctionsIFsSTNs;
 
 // I have to set this since Create_adouble called from adSetup nodes needs it
-	m_pModel->PropagateGlobalExecutionContext(&EC);
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(pDataProxy->GetTopLevelModel());
+    pTopLevelModel->PropagateGlobalExecutionContext(&EC);
 
 	for(i = 0; i < m_ptrarrStates.size(); i++) 
 	{
@@ -600,7 +602,7 @@ void daeSTN::BuildExpressions(daeBlock* pBlock)
 	}
 
 // Restore it to NULL
-	m_pModel->PropagateGlobalExecutionContext(NULL);
+    pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }
 
 // This function ONLY checks if there is a discontinuity somewhere; if there is - it returns true; otherwise false

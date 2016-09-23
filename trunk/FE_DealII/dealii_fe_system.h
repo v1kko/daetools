@@ -457,7 +457,7 @@ public:
     dealiiFiniteElementSystem<dim>
 *******************************************************************/
 template <int dim>
-class dealiiFiniteElementSystem : public daeFiniteElementObject
+class dealiiFiniteElementSystem : public daeFiniteElementObject_t
 {
 typedef typename std::map<unsigned int, const Function<dim>*> map_Uint_FunctionPtr;
 typedef typename std::pair<std::string, const Function<dim>*> pair_String_FunctionPtr;
@@ -477,7 +477,7 @@ public:
     virtual ~dealiiFiniteElementSystem();
 
 public:
-    virtual void SetModel(daeModel* pModel);
+    virtual void SetModel(daeFiniteElementModel* pFEModel);
     virtual void AssembleSystem();
     virtual bool NeedsReAssembling();
     virtual void ReAssembleSystem();
@@ -492,11 +492,13 @@ public:
     virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
     virtual dealIIDataReporter*         CreateDataReporter();
 
-    void Initialize(const std::string&                meshFilename,
-                    const Quadrature<dim>&            quadrature,
-                    const Quadrature<dim-1>&          faceQuadrature,
-                    vector_DOFs&                      DOFs,
-                    dealiiFiniteElementWeakForm<dim>& weakForm);
+    void Initialize(const std::string&       meshFilename,
+                    const Quadrature<dim>&   quadrature,
+                    const Quadrature<dim-1>& faceQuadrature,
+                    vector_DOFs&             DOFs);
+
+    dealiiFiniteElementWeakForm<dim>* GetWeakForm() const;
+    void SetWeakForm(dealiiFiniteElementWeakForm<dim>* wf);
 
 protected:
     void setup_system();
@@ -524,7 +526,7 @@ public:
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
 
     // Model-specific data
-    daeModel*                                 m_model;
+    daeFiniteElementModel*                    m_pfeModel;
     dealiiFiniteElementWeakForm<dim>*         m_weakForm;
     std::vector<dealiiFiniteElementDOF<dim>*> m_DOFs;
     unsigned int                              m_no_components;
@@ -536,27 +538,17 @@ template <int dim>
 dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
     dof_handler (triangulation)
 {
-    m_model    = NULL;
+    m_pfeModel = NULL;
     m_weakForm = NULL;
-}
-
-template <int dim>
-void dealiiFiniteElementSystem<dim>::SetModel(daeModel* pModel)
-{
-    m_model = pModel;
-    if(!m_model)
-        throw std::runtime_error(std::string("Model not set"));
 }
 
 template <int dim>
 void dealiiFiniteElementSystem<dim>::Initialize(const std::string&                meshFilename,
                                                 const Quadrature<dim>&            quadrature,
                                                 const Quadrature<dim-1>&          faceQuadrature,
-                                                vector_DOFs&                      DOFs,
-                                                dealiiFiniteElementWeakForm<dim>& weakForm)
+                                                vector_DOFs&                      DOFs)
 {
-    m_weakForm = &weakForm;
-    m_DOFs     = DOFs;
+    m_DOFs = DOFs;
 
     // Create FESystem using one FE<dim> per dof (for multicomponent dofs too)
     std::vector<const FiniteElement<dim>*> arrFEs;
@@ -587,6 +579,35 @@ void dealiiFiniteElementSystem<dim>::Initialize(const std::string&              
 
     // Setup the system
     dealiiFiniteElementSystem<dim>::setup_system();
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::SetModel(daeFiniteElementModel* pFEModel)
+{
+    if(!pFEModel)
+        throw std::runtime_error(std::string("The finite element model is null pointer"));
+
+    m_pfeModel = pFEModel;
+}
+
+template <int dim>
+dealiiFiniteElementWeakForm<dim>* dealiiFiniteElementSystem<dim>::GetWeakForm() const
+{
+    return m_weakForm;
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::SetWeakForm(dealiiFiniteElementWeakForm<dim>* weakForm)
+{
+    if(!weakForm)
+        throw std::runtime_error(std::string("The weak form is null pointer"));
+
+    m_weakForm = weakForm;
+
+    // The weak form is typically set in daeModel::DeclareEquations(), therefore
+    // immeadiately call DeclareEquationsForWeakForm() to declare equations for
+    // the system [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integrals.
+    m_pfeModel->DeclareEquationsForWeakForm();
 }
 
 template <int dim>
@@ -794,6 +815,11 @@ adNodePtr simplify(adNodePtr node)
 template <int dim>
 void dealiiFiniteElementSystem<dim>::assemble_system()
 {
+    if(!m_weakForm)
+        throw std::runtime_error(std::string("The weak form has not been set"));
+    if(!m_pfeModel)
+        throw std::runtime_error(std::string("The finite element model has not been set"));
+
     Quadrature<dim>&   quadrature_formula      = *m_quadrature_formula;
     Quadrature<dim-1>& face_quadrature_formula = *m_face_quadrature_formula;
 
@@ -845,8 +871,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         currentIndex += dof.m_nMultiplicity;
     }
 
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_model, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_model, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
 
     // Interpolate Dirichlet boundary conditions on the system matrix and rhs
     std::vector< std::map<types::global_dof_index, double> > arr_boundary_values_map;
@@ -915,7 +941,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                             throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
 
-                        //daeNodeSaveAsContext c(m_model);
+                        //daeNodeSaveAsContext c(m_pfeModel);
                         adouble res = getValueFromNumber<dim>(result);
                         if(res.node)
                         {
@@ -1044,7 +1070,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         const feExpression<dim>& biExpression = pve.second;
 
                         adouble adIntegral;
-                        printf("n_face_q_points = %d\n", n_face_q_points);
                         for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
                         {
                             cellFaceContext.m_q = q_point;
@@ -1058,8 +1083,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                 if(!biExpression.m_node)
                                     continue;
 
-                                printf("biExpression.node = %s\n", biExpression.m_node->ToString().c_str());
-
                                 feRuntimeNumber<dim> result = biExpression.m_node->Evaluate(&cellFaceContext);
                                 if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                                     throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
@@ -1072,8 +1095,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                             }
                         }
 
-                        daeNodeSaveAsContext c(m_model);
-                        std::cout << "Cell boundary Integral: $" << adIntegral.node->SaveAsLatex(&c) << "$" << std::endl;
+                        //daeNodeSaveAsContext c(m_pfeModel);
+                        //if(adIntegral.node)
+                        //    std::cout << "Cell boundary Integral: $" << adIntegral.node->SaveAsLatex(&c) << "$" << std::endl;
 
                         // Finally, add the sum to the map
                         std::map< unsigned int, std::pair<adouble,adouble> >::iterator itbi = m_mapBoundaryIntegrals.find(id);
@@ -1083,9 +1107,12 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         }
                         else
                         {
-                            std::pair<adouble,adouble>& p = m_mapBoundaryIntegrals[id];
-                            p.second += adIntegral;
-                            std::cout << "\n\nBoundary Integral: $" << p.second.node->SaveAsLatex(&c) << "$\n\n" << std::endl;
+                            std::pair<adouble,adouble>& pad = itbi->second;
+                            adouble& pad_integral = pad.second;
+                            pad_integral += adIntegral;
+
+                            //if(pad_integral.node)
+                            //    std::cout << "\n\nBoundary Integral: $" << pad_integral.node->SaveAsLatex(&c) << "$\n\n" << std::endl;
                         }
                     }
                 }
