@@ -11,9 +11,91 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import numpy
+import os, sys, numpy
 from pyCore import *
 from pyDataReporting import *
+
+class daeVTKDataReporter(daeDataReporterLocal):
+    """
+    Saves data in the VTK format (.vtk) using pyEVTK module avaialable
+    at https://bitbucket.org/somada141/pyevtk. Install using: "pip install pyevtk".
+    Nota bene:
+      It is not an original module available at https://bitbucket.org/pauloh/pyevtk.
+    Does not require VTK installed.
+    """
+    def __init__(self):
+        daeDataReporterLocal.__init__(self)
+        self.ProcessName   = ""
+        self.ConnectString = ""
+
+    def Connect(self, ConnectString, ProcessName):
+        print(ConnectString, ProcessName)
+
+        self.ProcessName   = ProcessName
+        self.ConnectString = ConnectString
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.WriteDataToFile()
+        return True
+
+    def WriteDataToFile(self):
+        try:
+            from pyevtk.hl import gridToVTK
+
+            base_folder = self.ConnectString
+            if not os.path.isdir(base_folder):
+                os.mkdir(base_folder)
+
+            vtk_visit = {}
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
+                varName = daeGetStrippedName(variable_name).split('.')[-1]
+                varStrippedName = daeGetStrippedName(variable_name)
+                for (t,), time in numpy.ndenumerate(ndarr_times):
+                    filename = '%s - %.5fs' % (varStrippedName, time)
+                    filepath = os.path.join(base_folder, filename)
+                    x = numpy.array([0.0])
+                    y = numpy.array([0.0])
+                    z = numpy.array([0.0])
+                    nd = len(l_domains)
+                    if nd > 3:
+                        break
+
+                    if nd == 1:
+                        x = numpy.array(l_domains[0])
+                    elif nd == 2:
+                        x = numpy.array(l_domains[0])
+                        y = numpy.array(l_domains[1])
+                    elif nd == 3:
+                        x = numpy.array(l_domains[0])
+                        y = numpy.array(l_domains[1])
+                        z = numpy.array(l_domains[2])
+
+                    if nd == 0:
+                        values = numpy.array([ndarr_values[t]])
+                    else:
+                        values = numpy.array(ndarr_values[t])
+
+                    values = values.reshape((len(x), len(y), len(z)))
+
+                    gridToVTK(filepath, x, y, z, pointData = {varName : values})
+                    if not varStrippedName in vtk_visit:
+                        vtk_visit[varStrippedName] = []
+                    vtk_visit[varStrippedName].append(filename + '.vtr')
+
+            for var, files in vtk_visit.items():
+                filename = '%s.visit' % var
+                filepath = os.path.join(base_folder, filename)
+                f = open(filepath, 'w')
+                f.write('\n'.join(files))
+                f.close()
+
+        except Exception as e:
+            raise e
+            print(('Cannot write results in .vtk format:\n' + str(e)))
 
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):
     """
