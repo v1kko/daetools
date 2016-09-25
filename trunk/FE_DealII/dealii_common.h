@@ -40,11 +40,34 @@ typedef Tensor<3, 1, double> Tensor_3_1D;
 typedef Tensor<3, 2, double> Tensor_3_2D;
 typedef Tensor<3, 3, double> Tensor_3_3D;
 
+// Tensors of rank=1
+typedef Tensor<1, 1, adouble> Tensor_1_adouble_1D;
+typedef Tensor<1, 2, adouble> Tensor_1_adouble_2D;
+typedef Tensor<1, 3, adouble> Tensor_1_adouble_3D;
+
+// Tensors of rank=2
+typedef Tensor<2, 1, adouble> Tensor_2_adouble_1D;
+typedef Tensor<2, 2, adouble> Tensor_2_adouble_2D;
+typedef Tensor<2, 3, adouble> Tensor_2_adouble_3D;
+
+// Tensors of rank=3
+typedef Tensor<3, 1, adouble> Tensor_3_adouble_1D;
+typedef Tensor<3, 2, adouble> Tensor_3_adouble_2D;
+typedef Tensor<3, 3, adouble> Tensor_3_adouble_3D;
+
 // Points are in fact tensors with rank=1 just their coordinates mean length
 // and have some additional functions
 typedef Point<1, double> Point_1D;
 typedef Point<2, double> Point_2D;
 typedef Point<3, double> Point_3D;
+
+namespace dealii
+{
+template <> struct EnableIfScalar<adouble>
+{
+  typedef adouble type;
+};
+}
 
 // Used in NeumannBC to choose between a constant flux and gradient
 //enum dealiiFluxType
@@ -265,12 +288,15 @@ public:
 enum efeNumberType
 {
     eFEScalar = 0,
-    eFEScalar_adouble,
     eFECurl2D,
     eFETensor1,
     eFETensor2,
     eFETensor3,
     eFEPoint,
+    eFEScalar_adouble,
+    eFETensor1_adouble,
+    eFETensor2_adouble,
+    eFETensor3_adouble,
     eFEInvalid
 };
 
@@ -371,6 +397,25 @@ public:
         m_tensor3 = t;
     }
 
+    feRuntimeNumber(const Tensor<1, dim, adouble>& t)
+    {
+        m_eType           = eFETensor1_adouble;
+        m_tensor1_adouble = t;
+    }
+
+    feRuntimeNumber(const Tensor<2, dim, adouble>& t)
+    {
+        m_eType           = eFETensor2_adouble;
+        m_tensor2_adouble = t;
+    }
+
+    feRuntimeNumber(const Tensor<3, dim, adouble>& t)
+    {
+        m_eType           = eFETensor3_adouble;
+        m_tensor3_adouble = t;
+    }
+
+
     feRuntimeNumber(const Point<dim, double>& t)
     {
         m_eType = eFEPoint;
@@ -421,6 +466,31 @@ public:
         {
             return "";
         }
+        else if(m_eType == eFETensor1_adouble)
+        {
+            if(dim == 1)
+                return (boost::format("[%s]") % m_tensor1_adouble[0].NodeAsPlainText()).str();
+            else if(dim == 2)
+                return (boost::format("[%s, %s]") % m_tensor1_adouble[0].NodeAsPlainText() % m_tensor1_adouble[1].NodeAsPlainText()).str();
+            else if(dim == 3)
+                return (boost::format("[%s, %s, %s]") % m_tensor1_adouble[0].NodeAsPlainText() % m_tensor1_adouble[1].NodeAsPlainText() % m_tensor1_adouble[2].NodeAsPlainText()).str();
+        }
+        else if(m_eType == eFETensor2_adouble)
+        {
+            if(dim == 1)
+                return (boost::format("[[%s], [%s]]") % m_tensor2_adouble[0][0].NodeAsPlainText() % m_tensor2_adouble[0][1].NodeAsPlainText()).str();
+            else if(dim == 2)
+                return (boost::format("[[%s, %s], [%s, %s]]")  % m_tensor2_adouble[0][0].NodeAsPlainText() % m_tensor2_adouble[0][1].NodeAsPlainText()
+                                                               % m_tensor2_adouble[1][0].NodeAsPlainText() % m_tensor2_adouble[1][1].NodeAsPlainText()).str();
+            else if(dim == 3)
+                return (boost::format("[[%s, %s, %s], [%s, %s, %s], [%s, %s, %s]]") % m_tensor2_adouble[0][0].NodeAsPlainText() % m_tensor2_adouble[0][1].NodeAsPlainText() % m_tensor2_adouble[0][2].NodeAsPlainText()
+                                                                                    % m_tensor2_adouble[1][0].NodeAsPlainText() % m_tensor2_adouble[1][1].NodeAsPlainText() % m_tensor2_adouble[1][2].NodeAsPlainText()
+                                                                                    % m_tensor2_adouble[2][0].NodeAsPlainText() % m_tensor2_adouble[2][1].NodeAsPlainText() % m_tensor2_adouble[2][2].NodeAsPlainText()).str();
+        }
+        else if(m_eType == eFETensor3_adouble)
+        {
+            return "";
+        }
         else if(m_eType == eFEPoint)
         {
             if(dim == 1)
@@ -435,16 +505,19 @@ public:
     }
 
 public:
-    efeNumberType          m_eType;
-    Point<dim, double>     m_point;
+    efeNumberType           m_eType;
+    Point<dim, double>      m_point;
     /* CURL
-    Tensor<1, 1, double>   m_curl2D;
+    Tensor<1, 1, double>    m_curl2D;
     */
-    Tensor<1, dim, double> m_tensor1;
-    Tensor<2, dim, double> m_tensor2;
-    Tensor<3, dim, double> m_tensor3;
-    double                 m_value;
-    adouble                m_adouble_value;
+    Tensor<1, dim, double>  m_tensor1;
+    Tensor<2, dim, double>  m_tensor2;
+    Tensor<3, dim, double>  m_tensor3;
+    Tensor<1, dim, adouble> m_tensor1_adouble;
+    Tensor<2, dim, adouble> m_tensor2_adouble;
+    Tensor<3, dim, adouble> m_tensor3_adouble;
+    double                  m_value;
+    adouble                 m_adouble_value;
 };
 
 template<int dim>
@@ -483,6 +556,23 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& fe)
         tmp.m_eType = eFETensor3;
         tmp.m_tensor3 = -fe.m_tensor3;
     }
+
+    else if(fe.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = -fe.m_tensor1_adouble;
+    }
+    else if(fe.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = -fe.m_tensor2_adouble;
+    }
+    else if(fe.m_eType == eFETensor3_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = -fe.m_tensor3_adouble;
+    }
+
     else if(fe.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -546,6 +636,23 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor3;
         tmp.m_tensor3 = l.m_tensor3 + r.m_tensor3;
     }
+
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble + r.m_tensor1_adouble;
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor2_adouble + r.m_tensor2_adouble;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFETensor3_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_tensor3_adouble + r.m_tensor3_adouble;
+    }
+
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -609,6 +716,23 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor3;
         tmp.m_tensor3 = l.m_tensor3 - r.m_tensor3;
     }
+
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble - r.m_tensor1_adouble;
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor2_adouble - r.m_tensor2_adouble;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFETensor3_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_tensor3_adouble - r.m_tensor3_adouble;
+    }
+
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -664,13 +788,30 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     /*
     else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor2)
     {
-        tmp.m_eType = eFETensor2;
-        tmp.m_tensor2 = l.m_tensor2 * r.m_tensor2;
+        tmp.m_eType = eFETensor1;
+        tmp.m_tensor1 = l.m_tensor2 * r.m_tensor2;
     }
     else if(l.m_eType == eFETensor3 && r.m_eType == eFETensor3)
     {
-        tmp.m_eType = eFETensor3;
-        tmp.m_tensor3 = l.m_tensor3 * r.m_tensor3;
+        tmp.m_eType = eFETensor2;
+        tmp.m_tensor2 = l.m_tensor3 * r.m_tensor3;
+    }
+    */
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = l.m_tensor1_adouble * r.m_tensor1_adouble;
+    }
+    /*
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor2_adouble * r.m_tensor2_adouble;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFETensor3_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor3_adouble * r.m_tensor3_adouble;
     }
     */
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
@@ -705,6 +846,28 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     }
 
 
+    else if(l.m_eType == eFEScalar && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_value * r.m_tensor1_adouble;
+    }
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble * r.m_value;
+    }
+    else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_adouble_value * r.m_tensor1_adouble;
+    }
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble * r.m_adouble_value;
+    }
+
+
     else if(l.m_eType == eFEScalar && r.m_eType == eFETensor2)
     {
         tmp.m_eType = eFETensor2;
@@ -717,6 +880,28 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     }
 
 
+    else if(l.m_eType == eFEScalar && r.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_value * r.m_tensor2_adouble;
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor2_adouble * r.m_value;
+    }
+    else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_adouble_value * r.m_tensor2_adouble;
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor2_adouble * r.m_adouble_value;
+    }
+
+
     else if(l.m_eType == eFEScalar && r.m_eType == eFETensor3)
     {
         tmp.m_eType = eFETensor3;
@@ -726,6 +911,28 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     {
         tmp.m_eType = eFETensor3;
         tmp.m_tensor3 = l.m_tensor3 * r.m_value;
+    }
+
+
+    else if(l.m_eType == eFEScalar && r.m_eType == eFETensor3_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_value * r.m_tensor3_adouble;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_tensor3_adouble * r.m_value;
+    }
+    else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFETensor3_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_adouble_value * r.m_tensor3_adouble;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_tensor3_adouble * r.m_adouble_value;
     }
 
 
@@ -797,6 +1004,40 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFETensor3;
         tmp.m_tensor3 = l.m_tensor3 / r.m_value;
     }
+
+
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble / r.m_value;
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor2_adouble / r.m_value;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_tensor3_adouble / r.m_value;
+    }
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble / r.m_adouble_value;
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFETensor2_adouble;
+        tmp.m_tensor2_adouble = l.m_tensor2_adouble / r.m_adouble_value;
+    }
+    else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFETensor3_adouble;
+        tmp.m_tensor3_adouble = l.m_tensor3_adouble / r.m_adouble_value;
+    }
+
+
     else if(l.m_eType == eFEPoint && r.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEPoint;
@@ -1229,9 +1470,11 @@ public:
     virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
     virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
-    virtual adouble daeVariable_value(const std::string& variableName, unsigned int i) const = 0;
+    virtual adouble dof(const std::string& variableName, unsigned int i) const = 0;
 
-    virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual adouble               dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual Tensor<1,dim,adouble> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual Tensor<2,dim,adouble> dof_hessian_approximation(const std::string& variableName, const unsigned int q) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
@@ -1650,7 +1893,7 @@ class feNode_function : public feNode<dim>
 public:
     typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
 
-    feNode_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = -1)
+    feNode_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
     {
         if(!dynamic_cast<feNode_xyz<dim>*>(xyz_node.get()))
             throw std::runtime_error(std::string("An argument to the Function must be a point"));
@@ -1671,18 +1914,11 @@ public:
 
         if(m_call == eFunctionValue)
         {
-            if(m_component == -1)
-                return feRuntimeNumber<dim>( pCellContext->function(m_name).value(node.m_point) );
-            else
-                return feRuntimeNumber<dim>( pCellContext->function(m_name).value(node.m_point, m_component) );
-
+            return feRuntimeNumber<dim>( pCellContext->function(m_name).value(node.m_point, m_component) );
         }
         else if(m_call == eFunctionGradient)
         {
-            if(m_component == -1)
-                return feRuntimeNumber<dim>( pCellContext->function(m_name).gradient(node.m_point) );
-            else
-                return feRuntimeNumber<dim>( pCellContext->function(m_name).gradient(node.m_point, m_component) );
+            return feRuntimeNumber<dim>( pCellContext->function(m_name).gradient(node.m_point, m_component) );
         }
         else
         {
@@ -1694,17 +1930,11 @@ public:
     {
         if(m_call == eFunctionValue)
         {
-            if(m_component == -1)
-                return (boost::format("fvalue('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
-            else
-                return (boost::format("fvalue('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fvalue('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else if(m_call == eFunctionGradient)
         {
-            if(m_component == -1)
-                return (boost::format("fgrad('%s'', %s)") % m_name % m_xyz_node->ToString()).str();
-            else
-                return (boost::format("fgrad('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fgrad('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -1723,13 +1953,13 @@ class feNode_adouble_function : public feNode<dim>
 public:
     typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
 
-    feNode_adouble_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = -1)
+    feNode_adouble_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
     {
         if(!dynamic_cast<feNode_xyz<dim>*>(xyz_node.get()))
             throw std::runtime_error(std::string("An argument to the Function must be a point"));
 
-        if(call == eFunctionGradient)
-            throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
+        //if(call == eFunctionGradient)
+        //    throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
 
         m_xyz_node = xyz_node;
         m_name = name;
@@ -1747,15 +1977,12 @@ public:
 
         if(m_call == eFunctionValue)
         {
-            if(m_component == -1)
-                return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point) );
-            else
-                return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point, m_component) );
-
+            return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point, m_component) );
         }
         else if(m_call == eFunctionGradient)
         {
-            throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
+            //throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
+            return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).gradient(node.m_point, m_component) );
         }
         else
         {
@@ -1769,17 +1996,11 @@ public:
     {
         if(m_call == eFunctionValue)
         {
-            if(m_component == -1)
-                return (boost::format("fvalue_adouble('%s', %s)") % m_name % m_xyz_node->ToString()).str();
-            else
-                return (boost::format("fvalue_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fvalue_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else if(m_call == eFunctionGradient)
         {
-            if(m_component == -1)
-                return (boost::format("fgrad_adouble('%s', %s)") % m_name % m_xyz_node->ToString()).str();
-            else
-                return (boost::format("fgrad_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fgrad_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -1806,7 +2027,7 @@ public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
         unsigned int index = getIndex<dim>(m_i, pCellContext);
-        return feRuntimeNumber<dim>( pCellContext->daeVariable_value(m_dofName, index) );
+        return feRuntimeNumber<dim>( pCellContext->dof(m_dofName, index) );
     }
     
     std::string ToString() const
@@ -1844,6 +2065,85 @@ public:
 public:
     std::string  m_dofName;
     int          m_q;
+};
+
+template<int dim>
+class feNode_dof_gradient_approximation : public feNode<dim>
+{
+public:
+    feNode_dof_gradient_approximation(const std::string& dofName, int q)
+    {
+        m_dofName  = dofName;
+        m_q        = q;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int index = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->dof_gradient_approximation(m_dofName, index) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("dof_gradient_approximation('%s', %s)") % m_dofName % getIndex(m_q)).str();
+    }
+
+public:
+    std::string  m_dofName;
+    int          m_q;
+};
+
+template<int dim>
+class feNode_dof_hessian_approximation : public feNode<dim>
+{
+public:
+    feNode_dof_hessian_approximation(const std::string& dofName, int q)
+    {
+        m_dofName  = dofName;
+        m_q        = q;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int index = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->dof_hessian_approximation(m_dofName, index) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("dof_laplacian_approximation('%s', %s)") % m_dofName % getIndex(m_q)).str();
+    }
+
+public:
+    std::string  m_dofName;
+    int          m_q;
+};
+
+template<int dim>
+class feNode_adouble : public feNode<dim>
+{
+public:
+    feNode_adouble(const adouble& ad)
+    {
+        m_ad = ad;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        return feRuntimeNumber<dim>( m_ad );
+    }
+
+    std::string ToString() const
+    {
+        std::string res = m_ad.NodeAsPlainText();
+        return (boost::format("adouble(%s)") % res).str();
+    }
+
+public:
+    adouble m_ad;
 };
 
 
@@ -2353,41 +2653,27 @@ feExpression<dim> normal(int q)
 }
 
 template<int dim>
-feExpression<dim> function_value(const std::string& name, const feExpression<dim>& xyz)
-{
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, -1) ) );
-}
-
-template<int dim>
-feExpression<dim> function_value2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
+feExpression<dim> function_value(const std::string& name, const feExpression<dim>& xyz, unsigned int component = 0)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
 }
 
 template<int dim>
-feExpression<dim> function_gradient(const std::string& name, const feExpression<dim>& xyz)
-{
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, -1) ) );
-}
-
-template<int dim>
-feExpression<dim> function_gradient2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
+feExpression<dim> function_gradient(const std::string& name, const feExpression<dim>& xyz, unsigned int component = 0)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
 }
 
-
-
 template<int dim>
-feExpression<dim> function_adouble_value(const std::string& name, const feExpression<dim>& xyz)
+feExpression<dim> function_adouble_value(const std::string& name, const feExpression<dim>& xyz, unsigned int component = 0)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionValue, xyz.m_node, -1) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
 }
 
 template<int dim>
-feExpression<dim> function_adouble_value2(const std::string& name, const feExpression<dim>& xyz, unsigned int component)
+feExpression<dim> function_adouble_gradient(const std::string& name, const feExpression<dim>& xyz, unsigned int component = 0)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
 }
 
 template<int dim>
@@ -2400,6 +2686,24 @@ template<int dim>
 feExpression<dim> dof_approximation(const std::string& variableName, int q)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dof_approximation<dim>(variableName, q) ) );
+}
+
+template<int dim>
+feExpression<dim> dof_gradient_approximation(const std::string& variableName, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dof_gradient_approximation<dim>(variableName, q) ) );
+}
+
+template<int dim>
+feExpression<dim> dof_hessian_approximation(const std::string& variableName, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dof_hessian_approximation<dim>(variableName, q) ) );
+}
+
+template<int dim>
+feExpression<dim> adouble_(const adouble& ad)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble<dim>(ad) ) );
 }
 
 

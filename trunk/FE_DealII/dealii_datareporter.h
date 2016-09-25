@@ -86,6 +86,8 @@ public:
                 e << "Invalid output directory name (" << m_strOutputDirectory
                   << ") specified as a 'connection string representing an output directory for daeDealIIDataReporter";
                 throw e;
+
+                return false;
             }
         }
 

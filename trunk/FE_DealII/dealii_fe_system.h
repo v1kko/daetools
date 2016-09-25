@@ -119,13 +119,16 @@ public:
                          const unsigned int i,
                          const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function phi('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function phi('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to phi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function phi() for the non-scalar variable: " + variableName);
 
         return m_fe_values[*extractorScalar].value(i, q);
     }
@@ -134,13 +137,16 @@ public:
                             const unsigned int i,
                             const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dphi('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function dphi('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to dphi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function dphi() for the non-scalar variable: " + variableName);
 
         return m_fe_values[*extractorScalar].gradient(i, q);
     }
@@ -149,13 +155,16 @@ public:
                            const unsigned int i,
                            const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function d2phi('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function d2phi('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to d2phi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function d2phi() for the non-scalar variable: " + variableName);
 
         return m_fe_values[*extractorScalar].hessian(i, q);
     }
@@ -167,13 +176,16 @@ public:
                                const unsigned int i,
                                const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function phi_vec('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function phi_vec('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to phi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function phi_vec() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].value(i, q);
     }
@@ -182,13 +194,16 @@ public:
                                    const unsigned int i,
                                    const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dphi_vec('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
             throw std::runtime_error("Cannot find variable " + variableName);
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to dphi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function dphi_vec('%s', %d, %d)") % variableName % i % q).str());
 
         return m_fe_values[*extractorVector].gradient(i, q);
     }
@@ -197,13 +212,16 @@ public:
                                   const unsigned int i,
                                   const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function d2phi_vec('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function d2phi_vec('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to d2phi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function d2phi_vec() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].hessian(i, q);
     }
@@ -212,13 +230,16 @@ public:
                       const unsigned int i,
                       const unsigned int q) const
     {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function div_phi('%s', %d, %d)") % variableName % i % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function div_phi('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call to div() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function div_phi() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].divergence(i, q);
     }
@@ -257,11 +278,17 @@ public:
 
     virtual const Point<dim>& quadrature_point(const unsigned int q) const
     {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function xyz(%d)") % q).str());
+
         return m_fe_values.quadrature_point(q);
     }
 
     virtual double JxW(const unsigned int q) const
     {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function JxW(%d)") % q).str());
+
         return m_fe_values.JxW(q);
     }
 
@@ -288,10 +315,13 @@ public:
         return *(iter->second);
     }
 
-    virtual adouble daeVariable_value(const std::string& variableName, unsigned int localIndex) const
+    virtual adouble dof(const std::string& variableName, unsigned int li) const
     {
+        if(li == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dof('%s', %d)") % variableName % li).str());
+
         // a) Find the index within block using the local cell dof index
-        int global_dof_index = m_local_dof_indices[localIndex];
+        int global_dof_index = m_local_dof_indices[li];
         const BlockIndices & index_mapping = m_sparsity_pattern.get_column_indices();
         //             <block_index,  index_in_block>
         std::pair<unsigned int, BlockIndices::size_type> block_index = index_mapping.global_to_local(global_dof_index);
@@ -313,13 +343,13 @@ public:
             }
         }
         if(!variable)
-            throw std::runtime_error(std::string("Cannot find DOF ") + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function dof('%s', %d)") % variableName % li).str());
 
         // c) Create adouble
         size_t n = variable->GetNumberOfPoints();
         if(index_in_block >= n)
-            throw std::runtime_error(std::string("DOF ") + variableName + std::string(" index out of bounds: ") +
-                                     toString(localIndex) + std::string(" >= ") + toString(n));
+            throw std::runtime_error((boost::format("DOF '%s' index in function dof('%s', %d) is out of bounds (global[%d] = %d) >= %d")
+                                      % variableName % variableName % li % li % index_in_block % n).str());
 
         return (*variable)(index_in_block);
 
@@ -327,23 +357,80 @@ public:
 
     virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const
     {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dof_approximation('%s', %d)") % variableName % q).str());
+
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function dof_approximation('%s', %d)") % variableName % q).str());
 
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call to phi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function phi() for the non-scalar variable: " + variableName);
 
         const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
 
         adouble ad_approximation;
         for(unsigned int j = 0; j < dofs_per_cell; ++j)
         {
-            adouble dof   = daeVariable_value(variableName, j);
+            adouble dof   = this->dof(variableName, j);
             double  phi_j = m_fe_values[*extractorScalar].value(j, q);
 
-            ad_approximation = ad_approximation + dof * phi_j;
+            ad_approximation +=(dof * phi_j);
+        }
+
+        return ad_approximation;
+    }
+
+    virtual Tensor<1,dim,adouble> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dof_gradient_approximation('%s', %d)") % variableName % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function dof_gradient_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
+        if(!extractorScalar)
+            throw std::runtime_error("Invalid call of the function dof_gradient_approximation() for the non-scalar variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        Tensor<1,dim,adouble> ad_approximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            adouble               dof    = this->dof(variableName, j);
+            Tensor<1,dim,double>  dphi_j = m_fe_values[*extractorScalar].gradient(j, q);
+
+            ad_approximation += (dof * dphi_j);
+        }
+
+        return ad_approximation;
+    }
+
+    virtual Tensor<2,dim,adouble> dof_hessian_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dof_hessian_approximation('%s', %d)") % variableName % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function dof_hessian_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
+        if(!extractorScalar)
+            throw std::runtime_error("Invalid call of the function dof_hessian_approximation() for the non-scalar variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        Tensor<2,dim,adouble> ad_approximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            adouble               dof     = this->dof(variableName, j);
+            Tensor<2,dim,double>  d2phi_j = m_fe_values[*extractorScalar].hessian(j, q);
+
+            ad_approximation += (dof * d2phi_j);
         }
 
         return ad_approximation;

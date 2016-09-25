@@ -727,30 +727,22 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("normal_2D", &normal<2>, ( arg("quadraturePoint") ));
     def("normal_3D", &normal<3>, ( arg("quadraturePoint") ));
 
-    def("function_value_1D", &function_value<1>, ( arg("functionName"), arg("point") ));
-    def("function_value_2D", &function_value<2>, ( arg("functionName"), arg("point") ));
-    def("function_value_3D", &function_value<3>, ( arg("functionName"), arg("point") ));
+    def("function_value_1D", &function_value<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_value_2D", &function_value<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_value_3D", &function_value<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
 
-    def("function_value_1D", &function_value2<1>, ( arg("functionName"), arg("point"), arg("component") ));
-    def("function_value_2D", &function_value2<2>, ( arg("functionName"), arg("point"), arg("component") ));
-    def("function_value_3D", &function_value2<3>, ( arg("functionName"), arg("point"), arg("component") ));
+    def("function_adouble_value_1D", &function_adouble_value<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_value_2D", &function_adouble_value<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_value_3D", &function_adouble_value<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
 
-    def("function_adouble_value_1D", &function_adouble_value<1>, ( arg("functionName"), arg("point") ));
-    def("function_adouble_value_2D", &function_adouble_value<2>, ( arg("functionName"), arg("point") ));
-    def("function_adouble_value_3D", &function_adouble_value<3>, ( arg("functionName"), arg("point") ));
-
-    def("function_adouble_value_1D", &function_adouble_value2<1>, ( arg("functionName"), arg("point"), arg("component") ));
-    def("function_adouble_value_2D", &function_adouble_value2<2>, ( arg("functionName"), arg("point"), arg("component") ));
-    def("function_adouble_value_3D", &function_adouble_value2<3>, ( arg("functionName"), arg("point"), arg("component") ));
-
-    def("function_gradient_1D", &function_gradient<1>, ( arg("functionName"), arg("point") ));
-    def("function_gradient_2D", &function_gradient<2>, ( arg("functionName"), arg("point") ));
-    def("function_gradient_3D", &function_gradient<3>, ( arg("functionName"), arg("point") ));
-
-    def("function_gradient_1D", &function_gradient2<1>, ( arg("functionName"), arg("point"), arg("component") ));
-    def("function_gradient_2D", &function_gradient2<2>, ( arg("functionName"), arg("point"), arg("component") ));
-    def("function_gradient_3D", &function_gradient2<3>, ( arg("functionName"), arg("point"), arg("component") ));
-
+    def("function_gradient_1D", &function_gradient<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_gradient_2D", &function_gradient<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_gradient_3D", &function_gradient<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    
+    def("function_adouble_gradient_1D", &function_adouble_gradient<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_gradient_2D", &function_adouble_gradient<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_gradient_3D", &function_adouble_gradient<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    
     def("phi_vec_1D", &phi_vec<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_vec_2D", &phi_vec<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_vec_3D", &phi_vec<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
@@ -774,6 +766,18 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("dof_approximation_1D", &dof_approximation<1>, ( arg("variableName"), arg("quadraturePoint") ));
     def("dof_approximation_2D", &dof_approximation<2>, ( arg("variableName"), arg("quadraturePoint") ));
     def("dof_approximation_3D", &dof_approximation<3>, ( arg("variableName"), arg("quadraturePoint") ));
+
+    def("dof_gradient_approximation_1D", &dof_gradient_approximation<1>, ( arg("variableName"), arg("quadraturePoint") ));
+    def("dof_gradient_approximation_2D", &dof_gradient_approximation<2>, ( arg("variableName"), arg("quadraturePoint") ));
+    def("dof_gradient_approximation_3D", &dof_gradient_approximation<3>, ( arg("variableName"), arg("quadraturePoint") ));
+
+    def("dof_hessian_approximation_1D", &dof_hessian_approximation<1>, ( arg("variableName"), arg("quadraturePoint") ));
+    def("dof_hessian_approximation_2D", &dof_hessian_approximation<2>, ( arg("variableName"), arg("quadraturePoint") ));
+    def("dof_hessian_approximation_3D", &dof_hessian_approximation<3>, ( arg("variableName"), arg("quadraturePoint") ));
+
+    def("adouble_1D", &adouble_<1>, ( arg("ad") ));
+    def("adouble_2D", &adouble_<2>, ( arg("ad") ));
+    def("adouble_3D", &adouble_<3>, ( arg("ad") ));
 
     /* CURL
     def("curl_2D", &curl<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));

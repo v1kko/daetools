@@ -131,8 +131,8 @@ class modTutorial(daeModel):
         #  - Parent: daeModel object (indicating the model where the domain will be added)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in whats_the_time example) apply here as well.
-        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge (Neuman BC)")
+        self.Tt = daeParameter("T_t",                K, self, "Temperature at the top edge (Dirichlet BC)")
         self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
@@ -188,7 +188,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qt()
+        eq.Residual = self.T(x,y) + self.Tt() * Sin(x() / Constant(3.14 * self.x.UpperBound * m))
 
         # The left edge is placed at x = 0 coordinate, thus we use eLowerBound for the x domain:
         eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
@@ -215,15 +215,15 @@ class simTutorial(daeSimulation):
         #  - UpperBound:  float
         # Here we create 2D structured gird with 10x10 intervals in x and y domains
         # (resulting in 11x11 points in both directions).
-        self.m.x.CreateStructuredGrid(10, 0, 0.1)
-        self.m.y.CreateStructuredGrid(10, 0, 0.1)
+        self.m.x.CreateStructuredGrid(20, 0, 0.1)
+        self.m.y.CreateStructuredGrid(20, 0, 0.1)
 
         # Parameter values can be set by using a function SetValue.
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.ro.SetValue(8960 * kg/(m**3))
-        self.m.Qb.SetValue(1e6 * W/(m**2))
-        self.m.Qt.SetValue(0 * W/(m**2))
+        self.m.Qb.SetValue(-1e5 * W/(m**2))
+        self.m.Tt.SetValue(100 * K)
 
     def SetUpVariables(self):
         # SetInitialCondition function in the case of distributed variables can accept additional arguments
@@ -243,11 +243,12 @@ def guiRun(app):
     simulator.exec_()
 
 # Setup everything manually and run in a console
+from daetools.pyDAE.data_reporters import *
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
+    datareporter = daeVTKDataReporter()
     simulation   = simTutorial()
 
     # Enable reporting of all variables
@@ -259,7 +260,7 @@ def consoleRun():
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+    if not datareporter.Connect("./%s" % simulation.m.Name, simName):
         sys.exit()
 
     # Initialize the simulation

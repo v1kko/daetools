@@ -117,12 +117,12 @@ class modTutorial(daeModel):
                                           multiplicity=1)]
 
         # Store the object so it does not go out of scope while still in use by daetools
-        self.fe_dealII = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
+        self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
                                                       quadrature      = QGauss_2D(3),  # quadrature formula
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction through a pipe wall with an external heat flux', self.fe_dealII)
+        self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction through a pipe wall with an external heat flux', self.fe_system)
        
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -175,7 +175,7 @@ class modTutorial(daeModel):
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
-        self.fe_dealII.WeakForm = weakForm
+        self.fe_system.WeakForm = weakForm
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -188,7 +188,7 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
-        setFEInitialConditions(self.m.fe, self.m.fe_dealII, 'T', 293)
+        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 293)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -201,7 +201,7 @@ def guiRun(app):
 
     # Create two data reporters:
     # 1. DealII
-    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
+    feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
@@ -238,7 +238,7 @@ def consoleRun():
 
     # Create two data reporters:
     # 1. DealII
-    feDataReporter = simulation.m.fe_dealII.CreateDataReporter()
+    feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
@@ -259,8 +259,8 @@ def consoleRun():
     simulation.Initialize(daesolver, datareporter, log)
     
     # Save the model report and the runtime model report
-    simulation.m.fe.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.fe.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
