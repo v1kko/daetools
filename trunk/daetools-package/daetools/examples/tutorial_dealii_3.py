@@ -20,15 +20,16 @@ __doc__ = """
 Mesh:
 
 .. image:: _static/square.png
-   :width: 300 px
+   :width: 400 px
 
 Results at t = 500s:
 
 .. image:: _static/tutorial_dealii_3-results.png
-   :width: 500 px
+   :width: 600 px
+
 """
 
-import os, sys, numpy, json, tempfile
+import os, sys, numpy, json, tempfile, random
 from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import *
@@ -41,15 +42,14 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        dofs = [dealiiFiniteElementDOF_2D(name='T',
-                                          description='Temperature',
+        dofs = [dealiiFiniteElementDOF_2D(name='c',
+                                          description='Concentration',
                                           fe = FE_Q_2D(1),
                                           multiplicity=1),
-                dealiiFiniteElementDOF_2D(name='T2',
-                                          description='Temperature 2',
+                dealiiFiniteElementDOF_2D(name='mu',
+                                          description='Chemical potential',
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
-        self.n_components = len(dofs)
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         mesh_file  = os.path.join(meshes_dir, 'square.msh')
@@ -60,64 +60,40 @@ class modTutorial(daeModel):
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Multi-scalar transient heat conduction FE problem', self.fe_system)
+        self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction equation', self.fe_system)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        rho   = 8960.0  # kg/m**3
-        cp    =  385.0  # J/(kg*K)
-        kappa =  401.0  # W/(m*K)
+        D0    = 0.02
+        kappa = 1e-2
+        Omg_a = 3.4
 
-        alpha = kappa/(rho * cp)
-
-        functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(alpha)
-        functions['Generation']  = ConstantFunction_2D(0.0)
-
-        # Boundary IDs
         left_edge   = 0
         top_edge    = 1
         right_edge  = 2
         bottom_edge = 3
 
-        # Nota bene 1:
-        #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
-        #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
-        # Nota bene 2:
-        #   ConstantFunction will return an array with values for both DOFS, i.e. [200, 200],
-        #   but we internally use the ComponentMask to select a DOF for which we want to set the BCs.
-        #   Therefore, it is safe to return values for all components.
+        functions = {}
         dirichletBC = {}
-        dirichletBC[left_edge]   = [
-                                    ('T',  adoubleConstantFunction_2D(adouble(200), self.n_components)),
-                                    ('T2', adoubleConstantFunction_2D(adouble( 20), self.n_components))
-                                   ]
-        dirichletBC[top_edge]    = [
-                                    ('T',  adoubleConstantFunction_2D(adouble(300), self.n_components)),
-                                    ('T2', adoubleConstantFunction_2D(adouble( 30), self.n_components))
-                                   ]
-        dirichletBC[right_edge]  = [
-                                    ('T',  adoubleConstantFunction_2D(adouble(400), self.n_components)),
-                                    ('T2', adoubleConstantFunction_2D(adouble( 40), self.n_components))
-                                   ]
-        dirichletBC[bottom_edge] = [
-                                    ('T',  adoubleConstantFunction_2D(adouble(500), self.n_components)),
-                                    ('T2', adoubleConstantFunction_2D(adouble( 50), self.n_components))
-                                   ]
-
         boundaryIntegrals = {}
-        
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q) \
-                                                      + (dphi_2D('T2', fe_i, fe_q) * dphi_2D('T2', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) \
-                                                      + (phi_2D('T2', fe_i, fe_q) * phi_2D('T2', fe_j, fe_q)) * JxW_2D(fe_q),
-                                                  Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  faceAij = {},
-                                                  faceFi  = {},
-                                                  functions = functions,
-                                                  functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = boundaryIntegrals)
+
+        # f(c) from the wikipedia
+        c = dof_approximation_2D('c', fe_q) # FE approximation of a quantity at the specified quadrature point
+        fc_Fi  = c**3 - c
+
+        weakForm = dealiiFiniteElementWeakForm_2D(
+            Aij = (   dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0
+                    +  phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q)
+                    - dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * kappa
+                  ) * JxW_2D(fe_q),
+            Mij = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q),
+            Fi  = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * fc_Fi,
+            faceAij = {},
+            faceFi  = {},
+            functions = functions,
+            functionsDirichletBC = dirichletBC,
+            boundaryIntegrals = boundaryIntegrals)
 
         print('Heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
@@ -125,6 +101,7 @@ class modTutorial(daeModel):
         print('    Fi  = %s' % str(weakForm.Fi))
         print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
         print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
+        print('    boundaryIntegrals  = %s' % str([item for item in weakForm.boundaryIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -133,15 +110,20 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_deal_II_3")
+        self.m = modTutorial("tutorial_dealii_3")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass
 
     def SetUpVariables(self):
-        setFEInitialConditions(self.m.fe_model, self.m.fe_system,  'T', 100)
-        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T2',  10)
+        numpy.random.seed(124)
+        def ic_with_noise(index):
+            ic = 0.5
+            return ic + random.uniform(-0.1*ic, 0.1*ic)
+
+        #setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
+        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', ic_with_noise)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -158,6 +140,7 @@ def guiRun(app):
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
+
     # 2. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
@@ -171,8 +154,8 @@ def guiRun(app):
         print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 20
-    simulation.TimeHorizon       = 2000
+    simulation.TimeHorizon       = 1.0
+    simulation.ReportingInterval = simulation.TimeHorizon/100
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
@@ -191,7 +174,7 @@ def consoleRun():
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -207,8 +190,8 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 20
-    simulation.TimeHorizon = 2000
+    simulation.TimeHorizon       = 1.0
+    simulation.ReportingInterval = simulation.TimeHorizon/100
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)

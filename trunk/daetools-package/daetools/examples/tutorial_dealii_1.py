@@ -19,9 +19,6 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 In this tutorial the DAE Tools support for finite element method is presented.
 
-
-n implementation
-
 Mesh:
 
 .. image:: _static/step-49.png
@@ -145,7 +142,7 @@ def guiRun(app):
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_1-')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
