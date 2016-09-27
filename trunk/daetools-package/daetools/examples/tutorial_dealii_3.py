@@ -81,27 +81,29 @@ class modTutorial(daeModel):
         right_edge  = 2
         bottom_edge = 3
 
-        # Set Dirichlet BCs for each edge and for both DOFs ('T' and 'T2').
-        # Nota bene:
+        # Nota bene 1:
+        #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
+        #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
+        # Nota bene 2:
         #   ConstantFunction will return an array with values for both DOFS, i.e. [200, 200],
-        #   but we internally use the ComponentMask to select a DOF we want to set Dirichlet BCs.
+        #   but we internally use the ComponentMask to select a DOF for which we want to set the BCs.
         #   Therefore, it is safe to return values for all components.
         dirichletBC = {}
         dirichletBC[left_edge]   = [
-                                    ('T',  ConstantFunction_2D(200, self.n_components)),
-                                    ('T2', ConstantFunction_2D( 20, self.n_components))
+                                    ('T',  adoubleConstantFunction_2D(adouble(200), self.n_components)),
+                                    ('T2', adoubleConstantFunction_2D(adouble( 20), self.n_components))
                                    ]
         dirichletBC[top_edge]    = [
-                                    ('T',  ConstantFunction_2D(300, self.n_components)),
-                                    ('T2', ConstantFunction_2D( 30, self.n_components))
+                                    ('T',  adoubleConstantFunction_2D(adouble(300), self.n_components)),
+                                    ('T2', adoubleConstantFunction_2D(adouble( 30), self.n_components))
                                    ]
         dirichletBC[right_edge]  = [
-                                    ('T',  ConstantFunction_2D(400, self.n_components)),
-                                    ('T2', ConstantFunction_2D( 40, self.n_components))
+                                    ('T',  adoubleConstantFunction_2D(adouble(400), self.n_components)),
+                                    ('T2', adoubleConstantFunction_2D(adouble( 40), self.n_components))
                                    ]
         dirichletBC[bottom_edge] = [
-                                    ('T',  ConstantFunction_2D(500, self.n_components)),
-                                    ('T2', ConstantFunction_2D( 50, self.n_components))
+                                    ('T',  adoubleConstantFunction_2D(adouble(500), self.n_components)),
+                                    ('T2', adoubleConstantFunction_2D(adouble( 50), self.n_components))
                                    ]
 
         boundaryIntegrals = {}
@@ -148,7 +150,7 @@ def guiRun(app):
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
 
     # Create two data reporters:
     # 1. DealII
@@ -194,6 +196,7 @@ def consoleRun():
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
+
     # 2. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)

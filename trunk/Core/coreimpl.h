@@ -3429,11 +3429,11 @@ public:
 
     virtual void RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const = 0;
 
-    virtual dae::daeMatrix<adouble>*                                     Asystem() const = 0;
-    virtual dae::daeMatrix<adouble>*                                     Msystem() const = 0;
-    virtual dae::daeArray<adouble>*                                      Fload()   const = 0;
-    virtual const std::map< unsigned int, std::pair<adouble,adouble> >*  BoundaryIntegrals() const = 0;
-    virtual daeFiniteElementObjectInfo                                   GetObjectInfo() const = 0;
+    virtual dae::daeMatrix<adouble>*                                                    Asystem() const = 0;
+    virtual dae::daeMatrix<adouble>*                                                    Msystem() const = 0;
+    virtual dae::daeArray<adouble>*                                                     Fload()   const = 0;
+    virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  BoundaryIntegrals() const = 0;
+    virtual daeFiniteElementObjectInfo                                                  GetObjectInfo() const = 0;
 };
 
 /******************************************************************

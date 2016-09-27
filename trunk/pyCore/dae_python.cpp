@@ -587,10 +587,12 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__floordiv__", &daepython::ad_floor_divide3)  // real_t  // adouble
 
     // Math. functions declared as members to enable numpy support
-    // For instance, the following will be possible to write in python:
-    //  x = np.empty(n, dtype=object)
-    //  x[:] = [self.x(i) for i in range(n)]
-    //  y = numpy.exp(x)
+    // For instance, the following will be possible to write in python for scalars:
+    //   y = numpy.exp(x())
+    // or for arrays:
+    //   x = np.empty(n, dtype=object)
+    //   x[:] = [self.x(i) for i in range(n)]
+    //   y = numpy.exp(x)
         .def("exp",     &daepython::ad_exp)
         .def("log",     &daepython::ad_log)
         .def("log10",   &daepython::ad_log10)

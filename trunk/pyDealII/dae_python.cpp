@@ -15,9 +15,9 @@ BOOST_PYTHON_MODULE(pyDealII)
     docstring_options doc_options(true, true, false);
 
     class_< Tensor<1,1,double>, boost::noncopyable>("Tensor_1_1D")
-        .add_property("dimension",                  &daepython::Tensor_1_1D_dimension)
-        .add_property("rank",                       &daepython::Tensor_1_1D_rank)
-        .add_property("n_independent_components",   &daepython::Tensor_1_1D_n_independent_components)
+        //.def_readonly("dimension",                  &Tensor<1,1,double>::dimension)
+        //.def_readonly("rank",                       &Tensor<1,1,double>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<1,1,double>::n_independent_components)
 
         .def(self == self)
         .def(self != self)
@@ -30,21 +30,19 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(self - self)
         .def(self * self)
 
-        .def("__getitem__",         &daepython::Tensor_1_1D_getitem)
-        .def("__setitem__",         &daepython::Tensor_1_1D_setitem)
-        .def("__str__",             &daepython::Tensor_1_1D_str)
-        .def("__repr__",            &daepython::Tensor_1_1D_repr)
+        .def("__getitem__",         &daepython::Tensor_1_1D_getitem<double>)
+        .def("__setitem__",         &daepython::Tensor_1_1D_setitem<double>)
+        .def("__str__",             &daepython::Tensor_1_1D_str<double>)
+        .def("__repr__",            &daepython::Tensor_1_1D_repr<double>)
 
-        .def("norm",                &Tensor_1_1D::norm)
-        .def("norm_square",         &Tensor_1_1D::norm_square)
-        .def("clear",               &Tensor_1_1D::clear)
-        .def("memory_consumption",  &Tensor_1_1D::memory_consumption)
+        .def("clear",               &Tensor<1,1,double>::clear)
+        .def("memory_consumption",  &Tensor<1,1,double>::memory_consumption)
     ;
 
     class_< Tensor<1,2,double>, boost::noncopyable>("Tensor_1_2D")
-        .add_property("dimension",                  &daepython::Tensor_1_2D_dimension)
-        .add_property("rank",                       &daepython::Tensor_1_2D_rank)
-        .add_property("n_independent_components",   &daepython::Tensor_1_2D_n_independent_components)
+        //.def_readonly("dimension",                  &Tensor<1,2,double>::dimension)
+        //.def_readonly("rank",                       &Tensor<1,2,double>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<1,2,double>::n_independent_components)
 
         .def(self == self)
         .def(self != self)
@@ -57,21 +55,19 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(self - self)
         .def(self * self)
 
-        .def("__getitem__",         &daepython::Tensor_1_2D_getitem)
-        .def("__setitem__",         &daepython::Tensor_1_2D_setitem)
-        .def("__str__",             &daepython::Tensor_1_2D_str)
-        .def("__repr__",            &daepython::Tensor_1_2D_repr)
+        .def("__getitem__",         &daepython::Tensor_1_2D_getitem<double>)
+        .def("__setitem__",         &daepython::Tensor_1_2D_setitem<double>)
+        .def("__str__",             &daepython::Tensor_1_2D_str<double>)
+        .def("__repr__",            &daepython::Tensor_1_2D_repr<double>)
 
-        .def("norm",                &Tensor_1_2D::norm)
-        .def("norm_square",         &Tensor_1_2D::norm_square)
-        .def("clear",               &Tensor_1_2D::clear)
-        .def("memory_consumption",  &Tensor_1_2D::memory_consumption)
+        .def("clear",               &Tensor<1,2,double>::clear)
+        .def("memory_consumption",  &Tensor<1,2,double>::memory_consumption)
     ;
 
     class_< Tensor<1,3,double>, boost::noncopyable>("Tensor_1_3D")
-        .add_property("dimension",                  &daepython::Tensor_1_3D_dimension)
-        .add_property("rank",                       &daepython::Tensor_1_3D_rank)
-        .add_property("n_independent_components",   &daepython::Tensor_1_3D_n_independent_components)
+        //.def_readonly("dimension",                  &Tensor<1,3,double>::dimension)
+        //.def_readonly("rank",                       &Tensor<1,3,double>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<1,3,double>::n_independent_components)
 
         .def(self == self)
         .def(self != self)
@@ -84,22 +80,20 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(self - self)
         .def(self * self)
 
-        .def("__getitem__",         &daepython::Tensor_1_3D_getitem)
-        .def("__setitem__",         &daepython::Tensor_1_3D_setitem)
-        .def("__str__",             &daepython::Tensor_1_3D_str)
-        .def("__repr__",            &daepython::Tensor_1_3D_repr)
+        .def("__getitem__",         &daepython::Tensor_1_3D_getitem<double>)
+        .def("__setitem__",         &daepython::Tensor_1_3D_setitem<double>)
+        .def("__str__",             &daepython::Tensor_1_3D_str<double>)
+        .def("__repr__",            &daepython::Tensor_1_3D_repr<double>)
 
-        .def("norm",                &Tensor_1_3D::norm)
-        .def("norm_square",         &Tensor_1_3D::norm_square)
-        .def("clear",               &Tensor_1_3D::clear)
-        .def("memory_consumption",  &Tensor_1_3D::memory_consumption)
+        .def("clear",               &Tensor<1,3,double>::clear)
+        .def("memory_consumption",  &Tensor<1,3,double>::memory_consumption)
     ;
 
 
     class_< Tensor<2,1,double>, boost::noncopyable>("Tensor_2_1D")
-        .add_property("dimension",                  &daepython::Tensor_2_1D_dimension)
-        .add_property("rank",                       &daepython::Tensor_2_1D_rank)
-        .add_property("n_independent_components",   &daepython::Tensor_2_1D_n_independent_components)
+        //.def_readonly("dimension",                  &Tensor<2,1,double>::dimension)
+        //.def_readonly("rank",                       &Tensor<2,1,double>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<2,1,double>::n_independent_components)
 
         .def(self == self)
         .def(self != self)
@@ -112,21 +106,19 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(self - self)
         .def(self * self)
 
-        .def("__getitem__",         &daepython::Tensor_2_1D_getitem)
-        .def("__setitem__",         &daepython::Tensor_2_1D_setitem)
-        .def("__str__",             &daepython::Tensor_2_1D_str)
-        .def("__repr__",            &daepython::Tensor_2_1D_repr)
+        .def("__getitem__",         &daepython::Tensor_2_1D_getitem<double>)
+        .def("__setitem__",         &daepython::Tensor_2_1D_setitem<double>)
+        //.def("__str__",             &daepython::Tensor_2_1D_str)
+        //.def("__repr__",            &daepython::Tensor_2_1D_repr)
 
-        .def("norm",                &Tensor_2_1D::norm)
-        .def("norm_square",         &Tensor_2_1D::norm_square)
-        .def("clear",               &Tensor_2_1D::clear)
-        .def("memory_consumption",  &Tensor_2_1D::memory_consumption)
+        .def("clear",               &Tensor<2,1,double>::clear)
+        .def("memory_consumption",  &Tensor<2,1,double>::memory_consumption)
     ;
 
     class_< Tensor<2,2,double>, boost::noncopyable>("Tensor_2_2D")
-        .add_property("dimension",                  &daepython::Tensor_2_2D_dimension)
-        .add_property("rank",                       &daepython::Tensor_2_2D_rank)
-        .add_property("n_independent_components",   &daepython::Tensor_2_2D_n_independent_components)
+        //.def_readonly("dimension",                  &Tensor<2,2,double>::dimension)
+        //.def_readonly("rank",                       &Tensor<2,2,double>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<2,2,double>::n_independent_components)
 
         .def(self == self)
         .def(self != self)
@@ -139,21 +131,19 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(self - self)
         .def(self * self)
 
-        .def("__getitem__",         &daepython::Tensor_2_2D_getitem)
-        .def("__setitem__",         &daepython::Tensor_2_2D_setitem)
-        .def("__str__",             &daepython::Tensor_2_2D_str)
-        .def("__repr__",            &daepython::Tensor_2_2D_repr)
+        .def("__getitem__",         &daepython::Tensor_2_2D_getitem<double>)
+        .def("__setitem__",         &daepython::Tensor_2_2D_setitem<double>)
+        //.def("__str__",             &daepython::Tensor_2_2D_str)
+        //.def("__repr__",            &daepython::Tensor_2_2D_repr)
 
-        .def("norm",                &Tensor_2_2D::norm)
-        .def("norm_square",         &Tensor_2_2D::norm_square)
-        .def("clear",               &Tensor_2_2D::clear)
-        .def("memory_consumption",  &Tensor_2_2D::memory_consumption)
+        .def("clear",               &Tensor<2,2,double>::clear)
+        .def("memory_consumption",  &Tensor<2,2,double>::memory_consumption)
     ;
 
     class_< Tensor<2,3,double>, boost::noncopyable>("Tensor_2_3D")
-        .add_property("dimension",                  &daepython::Tensor_2_3D_dimension)
-        .add_property("rank",                       &daepython::Tensor_2_3D_rank)
-        .add_property("n_independent_components",   &daepython::Tensor_2_3D_n_independent_components)
+        //.def_readonly("dimension",                  &Tensor<2,3,double>::dimension)
+        //.def_readonly("rank",                       &Tensor<2,3,double>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<2,3,double>::n_independent_components)
 
         .def(self == self)
         .def(self != self)
@@ -166,18 +156,14 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(self - self)
         .def(self * self)
 
-        .def("__getitem__",         &daepython::Tensor_2_3D_getitem)
-        .def("__setitem__",         &daepython::Tensor_2_3D_setitem)
-        .def("__str__",             &daepython::Tensor_2_3D_str)
-        .def("__repr__",            &daepython::Tensor_2_3D_repr)
+        .def("__getitem__",         &daepython::Tensor_2_3D_getitem<double>)
+        .def("__setitem__",         &daepython::Tensor_2_3D_setitem<double>)
+        //.def("__str__",             &daepython::Tensor_2_3D_str)
+        //.def("__repr__",            &daepython::Tensor_2_3D_repr)
 
-        .def("norm",                &Tensor_2_3D::norm)
-        .def("norm_square",         &Tensor_2_3D::norm_square)
-        .def("clear",               &Tensor_2_3D::clear)
-        .def("memory_consumption",  &Tensor_2_3D::memory_consumption)
+        .def("clear",               &Tensor<2,3,double>::clear)
+        .def("memory_consumption",  &Tensor<2,3,double>::memory_consumption)
     ;
-
-
 
 
     class_<Point<1,double>, bases<Tensor_1_1D> >("Point_1D")
@@ -258,10 +244,89 @@ BOOST_PYTHON_MODULE(pyDealII)
         .add_property("z", &daepython::Point_3D_z)
     ;
 
+
+
+    class_< Tensor<1,1,adouble>, boost::noncopyable>("adoubleTensor_1_1D")
+        //.def_readonly("dimension",                  &Tensor<1,1,adouble>::dimension)
+        //.def_readonly("rank",                       &Tensor<1,1,adouble>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<1,1,adouble>::n_independent_components)
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= adouble())
+        .def(self /= adouble())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_1_1D_getitem<adouble>)
+        .def("__setitem__",         &daepython::Tensor_1_1D_setitem<adouble>)
+        .def("__str__",             &daepython::Tensor_1_1D_str<adouble>)
+        .def("__repr__",            &daepython::Tensor_1_1D_repr<adouble>)
+
+        .def("clear",               &Tensor<1,1,adouble>::clear)
+        .def("memory_consumption",  &Tensor<1,1,adouble>::memory_consumption)
+    ;
+
+    class_< Tensor<1,2,adouble>, boost::noncopyable>("adoubleTensor_1_2D")
+        //.def_readonly("dimension",                  &Tensor<1,2,adouble>::dimension)
+        //.def_readonly("rank",                       &Tensor<1,2,adouble>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<1,2,adouble>::n_independent_components)
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= adouble())
+        .def(self /= adouble())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_1_2D_getitem<adouble>)
+        .def("__setitem__",         &daepython::Tensor_1_2D_setitem<adouble>)
+        .def("__str__",             &daepython::Tensor_1_2D_str<adouble>)
+        .def("__repr__",            &daepython::Tensor_1_2D_repr<adouble>)
+
+        .def("clear",               &Tensor<1,2,adouble>::clear)
+        .def("memory_consumption",  &Tensor<1,2,adouble>::memory_consumption)
+    ;
+
+    class_< Tensor<1,3,adouble>, boost::noncopyable>("adoubleTensor_1_3D")
+        //.def_readonly("dimension",                  &Tensor<1,3,adouble>::dimension)
+        //.def_readonly("rank",                       &Tensor<1,3,adouble>::rank)
+        //.def_readonly("n_independent_components",   &Tensor<1,3,adouble>::n_independent_components)
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= adouble())
+        .def(self /= adouble())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_1_3D_getitem<adouble>)
+        .def("__setitem__",         &daepython::Tensor_1_3D_setitem<adouble>)
+        .def("__str__",             &daepython::Tensor_1_3D_str<adouble>)
+        .def("__repr__",            &daepython::Tensor_1_3D_repr<adouble>)
+
+        .def("clear",               &Tensor<1,3,adouble>::clear)
+        .def("memory_consumption",  &Tensor<1,3,adouble>::memory_consumption)
+    ;
+
+
+
+
     class_<daepython::Function_wrapper<1>, boost::noncopyable>("Function_1D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("dimension",	   &Function<1>::dimension)
         .def_readonly("n_components",  &Function<1>::n_components)
 
         .def("value",           pure_virtual(&daepython::Function_wrapper_1D::value),
@@ -278,7 +343,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::Function_wrapper<2>, boost::noncopyable>("Function_2D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("dimension",	   &Function<2>::dimension)
         .def_readonly("n_components",  &Function<2>::n_components)
 
         .def("value",           pure_virtual(&daepython::Function_wrapper_2D::value),
@@ -295,7 +359,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::Function_wrapper<3>, boost::noncopyable>("Function_3D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("dimension",	   &Function<3>::dimension)
         .def_readonly("n_components",  &Function<3>::n_components)
 
         .def("value",           pure_virtual(&daepython::Function_wrapper_3D::value),
@@ -312,7 +375,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::adoubleFunction_wrapper<1>, boost::noncopyable>("adoubleFunction_1D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("dimension",	   &Function<1,adouble>::dimension)
         .def_readonly("n_components",  &Function<1,adouble>::n_components)
 
         .def("value",           pure_virtual(&daepython::adoubleFunction_wrapper_1D::value),
@@ -329,7 +391,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::adoubleFunction_wrapper<2>, boost::noncopyable>("adoubleFunction_2D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("dimension",	   &Function<2,adouble>::dimension)
         .def_readonly("n_components",  &Function<2,adouble>::n_components)
 
         .def("value",           pure_virtual(&daepython::adoubleFunction_wrapper_2D::value),
@@ -346,7 +407,6 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<daepython::adoubleFunction_wrapper<3>, boost::noncopyable>("adoubleFunction_3D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("dimension",	   &Function<3,adouble>::dimension)
         .def_readonly("n_components",  &Function<3,adouble>::n_components)
 
         .def("value",           pure_virtual(&daepython::adoubleFunction_wrapper_3D::value),
@@ -1021,7 +1081,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<1>::m_faceAij)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<1>::m_faceFi)
         .def_readonly("Functions",             &dealiiFiniteElementWeakForm<1>::m_functions)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_functionsDirichletBC)
+        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_adoubleFunctionsDirichletBC)
         .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<1>::m_mapBoundaryIntegrals)
     ;
 
@@ -1050,7 +1110,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<2>::m_faceAij)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<2>::m_faceFi)
         .def_readonly("Functions",             &dealiiFiniteElementWeakForm<2>::m_functions)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_functionsDirichletBC)
+        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_adoubleFunctionsDirichletBC)
         .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<2>::m_mapBoundaryIntegrals)
     ;
 
@@ -1079,7 +1139,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<3>::m_faceAij)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<3>::m_faceFi)
         .def_readonly("Functions",             &dealiiFiniteElementWeakForm<3>::m_functions)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<3>::m_functionsDirichletBC)
+        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<3>::m_adoubleFunctionsDirichletBC)
         .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<3>::m_mapBoundaryIntegrals)
     ;
 

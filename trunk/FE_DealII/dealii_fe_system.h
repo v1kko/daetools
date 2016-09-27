@@ -535,7 +535,7 @@ public:
     map_Uint_Expression                             m_faceFi;
     map_String_FunctionPtr                          m_functions;
     map_String_adoubleFunctionPtr                   m_adouble_functions;
-    map_Uint_vector_pair_String_FunctionPtr         m_functionsDirichletBC;
+    //map_Uint_vector_pair_String_FunctionPtr         m_functionsDirichletBC;
     map_Uint_vector_pair_String_adoubleFunctionPtr  m_adoubleFunctionsDirichletBC;
     map_Uint_vector_pair_Variable_Expression        m_mapBoundaryIntegrals;
 };
@@ -558,6 +558,9 @@ typedef typename std::map<std::string, ComponentMask> map_string_ComponentMask;
 typedef typename std::pair< adouble,feExpression<dim> >  pair_Variable_Expression;
 typedef typename std::vector<pair_Variable_Expression>   vector_pair_Variable_Expression;
 typedef typename std::map<unsigned int, vector_pair_Variable_Expression> map_Uint_vector_pair_Variable_Expression;
+typedef typename std::pair<adouble,adouble> pair_Variable_adouble;
+typedef typename std::vector<pair_Variable_adouble> vector_pair_Variable_adouble;
+typedef typename std::map<unsigned int, vector_pair_Variable_adouble> map_Uint_vector_pair_Variable_adouble;
 
 public:
     dealiiFiniteElementSystem();
@@ -569,10 +572,10 @@ public:
     virtual bool NeedsReAssembling();
     virtual void ReAssembleSystem();
 
-    virtual dae::daeMatrix<adouble>*                                     Asystem() const; // Stiffness matrix
-    virtual dae::daeMatrix<adouble>*                                     Msystem() const; // Mass matrix (dt)
-    virtual dae::daeArray<adouble>*                                      Fload() const;   // Load vector
-    virtual const std::map< unsigned int, std::pair<adouble,adouble> >*  BoundaryIntegrals() const;
+    virtual dae::daeMatrix<adouble>*                                                    Asystem() const; // Stiffness matrix
+    virtual dae::daeMatrix<adouble>*                                                    Msystem() const; // Mass matrix (dt)
+    virtual dae::daeArray<adouble>*                                                     Fload() const;   // Load vector
+    virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  BoundaryIntegrals() const;
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
@@ -607,7 +610,7 @@ public:
     BlockVector<adouble>        solution;
     BlockVector<double>         datareporter_solution;
 
-    std::map< unsigned int, std::pair<adouble,adouble> > m_mapBoundaryIntegrals;
+    std::map< unsigned int, std::vector< std::pair<adouble,adouble> > > m_mapBoundaryIntegrals;
 
     SmartPointer< Quadrature<dim>   >  m_quadrature_formula;
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
@@ -723,10 +726,10 @@ void dealiiFiniteElementSystem<dim>::setup_system()
     m_dofs_per_block.resize(n_dofs);
     DoFTools::count_dofs_per_block (dof_handler, m_dofs_per_block, m_block_component);
 
-    for(unsigned int i = 0; i < m_no_components; i++)
-        printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
-    for(unsigned int i = 0; i < n_dofs; i++)
-        printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
+    //for(unsigned int i = 0; i < m_no_components; i++)
+    //    printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
+    //for(unsigned int i = 0; i < n_dofs; i++)
+    //    printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
 
     const unsigned int n_couplings = dof_handler.max_couplings_between_dofs();
 
@@ -962,40 +965,96 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
 
     // Interpolate Dirichlet boundary conditions on the system matrix and rhs
-    std::vector< std::map<types::global_dof_index, double> > arr_boundary_values_map;
+    //std::map<types::global_dof_index,  double> boundary_values_map_double;
+    std::map<types::global_dof_index, adouble> boundary_values_map_adouble;
 
-    typedef typename std::pair<std::string, const Function<dim>*>                  pair_String_FunctionPtr;
-    typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
-    for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
-    {
-        const unsigned int   id                         = it->first;
-        const std::vector<pair_String_FunctionPtr>& bcs = it->second;
+/*  {
+        typedef typename std::pair<std::string, const Function<dim,double>*>           pair_String_FunctionPtr;
+        typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
 
-        for(int k = 0; k < bcs.size(); k++)
+        for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_functionsDirichletBC.begin(); it != m_weakForm->m_functionsDirichletBC.end(); it++)
         {
-            pair_String_FunctionPtr p = bcs[k];
-            const std::string    variableName =  p.first;
-            const Function<dim>& fun          = *p.second;
+            const unsigned int   id                         = it->first;
+            const std::vector<pair_String_FunctionPtr>& bcs = it->second;
 
-            typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
-            if(iter == mapComponentMasks.end())
-                throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
+            for(int k = 0; k < bcs.size(); k++)
+            {
+                pair_String_FunctionPtr p = bcs[k];
+                const std::string           variableName =  p.first;
+                const Function<dim,double>& fun          = *p.second;
 
-            std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
+                typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
+                if(iter == mapComponentMasks.end())
+                    throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
 
-            std::map<types::global_dof_index, double> boundary_values;
-            VectorTools::interpolate_boundary_values (dof_handler,
-                                                      id,
-                                                      fun,
-                                                      boundary_values,
-                                                      iter->second);
-            arr_boundary_values_map.push_back(boundary_values);
+                std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
 
-            //printf("bc[%d] = [", id);
-            //for(std::map<types::global_dof_index, double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
-            //    printf("(%d,%f) ", it->first, it->second);
-            //printf("]\n");
+                daeVectorTools::interpolate_boundary_values (dof_handler,
+                                                             id,
+                                                             fun,
+                                                             boundary_values_map_double,
+                                                             iter->second);
+
+                //printf("bc[%d] = [", id);
+                //for(std::map<types::global_dof_index, double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
+                //    printf("(%d,%f) ", it->first, it->second);
+                //printf("]\n");
+            }
         }
+    }
+*/
+    // Create a map with values for Dirichlet BCs using the adouble version of interpolate_boundary_values() function
+    {
+        typedef typename std::pair<std::string, const Function<dim,adouble>*>          pair_String_FunctionPtr;
+        typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
+
+        for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_adoubleFunctionsDirichletBC.begin(); it != m_weakForm->m_adoubleFunctionsDirichletBC.end(); it++)
+        {
+            const unsigned int   id                         = it->first;
+            const std::vector<pair_String_FunctionPtr>& bcs = it->second;
+
+            for(int k = 0; k < bcs.size(); k++)
+            {
+                pair_String_FunctionPtr p = bcs[k];
+                const std::string           variableName =  p.first;
+                const Function<dim,adouble>& fun          = *p.second;
+
+                typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
+                if(iter == mapComponentMasks.end())
+                    throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
+
+                std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
+
+                daeVectorTools::interpolate_boundary_values (dof_handler,
+                                                             id,
+                                                             fun,
+                                                             boundary_values_map_adouble,
+                                                             iter->second);
+
+                //printf("bc[%d] = [", id);
+                //for(std::map<types::global_dof_index, double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
+                //    printf("(%d,%f) ", it->first, it->second);
+                //printf("]\n");
+            }
+        }
+    }
+
+    // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects
+    // The integral expressions will be built and added later
+    for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapBoundaryIntegrals.begin(); it != m_weakForm->m_mapBoundaryIntegrals.end(); it++)
+    {
+        const unsigned int                           id   = it->first;
+        const std::vector<pair_Variable_Expression>& vpve = it->second;
+
+        vector_pair_Variable_adouble vpaa;
+        vpaa.reserve(vpve.size());
+        for(size_t i = 0; i < vpve.size(); i++)
+        {
+            const pair_Variable_Expression& pve = vpve[i];
+            const adouble& ad_variable = pve.first;
+            vpaa.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
+        }
+        this->m_mapBoundaryIntegrals[id] = vpaa;
     }
 
     typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
@@ -1141,17 +1200,19 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 }
 
 
-
                 typename map_Uint_vector_pair_Variable_Expression::const_iterator itboundaryIntegral = m_weakForm->m_mapBoundaryIntegrals.find(id);
                 if(itboundaryIntegral != m_weakForm->m_mapBoundaryIntegrals.end())
                 {
                     const std::vector<pair_Variable_Expression>& arrExpressions = itboundaryIntegral->second;
 
+                    // Get the vector of pairs <variable,integral_adouble_expression> where the integral expressions wil be stored
+                    std::vector< std::pair<adouble,adouble> >& vpaa = m_mapBoundaryIntegrals[id];
+
                     for(int v = 0; v < arrExpressions.size(); v++)
                     {
                         const std::pair< adouble, feExpression<dim> >& pve = arrExpressions[v];
 
-                        const adouble&           variable     = pve.first;
+                        const adouble&           ad_variable  = pve.first; // not used here
                         const feExpression<dim>& biExpression = pve.second;
 
                         if(!biExpression.m_node)
@@ -1183,11 +1244,18 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                         //if(adIntegral.node)
                         //    std::cout << "Cell boundary Integral: $" << adIntegral.node->SaveAsLatex(&c) << "$" << std::endl;
 
+                        // Finally, add the sum to the vpaa vector's item v (which is the vector at boundary=ID)
+                        std::pair<adouble,adouble>& pad = vpaa[v];
+                        adouble& pad_integral = pad.second;
+                        pad_integral += adIntegral;
+
+                        /*
                         // Finally, add the sum to the map
-                        std::map< unsigned int, std::pair<adouble,adouble> >::iterator itbi = m_mapBoundaryIntegrals.find(id);
+                        std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >::iterator itbi = m_mapBoundaryIntegrals.find(id);
                         if(itbi == m_mapBoundaryIntegrals.end())
                         {
-                            m_mapBoundaryIntegrals[id] = std::pair<adouble,adouble>(variable, adIntegral);
+                            m_mapBoundaryIntegrals[id] = arrPairsVariableExpression;
+                            arrPairsVariableExpression.push_back( std::pair<adouble,adouble>(variable, adIntegral) );
                         }
                         else
                         {
@@ -1198,6 +1266,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                             //if(pad_integral.node)
                             //    std::cout << "\n\nBoundary Integral: $" << pad_integral.node->SaveAsLatex(&c) << "$\n\n" << std::endl;
                         }
+
+                        arrPairsVariableExpression.push_back(std::pair<adouble,adouble>(variable, adIntegral));
+                        */
                     }
                 }
             }
@@ -1221,20 +1292,33 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         printf("]\n");
         printf("\n");
     */
-        for(size_t i = 0; i < arr_boundary_values_map.size(); i++)
-        {
-            std::map<types::global_dof_index, double>& boundary_values = arr_boundary_values_map[i];
-
+        // double version, not used anymore
+/*      {
             // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
-            MatrixTools::local_apply_boundary_values(boundary_values,
-                                                     local_dof_indices,
-                                                     cell_matrix,
-                                                     cell_rhs);
+            daeMatrixTools::local_apply_boundary_values(boundary_values_map_double,
+                                                        local_dof_indices,
+                                                        cell_matrix,
+                                                        cell_rhs);
 
             // Modify the local mass atrix for those nodes that have Dirichlet boundary conditions set
-            MatrixTools::local_process_mass_matrix(boundary_values,
-                                                   local_dof_indices,
-                                                   cell_matrix_dt);
+            daeMatrixTools::local_process_mass_matrix(boundary_values_map_double,
+                                                      local_dof_indices,
+                                                      cell_matrix_dt);
+        }
+*/
+        // Apply a map with values of Dirichlet BCs using the adouble version of local_apply_boundary_values()
+        // and local_process_mass_matrix() functions.
+        {
+            // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
+            daeMatrixTools::local_apply_boundary_values(boundary_values_map_adouble,
+                                                        local_dof_indices,
+                                                        cell_matrix,
+                                                        cell_rhs);
+
+            // Modify the local mass atrix for those nodes that have Dirichlet boundary conditions set
+            daeMatrixTools::local_process_mass_matrix(boundary_values_map_adouble,
+                                                      local_dof_indices,
+                                                      cell_matrix_dt);
         }
     /*
         printf("cell_matrix after bcs:\n");
@@ -1410,7 +1494,7 @@ dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 }
 
 template <int dim>
-const std::map< unsigned int, std::pair<adouble,adouble> >*  dealiiFiniteElementSystem<dim>::BoundaryIntegrals() const
+const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  dealiiFiniteElementSystem<dim>::BoundaryIntegrals() const
 {
     return &m_mapBoundaryIntegrals;
 }

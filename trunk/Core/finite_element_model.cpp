@@ -93,45 +93,53 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
 
 
     // Add boundary integral equations
-    const std::map< unsigned int, std::pair<adouble,adouble> >* mapBI = m_fe->BoundaryIntegrals();
-    std::map< unsigned int, std::pair<adouble,adouble> >::const_iterator cit = mapBI->begin();
-    for(int counter=0; cit != mapBI->end(); counter++, cit++)
+    const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >* mapBI = m_fe->BoundaryIntegrals();
+    std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >::const_iterator cit = mapBI->begin();
+    int counter = 0;
+    for(; cit != mapBI->end(); cit++)
     {
-        daeEquation* pEq = new daeEquation();
+        const std::vector< std::pair<adouble,adouble> >& arrPairsVaribleIntegral = cit->second;
 
-        if(!pCurrentState)
+        for(size_t i = 0; i < arrPairsVaribleIntegral.size(); i++)
         {
-            string strEqName = "dealIIFEBoundaryIntegral_" + toString<size_t>(counter);
-            pEq->SetName(strEqName);
-            AddEquation(pEq);
+            daeEquation* pEq = new daeEquation();
+
+            if(!pCurrentState)
+            {
+                string strEqName = "dealIIFEBoundaryIntegral_" + toString<size_t>(counter);
+                pEq->SetName(strEqName);
+                AddEquation(pEq);
+            }
+            else
+            {
+                string strEqName = "dealIIFEBoundaryIntegral_" + toString<size_t>(counter);
+                pEq->SetName(strEqName);
+                pCurrentState->AddEquation(pEq);
+            }
+
+            pEq->SetDescription("");
+            pEq->SetScaling(1.0);
+
+            const std::pair<adouble,adouble>& p = arrPairsVaribleIntegral[i];
+            const adouble& ad_variable = p.first;
+            const adouble& ad_integral = p.second;
+
+            if(!ad_variable.node)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "The variable to store the result of the boundary integral is not specified";
+                throw e;
+            }
+
+            //daeNodeSaveAsContext c(this);
+            //adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
+            //printf("ad_variable = %s (%s)\n", ad_variable.node->SaveAsLatex(&c).c_str(), (psvn ? psvn->GetObjectClassName().c_str() : "nullptr"));
+            //printf("ad_integral = %s\n", ad_integral.node->SaveAsLatex(&c).c_str());
+
+            pEq->SetResidual(ad_variable - ad_integral);
+
+            counter++;
         }
-        else
-        {
-            string strEqName = "dealIIFEBoundaryIntegral_" + toString<size_t>(counter);
-            pEq->SetName(strEqName);
-            pCurrentState->AddEquation(pEq);
-        }
-
-        pEq->SetDescription("");
-        pEq->SetScaling(1.0);
-
-        const std::pair<adouble,adouble>& p = cit->second;
-        const adouble& ad_variable = p.first;
-        const adouble& ad_integral = p.second;
-
-        if(!ad_variable.node)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The variable to store the result of the boundary integral is not specified";
-            throw e;
-        }
-
-        //daeNodeSaveAsContext c(this);
-        //adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
-        //printf("ad_variable = %s (%s)\n", ad_variable.node->SaveAsLatex(&c).c_str(), (psvn ? psvn->GetObjectClassName().c_str() : "nullptr"));
-        //printf("ad_integral = %s\n", ad_integral.node->SaveAsLatex(&c).c_str());
-
-        pEq->SetResidual(ad_variable - ad_integral);
     }
 
 }

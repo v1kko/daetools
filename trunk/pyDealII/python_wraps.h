@@ -31,176 +31,116 @@ boost::python::list getListFromVectorByValue(const std::vector<ITEM>& arrItems)
     return l;
 }
 
-unsigned int Tensor_1_1D_rank(Tensor_1_1D& self)
-{
-    return Tensor_1_1D::rank;
-}
-unsigned int Tensor_1_1D_dimension(Tensor_1_1D& self)
-{
-    return Tensor_1_1D::dimension;
-}
-unsigned int Tensor_1_1D_n_independent_components(Tensor_1_1D& self)
-{
-    return Tensor_1_1D::n_independent_components;
-}
-
-unsigned int Tensor_1_2D_rank(Tensor_1_2D& self)
-{
-    return Tensor_1_2D::rank;
-}
-unsigned int Tensor_1_2D_dimension(Tensor_1_2D& self)
-{
-    return Tensor_1_2D::dimension;
-}
-unsigned int Tensor_1_2D_n_independent_components(Tensor_1_2D& self)
-{
-    return Tensor_1_2D::n_independent_components;
-}
-
-unsigned int Tensor_1_3D_rank(Tensor_1_3D& self)
-{
-    return Tensor_1_3D::rank;
-}
-unsigned int Tensor_1_3D_dimension(Tensor_1_3D& self)
-{
-    return Tensor_1_3D::dimension;
-}
-unsigned int Tensor_1_3D_n_independent_components(Tensor_1_3D& self)
-{
-    return Tensor_1_3D::n_independent_components;
-}
-
-double Tensor_1_1D_getitem(Tensor_1_1D& self, size_t i)
+template<class Number>
+Number Tensor_1_1D_getitem(Tensor<1,1,Number>& self, size_t i)
 {
     return self[i];
 }
-double Tensor_1_2D_getitem(Tensor_1_2D& self, size_t i)
+template<class Number>
+Number Tensor_1_2D_getitem(Tensor<1,2,Number>& self, size_t i)
 {
     return self[i];
 }
-double Tensor_1_3D_getitem(Tensor_1_3D& self, size_t i)
+template<class Number>
+Number Tensor_1_3D_getitem(Tensor<1,3,Number>& self, size_t i)
 {
     return self[i];
 }
 
-void Tensor_1_1D_setitem(Tensor_1_1D& self, size_t i, double value)
+template<class Number>
+void Tensor_1_1D_setitem(Tensor<1,1,Number>& self, size_t i, Number value)
 {
     self[i] = value;
 }
-void Tensor_1_2D_setitem(Tensor_1_2D& self, size_t i, double value)
+template<class Number>
+void Tensor_1_2D_setitem(Tensor<1,2,Number>& self, size_t i, Number value)
 {
     self[i] = value;
 }
-void Tensor_1_3D_setitem(Tensor_1_3D& self, size_t i, double value)
+template<class Number>
+void Tensor_1_3D_setitem(Tensor<1,3,Number>& self, size_t i, Number value)
 {
     self[i] = value;
 }
 
 
-string Tensor_1_1D_str(Tensor_1_1D& self)
+template<class Number>
+string Tensor_1_1D_str(Tensor<1,1,Number>& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
     s << "(" << self[0] << ")";
     return s.str();
 }
-string Tensor_1_2D_str(Tensor_1_2D& self)
+template<class Number>
+string Tensor_1_2D_str(Tensor<1,2,Number>& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
     s << "(" << self[0] << ", " << self[1]<< ")";
     return s.str();
 }
-string Tensor_1_3D_str(Tensor_1_3D& self)
+template<class Number>
+string Tensor_1_3D_str(Tensor<1,3,Number>& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
     s << "(" << self[0] << ", " << self[1] << ", " << self[2] << ")";
     return s.str();
 }
 
-string Tensor_1_1D_repr(Tensor_1_1D& self)
+template<class Number>
+string Tensor_1_1D_repr(Tensor<1,1,Number>& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
-    s << "Tensor<1,1,double>(" << self[0] << ")";
+    s << "Tensor<1,1>(" << self[0] << ")";
     return s.str();
 }
-string Tensor_1_2D_repr(Tensor_1_2D& self)
+template<class Number>
+string Tensor_1_2D_repr(Tensor<1,2,Number>& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
-    s << "Tensor<1,2,double>(" << self[0] << ", " << self[1] << ")";
+    s << "Tensor<1,2>(" << self[0] << ", " << self[1] << ")";
     return s.str();
 }
-string Tensor_1_3D_repr(Tensor_1_3D& self)
+template<class Number>
+string Tensor_1_3D_repr(Tensor<1,3,Number>& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
-    s << "Tensor<1,3,double>(" << self[0] << ", " << self[1] << ", " << self[2] << ")";
+    s << "Tensor<1,3>(" << self[0] << ", " << self[1] << ", " << self[2] << ")";
     return s.str();
 }
 
-unsigned int Tensor_2_1D_rank(Tensor_2_1D& self)
-{
-    return Tensor_2_1D::rank;
-}
-unsigned int Tensor_2_1D_dimension(Tensor_2_1D& self)
-{
-    return Tensor_2_1D::dimension;
-}
-unsigned int Tensor_2_1D_n_independent_components(Tensor_2_1D& self)
-{
-    return Tensor_2_1D::n_independent_components;
-}
-
-unsigned int Tensor_2_2D_rank(Tensor_2_2D& self)
-{
-    return Tensor_2_2D::rank;
-}
-unsigned int Tensor_2_2D_dimension(Tensor_2_2D& self)
-{
-    return Tensor_2_2D::dimension;
-}
-unsigned int Tensor_2_2D_n_independent_components(Tensor_2_2D& self)
-{
-    return Tensor_2_2D::n_independent_components;
-}
-
-unsigned int Tensor_2_3D_rank(Tensor_2_3D& self)
-{
-    return Tensor_2_3D::rank;
-}
-unsigned int Tensor_2_3D_dimension(Tensor_2_3D& self)
-{
-    return Tensor_2_3D::dimension;
-}
-unsigned int Tensor_2_3D_n_independent_components(Tensor_2_3D& self)
-{
-    return Tensor_2_3D::n_independent_components;
-}
-
-Tensor_1_1D Tensor_2_1D_getitem(Tensor_2_1D& self, size_t i)
+template<class Number>
+Tensor<1,1,Number> Tensor_2_1D_getitem(Tensor<2,1,Number>& self, size_t i)
 {
     return self[i];
 }
-Tensor_1_2D Tensor_2_2D_getitem(Tensor_2_2D& self, size_t i)
+template<class Number>
+Tensor<1,2,Number> Tensor_2_2D_getitem(Tensor<2,2,Number>& self, size_t i)
 {
     return self[i];
 }
-Tensor_1_3D Tensor_2_3D_getitem(Tensor_2_3D& self, size_t i)
+template<class Number>
+Tensor<1,3,Number> Tensor_2_3D_getitem(Tensor<2,3,Number>& self, size_t i)
 {
     return self[i];
 }
 
-void Tensor_2_1D_setitem(Tensor_2_1D& self, size_t i, const Tensor_1_1D& value)
+template<class Number>
+void Tensor_2_1D_setitem(Tensor<2,1,Number>& self, size_t i, const Tensor<1,1,Number>& value)
 {
     self[i] = value;
 }
-void Tensor_2_2D_setitem(Tensor_2_2D& self, size_t i, const Tensor_1_2D& value)
+template<class Number>
+void Tensor_2_2D_setitem(Tensor<2,2,Number>& self, size_t i, const Tensor<1,2,Number>& value)
 {
     self[i] = value;
 }
-void Tensor_2_3D_setitem(Tensor_2_3D& self, size_t i, const Tensor_1_3D& value)
+template<class Number>
+void Tensor_2_3D_setitem(Tensor<2,3,Number>& self, size_t i, const Tensor<1,3,Number>& value)
 {
     self[i] = value;
 }
 
-
+/*
 string Tensor_2_1D_str(Tensor_2_1D& self)
 {
     return (boost::format("[[%f], [%f]]") % self[0][0] % self[0][1]).str();
@@ -232,7 +172,7 @@ string Tensor_2_3D_repr(Tensor_2_3D& self)
                                                                                             % self[1][0] % self[1][1] % self[1][2]
                                                                                             % self[2][0] % self[2][1] % self[2][2]).str();
 }
-
+*/
 
 string Point_1D_repr(Point_1D& self)
 {
@@ -567,7 +507,7 @@ public:
 
             unsigned int key = boost::python::extract<unsigned int>(key_);
 
-            std::vector< std::pair<std::string, const Function<dim,double>*> >  bcs_double;
+            //std::vector< std::pair<std::string, const Function<dim,double>*> >  bcs_double;
             std::vector< std::pair<std::string, const Function<dim,adouble>*> > bcs_adouble;
             for(int k = 0; k < len(vals_); k++)
             {
@@ -582,8 +522,11 @@ public:
 
                 if(get_double_fn.check())
                 {
-                    const Function<dim,double>* fn = get_double_fn();
-                    bcs_double.push_back( std::pair<std::string, const Function<dim,double>*>(var,fn) );
+                    daeDeclareException(exInvalidCall);
+                    e << "Only the adouble version of the Function class (that is Function<dim,adouble>) objects are allowed for setting the Dirichlet BCs";
+                    throw e;
+                    //const Function<dim,double>* fn = get_double_fn();
+                    //bcs_double.push_back( std::pair<std::string, const Function<dim,double>*>(var,fn) );
                 }
                 else if(get_adouble_fn.check())
                 {
@@ -599,8 +542,8 @@ public:
 
             }
 
-            if(bcs_double.size() > 0)
-                this->m_functionsDirichletBC[key] = bcs_double;
+            //if(bcs_double.size() > 0)
+            //    this->m_functionsDirichletBC[key] = bcs_double;
             if(bcs_adouble.size() > 0)
                 this->m_adoubleFunctionsDirichletBC[key] = bcs_adouble;
         }

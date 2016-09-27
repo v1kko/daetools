@@ -88,10 +88,13 @@ class modTutorial(daeModel):
         functions['Diffusivity'] = ConstantFunction_2D(alpha)
         functions['Generation']  = ConstantFunction_2D(0.0)
 
+        # Nota bene:
+        #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
+        #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
         dirichletBC    = {}
-        dirichletBC[0] = [('T', ConstantFunction_2D(200))] # outer boundary
-        dirichletBC[1] = [('T', ConstantFunction_2D(350))] # inner ellipse
-        dirichletBC[2] = [('T', ConstantFunction_2D(250))] # inner rectangle
+        dirichletBC[0] = [('T', adoubleConstantFunction_2D( adouble(200)) )] # outer boundary
+        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350)) )] # inner ellipse
+        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250)) )] # inner rectangle
 
         boundaryIntegrals = {
                                0 : [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
@@ -147,6 +150,7 @@ def guiRun(app):
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
+
     # 2. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)

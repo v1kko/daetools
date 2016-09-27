@@ -4,6 +4,7 @@
 #include "../Core/coreimpl.h"
 
 //#include <deal.II/lac/constraint_matrix.h>
+#include <deal.II/numerics/vector_tools.h>
 #include <deal.II/numerics/matrix_tools.h>
 #include <deal.II/lac/vector.h>
 #include <deal.II/lac/block_vector.h>
@@ -49,6 +50,9 @@ namespace dealii
 // Many template functions need to be specialized for Number=adouble
 namespace numbers
 {
+//    template <>
+//    struct NumberTraits<adouble>;
+
     template <>
     typename NumberTraits<adouble>::real_type
     NumberTraits<adouble>::abs (const adouble &x)
@@ -235,7 +239,7 @@ template class ConstantFunction<1, adouble>;
 template class ConstantFunction<2, adouble>;
 template class ConstantFunction<3, adouble>;
 
-namespace MatrixTools
+namespace daeMatrixTools
 {
 namespace
 {
@@ -248,7 +252,8 @@ namespace
 }
 
 // This is my version of the local_apply_boundary_values function (NOT a specialization)!
-inline void local_apply_boundary_values (const std::map<types::global_dof_index,double> &boundary_values,
+template<class Number>
+inline void local_apply_boundary_values (const typename std::map<types::global_dof_index,Number> &boundary_values,
                                          const std::vector<types::global_dof_index> &local_dof_indices,
                                          boost::numeric::ublas::matrix<adouble>& local_matrix,
                                          std::vector<adouble>& local_rhs,
@@ -296,8 +301,7 @@ inline void local_apply_boundary_values (const std::map<types::global_dof_index,
   const unsigned int n_local_dofs = local_dof_indices.size();
   for (unsigned int i=0; i<n_local_dofs; ++i)
     {
-      const std::map<types::global_dof_index, double>::const_iterator
-      boundary_value = boundary_values.find (local_dof_indices[i]);
+      const typename std::map<types::global_dof_index, Number>::const_iterator boundary_value = boundary_values.find (local_dof_indices[i]);
       if (boundary_value != boundary_values.end())
         {
           // remove this row, except for the
@@ -309,21 +313,24 @@ inline void local_apply_boundary_values (const std::map<types::global_dof_index,
           // replace diagonal entry by its
           // absolute value to make sure that
           // everything remains positive, or
-          // by the average diagonal value if
-          // zero
+          // by the average diagonal value if zero
+
+          // Nota bene:
+          //   In my version the average_diagonal is always double (no matter what Number type is)
+          //
           if (!local_matrix(i,i).node && local_matrix(i,i).getValue() == 0.0) // the item doesn't have a node and the value is 0
           {
           /* We have some adoubles with a value and some adoubles with a node.
-           * We can;t tell what is the average value, but we can work with
-           * those items that have value. */
+           * We can't tell what is the average value taking into account all of them,
+           * but we can work with those items that have float value. */
 
               // if average diagonal hasn't
               // yet been computed, do so now
-              if (average_diagonal == 0.)
+              if (average_diagonal == 0.0)
                 {
                   unsigned int nonzero_diagonals = 0;
                   for (unsigned int k=0; k<n_local_dofs; ++k)
-                    if (local_matrix(k,k).getValue() != 0.0)
+                    if (!local_matrix(k,k).node && local_matrix(k,k).getValue() != 0.0) // only if it doesn't have a node and has a value!
                       {
                         average_diagonal += std::fabs(local_matrix(k,k).getValue());
                         ++nonzero_diagonals;
@@ -367,7 +374,8 @@ inline void local_apply_boundary_values (const std::map<types::global_dof_index,
 }
 
 // This is my version of the local_apply_boundary_values function (NOT a specialization)!
-inline void local_process_mass_matrix(const std::map<types::global_dof_index,double> &boundary_values,
+template<class Number>
+inline void local_process_mass_matrix(const std::map<types::global_dof_index,Number> &boundary_values,
                                       const std::vector<types::global_dof_index> &local_dof_indices,
                                       boost::numeric::ublas::matrix<adouble>& local_mass_matrix,
                                       const bool eliminate_columns = true)
@@ -387,7 +395,7 @@ inline void local_process_mass_matrix(const std::map<types::global_dof_index,dou
   const unsigned int n_local_dofs = local_dof_indices.size();
   for (unsigned int i=0; i<n_local_dofs; ++i)
     {
-      const std::map<types::global_dof_index, double>::const_iterator boundary_value = boundary_values.find (local_dof_indices[i]);
+      const typename std::map<types::global_dof_index, Number>::const_iterator boundary_value = boundary_values.find (local_dof_indices[i]);
       if (boundary_value != boundary_values.end())
         {
           // remove this row, and the diagonal element
@@ -404,247 +412,362 @@ inline void local_process_mass_matrix(const std::map<types::global_dof_index,dou
         }
     }
 }
-
-/*
- * Specialization for Number=adouble (not used anymore - the local_apply_boundary_values is used now)!
- * Not sure if it works at all!
- */
-//template<>
-//void apply_boundary_values (const std::map<types::global_dof_index,double> &boundary_values,
-//                            BlockSparseMatrix< adouble > &matrix,
-//                            BlockVector< adouble > &solution,
-//                            BlockVector< adouble > &right_hand_side,
-//                            const bool eliminate_columns)
-//{
-//  const unsigned int blocks = matrix.n_block_rows();
-
-//  Assert (matrix.n() == right_hand_side.size(),
-//          ExcDimensionMismatch(matrix.n(), right_hand_side.size()));
-//  Assert (matrix.n() == solution.size(),
-//          ExcDimensionMismatch(matrix.n(), solution.size()));
-//  Assert (matrix.n_block_rows() == matrix.n_block_cols(),
-//          ExcNotQuadratic());
-//  Assert (matrix.get_sparsity_pattern().get_row_indices() == matrix.get_sparsity_pattern().get_column_indices(),
-//          ExcNotQuadratic());
-//  Assert (matrix.get_sparsity_pattern().get_column_indices() == solution.get_block_indices (),
-//          ExcBlocksDontMatch ());
-//  Assert (matrix.get_sparsity_pattern().get_row_indices() == right_hand_side.get_block_indices (),
-//          ExcBlocksDontMatch ());
-
-//  // if no boundary values are to be applied
-//  // simply return
-//  if (boundary_values.size() == 0)
-//    return;
-
-
-//  const types::global_dof_index n_dofs = matrix.m();
-
-//  // if a diagonal entry is zero
-//  // later, then we use another
-//  // number instead. take it to be
-//  // the first nonzero diagonal
-//  // element of the matrix, or 1 if
-//  // there is no such thing
-//  adouble first_nonzero_diagonal_entry = 0;
-//  for (unsigned int diag_block=0; diag_block<blocks; ++diag_block)
-//    {
-//      for (unsigned int i=0; i<matrix.block(diag_block,diag_block).n(); ++i)
-//        if (matrix.block(diag_block,diag_block).diag_element(i) != 0)
-//          {
-//            first_nonzero_diagonal_entry = matrix.block(diag_block,diag_block).diag_element(i);
-//            break;
-//          }
-//      // check whether we have found
-//      // something in the present
-//      // block
-//      if (first_nonzero_diagonal_entry.node || first_nonzero_diagonal_entry.getValue() != 0)
-//        break;
-//    }
-//  // nothing found on all diagonal
-//  // blocks? if so, use 1.0 instead
-//  if (!first_nonzero_diagonal_entry.node && first_nonzero_diagonal_entry.getValue() == 0)
-//    first_nonzero_diagonal_entry = 1;
-
-
-//  std::map<types::global_dof_index,double>::const_iterator dof  = boundary_values.begin(),
-//                                                           endd = boundary_values.end();
-//  const BlockSparsityPattern & sparsity_pattern = matrix.get_sparsity_pattern();
-
-//  // pointer to the mapping between
-//  // global and block indices. since
-//  // the row and column mappings are
-//  // equal, store a pointer on only
-//  // one of them
-//  const BlockIndices & index_mapping = sparsity_pattern.get_column_indices();
-
-//  // now loop over all boundary dofs
-//  for (; dof != endd; ++dof)
-//    {
-//      Assert (dof->first < n_dofs, ExcInternalError());
-//      (void)n_dofs;
-
-//      // get global index and index
-//      // in the block in which this
-//      // dof is located
-//      const types::global_dof_index dof_number = dof->first;
-//      const std::pair<unsigned int,types::global_dof_index> block_index = index_mapping.global_to_local (dof_number);
-
-//      // for each boundary dof:
-
-//      // set entries of this line
-//      // to zero except for the diagonal
-//      // entry. Note that the diagonal
-//      // entry is always the first one
-//      // in a row for square matrices
-//      for (unsigned int block_col=0; block_col<blocks; ++block_col)
-//        for (typename SparseMatrix<adouble>::iterator
-//             p = (block_col == block_index.first ?
-//                  matrix.block(block_index.first,block_col).begin(block_index.second) + 1 :
-//                  matrix.block(block_index.first,block_col).begin(block_index.second));
-//             p != matrix.block(block_index.first,block_col).end(block_index.second);
-//             ++p)
-//          p->value() = 0;
-
-//      // set right hand side to
-//      // wanted value: if main diagonal
-//      // entry nonzero, don't touch it
-//      // and scale rhs accordingly. If
-//      // zero, take the first main
-//      // diagonal entry we can find, or
-//      // one if no nonzero main diagonal
-//      // element exists. Normally, however,
-//      // the main diagonal entry should
-//      // not be zero.
-//      //
-//      // store the new rhs entry to make
-//      // the gauss step more efficient
-//      adouble new_rhs;
-//      if (matrix.block(block_index.first, block_index.first).diag_element(block_index.second).node ||
-//          matrix.block(block_index.first, block_index.first).diag_element(block_index.second).getValue() != 0.0)
-//        new_rhs = dof->second * matrix.block(block_index.first, block_index.first).diag_element(block_index.second);
-//      else
-//        {
-//          matrix.block(block_index.first, block_index.first).diag_element(block_index.second) = first_nonzero_diagonal_entry;
-//          new_rhs = dof->second * first_nonzero_diagonal_entry;
-//        }
-//      right_hand_side.block(block_index.first)(block_index.second) = new_rhs;
-
-
-//      // if the user wants to have
-//      // the symmetry of the matrix
-//      // preserved, and if the
-//      // sparsity pattern is
-//      // symmetric, then do a Gauss
-//      // elimination step with the
-//      // present row. this is a
-//      // little more complicated for
-//      // block matrices.
-//      if (eliminate_columns)
-//        {
-//          // store the only nonzero entry
-//          // of this line for the Gauss
-//          // elimination step
-//          const adouble diagonal_entry = matrix.block(block_index.first,block_index.first).diag_element(block_index.second);
-
-//          // we have to loop over all
-//          // rows of the matrix which
-//          // have a nonzero entry in
-//          // the column which we work
-//          // in presently. if the
-//          // sparsity pattern is
-//          // symmetric, then we can
-//          // get the positions of
-//          // these rows cheaply by
-//          // looking at the nonzero
-//          // column numbers of the
-//          // present row.
-//          //
-//          // note that if we check
-//          // whether row @p{row} in
-//          // block (r,c) is non-zero,
-//          // then we have to check
-//          // for the existence of
-//          // column @p{row} in block
-//          // (c,r), i.e. of the
-//          // transpose block
-//          for (unsigned int block_row=0; block_row<blocks; ++block_row)
-//            {
-//              // get pointers to the sparsity patterns of this block and of
-//              // the transpose one
-//              const SparsityPattern &this_sparsity = sparsity_pattern.block (block_row, block_index.first);
-
-//              SparseMatrix<adouble> &this_matrix = matrix.block(block_row, block_index.first);
-//              SparseMatrix<adouble> &transpose_matrix = matrix.block(block_index.first, block_row);
-
-//              // traverse the row of the transpose block to find the
-//              // interesting rows in the present block.  don't use the
-//              // diagonal element of the diagonal block
-//              for (typename SparseMatrix<adouble>::iterator
-//                   q = (block_index.first == block_row ?
-//                        transpose_matrix.begin(block_index.second)+1 :
-//                        transpose_matrix.begin(block_index.second));
-//                   q != transpose_matrix.end(block_index.second);
-//                   ++q)
-//                {
-//                  // get the number of the column in this row in which a
-//                  // nonzero entry is. this is also the row of the transpose
-//                  // block which has an entry in the interesting row
-//                  const types::global_dof_index row = q->column();
-
-//                  // find the position of element (row,dof_number) in this
-//                  // block (not in the transpose one). note that we have to
-//                  // take care of special cases with square sub-matrices
-//                  bool (*comp)(typename SparseMatrix<adouble>::iterator::value_type p, const unsigned int column)
-//                    = &column_less_than<typename SparseMatrix<adouble>::iterator>;
-
-//                  typename SparseMatrix<adouble>::iterator p = this_matrix.end();
-
-//                  if (this_sparsity.n_rows() == this_sparsity.n_cols())
-//                    {
-//                      if (this_matrix.begin(row)->column() == block_index.second)
-//                        p = this_matrix.begin(row);
-//                      else
-//                        p = Utilities::lower_bound(this_matrix.begin(row)+1,
-//                                                   this_matrix.end(row),
-//                                                   block_index.second,
-//                                                   comp);
-//                    }
-//                  else
-//                    p = Utilities::lower_bound(this_matrix.begin(row),
-//                                               this_matrix.end(row),
-//                                               block_index.second,
-//                                               comp);
-
-//                  // check whether this line has an entry in the
-//                  // regarding column (check for ==dof_number and !=
-//                  // next_row, since if row==dof_number-1, *p is a
-//                  // past-the-end pointer but points to dof_number
-//                  // anyway...)
-//                  //
-//                  // there should be such an entry! we know this because
-//                  // we have assumed that the sparsity pattern is
-//                  // symmetric and we only walk over those rows for
-//                  // which the current row has a column entry
-//                  Assert ((p->column() == block_index.second) &&
-//                          (p != this_matrix.end(row)),
-//                          ExcInternalError());
-
-//                  // correct right hand side
-//                  right_hand_side.block(block_row)(row) -= adouble(p->value()) / diagonal_entry * new_rhs;
-
-//                  // set matrix entry to zero
-//                  p->value() = 0.0;
-//                }
-//            }
-//        }
-
-//      // preset solution vector
-//      solution.block(block_index.first)(block_index.second) = dof->second;
-//    }
-//}
-
 }
 
+namespace daeVectorTools
+{
+// interpolate boundary values in 1D.
+//
+// in higher dimensions, we
+// use FEValues to figure out
+// what to do on faces, but in 1d
+// faces are points and it is far
+// easier to simply work on
+// individual vertices
+template <typename DoFHandlerType, template <int,int> class M_or_MC, class Number>
+static inline void do_interpolate_boundary_values(const M_or_MC<DoFHandlerType::dimension, DoFHandlerType::space_dimension>     &,
+                                                  const DoFHandlerType                                                          &dof,
+                                                  const typename FunctionMap<DoFHandlerType::space_dimension,adouble>::type     &function_map,
+                                                  std::map<types::global_dof_index,Number>                                      &boundary_values,
+                                                  const ComponentMask                                                           &component_mask,
+                                                  const dealii::internal::int2type<1>)
+{
+  const unsigned int dim = DoFHandlerType::dimension;
+  const unsigned int spacedim = DoFHandlerType::space_dimension;
+
+  Assert (component_mask.represents_n_components(dof.get_fe().n_components()),
+          ExcMessage ("The number of components in the mask has to be either "
+                      "zero or equal to the number of components in the finite "
+                      "element."));
+
+  // if for whatever reason we were
+  // passed an empty map, return
+  // immediately
+  if (function_map.size() == 0)
+    return;
+
+  for (typename DoFHandlerType::active_cell_iterator cell = dof.begin_active(); cell != dof.end(); ++cell)
+    for (unsigned int direction=0;
+         direction<GeometryInfo<dim>::faces_per_cell; ++direction)
+      if (cell->at_boundary(direction)
+          &&
+          (function_map.find(cell->face(direction)->boundary_id()) != function_map.end()))
+        {
+          const Function<DoFHandlerType::space_dimension,adouble> &boundary_function = *function_map.find(cell->face(direction)->boundary_id())->second;
+
+          // get the FE corresponding to this
+          // cell
+          const FiniteElement<dim,spacedim> &fe = cell->get_fe();
+          Assert (fe.n_components() == boundary_function.n_components,
+                  ExcDimensionMismatch(fe.n_components(),
+                                       boundary_function.n_components));
+
+          Assert (component_mask.n_selected_components(fe.n_components()) > 0,
+                  ComponentMask::ExcNoComponentSelected());
+
+          // now set the value of
+          // the vertex degree of
+          // freedom. setting
+          // also creates the
+          // entry in the map if
+          // it did not exist
+          // beforehand
+          //
+          // save some time by
+          // requesting values
+          // only once for each
+          // point, irrespective
+          // of the number of
+          // components of the
+          // function
+          Vector<Number> function_values (fe.n_components());
+          if (fe.n_components() == 1)
+            function_values(0)
+              = boundary_function.value (cell->vertex(direction));
+          else
+            boundary_function.vector_value (cell->vertex(direction),
+                                            function_values);
+
+          for (unsigned int i=0; i<fe.dofs_per_vertex; ++i)
+            if (component_mask[fe.face_system_to_component_index(i).first])
+              boundary_values[cell->vertex_dof_index(direction,i,cell->active_fe_index())] = function_values(fe.face_system_to_component_index(i).first);
+        }
+}
+
+
+// template for the case dim > 1.
+//
+// Since the function has a template argument
+// dim_, it is clearly less specialized than the 1D function above and
+// whenever possible (i.e., if dim==1), the function template above will be used
+template <typename DoFHandlerType, template <int,int> class M_or_MC, int dim_, class Number>
+static inline void do_interpolate_boundary_values(const M_or_MC<DoFHandlerType::dimension, DoFHandlerType::space_dimension> &mapping,
+                                                  const DoFHandlerType                                                      &dof,
+                                                  const typename FunctionMap<DoFHandlerType::space_dimension,adouble>::type &function_map,
+                                                  std::map<types::global_dof_index,Number>                                  &boundary_values,
+                                                  const ComponentMask                                                       &component_mask,
+                                                  const dealii::internal::int2type<dim_>)
+{
+  const unsigned int dim = DoFHandlerType::dimension;
+  const unsigned int spacedim=DoFHandlerType::space_dimension;
+
+  Assert (component_mask.represents_n_components(dof.get_fe().n_components()),
+          ExcMessage ("The number of components in the mask has to be either "
+                      "zero or equal to the number of components in the finite "
+                      "element."));
+
+
+  // if for whatever reason we were passed an empty map, return
+  // immediately
+  if (function_map.size() == 0)
+    return;
+
+  Assert (function_map.find(numbers::internal_face_boundary_id) == function_map.end(),
+          ExcMessage("You cannot specify the special boundary indicator "
+                     "for interior faces in your function map."));
+
+  const unsigned int        n_components = DoFTools::n_components(dof);
+  const bool                fe_is_system = (n_components != 1);
+
+  for (typename FunctionMap<spacedim,adouble>::type::const_iterator i=function_map.begin(); i!=function_map.end(); ++i)
+    Assert (n_components == i->second->n_components,
+            ExcDimensionMismatch(n_components, i->second->n_components));
+
+  // field to store the indices
+  std::vector<types::global_dof_index> face_dofs;
+  face_dofs.reserve (DoFTools::max_dofs_per_face(dof));
+
+  std::vector<Point<spacedim> >  dof_locations;
+  dof_locations.reserve (DoFTools::max_dofs_per_face(dof));
+
+  // array to store the values of the boundary function at the boundary
+  // points. have two arrays for scalar and vector functions to use the
+  // more efficient one respectively
+  std::vector<Number>          dof_values_scalar;
+  std::vector<Vector<Number> > dof_values_system;
+  dof_values_scalar.reserve (DoFTools::max_dofs_per_face (dof));
+  dof_values_system.reserve (DoFTools::max_dofs_per_face (dof));
+
+  // before we start with the loop over all cells create an hp::FEValues
+  // object that holds the interpolation points of all finite elements
+  // that may ever be in use
+  dealii::hp::FECollection<dim,spacedim> finite_elements (dof.get_fe());
+  dealii::hp::QCollection<dim-1>  q_collection;
+  for (unsigned int f=0; f<finite_elements.size(); ++f)
+    {
+      const FiniteElement<dim,spacedim> &fe = finite_elements[f];
+
+      // generate a quadrature rule on the face from the unit support
+      // points. this will be used to obtain the quadrature points on the
+      // real cell's face
+      //
+      // to do this, we check whether the FE has support points on the
+      // face at all:
+      if (fe.has_face_support_points())
+        q_collection.push_back (Quadrature<dim-1>(fe.get_unit_face_support_points()));
+      else
+        {
+          // if not, then we should try a more clever way. the idea is
+          // that a finite element may not offer support points for all
+          // its shape functions, but maybe only some. if it offers
+          // support points for the components we are interested in in
+          // this function, then that's fine. if not, the function we call
+          // in the finite element will raise an exception. the support
+          // points for the other shape functions are left uninitialized
+          // (well, initialized by the default constructor), since we
+          // don't need them anyway.
+          //
+          // As a detour, we must make sure we only query
+          // face_system_to_component_index if the index corresponds to a
+          // primitive shape function. since we know that all the
+          // components we are interested in are primitive (by the above
+          // check), we can safely put such a check in front
+          std::vector<Point<dim-1> > unit_support_points (fe.dofs_per_face);
+
+          for (unsigned int i=0; i<fe.dofs_per_face; ++i)
+            if (fe.is_primitive (fe.face_to_cell_index(i,0)))
+              if (component_mask[fe.face_system_to_component_index(i).first] == true)
+                unit_support_points[i] = fe.unit_face_support_point(i);
+
+          q_collection.push_back (Quadrature<dim-1>(unit_support_points));
+        }
+    }
+  // now that we have a q_collection object with all the right quadrature
+  // points, create an hp::FEFaceValues object that we can use to evaluate
+  // the boundary values at
+  dealii::hp::MappingCollection<dim,spacedim> mapping_collection (mapping);
+  dealii::hp::FEFaceValues<dim,spacedim> x_fe_values (mapping_collection, finite_elements, q_collection, update_quadrature_points);
+
+  typename DoFHandlerType::active_cell_iterator cell = dof.begin_active(), endc = dof.end();
+  for (; cell!=endc; ++cell)
+    if (!cell->is_artificial())
+      for (unsigned int face_no = 0; face_no < GeometryInfo<dim>::faces_per_cell;
+           ++face_no)
+        {
+          const FiniteElement<dim,spacedim> &fe = cell->get_fe();
+
+          // we can presently deal only with primitive elements for
+          // boundary values. this does not preclude us using
+          // non-primitive elements in components that we aren't
+          // interested in, however. make sure that all shape functions
+          // that are non-zero for the components we are interested in,
+          // are in fact primitive
+          for (unsigned int i=0; i<cell->get_fe().dofs_per_cell; ++i)
+            {
+              const ComponentMask &nonzero_component_array = cell->get_fe().get_nonzero_components (i);
+              for (unsigned int c=0; c<n_components; ++c)
+                if ((nonzero_component_array[c] == true) && (component_mask[c] == true))
+                  Assert (cell->get_fe().is_primitive (i),
+                          ExcMessage ("This function can only deal with requested boundary "
+                                      "values that correspond to primitive (scalar) base "
+                                      "elements"));
+            }
+
+          const typename DoFHandlerType::face_iterator face = cell->face(face_no);
+          const types::boundary_id boundary_component = face->boundary_id();
+
+          // see if this face is part of the boundaries for which we are
+          // supposed to do something, and also see if the finite element
+          // in use here has DoFs on the face at all
+          if ((function_map.find(boundary_component) != function_map.end())
+              &&
+              (cell->get_fe().dofs_per_face > 0))
+            {
+              // face is of the right component
+              x_fe_values.reinit(cell, face_no);
+              const dealii::FEFaceValues<dim,spacedim> &fe_values = x_fe_values.get_present_fe_values();
+
+              // get indices, physical location and boundary values of
+              // dofs on this face
+              face_dofs.resize (fe.dofs_per_face);
+              face->get_dof_indices (face_dofs, cell->active_fe_index());
+              const std::vector<Point<spacedim> > &dof_locations = fe_values.get_quadrature_points ();
+
+              if (fe_is_system)
+                {
+                  // resize array. avoid construction of a memory
+                  // allocating temporary if possible
+                  if (dof_values_system.size() < fe.dofs_per_face)
+                    dof_values_system.resize (fe.dofs_per_face, Vector<Number>(fe.n_components()));
+                  else
+                    dof_values_system.resize (fe.dofs_per_face);
+
+                  function_map.find(boundary_component)->second->vector_value_list (dof_locations, dof_values_system);
+
+                  // enter those dofs into the list that match the
+                  // component signature. avoid the usual complication
+                  // that we can't just use *_system_to_component_index
+                  // for non-primitive FEs
+                  for (unsigned int i=0; i<face_dofs.size(); ++i)
+                    {
+                      unsigned int component;
+                      if (fe.is_primitive())
+                        component = fe.face_system_to_component_index(i).first;
+                      else
+                        {
+                          // non-primitive case. make sure that this
+                          // particular shape function _is_ primitive, and
+                          // get at it's component. use usual trick to
+                          // transfer face dof index to cell dof index
+                          const unsigned int cell_i
+                            = (dim == 1 ?
+                               i
+                               :
+                               (dim == 2 ?
+                                (i<2*fe.dofs_per_vertex ? i : i+2*fe.dofs_per_vertex)
+                                :
+                                (dim == 3 ?
+                                 (i<4*fe.dofs_per_vertex ?
+                                  i
+                                  :
+                                  (i<4*fe.dofs_per_vertex+4*fe.dofs_per_line ?
+                                   i+4*fe.dofs_per_vertex
+                                   :
+                                   i+4*fe.dofs_per_vertex+8*fe.dofs_per_line))
+                                 :
+                                 numbers::invalid_unsigned_int)));
+                          Assert (cell_i < fe.dofs_per_cell, ExcInternalError());
+
+                          // make sure that if this is not a primitive
+                          // shape function, then all the corresponding
+                          // components in the mask are not set
+                          if (!fe.is_primitive(cell_i))
+                            for (unsigned int c=0; c<n_components; ++c)
+                              if (fe.get_nonzero_components(cell_i)[c])
+                                Assert (component_mask[c] == false, FETools::ExcFENotPrimitive());
+
+                          // let's pick the first of possibly more than
+                          // one non-zero components. if shape function is
+                          // non-primitive, then we will ignore the result
+                          // in the following anyway, otherwise there's
+                          // only one non-zero component which we will use
+                          component = fe.get_nonzero_components(cell_i).first_selected_component();
+                        }
+
+                      if (component_mask[component] == true)
+                        boundary_values[face_dofs[i]] = dof_values_system[i](component);
+                    }
+                }
+              else
+                // fe has only one component, so save some computations
+                {
+                  // get only the one component that this function has
+                  dof_values_scalar.resize (fe.dofs_per_face);
+                  function_map.find(boundary_component)->second->value_list (dof_locations, dof_values_scalar, 0);
+
+                  // enter into list
+
+                  for (unsigned int i=0; i<face_dofs.size(); ++i)
+                    boundary_values[face_dofs[i]] = dof_values_scalar[i];
+                }
+            }
+        }
+} // end of interpolate_boundary_values
+
+
+template <typename DoFHandlerType>
+void interpolate_boundary_values(const Mapping<DoFHandlerType::dimension, DoFHandlerType::space_dimension>      &mapping,
+                                 const DoFHandlerType                                                           &dof,
+                                 const typename FunctionMap<DoFHandlerType::space_dimension,adouble>::type      &function_map,
+                                 std::map<types::global_dof_index,adouble>                                      &boundary_values,
+                                 const ComponentMask                                                            &component_mask_)
+{
+  do_interpolate_boundary_values (mapping, dof, function_map, boundary_values,
+                                  component_mask_,
+                                  dealii::internal::int2type<DoFHandlerType::dimension>());
+}
+
+
+template <typename DoFHandlerType>
+void interpolate_boundary_values(const Mapping<DoFHandlerType::dimension, DoFHandlerType::space_dimension> &mapping,
+                                 const DoFHandlerType                                                      &dof,
+                                 const types::boundary_id                                                   boundary_component,
+                                 const Function<DoFHandlerType::space_dimension,adouble>                   &boundary_function,
+                                 std::map<types::global_dof_index,adouble>                                 &boundary_values,
+                                 const ComponentMask                                                       &component_mask)
+{
+  typename FunctionMap<DoFHandlerType::space_dimension,adouble>::type function_map;
+  function_map[boundary_component] = &boundary_function;
+  interpolate_boundary_values (mapping, dof, function_map, boundary_values,
+                               component_mask);
+}
+
+
+
+template <typename DoFHandlerType>
+void interpolate_boundary_values(const DoFHandlerType                                       &dof,
+                                 const types::boundary_id                                    boundary_component,
+                                 const Function<DoFHandlerType::space_dimension,adouble>    &boundary_function,
+                                 std::map<types::global_dof_index,adouble>                  &boundary_values,
+                                 const ComponentMask                                        &component_mask)
+{
+  interpolate_boundary_values(StaticMappingQ1<DoFHandlerType::dimension,DoFHandlerType::space_dimension>::mapping,
+                              dof, boundary_component,
+                              boundary_function, boundary_values, component_mask);
+}
+
+
+}
 }
 
 #endif

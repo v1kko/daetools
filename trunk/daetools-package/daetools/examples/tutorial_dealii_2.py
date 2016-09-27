@@ -147,8 +147,11 @@ class modTutorial(daeModel):
         # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
         functions['Flux_b'] = BottomGradientFunction_2D(flux_beneath)
 
+        # Nota bene:
+        #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
+        #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
         dirichletBC    = {}
-        dirichletBC[2] = [ ('T', ConstantFunction_2D(300)) ] # at boundary id=2 (inner tube)
+        dirichletBC[2] = [ ('T', adoubleConstantFunction_2D( adouble(300) )) ] # at boundary id=2 (inner tube)
 
         boundaryIntegrals = {
                                0 : [(self.Q0_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
@@ -234,7 +237,7 @@ def consoleRun():
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results')
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results')
 
     # Create two data reporters:
     # 1. DealII
@@ -242,6 +245,7 @@ def consoleRun():
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
+
     # 2. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
