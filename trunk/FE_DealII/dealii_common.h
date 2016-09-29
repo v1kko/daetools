@@ -297,6 +297,7 @@ enum efeNumberType
     eFETensor1_adouble,
     eFETensor2_adouble,
     eFETensor3_adouble,
+    eFESymmetricTensor2,
     eFEInvalid
 };
 
@@ -415,11 +416,16 @@ public:
         m_tensor3_adouble = t;
     }
 
-
     feRuntimeNumber(const Point<dim, double>& t)
     {
         m_eType = eFEPoint;
         m_point = t;
+    }
+
+    feRuntimeNumber(const SymmetricTensor<2, dim, double>& st)
+    {
+        m_eType             = eFESymmetricTensor2;
+        m_symmetric_tensor2 = st;
     }
 
     std::string ToString() const
@@ -491,6 +497,18 @@ public:
         {
             return "";
         }
+        else if(m_eType == eFESymmetricTensor2)
+        {
+            if(dim == 1)
+                return (boost::format("[[%f], [%f]]") % m_symmetric_tensor2[0][0] % m_symmetric_tensor2[0][1]).str();
+            else if(dim == 2)
+                return (boost::format("[[%f, %f], [%f, %f]]")  % m_symmetric_tensor2[0][0] % m_symmetric_tensor2[0][1]
+                                                               % m_symmetric_tensor2[1][0] % m_symmetric_tensor2[1][1]).str();
+            else if(dim == 3)
+                return (boost::format("[[%f, %f, %f], [%f, %f, %f], [%f, %f, %f]]") % m_symmetric_tensor2[0][0] % m_symmetric_tensor2[0][1] % m_symmetric_tensor2[0][2]
+                                                                                    % m_symmetric_tensor2[1][0] % m_symmetric_tensor2[1][1] % m_symmetric_tensor2[1][2]
+                                                                                    % m_symmetric_tensor2[2][0] % m_symmetric_tensor2[2][1] % m_symmetric_tensor2[2][2]).str();
+        }
         else if(m_eType == eFEPoint)
         {
             if(dim == 1)
@@ -505,19 +523,20 @@ public:
     }
 
 public:
-    efeNumberType           m_eType;
-    Point<dim, double>      m_point;
+    efeNumberType                       m_eType;
+    Point<dim, double>                  m_point;
     /* CURL
-    Tensor<1, 1, double>    m_curl2D;
+    Tensor<1, 1, double>                m_curl2D;
     */
-    Tensor<1, dim, double>  m_tensor1;
-    Tensor<2, dim, double>  m_tensor2;
-    Tensor<3, dim, double>  m_tensor3;
-    Tensor<1, dim, adouble> m_tensor1_adouble;
-    Tensor<2, dim, adouble> m_tensor2_adouble;
-    Tensor<3, dim, adouble> m_tensor3_adouble;
-    double                  m_value;
-    adouble                 m_adouble_value;
+    Tensor<1, dim, double>              m_tensor1;
+    Tensor<2, dim, double>              m_tensor2;
+    Tensor<3, dim, double>              m_tensor3;
+    Tensor<1, dim, adouble>             m_tensor1_adouble;
+    Tensor<2, dim, adouble>             m_tensor2_adouble;
+    Tensor<3, dim, adouble>             m_tensor3_adouble;
+    SymmetricTensor<2, dim, double>     m_symmetric_tensor2;
+    double                              m_value;
+    adouble                             m_adouble_value;
 };
 
 template<int dim>
@@ -814,6 +833,21 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor2_adouble = l.m_tensor3_adouble * r.m_tensor3_adouble;
     }
     */
+    else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFESymmetricTensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_symmetric_tensor2, r.m_symmetric_tensor2);
+    }
+    else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFETensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_symmetric_tensor2, r.m_tensor2);
+    }
+    else if(l.m_eType == eFETensor2 && r.m_eType == eFESymmetricTensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_tensor2, r.m_symmetric_tensor2);
+    }
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEScalar;
@@ -1432,35 +1466,38 @@ public:
 public:
     virtual double value(const std::string& variableName,
                          const unsigned int i,
-                         const unsigned int j) const = 0;
+                         const unsigned int q) const = 0;
     virtual Tensor<1,dim> gradient (const std::string& variableName,
                                     const unsigned int i,
-                                    const unsigned int j) const = 0;
+                                    const unsigned int q) const = 0;
     virtual Tensor<2,dim> hessian (const std::string& variableName,
                                    const unsigned int i,
-                                   const unsigned int j) const = 0;
+                                   const unsigned int q) const = 0;
 
     virtual Tensor<1,dim> vector_value(const std::string& variableName,
                                        const unsigned int i,
-                                       const unsigned int j) const = 0;
+                                       const unsigned int q) const = 0;
     virtual Tensor<2,dim> vector_gradient (const std::string& variableName,
                                            const unsigned int i,
-                                           const unsigned int j) const = 0;
+                                           const unsigned int q) const = 0;
     virtual Tensor<3,dim> vector_hessian (const std::string& variableName,
                                           const unsigned int i,
-                                          const unsigned int j) const = 0;
+                                          const unsigned int q) const = 0;
     virtual double divergence(const std::string& variableName,
                               const unsigned int i,
-                              const unsigned int j) const = 0;
+                              const unsigned int q) const = 0;
+    virtual SymmetricTensor<2,dim > symmetric_gradient(const std::string& variableName,
+                                                       const unsigned int i,
+                                                       const unsigned int q) const = 0;
 
     /* CURL
     virtual Tensor<1,1> curl_2D(const std::string& variableName,
                                 const unsigned int i,
-                                const unsigned int j) const = 0;
+                                const unsigned int q) const = 0;
 
     virtual Tensor<1,3> curl_3D(const std::string& variableName,
                                 const unsigned int i,
-                                const unsigned int j) const = 0;
+                                const unsigned int q) const = 0;
     */
 
     virtual const Point<dim>& quadrature_point (const unsigned int q) const = 0;
@@ -1470,11 +1507,14 @@ public:
     virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
     virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
-    virtual adouble dof(const std::string& variableName, unsigned int i) const = 0;
+    virtual adouble dof(const std::string& variableName, const unsigned int i) const = 0;
 
     virtual adouble               dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
     virtual Tensor<1,dim,adouble> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
     virtual Tensor<2,dim,adouble> dof_hessian_approximation(const std::string& variableName, const unsigned int q) const = 0;
+
+    virtual Tensor<1,dim,adouble> vector_dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual Tensor<2,dim,adouble> vector_dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
@@ -1644,10 +1684,10 @@ public:
 
 // Vector-data nodes
 template<int dim>
-class feNode_phi_vec : public feNode<dim>
+class feNode_phi_vector : public feNode<dim>
 {
 public:
-    feNode_phi_vec(const std::string& variableName, int i, int q, unsigned int component = 0)
+    feNode_phi_vector(const std::string& variableName, int i, int q, unsigned int component = 0)
     {
         m_variableName = variableName;
         m_i = i;
@@ -1665,7 +1705,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("phi_vec('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("phi_vector('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1676,10 +1716,10 @@ public:
 };
 
 template<int dim>
-class feNode_dphi_vec : public feNode<dim>
+class feNode_dphi_vector : public feNode<dim>
 {
 public:
-    feNode_dphi_vec(const std::string& variableName, int i, int q, unsigned int component = 0)
+    feNode_dphi_vector(const std::string& variableName, int i, int q, unsigned int component = 0)
     {
         m_variableName = variableName;
         m_i = i;
@@ -1697,7 +1737,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("dphi_vec('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("dphi_vector('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1708,10 +1748,10 @@ public:
 };
 
 template<int dim>
-class feNode_d2phi_vec : public feNode<dim>
+class feNode_d2phi_vector : public feNode<dim>
 {
 public:
-    feNode_d2phi_vec(const std::string& variableName, int i, int q, unsigned int component = 0)
+    feNode_d2phi_vector(const std::string& variableName, int i, int q, unsigned int component = 0)
     {
         m_variableName = variableName;
         m_i = i;
@@ -1729,7 +1769,7 @@ public:
 
     std::string ToString() const
     {
-        return (boost::format("d2phi_vec('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+        return (boost::format("d2phi_vector('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
     }
 
 public:
@@ -1769,6 +1809,36 @@ public:
     int            m_i;
     int            m_q;
     unsigned int   m_component;
+};
+
+template<int dim>
+class feNode_symmetric_gradient : public feNode<dim>
+{
+public:
+    feNode_symmetric_gradient(const std::string& variableName, int i, int q)
+    {
+        m_variableName = variableName;
+        m_i = i;
+        m_q = q;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int i = getIndex<dim>(m_i, pCellContext);
+        unsigned int q = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->symmetric_gradient(m_variableName, i, q) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("symmetric_gradient('%s', %d, %d)") % m_variableName % getIndex(m_i) % getIndex(m_q)).str();
+    }
+
+public:
+    std::string    m_variableName;
+    int            m_i;
+    int            m_q;
 };
 
 template<int dim>
@@ -2038,6 +2108,60 @@ public:
 public:
     std::string  m_dofName;
     int          m_i;
+};
+
+template<int dim>
+class feNode_vector_dof_approximation : public feNode<dim>
+{
+public:
+    feNode_vector_dof_approximation(const std::string& dofName, int q)
+    {
+        m_dofName  = dofName;
+        m_q        = q;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int index = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->vector_dof_approximation(m_dofName, index) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("dof_vector_approximation('%s', %s)") % m_dofName % getIndex(m_q)).str();
+    }
+
+public:
+    std::string  m_dofName;
+    int          m_q;
+};
+
+template<int dim>
+class feNode_vector_dof_gradient_approximation : public feNode<dim>
+{
+public:
+    feNode_vector_dof_gradient_approximation(const std::string& dofName, int q)
+    {
+        m_dofName  = dofName;
+        m_q        = q;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        unsigned int index = getIndex<dim>(m_q, pCellContext);
+        return feRuntimeNumber<dim>( pCellContext->vector_dof_gradient_approximation(m_dofName, index) );
+    }
+
+    std::string ToString() const
+    {
+        return (boost::format("dof_vector_approximation('%s', %s)") % m_dofName % getIndex(m_q)).str();
+    }
+
+public:
+    std::string  m_dofName;
+    int          m_q;
 };
 
 template<int dim>
@@ -2599,27 +2723,33 @@ feExpression<dim> d2phi(const std::string& variableName, int i, int q)
 
 // Vector-data functions
 template<int dim>
-feExpression<dim> phi_vec(const std::string& variableName, int i, int q)
+feExpression<dim> phi_vector(const std::string& variableName, int i, int q)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_phi_vec<dim>(variableName, i, q) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_phi_vector<dim>(variableName, i, q) ) );
 }
 
 template<int dim>
-feExpression<dim> dphi_vec(const std::string& variableName, int i, int q)
+feExpression<dim> dphi_vector(const std::string& variableName, int i, int q)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dphi_vec<dim>(variableName, i, q) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_dphi_vector<dim>(variableName, i, q) ) );
 }
 
 template<int dim>
-feExpression<dim> d2phi_vec(const std::string& variableName, int i, int q)
+feExpression<dim> d2phi_vector(const std::string& variableName, int i, int q)
 {
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_d2phi_vec<dim>(variableName, i, q) ) );
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_d2phi_vector<dim>(variableName, i, q) ) );
 }
 
 template<int dim>
 feExpression<dim> div_phi(const std::string& variableName, int i, int q)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_div_phi<dim>(variableName, i, q) ) );
+}
+
+template<int dim>
+feExpression<dim> symmetric_gradient(const std::string& variableName, int i, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_symmetric_gradient<dim>(variableName, i, q) ) );
 }
 
 /* CURL
@@ -2704,6 +2834,19 @@ template<int dim>
 feExpression<dim> adouble_(const adouble& ad)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble<dim>(ad) ) );
+}
+
+
+template<int dim>
+feExpression<dim> vector_dof_approximation(const std::string& variableName, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_vector_dof_approximation<dim>(variableName, q) ) );
+}
+
+template<int dim>
+feExpression<dim> vector_dof_gradient_approximation(const std::string& variableName, int q)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_vector_dof_gradient_approximation<dim>(variableName, q) ) );
 }
 
 

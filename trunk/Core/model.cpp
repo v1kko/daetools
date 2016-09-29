@@ -3,6 +3,12 @@
 #include <typeinfo>
 #include "nodes.h"
 
+#include <boost/config.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/cuthill_mckee_ordering.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/graph/bandwidth.hpp>
+
 namespace dae
 {
 namespace core
@@ -3160,6 +3166,8 @@ daeBlock* daeModel::DoBlockDecomposition(void)
 
 /***********************************************************************************
     Populate vector with all existing equation execution infos
+    Nota bene:
+      m_ptrarrEEIfromSTNs includes only EEI from the current active states in all STNs!
 ************************************************************************************/
     m_ptrarrEEIfromModels.clear();
     m_ptrarrEEIfromSTNs.clear();
@@ -3260,7 +3268,7 @@ daeBlock* daeModel::DoBlockDecomposition(void)
 
     if(pBlock->m_mapVariableIndexes.size() == pBlock->m_nTotalNumberOfVariables)
     {
-    // There are no assigned variables (DOFs) - we can set the block indexes to be equal to overall ones
+    // There are no assigned variables (DOFs) - we can set the block indexes to be equal to the overall ones
         std::map<size_t, size_t>::iterator iter;
         for(iter = pBlock->m_mapVariableIndexes.begin(); iter != pBlock->m_mapVariableIndexes.end(); iter++)
             iter->second = iter->first;
@@ -3287,6 +3295,97 @@ daeBlock* daeModel::DoBlockDecomposition(void)
 
 //        pSTN->CollectVariableIndexes(mapVariableIndexes);
 //    }
+
+    {
+        // Nota bene:
+        //   ptrarrAllEquationExecutionInfosInModel includes EEI from all models and from the current active states from all STNs!
+        using namespace boost;
+
+        std::size_t oi, bi;
+        typedef adjacency_list<vecS,
+                               vecS,
+                               undirectedS,
+                               property<vertex_color_t, default_color_type, property<vertex_degree_t,int> >
+                              > Graph;
+        typedef graph_traits<Graph>::vertex_descriptor Vertex;
+        typedef graph_traits<Graph>::vertices_size_type size_type;
+
+        size_t Neqns = m_ptrarrEEIfromModels.size();
+        size_t Nvars = pBlock->m_mapVariableIndexes.size();
+//        if(Nvars != Neqns)
+//        {
+//            std::cout << "Nvars = " << Nvars << " Neqns = " << Neqns << std::endl;
+//            daeDeclareAndThrowException(exInvalidCall);
+//        }
+
+        Graph G(Nvars);
+        for(int ei = 0; ei < Neqns; ei++)
+        {
+            daeEquationExecutionInfo* pEEI = m_ptrarrEEIfromModels[ei];
+            for(std::map<size_t,size_t>::const_iterator cit = pEEI->m_mapIndexes.begin(); cit != pEEI->m_mapIndexes.end(); cit++)
+            {
+                oi = cit->first;
+
+                // Block indexes in daeEquationExecutionInfos are invalid at this point - use the map from the daeBlock
+                std::map<size_t,size_t>::const_iterator bi_it = pBlock->m_mapVariableIndexes.find(oi);
+                if(bi_it == pBlock->m_mapVariableIndexes.end())
+                    daeDeclareAndThrowException(exInvalidCall);
+                bi = bi_it->second;
+
+                std::cout << ei << "," << bi << std::endl;
+
+                add_edge(ei, bi, G);
+            }
+        }
+
+        graph_traits<Graph>::vertex_iterator ui, ui_end;
+
+        property_map<Graph,vertex_degree_t>::type deg = get(vertex_degree, G);
+        for (boost::tie(ui, ui_end) = vertices(G); ui != ui_end; ++ui)
+          deg[*ui] = degree(*ui, G);
+
+        property_map<Graph, vertex_index_t>::type index_map = get(vertex_index, G);
+        std::cout << "Original ordering: " << std::endl;
+        for(size_t k = 0; k < Nvars; k++)
+            std::cout << index_map[k] << ", ";
+        std::cout << std::endl;
+
+        std::cout << "Original bandwidth: " << bandwidth(G) << std::endl;
+
+        std::vector<Vertex> inv_perm(num_vertices(G));
+        std::vector<size_type> perm(num_vertices(G));
+
+        cuthill_mckee_ordering(G, inv_perm.rbegin(), get(vertex_color, G), make_degree_map(G));
+
+        std::cout << "Cuthill McKee ordering: " << std::endl;
+        for(std::vector<Vertex>::const_iterator i = inv_perm.begin(); i != inv_perm.end(); ++i)
+            std::cout << index_map[*i] << ", ";
+        std::cout << std::endl;
+
+        for(size_type c = 0; c != inv_perm.size(); ++c)
+            perm[index_map[inv_perm[c]]] = c;
+        std::cout << std::endl;
+
+        // This basically means to put old block index k to new position perm[k]
+        std::cout << "Permutation: " << std::endl;
+        for(size_t k = 0; k < Nvars; k++)
+            std::cout << perm[k] << ", ";
+        std::cout << std::endl;
+
+        std::cout << "Cuthill McKee bandwidth: " << bandwidth(G, make_iterator_property_map(&perm[0], index_map, perm[0])) << std::endl;
+
+        // Perform actual permutations
+        std::vector<daeEquationExecutionInfo*> ptrarrEEIfromModels;
+        ptrarrEEIfromModels.resize(m_ptrarrEEIfromModels.size());
+        for(std::map<size_t,size_t>::iterator it = pBlock->m_mapVariableIndexes.begin(); it != pBlock->m_mapVariableIndexes.end(); it++)
+        {
+            std::cout << it->first << ": " << it->second << " -> " << perm[it->second] << std::endl;
+
+            //it->second = perm[it->second];
+            //ptrarrEEIfromModels[perm[it->second]] = m_ptrarrEEIfromModels[it->second];
+        }
+        //m_ptrarrEEIfromModels = ptrarrEEIfromModels;
+    }
 
     return pBlock;
 }
@@ -3363,6 +3462,8 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
     }
 
 // Now, after associating overall and block indexes build Jacobian expressions, if requested
+// That will also associate block indexes in adRuntimeVariable/adRuntimeTimeDerivative with those in the block
+// because the function Evaluate() for runtime nodes will be called for the first time here.
     for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
     {
         pEquationExec = m_ptrarrEEIfromModels[i];
@@ -3389,7 +3490,7 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
         throw e;
     }
 
-    // These are not needed anyore
+    // These are not needed anymore
     m_ptrarrEEIfromModels.clear();
     m_ptrarrEEIfromSTNs.clear();
     m_ptrarrAllSTNs.clear();

@@ -44,9 +44,10 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         
-        self.Q0_total = daeVariable("Q0_total", no_t, self, "Total heat passing through the boundary with id=0")
-        self.Q1_total = daeVariable("Q1_total", no_t, self, "Total heat passing through the boundary with id=1")
-        self.Q2_total = daeVariable("Q2_total", no_t, self, "Total heat passing through the boundary with id=2")
+        self.T_outer  = daeVariable("T_outer", temperature_t, self, "Temperature of the outer boundary with id=0 (Dirichlet BC)")
+        self.Q0_total = daeVariable("Q0_total",         no_t, self, "Total heat passing through the boundary with id=0")
+        self.Q1_total = daeVariable("Q1_total",         no_t, self, "Total heat passing through the boundary with id=1")
+        self.Q2_total = daeVariable("Q2_total",         no_t, self, "Total heat passing through the boundary with id=2")
 
         # The starting point is the daeFiniteElementModel class that contains an implementation
         # of the daeFiniteElementObject class: dealiiFiniteElementSystem which is a wrapper
@@ -72,6 +73,9 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        eq = self.CreateEquation("T_outer", "Boundary conditions for the outer edge")
+        eq.Residual = self.T_outer() - Constant(200 * K)
+
         rho   = 8960.0  # kg/m**3
         cp    =  385.0  # J/(kg*K)
         kappa =  401.0  # W/(m*K)
@@ -88,10 +92,11 @@ class modTutorial(daeModel):
         # Nota bene:
         #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
         #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
+        # Here we use daetools variable for the outer boundary and constant values for the rest.
         dirichletBC    = {}
-        dirichletBC[0] = [('T', adoubleConstantFunction_2D( adouble(200)) )] # outer boundary
-        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350)) )] # inner ellipse
-        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250)) )] # inner rectangle
+        dirichletBC[0] = [('T', adoubleConstantFunction_2D( self.T_outer() ))] # outer boundary
+        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350) ))] # inner ellipse
+        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250) ))] # inner rectangle
 
         boundaryIntegrals = {
                                0 : [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
@@ -108,7 +113,7 @@ class modTutorial(daeModel):
                                                   functionsDirichletBC = dirichletBC,
                                                   boundaryIntegrals = boundaryIntegrals)
 
-        print('Heat conduction equation:')
+        print('Transient heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))

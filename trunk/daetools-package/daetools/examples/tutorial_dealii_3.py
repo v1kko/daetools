@@ -60,7 +60,7 @@ class modTutorial(daeModel):
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction equation', self.fe_system)
+        self.fe_model = daeFiniteElementModel('CahnHilliard', self, 'Transient Cahn-Hilliard equation', self.fe_system)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -78,9 +78,14 @@ class modTutorial(daeModel):
         dirichletBC = {}
         boundaryIntegrals = {}
 
-        # f(c) from the wikipedia
+        log_fe = feExpression_2D.log
         c = dof_approximation_2D('c', fe_q) # FE approximation of a quantity at the specified quadrature point
-        fc_Fi  = c**3 - c
+
+        # 1) f(c) from the Wikipedia (https://en.wikipedia.org/wiki/Cahn-Hilliard_equation)
+        fc_Fi = c**3 - c
+
+        # 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes
+        #fc_Fi = log_fe(c/(1-c)) + Omg_a*(1-2*c)
 
         weakForm = dealiiFiniteElementWeakForm_2D(
             Aij = (   dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0
@@ -95,7 +100,7 @@ class modTutorial(daeModel):
             functionsDirichletBC = dirichletBC,
             boundaryIntegrals = boundaryIntegrals)
 
-        print('Heat conduction equation:')
+        print('Cahn-Hilliard equation:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))

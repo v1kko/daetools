@@ -37,9 +37,7 @@ __doc__ = """
                /
              ID=1: Outer surface below y=-0.5, constant flux of 2 kW/m**2
 
-    dT                                             
-   ---- - ∇κ∇Τ = g, in Ω
-    dt
+   dT/dt - ∇κ∇Τ = g, in Ω
 
 Mesh:
 
@@ -169,7 +167,7 @@ class modTutorial(daeModel):
                                                   functionsDirichletBC = dirichletBC,
                                                   boundaryIntegrals = boundaryIntegrals)
 
-        print('Heat conduction equation:')
+        print('Transient heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))

@@ -177,15 +177,15 @@ public:
                                const unsigned int q) const
     {
         if(i == -1 || q == -1)
-            throw std::runtime_error((boost::format("Invalid index in function phi_vec('%s', %d, %d)") % variableName % i % q).str());
+            throw std::runtime_error((boost::format("Invalid index in function phi_vector('%s', %d, %d)") % variableName % i % q).str());
 
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error((boost::format("Invalid DOF name in function phi_vec('%s', %d, %d)") % variableName % i % q).str());
+            throw std::runtime_error((boost::format("Invalid DOF name in function phi_vector('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call of the function phi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function phi_vector() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].value(i, q);
     }
@@ -195,15 +195,15 @@ public:
                                    const unsigned int q) const
     {
         if(i == -1 || q == -1)
-            throw std::runtime_error((boost::format("Invalid index in function dphi_vec('%s', %d, %d)") % variableName % i % q).str());
+            throw std::runtime_error((boost::format("Invalid index in function dphi_vector('%s', %d, %d)") % variableName % i % q).str());
 
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error("Cannot find variable " + variableName);
+            throw std::runtime_error((boost::format("Invalid DOF name in function dphi_vector('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error((boost::format("Invalid DOF name in function dphi_vec('%s', %d, %d)") % variableName % i % q).str());
+            throw std::runtime_error("Invalid call of the function dphi_vector() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].gradient(i, q);
     }
@@ -213,15 +213,15 @@ public:
                                   const unsigned int q) const
     {
         if(i == -1 || q == -1)
-            throw std::runtime_error((boost::format("Invalid index in function d2phi_vec('%s', %d, %d)") % variableName % i % q).str());
+            throw std::runtime_error((boost::format("Invalid index in function d2phi_vector('%s', %d, %d)") % variableName % i % q).str());
 
         typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
         if(iter == m_mapExtractors.end())
-            throw std::runtime_error((boost::format("Invalid DOF name in function d2phi_vec('%s', %d, %d)") % variableName % i % q).str());
+            throw std::runtime_error((boost::format("Invalid DOF name in function d2phi_vector('%s', %d, %d)") % variableName % i % q).str());
 
         FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
         if(!extractorVector)
-            throw std::runtime_error("Invalid call of the function d2phi_vec() for the non-vector variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function d2phi_vector() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].hessian(i, q);
     }
@@ -242,6 +242,24 @@ public:
             throw std::runtime_error("Invalid call of the function div_phi() for the non-vector variable: " + variableName);
 
         return m_fe_values[*extractorVector].divergence(i, q);
+    }
+
+    SymmetricTensor<2,dim,double> symmetric_gradient(const std::string& variableName,
+                                                     const unsigned int i,
+                                                     const unsigned int q) const
+    {
+        if(i == -1 || q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function symmetric_gradient('%s', %d, %d)") % variableName % i % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function symmetric_gradient('%s', %d, %d)") % variableName % i % q).str());
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call of the function symmetric_gradient() for the non-vector variable: " + variableName);
+
+        return m_fe_values[*extractorVector].symmetric_gradient(i, q);
     }
 
     /*
@@ -315,7 +333,7 @@ public:
         return *(iter->second);
     }
 
-    virtual adouble dof(const std::string& variableName, unsigned int li) const
+    virtual adouble dof(const std::string& variableName, const unsigned int li) const
     {
         if(li == -1)
             throw std::runtime_error((boost::format("Invalid index in function dof('%s', %d)") % variableName % li).str());
@@ -355,6 +373,60 @@ public:
 
     }
 
+    virtual Tensor<1,dim,adouble> vector_dof_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function vector_dof_approximation('%s', %d)") % variableName % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function vector_dof_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call of the function vector_dof_approximation() for the non-vector variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        Tensor<1,dim,adouble> ad_vector_approximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            adouble               dof   = this->dof(variableName, j);
+            Tensor<1,dim,double>  phi_vector_j = m_fe_values[*extractorVector].value(j, q);
+
+            ad_vector_approximation += (dof * phi_vector_j);
+        }
+
+        return ad_vector_approximation;
+    }
+
+    virtual Tensor<2,dim,adouble> vector_dof_gradient_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function vector_dof_gradient_approximation('%s', %d)") % variableName % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function vector_dof_gradient_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call of the function vector_dof_gradient_approximation() for the non-vector variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        Tensor<2,dim,adouble> ad_vector_approximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            adouble               dof           = this->dof(variableName, j);
+            Tensor<2,dim,double>  dphi_vector_j = m_fe_values[*extractorVector].gradient(j, q);
+
+            ad_vector_approximation += (dof * dphi_vector_j);
+        }
+
+        return ad_vector_approximation;
+    }
+
     virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const
     {
         if(q == -1)
@@ -366,7 +438,7 @@ public:
 
         FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
         if(!extractorScalar)
-            throw std::runtime_error("Invalid call of the function phi() for the non-scalar variable: " + variableName);
+            throw std::runtime_error("Invalid call of the function dof_approximation() for the non-scalar variable: " + variableName);
 
         const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
 
@@ -376,7 +448,7 @@ public:
             adouble dof   = this->dof(variableName, j);
             double  phi_j = m_fe_values[*extractorScalar].value(j, q);
 
-            ad_approximation +=(dof * phi_j);
+            ad_approximation += (dof * phi_j);
         }
 
         return ad_approximation;
