@@ -3296,6 +3296,9 @@ daeBlock* daeModel::DoBlockDecomposition(void)
 //        pSTN->CollectVariableIndexes(mapVariableIndexes);
 //    }
 
+
+
+/*
     {
         // Nota bene:
         //   ptrarrAllEquationExecutionInfosInModel includes EEI from all models and from the current active states from all STNs!
@@ -3386,7 +3389,7 @@ daeBlock* daeModel::DoBlockDecomposition(void)
         }
         //m_ptrarrEEIfromModels = ptrarrEEIfromModels;
     }
-
+*/
     return pBlock;
 }
 

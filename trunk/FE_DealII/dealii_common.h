@@ -350,6 +350,35 @@ public:
     feNodePtr m_node;
 };
 
+inline std::string type(efeNumberType eType)
+{
+    if(eType == eFEScalar)
+        return "Scalar";
+    else if(eType == eFEScalar_adouble)
+        return "Scalar_adouble";
+    else if(eType == eFETensor1)
+        return "Tensor1";
+    else if(eType == eFETensor2)
+        return "Tensor2";
+    else if(eType == eFETensor3)
+        return "Tensor3";
+    else if(eType == eFETensor1_adouble)
+        return "Tensor1_adouble";
+    else if(eType == eFETensor2_adouble)
+        return "Tensor2_adouble";
+    else if(eType == eFETensor3_adouble)
+        return "Tensor3_adouble";
+    else if(eType == eFEPoint)
+        return "Point";
+    else if(eType == eFESymmetricTensor2)
+        return "SymmetricTensor2";
+    else if(eType == eFECurl2D)
+        return "Curl2D";
+    else if(eType == eFEInvalid)
+        return "Invalid";
+    else
+        return "unknown";
+}
 
 template<int dim>
 class feRuntimeNumber
@@ -519,7 +548,7 @@ public:
                 return (boost::format("(%f, %f, %f)") % m_point[0] % m_point[1] % m_point[2]).str();
         }
         else
-            throw std::runtime_error(std::string("Invalid runtime number type"));
+            throw std::runtime_error(std::string("Invalid runtime number type: ") + type(m_eType));
     }
 
 public:
@@ -598,7 +627,7 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& fe)
         tmp.m_point = -fe.m_point;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation - ") + typeid(fe).name());
+        throw std::runtime_error(std::string("Invalid operation - for the type: ") + type(fe.m_eType));
     return tmp;
 }
 
@@ -622,14 +651,14 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " + " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " + " + type(r.m_eType));
 
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " + " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " + " + type(r.m_eType));
 
         tmp.m_adouble_value = lad + rad;
     }
@@ -678,7 +707,7 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor1 = l.m_point + r.m_point;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " + " + typeid(r).name());
+        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " + " + type(r.m_eType));
     return tmp;
 }
 
@@ -702,14 +731,14 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " - " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " - " + type(r.m_eType));
 
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " - " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " - " + type(r.m_eType));
 
         tmp.m_adouble_value = lad - rad;
     }
@@ -758,7 +787,7 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor1 = l.m_point - r.m_point;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " - " + typeid(r).name());
+        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " - " + type(r.m_eType));
     return tmp;
 }
 
@@ -781,14 +810,14 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " * " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType));
 
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " * " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType));
 
         tmp.m_adouble_value = lad * rad;
     }
@@ -833,6 +862,29 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor2_adouble = l.m_tensor3_adouble * r.m_tensor3_adouble;
     }
     */
+
+    else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor1) // Tensor<2> * Tensor<1> = Tensor<2+1-2> => Tensor<1>
+    {
+        tmp.m_eType = eFETensor1;
+        tmp.m_tensor1 = l.m_tensor2 * r.m_tensor1;
+    }
+    else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor2) // Tensor<2> * Tensor<1> = Tensor<1+2-2> => Tensor<1>
+    {
+        tmp.m_eType = eFETensor1;
+        tmp.m_tensor1 = l.m_tensor1 * r.m_tensor2;
+    }
+
+    else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor1_adouble) // Tensor<2> * Tensor<1> = Tensor<2+1-2> => Tensor<1>
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor2 * r.m_tensor1_adouble;
+    }
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor2) // Tensor<2> * Tensor<1> = Tensor<1+2-2> => Tensor<1>
+    {
+        tmp.m_eType = eFETensor1_adouble;
+        tmp.m_tensor1_adouble = l.m_tensor1_adouble * r.m_tensor2;
+    }
+
     else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFESymmetricTensor2)
     {
         tmp.m_eType = eFEScalar;
@@ -982,7 +1034,7 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     }
 
     else
-        throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " * " + typeid(r).name());
+        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType));
     return tmp;
 }
 
@@ -1005,14 +1057,14 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
         else if(l.m_eType == eFEScalar_adouble)
             lad = l.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " / " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " / " + type(r.m_eType));
 
         if(r.m_eType == eFEScalar)
             rad = r.m_value;
         else if(r.m_eType == eFEScalar_adouble)
             rad = r.m_adouble_value;
         else
-            throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " / " + typeid(r).name());
+            throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " / " + type(r.m_eType));
 
         tmp.m_adouble_value = lad / rad;
     }
@@ -1078,7 +1130,7 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_point = l.m_point / r.m_value;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " / " + typeid(r).name());
+        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " / " + type(r.m_eType));
     return tmp;
 }
 
@@ -1102,7 +1154,7 @@ feRuntimeNumber<dim> operator ^(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_adouble_value = pow(l.m_adouble_value, r.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + typeid(l).name() + " ** " + typeid(r).name());
+        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " ** " + type(r.m_eType));
     return tmp;
 }
 
@@ -2000,11 +2052,11 @@ public:
     {
         if(m_call == eFunctionValue)
         {
-            return (boost::format("fvalue('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fvalue('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else if(m_call == eFunctionGradient)
         {
-            return (boost::format("fgrad('%s'', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fgrad('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -2028,9 +2080,6 @@ public:
         if(!dynamic_cast<feNode_xyz<dim>*>(xyz_node.get()))
             throw std::runtime_error(std::string("An argument to the Function must be a point"));
 
-        //if(call == eFunctionGradient)
-        //    throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
-
         m_xyz_node = xyz_node;
         m_name = name;
         m_call = call;
@@ -2051,7 +2100,6 @@ public:
         }
         else if(m_call == eFunctionGradient)
         {
-            //throw std::runtime_error(std::string("Function gradient call not allowed for functions that return adouble"));
             return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).gradient(node.m_point, m_component) );
         }
         else

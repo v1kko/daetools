@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                        tutorial_dealii_1.py
+                           tutorial_dealii_4.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -17,18 +17,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this tutorial the DAE Tools support for finite element method is presented.
-
 Mesh:
 
-.. image:: _static/step-49.png
-   :width: 400 px
+.. image:: _static/square.png
+   :width: 300 px
 
 Results at t = 500s:
 
-.. image:: _static/tutorial_dealii_1-results.png
-   :width: 600 px
-
+.. image:: _static/tutorial_dealii_4-results.png
+   :width: 500 px
 """
 
 import os, sys, numpy, json, tempfile
@@ -40,84 +37,126 @@ from daetools.solvers.superlu import pySuperLU
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+# Nota bene:
+#   This function is derived from Function_2D class and returns "double" value/gradient
+class VelocityFunction_2D(Function_2D):
+    def __init__(self, velocity, direction, n_components = 1):
+        """
+        Arguments:
+          velocity  - float, velocity magnitude
+          direction - Tensor<1,dim>, unit vector
+        """
+        Function_2D.__init__(self, n_components)
+        self.m_velocity = Tensor_1_2D()
+        self.m_velocity[0] = velocity * direction[0]
+        self.m_velocity[1] = velocity * direction[1]
+
+    def gradient(self, point, component = 0):
+        return self.m_velocity
+
+    def vector_gradient(self, point):
+        return [self.value(point, c) for c in range(self.n_components)]
+
+class TemperatureSource_2D(adoubleFunction_2D):
+    def __init__(self, ymin, ymax, T_base, T_offset, n_components = 1):
+        """
+        The function creates bubble-like regions of fluid with a higher temperature.
+        Arguments:
+          ymin     - float
+          ymax     - float
+          T_base   - float
+          T_offset - float
+        Return value:
+          T_base + T_offset * |sin(t/25)|
+        """
+        adoubleFunction_2D.__init__(self, n_components)
+
+        self.ymin = ymin
+        self.ymax = ymax
+        self.T_base   = adouble(T_base)
+        self.T_offset = adouble(T_offset)
+
+    def value(self, point, component = 0):
+        if point.y > self.ymin and point.y < self.ymax:
+            return self.T_base + self.T_offset*numpy.fabs(numpy.sin(numpy.pi*Time()/25))
+        else:
+            return self.T_base
+
+    def vector_value(self, point):
+        return [self.value(point, c) for c in range(self.n_components)]
+
+
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-        
-        self.T_outer  = daeVariable("T_outer", temperature_t, self, "Temperature of the outer boundary with id=0 (Dirichlet BC)")
-        self.Q0_total = daeVariable("Q0_total",         no_t, self, "Total heat passing through the boundary with id=0")
-        self.Q1_total = daeVariable("Q1_total",         no_t, self, "Total heat passing through the boundary with id=1")
-        self.Q2_total = daeVariable("Q2_total",         no_t, self, "Total heat passing through the boundary with id=2")
 
-        # The starting point is the daeFiniteElementModel class that contains an implementation
-        # of the daeFiniteElementObject class: dealiiFiniteElementSystem which is a wrapper
-        # around deal.II FESystem<dim> class and handles all finite element related details.
-
-        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'step-49.msh')
-        
         dofs = [dealiiFiniteElementDOF_2D(name='T',
                                           description='Temperature',
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
+        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
+        mesh_file  = os.path.join(meshes_dir, 'square-50x50.msh')
+
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
                                                       quadrature      = QGauss_2D(3),  # quadrature formula
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
-          
-        self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction FE problem', self.fe_system)
-       
+
+        self.fe_model = daeFiniteElementModel('HeatConvection', self, 'Transient heat convection', self.fe_system)
+
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("T_outer", "Boundary conditions for the outer edge")
-        eq.Residual = self.T_outer() - Constant(200 * K)
-
-        rho   = 8960.0  # kg/m**3
-        cp    =  385.0  # J/(kg*K)
-        kappa =  401.0  # W/(m*K)
+        # The liquid is water
+        # The specific heat conductivity is normally 0.6 W/mK,
+        # however, here we used much larger value to amplify the effect of conduction
+        rho   = 1000.0  # kg/m**3
+        cp    = 4181.0  # J/(kg*K)
+        kappa =  100.0  # W/(m*K)
 
         alpha = kappa/(rho * cp)
 
-        # We use deal.II ConstantFunction class to specify a constant value.
-        # Since we have only one DOF we do not need to specify n_components in the constructor
-        # (the default value is 1) and do not need to handle values of multiple components.
+        # Velocity is in the positive x-axis direction
+        velocity  = 0.01   # The velocity magnitude, m/s
+        direction = (1, 0) # The velocity direction (unit vector)
+
+        # The dimensions of the 2D domain is: x=[0,1] and y=[0,1] (a 1x1 square)
+        ymin = 0.45
+        ymax = 0.55
+        T_base   = 300 # Base temperature, K
+        T_offset = 50  # Offset temperature, K
+
         functions = {}
-        functions['Diffusivity'] = ConstantFunction_2D(alpha)
-        functions['Generation']  = ConstantFunction_2D(0.0)
+        functions['u'] = VelocityFunction_2D(velocity, direction)
 
-        # Nota bene:
-        #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
-        #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
-        # Here we use daetools variable for the outer boundary and constant values for the rest.
-        dirichletBC    = {}
-        dirichletBC[0] = [('T', adoubleConstantFunction_2D( self.T_outer() ))] # outer boundary
-        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350) ))] # inner ellipse
-        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250) ))] # inner rectangle
+        # Boundary IDs
+        left_edge   = 0
+        top_edge    = 1
+        right_edge  = 2
+        bottom_edge = 3
 
-        boundaryIntegrals = {
-                               0 : [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               1 : [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               2 : [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-                            }
+        dirichletBC = {}
+        dirichletBC[left_edge]  = [
+                                    ('T',  TemperatureSource_2D(ymin, ymax, T_base, T_offset, self.n_components)),
+                                  ]
 
         accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D('Diffusivity', xyz_2D(fe_q)) * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q)
+        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * alpha * JxW_2D(fe_q)
+        convection   = phi_2D('T', fe_i, fe_q) * (function_gradient_2D("u", xyz_2D(fe_q)) * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) # ??
+        source       = phi_2D('T', fe_i, fe_q) * 0.0 * JxW_2D(fe_q)
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + convection,
                                                   Mij = accumulation,
                                                   Fi  = source,
                                                   faceAij = {},
                                                   faceFi  = {},
                                                   functions = functions,
-                                                  functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = boundaryIntegrals)
+                                                  functionsDirichletBC = dirichletBC)
 
-        print('Transient heat conduction equation:')
+        print('Transient heat convection equations:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
@@ -131,15 +170,15 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_deal_II_1")
+        self.m = modTutorial("tutorial_deal_II_4")
         self.m.Description = __doc__
-        
+
     def SetUpParametersAndDomains(self):
         pass
 
     def SetUpVariables(self):
         # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
-        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 300)
+        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 300.0)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -148,7 +187,7 @@ def guiRun(app):
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_1-')
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_4-')
 
     # Create two data reporters:
     # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
@@ -168,13 +207,13 @@ def guiRun(app):
         QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
     except Exception as e:
         print(str(e))
-    
+
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 10
+    simulation.ReportingInterval = 2
     simulation.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
-    
+
 # Setup everything manually and run in a console
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
@@ -187,7 +226,7 @@ def consoleRun():
     daesolver.SetLASolver(lasolver)
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results')
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_4-results')
 
     # Create two data reporters:
     # 1. DealII
@@ -195,7 +234,7 @@ def consoleRun():
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
-        
+
     # 2. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
@@ -206,16 +245,16 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
+    simulation.ReportingInterval = 2
     simulation.TimeHorizon = 500
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    
+
     # Save the model report and the runtime model report
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-    
+
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

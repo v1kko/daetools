@@ -455,7 +455,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<ZeroFunction<3>, bases< Function<3> >, boost::noncopyable>("ZeroFunction_3D", no_init)
         .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
     ;
-
+    /*
     class_<ComponentSelectFunction<1>, bases< Function<1> >, boost::noncopyable>("ComponentSelectFunction_1D", no_init)
         .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
         .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
@@ -470,7 +470,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
         .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
     ;
-
+    */
 
     class_< std::vector< Point<1,double> > >("vector_Point_1D")
         .def(vector_indexing_suite< std::vector< Point<1,double> > >())
@@ -807,13 +807,13 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("phi_vector_2D", &phi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_vector_3D", &phi_vector<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
-    def("dphi_vec_1D", &dphi_vector<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
-    def("dphi_vec_2D", &dphi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
-    def("dphi_vec_3D", &dphi_vector<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_vector_1D", &dphi_vector<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_vector_2D", &dphi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("dphi_vector_3D", &dphi_vector<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
-    def("d2phi_vec_1D", &d2phi_vector<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
-    def("d2phi_vec_2D", &d2phi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
-    def("d2phi_vec_3D", &d2phi_vector<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_vector_1D", &d2phi_vector<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_vector_2D", &d2phi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("d2phi_vector_3D", &d2phi_vector<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
     def("div_phi_1D", &div_phi<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("div_phi_2D", &div_phi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));

@@ -244,12 +244,16 @@ def guiRun(app):
 
 # Setup everything manually and run in a console
 from daetools.pyDAE.data_reporters import *
+from daetools.solvers.superlu import pySuperLU
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeVTKDataReporter()
     simulation   = simTutorial()
+
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -269,6 +273,7 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    lasolver.SaveAsXPM('mpet_dealii.xpm')
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

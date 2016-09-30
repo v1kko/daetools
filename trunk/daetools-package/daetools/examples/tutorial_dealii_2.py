@@ -67,6 +67,11 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
 #   This function is derived from Function_2D class and returns "double" value/gradient
 class GradientFunction_2D(Function_2D):
     def __init__(self, gradient, direction, n_components = 1):
+        """
+        Arguments:
+          gradient - float, flux magnitude
+          direction - Tensor<1,dim>, unit vector
+        """
         Function_2D.__init__(self, n_components)
         self.m_gradient = Tensor_1_2D()
         self.m_gradient[0] = gradient * direction[0]
@@ -86,6 +91,10 @@ class GradientFunction_2D(Function_2D):
 #   In this case, it is a function of daetools parameters/variables
 class BottomGradientFunction_2D(adoubleFunction_2D):
     def __init__(self, gradient, n_components = 1):
+        """
+        Arguments:
+          gradient - adouble, flux magnitude (scalar)
+        """
         adoubleFunction_2D.__init__(self, n_components)
         self.gradient = adouble(gradient)
         
@@ -113,6 +122,7 @@ class modTutorial(daeModel):
                                           description='Temperature',
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
+        self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -157,12 +167,19 @@ class modTutorial(daeModel):
                                2 : [(self.Q2_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
                             }
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                                                  Mij = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q),
-                                                  Fi  = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q),
+        accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
+        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q)
+        source       = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q)
+        faceFluxes   = {
+                         0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
+                         1: phi_2D('T', fe_i, fe_q) * function_adouble_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)
+                       }
+
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
+                                                  Mij = accumulation,
+                                                  Fi  = source,
                                                   faceAij = {},
-                                                  faceFi  = {0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
-                                                             1: phi_2D('T', fe_i, fe_q) * function_adouble_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)},
+                                                  faceFi  = faceFluxes,
                                                   functions = functions,
                                                   functionsDirichletBC = dirichletBC,
                                                   boundaryIntegrals = boundaryIntegrals)

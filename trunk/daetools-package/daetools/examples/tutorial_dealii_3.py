@@ -50,6 +50,7 @@ class modTutorial(daeModel):
                                           description='Chemical potential',
                                           fe = FE_Q_2D(1),
                                           multiplicity=1)]
+        self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         mesh_file  = os.path.join(meshes_dir, 'square.msh')
@@ -79,7 +80,8 @@ class modTutorial(daeModel):
         boundaryIntegrals = {}
 
         log_fe = feExpression_2D.log
-        c = dof_approximation_2D('c', fe_q) # FE approximation of a quantity at the specified quadrature point
+        # FE approximation of a quantity at the specified quadrature point (adouble object)
+        c = dof_approximation_2D('c', fe_q)
 
         # 1) f(c) from the Wikipedia (https://en.wikipedia.org/wiki/Cahn-Hilliard_equation)
         fc_Fi = c**3 - c
@@ -87,13 +89,16 @@ class modTutorial(daeModel):
         # 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes
         #fc_Fi = log_fe(c/(1-c)) + Omg_a*(1-2*c)
 
+        c_accumulation    = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q)
+        mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0 * JxW_2D(fe_q)
+        mu                = phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q) * JxW_2D(fe_q)
+        c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * kappa * JxW_2D(fe_q)
+        fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * fc_Fi
+
         weakForm = dealiiFiniteElementWeakForm_2D(
-            Aij = (   dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0
-                    +  phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q)
-                    - dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * kappa
-                  ) * JxW_2D(fe_q),
-            Mij = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q),
-            Fi  = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * fc_Fi,
+            Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
+            Mij = c_accumulation,
+            Fi  = fun_c,
             faceAij = {},
             faceFi  = {},
             functions = functions,
