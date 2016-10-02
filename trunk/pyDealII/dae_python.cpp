@@ -14,7 +14,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     
     docstring_options doc_options(true, true, false);
 
-    class_< Tensor<1,1,double>, boost::noncopyable>("Tensor_1_1D")
+    class_< Tensor<1,1,double> >("Tensor_1_1D")
         //.def_readonly("dimension",                  &Tensor<1,1,double>::dimension)
         //.def_readonly("rank",                       &Tensor<1,1,double>::rank)
         //.def_readonly("n_independent_components",   &Tensor<1,1,double>::n_independent_components)
@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor<1,1,double>::memory_consumption)
     ;
 
-    class_< Tensor<1,2,double>, boost::noncopyable>("Tensor_1_2D")
+    class_< Tensor<1,2,double> >("Tensor_1_2D")
         //.def_readonly("dimension",                  &Tensor<1,2,double>::dimension)
         //.def_readonly("rank",                       &Tensor<1,2,double>::rank)
         //.def_readonly("n_independent_components",   &Tensor<1,2,double>::n_independent_components)
@@ -64,7 +64,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor<1,2,double>::memory_consumption)
     ;
 
-    class_< Tensor<1,3,double>, boost::noncopyable>("Tensor_1_3D")
+    class_< Tensor<1,3,double> >("Tensor_1_3D")
         //.def_readonly("dimension",                  &Tensor<1,3,double>::dimension)
         //.def_readonly("rank",                       &Tensor<1,3,double>::rank)
         //.def_readonly("n_independent_components",   &Tensor<1,3,double>::n_independent_components)
@@ -90,7 +90,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
 
-    class_< Tensor<2,1,double>, boost::noncopyable>("Tensor_2_1D")
+    class_< Tensor<2,1,double> >("Tensor_2_1D")
         //.def_readonly("dimension",                  &Tensor<2,1,double>::dimension)
         //.def_readonly("rank",                       &Tensor<2,1,double>::rank)
         //.def_readonly("n_independent_components",   &Tensor<2,1,double>::n_independent_components)
@@ -115,7 +115,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor<2,1,double>::memory_consumption)
     ;
 
-    class_< Tensor<2,2,double>, boost::noncopyable>("Tensor_2_2D")
+    class_< Tensor<2,2,double> >("Tensor_2_2D")
         //.def_readonly("dimension",                  &Tensor<2,2,double>::dimension)
         //.def_readonly("rank",                       &Tensor<2,2,double>::rank)
         //.def_readonly("n_independent_components",   &Tensor<2,2,double>::n_independent_components)
@@ -140,7 +140,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor<2,2,double>::memory_consumption)
     ;
 
-    class_< Tensor<2,3,double>, boost::noncopyable>("Tensor_2_3D")
+    class_< Tensor<2,3,double> >("Tensor_2_3D")
         //.def_readonly("dimension",                  &Tensor<2,3,double>::dimension)
         //.def_readonly("rank",                       &Tensor<2,3,double>::rank)
         //.def_readonly("n_independent_components",   &Tensor<2,3,double>::n_independent_components)
@@ -246,7 +246,7 @@ BOOST_PYTHON_MODULE(pyDealII)
 
 
 
-    class_< Tensor<1,1,adouble>, boost::noncopyable>("adoubleTensor_1_1D")
+    class_< Tensor<1,1,adouble> >("adoubleTensor_1_1D")
         //.def_readonly("dimension",                  &Tensor<1,1,adouble>::dimension)
         //.def_readonly("rank",                       &Tensor<1,1,adouble>::rank)
         //.def_readonly("n_independent_components",   &Tensor<1,1,adouble>::n_independent_components)
@@ -271,7 +271,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor<1,1,adouble>::memory_consumption)
     ;
 
-    class_< Tensor<1,2,adouble>, boost::noncopyable>("adoubleTensor_1_2D")
+    class_< Tensor<1,2,adouble> >("adoubleTensor_1_2D")
         //.def_readonly("dimension",                  &Tensor<1,2,adouble>::dimension)
         //.def_readonly("rank",                       &Tensor<1,2,adouble>::rank)
         //.def_readonly("n_independent_components",   &Tensor<1,2,adouble>::n_independent_components)
@@ -296,7 +296,7 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("memory_consumption",  &Tensor<1,2,adouble>::memory_consumption)
     ;
 
-    class_< Tensor<1,3,adouble>, boost::noncopyable>("adoubleTensor_1_3D")
+    class_< Tensor<1,3,adouble> >("adoubleTensor_1_3D")
         //.def_readonly("dimension",                  &Tensor<1,3,adouble>::dimension)
         //.def_readonly("rank",                       &Tensor<1,3,adouble>::rank)
         //.def_readonly("n_independent_components",   &Tensor<1,3,adouble>::n_independent_components)
@@ -455,6 +455,64 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<ZeroFunction<3>, bases< Function<3> >, boost::noncopyable>("ZeroFunction_3D", no_init)
         .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
     ;
+
+    class_<daepython::TensorFunction_wrapper<1,1>, boost::noncopyable>("TensorFunction_1_1D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,1>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,1>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+    ;
+
+    class_<daepython::TensorFunction_wrapper<1,2>, boost::noncopyable>("TensorFunction_1_2D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,2>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,2>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+    ;
+
+    class_<daepython::TensorFunction_wrapper<1,3>, boost::noncopyable>("TensorFunction_1_3D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,3>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,3>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+    ;
+
+
+
+    class_<daepython::TensorFunction_wrapper<2,1>, boost::noncopyable>("TensorFunction_2_1D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,1>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,1>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+    ;
+
+    class_<daepython::TensorFunction_wrapper<2,2>, boost::noncopyable>("TensorFunction_2_2D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,2>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,2>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+    ;
+
+    class_<daepython::TensorFunction_wrapper<2,3>, boost::noncopyable>("TensorFunction_2_3D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,3>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,3>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+    ;
+
+
     /*
     class_<ComponentSelectFunction<1>, bases< Function<1> >, boost::noncopyable>("ComponentSelectFunction_1D", no_init)
         .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
@@ -838,6 +896,30 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("adouble_1D", &adouble_<1>, ( arg("ad") ));
     def("adouble_2D", &adouble_<2>, ( arg("ad") ));
     def("adouble_3D", &adouble_<3>, ( arg("ad") ));
+
+    def("tensor1_1D", &tensor1<1>, ( arg("tensor") ));
+    def("tensor1_2D", &tensor1<2>, ( arg("tensor") ));
+    def("tensor1_3D", &tensor1<3>, ( arg("tensor") ));
+
+    def("tensor2_1D", &tensor2<1>, ( arg("tensor") ));
+    def("tensor2_2D", &tensor2<2>, ( arg("tensor") ));
+    def("tensor2_3D", &tensor2<3>, ( arg("tensor") ));
+
+    def("tensor3_1D", &tensor3<1>, ( arg("tensor") ));
+    def("tensor3_2D", &tensor3<2>, ( arg("tensor") ));
+    def("tensor3_3D", &tensor3<3>, ( arg("tensor") ));
+
+    def("adouble_tensor1_1D", &adouble_tensor1<1>, ( arg("tensor") ));
+    def("adouble_tensor1_2D", &adouble_tensor1<2>, ( arg("tensor") ));
+    def("adouble_tensor1_3D", &adouble_tensor1<3>, ( arg("tensor") ));
+
+    def("adouble_tensor2_1D", &adouble_tensor2<1>, ( arg("tensor") ));
+    def("adouble_tensor2_2D", &adouble_tensor2<2>, ( arg("tensor") ));
+    def("adouble_tensor2_3D", &adouble_tensor2<3>, ( arg("tensor") ));
+
+    def("adouble_tensor3_1D", &adouble_tensor3<1>, ( arg("tensor") ));
+    def("adouble_tensor3_2D", &adouble_tensor3<2>, ( arg("tensor") ));
+    def("adouble_tensor3_3D", &adouble_tensor3<3>, ( arg("tensor") ));
 
     def("vector_dof_approximation_1D", &vector_dof_approximation<1>, ( arg("variableName"), arg("quadraturePoint") ));
     def("vector_dof_approximation_2D", &vector_dof_approximation<2>, ( arg("variableName"), arg("quadraturePoint") ));

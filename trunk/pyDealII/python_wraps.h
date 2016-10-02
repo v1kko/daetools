@@ -272,7 +272,7 @@ class Function_wrapper : public Function<dim,double>,
                          public boost::python::wrapper< Function<dim,double> >
 {
 public:
-    Function_wrapper(unsigned int n_components = 1) : Function<dim>(n_components)
+    Function_wrapper(unsigned int n_components = 1) : Function<dim,double>(n_components)
     {
     }
 
@@ -286,7 +286,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'value' not implemented in the python Function_xD-derived class";
+            e << "The function 'value' not implemented in the python Function_" << dim << "D-derived class";
             throw e;
         }
         return f(p, component);
@@ -298,7 +298,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'vector_value' not implemented in the python Function_xD-derived class";
+            e << "The function 'vector_value' not implemented in the python Function_" << dim << "D-derived class";
             throw e;
         }
 
@@ -323,7 +323,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'gradient' not implemented in the python Function_xD-derived class";
+            e << "The function 'gradient' not implemented in the python Function_" << dim << "D-derived class";
             throw e;
         }
 
@@ -336,7 +336,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'vector_gradient' not implemented in the python Function_xD-derived class";
+            e << "The function 'vector_gradient' not implemented in the python Function_" << dim << "D-derived class";
             throw e;
         }
 
@@ -373,6 +373,44 @@ ConstantFunction<dim>* ConstantFunction_init(boost::python::list l_values)
     return new ConstantFunction<dim>(values);
 }
 
+template<int rank, int dim>
+class TensorFunction_wrapper : public TensorFunction<rank,dim,double>,
+                               public boost::python::wrapper< TensorFunction<rank,dim,double> >
+{
+public:
+    TensorFunction_wrapper(unsigned int n_components = 1) : TensorFunction<rank,dim,double>(n_components)
+    {
+    }
+
+    virtual ~TensorFunction_wrapper()
+    {
+    }
+
+    Tensor<rank,dim,double> value(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        boost::python::override f = this->get_override("value");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'value' not implemented in the python TensorFunction_" << dim << "D-derived class";
+            throw e;
+        }
+        return f(p, component);
+    }
+
+    Tensor<rank+1,dim,double> gradient(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        boost::python::override f = this->get_override("gradient");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'gradient' not implemented in the python TensorFunction_" << dim << "D-derived class";
+            throw e;
+        }
+        return f(p, component);
+    }
+};
+
 
 template<int dim>
 class adoubleFunction_wrapper : public Function<dim,adouble>,
@@ -393,7 +431,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'value' not implemented in the python adoubleFunction_xD-derived class";
+            e << "The function 'value' not implemented in the python adoubleFunction_" << dim << "D-derived class";
             throw e;
         }
         return f(p, component);
@@ -405,7 +443,7 @@ public:
         if(!f)
         {
             daeDeclareException(exInvalidCall);
-            e << "The function 'vector_value' not implemented in the python adoubleFunction_xD-derived class";
+            e << "The function 'vector_value' not implemented in the python adoubleFunction_" << dim << "D-derived class";
             throw e;
         }
 
@@ -416,12 +454,50 @@ public:
         if(n != Function<dim,adouble>::n_components)
         {
             daeDeclareException(exInvalidCall);
-            e << "The number of items (" << n << ") returned from the Function<" << Function<dim>::dimension
+            e << "The number of items (" << n << ") returned from the adoubleFunction<" << dim
               << ">::vector_value call must be " << Function<dim,adouble>::n_components;
             throw e;
         }
         for(i = 0; i < n; i++)
             values[i] = boost::python::extract<adouble>(lvalues[i]);
+    }
+
+    Tensor<1,dim,adouble> gradient(const Point<dim> &p, const unsigned int component = 0) const
+    {
+        boost::python::override f = this->get_override("gradient");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'gradient' not implemented in the python adoubleFunction_" << dim << "D-derived class";
+            throw e;
+        }
+
+        return f(p, component);
+    }
+
+    void vector_gradient(const Point<dim> &p, std::vector<Tensor<1,dim,adouble> > &gradients) const
+    {
+        boost::python::override f = this->get_override("vector_gradient");
+        if(!f)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The function 'vector_gradient' not implemented in the python adoubleFunction_" << dim << "D-derived class";
+            throw e;
+        }
+
+        boost::python::list lgradients = f(p);
+
+        boost::python::ssize_t i, n;
+        n = boost::python::len(lgradients);
+        if(n != Function<dim,adouble>::n_components)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The number of items (" << n << ") returned from the adoubleFunction<" << dim
+              << ">::vector_gradient call must be " << Function<dim,adouble>::n_components;
+            throw e;
+        }
+        for(i = 0; i < n; i++)
+            gradients[i] = boost::python::extract< Tensor<1,dim,adouble> >(lgradients[i]);
     }
 };
 typedef adoubleFunction_wrapper<1> adoubleFunction_wrapper_1D;

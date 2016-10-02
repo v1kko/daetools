@@ -1272,7 +1272,7 @@ configure_dealii()
     #    make expand_instantiations_exe
     # Locate the expand_instantiations executable (it usually resides under ${CMAKE_BINARY_DIR}/common/scripts
     # and export its location using the PATH environment variable.
-    export PATH=${TRUNK}/../../daetools/trunk/deal.II/common/scripts:${PATH}
+    export PATH=${TRUNK}/../../daetools/trunk/deal.II/bin:${PATH}
         
     DEALII_CROSS_COMPILE_OPTIONS="${DAE_CROSS_COMPILE_TOOLCHAIN_FILE}"
   fi

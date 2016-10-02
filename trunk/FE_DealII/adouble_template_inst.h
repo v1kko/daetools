@@ -482,11 +482,9 @@ static inline void do_interpolate_boundary_values(const M_or_MC<DoFHandlerType::
           // function
           Vector<Number> function_values (fe.n_components());
           if (fe.n_components() == 1)
-            function_values(0)
-              = boundary_function.value (cell->vertex(direction));
+            function_values(0) = boundary_function.value (cell->vertex(direction));
           else
-            boundary_function.vector_value (cell->vertex(direction),
-                                            function_values);
+            boundary_function.vector_value (cell->vertex(direction), function_values);
 
           for (unsigned int i=0; i<fe.dofs_per_vertex; ++i)
             if (component_mask[fe.face_system_to_component_index(i).first])

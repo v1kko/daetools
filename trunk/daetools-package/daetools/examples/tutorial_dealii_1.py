@@ -17,6 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
+Transient heat conduction.
 In this tutorial the DAE Tools support for finite element method is presented.
 
 Mesh:
@@ -79,7 +80,7 @@ class modTutorial(daeModel):
         rho   = 8960.0  # kg/m**3
         cp    =  385.0  # J/(kg*K)
         kappa =  401.0  # W/(m*K)
-
+        # Thermal diffusivity (m**2/s)
         alpha = kappa/(rho * cp)
 
         # We use deal.II ConstantFunction class to specify a constant value.

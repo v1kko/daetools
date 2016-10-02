@@ -17,6 +17,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
+Cahn-Hilliard equation.
+
 Mesh:
 
 .. image:: _static/square.png
@@ -61,7 +63,7 @@ class modTutorial(daeModel):
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('CahnHilliard', self, 'Transient Cahn-Hilliard equation', self.fe_system)
+        self.fe_model = daeFiniteElementModel('CahnHilliard', self, 'Cahn-Hilliard equation', self.fe_system)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)

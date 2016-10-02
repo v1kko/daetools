@@ -548,7 +548,7 @@ public:
                 return (boost::format("(%f, %f, %f)") % m_point[0] % m_point[1] % m_point[2]).str();
         }
         else
-            throw std::runtime_error(std::string("Invalid runtime number type: ") + type(m_eType));
+            return "(unknown)";
     }
 
 public:
@@ -707,7 +707,11 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor1 = l.m_point + r.m_point;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " + " + type(r.m_eType));
+    {
+        std::string error = std::string("Invalid operation ") + type(l.m_eType) + " + " + type(r.m_eType) + ":\n";
+        error += l.ToString() + " + " + r.ToString(); 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -787,7 +791,11 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor1 = l.m_point - r.m_point;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " - " + type(r.m_eType));
+    {
+        std::string error = std::string("Invalid operation ") + type(l.m_eType) + " - " + type(r.m_eType) + ":\n";
+        error += l.ToString() + " - " + r.ToString(); 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -833,12 +841,12 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_tensor1 * r.m_tensor1;
     }
-    /*
     else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor2)
     {
-        tmp.m_eType = eFETensor1;
-        tmp.m_tensor1 = l.m_tensor2 * r.m_tensor2;
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_tensor2, r.m_tensor2);
     }
+    /*
     else if(l.m_eType == eFETensor3 && r.m_eType == eFETensor3)
     {
         tmp.m_eType = eFETensor2;
@@ -850,12 +858,12 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar_adouble;
         tmp.m_adouble_value = l.m_tensor1_adouble * r.m_tensor1_adouble;
     }
-    /*
     else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFETensor2_adouble)
     {
-        tmp.m_eType = eFETensor1_adouble;
-        tmp.m_tensor1_adouble = l.m_tensor2_adouble * r.m_tensor2_adouble;
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = scalar_product(l.m_tensor2_adouble, r.m_tensor2_adouble);
     }
+    /*
     else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFETensor3_adouble)
     {
         tmp.m_eType = eFETensor2_adouble;
@@ -885,6 +893,19 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor1_adouble = l.m_tensor1_adouble * r.m_tensor2;
     }
 
+    
+    else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = l.m_tensor1 * r.m_tensor1_adouble;
+    }
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor1)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = l.m_tensor1_adouble * r.m_tensor1;
+    }
+    
+    
     else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFESymmetricTensor2)
     {
         tmp.m_eType = eFEScalar;
@@ -905,7 +926,6 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_point * r.m_point;
     }
-
 
     /* CURL
     else if(l.m_eType == eFEScalar && r.m_eType == eFECurl2D)
@@ -1034,7 +1054,11 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     }
 
     else
-        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType));
+    {
+        std::string error = std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType) + ":\n";
+        error += l.ToString() + " * " + r.ToString(); 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1130,7 +1154,11 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_point = l.m_point / r.m_value;
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " / " + type(r.m_eType));
+    {
+        std::string error = std::string("Invalid operation ") + type(l.m_eType) + " / " + type(r.m_eType) + ":\n";
+        error += l.ToString() + " / " + r.ToString(); 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1154,7 +1182,11 @@ feRuntimeNumber<dim> operator ^(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_adouble_value = pow(l.m_adouble_value, r.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation ") + type(l.m_eType) + " ** " + type(r.m_eType));
+    {
+        std::string error = std::string("Invalid operation ") + type(l.m_eType) + " ** " + type(r.m_eType) + ":\n";
+        error += l.ToString() + " ** " + r.ToString(); 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1179,7 +1211,11 @@ feRuntimeNumber<dim> sin_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = sin(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation sin(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation sin(") + type(fe.m_eType) + "):\n";
+        error += "sin(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1198,7 +1234,11 @@ feRuntimeNumber<dim> cos_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = cos(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation cos(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation cos(") + type(fe.m_eType) + "):\n";
+        error += "cos(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1217,7 +1257,11 @@ feRuntimeNumber<dim> tan_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = tan(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation tan(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation tan(") + type(fe.m_eType) + "):\n";
+        error += "tan(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1236,7 +1280,11 @@ feRuntimeNumber<dim> asin_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = asin(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation asin(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation asin(") + type(fe.m_eType) + "):\n";
+        error += "asin(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1255,7 +1303,11 @@ feRuntimeNumber<dim> acos_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = acos(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation acos(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation acos(") + type(fe.m_eType) + "):\n";
+        error += "acos(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1274,7 +1326,11 @@ feRuntimeNumber<dim> atan_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = atan(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation atan(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation atan(") + type(fe.m_eType) + "):\n";
+        error += "atan(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1293,7 +1349,11 @@ feRuntimeNumber<dim> sqrt_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = sqrt(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation sqrt(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation sqrt(") + type(fe.m_eType) + "):\n";
+        error += "sqrt(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1312,7 +1372,11 @@ feRuntimeNumber<dim> log_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = log(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation log(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation log(") + type(fe.m_eType) + "):\n";
+        error += "log(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1331,7 +1395,11 @@ feRuntimeNumber<dim> log10_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = log10(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation log10(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation log10(") + type(fe.m_eType) + "):\n";
+        error += "log10(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1350,7 +1418,11 @@ feRuntimeNumber<dim> exp_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = exp(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation exp(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation exp(") + type(fe.m_eType) + "):\n";
+        error += "exp(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1369,7 +1441,11 @@ feRuntimeNumber<dim> abs_(const feRuntimeNumber<dim>& fe)
         tmp.m_adouble_value = abs(fe.m_adouble_value);
     }
     else
-        throw std::runtime_error(std::string("Invalid operation abs(") + typeid(fe).name() + ")");
+    {
+        std::string error = std::string("Invalid operation abs(") + type(fe.m_eType) + "):\n";
+        error += "abs(" + fe.ToString() + ")"; 
+        throw std::runtime_error(error);
+    }
     return tmp;
 }
 
@@ -1571,6 +1647,7 @@ public:
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
     virtual unsigned int j() const = 0;
+    virtual unsigned int component(unsigned int index) const = 0;
 };
 
 template<int dim>
@@ -1610,6 +1687,30 @@ public:
 public:
     double m_value;
 };
+
+template<int dim>
+unsigned int getComponentIndex(int index, const feCellContext<dim>* pCellContext)
+{
+    unsigned int c_index;
+    if(index == fe_i)
+        c_index = pCellContext->i();
+    else if(index == fe_j)
+        c_index = pCellContext->j();
+    else
+        c_index = index;
+
+    return pCellContext->component(c_index);
+}
+
+inline std::string getComponentIndex(int index)
+{
+    if(index == fe_i)
+        return "i";
+    else if(index == fe_j)
+        return "j";
+    else
+        return (boost::format("%d") % index).str();
+}
 
 template<int dim>
 unsigned int getIndex(int index, const feCellContext<dim>* pCellContext)
@@ -2029,6 +2130,11 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        // According to the documentation for FiniteElement<dim,spacedim>::system_to_component_index(index):
+        //  - for scalar elements, this returns always zero
+        //  - for vector elements, this returns the corresponding vector component
+        unsigned int component_index = getComponentIndex<dim>(m_component, pCellContext);
+
         feRuntimeNumber<dim> node = m_xyz_node->Evaluate(pCellContext);
 
         if(node.m_eType != eFEPoint)
@@ -2036,11 +2142,11 @@ public:
 
         if(m_call == eFunctionValue)
         {
-            return feRuntimeNumber<dim>( pCellContext->function(m_name).value(node.m_point, m_component) );
+            return feRuntimeNumber<dim>( pCellContext->function(m_name).value(node.m_point, component_index) );
         }
         else if(m_call == eFunctionGradient)
         {
-            return feRuntimeNumber<dim>( pCellContext->function(m_name).gradient(node.m_point, m_component) );
+            return feRuntimeNumber<dim>( pCellContext->function(m_name).gradient(node.m_point, component_index) );
         }
         else
         {
@@ -2052,11 +2158,11 @@ public:
     {
         if(m_call == eFunctionValue)
         {
-            return (boost::format("fvalue('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fvalue('%s', %s, %d)") % m_name % m_xyz_node->ToString() % getComponentIndex(m_component)).str();
         }
         else if(m_call == eFunctionGradient)
         {
-            return (boost::format("fgrad('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fgrad('%s', %s, %d)") % m_name % m_xyz_node->ToString() % getComponentIndex(m_component)).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -2089,6 +2195,11 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        // According to the documentation for FiniteElement<dim,spacedim>::system_to_component_index(index):
+        //  - for scalar elements, this returns always zero
+        //  - for vector elements, this returns the corresponding vector component
+        unsigned int component_index = getComponentIndex<dim>(m_component, pCellContext);
+
         feRuntimeNumber<dim> node = m_xyz_node->Evaluate(pCellContext);
 
         if(node.m_eType != eFEPoint)
@@ -2096,11 +2207,11 @@ public:
 
         if(m_call == eFunctionValue)
         {
-            return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point, m_component) );
+            return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).value(node.m_point, component_index) );
         }
         else if(m_call == eFunctionGradient)
         {
-            return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).gradient(node.m_point, m_component) );
+            return feRuntimeNumber<dim>( pCellContext->adouble_function(m_name).gradient(node.m_point, component_index) );
         }
         else
         {
@@ -2114,11 +2225,11 @@ public:
     {
         if(m_call == eFunctionValue)
         {
-            return (boost::format("fvalue_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fvalue_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % getComponentIndex(m_component)).str();
         }
         else if(m_call == eFunctionGradient)
         {
-            return (boost::format("fgrad_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % m_component).str();
+            return (boost::format("fgrad_adouble('%s', %s, %d)") % m_name % m_xyz_node->ToString() % getComponentIndex(m_component)).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -2130,6 +2241,73 @@ public:
     efeFunctionCall m_call;
     unsigned int    m_component;
 };
+
+/*
+template<int rank, int dim>
+class feNode_tensor2_function : public feNode<dim>
+{
+public:
+    typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
+
+    feNode_function(const std::string& name, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
+    {
+        if(!dynamic_cast<feNode_xyz<dim>*>(xyz_node.get()))
+            throw std::runtime_error(std::string("An argument to the Function must be a point"));
+
+        m_xyz_node = xyz_node;
+        m_name = name;
+        m_call = call;
+        m_component = component;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        // According to the documentation for FiniteElement<dim,spacedim>::system_to_component_index(index):
+        //  - for scalar elements, this returns always zero
+        //  - for vector elements, this returns the corresponding vector component
+        unsigned int component_index = getComponentIndex<dim>(m_component, pCellContext);
+
+        feRuntimeNumber<dim> node = m_xyz_node->Evaluate(pCellContext);
+
+        if(node.m_eType != eFEPoint)
+            throw std::runtime_error(std::string("An argument to the Function must be a point"));
+
+        if(m_call == eFunctionValue)
+        {
+            return feRuntimeNumber<dim>( pCellContext->function(m_name).value(node.m_point, component_index) );
+        }
+        else if(m_call == eFunctionGradient)
+        {
+            return feRuntimeNumber<dim>( pCellContext->function(m_name).gradient(node.m_point, component_index) );
+        }
+        else
+        {
+            throw std::runtime_error(std::string("Invalid Function call type"));
+        }
+    }
+
+    std::string ToString() const
+    {
+        if(m_call == eFunctionValue)
+        {
+            return (boost::format("ftensor2_value('%s', %s, %d)") % m_name % m_xyz_node->ToString() % getComponentIndex(m_component)).str();
+        }
+        else if(m_call == eFunctionGradient)
+        {
+            return (boost::format("ftensor2_grad('%s', %s, %d)") % m_name % m_xyz_node->ToString() % getComponentIndex(m_component)).str();
+        }
+        else
+            throw std::runtime_error(std::string("Invalid Function call type"));
+    }
+
+public:
+    feNodePtr       m_xyz_node;
+    std::string     m_name;
+    efeFunctionCall m_call;
+    unsigned int    m_component;
+};
+*/
 
 template<int dim>
 class feNode_dof : public feNode<dim>
@@ -2318,6 +2496,59 @@ public:
     adouble m_ad;
 };
 
+template<int rank, int dim>
+class feNode_tensor : public feNode<dim>
+{
+public:
+    feNode_tensor(const Tensor<rank,dim,double>& t)
+    {
+        m_tensor = t;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        return feRuntimeNumber<dim>( m_tensor );
+    }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << m_tensor;
+        std::string res = ss.str();
+        return (boost::format("tensor%d(%s)") % rank % res).str();
+    }
+
+public:
+    Tensor<rank,dim,double> m_tensor;
+};
+
+template<int rank, int dim>
+class feNode_adouble_tensor : public feNode<dim>
+{
+public:
+    feNode_adouble_tensor(const Tensor<rank,dim,adouble>& t)
+    {
+        m_tensor = t;
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        return feRuntimeNumber<dim>( m_tensor );
+    }
+
+    std::string ToString() const
+    {
+        std::stringstream ss;
+        ss << m_tensor;
+        std::string res = ss.str();
+        return (boost::format("adouble_tensor%d(%s)") % rank % res).str();
+    }
+
+public:
+    Tensor<rank,dim,adouble> m_tensor;
+};
 
 enum efeUnaryFunction
 {
@@ -2884,6 +3115,41 @@ feExpression<dim> adouble_(const adouble& ad)
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble<dim>(ad) ) );
 }
 
+template<int dim>
+feExpression<dim> tensor1(const Tensor<1,dim,double>& t1)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_tensor<1,dim>(t1) ) );
+}
+
+template<int dim>
+feExpression<dim> tensor2(const Tensor<2,dim,double>& t2)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_tensor<2,dim>(t2) ) );
+}
+
+template<int dim>
+feExpression<dim> tensor3(const Tensor<3,dim,double>& t3)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_tensor<3,dim>(t3) ) );
+}
+
+template<int dim>
+feExpression<dim> adouble_tensor1(const Tensor<1,dim,adouble>& t1)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_tensor<1,dim>(t1) ) );
+}
+
+template<int dim>
+feExpression<dim> adouble_tensor2(const Tensor<2,dim,adouble>& t2)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_tensor<2,dim>(t2) ) );
+}
+
+template<int dim>
+feExpression<dim> adouble_tensor3(const Tensor<3,dim,adouble>& t3)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_tensor<3,dim>(t3) ) );
+}
 
 template<int dim>
 feExpression<dim> vector_dof_approximation(const std::string& variableName, int q)

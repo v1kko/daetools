@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                        tutorial_dealii_2.py
+                           tutorial_dealii_2.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -17,40 +17,20 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-.. code-block:: none
-
-                                                                       -->
-    ID=0: Sun (45 degrees), gradient heat flux = 2 kW/m**2 in direction n = (1,-1)
-      \ \ \ \ \ \ \
-       \ \ \ \ \ \ \         ID=2: Inner tube: constant temperature of 300 K
-        \ \ \ \ \ \ \       /
-         \ \ \ \ \ \ \     /
-          \ \ \ \ \ \ \   /
-           \ \ \ \ \ ****/
-            \ \ \ **    / **
-             \ \**    **    **
-              \ *    *  *    *
-    ____________**    **    **_____________
-                  **      **                y = -0.5
-                 /   ****
-                /
-               /
-             ID=1: Outer surface below y=-0.5, constant flux of 2 kW/m**2
-
-   dT/dt - ∇κ∇Τ = g, in Ω
+Simple transient heat convection.
 
 Mesh:
 
-.. image:: _static/pipe.png
-   :width: 400 px
+.. image:: _static/square.png
+   :width: 300 px
 
-Results at t = 3600s:
+Results at t = 500s:
 
 .. image:: _static/tutorial_dealii_2-results.png
-   :width: 600 px
+   :width: 500 px
 """
 
-import os, sys, numpy, json, math, tempfile
+import os, sys, numpy, json, tempfile
 from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.deal_II import *
@@ -59,64 +39,58 @@ from daetools.solvers.superlu import pySuperLU
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
-# Neumann BC use either value() or gradient() functions.
-# Dirichlet BC use vector_value() with n_component = multiplicity of the equation.
-# Other functions use just the value().
-#
 # Nota bene:
 #   This function is derived from Function_2D class and returns "double" value/gradient
-class GradientFunction_2D(Function_2D):
-    def __init__(self, gradient, direction, n_components = 1):
+class VelocityFunction_2D(Function_2D):
+    def __init__(self, velocity, direction, n_components = 1):
         """
         Arguments:
-          gradient - float, flux magnitude
+          velocity  - float, velocity magnitude
           direction - Tensor<1,dim>, unit vector
         """
         Function_2D.__init__(self, n_components)
-        self.m_gradient = Tensor_1_2D()
-        self.m_gradient[0] = gradient * direction[0]
-        self.m_gradient[1] = gradient * direction[1]
-        
+        self.m_velocity = Tensor_1_2D()
+        self.m_velocity[0] = velocity * direction[0]
+        self.m_velocity[1] = velocity * direction[1]
+
     def gradient(self, point, component = 0):
-        if point.x < 0 and point.y > 0:
-            return self.m_gradient
-        else:
-            return Tensor_1_2D()
+        return self.m_velocity
 
     def vector_gradient(self, point):
-        return [self.gradient(point, c) for c in range(self.n_components)]
+        return [self.value(point, c) for c in range(self.n_components)]
 
-# Nota bene:
-#   This function is derived from adoubleFunction_2D class and returns "adouble" value
-#   In this case, it is a function of daetools parameters/variables
-class BottomGradientFunction_2D(adoubleFunction_2D):
-    def __init__(self, gradient, n_components = 1):
+class TemperatureSource_2D(adoubleFunction_2D):
+    def __init__(self, ymin, ymax, T_base, T_offset, n_components = 1):
         """
+        The function creates bubble-like regions of fluid with a higher temperature.
         Arguments:
-          gradient - adouble, flux magnitude (scalar)
+          ymin     - float
+          ymax     - float
+          T_base   - float
+          T_offset - float
+        Return value:
+          T_base + T_offset * |sin(t/25)|
         """
         adoubleFunction_2D.__init__(self, n_components)
-        self.gradient = adouble(gradient)
-        
+
+        self.ymin = ymin
+        self.ymax = ymax
+        self.T_base   = adouble(T_base)
+        self.T_offset = adouble(T_offset)
+
     def value(self, point, component = 0):
-        if point.y < -0.5:
-            return self.gradient
+        if point.y > self.ymin and point.y < self.ymax:
+            return self.T_base + self.T_offset*numpy.fabs(numpy.sin(numpy.pi*Time()/25))
         else:
-            return adouble(0.0)
+            return self.T_base
 
     def vector_value(self, point):
         return [self.value(point, c) for c in range(self.n_components)]
 
+
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
-
-        self.Q0_total = daeVariable("Q0_total", no_t, self, "Total heat passing through the boundary with id=0")
-        self.Q1_total = daeVariable("Q1_total", no_t, self, "Total heat passing through the boundary with id=1")
-        self.Q2_total = daeVariable("Q2_total", no_t, self, "Total heat passing through the boundary with id=2")
-
-        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'pipe.msh')
 
         dofs = [dealiiFiniteElementDOF_2D(name='T',
                                           description='Temperature',
@@ -124,67 +98,67 @@ class modTutorial(daeModel):
                                           multiplicity=1)]
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
+        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
+        mesh_file  = os.path.join(meshes_dir, 'square-50x50.msh')
+
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
                                                       quadrature      = QGauss_2D(3),  # quadrature formula
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction through a pipe wall with an external heat flux', self.fe_system)
-       
+        self.fe_model = daeFiniteElementModel('HeatConvection', self, 'Transient heat convection', self.fe_system)
+
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        rho   = 8960.0  # kg/m**3
-        cp    =  385.0  # J/(kg*K)
-        kappa =  401.0  # W/(m*K)
+        # The liquid is water
+        # The specific heat conductivity is normally 0.6 W/mK,
+        # however, here we used much larger value to amplify the effect of conduction
+        rho   = 1000.0  # kg/m**3
+        cp    = 4181.0  # J/(kg*K)
+        kappa =  100.0  # W/(m*K)
+        # Thermal diffusivity (m**2/s)
+        alpha = kappa/(rho * cp)
 
-        flux_above   = 2.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        flux_beneath = 5.0E3/(rho*cp) # (W/m**2)/((kg/m**3) * (J/(kg*K))) =
-        alpha        = kappa / (rho*cp)   # m**2/s
+        # Velocity is in the positive x-axis direction
+        velocity  = 0.01   # The velocity magnitude, m/s
+        direction = (1, 0) # The velocity direction (unit vector)
 
-        print('Thermal diffusivity = %f' % alpha)
-        print('Beneath source flux = %f' % flux_beneath)
-        print('Above source flux = %f x (1,-1)' % flux_above)
+        # The dimensions of the 2D domain is: x=[0,1] and y=[0,1] (a 1x1 square)
+        ymin = 0.45
+        ymax = 0.55
+        T_base   = 300 # Base temperature, K
+        T_offset = 50  # Offset temperature, K
 
-        functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(alpha)
-        functions['Generation']  = ConstantFunction_2D(0.0)
-        # Gradient flux at boundary id=0 (Sun)
-        functions['Flux_a'] = GradientFunction_2D(flux_above, direction = (-1, 1))
-        # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
-        functions['Flux_b'] = BottomGradientFunction_2D(flux_beneath)
+        functions = {}
+        functions['u'] = VelocityFunction_2D(velocity, direction)
 
-        # Nota bene:
-        #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
-        #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
-        dirichletBC    = {}
-        dirichletBC[2] = [ ('T', adoubleConstantFunction_2D( adouble(300) )) ] # at boundary id=2 (inner tube)
+        # Boundary IDs
+        left_edge   = 0
+        top_edge    = 1
+        right_edge  = 2
+        bottom_edge = 3
 
-        boundaryIntegrals = {
-                               0 : [(self.Q0_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               1 : [(self.Q1_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               2 : [(self.Q2_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-                            }
+        dirichletBC = {}
+        dirichletBC[left_edge]  = [
+                                    ('T',  TemperatureSource_2D(ymin, ymax, T_base, T_offset, self.n_components)),
+                                  ]
 
         accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q)
-        faceFluxes   = {
-                         0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
-                         1: phi_2D('T', fe_i, fe_q) * function_adouble_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)
-                       }
+        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * alpha * JxW_2D(fe_q)
+        convection   = phi_2D('T', fe_i, fe_q) * (function_gradient_2D("u", xyz_2D(fe_q)) * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) # ??
+        source       = phi_2D('T', fe_i, fe_q) * 0.0 * JxW_2D(fe_q)
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + convection,
                                                   Mij = accumulation,
                                                   Fi  = source,
                                                   faceAij = {},
-                                                  faceFi  = faceFluxes,
+                                                  faceFi  = {},
                                                   functions = functions,
-                                                  functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = boundaryIntegrals)
+                                                  functionsDirichletBC = dirichletBC)
 
-        print('Transient heat conduction equation:')
+        print('Transient heat convection equations:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
@@ -200,13 +174,13 @@ class simTutorial(daeSimulation):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial_deal_II_2")
         self.m.Description = __doc__
-        
+
     def SetUpParametersAndDomains(self):
         pass
 
     def SetUpVariables(self):
         # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
-        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 293)
+        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 300.0)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -218,7 +192,7 @@ def guiRun(app):
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
 
     # Create two data reporters:
-    # 1. deal.II
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -237,8 +211,8 @@ def guiRun(app):
         print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 60      # 1 minute
-    simulation.TimeHorizon       = 2*60*60 # 2 hours
+    simulation.ReportingInterval = 2
+    simulation.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
@@ -251,6 +225,7 @@ def consoleRun():
     simulation   = simTutorial()
 
     lasolver = pySuperLU.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results')
@@ -272,12 +247,12 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 60      # 1 minute
-    simulation.TimeHorizon       = 2*60*60 # 2 hours
+    simulation.ReportingInterval = 2
+    simulation.TimeHorizon = 500
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    
+
     # Save the model report and the runtime model report
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
