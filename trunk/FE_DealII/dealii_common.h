@@ -13,10 +13,6 @@
 #include "../Core/coreimpl.h"
 #include <typeinfo>
 
-namespace dae
-{
-namespace fe_solver
-{
 using namespace dealii;
 /*********************************************************
  * deal.II related classes and typedefs
@@ -69,13 +65,10 @@ template <> struct EnableIfScalar<adouble>
 };
 }
 
-// Used in NeumannBC to choose between a constant flux and gradient
-//enum dealiiFluxType
-//{
-//    eConstantFlux = 0,
-//    eGradientFlux
-//};
-
+namespace dae
+{
+namespace fe_solver
+{
 /*********************************************************
  * daeFEMatrix
  * A wrapper around deal.II SparseMatrix<double>

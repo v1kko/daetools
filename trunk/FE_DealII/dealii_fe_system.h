@@ -335,6 +335,15 @@ public:
 
     virtual adouble dof(const std::string& variableName, const unsigned int li) const
     {
+        /* Achtung, Achtung!!
+         * This function can get called with the argument li (index) that belongs to some other variable in the FE system.
+         * What to do then?
+         *  a) Throw an exception (bad idea for dof() can be called within the loop)
+         *  b) Return adouble(0,0,false,NULL) that is an empty adouble object.
+         *     Here, block_index.first can help detect the variable in that block.
+         *     If its name is equal to the requested variableName return variable(index);
+         *     otherwise, return an empt adouble().
+         */
         if(li == -1)
             throw std::runtime_error((boost::format("Invalid index in function dof('%s', %d)") % variableName % li).str());
 
@@ -343,34 +352,48 @@ public:
         const BlockIndices & index_mapping = m_sparsity_pattern.get_column_indices();
         //             <block_index,  index_in_block>
         std::pair<unsigned int, BlockIndices::size_type> block_index = index_mapping.global_to_local(global_dof_index);
+        unsigned int block          = block_index.first;
         unsigned int index_in_block = block_index.second;
 
         //printf("dof_number = %d -> (block=%d, block_index = %d) \n", global_dof_index, block_index.first, block_index.second);
 
         // b) Find variable in the parent model using its name
         daeVariable* variable = NULL;
+        unsigned int variable_block = -1;
+
         std::vector<daeVariable_t*> arrVariables;
         m_model->GetVariables(arrVariables);
+
         for(int i = 0; i < arrVariables.size(); i++)
         {
             daeVariable* pVariable = dynamic_cast<daeVariable*>(arrVariables[i]);
             if(pVariable && pVariable->GetName() == variableName)
             {
-                variable = pVariable;
+                variable_block = i; //  counter i is also the block counter: each variable forms one block (including the vector dofs)
+                variable       = pVariable;
                 break;
             }
         }
         if(!variable)
             throw std::runtime_error((boost::format("Invalid DOF name in function dof('%s', %d)") % variableName % li).str());
 
+        if(variable_block != block)
+        {
+            printf("The block index found for the specified index [%d] does not match the block where variable belongs [%d]. "
+                   "Returning an empty adouble object.\n", block, variable_block);
+            return adouble();
+        }
+
         // c) Create adouble
         size_t n = variable->GetNumberOfPoints();
         if(index_in_block >= n)
+        {
+            printf("dof_number = %d -> (block=%d, block_index = %d) \n", global_dof_index, block_index.first, block_index.second);
             throw std::runtime_error((boost::format("DOF '%s' index in function dof('%s', %d) is out of bounds (global[%d] = %d) >= %d")
                                       % variableName % variableName % li % li % index_in_block % n).str());
+        }
 
         return (*variable)(index_in_block);
-
     }
 
     virtual Tensor<1,dim,adouble> vector_dof_approximation(const std::string& variableName, const unsigned int q) const
@@ -391,8 +414,22 @@ public:
         Tensor<1,dim,adouble> ad_vector_approximation;
         for(unsigned int j = 0; j < dofs_per_cell; ++j)
         {
-            adouble               dof   = this->dof(variableName, j);
             Tensor<1,dim,double>  phi_vector_j = m_fe_values[*extractorVector].value(j, q);
+            bool non_zero = false;
+            for(int x = 0; x < dim; x++)
+                if(phi_vector_j[x] != 0)
+                {
+                    non_zero = true;
+                    break;
+                }
+            // If all items in the tensor are zero skip the addition
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(non_zero == false)
+                continue;
+
+            adouble dof = this->dof(variableName, j);
 
             ad_vector_approximation += (dof * phi_vector_j);
         }
@@ -418,8 +455,23 @@ public:
         Tensor<2,dim,adouble> ad_vector_approximation;
         for(unsigned int j = 0; j < dofs_per_cell; ++j)
         {
-            adouble               dof           = this->dof(variableName, j);
             Tensor<2,dim,double>  dphi_vector_j = m_fe_values[*extractorVector].gradient(j, q);
+            bool non_zero = false;
+            for(int x = 0; x < dim; x++)
+                for(int y = 0; y < dim; y++)
+                    if(dphi_vector_j[x][y] != 0)
+                    {
+                        non_zero = true;
+                        break;
+                    }
+            // If all items in the tensor are zero skip the addition.
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(non_zero == false)
+                continue;
+
+            adouble dof = this->dof(variableName, j);
 
             ad_vector_approximation += (dof * dphi_vector_j);
         }
@@ -445,8 +497,15 @@ public:
         adouble ad_approximation;
         for(unsigned int j = 0; j < dofs_per_cell; ++j)
         {
-            adouble dof   = this->dof(variableName, j);
-            double  phi_j = m_fe_values[*extractorScalar].value(j, q);
+            double phi_j = m_fe_values[*extractorScalar].value(j, q);
+            // If it is equal to zero skip the addition.
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(phi_j == 0)
+                continue;
+
+            adouble dof = this->dof(variableName, j);
 
             ad_approximation += (dof * phi_j);
         }
@@ -795,21 +854,22 @@ void dealiiFiniteElementSystem<dim>::setup_system()
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
         m_no_components += m_DOFs[i]->m_nMultiplicity;
 
-    m_block_component.clear();
-    for(unsigned int i = 0; i < n_dofs; i++)
-        m_block_component.insert(m_block_component.end(), m_DOFs[i]->m_nMultiplicity, i);
+    //m_block_component.clear();
+    //for(unsigned int i = 0; i < n_dofs; i++)
+    //    m_block_component.insert(m_block_component.end(), m_DOFs[i]->m_nMultiplicity, i);
 
-    DoFRenumbering::component_wise(dof_handler, m_block_component);
+    DoFRenumbering::component_wise(dof_handler);//, m_block_component);
 
     m_dofs_per_block.resize(n_dofs);
-    DoFTools::count_dofs_per_block (dof_handler, m_dofs_per_block, m_block_component);
+    DoFTools::count_dofs_per_block (dof_handler, m_dofs_per_block);//, m_block_component);
 
     //for(unsigned int i = 0; i < m_no_components; i++)
     //    printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
-    //for(unsigned int i = 0; i < n_dofs; i++)
-    //    printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
 
     const unsigned int n_couplings = dof_handler.max_couplings_between_dofs();
+    printf("n_couplings = %d\n", n_couplings);
 
     sparsity_pattern.reinit (n_dofs, n_dofs);
     for(unsigned int i = 0; i < n_dofs; i++)

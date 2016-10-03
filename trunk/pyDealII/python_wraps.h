@@ -109,19 +109,19 @@ string Tensor_1_3D_repr(Tensor<1,3,Number>& self)
 }
 
 template<class Number>
-Tensor<1,1,Number> Tensor_2_1D_getitem(Tensor<2,1,Number>& self, size_t i)
+Tensor<1,1,Number>* Tensor_2_1D_getitem(Tensor<2,1,Number>& self, size_t i)
 {
-    return self[i];
+    return &self[i];
 }
 template<class Number>
-Tensor<1,2,Number> Tensor_2_2D_getitem(Tensor<2,2,Number>& self, size_t i)
+Tensor<1,2,Number>* Tensor_2_2D_getitem(Tensor<2,2,Number>& self, size_t i)
 {
-    return self[i];
+    return &self[i];
 }
 template<class Number>
-Tensor<1,3,Number> Tensor_2_3D_getitem(Tensor<2,3,Number>& self, size_t i)
+Tensor<1,3,Number>* Tensor_2_3D_getitem(Tensor<2,3,Number>& self, size_t i)
 {
-    return self[i];
+    return &self[i];
 }
 
 template<class Number>
@@ -138,6 +138,22 @@ template<class Number>
 void Tensor_2_3D_setitem(Tensor<2,3,Number>& self, size_t i, const Tensor<1,3,Number>& value)
 {
     self[i] = value;
+}
+
+template<int rank, int dim, typename Number>
+std::string tensor__str__(const Tensor<rank,dim,Number>& t)
+{
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
+}
+
+template<int rank, int dim, typename Number>
+std::string tensor__repr__(const Tensor<rank,dim,Number>& t)
+{
+    std::stringstream ss;
+    ss << "Tensor<" << rank << "," << dim << ">(" << t << ")";
+    return ss.str();
 }
 
 /*
