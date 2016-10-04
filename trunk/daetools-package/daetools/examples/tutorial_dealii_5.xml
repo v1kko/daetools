@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" 
+       "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd"[ 
+        <!ENTITY mathml "http://www.w3.org/1998/Math/MathML" > 
+]> 
+<?xml-stylesheet type="text/xsl" href="dae-tools.xsl"?>
+<Model ID="41665576" Class="daeModel" Library="DAE.Core" Version="1.6.0">
+  <Name>HeatConduction</Name>
+  <Description>Transient heat conduction equation</Description>
+  <MathMLName>
+    <math xmlns="http://www.w3.org/1998/Math/MathML">
+      <mrow>
+        <mi mathvariant="italic">HeatConduction</mi>
+      </mrow>
+    </math>
+  </MathMLName>
+  <Domains>
+    <Object ID="41665384" Class="daeDomain" Library="DAE.Core" Version="1.6.0">
+      <Name>&Omega;</Name>
+      <Description>Omega</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">&Omega;</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eUnstructuredGrid</Type>
+      <Units/>
+      <MathMLUnits>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow/>
+        </math>
+      </MathMLUnits>
+    </Object>
+    <Object ID="41603088" Class="daeDomain" Library="DAE.Core" Version="1.6.0">
+      <Name>&amp;Omega;_0</Name>
+      <Description>FE sub domain 0</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mrow>
+                <mi mathvariant="italic">&Omega;</mi>
+              </mrow>
+              <mrow>
+                <mi mathvariant="italic">0</mi>
+              </mrow>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eArray</Type>
+      <Units/>
+      <MathMLUnits>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow/>
+        </math>
+      </MathMLUnits>
+    </Object>
+    <Object ID="41665808" Class="daeDomain" Library="DAE.Core" Version="1.6.0">
+      <Name>&amp;Omega;_1</Name>
+      <Description>FE sub domain 1</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mrow>
+                <mi mathvariant="italic">&Omega;</mi>
+              </mrow>
+              <mrow>
+                <mi mathvariant="italic">1</mi>
+              </mrow>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <Type>eArray</Type>
+      <Units/>
+      <MathMLUnits>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow/>
+        </math>
+      </MathMLUnits>
+    </Object>
+  </Domains>
+  <Parameters/>
+  <Variables>
+    <Object ID="41595992" Class="daeVariable" Library="DAE.Core" Version="1.6.0">
+      <Name>c</Name>
+      <Description>Concentration</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">c</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>no_t</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="41603088">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mrow>
+                    <mi mathvariant="italic">&Omega;</mi>
+                  </mrow>
+                  <mrow>
+                    <mi mathvariant="italic">0</mi>
+                  </mrow>
+                </msub>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        &amp;Omega;_0</ObjectRef>
+      </DomainRefs>
+    </Object>
+    <Object ID="41847128" Class="daeVariable" Library="DAE.Core" Version="1.6.0">
+      <Name>mu</Name>
+      <Description>Chemical potential</Description>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <mi mathvariant="italic">mu</mi>
+          </mrow>
+        </math>
+      </MathMLName>
+      <VariableType>no_t</VariableType>
+      <DomainRefs>
+        <ObjectRef ID="41665808">
+          <ObjectRefMathML>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <msub>
+                  <mrow>
+                    <mi mathvariant="italic">&Omega;</mi>
+                  </mrow>
+                  <mrow>
+                    <mi mathvariant="italic">1</mi>
+                  </mrow>
+                </msub>
+              </mrow>
+            </math>
+          </ObjectRefMathML>
+        &amp;Omega;_1</ObjectRef>
+      </DomainRefs>
+    </Object>
+  </Variables>
+  <Ports/>
+  <EventPorts/>
+  <Equations>
+    <Object ID="43095048" Class="daeFiniteElementEquation" Library="DAE.Core" Version="1.6.0">
+      <Name>dealIIFESystem_0</Name>
+      <Description/>
+      <MathMLName>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+          <mrow>
+            <msub>
+              <mrow>
+                <mi mathvariant="italic">dealIIFESystem</mi>
+              </mrow>
+              <mrow>
+                <mi mathvariant="italic">0</mi>
+              </mrow>
+            </msub>
+          </mrow>
+        </math>
+      </MathMLName>
+      <EquationType>eAlgebraic</EquationType>
+      <Expression>
+        <Value>
+          <units/>
+          <value>0</value>
+        </Value>
+      </Expression>
+      <Residual>$${ \left [ \mathbf{M_{ij}} \right ] \left \{ \frac{\partial x_j}{\partial t} \right \} } + { \left [ \mathbf{A_{ij}} \right ] \left \{ {x_j} \right \} } = \left \{ f_i\right \}$$</Residual>
+      <DistributedDomainInfos>
+        <Object ID="41658888" Class="daeDistributedEquationDomainInfo" Library="DAE.Core" Version="1.6.0">
+          <Name>&Omega;</Name>
+          <Description/>
+          <MathMLName>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+              <mrow>
+                <mi mathvariant="italic">&Omega;</mi>
+              </mrow>
+            </math>
+          </MathMLName>
+          <Domain ID="41665384">
+            <ObjectRefMathML>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                  <mi mathvariant="italic">&Omega;</mi>
+                </mrow>
+              </math>
+            </ObjectRefMathML>
+          &Omega;</Domain>
+          <Type>eClosedClosed</Type>
+        </Object>
+      </DistributedDomainInfos>
+    </Object>
+  </Equations>
+  <OnEventActions/>
+  <OnConditionActions/>
+  <STNs/>
+  <PortConnections/>
+  <EventPortConnections/>
+  <Units/>
+  <UnitArrays/>
+  <PortArrays/>
+</Model>

@@ -435,59 +435,59 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_<daepython::TensorFunction_wrapper<1,1>, boost::noncopyable>("TensorFunction_1_1D", no_init)
-        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+        .def(init<>())
 
         .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,1>::value),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
         .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,1>::gradient),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
     ;
 
     class_<daepython::TensorFunction_wrapper<1,2>, boost::noncopyable>("TensorFunction_1_2D", no_init)
-        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+        .def(init<>())
 
         .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,2>::value),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
         .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,2>::gradient),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
     ;
 
     class_<daepython::TensorFunction_wrapper<1,3>, boost::noncopyable>("TensorFunction_1_3D", no_init)
-        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+        .def(init<>())
 
         .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,3>::value),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
         .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,3>::gradient),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
     ;
 
 
 
     class_<daepython::TensorFunction_wrapper<2,1>, boost::noncopyable>("TensorFunction_2_1D", no_init)
-        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+        .def(init<>())
 
         .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,1>::value),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
         .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,1>::gradient),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
     ;
 
     class_<daepython::TensorFunction_wrapper<2,2>, boost::noncopyable>("TensorFunction_2_2D", no_init)
-        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+        .def(init<>())
 
         .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,2>::value),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
         .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,2>::gradient),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
     ;
 
     class_<daepython::TensorFunction_wrapper<2,3>, boost::noncopyable>("TensorFunction_2_3D", no_init)
-        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+        .def(init<>())
 
         .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,3>::value),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
         .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,3>::gradient),
-                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+                                ( arg("self"), arg("point") ) )
     ;
 
 
@@ -822,6 +822,32 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("normal_1D", &normal<1>, ( arg("quadraturePoint") ));
     def("normal_2D", &normal<2>, ( arg("quadraturePoint") ));
     def("normal_3D", &normal<3>, ( arg("quadraturePoint") ));
+
+
+    def("tensor1_function_value_1D", &tensor_function_value<1,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor1_function_value_2D", &tensor_function_value<1,2,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor1_function_value_3D", &tensor_function_value<1,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+
+    def("tensor2_function_value_1D", &tensor_function_value<2,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor2_function_value_2D", &tensor_function_value<2,2,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor2_function_value_3D", &tensor_function_value<2,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+
+    //def("tensor3_function_value_1D", &tensor_function_value<3,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    //def("tensor3_function_value_2D", &tensor_function_value<3,2,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    //def("tensor3_function_value_3D", &tensor_function_value<3,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+
+    def("tensor1_function_gradient_1D", &tensor_function_gradient<1,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor1_function_gradient_2D", &tensor_function_gradient<1,2,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor1_function_gradient_3D", &tensor_function_gradient<1,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+
+    def("tensor2_function_gradient_1D", &tensor_function_gradient<2,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor2_function_gradient_2D", &tensor_function_gradient<2,2,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    def("tensor2_function_gradient_3D", &tensor_function_gradient<2,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+
+    //def("tensor3_function_gradient_1D", &tensor_function_gradient<3,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    //def("tensor3_function_gradient_2D", &tensor_function_gradient<3,2,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+    //def("tensor3_function_gradient_3D", &tensor_function_gradient<3,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
+
 
     def("function_value_1D", &function_value<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
     def("function_value_2D", &function_value<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));

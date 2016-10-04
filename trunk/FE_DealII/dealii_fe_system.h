@@ -865,11 +865,11 @@ void dealiiFiniteElementSystem<dim>::setup_system()
 
     //for(unsigned int i = 0; i < m_no_components; i++)
     //    printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
-    for(unsigned int i = 0; i < n_dofs; i++)
-        printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
+    //for(unsigned int i = 0; i < n_dofs; i++)
+    //    printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
 
     const unsigned int n_couplings = dof_handler.max_couplings_between_dofs();
-    printf("n_couplings = %d\n", n_couplings);
+    //printf("n_couplings = %d\n", n_couplings);
 
     sparsity_pattern.reinit (n_dofs, n_dofs);
     for(unsigned int i = 0; i < n_dofs; i++)
@@ -1177,9 +1177,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         }
     }
     
-    for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
-       printf("(%d,%f) ", it->first, it->second.getValue());
-    printf("\n");
+    //for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
+    //   printf("(%d,%f) ", it->first, it->second.getValue());
+    //printf("\n");
     
     // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects
     // The integral expressions will be built and added later
@@ -1203,7 +1203,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                                    endc = dof_handler.end();
     
     int n_active_cells = triangulation.n_active_cells();
-    for(int cellCounter = 0; cell != endc; ++cell, ++cellCounter)
+    for(int cellCounter = 0; cell != endc; ++cell, cellCounter++)
     {
         cell_matrix.clear();
         cell_matrix_dt.clear();
@@ -1496,14 +1496,16 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 system_rhs(local_dof_indices[i]) += cell_rhs[i];
         }
         
-        printf("Assembling the system matrices... %.1f%%", int((100.0*(cellCounter+1))/n_active_cells));
-        printf("\r");
+        printf("\rAssembling the system... %5.1f%%", float((100.0*(cellCounter+1))/n_active_cells));
         fflush(stdout);
         
     } // End cell iteration
-    printf("Assembling the system matrices... done.\n\n");
+    printf("\rAssembling the system... done.  \n\n");
+    fflush(stdout);
     
-    // Hanging nodes are NOT supported!! There must be a way to stop simulation if hanging nodes are detected
+    // Achtung, Achtung!!!
+    //   Hanging nodes are NOT supported at th moment!! 
+    //   There must be a way to stop simulation if hanging nodes are detected.
 
     // If using refined grids condense hanging nodes
     //hanging_node_constraints.condense(system_matrix);

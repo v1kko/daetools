@@ -394,7 +394,7 @@ class TensorFunction_wrapper : public TensorFunction<rank,dim,double>,
                                public boost::python::wrapper< TensorFunction<rank,dim,double> >
 {
 public:
-    TensorFunction_wrapper(unsigned int n_components = 1) : TensorFunction<rank,dim,double>(n_components)
+    TensorFunction_wrapper() : TensorFunction<rank,dim,double>()
     {
     }
 
@@ -402,7 +402,7 @@ public:
     {
     }
 
-    Tensor<rank,dim,double> value(const Point<dim> &p, const unsigned int component = 0) const
+    Tensor<rank,dim,double> value(const Point<dim> &p) const
     {
         boost::python::override f = this->get_override("value");
         if(!f)
@@ -411,10 +411,10 @@ public:
             e << "The function 'value' not implemented in the python TensorFunction_" << dim << "D-derived class";
             throw e;
         }
-        return f(p, component);
+        return f(p);
     }
 
-    Tensor<rank+1,dim,double> gradient(const Point<dim> &p, const unsigned int component = 0) const
+    Tensor<rank+1,dim,double> gradient(const Point<dim> &p) const
     {
         boost::python::override f = this->get_override("gradient");
         if(!f)
@@ -423,7 +423,7 @@ public:
             e << "The function 'gradient' not implemented in the python TensorFunction_" << dim << "D-derived class";
             throw e;
         }
-        return f(p, component);
+        return f(p);
     }
 };
 

@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial_dealii_3.py
+                           tutorial_dealii_5.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -17,18 +17,24 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Cahn-Hilliard equation.
+Flow through porous media. Darcy's law (deal.II step-20).
+
+.. code-block:: none
+    .. math::
+
+        K^{-1} {\mathbf u} + \nabla p &=  0 \qquad {\textrm{in}\ } \Omega \\
+         -{\textrm{div}}\ {\mathbf u} &= -f \qquad {\textrm{in}\ } \Omega \\
+                                    p &=  g \qquad {\textrm{on}\ } \partial \Omega
 
 Mesh:
 
 .. image:: _static/square.png
-   :width: 400 px
+   :width: 300 px
 
 Results at t = 500s:
 
-.. image:: _static/tutorial_dealii_3-results.png
-   :width: 600 px
-
+.. image:: _static/tutorial_dealii_4-results.png
+   :width: 500 px
 """
 
 import os, sys, numpy, json, tempfile, random
@@ -40,22 +46,56 @@ from daetools.solvers.superlu import pySuperLU
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+class permeabilityFunction_2D(TensorFunction_2_2D):
+    def __init__(self, N):
+        TensorFunction_2_2D.__init__(self)
+
+        numpy.random.seed(1000)
+        self.centers   = 2 * numpy.random.rand(N,2) - 1
+        self.inv_kappa = Tensor_2_2D()
+
+    def value(self, point, component = 0):
+        # 1) Sinusoidal (a function of the distance from the flowline)
+        #distance_to_flowline = numpy.fabs(point[1] - 0.2*numpy.sin(10*point[0]))
+        #permeability = numpy.exp(-(distance_to_flowline*distance_to_flowline)/0.01)
+        #norm_permeability = max(permeability, 0.001)
+
+        # 2) Random permeability field
+        x2 = numpy.square(point[0]-self.centers[:,0])
+        y2 = numpy.square(point[1]-self.centers[:,1])
+        permeability = numpy.sum( numpy.exp(-(x2 + y2) / 0.01) )
+        norm_permeability = max(permeability, 0.005)
+
+        self.inv_kappa[0][0] = 1.0 / norm_permeability
+        self.inv_kappa[1][1] = 1.0 / norm_permeability
+
+        return self.inv_kappa
+
+class pBoundaryFunction_2D(Function_2D):
+    def __init__(self, n_components = 1):
+        Function_2D.__init__(self, n_components)
+
+    def value(self, p, component = 0):
+        alpha = 0.3
+        beta  = 1.0
+        return -(alpha*p[0]*p[1]*p[1]/2.0 + beta*p[0] - alpha*p[0]*p[0]*p[0]/6.0)
+
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        dofs = [dealiiFiniteElementDOF_2D(name='c',
-                                          description='Concentration',
-                                          fe = FE_Q_2D(1),
-                                          multiplicity=1),
-                dealiiFiniteElementDOF_2D(name='mu',
-                                          description='Chemical potential',
-                                          fe = FE_Q_2D(1),
+        dofs = [dealiiFiniteElementDOF_2D(name='u',
+                                          description='Velocity',
+                                          fe = FE_RaviartThomas_2D(0),
+                                          multiplicity=2),
+                dealiiFiniteElementDOF_2D(name='p',
+                                          description='Pressure',
+                                          fe = FE_DGQ_2D(0),
                                           multiplicity=1)]
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'square-50x50.msh')
+        mesh_file  = os.path.join(meshes_dir, 'square-step-20.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -63,57 +103,58 @@ class modTutorial(daeModel):
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('CahnHilliard', self, 'Cahn-Hilliard equation', self.fe_system)
+        self.fe_model = daeFiniteElementModel('PorousMedia', self, 'Flow through porous media', self.fe_system)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        D0    = 0.02
-        kappa = 1e-2
-        Omg_a = 3.4
+        functions = {}
+        functions['p_boundary'] = pBoundaryFunction_2D(self.n_components)
 
+        # Boundary IDs
         left_edge   = 0
         top_edge    = 1
         right_edge  = 2
         bottom_edge = 3
 
-        functions = {}
         dirichletBC = {}
-        boundaryIntegrals = {}
 
-        log_fe = feExpression_2D.log
-        # FE approximation of a quantity at the specified quadrature point (adouble object)
-        c = dof_approximation_2D('c', fe_q)
+        faceFi = {
+                   left_edge:   -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q),
+                   top_edge:    -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q),
+                   right_edge:  -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q),
+                   bottom_edge: -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q)
+                 }
 
-        # 1) f(c) from the Wikipedia (https://en.wikipedia.org/wiki/Cahn-Hilliard_equation)
-        fc_Fi = c**3 - c
+        #exp_fe = feExpression_2D.exp
+        #p = dof_approximation_2D('p', fe_q)
+        #alfa0 = 1.0
+        #gamma = 0.5
+        #alfa = alfa0 #* exp_fe(-gamma*p)
 
-        # 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes
-        #fc_Fi = log_fe(c/(1-c)) + Omg_a*(1-2*c)
+        self.fun_k_inverse = permeabilityFunction_2D(40)
+        k_inverse = tensor2_function_value_2D('k_inverse', self.fun_k_inverse, xyz_2D(fe_q))
 
-        c_accumulation    = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q)
-        mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0 * JxW_2D(fe_q)
-        mu                = phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q) * JxW_2D(fe_q)
-        c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * kappa * JxW_2D(fe_q)
-        fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * fc_Fi
+        accumulation = 0.0 * JxW_2D(fe_q)
+        velocity     = (phi_vector_2D('u', fe_i, fe_q) * k_inverse * phi_vector_2D('u', fe_j, fe_q)) * JxW_2D(fe_q)
+        p_gradient   = -(div_phi_2D('u', fe_i, fe_q) * phi_2D('p', fe_j, fe_q)) * JxW_2D(fe_q)
+        continuity   = -(phi_2D('p', fe_i, fe_q) * div_phi_2D('u', fe_j, fe_q)) * JxW_2D(fe_q)
+        source       = 0.0 * JxW_2D(fe_q)
 
-        weakForm = dealiiFiniteElementWeakForm_2D(
-            Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
-            Mij = c_accumulation,
-            Fi  = fun_c,
-            faceAij = {},
-            faceFi  = {},
-            functions = functions,
-            functionsDirichletBC = dirichletBC,
-            boundaryIntegrals = boundaryIntegrals)
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = velocity + p_gradient + continuity,
+                                                  Mij = accumulation,
+                                                  Fi  = source,
+                                                  faceAij = {},
+                                                  faceFi  = faceFi,
+                                                  functions = functions,
+                                                  functionsDirichletBC = dirichletBC)
 
-        print('Cahn-Hilliard equation:')
+        print('Darcy law equations:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
         print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
         print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
-        print('    boundaryIntegrals  = %s' % str([item for item in weakForm.boundaryIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -122,20 +163,14 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_dealii_3")
+        self.m = modTutorial("tutorial_deal_II_5")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass
 
     def SetUpVariables(self):
-        numpy.random.seed(124)
-        def ic_with_noise(index):
-            ic = 0.5
-            return ic + random.uniform(-0.1*ic, 0.1*ic)
-
-        #setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
-        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', ic_with_noise)
+        pass
 
 # Use daeSimulator class
 def guiRun(app):
@@ -144,10 +179,10 @@ def guiRun(app):
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_5-')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -166,8 +201,8 @@ def guiRun(app):
         print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.TimeHorizon       = 1.0
-    simulation.ReportingInterval = simulation.TimeHorizon/100
+    simulation.ReportingInterval = 5
+    simulation.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
@@ -183,10 +218,10 @@ def consoleRun():
     daesolver.SetLASolver(lasolver)
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results')
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_5-results')
 
     # Create two data reporters:
-    # 1. deal.II
+    # 1. DealII
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -202,15 +237,16 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.TimeHorizon       = 1.0
-    simulation.ReportingInterval = simulation.TimeHorizon/100
+    simulation.ReportingInterval = 5
+    simulation.TimeHorizon = 500
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
+    lasolver.SaveAsXPM(simulation.m.Name + '.xpm')
 
     # Save the model report and the runtime model report
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    #simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
