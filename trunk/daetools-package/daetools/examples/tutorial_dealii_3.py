@@ -77,11 +77,9 @@ class modTutorial(daeModel):
         right_edge  = 2
         bottom_edge = 3
 
-        functions = {}
         dirichletBC = {}
         boundaryIntegrals = {}
 
-        log_fe = feExpression_2D.log
         # FE approximation of a quantity at the specified quadrature point (adouble object)
         c = dof_approximation_2D('c', fe_q)
 
@@ -89,23 +87,23 @@ class modTutorial(daeModel):
         fc_Fi = c**3 - c
 
         # 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes
+        #log_fe = feExpression_2D.log
         #fc_Fi = log_fe(c/(1-c)) + Omg_a*(1-2*c)
 
+        # FE weak form terms
         c_accumulation    = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q)
         mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0 * JxW_2D(fe_q)
         mu                = phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q) * JxW_2D(fe_q)
         c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * kappa * JxW_2D(fe_q)
         fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * fc_Fi
 
-        weakForm = dealiiFiniteElementWeakForm_2D(
-            Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
-            Mij = c_accumulation,
-            Fi  = fun_c,
-            faceAij = {},
-            faceFi  = {},
-            functions = functions,
-            functionsDirichletBC = dirichletBC,
-            boundaryIntegrals = boundaryIntegrals)
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
+                                                  Mij = c_accumulation,
+                                                  Fi  = fun_c,
+                                                  faceAij = {},
+                                                  faceFi  = {},
+                                                  functionsDirichletBC = dirichletBC,
+                                                  boundaryIntegrals = boundaryIntegrals)
 
         print('Cahn-Hilliard equation:')
         print('    Aij = %s' % str(weakForm.Aij))

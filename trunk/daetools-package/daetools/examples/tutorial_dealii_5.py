@@ -110,8 +110,10 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        functions = {}
-        functions['p_boundary'] = pBoundaryFunction_2D(self.n_components)
+        # deal.II Function<dim> wrapper.
+        self.fun_p_boundary = pBoundaryFunction_2D(self.n_components)
+        # deal.II TensorFunction<2,dim> wrapper.
+        self.fun_k_inverse  = permeabilityFunction_2D(40)
 
         # Boundary IDs
         left_edge   = 0
@@ -121,22 +123,19 @@ class modTutorial(daeModel):
 
         dirichletBC = {}
 
+        # Function value wrapper
+        p_boundary = function_value_2D("p_boundary", self.fun_p_boundary, xyz_2D(fe_q))
         faceFi = {
-                   left_edge:   -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                   top_edge:    -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                   right_edge:  -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q),
-                   bottom_edge: -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * function_value_2D("p_boundary", xyz_2D(fe_q)) * JxW_2D(fe_q)
+                   left_edge:   -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q),
+                   top_edge:    -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q),
+                   right_edge:  -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q),
+                   bottom_edge: -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q)
                  }
 
-        #exp_fe = feExpression_2D.exp
-        #p = dof_approximation_2D('p', fe_q)
-        #alfa0 = 1.0
-        #gamma = 0.5
-        #alfa = alfa0 #* exp_fe(-gamma*p)
-
-        self.fun_k_inverse = permeabilityFunction_2D(40)
+        # TensorFunction<2,dim>::value wrappers
         k_inverse = tensor2_function_value_2D('k_inverse', self.fun_k_inverse, xyz_2D(fe_q))
 
+        # FE weak form terms
         accumulation = 0.0 * JxW_2D(fe_q)
         velocity     = (phi_vector_2D('u', fe_i, fe_q) * k_inverse * phi_vector_2D('u', fe_j, fe_q)) * JxW_2D(fe_q)
         p_gradient   = -(div_phi_2D('u', fe_i, fe_q) * phi_2D('p', fe_j, fe_q)) * JxW_2D(fe_q)
@@ -148,8 +147,8 @@ class modTutorial(daeModel):
                                                   Fi  = source,
                                                   faceAij = {},
                                                   faceFi  = faceFi,
-                                                  functions = functions,
-                                                  functionsDirichletBC = dirichletBC)
+                                                  functionsDirichletBC = dirichletBC,
+                                                  boundaryIntegrals = {})
 
         print('Darcy law equations:')
         print('    Aij = %s' % str(weakForm.Aij))

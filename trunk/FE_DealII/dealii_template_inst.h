@@ -40,6 +40,7 @@ adouble sqrt(const adouble& a)
 #include <deal.II/lac/block_sparse_matrix.templates.h>
 #include <deal.II/base/function_time.templates.h>
 #include <deal.II/base/function.templates.h>
+#include <deal.II/base/tensor_function.templates.h>
 
 namespace dealii
 {
@@ -146,6 +147,36 @@ SparseMatrix<adouble>::add (const size_type i,
 }
 
 template <>
+void
+SparseMatrix<adouble>::reinit (const SparsityPattern &sparsity)
+{
+    cols = &sparsity;
+    
+    if (cols->empty())
+    {
+        if (val != 0)
+            delete[] val;
+        val = 0;
+        max_len = 0;
+        return;
+    }
+    
+    const std::size_t N = cols->n_nonzero_elements();
+    if (N > max_len || max_len == 0)
+    {
+        if (val != 0)
+            delete[] val;
+        val = new adouble[N];
+        max_len = N;
+    }
+    
+    // Achtung, Achtung!!
+    // This causes the seg. fault when std::memset is called on an aray of non-PODs
+    // It is not needed for adouble, since it gets initialised to zeros in the constructor, anyway.
+    //*this = 0.;
+}
+
+template <>
 inline void
 BlockMatrixBase< SparseMatrix<adouble> >::add (const size_type  i,
                                                const size_type  j,
@@ -174,8 +205,6 @@ Vector<adouble>::allocate()
   // then allocate memory with the proper alignment requirements of 64 bytes
   val = new adouble[max_vec_size];
 }
-
-
 
 template <>
 void
@@ -211,7 +240,10 @@ Vector<adouble>::reinit (const size_type n,
       for(size_t i = 0; i < vec_size; i++)
           val[i] = adouble(0);
 
-   //*this = adouble(0); // this causes a segmentation fault!
+  // Achtung, Achtung!!
+  // This causes the seg. fault when std::memset is called on an aray of non-PODs
+  // It is not needed for adouble, since it gets initialised to zeros in the constructor, anyway.
+  //*this = 0;
 }
 
 // Explicit instantiation of template classes for Number=adouble
@@ -231,6 +263,18 @@ template class ZeroFunction<3, adouble>;
 template class ConstantFunction<1, adouble>;
 template class ConstantFunction<2, adouble>;
 template class ConstantFunction<3, adouble>;
+
+template class TensorFunction<1,1,adouble>;
+template class TensorFunction<1,2,adouble>;
+template class TensorFunction<1,3,adouble>;
+
+template class TensorFunction<2,1,adouble>;
+template class TensorFunction<2,2,adouble>;
+template class TensorFunction<2,3,adouble>;
+
+template class TensorFunction<3,1,adouble>;
+template class TensorFunction<3,2,adouble>;
+template class TensorFunction<3,3,adouble>;
 
 namespace daeMatrixTools
 {

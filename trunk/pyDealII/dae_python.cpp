@@ -302,54 +302,163 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
 
-    class_<daepython::Function_wrapper<1>, boost::noncopyable>("Function_1D", no_init)
+
+    class_< Tensor<2,1,adouble> >("adoubleTensor_2_1D", no_init)
+         .def(init<>())
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= adouble())
+        .def(self /= adouble())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_2_1D_getitem<adouble>, return_internal_reference<>())
+        .def("__setitem__",         &daepython::Tensor_2_1D_setitem<adouble>)
+        .def("__str__",             &daepython::tensor__str__<2,1,adouble>)
+        .def("__repr__",            &daepython::tensor__repr__<2,1,adouble>)
+
+        .def("clear",               &Tensor<2,1,adouble>::clear)
+        .def("memory_consumption",  &Tensor<2,1,adouble>::memory_consumption)
+    ;
+
+    class_< Tensor<2,2,adouble> >("adoubleTensor_2_2D", no_init)
+        .def(init<>())
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= adouble())
+        .def(self /= adouble())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_2_2D_getitem<adouble>, return_internal_reference<>())
+        .def("__setitem__",         &daepython::Tensor_2_2D_setitem<adouble>)
+        .def("__str__",             &daepython::tensor__str__<2,2,adouble>)
+        .def("__repr__",            &daepython::tensor__repr__<2,2,adouble>)
+
+        .def("clear",               &Tensor<2,2,adouble>::clear)
+        .def("memory_consumption",  &Tensor<2,2,adouble>::memory_consumption)
+    ;
+
+    class_< Tensor<2,3,adouble> >("adoubleTensor_2_3D", no_init)
+        .def(init<>())
+
+        .def(self == self)
+        .def(self != self)
+        .def(self += self)
+        .def(self -= self)
+        .def(self *= adouble())
+        .def(self /= adouble())
+        .def(- self)
+        .def(self + self)
+        .def(self - self)
+        .def(self * self)
+
+        .def("__getitem__",         &daepython::Tensor_2_3D_getitem<adouble>, return_internal_reference<>())
+        .def("__setitem__",         &daepython::Tensor_2_3D_setitem<adouble>)
+        .def("__str__",             &daepython::tensor__str__<2,3,adouble>)
+        .def("__repr__",            &daepython::tensor__repr__<2,3,adouble>)
+
+        .def("clear",               &Tensor<2,3,adouble>::clear)
+        .def("memory_consumption",  &Tensor<2,3,adouble>::memory_consumption)
+    ;
+
+
+    class_<daepython::Function_wrapper<1,double>, boost::noncopyable>("Function_1D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("n_components",  &Function<1>::n_components)
-
-        .def("value",           pure_virtual(&daepython::Function_wrapper_1D::value),
+        .def("value",           pure_virtual(&daepython::Function_wrapper<1,double>::value),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
-        .def("vector_value",    pure_virtual(&daepython::Function_wrapper_1D::vector_value),
+        .def("vector_value",    pure_virtual(&daepython::Function_wrapper<1,double>::vector_value),
                                 ( arg("self"), arg("point") ) )
 
-        .def("gradient",        pure_virtual(&daepython::Function_wrapper_1D::gradient),
+        .def("gradient",        pure_virtual(&daepython::Function_wrapper<1,double>::gradient),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
-        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper_1D::vector_gradient),
+        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper<1,double>::vector_gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daepython::Function_wrapper<2>, boost::noncopyable>("Function_2D", no_init)
+    class_<daepython::Function_wrapper<2,double>, boost::noncopyable>("Function_2D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("n_components",  &Function<2>::n_components)
-
-        .def("value",           pure_virtual(&daepython::Function_wrapper_2D::value),
+        .def("value",           pure_virtual(&daepython::Function_wrapper<2,double>::value),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
-        .def("vector_value",    pure_virtual(&daepython::Function_wrapper_2D::vector_value),
+        .def("vector_value",    pure_virtual(&daepython::Function_wrapper<2,double>::vector_value),
                                 ( arg("self"), arg("point") ) )
 
-        .def("gradient",        pure_virtual(&daepython::Function_wrapper_2D::gradient),
+        .def("gradient",        pure_virtual(&daepython::Function_wrapper<2,double>::gradient),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
-        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper_2D::vector_gradient),
+        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper<2,double>::vector_gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daepython::Function_wrapper<3>, boost::noncopyable>("Function_3D", no_init)
+    class_<daepython::Function_wrapper<3,double>, boost::noncopyable>("Function_3D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
-        .def_readonly("n_components",  &Function<3>::n_components)
-
-        .def("value",           pure_virtual(&daepython::Function_wrapper_3D::value),
+        .def("value",           pure_virtual(&daepython::Function_wrapper<3,double>::value),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
-        .def("vector_value",    pure_virtual(&daepython::Function_wrapper_3D::vector_value),
+        .def("vector_value",    pure_virtual(&daepython::Function_wrapper<3,double>::vector_value),
                                 ( arg("self"), arg("point") ) )
 
-        .def("gradient",        pure_virtual(&daepython::Function_wrapper_3D::gradient),
+        .def("gradient",        pure_virtual(&daepython::Function_wrapper<3,double>::gradient),
                                 ( arg("self"), arg("point"), arg("component") = 0 ) )
-        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper_3D::vector_gradient),
+        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper<3,double>::vector_gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
+    class_<daepython::Function_wrapper<1,adouble>, boost::noncopyable>("adoubleFunction_1D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::Function_wrapper<1,adouble>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_value",    pure_virtual(&daepython::Function_wrapper<1,adouble>::vector_value),
+                                ( arg("self"), arg("point") ) )
+
+        .def("gradient",        pure_virtual(&daepython::Function_wrapper<1,adouble>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper<1,adouble>::vector_gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+    class_<daepython::Function_wrapper<2,adouble>, boost::noncopyable>("adoubleFunction_2D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::Function_wrapper<2,adouble>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_value",    pure_virtual(&daepython::Function_wrapper<2,adouble>::vector_value),
+                                ( arg("self"), arg("point") ) )
+
+        .def("gradient",        pure_virtual(&daepython::Function_wrapper<2,adouble>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper<2,adouble>::vector_gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+    class_<daepython::Function_wrapper<3,adouble>, boost::noncopyable>("adoubleFunction_3D", no_init)
+        .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
+
+        .def("value",           pure_virtual(&daepython::Function_wrapper<3,adouble>::value),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_value",    pure_virtual(&daepython::Function_wrapper<3,adouble>::vector_value),
+                                ( arg("self"), arg("point") ) )
+
+        .def("gradient",        pure_virtual(&daepython::Function_wrapper<3,adouble>::gradient),
+                                ( arg("self"), arg("point"), arg("component") = 0 ) )
+        .def("vector_gradient",	pure_virtual(&daepython::Function_wrapper<3,adouble>::vector_gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+
+/*
     class_<daepython::adoubleFunction_wrapper<1>, boost::noncopyable>("adoubleFunction_1D", no_init)
         .def(init<unsigned int>((arg("self"), arg("n_components") = 1)))
 
@@ -397,116 +506,144 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("vector_gradient",	pure_virtual(&daepython::adoubleFunction_wrapper_3D::vector_gradient),
                                 ( arg("self"), arg("point") ) )
     ;
-
-    class_<ConstantFunction<1>, bases< Function<1> >, boost::noncopyable>("ConstantFunction_1D", no_init)
+*/
+    class_<ConstantFunction<1,double>, bases< Function<1,double> >, boost::noncopyable>("ConstantFunction_1D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
-        .def("__init__", make_constructor(&daepython::ConstantFunction_init<1>, default_call_policies(), ( arg("values") ) ))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<1,double>, default_call_policies(), ( arg("values") ) ))
     ;
-    class_<ConstantFunction<2>, bases< Function<2> >, boost::noncopyable>("ConstantFunction_2D", no_init)
+    class_<ConstantFunction<2,double>, bases< Function<2,double> >, boost::noncopyable>("ConstantFunction_2D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
-        .def("__init__", make_constructor(&daepython::ConstantFunction_init<2>, default_call_policies(), ( arg("values") ) ))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<2,double>, default_call_policies(), ( arg("values") ) ))
     ;
-    class_<ConstantFunction<3>, bases< Function<3> >, boost::noncopyable>("ConstantFunction_3D", no_init)
+    class_<ConstantFunction<3,double>, bases< Function<3,double> >, boost::noncopyable>("ConstantFunction_3D", no_init)
         .def(init<const double, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
-        .def("__init__", make_constructor(&daepython::ConstantFunction_init<3>, default_call_policies(), ( arg("values") ) ))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<3,double>, default_call_policies(), ( arg("values") ) ))
     ;
 
     class_<ConstantFunction<1,adouble>, bases< Function<1,adouble> >, boost::noncopyable>("adoubleConstantFunction_1D", no_init)
         .def(init<const adouble, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
-        .def("__init__", make_constructor(&daepython::adoubleConstantFunction_init<1>, default_call_policies(), ( arg("values") ) ))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<1,adouble>, default_call_policies(), ( arg("values") ) ))
     ;
     class_<ConstantFunction<2,adouble>, bases< Function<2,adouble> >, boost::noncopyable>("adoubleConstantFunction_2D", no_init)
         .def(init<const adouble, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
-        .def("__init__", make_constructor(&daepython::adoubleConstantFunction_init<2>, default_call_policies(), ( arg("values") ) ))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<2,adouble>, default_call_policies(), ( arg("values") ) ))
     ;
     class_<ConstantFunction<3,adouble>, bases< Function<3,adouble> >, boost::noncopyable>("adoubleConstantFunction_3D", no_init)
         .def(init<const adouble, optional<const unsigned int> >((arg("self"), arg("value"), arg("n_components") = 1)))
-        .def("__init__", make_constructor(&daepython::adoubleConstantFunction_init<3>, default_call_policies(), ( arg("values") ) ))
+        .def("__init__", make_constructor(&daepython::ConstantFunction_init<3,adouble>, default_call_policies(), ( arg("values") ) ))
     ;
 
-    class_<ZeroFunction<1>, bases< Function<1> >, boost::noncopyable>("ZeroFunction_1D", no_init)
-        .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
-    ;
-    class_<ZeroFunction<2>, bases< Function<2> >, boost::noncopyable>("ZeroFunction_2D", no_init)
-        .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
-    ;
-    class_<ZeroFunction<3>, bases< Function<3> >, boost::noncopyable>("ZeroFunction_3D", no_init)
-        .def(init< optional<const unsigned int> >((arg("self"), arg("n_components") = 1)))
-    ;
 
-    class_<daepython::TensorFunction_wrapper<1,1>, boost::noncopyable>("TensorFunction_1_1D", no_init)
+    class_<daepython::TensorFunction_wrapper<1,1,double>, boost::noncopyable>("TensorFunction_1_1D", no_init)
         .def(init<>())
 
-        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,1>::value),
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,1,double>::value),
                                 ( arg("self"), arg("point") ) )
-        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,1>::gradient),
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,1,double>::gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daepython::TensorFunction_wrapper<1,2>, boost::noncopyable>("TensorFunction_1_2D", no_init)
+    class_<daepython::TensorFunction_wrapper<1,2,double>, boost::noncopyable>("TensorFunction_1_2D", no_init)
         .def(init<>())
 
-        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,2>::value),
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,2,double>::value),
                                 ( arg("self"), arg("point") ) )
-        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,2>::gradient),
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,2,double>::gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daepython::TensorFunction_wrapper<1,3>, boost::noncopyable>("TensorFunction_1_3D", no_init)
+    class_<daepython::TensorFunction_wrapper<1,3,double>, boost::noncopyable>("TensorFunction_1_3D", no_init)
         .def(init<>())
 
-        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,3>::value),
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,3,double>::value),
                                 ( arg("self"), arg("point") ) )
-        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,3>::gradient),
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,3,double>::gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
 
-
-    class_<daepython::TensorFunction_wrapper<2,1>, boost::noncopyable>("TensorFunction_2_1D", no_init)
+    class_<daepython::TensorFunction_wrapper<2,1,double>, boost::noncopyable>("TensorFunction_2_1D", no_init)
         .def(init<>())
 
-        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,1>::value),
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,1,double>::value),
                                 ( arg("self"), arg("point") ) )
-        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,1>::gradient),
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,1,double>::gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daepython::TensorFunction_wrapper<2,2>, boost::noncopyable>("TensorFunction_2_2D", no_init)
+    class_<daepython::TensorFunction_wrapper<2,2,double>, boost::noncopyable>("TensorFunction_2_2D", no_init)
         .def(init<>())
 
-        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,2>::value),
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,2,double>::value),
                                 ( arg("self"), arg("point") ) )
-        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,2>::gradient),
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,2,double>::gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
-    class_<daepython::TensorFunction_wrapper<2,3>, boost::noncopyable>("TensorFunction_2_3D", no_init)
+    class_<daepython::TensorFunction_wrapper<2,3,double>, boost::noncopyable>("TensorFunction_2_3D", no_init)
         .def(init<>())
 
-        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,3>::value),
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,3,double>::value),
                                 ( arg("self"), arg("point") ) )
-        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,3>::gradient),
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,3,double>::gradient),
                                 ( arg("self"), arg("point") ) )
     ;
 
 
-    /*
-    class_<ComponentSelectFunction<1>, bases< Function<1> >, boost::noncopyable>("ComponentSelectFunction_1D", no_init)
-        .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
-        .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
+    class_<daepython::TensorFunction_wrapper<1,1,adouble>, boost::noncopyable>("adoubleTensorFunction_1_1D", no_init)
+        .def(init<>())
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,1,adouble>::value),
+                                ( arg("self"), arg("point") ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,1,adouble>::gradient),
+                                ( arg("self"), arg("point") ) )
     ;
 
-    class_<ComponentSelectFunction<2>, bases< Function<2> >, boost::noncopyable>("ComponentSelectFunction_2D", no_init)
-        .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
-        .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
+    class_<daepython::TensorFunction_wrapper<1,2,adouble>, boost::noncopyable>("adoubleTensorFunction_1_2D", no_init)
+        .def(init<>())
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,2,adouble>::value),
+                                ( arg("self"), arg("point") ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,2,adouble>::gradient),
+                                ( arg("self"), arg("point") ) )
     ;
 
-    class_<ComponentSelectFunction<3>, bases< Function<3> >, boost::noncopyable>("ComponentSelectFunction_3D", no_init)
-        .def(init<const unsigned int, double, const unsigned int>((arg("self"), arg("selected"), arg("value"), arg("n_components"))))
-        .def(init<const unsigned int, const unsigned int>((arg("self"), arg("value"), arg("n_components"))))
+    class_<daepython::TensorFunction_wrapper<1,3,adouble>, boost::noncopyable>("adoubleTensorFunction_1_3D", no_init)
+        .def(init<>())
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<1,3,adouble>::value),
+                                ( arg("self"), arg("point") ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<1,3,adouble>::gradient),
+                                ( arg("self"), arg("point") ) )
     ;
-    */
+
+
+    class_<daepython::TensorFunction_wrapper<2,1,adouble>, boost::noncopyable>("adoubleTensorFunction_2_1D", no_init)
+        .def(init<>())
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,1,adouble>::value),
+                                ( arg("self"), arg("point") ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,1,adouble>::gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+    class_<daepython::TensorFunction_wrapper<2,2,adouble>, boost::noncopyable>("adoubleTensorFunction_2_2D", no_init)
+        .def(init<>())
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,2,adouble>::value),
+                                ( arg("self"), arg("point") ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,2,adouble>::gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
+
+    class_<daepython::TensorFunction_wrapper<2,3,adouble>, boost::noncopyable>("adoubleTensorFunction_2_3D", no_init)
+        .def(init<>())
+
+        .def("value",           pure_virtual(&daepython::TensorFunction_wrapper<2,3,adouble>::value),
+                                ( arg("self"), arg("point") ) )
+        .def("gradient",        pure_virtual(&daepython::TensorFunction_wrapper<2,3,adouble>::gradient),
+                                ( arg("self"), arg("point") ) )
+    ;
 
     class_< std::vector< Point<1,double> > >("vector_Point_1D")
         .def(vector_indexing_suite< std::vector< Point<1,double> > >())
@@ -849,21 +986,21 @@ BOOST_PYTHON_MODULE(pyDealII)
     //def("tensor3_function_gradient_3D", &tensor_function_gradient<3,3,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
 
 
-    def("function_value_1D", &function_value<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_value_2D", &function_value<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_value_3D", &function_value<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_value_1D", &function_value<1,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_value_2D", &function_value<2,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_value_3D", &function_value<3,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
 
-    def("function_adouble_value_1D", &function_adouble_value<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_adouble_value_2D", &function_adouble_value<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_adouble_value_3D", &function_adouble_value<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_value_1D", &function_value<1,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_value_2D", &function_value<2,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_value_3D", &function_value<3,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
 
-    def("function_gradient_1D", &function_gradient<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_gradient_2D", &function_gradient<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_gradient_3D", &function_gradient<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_gradient_1D", &function_gradient<1,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_gradient_2D", &function_gradient<2,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_gradient_3D", &function_gradient<3,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
     
-    def("function_adouble_gradient_1D", &function_adouble_gradient<1>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_adouble_gradient_2D", &function_adouble_gradient<2>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
-    def("function_adouble_gradient_3D", &function_adouble_gradient<3>, ( arg("functionName"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_gradient_1D", &function_gradient<1,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_gradient_2D", &function_gradient<2,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
+    def("function_adouble_gradient_3D", &function_gradient<3,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
     
     def("phi_vector_1D", &phi_vector<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_vector_2D", &phi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
@@ -1157,14 +1294,12 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict,
                   boost::python::dict>(( arg("self"),
                                          arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
                                          arg("faceAij")              = boost::python::dict(),
                                          arg("faceFi")               = boost::python::dict(),
-                                         arg("functions")            = boost::python::dict(),
                                          arg("functionsDirichletBC") = boost::python::dict(),
                                          arg("boundaryIntegrals")    = boost::python::dict()
                                       )))
@@ -1174,7 +1309,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<1>::m_Fi)
         .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<1>::m_faceAij)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<1>::m_faceFi)
-        .def_readonly("Functions",             &dealiiFiniteElementWeakForm<1>::m_functions)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_adoubleFunctionsDirichletBC)
         .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<1>::m_mapBoundaryIntegrals)
     ;
@@ -1186,14 +1320,12 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict,
                   boost::python::dict>(( arg("self"),
                                          arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
                                          arg("faceAij")              = boost::python::dict(),
                                          arg("faceFi")               = boost::python::dict(),
-                                         arg("functions")            = boost::python::dict(),
                                          arg("functionsDirichletBC") = boost::python::dict(),
                                          arg("boundaryIntegrals")    = boost::python::dict()
                                       )))
@@ -1203,7 +1335,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<2>::m_Fi)
         .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<2>::m_faceAij)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<2>::m_faceFi)
-        .def_readonly("Functions",             &dealiiFiniteElementWeakForm<2>::m_functions)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_adoubleFunctionsDirichletBC)
         .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<2>::m_mapBoundaryIntegrals)
     ;
@@ -1215,14 +1346,12 @@ BOOST_PYTHON_MODULE(pyDealII)
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict,
                   boost::python::dict>(( arg("self"),
                                          arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
                                          arg("faceAij")              = boost::python::dict(),
                                          arg("faceFi")               = boost::python::dict(),
-                                         arg("functions")            = boost::python::dict(),
                                          arg("functionsDirichletBC") = boost::python::dict(),
                                          arg("boundaryIntegrals")    = boost::python::dict()
                                       )))
@@ -1232,7 +1361,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<3>::m_Fi)
         .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<3>::m_faceAij)
         .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<3>::m_faceFi)
-        .def_readonly("Functions",             &dealiiFiniteElementWeakForm<3>::m_functions)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<3>::m_adoubleFunctionsDirichletBC)
         .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<3>::m_mapBoundaryIntegrals)
     ;

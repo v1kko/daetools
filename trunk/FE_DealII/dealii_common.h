@@ -1576,8 +1576,6 @@ feRuntimeNumber<dim> erf_(const feRuntimeNumber<dim>& fe)
 }
 
 
-
-
 template<int dim>
 class feCellContext
 {
@@ -1625,8 +1623,8 @@ public:
     virtual double JxW (const unsigned int q) const = 0;
     virtual const Tensor<1,dim>& normal_vector (const unsigned int q) const = 0;
 
-    virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
-    virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
+    //virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
+    //virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
 
     virtual adouble dof(const std::string& variableName, const unsigned int i) const = 0;
 
@@ -2103,6 +2101,7 @@ public:
     int m_q;
 };
 
+/*
 template<int dim>
 class feNode_function : public feNode<dim>
 {
@@ -2234,19 +2233,20 @@ public:
     efeFunctionCall m_call;
     unsigned int    m_component;
 };
+*/
 
-/*
+
 template<int dim, typename Number>
 class feNode_function : public feNode<dim>
 {
 public:
     typedef typename boost::shared_ptr< feNode<dim> > feNodePtr;
 
-    feNode_tensor_function(const std::string& name, const Function<dim,Number>& tfun, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
-        : m_tensor_function(tfun)
+    feNode_function(const std::string& name, const Function<dim,Number>& fun, efeFunctionCall call, feNodePtr xyz_node, unsigned int component = 0)
+        : m_function(fun)
     {
         if(!dynamic_cast<feNode_xyz<dim>*>(xyz_node.get()))
-            throw std::runtime_error(std::string("An argument to the Function must be a point"));
+            throw std::runtime_error(std::string("An argument of the function_value|gradient() must be a point"));
 
         m_name      = name;
         m_xyz_node  = xyz_node;
@@ -2285,11 +2285,11 @@ public:
     {
         if(m_call == eFunctionValue)
         {
-            return (boost::format("function_value('%s', %s)") % rank % m_name % m_xyz_node->ToString()).str();
+            return (boost::format("function_value('%s', %s)") % m_name % m_xyz_node->ToString()).str();
         }
         else if(m_call == eFunctionGradient)
         {
-            return (boost::format("function_gradient('%s', %s)") % rank % m_name % m_xyz_node->ToString()).str();
+            return (boost::format("function_gradient('%s', %s)") % m_name % m_xyz_node->ToString()).str();
         }
         else
             throw std::runtime_error(std::string("Invalid Function call type"));
@@ -2301,7 +2301,7 @@ public:
     const Function<dim,Number>& m_function;
     efeFunctionCall             m_call;
     unsigned int                m_component;
-};*/
+};
 
 template<int rank, int dim, typename Number>
 class feNode_tensor_function : public feNode<dim>
@@ -3115,7 +3115,8 @@ feExpression<dim> normal(int q)
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_normal<dim>(q) ) );
 }
 
-template<int dim>
+/*
+ template<int dim>
 feExpression<dim> function_value(const std::string& name, const feExpression<dim>& xyz, unsigned int component = 0)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim>(name, eFunctionValue, xyz.m_node, component) ) );
@@ -3138,20 +3139,19 @@ feExpression<dim> function_adouble_gradient(const std::string& name, const feExp
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_adouble_function<dim>(name, eFunctionGradient, xyz.m_node, component) ) );
 }
-
-
-/*
-template<int rank, int dim, typename Number>
-feExpression<dim> tensor_function_value(const std::string& name, const TensorFunction<rank,dim,Number>& tfun, const feExpression<dim>& xyz, unsigned int component = 0)
-{
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_tensor_function<rank,dim,Number>(name, tfun, eFunctionValue, xyz.m_node, component) ) );
-}
-template<int rank, int dim, typename Number>
-feExpression<dim> tensor_function_gradient(const std::string& name, const TensorFunction<rank,dim,Number>& tfun, const feExpression<dim>& xyz, unsigned int component = 0)
-{
-    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_tensor_function<rank,dim,Number>(name, tfun, eFunctionGradient, xyz.m_node, component) ) );
-}
 */
+
+template<int dim, typename Number>
+feExpression<dim> function_value(const std::string& name, const Function<dim,Number>& fun, const feExpression<dim>& xyz, unsigned int component = 0)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim,Number>(name, fun, eFunctionValue, xyz.m_node, component) ) );
+}
+template<int dim, typename Number>
+feExpression<dim> function_gradient(const std::string& name, const Function<dim,Number>& fun, const feExpression<dim>& xyz, unsigned int component = 0)
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_function<dim,Number>(name, fun, eFunctionGradient, xyz.m_node, component) ) );
+}
+
 
 template<int rank, int dim, typename Number>
 feExpression<dim> tensor_function_value(const std::string& name, const TensorFunction<rank,dim,Number>& tfun, const feExpression<dim>& xyz)
@@ -3163,8 +3163,6 @@ feExpression<dim> tensor_function_gradient(const std::string& name, const Tensor
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_tensor_function<rank,dim,Number>(name, tfun, eFunctionGradient, xyz.m_node) ) );
 }
-
-
 
 template<int dim>
 feExpression<dim> dof(const std::string& variableName, int i)

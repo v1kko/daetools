@@ -70,25 +70,31 @@ class modTutorial(daeModel):
                                                       dofs            = dofs)          # degrees of freedom
           
         self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction FE problem', self.fe_system)
-       
+
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
         eq = self.CreateEquation("T_outer", "Boundary conditions for the outer edge")
         eq.Residual = self.T_outer() - Constant(200 * K)
 
+        # Thermo-physical properties of copper.
         rho   = 8960.0  # kg/m**3
         cp    =  385.0  # J/(kg*K)
         kappa =  401.0  # W/(m*K)
-        # Thermal diffusivity (m**2/s)
-        alpha = kappa/(rho * cp)
 
-        # We use deal.II ConstantFunction class to specify a constant value.
+        # Thermal diffusivity (m**2/s)
+        alpha = kappa / (rho * cp)
+
+        # deal.II Function<dim,Number> wrappers.
+        # Nota bene:
+        #   The function objects have to be stored in the python model
+        #   since the weak form holds only the weak references to them.
+        #
+        # In this example we use deal.II ConstantFunction<dim> class to specify a constant value.
         # Since we have only one DOF we do not need to specify n_components in the constructor
         # (the default value is 1) and do not need to handle values of multiple components.
-        functions = {}
-        functions['Diffusivity'] = ConstantFunction_2D(alpha)
-        functions['Generation']  = ConstantFunction_2D(0.0)
+        self.fun_Diffusivity = ConstantFunction_2D(alpha)
+        self.fun_Generation  = ConstantFunction_2D(0.0)
 
         # Nota bene:
         #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
@@ -96,25 +102,28 @@ class modTutorial(daeModel):
         # Here we use daetools variable for the outer boundary and constant values for the rest.
         dirichletBC    = {}
         dirichletBC[0] = [('T', adoubleConstantFunction_2D( self.T_outer() ))] # outer boundary
-        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350) ))] # inner ellipse
-        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250) ))] # inner rectangle
+        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350) ))]   # inner ellipse
+        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250) ))]   # inner rectangle
 
-        boundaryIntegrals = {
-                               0 : [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               1 : [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               2 : [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-                            }
+        boundaryIntegrals = {}
+        boundaryIntegrals[0] = [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        boundaryIntegrals[1] = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        boundaryIntegrals[2] = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
 
+        # Function<dim>::value wrappers
+        Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))
+        Generation  = function_value_2D('Generation',  self.fun_Generation,  xyz_2D(fe_q))
+
+        # FE weak form terms
         accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D('Diffusivity', xyz_2D(fe_q)) * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q)
+        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * Diffusivity * JxW_2D(fe_q)
+        source       = phi_2D('T', fe_i, fe_q) * Generation * JxW_2D(fe_q)
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
                                                   Mij = accumulation,
                                                   Fi  = source,
                                                   faceAij = {},
                                                   faceFi  = {},
-                                                  functions = functions,
                                                   functionsDirichletBC = dirichletBC,
                                                   boundaryIntegrals = boundaryIntegrals)
 

@@ -87,6 +87,15 @@ $PYTHON $ROOT/tutorial_dealii_1.py console
 echo tutorial_dealii_2.py
 $PYTHON $ROOT/tutorial_dealii_2.py console
 
+echo tutorial_dealii_3.py
+$PYTHON $ROOT/tutorial_dealii_3.py console
+
+echo tutorial_dealii_4.py
+$PYTHON $ROOT/tutorial_dealii_4.py console
+
+echo tutorial_dealii_5.py
+$PYTHON $ROOT/tutorial_dealii_5.py console
+
 echo opt_tutorial1.py
 $PYTHON $ROOT/opt_tutorial1.py console
 

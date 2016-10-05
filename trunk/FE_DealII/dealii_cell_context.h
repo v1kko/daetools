@@ -298,7 +298,7 @@ public:
     {
         return m_fe_values.normal_vector(q);
     }
-
+    /*
     virtual const Function<dim,double>& function(const std::string& functionName) const
     {
         typename map_String_FunctionPtr::iterator iter = m_mapFunctions.find(functionName);
@@ -316,7 +316,7 @@ public:
 
         return *(iter->second);
     }
-
+    */
     virtual adouble dof(const std::string& variableName, const unsigned int li) const
     {
         /* Achtung, Achtung!!

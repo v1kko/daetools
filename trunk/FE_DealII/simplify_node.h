@@ -19,7 +19,8 @@ adNodePtr simplify(adNodePtr node)
 
         adNode* n = n_s.get();
 
-        if(dynamic_cast<adConstantNode*>(n)) // transform i.e. exp(constant node) into the value of exp(node.value)
+        // Transform an unary node (i.e. exp(constant node)) into the constant node with value: exp(node.value)
+        if(dynamic_cast<adConstantNode*>(n))
         {
             adConstantNode* val = dynamic_cast<adConstantNode*>(n);
             quantity& q = val->m_quantity;

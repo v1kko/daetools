@@ -137,9 +137,11 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        # Thermo-physical properties of copper.
         rho   = 8960.0  # kg/m**3
         cp    =  385.0  # J/(kg*K)
         kappa =  401.0  # W/(m*K)
+
         # Thermal diffusivity (m**2/s)
         alpha        = kappa / (rho*cp)   # m**2/s
 
@@ -150,13 +152,13 @@ class modTutorial(daeModel):
         print('Beneath source flux = %f' % flux_beneath)
         print('Above source flux = %f x (1,-1)' % flux_above)
 
-        functions    = {}
-        functions['Diffusivity'] = ConstantFunction_2D(alpha)
-        functions['Generation']  = ConstantFunction_2D(0.0)
+        # deal.II Function<dim,Number> wrappers.
+        self.fun_Diffusivity = ConstantFunction_2D(alpha)
+        self.fun_Generation  = ConstantFunction_2D(0.0)
         # Gradient flux at boundary id=0 (Sun)
-        functions['Flux_a'] = GradientFunction_2D(flux_above, direction = (-1, 1))
+        self.fun_Flux_a = GradientFunction_2D(flux_above, direction = (-1, 1))
         # Flux as a function of daetools variables at boundary id=1 (outer tube where y < -0.5)
-        functions['Flux_b'] = BottomGradientFunction_2D(flux_beneath)
+        self.fun_Flux_b = BottomGradientFunction_2D(flux_beneath)
 
         # Nota bene:
         #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
@@ -164,18 +166,24 @@ class modTutorial(daeModel):
         dirichletBC    = {}
         dirichletBC[2] = [ ('T', adoubleConstantFunction_2D( adouble(300) )) ] # at boundary id=2 (inner tube)
 
-        boundaryIntegrals = {
-                               0 : [(self.Q0_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               1 : [(self.Q1_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))],
-                               2 : [(self.Q2_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-                            }
+        boundaryIntegrals = {}
+        boundaryIntegrals[0] = [(self.Q0_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        boundaryIntegrals[1] = [(self.Q1_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        boundaryIntegrals[2] = [(self.Q2_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
 
+        # Function<dim>::value and Function<dim>::gradient wrappers
+        D      = function_value_2D        ('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))
+        G      = function_value_2D        ('Generation',  self.fun_Generation,  xyz_2D(fe_q))
+        Flux_a = function_gradient_2D     ('Flux_a',      self.fun_Flux_a,      xyz_2D(fe_q))
+        Flux_b = function_adouble_value_2D('Flux_b',      self.fun_Flux_b,      xyz_2D(fe_q))
+
+        # FE weak form terms
         accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * function_value_2D("Diffusivity", xyz_2D(fe_q)) * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * function_value_2D("Generation", xyz_2D(fe_q)) * JxW_2D(fe_q)
+        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * D * JxW_2D(fe_q)
+        source       = phi_2D('T', fe_i, fe_q) * G * JxW_2D(fe_q)
         faceFluxes   = {
-                         0: phi_2D('T', fe_i, fe_q) * (function_gradient_2D("Flux_a", xyz_2D(fe_q)) * normal_2D(fe_q)) * JxW_2D(fe_q),
-                         1: phi_2D('T', fe_i, fe_q) * function_adouble_value_2D("Flux_b", xyz_2D(fe_q)) * JxW_2D(fe_q)
+                         0: phi_2D('T', fe_i, fe_q) * (Flux_a * normal_2D(fe_q)) * JxW_2D(fe_q),
+                         1: phi_2D('T', fe_i, fe_q) * Flux_b * JxW_2D(fe_q)
                        }
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
@@ -183,7 +191,6 @@ class modTutorial(daeModel):
                                                   Fi  = source,
                                                   faceAij = {},
                                                   faceFi  = faceFluxes,
-                                                  functions = functions,
                                                   functionsDirichletBC = dirichletBC,
                                                   boundaryIntegrals = boundaryIntegrals)
 

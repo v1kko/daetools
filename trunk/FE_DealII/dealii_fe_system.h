@@ -767,7 +767,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         fflush(stdout);
         
     } // End cell iteration
-    printf("\rAssembling the system... done.  \n\n");
+    printf("\rAssembling the system... done.  \n");
     fflush(stdout);
     
     // Achtung, Achtung!!!

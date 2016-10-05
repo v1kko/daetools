@@ -156,40 +156,6 @@ std::string tensor__repr__(const Tensor<rank,dim,Number>& t)
     return ss.str();
 }
 
-/*
-string Tensor_2_1D_str(Tensor_2_1D& self)
-{
-    return (boost::format("[[%f], [%f]]") % self[0][0] % self[0][1]).str();
-}
-string Tensor_2_2D_str(Tensor_2_2D& self)
-{
-    return (boost::format("[[%f, %f], [%f, %f]]")  % self[0][0] % self[0][1]
-                                                   % self[1][0] % self[1][1]).str();
-}
-string Tensor_2_3D_str(Tensor_2_3D& self)
-{
-    return (boost::format("[[%f, %f, %f], [%f, %f, %f], [%f, %f, %f]]") % self[0][0] % self[0][1] % self[0][2]
-                                                                        % self[1][0] % self[1][1] % self[1][2]
-                                                                        % self[1][0] % self[1][1] % self[1][2]).str();
-}
-
-string Tensor_2_1D_repr(Tensor_2_1D& self)
-{
-    return (boost::format("Tensor<2,1,double>([[%f], [%f]])") % self[0][0] % self[0][1]).str();
-}
-string Tensor_2_2D_repr(Tensor_2_2D& self)
-{
-    return (boost::format("Tensor<2,2,double>([[%f, %f], [%f, %f]])")  % self[0][0] % self[0][1]
-                                                                       % self[1][0] % self[1][1]).str();
-}
-string Tensor_2_3D_repr(Tensor_2_3D& self)
-{
-    return (boost::format("Tensor<2,3,double>([[%f, %f, %f], [%f, %f, %f], [%f, %f, %f]])") % self[0][0] % self[0][1] % self[0][2]
-                                                                                            % self[1][0] % self[1][1] % self[1][2]
-                                                                                            % self[2][0] % self[2][1] % self[2][2]).str();
-}
-*/
-
 string Point_1D_repr(Point_1D& self)
 {
     std::stringstream s(std::ios_base::out|std::ios_base::in);
@@ -283,12 +249,12 @@ void SparseMatrix_add(SparseMatrix<double>& self, unsigned int i, unsigned int j
 }
 
 
-template<int dim>
-class Function_wrapper : public Function<dim,double>,
-                         public boost::python::wrapper< Function<dim,double> >
+template<int dim, typename Number>
+class Function_wrapper : public Function<dim,Number>,
+                         public boost::python::wrapper< Function<dim,Number> >
 {
 public:
-    Function_wrapper(unsigned int n_components = 1) : Function<dim,double>(n_components)
+    Function_wrapper(unsigned int n_components = 1) : Function<dim,Number>(n_components)
     {
     }
 
@@ -296,7 +262,7 @@ public:
     {
     }
 
-    double value(const Point<dim> &p, const unsigned int component = 0) const
+    Number value(const Point<dim> &p, const unsigned int component = 0) const
     {
         boost::python::override f = this->get_override("value");
         if(!f)
@@ -308,7 +274,7 @@ public:
         return f(p, component);
     }
 
-    void vector_value(const Point<dim> &p, Vector<double>& values) const
+    void vector_value(const Point<dim> &p, Vector<Number>& values) const
     {
         boost::python::override f = this->get_override("vector_value");
         if(!f)
@@ -322,18 +288,18 @@ public:
 
         boost::python::ssize_t i, n;
         n = boost::python::len(lvalues);
-        if(n != Function<dim>::n_components)
+        if(n != Function<dim,Number>::n_components)
         {
             daeDeclareException(exInvalidCall);
-            e << "The number of items (" << n << ") returned from the Function<" << Function<dim>::dimension
-              << ">::vector_value call must be " << Function<dim>::n_components;
+            e << "The number of items (" << n << ") returned from the Function<" << dim
+              << ">::vector_value call must be " << Function<dim,Number>::n_components;
             throw e;
         }
         for(i = 0; i < n; i++)
-            values[i] = boost::python::extract<double>(lvalues[i]);
+            values[i] = boost::python::extract<Number>(lvalues[i]);
     }
 
-    Tensor<1,dim> gradient(const Point<dim> &p, const unsigned int component = 0) const
+    Tensor<1,dim,Number> gradient(const Point<dim> &p, const unsigned int component = 0) const
     {
         boost::python::override f = this->get_override("gradient");
         if(!f)
@@ -346,7 +312,7 @@ public:
         return f(p, component);
     }
 
-    void vector_gradient(const Point<dim> &p, std::vector<Tensor<1,dim> > &gradients) const
+    void vector_gradient(const Point<dim> &p, std::vector<Tensor<1,dim,Number> > &gradients) const
     {
         boost::python::override f = this->get_override("vector_gradient");
         if(!f)
@@ -360,41 +326,38 @@ public:
 
         boost::python::ssize_t i, n;
         n = boost::python::len(lgradients);
-        if(n != Function<dim>::n_components)
+        if(n != Function<dim,Number>::n_components)
         {
             daeDeclareException(exInvalidCall);
-            e << "The number of items (" << n << ") returned from the Function<" << Function<dim>::dimension
-              << ">::vector_gradient call must be " << Function<dim>::n_components;
+            e << "The number of items (" << n << ") returned from the Function<" << dim
+              << ">::vector_gradient call must be " << Function<dim,Number>::n_components;
             throw e;
         }
         for(i = 0; i < n; i++)
-            gradients[i] = boost::python::extract< Tensor<1,dim> >(lgradients[i]);
+            gradients[i] = boost::python::extract< Tensor<1,dim,Number> >(lgradients[i]);
     }
 };
-typedef Function_wrapper<1> Function_wrapper_1D;
-typedef Function_wrapper<2> Function_wrapper_2D;
-typedef Function_wrapper<3> Function_wrapper_3D;
 
-template<int dim>
-ConstantFunction<dim>* ConstantFunction_init(boost::python::list l_values)
+template<int dim, typename Number>
+ConstantFunction<dim,Number>* ConstantFunction_init(boost::python::list l_values)
 {
-    std::vector<double> values;
+    std::vector<Number> values;
 
     for(boost::python::ssize_t i = 0; i < boost::python::len(l_values); i++)
     {
-        double item_value = boost::python::extract<double>(l_values[i]);
+        Number item_value = boost::python::extract<Number>(l_values[i]);
         values.push_back(item_value);
     }
 
-    return new ConstantFunction<dim>(values);
+    return new ConstantFunction<dim,Number>(values);
 }
 
-template<int rank, int dim>
-class TensorFunction_wrapper : public TensorFunction<rank,dim,double>,
-                               public boost::python::wrapper< TensorFunction<rank,dim,double> >
+template<int rank, int dim, typename Number>
+class TensorFunction_wrapper : public TensorFunction<rank,dim,Number>,
+                               public boost::python::wrapper< TensorFunction<rank,dim,Number> >
 {
 public:
-    TensorFunction_wrapper() : TensorFunction<rank,dim,double>()
+    TensorFunction_wrapper() : TensorFunction<rank,dim,Number>()
     {
     }
 
@@ -402,7 +365,7 @@ public:
     {
     }
 
-    Tensor<rank,dim,double> value(const Point<dim> &p) const
+    Tensor<rank,dim,Number> value(const Point<dim> &p) const
     {
         boost::python::override f = this->get_override("value");
         if(!f)
@@ -414,7 +377,7 @@ public:
         return f(p);
     }
 
-    Tensor<rank+1,dim,double> gradient(const Point<dim> &p) const
+    Tensor<rank+1,dim,Number> gradient(const Point<dim> &p) const
     {
         boost::python::override f = this->get_override("gradient");
         if(!f)
@@ -427,114 +390,6 @@ public:
     }
 };
 
-
-template<int dim>
-class adoubleFunction_wrapper : public Function<dim,adouble>,
-                                public boost::python::wrapper< Function<dim,adouble> >
-{
-public:
-    adoubleFunction_wrapper(unsigned int n_components = 1) : Function<dim,adouble>(n_components)
-    {
-    }
-
-    virtual ~adoubleFunction_wrapper()
-    {
-    }
-
-    adouble value(const Point<dim> &p, const unsigned int component = 0) const
-    {
-        boost::python::override f = this->get_override("value");
-        if(!f)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The function 'value' not implemented in the python adoubleFunction_" << dim << "D-derived class";
-            throw e;
-        }
-        return f(p, component);
-    }
-
-    void vector_value(const Point<dim> &p, Vector<adouble>& values) const
-    {
-        boost::python::override f = this->get_override("vector_value");
-        if(!f)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The function 'vector_value' not implemented in the python adoubleFunction_" << dim << "D-derived class";
-            throw e;
-        }
-
-        boost::python::list lvalues = f(p);
-
-        boost::python::ssize_t i, n;
-        n = boost::python::len(lvalues);
-        if(n != Function<dim,adouble>::n_components)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The number of items (" << n << ") returned from the adoubleFunction<" << dim
-              << ">::vector_value call must be " << Function<dim,adouble>::n_components;
-            throw e;
-        }
-        for(i = 0; i < n; i++)
-            values[i] = boost::python::extract<adouble>(lvalues[i]);
-    }
-
-    Tensor<1,dim,adouble> gradient(const Point<dim> &p, const unsigned int component = 0) const
-    {
-        boost::python::override f = this->get_override("gradient");
-        if(!f)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The function 'gradient' not implemented in the python adoubleFunction_" << dim << "D-derived class";
-            throw e;
-        }
-
-        return f(p, component);
-    }
-
-    void vector_gradient(const Point<dim> &p, std::vector<Tensor<1,dim,adouble> > &gradients) const
-    {
-        boost::python::override f = this->get_override("vector_gradient");
-        if(!f)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The function 'vector_gradient' not implemented in the python adoubleFunction_" << dim << "D-derived class";
-            throw e;
-        }
-
-        boost::python::list lgradients = f(p);
-
-        boost::python::ssize_t i, n;
-        n = boost::python::len(lgradients);
-        if(n != Function<dim,adouble>::n_components)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "The number of items (" << n << ") returned from the adoubleFunction<" << dim
-              << ">::vector_gradient call must be " << Function<dim,adouble>::n_components;
-            throw e;
-        }
-        for(i = 0; i < n; i++)
-            gradients[i] = boost::python::extract< Tensor<1,dim,adouble> >(lgradients[i]);
-    }
-};
-typedef adoubleFunction_wrapper<1> adoubleFunction_wrapper_1D;
-typedef adoubleFunction_wrapper<2> adoubleFunction_wrapper_2D;
-typedef adoubleFunction_wrapper<3> adoubleFunction_wrapper_3D;
-
-template<int dim>
-ConstantFunction<dim,adouble>* adoubleConstantFunction_init(boost::python::list l_values)
-{
-    std::vector<adouble> values;
-
-    for(boost::python::ssize_t i = 0; i < boost::python::len(l_values); i++)
-    {
-        adouble item_value = boost::python::extract<adouble>(l_values[i]);
-        values.push_back(item_value);
-    }
-
-    return new ConstantFunction<dim,adouble>(values);
-}
-
-
 template<int dim>
 class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<dim>,
                                            public boost::python::wrapper< dealiiFiniteElementWeakForm<dim> >
@@ -545,7 +400,6 @@ public:
                                        const feExpression<dim>& Fi,  // Local contribution to the load vector
                                        boost::python::dict      dictFaceAij              = boost::python::dict(),
                                        boost::python::dict      dictFaceFi               = boost::python::dict(),
-                                       boost::python::dict      dictFunctions            = boost::python::dict(),
                                        boost::python::dict      dictFunctionsDirichletBC = boost::python::dict(),
                                        boost::python::dict      dictBoundaryIntegrals    = boost::python::dict())
     {
@@ -559,7 +413,7 @@ public:
         // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
         this->m_dictFaceAij              = dictFaceAij;
         this->m_dictFaceFi               = dictFaceFi;
-        this->m_dictFunctions            = dictFunctions;
+        //this->m_dictFunctions            = dictFunctions;
         this->m_dictFunctionsDirichletBC = dictFunctionsDirichletBC;
         this->m_dictBoundaryIntegrals    = dictBoundaryIntegrals;
 
@@ -599,7 +453,6 @@ public:
 
             unsigned int key = boost::python::extract<unsigned int>(key_);
 
-            //std::vector< std::pair<std::string, const Function<dim,double>*> >  bcs_double;
             std::vector< std::pair<std::string, const Function<dim,adouble>*> > bcs_adouble;
             for(int k = 0; k < len(vals_); k++)
             {
@@ -617,8 +470,6 @@ public:
                     daeDeclareException(exInvalidCall);
                     e << "Only the adouble version of the Function class (that is Function<dim,adouble>) objects are allowed for setting the Dirichlet BCs";
                     throw e;
-                    //const Function<dim,double>* fn = get_double_fn();
-                    //bcs_double.push_back( std::pair<std::string, const Function<dim,double>*>(var,fn) );
                 }
                 else if(get_adouble_fn.check())
                 {
@@ -634,12 +485,11 @@ public:
 
             }
 
-            //if(bcs_double.size() > 0)
-            //    this->m_functionsDirichletBC[key] = bcs_double;
             if(bcs_adouble.size() > 0)
                 this->m_adoubleFunctionsDirichletBC[key] = bcs_adouble;
         }
-
+        
+        /*
         keys = dictFunctions.keys();
         for(int i = 0; i < len(keys); ++i)
         {
@@ -666,7 +516,8 @@ public:
                 throw e;
             }
         }
-
+        */
+        
         keys = dictFaceAij.keys();
         for(int i = 0; i < len(keys); ++i)
         {
@@ -700,7 +551,7 @@ public:
     // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
     boost::python::object m_dictFaceAij;
     boost::python::object m_dictFaceFi;
-    boost::python::object m_dictFunctions;
+    //boost::python::object m_dictFunctions;
     boost::python::object m_dictFunctionsDirichletBC;
     boost::python::object m_dictBoundaryIntegrals;
 };

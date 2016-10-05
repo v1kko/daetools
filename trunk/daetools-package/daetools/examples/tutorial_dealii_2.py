@@ -112,7 +112,7 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        # The liquid is water
+        # Thermo-physical properties of the liquid (water).
         # The specific heat conductivity is normally 0.6 W/mK,
         # however, here we used much larger value to amplify the effect of conduction
         rho   = 1000.0  # kg/m**3
@@ -131,9 +131,6 @@ class modTutorial(daeModel):
         T_base   = 300 # Base temperature, K
         T_offset = 50  # Offset temperature, K
 
-        functions = {}
-        functions['u'] = VelocityFunction_2D(velocity, direction)
-
         # Boundary IDs
         left_edge   = 0
         top_edge    = 1
@@ -145,9 +142,15 @@ class modTutorial(daeModel):
                                     ('T',  TemperatureSource_2D(ymin, ymax, T_base, T_offset, self.n_components)),
                                   ]
 
+        # Function<dim> wrapper
+        self.fun_u_grad = VelocityFunction_2D(velocity, direction)
+        # Function<dim>::value wrappers
+        u_grad = function_gradient_2D("u", self.fun_u_grad, xyz_2D(fe_q))
+
+        # FE weak form terms
         accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
         diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * alpha * JxW_2D(fe_q)
-        convection   = phi_2D('T', fe_i, fe_q) * (function_gradient_2D("u", xyz_2D(fe_q)) * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) # ??
+        convection   = phi_2D('T', fe_i, fe_q) * (u_grad * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) # ??
         source       = phi_2D('T', fe_i, fe_q) * 0.0 * JxW_2D(fe_q)
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + convection,
@@ -155,8 +158,8 @@ class modTutorial(daeModel):
                                                   Fi  = source,
                                                   faceAij = {},
                                                   faceFi  = {},
-                                                  functions = functions,
-                                                  functionsDirichletBC = dirichletBC)
+                                                  functionsDirichletBC = dirichletBC,
+                                                  boundaryIntegrals = {})
 
         print('Transient heat convection equations:')
         print('    Aij = %s' % str(weakForm.Aij))
