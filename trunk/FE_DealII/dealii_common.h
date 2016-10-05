@@ -1,5 +1,5 @@
-#ifndef DAE_DEALII_COMMON_H
-#define DAE_DEALII_COMMON_H
+#ifndef DEAL_II_COMMON_H
+#define DEAL_II_COMMON_H
 
 #include <deal.II/base/point.h>
 #include <deal.II/base/tensor.h>

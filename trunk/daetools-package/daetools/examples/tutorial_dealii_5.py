@@ -51,11 +51,12 @@ class permeabilityFunction_2D(TensorFunction_2_2D):
         TensorFunction_2_2D.__init__(self)
 
         numpy.random.seed(1000)
-        self.centers   = 2 * numpy.random.rand(N,2) - 1
+        self.centers = 2 * numpy.random.rand(N,2) - 1
+        # Create a Tensor<rank=2,dim=2> object to serve as a return value (to make the function faster)
         self.inv_kappa = Tensor_2_2D()
 
     def value(self, point, component = 0):
-        # 1) Sinusoidal (a function of the distance from the flowline)
+        # 1) Sinusoidal (a function of the distance to the flowline)
         #distance_to_flowline = numpy.fabs(point[1] - 0.2*numpy.sin(10*point[0]))
         #permeability = numpy.exp(-(distance_to_flowline*distance_to_flowline)/0.01)
         #norm_permeability = max(permeability, 0.001)
@@ -66,6 +67,7 @@ class permeabilityFunction_2D(TensorFunction_2_2D):
         permeability = numpy.sum( numpy.exp(-(x2 + y2) / 0.01) )
         norm_permeability = max(permeability, 0.005)
 
+        # Set-up the inverse permeability tensor (only the diagonal items)
         self.inv_kappa[0][0] = 1.0 / norm_permeability
         self.inv_kappa[1][1] = 1.0 / norm_permeability
 

@@ -1,5 +1,5 @@
-#ifndef DAE_ADOUBLE_TEMPLATE_INSTANTIATIONS_H
-#define DAE_ADOUBLE_TEMPLATE_INSTANTIATIONS_H
+#ifndef DEAL_II_TEMPLATE_INSTANTIATIONS_H
+#define DEAL_II_TEMPLATE_INSTANTIATIONS_H
 
 #include "../Core/coreimpl.h"
 
@@ -11,10 +11,6 @@
 #include <deal.II/lac/full_matrix.h>
 #include <deal.II/lac/sparse_matrix.h>
 #include <deal.II/lac/block_sparse_matrix.h>
-//#include <deal.II/lac/sparse_matrix_ez.h>
-//#include <deal.II/lac/chunk_sparse_matrix.h>
-//#include <deal.II/lac/block_sparse_matrix_ez.h>
-//#include <deal.II/lac/matrix_block.h>
 #include <algorithm>
 #include <numeric>
 #include <set>
@@ -50,9 +46,6 @@ namespace dealii
 // Many template functions need to be specialized for Number=adouble
 namespace numbers
 {
-//    template <>
-//    struct NumberTraits<adouble>;
-
     template <>
     typename NumberTraits<adouble>::real_type
     NumberTraits<adouble>::abs (const adouble &x)
