@@ -395,33 +395,39 @@ class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<di
                                            public boost::python::wrapper< dealiiFiniteElementWeakForm<dim> >
 {
 public:
-    dealiiFiniteElementWeakFormWrapper(const feExpression<dim>& Aij, // Local contribution to the stiffness matrix
-                                       const feExpression<dim>& Mij, // Local contribution to the mass matrix
-                                       const feExpression<dim>& Fi,  // Local contribution to the load vector
-                                       boost::python::dict      dictFaceAij              = boost::python::dict(),
-                                       boost::python::dict      dictFaceFi               = boost::python::dict(),
+    dealiiFiniteElementWeakFormWrapper(const feExpression<dim>& Aij,               // Local contribution to the stiffness matrix
+                                       const feExpression<dim>& Mij,               // Local contribution to the mass matrix
+                                       const feExpression<dim>& Fi,                // Local contribution to the load vector
+                                       const feExpression<dim>& innerCellFaceAij         = feExpression<dim>(),
+                                       const feExpression<dim>& innerCellFaceFi          = feExpression<dim>(),
+                                       boost::python::dict      dictBoundaryFaceAij      = boost::python::dict(),
+                                       boost::python::dict      dictBoundaryFaceFi       = boost::python::dict(),
                                        boost::python::dict      dictFunctionsDirichletBC = boost::python::dict(),
-                                       boost::python::dict      dictBoundaryIntegrals    = boost::python::dict())
+                                       boost::python::dict      dictSurfaceIntegrals     = boost::python::dict(),
+                                       boost::python::list      listVolumeIntegrals      = boost::python::list())
     {
         boost::python::list keys;
 
 	// These terms get copied using the copy constructor and do need to be stored internally
-        this->m_Aij = Aij;
-        this->m_Mij = Mij;
-        this->m_Fi  = Fi;
+        this->m_Aij              = Aij;
+        this->m_Mij              = Mij;
+        this->m_Fi               = Fi;
+        this->m_innerCellFaceAij = innerCellFaceAij;
+        this->m_innerCellFaceFi  = innerCellFaceFi;
 
         // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
-        this->m_dictFaceAij              = dictFaceAij;
-        this->m_dictFaceFi               = dictFaceFi;
-        //this->m_dictFunctions            = dictFunctions;
+        this->m_dictBoundaryFaceAij      = dictBoundaryFaceAij;
+        this->m_dictBoundaryFaceFi       = dictBoundaryFaceFi;
+        //this->m_dictFunctions          = dictFunctions;
         this->m_dictFunctionsDirichletBC = dictFunctionsDirichletBC;
-        this->m_dictBoundaryIntegrals    = dictBoundaryIntegrals;
+        this->m_dictSurfaceIntegrals     = dictSurfaceIntegrals;
+        this->m_listVolumeIntegrals      = listVolumeIntegrals;
 
-        keys = dictBoundaryIntegrals.keys();
+        keys = dictSurfaceIntegrals.keys();
         for(int i = 0; i < len(keys); i++)
         {
             boost::python::object key_  = keys[i];
-            boost::python::list   vals_ = boost::python::extract<boost::python::list>(dictBoundaryIntegrals[key_]);
+            boost::python::list   vals_ = boost::python::extract<boost::python::list>(dictSurfaceIntegrals[key_]);
 
             unsigned int key = boost::python::extract<unsigned int>(key_);
 
@@ -442,7 +448,24 @@ public:
             }
 
             if(pairs.size() > 0)
-                this->m_mapBoundaryIntegrals[key] = pairs;
+                this->m_mapSurfaceIntegrals[key] = pairs;
+        }
+
+        for(int i = 0; i < len(listVolumeIntegrals); i++)
+        {
+            boost::python::object integral_ = boost::python::extract<boost::python::object>(listVolumeIntegrals[i]);
+
+            boost::python::tuple  t_var_expr = boost::python::extract<boost::python::tuple>(integral_);
+            boost::python::object o_variable   = t_var_expr[0];
+            boost::python::object o_expression = t_var_expr[1];
+
+            adouble           advar  = boost::python::extract<adouble>(o_variable);
+            feExpression<dim> expr   = boost::python::extract< feExpression<dim> >(o_expression);
+
+            if(!advar.node || !dynamic_cast<adSetupVariableNode*>(advar.node.get()))
+                throw std::runtime_error(std::string("Invalid variable node in the boundary integrals dictionary (must be adSetupVariableNode)"));
+
+            this->m_arrVolumeIntegrals.push_back( std::pair< adouble, feExpression<dim> >(advar, expr) );
         }
 
         keys = dictFunctionsDirichletBC.keys();
@@ -482,7 +505,6 @@ public:
                     e << "Invalid function " << key << " in the functions dictionary";
                     throw e;
                 }
-
             }
 
             if(bcs_adouble.size() > 0)
@@ -518,28 +540,28 @@ public:
         }
         */
         
-        keys = dictFaceAij.keys();
+        keys = dictBoundaryFaceAij.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFaceAij[key_];
+            boost::python::object val_ = dictBoundaryFaceAij[key_];
 
             unsigned int      key  = boost::python::extract<unsigned int>(key_);
             feExpression<dim> expr = boost::python::extract< feExpression<dim> >(val_);
 
-            this->m_faceAij[key] = expr;
+            this->m_boundaryFaceAij[key] = expr;
         }
 
-        keys = dictFaceFi.keys();
+        keys = dictBoundaryFaceFi.keys();
         for(int i = 0; i < len(keys); ++i)
         {
             boost::python::object key_ = keys[i];
-            boost::python::object val_ = dictFaceFi[key_];
+            boost::python::object val_ = dictBoundaryFaceFi[key_];
 
             unsigned int      key  = boost::python::extract<unsigned int>(key_);
             feExpression<dim> expr = boost::python::extract< feExpression<dim> >(val_);
 
-            this->m_faceFi[key] = expr;
+            this->m_boundaryFaceFi[key] = expr;
         }
     }
 
@@ -549,11 +571,12 @@ public:
 
 public:
     // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
-    boost::python::object m_dictFaceAij;
-    boost::python::object m_dictFaceFi;
+    boost::python::object m_dictBoundaryFaceAij;
+    boost::python::object m_dictBoundaryFaceFi;
     //boost::python::object m_dictFunctions;
     boost::python::object m_dictFunctionsDirichletBC;
-    boost::python::object m_dictBoundaryIntegrals;
+    boost::python::object m_dictSurfaceIntegrals;
+    boost::python::object m_listVolumeIntegrals;
 };
 
 template<int dim>

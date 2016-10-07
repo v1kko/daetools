@@ -88,17 +88,20 @@ public:
     }
 
 public:
-    bool                                            m_bNeedsUpdate; // Not used at the moment
-    feExpression<dim>                               m_Aij;  // Stiffness matrix
-    feExpression<dim>                               m_Mij;  // Mass matrix (dt)
-    feExpression<dim>                               m_Fi;   // Load vector (rhs)
-    map_Uint_Expression                             m_faceAij;
-    map_Uint_Expression                             m_faceFi;
+    bool                                            m_bNeedsUpdate;     // Not used at the moment
+    feExpression<dim>                               m_Aij;              // Stiffness matrix
+    feExpression<dim>                               m_Mij;              // Mass matrix (dt)
+    feExpression<dim>                               m_Fi;               // Load vector (rhs)
+    feExpression<dim>                               m_innerCellFaceAij;
+    feExpression<dim>                               m_innerCellFaceFi;
+    map_Uint_Expression                             m_boundaryFaceAij;
+    map_Uint_Expression                             m_boundaryFaceFi;
     map_String_FunctionPtr                          m_functions;
     map_String_adoubleFunctionPtr                   m_adouble_functions;
-    //map_Uint_vector_pair_String_FunctionPtr         m_functionsDirichletBC;
+    //map_Uint_vector_pair_String_FunctionPtr       m_functionsDirichletBC;
     map_Uint_vector_pair_String_adoubleFunctionPtr  m_adoubleFunctionsDirichletBC;
-    map_Uint_vector_pair_Variable_Expression        m_mapBoundaryIntegrals;
+    map_Uint_vector_pair_Variable_Expression        m_mapSurfaceIntegrals;
+    vector_pair_Variable_Expression                 m_arrVolumeIntegrals;
 };
 
 /******************************************************************
@@ -137,6 +140,7 @@ public:
     virtual dae::daeMatrix<adouble>*                                                    Msystem() const; // Mass matrix (dt)
     virtual dae::daeArray<adouble>*                                                     Fload() const;   // Load vector
     virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  BoundaryIntegrals() const;
+    virtual const std::vector< std::pair<adouble,adouble> >*                            VolumeIntegrals() const;
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
@@ -157,6 +161,37 @@ protected:
     void update_block(unsigned int block_index, double* values, unsigned int n);
     void write_solution(const std::string& strFilename);
 
+    void assemble_cell(const unsigned int dofs_per_cell,
+                       const unsigned int n_q_points,
+                       feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                       boost::numeric::ublas::matrix<adouble>& cell_matrix_dt,
+                       boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                       std::vector<adouble>& cell_rhs);
+    void assemble_boundary_face(const unsigned int face,
+                                const unsigned int boundary_id,
+                                FEFaceValues<dim>& fe_face_values,
+                                const unsigned int dofs_per_cell,
+                                const unsigned int n_face_q_points,
+                                feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
+                                typename DoFHandler<dim>::active_cell_iterator& cell,
+                                boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                std::vector<adouble>& cell_rhs);
+    void assemble_inner_cell_face(const unsigned int face,
+                                  FEFaceValues<dim>& fe_face_values,
+                                  const unsigned int dofs_per_cell,
+                                  const unsigned int n_face_q_points,
+                                  feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
+                                  typename DoFHandler<dim>::active_cell_iterator& cell,
+                                  boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                  std::vector<adouble>& cell_rhs);
+    void integrate_surface_integrals(const unsigned int face,
+                                     const unsigned int boundary_id,
+                                     FEFaceValues<dim>& fe_face_values,
+                                     const unsigned int dofs_per_cell,
+                                     const unsigned int n_face_q_points,
+                                     feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
+                                     typename DoFHandler<dim>::active_cell_iterator& cell);
+
 public:
     // Additional deal.II specific data
     Triangulation<dim>              triangulation;
@@ -171,7 +206,8 @@ public:
     BlockVector<adouble>        solution;
     BlockVector<double>         datareporter_solution;
 
-    std::map< unsigned int, std::vector< std::pair<adouble,adouble> > > m_mapBoundaryIntegrals;
+    std::map< unsigned int, std::vector< std::pair<adouble,adouble> > > m_mapSurfaceIntegrals;
+    std::vector< std::pair<adouble,adouble> >                           m_arrVolumeIntegrals;
 
     SmartPointer< Quadrature<dim>   >  m_quadrature_formula;
     SmartPointer< Quadrature<dim-1> >  m_face_quadrature_formula;
@@ -343,6 +379,271 @@ void dealiiFiniteElementSystem<dim>::AssembleSystem()
 }
 
 template <int dim>
+void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_cell,
+                                                   const unsigned int n_q_points,
+                                                   feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                                                   boost::numeric::ublas::matrix<adouble>& cell_matrix_dt,
+                                                   boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                                   std::vector<adouble>& cell_rhs)
+{
+    for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
+    {
+        cellContext.m_q = q_point;
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            cellContext.m_i = i;
+
+            for(unsigned int j = 0; j < dofs_per_cell; ++j)
+            {
+                cellContext.m_j = j;
+
+                /* Stifness matrix (Aij) */
+                if(m_weakForm->m_Aij.m_node)
+                {
+                    feRuntimeNumber<dim> result = m_weakForm->m_Aij.m_node->Evaluate(&cellContext);
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
+
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = dae::core::simplify(res.node);
+
+                    cell_matrix(i,j) += res;
+                }
+
+                /* Mass matrix (Mij) */
+                if(m_weakForm->m_Mij.m_node)
+                {
+                    feRuntimeNumber<dim> result = m_weakForm->m_Mij.m_node->Evaluate(&cellContext);
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value or adouble)"));
+
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = simplify(res.node);
+
+                    cell_matrix_dt(i,j) += res;
+                }
+            }
+
+            /* Load vector (Fi) */
+            if(m_weakForm->m_Fi.m_node)
+            {
+                cellContext.m_j = -1; // Set the unphysical value since it must not be used in Fi contributions
+
+                feRuntimeNumber<dim> result = m_weakForm->m_Fi.m_node->Evaluate(&cellContext);
+                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                    throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value or adouble)"));
+
+                adouble res = getValueFromNumber<dim>(result);
+                if(res.node)
+                    res.node = simplify(res.node);
+
+                cell_rhs[i] += res;
+            }
+        }
+    }
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int face,
+                                                              FEFaceValues<dim>& fe_face_values,
+                                                              const unsigned int dofs_per_cell,
+                                                              const unsigned int n_face_q_points,
+                                                              feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
+                                                              typename DoFHandler<dim>::active_cell_iterator& cell,
+                                                              boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                                              std::vector<adouble>& cell_rhs)
+{
+    fe_face_values.reinit (cell, face);
+
+    for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
+    {
+        cellFaceContext.m_q = q_point;
+
+        for (unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            cellFaceContext.m_i = i;
+
+            for(unsigned int j = 0; j < dofs_per_cell; ++j)
+            {
+                cellFaceContext.m_j = j;
+
+                if(m_weakForm->m_innerCellFaceAij.m_node)
+                {
+                    const feExpression<dim>& faceAij = m_weakForm->m_innerCellFaceAij;
+                    if(!faceAij.m_node)
+                        throw std::runtime_error(std::string("Empty innerCellFaceAij expression specified"));
+
+                    feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid innerCellFaceAij expression specified (it must be a scalar value or adouble)"));
+
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = simplify(res.node);
+
+                    cell_matrix(i,j) += res;
+                }
+            }
+
+            if(m_weakForm->m_innerCellFaceFi.m_node)
+            {
+                const feExpression<dim>& faceFi = m_weakForm->m_innerCellFaceFi;
+                if(!faceFi.m_node)
+                    throw std::runtime_error(std::string("Empty innerCellFaceFi expression specified"));
+
+                cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
+
+                feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
+                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                    throw std::runtime_error(std::string("Invalid innerCellFaceFi expression specified (it must be a scalar value or adouble)"));
+
+                adouble res = getValueFromNumber<dim>(result);
+                if(res.node)
+                    res.node = simplify(res.node);
+
+                cell_rhs[i] += res;
+            }
+        }
+    }
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int face,
+                                                            const unsigned int boundary_id,
+                                                            FEFaceValues<dim>& fe_face_values,
+                                                            const unsigned int dofs_per_cell,
+                                                            const unsigned int n_face_q_points,
+                                                            feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
+                                                            typename DoFHandler<dim>::active_cell_iterator& cell,
+                                                            boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                                            std::vector<adouble>& cell_rhs)
+{
+    typename map_Uint_Expression::const_iterator itAij = m_weakForm->m_boundaryFaceAij.find(boundary_id);
+    typename map_Uint_Expression::const_iterator itFi  = m_weakForm->m_boundaryFaceFi.find(boundary_id);
+
+    // If there is face Aij or Fi (or both)
+    if(itAij != m_weakForm->m_boundaryFaceAij.end() || itFi != m_weakForm->m_boundaryFaceFi.end())
+    {
+        fe_face_values.reinit (cell, face);
+
+        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
+        {
+            cellFaceContext.m_q = q_point;
+
+            for (unsigned int i = 0; i < dofs_per_cell; ++i)
+            {
+                cellFaceContext.m_i = i;
+
+                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                {
+                    cellFaceContext.m_j = j;
+
+                    if(itAij != m_weakForm->m_boundaryFaceAij.end())
+                    {
+                        const feExpression<dim>& faceAij = itAij->second;
+                        if(!faceAij.m_node)
+                            throw std::runtime_error(std::string("Empty boundaryFaceAij expression specified"));
+
+                        feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
+                        if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                            throw std::runtime_error(std::string("Invalid boundaryFaceAij expression specified (it must be a scalar value or adouble)"));
+
+                        adouble res = getValueFromNumber<dim>(result);
+                        if(res.node)
+                            res.node = simplify(res.node);
+
+                        cell_matrix(i,j) += res;
+                    }
+                }
+
+                if(itFi != m_weakForm->m_boundaryFaceFi.end())
+                {
+                    const feExpression<dim>& faceFi = itFi->second;
+                    if(!faceFi.m_node)
+                        throw std::runtime_error(std::string("Empty boundaryFaceFi expression specified"));
+
+                    cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
+
+                    feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid boundaryFaceFi expression specified (it must be a scalar value or adouble)"));
+
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = simplify(res.node);
+
+                    cell_rhs[i] += res;
+                }
+            }
+        }
+    }
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned int face,
+                                                                 const unsigned int boundary_id,
+                                                                 FEFaceValues<dim>& fe_face_values,
+                                                                 const unsigned int dofs_per_cell,
+                                                                 const unsigned int n_face_q_points,
+                                                                 feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
+                                                                 typename DoFHandler<dim>::active_cell_iterator& cell)
+{
+    typename map_Uint_vector_pair_Variable_Expression::const_iterator itboundaryIntegral = m_weakForm->m_mapSurfaceIntegrals.find(boundary_id);
+    if(itboundaryIntegral != m_weakForm->m_mapSurfaceIntegrals.end())
+    {
+        // Nota bene:
+        //   This can be evaluated twice if there are FaceFi or FaceAij contributions
+        fe_face_values.reinit (cell, face);
+
+        const std::vector<pair_Variable_Expression>& arrExpressions = itboundaryIntegral->second;
+
+        // Get the vector of pairs <variable,integral_adouble_expression> where the integral expressions wil be stored
+        std::vector< std::pair<adouble,adouble> >& vpaa = m_mapSurfaceIntegrals[boundary_id];
+
+        for(int v = 0; v < arrExpressions.size(); v++)
+        {
+            const std::pair< adouble, feExpression<dim> >& pve = arrExpressions[v];
+
+            const adouble&           ad_variable  = pve.first; // not used here
+            const feExpression<dim>& biExpression = pve.second;
+
+            if(!biExpression.m_node)
+                continue;
+
+            adouble adIntegral;
+            for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
+            {
+                cellFaceContext.m_q = q_point;
+
+                for (unsigned int i = 0; i < dofs_per_cell; ++i)
+                {
+                    cellFaceContext.m_i = i;
+                    cellFaceContext.m_j = -1;
+
+                    feRuntimeNumber<dim> result = biExpression.m_node->Evaluate(&cellFaceContext);
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
+
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = simplify(res.node);
+
+                    adIntegral += res;
+                }
+            }
+
+            // Finally, add the sum to the vpaa vector's item v (which is the vector at boundary=ID)
+            std::pair<adouble,adouble>& pad = vpaa[v];
+            adouble& pad_integral = pad.second;
+            pad_integral += adIntegral;
+        }
+    }
+}
+
+template <int dim>
 void dealiiFiniteElementSystem<dim>::assemble_system()
 {
     if(!m_weakForm)
@@ -366,7 +667,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
     FEValues<dim>  fe_values (*fe, quadrature_formula,
                               update_values   | update_gradients |
-                              update_quadrature_points | update_JxW_values);
+                              update_quadrature_points | update_normal_vectors | update_JxW_values);
 
     FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
                                       update_values | update_gradients | update_quadrature_points  |
@@ -450,7 +751,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     
     // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects
     // The integral expressions will be built and added later
-    for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapBoundaryIntegrals.begin(); it != m_weakForm->m_mapBoundaryIntegrals.end(); it++)
+    for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapSurfaceIntegrals.begin(); it != m_weakForm->m_mapSurfaceIntegrals.end(); it++)
     {
         const unsigned int                           id   = it->first;
         const std::vector<pair_Variable_Expression>& vpve = it->second;
@@ -463,13 +764,12 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             const adouble& ad_variable = pve.first;
             vpaa.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
         }
-        this->m_mapBoundaryIntegrals[id] = vpaa;
+        this->m_mapSurfaceIntegrals[id] = vpaa;
     }
 
-    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
-                                                   endc = dof_handler.end();
-    
     int n_active_cells = triangulation.n_active_cells();
+    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
+                                                   endc = dof_handler.end();    
     for(int cellCounter = 0; cell != endc; ++cell, cellCounter++)
     {
         cell_matrix.clear();
@@ -479,209 +779,49 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         fe_values.reinit(cell);
         cell->get_dof_indices(local_dof_indices);
 
-        for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
-        {
-            cellContext.m_q = q_point;
+        assemble_cell(dofs_per_cell,
+                      n_q_points,
+                      cellContext,
+                      cell_matrix_dt,
+                      cell_matrix,
+                      cell_rhs);
 
-            for(unsigned int i = 0; i < dofs_per_cell; ++i)
-            {
-                cellContext.m_i = i;
-
-                for(unsigned int j = 0; j < dofs_per_cell; ++j)
-                {
-                    cellContext.m_j = j;
-
-                    /* Stifness matrix (Aij) */
-                    if(m_weakForm->m_Aij.m_node)
-                    {
-                        feRuntimeNumber<dim> result = m_weakForm->m_Aij.m_node->Evaluate(&cellContext);
-                        if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                            throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
-
-                        //daeNodeSaveAsContext c(m_pfeModel);
-                        adouble res = getValueFromNumber<dim>(result);
-                        if(res.node)
-                        {
-                            //std::cout << "Before: $" << res.node->SaveAsLatex(&c) << "$" << std::endl;
-                            res.node = dae::core::simplify(res.node);
-                            //std::cout << "After: $" << res.node->SaveAsLatex(&c) << "$" << std::endl;
-                        }
-
-                        cell_matrix(i,j) += res;
-                    }
-
-                    /* Mass matrix (Mij) */
-                    if(m_weakForm->m_Mij.m_node)
-                    {
-                        feRuntimeNumber<dim> result = m_weakForm->m_Mij.m_node->Evaluate(&cellContext);
-                        if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                            throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value or adouble)"));
-
-                        adouble res = getValueFromNumber<dim>(result);
-                        if(res.node)
-                            res.node = simplify(res.node);
-
-                        cell_matrix_dt(i,j) += res;
-                    }
-                }
-
-                /* Load vector (Fi) */
-                if(m_weakForm->m_Fi.m_node)
-                {
-                    cellContext.m_j = -1; // Set the unphysical value since it must not be used in Fi contributions
-
-                    feRuntimeNumber<dim> result = m_weakForm->m_Fi.m_node->Evaluate(&cellContext);
-                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                        throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value or adouble)"));
-
-                    adouble res = getValueFromNumber<dim>(result);
-                    if(res.node)
-                        res.node = simplify(res.node);
-
-                    cell_rhs[i] += res;
-                }
-            }
-        }
-
-        /* Boundary conditions of the Neumann or Robin type. */
-        for(unsigned int face = 0; face<GeometryInfo<dim>::faces_per_cell; ++face)
+        /* Typically boundary conditions of the Neumann or Robin type. */
+        for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
         {
             if(cell->face(face)->at_boundary())
             {
-                fe_face_values.reinit (cell, face);
-
                 const unsigned int id = cell->face(face)->boundary_id();
 
-                typename map_Uint_Expression::const_iterator itAij = m_weakForm->m_faceAij.find(id);
-                typename map_Uint_Expression::const_iterator itFi  = m_weakForm->m_faceFi.find(id);
+                assemble_boundary_face(face,
+                                       id,
+                                       fe_face_values,
+                                       dofs_per_cell,
+                                       n_face_q_points,
+                                       cellFaceContext,
+                                       cell,
+                                       cell_matrix,
+                                       cell_rhs);
 
-                // If there is face Aij or Fi (or both)
-                if(itAij != m_weakForm->m_faceAij.end() || itFi != m_weakForm->m_faceFi.end())
-                {
-                    for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
-                    {
-                        cellFaceContext.m_q = q_point;
+                integrate_surface_integrals(face,
+                                            id,
+                                            fe_face_values,
+                                            dofs_per_cell,
+                                            n_face_q_points,
+                                            cellFaceContext,
+                                            cell);
 
-                        for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                        {
-                            cellFaceContext.m_i = i;
-
-                            for(unsigned int j = 0; j < dofs_per_cell; ++j)
-                            {
-                                cellFaceContext.m_j = j;
-
-                                if(itAij != m_weakForm->m_faceAij.end())
-                                {
-                                    const feExpression<dim>& faceAij = itAij->second;
-                                    if(!faceAij.m_node)
-                                        throw std::runtime_error(std::string("Empty faceAij expression specified"));
-
-                                    feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
-                                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                                        throw std::runtime_error(std::string("Invalid faceAij expression specified (it must be a scalar value or adouble)"));
-
-                                    adouble res = getValueFromNumber<dim>(result);
-                                    if(res.node)
-                                        res.node = simplify(res.node);
-
-                                    cell_matrix(i,j) += res;
-                                }
-                            }
-
-                            if(itFi != m_weakForm->m_faceFi.end())
-                            {
-                                const feExpression<dim>& faceFi = itFi->second;
-                                if(!faceFi.m_node)
-                                    throw std::runtime_error(std::string("Empty faceFi expression specified"));
-
-                                cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
-
-                                feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
-                                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                                    throw std::runtime_error(std::string("Invalid faceFi expression specified (it must be a scalar value or adouble)"));
-
-                                adouble res = getValueFromNumber<dim>(result);
-                                if(res.node)
-                                    res.node = simplify(res.node);
-
-                                cell_rhs[i] += res;
-                            }
-                        }
-                    }
-                }
-
-
-                typename map_Uint_vector_pair_Variable_Expression::const_iterator itboundaryIntegral = m_weakForm->m_mapBoundaryIntegrals.find(id);
-                if(itboundaryIntegral != m_weakForm->m_mapBoundaryIntegrals.end())
-                {
-                    const std::vector<pair_Variable_Expression>& arrExpressions = itboundaryIntegral->second;
-
-                    // Get the vector of pairs <variable,integral_adouble_expression> where the integral expressions wil be stored
-                    std::vector< std::pair<adouble,adouble> >& vpaa = m_mapBoundaryIntegrals[id];
-
-                    for(int v = 0; v < arrExpressions.size(); v++)
-                    {
-                        const std::pair< adouble, feExpression<dim> >& pve = arrExpressions[v];
-
-                        const adouble&           ad_variable  = pve.first; // not used here
-                        const feExpression<dim>& biExpression = pve.second;
-
-                        if(!biExpression.m_node)
-                            continue;
-
-                        adouble adIntegral;
-                        for(unsigned int q_point = 0; q_point < n_face_q_points; ++q_point)
-                        {
-                            cellFaceContext.m_q = q_point;
-
-                            for (unsigned int i = 0; i < dofs_per_cell; ++i)
-                            {
-                                cellFaceContext.m_i = i;
-                                cellFaceContext.m_j = -1;
-
-                                feRuntimeNumber<dim> result = biExpression.m_node->Evaluate(&cellFaceContext);
-                                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                                    throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
-
-                                adouble res = getValueFromNumber<dim>(result);
-                                if(res.node)
-                                    res.node = simplify(res.node);
-
-                                adIntegral += res;
-                            }
-                        }
-
-                        //daeNodeSaveAsContext c(m_pfeModel);
-                        //if(adIntegral.node)
-                        //    std::cout << "Cell boundary Integral: $" << adIntegral.node->SaveAsLatex(&c) << "$" << std::endl;
-
-                        // Finally, add the sum to the vpaa vector's item v (which is the vector at boundary=ID)
-                        std::pair<adouble,adouble>& pad = vpaa[v];
-                        adouble& pad_integral = pad.second;
-                        pad_integral += adIntegral;
-
-                        /*
-                        // Finally, add the sum to the map
-                        std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >::iterator itbi = m_mapBoundaryIntegrals.find(id);
-                        if(itbi == m_mapBoundaryIntegrals.end())
-                        {
-                            m_mapBoundaryIntegrals[id] = arrPairsVariableExpression;
-                            arrPairsVariableExpression.push_back( std::pair<adouble,adouble>(variable, adIntegral) );
-                        }
-                        else
-                        {
-                            std::pair<adouble,adouble>& pad = itbi->second;
-                            adouble& pad_integral = pad.second;
-                            pad_integral += adIntegral;
-
-                            //if(pad_integral.node)
-                            //    std::cout << "\n\nBoundary Integral: $" << pad_integral.node->SaveAsLatex(&c) << "$\n\n" << std::endl;
-                        }
-
-                        arrPairsVariableExpression.push_back(std::pair<adouble,adouble>(variable, adIntegral));
-                        */
-                    }
-                }
+            }
+            else // if face is NOT at the boundary
+            {
+                assemble_inner_cell_face(face,
+                                         fe_face_values,
+                                         dofs_per_cell,
+                                         n_face_q_points,
+                                         cellFaceContext,
+                                         cell,
+                                         cell_matrix,
+                                         cell_rhs);
             }
         }
 
@@ -916,7 +1056,13 @@ dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 template <int dim>
 const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  dealiiFiniteElementSystem<dim>::BoundaryIntegrals() const
 {
-    return &m_mapBoundaryIntegrals;
+    return &m_mapSurfaceIntegrals;
+}
+
+template <int dim>
+const std::vector< std::pair<adouble,adouble> >*  dealiiFiniteElementSystem<dim>::VolumeIntegrals() const
+{
+    return &m_arrVolumeIntegrals;
 }
 
 

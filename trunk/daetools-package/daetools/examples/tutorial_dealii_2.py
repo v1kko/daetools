@@ -21,7 +21,7 @@ Simple transient heat convection.
 
 Mesh:
 
-.. image:: _static/square.png
+.. image:: _static/rect(1.5,0.5)-100x50.msh
    :width: 300 px
 
 Results at t = 500s:
@@ -99,7 +99,7 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'square-50x50.msh')
+        mesh_file  = os.path.join(meshes_dir, 'rect(1.5,0.5)-100x50.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -125,9 +125,9 @@ class modTutorial(daeModel):
         velocity  = 0.01   # The velocity magnitude, m/s
         direction = (1, 0) # The velocity direction (unit vector)
 
-        # The dimensions of the 2D domain is: x=[0,1] and y=[0,1] (a 1x1 square)
-        ymin = 0.45
-        ymax = 0.55
+        # The dimensions of the 2D domain is a rectangle: x=[0,2] and y=[0,0.5]
+        ymin = 0.2
+        ymax = 0.3
         T_base   = 300 # Base temperature, K
         T_offset = 50  # Offset temperature, K
 
@@ -150,23 +150,23 @@ class modTutorial(daeModel):
         # FE weak form terms
         accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
         diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * alpha * JxW_2D(fe_q)
-        convection   = phi_2D('T', fe_i, fe_q) * (u_grad * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q) # ??
+        convection   = phi_2D('T', fe_i, fe_q) * (u_grad * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
         source       = phi_2D('T', fe_i, fe_q) * 0.0 * JxW_2D(fe_q)
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + convection,
                                                   Mij = accumulation,
                                                   Fi  = source,
-                                                  faceAij = {},
-                                                  faceFi  = {},
-                                                  functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = {})
+                                                  functionsDirichletBC = dirichletBC)
 
         print('Transient heat convection equations:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
-        print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
-        print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
+        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
+        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
+        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
+        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
+        print('    surfaceIntegrals  = %s' % str([item for item in weakForm.surfaceIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -215,7 +215,7 @@ def guiRun(app):
 
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 2
-    simulation.TimeHorizon       = 500
+    simulation.TimeHorizon       = 200
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
@@ -250,8 +250,8 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon = 500
+    simulation.ReportingInterval = 5
+    simulation.TimeHorizon = 200
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)

@@ -97,7 +97,7 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'square-step-20.msh')
+        mesh_file  = os.path.join(meshes_dir, 'square(-1,1)x(-1,1)-50x50.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -145,17 +145,18 @@ class modTutorial(daeModel):
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = velocity + p_gradient + continuity,
                                                   Mij = accumulation,
                                                   Fi  = source,
-                                                  faceAij = {},
-                                                  faceFi  = faceFi,
-                                                  functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = {})
+                                                  boundaryFaceFi  = faceFi,
+                                                  functionsDirichletBC = dirichletBC)
 
         print('Darcy law equations:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
-        print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
-        print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
+        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
+        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
+        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
+        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
+        print('    surfaceIntegrals = %s' % str([item for item in weakForm.surfaceIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations

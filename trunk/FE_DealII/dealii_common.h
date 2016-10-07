@@ -336,7 +336,10 @@ public:
 
     std::string ToString() const
     {
-        return m_node->ToString();
+        if(m_node)
+            return m_node->ToString();
+        else
+            return std::string("");
     }
 
 public:

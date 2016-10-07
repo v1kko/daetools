@@ -105,10 +105,10 @@ class modTutorial(daeModel):
         dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350) ))]   # inner ellipse
         dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250) ))]   # inner rectangle
 
-        boundaryIntegrals = {}
-        boundaryIntegrals[0] = [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        boundaryIntegrals[1] = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        boundaryIntegrals[2] = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        surfaceIntegrals = {}
+        surfaceIntegrals[0] = [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        surfaceIntegrals[1] = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        surfaceIntegrals[2] = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
 
         # Function<dim>::value wrappers
         Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))
@@ -122,17 +122,18 @@ class modTutorial(daeModel):
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
                                                   Mij = accumulation,
                                                   Fi  = source,
-                                                  faceAij = {},
-                                                  faceFi  = {},
                                                   functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = boundaryIntegrals)
+                                                  surfaceIntegrals = surfaceIntegrals)
 
         print('Transient heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
-        print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
-        print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
+        print('    boundaryFaceAij = %s' % str([item for item in enumerate(weakForm.boundaryFaceAij)]))
+        print('    boundaryFaceFi  = %s' % str([item for item in enumerate(weakForm.boundaryFaceFi)]))
+        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
+        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
+        print('    surfaceIntegrals  = %s' % str([item for item in enumerate(weakForm.surfaceIntegrals)]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations

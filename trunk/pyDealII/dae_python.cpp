@@ -800,6 +800,8 @@ BOOST_PYTHON_MODULE(pyDealII)
 
 
     class_< feExpression<1> >("feExpression_1D", no_init)
+        .def(init<>())
+
         .def(- self)
         .def(+ self)
 
@@ -843,6 +845,8 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_< feExpression<2> >("feExpression_2D", no_init)
+        .def(init<>())
+
         .def(- self)
         .def(+ self)
 
@@ -886,6 +890,8 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_< feExpression<3> >("feExpression_3D", no_init)
+        .def(init<>())
+
         .def(- self)
         .def(+ self)
 
@@ -1086,21 +1092,28 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_< dealiiFiniteElementWeakForm<1>::pair_Variable_Expression >("pair_Variable_Expression_1D")
+        .def_readonly("first",   &dealiiFiniteElementWeakForm<1>::pair_Variable_Expression::first)
+        .def_readonly("second",  &dealiiFiniteElementWeakForm<1>::pair_Variable_Expression::second)
     ;
     class_< dealiiFiniteElementWeakForm<2>::pair_Variable_Expression >("pair_Variable_Expression_2D")
+        .def_readonly("first",   &dealiiFiniteElementWeakForm<2>::pair_Variable_Expression::first)
+        .def_readonly("second",  &dealiiFiniteElementWeakForm<2>::pair_Variable_Expression::second)
     ;
     class_< dealiiFiniteElementWeakForm<3>::pair_Variable_Expression >("pair_Variable_Expression_3D")
+        .def_readonly("first",   &dealiiFiniteElementWeakForm<3>::pair_Variable_Expression::first)
+        .def_readonly("second",  &dealiiFiniteElementWeakForm<3>::pair_Variable_Expression::second)
     ;
 
-    class_< dealiiFiniteElementWeakForm<1>::vector_pair_Variable_Expression >("vector_Uint_Expression_1D")
+    class_< dealiiFiniteElementWeakForm<1>::vector_pair_Variable_Expression >("vector_pair_Variable_Expression_1D")
         .def(vector_indexing_suite< dealiiFiniteElementWeakForm<1>::vector_pair_Variable_Expression >())
     ;
-    class_< dealiiFiniteElementWeakForm<2>::vector_pair_Variable_Expression >("vector_Uint_Expression_2D")
+    class_< dealiiFiniteElementWeakForm<2>::vector_pair_Variable_Expression >("vector_pair_Variable_Expression_2D")
         .def(vector_indexing_suite< dealiiFiniteElementWeakForm<2>::vector_pair_Variable_Expression >())
     ;
-    class_< dealiiFiniteElementWeakForm<3>::vector_pair_Variable_Expression >("vector_Uint_Expression_3D")
+    class_< dealiiFiniteElementWeakForm<3>::vector_pair_Variable_Expression >("vector_pair_Variable_Expression_3D")
         .def(vector_indexing_suite< dealiiFiniteElementWeakForm<3>::vector_pair_Variable_Expression >())
     ;
+
 
     class_< dealiiFiniteElementWeakForm<1>::map_Uint_vector_pair_Variable_Expression >("map_Uint_pair_Variable_Expression_1D")
         .def(map_indexing_suite< dealiiFiniteElementWeakForm<1>::map_Uint_vector_pair_Variable_Expression >())
@@ -1291,78 +1304,105 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const feExpression<1>&,
                   const feExpression<1>&,
                   const feExpression<1>&,
+                  const feExpression<1>&,
+                  const feExpression<1>&,
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict>(( arg("self"),
+                  boost::python::dict,
+                  boost::python::list>(( arg("self"),
                                          arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
-                                         arg("faceAij")              = boost::python::dict(),
-                                         arg("faceFi")               = boost::python::dict(),
+                                         arg("innerCellFaceAij")     = feExpression<1>(),
+                                         arg("innerCellFaceFi")      = feExpression<1>(),
+                                         arg("boundaryFaceAij")      = boost::python::dict(),
+                                         arg("boundaryFaceFi")       = boost::python::dict(),
                                          arg("functionsDirichletBC") = boost::python::dict(),
-                                         arg("boundaryIntegrals")    = boost::python::dict()
+                                         arg("surfaceIntegrals")     = boost::python::dict(),
+                                         arg("volumeIntegrals")      = boost::python::list()
                                       )))
 
         .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<1>::m_Aij)
         .def_readonly("Mij",                   &dealiiFiniteElementWeakForm<1>::m_Mij)
         .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<1>::m_Fi)
-        .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<1>::m_faceAij)
-        .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<1>::m_faceFi)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_adoubleFunctionsDirichletBC)
-        .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<1>::m_mapBoundaryIntegrals)
+        .def_readonly("boundaryFaceAij",       &dealiiFiniteElementWeakForm<1>::m_boundaryFaceAij)
+        .def_readonly("boundaryFaceFi",        &dealiiFiniteElementWeakForm<1>::m_boundaryFaceFi)
+        .def_readonly("innerCellFaceAij",      &dealiiFiniteElementWeakForm<1>::m_innerCellFaceAij)
+        .def_readonly("innerCellFaceFi",       &dealiiFiniteElementWeakForm<1>::m_innerCellFaceFi)
+        .def_readonly("functionsDirichletBC",  &dealiiFiniteElementWeakForm<1>::m_adoubleFunctionsDirichletBC)
+        .def_readonly("surfaceIntegrals",      &dealiiFiniteElementWeakForm<1>::m_mapSurfaceIntegrals)
+        .def_readonly("volumeIntegrals",       &dealiiFiniteElementWeakForm<1>::m_arrVolumeIntegrals)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<2>, boost::noncopyable>("dealiiFiniteElementWeakForm_2D", no_init)
         .def(init<const feExpression<2>&,
                   const feExpression<2>&,
                   const feExpression<2>&,
+                  const feExpression<2>&,
+                  const feExpression<2>&,
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict>(( arg("self"),
+                  boost::python::dict,
+                  boost::python::list>(( arg("self"),
                                          arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
-                                         arg("faceAij")              = boost::python::dict(),
-                                         arg("faceFi")               = boost::python::dict(),
+                                         arg("innerCellFaceAij")     = feExpression<2>(),
+                                         arg("innerCellFaceFi")      = feExpression<2>(),
+                                         arg("boundaryFaceAij")      = boost::python::dict(),
+                                         arg("boundaryFaceFi")       = boost::python::dict(),
                                          arg("functionsDirichletBC") = boost::python::dict(),
-                                         arg("boundaryIntegrals")    = boost::python::dict()
+                                         arg("surfaceIntegrals")     = boost::python::dict(),
+                                         arg("volumeIntegrals")      = boost::python::list()
                                       )))
 
         .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<2>::m_Aij)
         .def_readonly("Mij",                   &dealiiFiniteElementWeakForm<2>::m_Mij)
         .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<2>::m_Fi)
-        .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<2>::m_faceAij)
-        .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<2>::m_faceFi)
-        .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_adoubleFunctionsDirichletBC)
-        .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<2>::m_mapBoundaryIntegrals)
+        .def_readonly("boundaryFaceAij",       &dealiiFiniteElementWeakForm<2>::m_boundaryFaceAij)
+        .def_readonly("boundaryFaceFi",        &dealiiFiniteElementWeakForm<2>::m_boundaryFaceFi)
+        .def_readonly("innerCellFaceAij",      &dealiiFiniteElementWeakForm<2>::m_innerCellFaceAij)
+        .def_readonly("innerCellFaceFi",       &dealiiFiniteElementWeakForm<2>::m_innerCellFaceFi)
+        .def_readonly("functionsDirichletBC",  &dealiiFiniteElementWeakForm<2>::m_adoubleFunctionsDirichletBC)
+        .def_readonly("surfaceIntegrals",      &dealiiFiniteElementWeakForm<2>::m_mapSurfaceIntegrals)
+        .def_readonly("volumeIntegrals",       &dealiiFiniteElementWeakForm<2>::m_arrVolumeIntegrals)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<3>, boost::noncopyable>("dealiiFiniteElementWeakForm_3D", no_init)
         .def(init<const feExpression<3>&,
                   const feExpression<3>&,
                   const feExpression<3>&,
+                  const feExpression<3>&,
+                  const feExpression<3>&,
                   boost::python::dict,
                   boost::python::dict,
                   boost::python::dict,
-                  boost::python::dict>(( arg("self"),
+                  boost::python::dict,
+                  boost::python::list>(( arg("self"),
                                          arg("Aij"),
                                          arg("Mij"),
                                          arg("Fi"),
-                                         arg("faceAij")              = boost::python::dict(),
-                                         arg("faceFi")               = boost::python::dict(),
+                                         arg("innerCellFaceAij")     = feExpression<3>(),
+                                         arg("innerCellFaceFi")      = feExpression<3>(),
+                                         arg("boundaryFaceAij")      = boost::python::dict(),
+                                         arg("boundaryFaceFi")       = boost::python::dict(),
                                          arg("functionsDirichletBC") = boost::python::dict(),
-                                         arg("boundaryIntegrals")    = boost::python::dict()
+                                         arg("surfaceIntegrals")     = boost::python::dict(),
+                                         arg("volumeIntegrals")      = boost::python::list()
                                       )))
 
         .def_readonly("Aij",                   &dealiiFiniteElementWeakForm<3>::m_Aij)
         .def_readonly("Mij",                   &dealiiFiniteElementWeakForm<3>::m_Mij)
         .def_readonly("Fi",                    &dealiiFiniteElementWeakForm<3>::m_Fi)
-        .def_readonly("faceAij",               &dealiiFiniteElementWeakForm<3>::m_faceAij)
-        .def_readonly("faceFi",                &dealiiFiniteElementWeakForm<3>::m_faceFi)
+        .def_readonly("boundaryFaceAij",       &dealiiFiniteElementWeakForm<3>::m_boundaryFaceAij)
+        .def_readonly("boundaryFaceFi",        &dealiiFiniteElementWeakForm<3>::m_boundaryFaceFi)
+        .def_readonly("innerCellFaceAij",      &dealiiFiniteElementWeakForm<3>::m_innerCellFaceAij)
+        .def_readonly("innerCellFaceFi",       &dealiiFiniteElementWeakForm<3>::m_innerCellFaceFi)
         .def_readonly("FunctionsDirichletBC",  &dealiiFiniteElementWeakForm<3>::m_adoubleFunctionsDirichletBC)
-        .def_readonly("boundaryIntegrals",     &dealiiFiniteElementWeakForm<3>::m_mapBoundaryIntegrals)
+        .def_readonly("surfaceIntegrals",      &dealiiFiniteElementWeakForm<3>::m_mapSurfaceIntegrals)
+        .def_readonly("volumeIntegrals",       &dealiiFiniteElementWeakForm<3>::m_arrVolumeIntegrals)
     ;
 
     class_<dealIIDataReporter, bases<daeDataReporter_t>, boost::noncopyable>("dealIIDataReporter", no_init)

@@ -65,7 +65,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>int</span>(numpy.<span style='color:#0000ff;'>sum</span>([dof.Multiplicity <b>for</b> dof <b><span style='color:#0000ff;'>in</span></b> dofs]))
 
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#c00000;'>'square-50x50.msh'</span>)
+        <span style='color:#008000;'># This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,1)x(0,1)-50x50.msh</span>
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#c00000;'>'square(0,1)x(0,1)-20x20.msh'</span>)
 
         <span style='color:#008000;'># Store the object so it does not go out of scope while still in use by daetools</span>
         <span style='color:#0000ff;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#008000;'># path to mesh</span>
@@ -87,43 +88,41 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         right_edge  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>
         bottom_edge <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>3</span>
 
-        functions <b><span style='color:#0000ff;'>=</span></b> {}
         dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
-        boundaryIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
+        surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
 
-        log_fe <b><span style='color:#0000ff;'>=</span></b> feExpression_2D.log
         <span style='color:#008000;'># FE approximation of a quantity at the specified quadrature point (adouble object)</span>
         c <b><span style='color:#0000ff;'>=</span></b> dof_approximation_2D(<span style='color:#c00000;'>'c'</span>, fe_q)
 
         <span style='color:#008000;'># 1) f(c) from the Wikipedia (https://en.wikipedia.org/wiki/Cahn-Hilliard_equation)</span>
-        <span style='color:#008000;'>#fc_Fi = c**3 - c</span>
+        fc_Fi <b><span style='color:#0000ff;'>=</span></b> c<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span> <b><span style='color:#0000ff;'>-</span></b> c
 
         <span style='color:#008000;'># 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes</span>
-        fc_Fi <b><span style='color:#0000ff;'>=</span></b> log_fe(c<b><span style='color:#0000ff;'>/</span></b>(<span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>-</span></b>c)) <b><span style='color:#0000ff;'>+</span></b> Omg_a<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>2</span><b><span style='color:#0000ff;'>*</span></b>c)
+        <span style='color:#008000;'>#log_fe = feExpression_2D.log</span>
+        <span style='color:#008000;'>#fc_Fi = log_fe(c/(1-c)) + Omg_a*(1-2*c)</span>
 
+        <span style='color:#008000;'># FE weak form terms</span>
         c_accumulation    <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#c00000;'>'c'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#c00000;'>'c'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
         mu_diffusion_c_eq <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#c00000;'>'c'</span>,  fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#c00000;'>'mu'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> D0 <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
         mu                <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#c00000;'>'mu'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b>  phi_2D(<span style='color:#c00000;'>'mu'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
         c_diffusion_mu_eq <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>dphi_2D(<span style='color:#c00000;'>'mu'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#c00000;'>'c'</span>,  fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> kappa <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
         fun_c             <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#c00000;'>'mu'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> fc_Fi
 
-        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(
-            Aij <b><span style='color:#0000ff;'>=</span></b> mu_diffusion_c_eq <b><span style='color:#0000ff;'>+</span></b> mu <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq,
-            Mij <b><span style='color:#0000ff;'>=</span></b> c_accumulation,
-            Fi  <b><span style='color:#0000ff;'>=</span></b> fun_c,
-            faceAij <b><span style='color:#0000ff;'>=</span></b> {},
-            faceFi  <b><span style='color:#0000ff;'>=</span></b> {},
-            functions <b><span style='color:#0000ff;'>=</span></b> functions,
-            functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC,
-            boundaryIntegrals <b><span style='color:#0000ff;'>=</span></b> boundaryIntegrals)
+        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> mu_diffusion_c_eq <b><span style='color:#0000ff;'>+</span></b> mu <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq,
+                                                  Mij <b><span style='color:#0000ff;'>=</span></b> c_accumulation,
+                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> fun_c,
+                                                  functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC,
+                                                  surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> surfaceIntegrals)
 
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Cahn-Hilliard equation:'</span>)
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Aij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Aij))
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Mij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Mij))
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Fi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Fi))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    faceAij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.faceAij]))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    faceFi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.faceFi]))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    boundaryIntegrals  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.boundaryIntegrals]))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    boundaryFaceAij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.boundaryFaceAij]))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    boundaryFaceFi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.boundaryFaceFi]))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    innerCellFaceAij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.innerCellFaceAij))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    innerCellFaceFi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.innerCellFaceFi))
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    surfaceIntegrals  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> weakForm.surfaceIntegrals]))
 
         <span style='color:#008000;'># Setting the weak form of the FE system will declare a set of equations:</span>
         <span style='color:#008000;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>

@@ -23,34 +23,52 @@ def setFEInitialConditions(FEmodel, FEsystem, dofName, ic):
         FEsystem is an instance of daeFiniteElementObject (i.e. dealiiFiniteElementSystem_xD)
         dofName is a string with the dof name
         ic can be float value or a callable that returns float value for the given index in variable
+
+    Nota bene:
+        There can be other variables in the model.
+        Therefore, the overall index of the first variable does not start at 0.
+        For instance, there is one variable apart from the FE system and the system has N=100 DOFs:
+          - FE system starts from Nstart=1 and internally in the range [0,N): Mij(N,N)
+          - The overall index is Nstart+column where the column is a position of a non-zero item in Mij.
+
     """
     variable = None
-    indexMap = {}
+    dict_oi_varIndex = {}
+    fe_start_index = 0
+    if len(FEmodel.Variables) > 0:
+        var = FEmodel.Variables[0]
+        fe_start_index = var.OverallIndex
+        #print('fe_start_index = %d' % fe_start_index)
+
     for var in FEmodel.Variables:
         if var.Name == dofName:
             variable = var
             for i in range(var.NumberOfPoints):
-                index = var.OverallIndex+i
-                indexMap[index] = i
-
+                oi_index = var.OverallIndex+i
+                dict_oi_varIndex[oi_index] = i
             break
 
     if not variable:
         raise RuntimeError('DOF %s not found' % dofName)
 
-    #print(indexMap)
-
+    ic_already_set = {}
     Mij = FEsystem.Msystem()
     for row in range(Mij.n):
         # Iterate over columns and set initial conditions.
         # If an item in the mass matrix is zero skip it.
         for column in FEsystem.RowIndices(row):
             if Mij(row, column).Node or Mij(row, column).Value != 0:
-                oi_column = variable.OverallIndex+column
-                if oi_column in indexMap:
-                    internal_index = indexMap[oi_column]
+                oi_column = fe_start_index + column
+                # Proceed if the column belongs to the selected variable
+                if oi_column in dict_oi_varIndex:
+                    # If the IC has already been set skip the column
+                    if oi_column in ic_already_set:
+                        continue
+                    # Internal index is the internal variable index
+                    internal_index = dict_oi_varIndex[oi_column]
                     if callable(ic):
                         ic_val = float(ic(internal_index))
                     else:
                         ic_val = float(ic)
                     variable.SetInitialCondition(internal_index, ic_val)
+                    ic_already_set[oi_column] = ic_val # Not used, can be any value

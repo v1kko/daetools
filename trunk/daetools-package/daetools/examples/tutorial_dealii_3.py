@@ -55,7 +55,8 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'square-50x50.msh')
+        # This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,1)x(0,1)-50x50.msh
+        mesh_file  = os.path.join(meshes_dir, 'square(0,1)x(0,1)-20x20.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -78,7 +79,7 @@ class modTutorial(daeModel):
         bottom_edge = 3
 
         dirichletBC = {}
-        boundaryIntegrals = {}
+        surfaceIntegrals = {}
 
         # FE approximation of a quantity at the specified quadrature point (adouble object)
         c = dof_approximation_2D('c', fe_q)
@@ -100,18 +101,18 @@ class modTutorial(daeModel):
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
                                                   Mij = c_accumulation,
                                                   Fi  = fun_c,
-                                                  faceAij = {},
-                                                  faceFi  = {},
                                                   functionsDirichletBC = dirichletBC,
-                                                  boundaryIntegrals = boundaryIntegrals)
+                                                  surfaceIntegrals = surfaceIntegrals)
 
         print('Cahn-Hilliard equation:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
-        print('    faceAij = %s' % str([item for item in weakForm.faceAij]))
-        print('    faceFi  = %s' % str([item for item in weakForm.faceFi]))
-        print('    boundaryIntegrals  = %s' % str([item for item in weakForm.boundaryIntegrals]))
+        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
+        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
+        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
+        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
+        print('    surfaceIntegrals  = %s' % str([item for item in weakForm.surfaceIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
