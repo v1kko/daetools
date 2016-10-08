@@ -442,7 +442,7 @@ public:
                 feExpression<dim> expr  = boost::python::extract< feExpression<dim> >(o_expression);
                 
                 if(!advar.node || !dynamic_cast<adSetupVariableNode*>(advar.node.get()))
-                    throw std::runtime_error(std::string("Invalid variable node in the boundary integrals dictionary (must be adSetupVariableNode)"));
+                    throw std::runtime_error(std::string("Invalid variable node in the surface integrals dictionary (must be a single variable)"));
 
                 pairs.push_back(std::pair< adouble, feExpression<dim> >(advar, expr));
             }
@@ -463,7 +463,7 @@ public:
             feExpression<dim> expr   = boost::python::extract< feExpression<dim> >(o_expression);
 
             if(!advar.node || !dynamic_cast<adSetupVariableNode*>(advar.node.get()))
-                throw std::runtime_error(std::string("Invalid variable node in the boundary integrals dictionary (must be adSetupVariableNode)"));
+                throw std::runtime_error(std::string("Invalid variable node in the volume integrals list (must be a single variable)"));
 
             this->m_arrVolumeIntegrals.push_back( std::pair< adouble, feExpression<dim> >(advar, expr) );
         }

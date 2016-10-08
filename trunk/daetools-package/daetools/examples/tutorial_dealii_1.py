@@ -46,6 +46,10 @@ class modTutorial(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
         
         self.T_outer  = daeVariable("T_outer", temperature_t, self, "Temperature of the outer boundary with id=0 (Dirichlet BC)")
+
+        self.MeshSurface = daeVariable("MeshSurface", no_t, self, "Mesh outer surface area in 3d, circumference in 2D)")
+        self.MeshVolume  = daeVariable("MeshVolume",  no_t, self, "Mesh volume in 3d, surface in 2D")
+
         self.Q0_total = daeVariable("Q0_total",         no_t, self, "Total heat passing through the boundary with id=0")
         self.Q1_total = daeVariable("Q1_total",         no_t, self, "Total heat passing through the boundary with id=1")
         self.Q2_total = daeVariable("Q2_total",         no_t, self, "Total heat passing through the boundary with id=2")
@@ -96,19 +100,33 @@ class modTutorial(daeModel):
         self.fun_Diffusivity = ConstantFunction_2D(alpha)
         self.fun_Generation  = ConstantFunction_2D(0.0)
 
+        outerRectangle = 0
+        innerEllipse   = 1
+        innerDiamond   = 2
         # Nota bene:
         #   For the Dirichlet BCs only the adouble versions of Function<dim> class can be used.
         #   The values allowed include constants and expressions on daeVariable/daeParameter objects.
         # Here we use daetools variable for the outer boundary and constant values for the rest.
         dirichletBC    = {}
-        dirichletBC[0] = [('T', adoubleConstantFunction_2D( self.T_outer() ))] # outer boundary
-        dirichletBC[1] = [('T', adoubleConstantFunction_2D( adouble(350) ))]   # inner ellipse
-        dirichletBC[2] = [('T', adoubleConstantFunction_2D( adouble(250) ))]   # inner rectangle
+        dirichletBC[outerRectangle] = [('T', adoubleConstantFunction_2D( self.T_outer() ))]
+        dirichletBC[innerEllipse]   = [('T', adoubleConstantFunction_2D( adouble(350) ))]
+        dirichletBC[innerDiamond]   = [('T', adoubleConstantFunction_2D( adouble(250) ))]
 
         surfaceIntegrals = {}
-        surfaceIntegrals[0] = [(self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        surfaceIntegrals[1] = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        surfaceIntegrals[2] = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        surfaceIntegrals[outerRectangle] = [
+                # Area of the mesh outer surface (a test, just to check the integration validity).
+                # In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.
+                (self.MeshSurface(), (phi_2D('T', fe_i, fe_q) * JxW_2D(fe_q))),
+                # Total heat transferred through boundaries
+                (self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))
+                                    ]
+        surfaceIntegrals[innerEllipse]   = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        surfaceIntegrals[innerDiamond]   = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+
+        # Surface of the mesh (another test, just to check the integration validity).
+        # Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732.
+        # (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).
+        volumeIntegrals = [ (self.MeshVolume(), (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q) * JxW_2D(fe_q))) ]
 
         # Function<dim>::value wrappers
         Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))
@@ -123,7 +141,8 @@ class modTutorial(daeModel):
                                                   Mij = accumulation,
                                                   Fi  = source,
                                                   functionsDirichletBC = dirichletBC,
-                                                  surfaceIntegrals = surfaceIntegrals)
+                                                  surfaceIntegrals = surfaceIntegrals,
+                                                  volumeIntegrals = volumeIntegrals)
 
         print('Transient heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))

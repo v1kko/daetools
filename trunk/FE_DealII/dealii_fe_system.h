@@ -139,7 +139,7 @@ public:
     virtual dae::daeMatrix<adouble>*                                                    Asystem() const; // Stiffness matrix
     virtual dae::daeMatrix<adouble>*                                                    Msystem() const; // Mass matrix (dt)
     virtual dae::daeArray<adouble>*                                                     Fload() const;   // Load vector
-    virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  BoundaryIntegrals() const;
+    virtual const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  SurfaceIntegrals() const;
     virtual const std::vector< std::pair<adouble,adouble> >*                            VolumeIntegrals() const;
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
@@ -191,6 +191,9 @@ protected:
                                      const unsigned int n_face_q_points,
                                      feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
                                      typename DoFHandler<dim>::active_cell_iterator& cell);
+    void integrate_volume_integrals(const unsigned int dofs_per_cell,
+                                    const unsigned int n_q_points,
+                                    feCellContextImpl< dim,FEValues<dim> >& cellContext);
 
 public:
     // Additional deal.II specific data
@@ -325,8 +328,8 @@ void dealiiFiniteElementSystem<dim>::setup_system()
 
     //for(unsigned int i = 0; i < m_no_components; i++)
     //    printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
-    //for(unsigned int i = 0; i < n_dofs; i++)
-    //    printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
+    for(unsigned int i = 0; i < n_dofs; i++)
+        printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
 
     const unsigned int n_couplings = dof_handler.max_couplings_between_dofs();
     //printf("n_couplings = %d\n", n_couplings);
@@ -583,6 +586,57 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
 }
 
 template <int dim>
+void dealiiFiniteElementSystem<dim>::integrate_volume_integrals(const unsigned int dofs_per_cell,
+                                                                const unsigned int n_q_points,
+                                                                feCellContextImpl< dim,FEValues<dim> >& cellContext)
+{
+    // Nota bene:
+    //   fe_values is already reinitialised
+
+    for(int v = 0; v < m_weakForm->m_arrVolumeIntegrals.size(); v++)
+    {
+        const std::pair< adouble, feExpression<dim> >& pve = m_weakForm->m_arrVolumeIntegrals[v];
+
+        const adouble&           ad_variable  = pve.first; // not used here
+        const feExpression<dim>& viExpression = pve.second;
+
+        if(!viExpression.m_node)
+            continue;
+
+        adouble adIntegral;
+        for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
+        {
+            cellContext.m_q = q_point;
+
+            for (unsigned int i = 0; i < dofs_per_cell; ++i)
+            {
+                cellContext.m_i = i;
+
+                for (unsigned int j = 0; j < dofs_per_cell; ++j)
+                {
+                    cellContext.m_j = j;
+
+                    feRuntimeNumber<dim> result = viExpression.m_node->Evaluate(&cellContext);
+                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                        throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
+
+                    adouble res = getValueFromNumber<dim>(result);
+                    if(res.node)
+                        res.node = simplify(res.node);
+
+                    adIntegral += res;
+                }
+            }
+        }
+
+        // Finally, add the sum to the vector's item v
+        std::pair<adouble,adouble>& pad = m_arrVolumeIntegrals[v];
+        adouble& pad_integral = pad.second;
+        pad_integral += adIntegral;
+    }
+}
+
+template <int dim>
 void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned int face,
                                                                  const unsigned int boundary_id,
                                                                  FEFaceValues<dim>& fe_face_values,
@@ -608,9 +662,9 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
             const std::pair< adouble, feExpression<dim> >& pve = arrExpressions[v];
 
             const adouble&           ad_variable  = pve.first; // not used here
-            const feExpression<dim>& biExpression = pve.second;
+            const feExpression<dim>& siExpression = pve.second;
 
-            if(!biExpression.m_node)
+            if(!siExpression.m_node)
                 continue;
 
             adouble adIntegral;
@@ -623,7 +677,7 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
                     cellFaceContext.m_i = i;
                     cellFaceContext.m_j = -1;
 
-                    feRuntimeNumber<dim> result = biExpression.m_node->Evaluate(&cellFaceContext);
+                    feRuntimeNumber<dim> result = siExpression.m_node->Evaluate(&cellFaceContext);
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                         throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
 
@@ -749,8 +803,8 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     //   printf("(%d,%f) ", it->first, it->second.getValue());
     //printf("\n");
     
-    // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects
-    // The integral expressions will be built and added later
+    // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects.
+    // The integral expressions will be built and added later.
     for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapSurfaceIntegrals.begin(); it != m_weakForm->m_mapSurfaceIntegrals.end(); it++)
     {
         const unsigned int                           id   = it->first;
@@ -765,6 +819,16 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             vpaa.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
         }
         this->m_mapSurfaceIntegrals[id] = vpaa;
+    }
+
+    // Populate the vector std:vector< std::pair<adouble,adouble> > with variable adouble objects.
+    // The integral expressions will be built and added later.
+    m_arrVolumeIntegrals.reserve(m_weakForm->m_arrVolumeIntegrals.size());
+    for(size_t i = 0; i < m_weakForm->m_arrVolumeIntegrals.size(); i++)
+    {
+        const pair_Variable_Expression& pve = m_weakForm->m_arrVolumeIntegrals[i];
+        const adouble& ad_variable = pve.first;
+        m_arrVolumeIntegrals.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
     }
 
     int n_active_cells = triangulation.n_active_cells();
@@ -786,9 +850,14 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                       cell_matrix,
                       cell_rhs);
 
+        integrate_volume_integrals(dofs_per_cell,
+                                   n_q_points,
+                                   cellContext);
+
         /* Typically boundary conditions of the Neumann or Robin type. */
         for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
         {
+            // Only boundary faces
             if(cell->face(face)->at_boundary())
             {
                 const unsigned int id = cell->face(face)->boundary_id();
@@ -812,17 +881,16 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                             cell);
 
             }
-            else // if face is NOT at the boundary
-            {
-                assemble_inner_cell_face(face,
-                                         fe_face_values,
-                                         dofs_per_cell,
-                                         n_face_q_points,
-                                         cellFaceContext,
-                                         cell,
-                                         cell_matrix,
-                                         cell_rhs);
-            }
+
+            // All faces
+            assemble_inner_cell_face(face,
+                                     fe_face_values,
+                                     dofs_per_cell,
+                                     n_face_q_points,
+                                     cellFaceContext,
+                                     cell,
+                                     cell_matrix,
+                                     cell_rhs);
         }
 
    /*
@@ -1054,7 +1122,7 @@ dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 }
 
 template <int dim>
-const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  dealiiFiniteElementSystem<dim>::BoundaryIntegrals() const
+const std::map< unsigned int, std::vector< std::pair<adouble,adouble> > >*  dealiiFiniteElementSystem<dim>::SurfaceIntegrals() const
 {
     return &m_mapSurfaceIntegrals;
 }

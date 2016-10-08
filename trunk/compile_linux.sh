@@ -148,10 +148,9 @@ else
   QMAKE_SPEC=win32-g++
 fi
 
-if [ ${Ncpu} -gt 1 ]; then
-  Ncpu=$(($Ncpu+1))
-fi
-#Ncpu=3
+#if [ ${Ncpu} -gt 1 ]; then
+#  Ncpu=$(($Ncpu+1))
+#fi
 
 cd "${TRUNK}"
 
