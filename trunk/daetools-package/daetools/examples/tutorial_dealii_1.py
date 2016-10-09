@@ -50,9 +50,10 @@ class modTutorial(daeModel):
         self.MeshSurface = daeVariable("MeshSurface", no_t, self, "Mesh outer surface area in 3d, circumference in 2D)")
         self.MeshVolume  = daeVariable("MeshVolume",  no_t, self, "Mesh volume in 3d, surface in 2D")
 
-        self.Q0_total = daeVariable("Q0_total",         no_t, self, "Total heat passing through the boundary with id=0")
-        self.Q1_total = daeVariable("Q1_total",         no_t, self, "Total heat passing through the boundary with id=1")
-        self.Q2_total = daeVariable("Q2_total",         no_t, self, "Total heat passing through the boundary with id=2")
+        #self.Q_total  = daeVariable("Q_total",  no_t, self, "Total heat content: integral(rho*cp*T) over domain Omega")
+        self.Q0_total = daeVariable("Q0_total", no_t, self, "Total heat passing through the boundary with id=0")
+        self.Q1_total = daeVariable("Q1_total", no_t, self, "Total heat passing through the boundary with id=1")
+        self.Q2_total = daeVariable("Q2_total", no_t, self, "Total heat passing through the boundary with id=2")
 
         # The starting point is the daeFiniteElementModel class that contains an implementation
         # of the daeFiniteElementObject class: dealiiFiniteElementSystem which is a wrapper
@@ -117,16 +118,25 @@ class modTutorial(daeModel):
                 # Area of the mesh outer surface (a test, just to check the integration validity).
                 # In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.
                 (self.MeshSurface(), (phi_2D('T', fe_i, fe_q) * JxW_2D(fe_q))),
+
                 # Total heat transferred through boundaries
                 (self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))
-                                    ]
+                                           ]
         surfaceIntegrals[innerEllipse]   = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
         surfaceIntegrals[innerDiamond]   = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
 
-        # Surface of the mesh (another test, just to check the integration validity).
-        # Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732.
-        # (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).
-        volumeIntegrals = [ (self.MeshVolume(), (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q) * JxW_2D(fe_q))) ]
+        # Nota bene:
+        #   Care should be taken with the volume integrals since they include values at ALL cells.
+        #   The resulting equations can be enormously long!!
+        volumeIntegrals = [
+            # Surface of the mesh (another test to check the integration validity).
+            # Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732
+            # (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).
+            (self.MeshVolume(), (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q) * JxW_2D(fe_q)))
+
+            # Total heat content in the system
+            #(self.Q_total(), (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q) * rho * cp * dof_2D('T', fe_j) * JxW_2D(fe_q)))
+                          ]
 
         # Function<dim>::value wrappers
         Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))

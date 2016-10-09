@@ -121,6 +121,7 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
             daeEquation* pEq = new daeEquation();
             string strEqName = "FESurfaceIntegral_" + variable->GetName();
             pEq->SetName(strEqName);
+            //pEq->SetBuildJacobianExpressions(true);
 
             if(!pCurrentState)
             {
@@ -170,6 +171,7 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
         daeEquation* pEq = new daeEquation();
         string strEqName = "FEVolumeIntegral_" + variable->GetName();
         pEq->SetName(strEqName);
+        //pEq->SetBuildJacobianExpressions(true);
 
         if(!pCurrentState)
         {

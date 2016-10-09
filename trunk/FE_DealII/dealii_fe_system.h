@@ -4,7 +4,7 @@
 #include "dealii_cell_context.h"
 #include "dealii_datareporter.h"
 #include "dealii_template_inst.h"
-#include "simplify_node.h"
+#include "../Core/nodes.h"
 
 namespace dae
 {
@@ -410,7 +410,7 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
-                        res.node = dae::core::simplify(res.node);
+                        res.node = adNode::SimplifyNode(res.node);
 
                     cell_matrix(i,j) += res;
                 }
@@ -424,7 +424,7 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
-                        res.node = simplify(res.node);
+                        res.node = adNode::SimplifyNode(res.node);
 
                     cell_matrix_dt(i,j) += res;
                 }
@@ -441,7 +441,7 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
 
                 adouble res = getValueFromNumber<dim>(result);
                 if(res.node)
-                    res.node = simplify(res.node);
+                    res.node = adNode::SimplifyNode(res.node);
 
                 cell_rhs[i] += res;
             }
@@ -485,7 +485,7 @@ void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
-                        res.node = simplify(res.node);
+                        res.node = adNode::SimplifyNode(res.node);
 
                     cell_matrix(i,j) += res;
                 }
@@ -505,7 +505,7 @@ void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int
 
                 adouble res = getValueFromNumber<dim>(result);
                 if(res.node)
-                    res.node = simplify(res.node);
+                    res.node = adNode::SimplifyNode(res.node);
 
                 cell_rhs[i] += res;
             }
@@ -556,7 +556,7 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
 
                         adouble res = getValueFromNumber<dim>(result);
                         if(res.node)
-                            res.node = simplify(res.node);
+                            res.node = adNode::SimplifyNode(res.node);
 
                         cell_matrix(i,j) += res;
                     }
@@ -576,7 +576,7 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
-                        res.node = simplify(res.node);
+                        res.node = adNode::SimplifyNode(res.node);
 
                     cell_rhs[i] += res;
                 }
@@ -622,7 +622,7 @@ void dealiiFiniteElementSystem<dim>::integrate_volume_integrals(const unsigned i
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
-                        res.node = simplify(res.node);
+                        res.node = adNode::SimplifyNode(res.node);
 
                     adIntegral += res;
                 }
@@ -683,7 +683,7 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
-                        res.node = simplify(res.node);
+                        res.node = adNode::SimplifyNode(res.node);
 
                     adIntegral += res;
                 }

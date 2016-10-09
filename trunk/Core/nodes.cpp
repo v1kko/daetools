@@ -6,6 +6,7 @@ using namespace dae;
 #include "xmlfunctions.h"
 #include "units_io.h"
 #include "../Units/units_pool.h"
+#include "simplify_node.h"
 #include <typeinfo>
 using namespace dae::xml;
 using namespace boost;
@@ -715,6 +716,11 @@ adJacobian adNode::Derivative(adNodePtr node_, size_t nOverallVariableIndex)
     }
 
     return adJacobian(val_, deriv_);
+}
+
+adNodePtr adNode::SimplifyNode(adNodePtr node)
+{
+    return simplify(node);
 }
 
 /*********************************************************************************************

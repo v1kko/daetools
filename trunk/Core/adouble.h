@@ -575,6 +575,7 @@ public:
                                     const daeNodeSaveAsContext* c,
                                     bool bAppendEqualToZero = false);
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
+    static adNodePtr  SimplifyNode(adNodePtr node);
 };
 
 // Originally, it has been cloning nodes every time. Now it just returns the existing node.

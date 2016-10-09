@@ -245,12 +245,17 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         startTime = dae::GetTimeInSeconds();
     }
 
+    /*
+    Nota bene:
+      Not valid anymore: if the building of derivatives fails then it will be empty
+      and m_bBuildJacobianExpressions is true.
     if(m_mapJacobianExpressions.empty() && m_pEquation->m_bBuildJacobianExpressions)
     {
         daeDeclareException(exInvalidCall);
         e << "JacobianExpressions not built for the equation [" << GetName() << "]";
         throw e;
     }
+    */
 
     if(m_mapJacobianExpressions.empty())
     {
@@ -424,16 +429,32 @@ void daeEquationExecutionInfo::BuildJacobianExpressions()
     if(bPrintInfo)
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("    Building Jacobian Expressions for equation ") + GetName() + string(" ..."), 0);
 
-    // m_mapIndexes<OverallIndex, IndexInBlock>
-    for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
+    try
     {
-        adJacobian jacob = adNode::Derivative(m_EquationEvaluationNode, iter->first);
+        // m_mapIndexes<OverallIndex, IndexInBlock>
+        for(iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
+        {
+            adJacobian jacob = adNode::Derivative(m_EquationEvaluationNode, iter->first);
 
-        // Achtung!! Jacobian items are with no scaling!
-        if(jacob.derivative)
-            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, jacob.derivative);
-        else
-            m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, adNodePtr(new adConstantNode(0.0)));
+            // Remove 0+adouble, 0*adouble, 0/adouble etc. etc.
+            adNodePtr derivative = adNode::SimplifyNode(jacob.derivative);
+
+            // Achtung!! Jacobian items are with no scaling!
+            if(derivative)
+                m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, derivative);
+            else
+                m_mapJacobianExpressions[iter->first] = std::pair<size_t, adNodePtr>(iter->second, adNodePtr(new adConstantNode(0.0)));
+        }
+    }
+    catch(std::exception& e)
+    {
+        std::cout << "Building of Jacobian expressions failed in equation " << m_pEquation->GetName() << "(" << e.what() << "); "
+                  << "proceed without..." << std::endl;
+        m_mapJacobianExpressions.clear();
+    }
+    catch(...)
+    {
+        m_mapJacobianExpressions.clear();
     }
 }
 
