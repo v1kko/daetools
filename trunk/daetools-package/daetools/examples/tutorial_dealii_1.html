@@ -47,8 +47,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>In this tutorial the simple transient heat conduction problem is solved using</span>
 <span style='color:#c00000;'>the finite element method:</span>
 
-<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_1-heat_condution.png</span>
-<span style='color:#c00000;'>   :alt: dT/dt - kappa/(rho cp} </span><span style='color:#c00000;'>\\</span><span style='color:#c00000;'>nabla^2 T = g(T) in </span><span style='color:#c00000;'>\\</span><span style='color:#c00000;'>Omega</span>
+<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_1-heat_conduction.png</span>
+<span style='color:#c00000;'>   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) = g(T) in Omega</span>
 <span style='color:#c00000;'>   :width: 200 px</span>
 
 
@@ -58,6 +58,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>.. image:: _static/step-49.png</span>
 <span style='color:#c00000;'>   :alt:</span>
 <span style='color:#c00000;'>   :width: 400 px</span>
+
+<span style='color:#c00000;'>Dirichlet boundary conditions are set to 300 K on the outer rectangle,</span>
+<span style='color:#c00000;'>350 K on the inner ellipse and 250 K on the inner diamond.</span>
 
 <span style='color:#c00000;'>Sample results (at t = 500s) generated in VisIt:</span>
 
@@ -111,7 +114,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'># 1. The starting point is a definition of the daeFiniteElementObject class (1D, 2D or 2D problem).</span>
 
         <span style='color:#008000;'>#    1.1 Specification of the mesh file in one of the formats supported by deal.II:</span>
-        <span style='color:#008000;'>#        UCD (unstructured cell data), DB Mesh, XDA, Gmsh, Tecplot, NetCDF, UNV, VTK, and Cubit</span>
+        <span style='color:#008000;'>#         - UCD (unstructured cell data)</span>
+        <span style='color:#008000;'>#         - DB Mesh</span>
+        <span style='color:#008000;'>#         - XDA</span>
+        <span style='color:#008000;'>#         - Gmsh</span>
+        <span style='color:#008000;'>#         - Tecplot</span>
+        <span style='color:#008000;'>#         - NetCDF</span>
+        <span style='color:#008000;'>#         - UNV</span>
+        <span style='color:#008000;'>#         - VTK</span>
+        <span style='color:#008000;'>#         - Cubit</span>
         <span style='color:#008000;'>#        Here the .msh format from Gmsh is used (generated from the step-49.geo file)</span>
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'meshes'</span>)
         mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#c00000;'>'step-49.msh'</span>)

@@ -39,7 +39,7 @@ Transient heat conduction.
                /
              ID=1: Outer surface below y=-0.5, constant flux of 2 kW/m**2
 
-   dT/dt - ∇κ∇Τ = g, in Ω
+   dT/dt - kappa * nabla^2(Τ) = g in Omega
 
 Mesh:
 

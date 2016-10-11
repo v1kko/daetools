@@ -266,7 +266,7 @@ elif [ ${PLATFORM} = "Linux" ]; then
 fi
 
 if [ ${Ncpu} -gt 1 ]; then
-  Ncpu=$(($Ncpu+1))
+ Ncpu=$(($Ncpu+1))
 fi
 
 export DAE_COMPILER_FLAGS

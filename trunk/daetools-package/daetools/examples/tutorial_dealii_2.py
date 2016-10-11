@@ -17,12 +17,16 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Simple transient heat convection.
+In this example a simple transient heat convection-diffusion equation is solved.
+
+.. image:: _static/deal.II_tutorial_2-heat_convection.png
+   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) + nabla.(uT)= g(T) in Omega
+   :width: 300 px
 
 Mesh:
 
-.. image:: _static/rect(1.5,0.5)-100x50.msh
-   :width: 300 px
+.. image:: _static/rect(1.5,0.5)-100x50.png
+   :width: 500 px
 
 Results at t = 500s:
 

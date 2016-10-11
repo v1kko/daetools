@@ -17,9 +17,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Cahn-Hilliard equation.
+In this example the Cahn-Hilliard equation is solved using the finite element method.
+This equation describes the process of phase separation, where two components of a
+binary mixture separate and form domains pure in each component.
 
-Mesh:
+.. image:: _static/deal.II_tutorial_3-cahn-hilliard.png
+   :alt: dc/dt - D*nabla^2(mu) = 0, mu = c^3 - c - gamma*nabla^2(c) in Omega
+   :width: 200 px
+
+The mesh is a simple square (0-100)x(0-100).
 
 .. image:: _static/square.png
    :width: 400 px
@@ -55,8 +61,8 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        # This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,1)x(0,1)-50x50.msh
-        mesh_file  = os.path.join(meshes_dir, 'square(0,1)x(0,1)-20x20.msh')
+        # This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,100)x(0,100)-50x50.msh
+        mesh_file  = os.path.join(meshes_dir, 'square(0,100)x(0,100)-30x30.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -69,10 +75,6 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        D0    = 0.02
-        kappa = 1e-2
-        Omg_a = 3.4
-
         left_edge   = 0
         top_edge    = 1
         right_edge  = 2
@@ -84,19 +86,30 @@ class modTutorial(daeModel):
         # FE approximation of a quantity at the specified quadrature point (adouble object)
         c = dof_approximation_2D('c', fe_q)
 
+        self.useWikipedia_fc = True
+
         # 1) f(c) from the Wikipedia (https://en.wikipedia.org/wiki/Cahn-Hilliard_equation)
-        fc_Fi = c**3 - c
+        if self.useWikipedia_fc:
+            Diffusivity = 1.0
+            gamma       = 1.0
+            def f(c):
+                return c**3 - c
 
         # 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes
-        #log_fe = feExpression_2D.log
-        #fc_Fi = log_fe(c/(1-c)) + Omg_a*(1-2*c)
+        if not self.useWikipedia_fc:
+            Diffusivity = 1
+            gamma       = 1
+            Omg_a       = 3.4
+            log_fe = feExpression_2D.log
+            def f(c):
+                return log_fe(c/(1-c)) + Omg_a*(1-2*c)
 
         # FE weak form terms
         c_accumulation    = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q)
-        mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * D0 * JxW_2D(fe_q)
+        mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * Diffusivity * JxW_2D(fe_q)
         mu                = phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q) * JxW_2D(fe_q)
-        c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * kappa * JxW_2D(fe_q)
-        fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * fc_Fi
+        c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * gamma * JxW_2D(fe_q)
+        fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * f(c)
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
                                                   Mij = c_accumulation,
@@ -121,7 +134,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_dealii_3")
+        self.m = modTutorial("tutorial_deal_II_3")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -129,12 +142,21 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         numpy.random.seed(124)
-        def ic_with_noise(index):
-            ic = 0.5
-            return ic + random.uniform(-0.1*ic, 0.1*ic)
 
-        #setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
-        setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', ic_with_noise)
+        def c_with_noise_wiki(index):
+            c0     = 0.0
+            stddev = 0.1
+            return numpy.random.normal(c0, stddev)
+
+        def c_with_noise_ray(index):
+            c0     = 0.5
+            stddev = 0.1
+            return numpy.random.normal(c0, stddev)
+
+        if self.m.useWikipedia_fc:
+            setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', c_with_noise_wiki)
+        else:
+            setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', c_with_noise_ray)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -201,7 +223,7 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.TimeHorizon       = 1.0
+    simulation.TimeHorizon       = 500.0
     simulation.ReportingInterval = simulation.TimeHorizon/100
 
     # Initialize the simulation

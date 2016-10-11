@@ -29,21 +29,18 @@
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 <span style='color:#c00000;'>Flow through porous media. Darcy's law (deal.II step-20).</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
-<span style='color:#c00000;'>    .. math::</span>
-
-<span style='color:#c00000;'>        K^{-1} {\mathbf u} + </span><span style='color:#c00000;'>\n</span><span style='color:#c00000;'>abla p &amp;=  0 \qquad {</span><span style='color:#c00000;'>\t</span><span style='color:#c00000;'>extrm</span><span style='color:#0057ae;'>{in}</span><span style='color:#c00000;'>\ } \Omega </span><span style='color:#c00000;'>\\</span>
-<span style='color:#c00000;'>         -{</span><span style='color:#c00000;'>\t</span><span style='color:#c00000;'>extrm</span><span style='color:#0057ae;'>{div}</span><span style='color:#c00000;'>}\ {\mathbf u} &amp;= -f \qquad {</span><span style='color:#c00000;'>\t</span><span style='color:#c00000;'>extrm</span><span style='color:#0057ae;'>{in}</span><span style='color:#c00000;'>\ } \Omega </span><span style='color:#c00000;'>\\</span>
-<span style='color:#c00000;'>                                    p &amp;=  g \qquad {</span><span style='color:#c00000;'>\t</span><span style='color:#c00000;'>extrm</span><span style='color:#0057ae;'>{on}</span><span style='color:#c00000;'>\ } \partial \Omega</span>
+<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_5-porous_media.png</span>
+<span style='color:#c00000;'>   :alt: K^{-1} u + nabla(p) = 0, -div(u) = -f, in Omega; p = g on dGamma</span>
+<span style='color:#c00000;'>   :width: 200 px</span>
 
 <span style='color:#c00000;'>Mesh:</span>
 
-<span style='color:#c00000;'>.. image:: _static/square.png</span>
+<span style='color:#c00000;'>.. image:: _static/square(-1,1)x(-1,1)-50x50.png</span>
 <span style='color:#c00000;'>   :width: 300 px</span>
 
 <span style='color:#c00000;'>Results at t = 500s:</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_dealii_4-results.png</span>
+<span style='color:#c00000;'>.. image:: _static/tutorial_dealii_5-results.png</span>
 <span style='color:#c00000;'>   :width: 500 px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 

@@ -37,8 +37,8 @@ In addition, non-linear and DAE finite element systems are automatically support
 In this tutorial the simple transient heat conduction problem is solved using
 the finite element method:
 
-.. image:: _static/deal.II_tutorial_1-heat_condution.png
-   :alt: dT/dt - kappa/(rho cp} \\nabla^2 T = g(T) in \\Omega
+.. image:: _static/deal.II_tutorial_1-heat_conduction.png
+   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) = g(T) in Omega
    :width: 200 px
 
 
@@ -48,6 +48,9 @@ to the mesh in the step-49 deal.II example:
 .. image:: _static/step-49.png
    :alt:
    :width: 400 px
+
+Dirichlet boundary conditions are set to 300 K on the outer rectangle,
+350 K on the inner ellipse and 250 K on the inner diamond.
 
 Sample results (at t = 500s) generated in VisIt:
 
@@ -101,7 +104,15 @@ class modTutorial(daeModel):
         # 1. The starting point is a definition of the daeFiniteElementObject class (1D, 2D or 2D problem).
 
         #    1.1 Specification of the mesh file in one of the formats supported by deal.II:
-        #        UCD (unstructured cell data), DB Mesh, XDA, Gmsh, Tecplot, NetCDF, UNV, VTK, and Cubit
+        #         - UCD (unstructured cell data)
+        #         - DB Mesh
+        #         - XDA
+        #         - Gmsh
+        #         - Tecplot
+        #         - NetCDF
+        #         - UNV
+        #         - VTK
+        #         - Cubit
         #        Here the .msh format from Gmsh is used (generated from the step-49.geo file)
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
         mesh_file  = os.path.join(meshes_dir, 'step-49.msh')

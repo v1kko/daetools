@@ -151,6 +151,7 @@ fi
 #if [ ${Ncpu} -gt 1 ]; then
 #  Ncpu=$(($Ncpu+1))
 #fi
+Ncpu=3
 
 cd "${TRUNK}"
 
