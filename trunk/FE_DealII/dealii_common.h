@@ -59,6 +59,18 @@ typedef Point<3, double> Point_3D;
 
 namespace dealii
 {
+template <>
+struct ProductType<adouble,double>
+{
+  typedef adouble type;
+};
+
+template <>
+struct ProductType<double,adouble>
+{
+  typedef adouble type;
+};
+
 template <> struct EnableIfScalar<adouble>
 {
   typedef adouble type;

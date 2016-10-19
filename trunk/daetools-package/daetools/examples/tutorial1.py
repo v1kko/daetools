@@ -131,8 +131,8 @@ class modTutorial(daeModel):
         #  - Parent: daeModel object (indicating the model where the domain will be added)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in whats_the_time example) apply here as well.
-        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge (Neuman BC)")
-        self.Tt = daeParameter("T_t",                K, self, "Temperature at the top edge (Dirichlet BC)")
+        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Tt = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
         self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
@@ -179,25 +179,25 @@ class modTutorial(daeModel):
         # Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags
         # are used to define the position of the boundary.
         # The bottom edge is placed at y = 0 coordinate, thus we use eLowerBound for the y domain:
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (sinusoidal inlet flux)")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qb()
 
         # The top edge is placed at y = Ly coordinate, thus we use eUpperBound for the y domain:
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
+        eq = self.CreateEquation("BC_top", "Dirichlet boundary conditions at the top edge (constant temperature)")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = self.T(x,y) + self.Tt() * Sin(x() / Constant(3.14 * self.x.UpperBound * m))
+        eq.Residual = self.T(x,y) - self.Tt()
 
         # The left edge is placed at x = 0 coordinate, thus we use eLowerBound for the x domain:
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         # The right edge is placed at x = Lx coordinate, thus we use eUpperBound for the x domain:
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions for the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
@@ -222,8 +222,8 @@ class simTutorial(daeSimulation):
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.ro.SetValue(8960 * kg/(m**3))
-        self.m.Qb.SetValue(-1e5 * W/(m**2))
-        self.m.Tt.SetValue(100 * K)
+        self.m.Qb.SetValue(1.0e5 * W/(m**2))
+        self.m.Tt.SetValue(300 * K)
 
     def SetUpVariables(self):
         # SetInitialCondition function in the case of distributed variables can accept additional arguments
@@ -243,17 +243,12 @@ def guiRun(app):
     simulator.exec_()
 
 # Setup everything manually and run in a console
-from daetools.pyDAE.data_reporters import *
-from daetools.solvers.superlu import pySuperLU
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeVTKDataReporter()
+    datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
-
-    lasolver = pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -264,7 +259,7 @@ def consoleRun():
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if not datareporter.Connect("./%s" % simulation.m.Name, simName):
+    if(datareporter.Connect("", simName) == False):
         sys.exit()
 
     # Initialize the simulation
@@ -273,7 +268,6 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-    lasolver.SaveAsXPM('mpet_dealii.xpm')
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

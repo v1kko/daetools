@@ -251,8 +251,9 @@ class modTutorial(daeModel):
         #
         #         The weak form expressions are specified using the functions that wrap deal.II
         #         concepts used to assembly the matrices/vectors. The weak forms in daetools
-        #         represent expressions as the would appear in typical nested for loops.
-        #         In deal.II a typical loop in C++ would look like (i.e. a very simple example given step-7):
+        #         represent expressions as they would appear in typical nested for loops.
+        #         In deal.II a typical cell assembly loop (in C++) would look like
+        #         (i.e. a very simple example given in step-7):
         #
         #         typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
         #                                                        endc = dof_handler.end();
@@ -262,7 +263,7 @@ class modTutorial(daeModel):
         #             {
         #                 for(unsigned int i = 0; i < dofs_per_cell; ++i)
         #                 {
-        #                     for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        #                     for(unsigned int j = 0; j < dofs_per_cell; ++j)
         #                     {
         #                         cell_matrix(i,j) += ((fe_values.shape_grad(i,q_point) *
         #                                               fe_values.shape_grad(j,q_point)
@@ -282,8 +283,9 @@ class modTutorial(daeModel):
         #         and only weak form expressions are required - all other data are managed automatically, in a generic way.
         #         Obviously, the generic loops can be used to solve many FE problems but not all.
         #         However, they can support a large number of problems at the moment.
+        #         In the future they will be expanded to support a broader class of problems.
         #
-        #         A function is provided for the most of the functionality provided by deal.II FEValues<dim> and
+        #         Functions are developed for the most of the functionality provided by deal.II FEValues<dim> and
         #         FEFaceValues<dim> classes used for matrix assembly. The current list include (for 1D, 2D and 3D):
         #          - phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II
         #          - dphi (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II
@@ -331,6 +333,7 @@ class modTutorial(daeModel):
                                                   surfaceIntegrals = surfaceIntegrals,
                                                   volumeIntegrals = volumeIntegrals)
 
+        # Print the assembled weak form as they will be seen from deal.II wrappers:
         print('Transient heat conduction equation:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))

@@ -1042,7 +1042,7 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
         if(m_dofs_per_block[i] / m_DOFs[i]->m_nMultiplicity != feObjectInfo.m_nNumberOfDOFsPerVariable)
-            std::runtime_error("Number of DOFs per each component must be equal (for dof " + std::to_string(i) + ")");
+            std::runtime_error("Number of DOFs per each component must be equal (for dof " + m_DOFs[i]->m_strName + ")");
     }
 
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
