@@ -37,7 +37,7 @@ tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
 for i in range(1, 24):
     tutorial_modules.append(('tutorial%d' % i, []))
-for i in range(1, 5):
+for i in range(1, 6):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))
 for i in range(1, 8):
     tutorial_modules.append(('opt_tutorial%d' % i, []))

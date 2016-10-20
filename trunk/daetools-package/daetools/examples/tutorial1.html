@@ -142,7 +142,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#  - Description: string (optional argument; the default value is an empty string)</span>
         <span style='color:#008000;'># All naming conventions (introduced in whats_the_time example) apply here as well.</span>
         <span style='color:#0000ff;'>self</span>.Qb <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Qt <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_t&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Tt <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;T_t&quot;</span>,                K, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature at the top edge of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.ro <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Density of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.cp <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Specific heat capacity of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.k  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Thermal conductivity of the plate&quot;</span>)
@@ -189,25 +189,25 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'># Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags</span>
         <span style='color:#008000;'># are used to define the position of the boundary.</span>
         <span style='color:#008000;'># The bottom edge is placed at y = 0 coordinate, thus we use eLowerBound for the y domain:</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the bottom edge&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Neumann boundary conditions at the bottom edge (sinusoidal inlet flux)&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eLowerBound)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qb()
 
         <span style='color:#008000;'># The top edge is placed at y = Ly coordinate, thus we use eUpperBound for the y domain:</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_top&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the top edge&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_top&quot;</span>, <span style='color:#c00000;'>&quot;Dirichlet boundary conditions at the top edge (constant temperature)&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eClosedClosed)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eUpperBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qt()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T(x,y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tt()
 
         <span style='color:#008000;'># The left edge is placed at x = 0 coordinate, thus we use eLowerBound for the x domain:</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_left&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions at the left edge&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_left&quot;</span>, <span style='color:#c00000;'>&quot;Neumann boundary conditions at the left edge (insulated)&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eLowerBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM)
 
         <span style='color:#008000;'># The right edge is placed at x = Lx coordinate, thus we use eUpperBound for the x domain:</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_right&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the right edge&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_right&quot;</span>, <span style='color:#c00000;'>&quot;Neumann boundary conditions for the right edge (insulated)&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eUpperBound)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM)
@@ -225,15 +225,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#  - UpperBound:  float</span>
         <span style='color:#008000;'># Here we create 2D structured gird with 10x10 intervals in x and y domains</span>
         <span style='color:#008000;'># (resulting in 11x11 points in both directions).</span>
-        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#c000c0;'>20</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#c000c0;'>20</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
         <span style='color:#008000;'># Parameter values can be set by using a function SetValue.</span>
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.ro.SetValue(<span style='color:#c000c0;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>))
-        <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1e6</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
+        <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1.0e5</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
+        <span style='color:#0000ff;'>self</span>.m.Tt.SetValue(<span style='color:#c000c0;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
         <span style='color:#008000;'># SetInitialCondition function in the case of distributed variables can accept additional arguments</span>
