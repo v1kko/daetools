@@ -31,7 +31,6 @@ elif python_major == 3:
     
 from daetools.pyDAE import *
 from .RunExamples_ui import Ui_RunExamplesDialog
-from daetools.pyDAE.web_view_dialog import daeWebView
 
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
@@ -132,14 +131,16 @@ class RunExamples(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
+        address = join(_examples_dir, simName + ".html")
         try:
-            url   = QtCore.QUrl(join(_examples_dir, simName + ".html"))
+            from daetools.pyDAE.web_view_dialog import daeWebView
+            url   = QtCore.QUrl(address)
             title = simName + ".py"
             wv = daeWebView(url)
             wv.setWindowTitle(title)
             wv.exec_()
         except Exception as e:
-            firefox.open_new_tab(simName + ".html")
+            firefox.open_new_tab(address)
             
     #@QtCore.pyqtSlot()
     def slotShowModelReport(self):
@@ -180,6 +181,7 @@ class RunExamples(QtGui.QDialog):
             sys.stdout = saveout
             message = '<pre>{0}</pre>'.format(output.getvalue())
             try:
+                from daetools.pyDAE.web_view_dialog import daeWebView
                 view = daeWebView(message)
                 view.resize(700, 500)
                 view.setWindowTitle('Console execution results')

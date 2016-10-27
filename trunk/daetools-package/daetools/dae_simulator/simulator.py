@@ -27,11 +27,6 @@ python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
 python_build = sys.version_info[2]
 
-try:
-    from daetools.pyDAE.web_view_dialog import daeWebView
-except Exception as e:
-    print(('Cannot load web_view_dialog module\n Error: ', str(e)))
-
 images_dir = join(dirname(__file__), 'images')
 
 class daeTextEditLog(daeBaseLog):
@@ -338,6 +333,7 @@ class daeSimulator(QtGui.QDialog):
             self.lasolver.SaveAsXPM(matName)
             url = QtCore.QUrl(matName)
             try:
+                from daetools.pyDAE.web_view_dialog import daeWebView
                 wv = daeWebView(url)
                 wv.resize(400, 400)
                 wv.setWindowTitle("Sparse matrix: " + matName)

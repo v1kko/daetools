@@ -251,11 +251,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
-    lasolver.SaveAsXPM(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>'.xpm'</span>)
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

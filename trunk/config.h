@@ -24,7 +24,7 @@ public:
         boost::filesystem::path cfg_file = daeConfig::GetConfigFolder();
         cfg_file /= "daetools.cfg";
         configfile = cfg_file.string();
-        //std::cout << "config file: " << cfg_file.string() << std::endl;
+        //std::cout << "using config file: " << cfg_file.string() << std::endl;
         Reload();
     }
 
@@ -51,7 +51,7 @@ public:
             catch(boost::property_tree::file_parser_error& infoe)
             {
                 std::cout << "Cannot load daetools.cfg config file in neither 'json' nor 'info' format. Error: " << jsone.message() << std::endl;
-                std::cout << "Config files are located in: (1)current_exe_directory, (b).../daetools/pyDAE or (c)$HOME/.daetools directory" << std::endl;
+                std::cout << "Config files are located in: (1)current_exe_directory, (b).../daetools or (c)$HOME/.daetools directory" << std::endl;
                 return;
             }
 

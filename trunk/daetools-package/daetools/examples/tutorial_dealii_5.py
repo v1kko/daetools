@@ -241,11 +241,10 @@ def consoleRun():
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
-    lasolver.SaveAsXPM(simulation.m.Name + '.xpm')
 
     # Save the model report and the runtime model report
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
-    #simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
