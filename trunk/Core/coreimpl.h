@@ -640,6 +640,7 @@ public:
 		daeConfig& cfg = daeConfig::GetConfig();
 		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
 		m_bPrintInfo                       = cfg.Get<bool>("daetools.core.printInfo", false);
+        m_bCheckForInfinite                = cfg.Get<bool>("daetools.core.checkForInfiniteNumbers", false);
 	}
 
 	
@@ -1332,7 +1333,12 @@ public:
 	{
 		return m_bPrintInfo;
 	}
-	
+
+    bool CheckForInfiniteNumbers(void) const
+    {
+        return m_bCheckForInfinite;
+    }
+
 	daeBlock* GetBlock(void) const
 	{
 		return m_pBlock;
@@ -1384,6 +1390,7 @@ protected:
 	bool							m_bReinitializationFlag;
 	bool							m_bResetLAMatrixAfterDiscontinuity;
 	bool							m_bPrintInfo;
+    bool                            m_bCheckForInfinite;
 	bool							m_bIsModelDynamic;
 	bool							m_bCopyDataFromBlock;
 

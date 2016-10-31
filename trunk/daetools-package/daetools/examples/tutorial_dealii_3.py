@@ -28,12 +28,12 @@ binary mixture separate and form domains pure in each component.
 The mesh is a simple square (0-100)x(0-100).
 
 .. image:: _static/square.png
-   :width: 400 px
+   :width: 300 px
 
 Results at t = 500s:
 
 .. image:: _static/tutorial_dealii_3-results.png
-   :width: 600 px
+   :width: 400 px
 
 """
 

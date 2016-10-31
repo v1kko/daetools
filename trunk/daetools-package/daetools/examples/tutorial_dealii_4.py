@@ -44,12 +44,12 @@ Transient heat conduction.
 Mesh:
 
 .. image:: _static/pipe.png
-   :width: 400 px
+   :width: 300 px
 
 Results at t = 3600s:
 
 .. image:: _static/tutorial_dealii_4-results.png
-   :width: 600 px
+   :width: 500 px
 """
 
 import os, sys, numpy, json, math, tempfile

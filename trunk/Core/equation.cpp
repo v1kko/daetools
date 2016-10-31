@@ -194,6 +194,14 @@ void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pMo
     pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }
 
+template<typename T>
+bool check_is_finite(T arg)
+{
+    return arg == arg &&
+           arg != std::numeric_limits<T>::infinity() &&
+           arg != -std::numeric_limits<T>::infinity();
+}
+
 void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 {
 #ifdef DAE_DEBUG
@@ -201,7 +209,9 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
 
-    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bPrintInfo               = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
+
     if(bPrintInfo)
     {
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Residual for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
@@ -209,17 +219,19 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 
 	EC.m_pEquationExecutionInfo = this;
 
-    try
-    {
-        adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-        EC.m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
-    }
-    catch(std::exception& exc)
-    {
-        daeDeclareException(exInvalidCall);
-        e << "Exception raised during calculation of the Residual of the equation [" << GetName() << "]; " << exc.what();
-        throw e;
-    }
+    adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+
+    if(bCheckForInfiniteNumbers)
+        if(!check_is_finite(__ad.getValue()))
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The residual value of the " << GetName() << " equation is not finite (= " << __ad.getValue() << ");\n";
+            daeNodeSaveAsContext c(m_pEquation->m_pModel);
+            e << m_EquationEvaluationNode->SaveAsLatex(&c);
+            throw e;
+        }
+
+    EC.m_pBlock->SetResidual(m_nEquationIndexInBlock, __ad.getValue());
 }
 
 void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
@@ -234,7 +246,9 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 	adouble __ad;
     double startTime, endTime;
 
-    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bPrintInfo               = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
+
     if(bPrintInfo)
     {
         size_t count = m_mapIndexes.size();
@@ -247,7 +261,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 
     /*
     Nota bene:
-      Not valid anymore: if the building of derivatives fails then it will be empty
+      The below code is not valid anymore: if the building of derivatives fails then it will be empty
       and m_bBuildJacobianExpressions is true.
     if(m_mapJacobianExpressions.empty() && m_pEquation->m_bBuildJacobianExpressions)
     {
@@ -259,9 +273,6 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 
     if(m_mapJacobianExpressions.empty())
     {
-        //std::cout << "  Jacobian of the equation [" << GetName() << "]" << std::endl;
-        //std::cout << "    ";
-
         // Achtung, Achtung!!
         // Evaluation trees must be calculated using the eCalculateJacobian mode
         EC.m_eEquationCalculationMode = eCalculateJacobian;
@@ -270,33 +281,21 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         for(map<size_t, size_t>::iterator iter = m_mapIndexes.begin(); iter != m_mapIndexes.end(); iter++)
         {
             EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
-            try
-            {
-                __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 
-                //std::cout << toStringFormatted<real_t>(__ad.getDerivative(), -1, 10, true) << " [" << iter->second << "], ";
-            }
-            catch(std::exception& exc)
-            {
-                daeDeclareException(exInvalidCall);
-                e << "Exception raised during calculation of the Jacobian of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << " VariableIndexInBlock=" << iter->second << "; " << exc.what();
-                throw e;
-            }
+            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 
-            try
-            {
-                EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
-            }
-            catch(std::exception& exc)
-            {
-                daeDeclareException(exInvalidCall);
-                e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << " VariableIndexInBlock=" << iter->second << "; " << exc.what();
-                throw e;
-            }
+            if(bCheckForInfiniteNumbers)
+                if(!check_is_finite(__ad.getDerivative()))
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "The Jacobian item " << iter->second << " of the " << GetName() << " equation is not finite (= " << __ad.getDerivative() << ");\n";
+                    daeNodeSaveAsContext c(m_pEquation->m_pModel);
+                    e << m_EquationEvaluationNode->SaveAsLatex(&c);
+                    throw e;
+                }
+
+            EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second, __ad.getDerivative());
         }
-        //std::cout << std::endl;
     }
     else
     {
@@ -311,31 +310,20 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         for(map< size_t, std::pair<size_t, adNodePtr> >::iterator iter = m_mapJacobianExpressions.begin(); iter != m_mapJacobianExpressions.end(); iter++)
         {
             EC.m_nCurrentVariableIndexForJacobianEvaluation = -1;
-            try
-            {
-                __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
 
-                //std::cout << toStringFormatted<real_t>(__ad.getValue(), -1, 10, true) << " [" << iter->second.first << "], ";
-            }
-            catch(std::exception& exc)
-            {
-                daeDeclareException(exInvalidCall);
-                e << "Exception raised during calculation of the Jacobian of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << " VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
-                throw e;
-            }
+            __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
 
-            try
-            {
-                EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second.first, __ad.getValue());
-            }
-            catch(std::exception& exc)
-            {
-                daeDeclareException(exInvalidCall);
-                e << "Cannot set Jacobian item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-                  << " VariableIndexInBlock=" << iter->second.first << "; " << exc.what();
-                throw e;
-            }
+            if(bCheckForInfiniteNumbers)
+                if(!check_is_finite(__ad.getDerivative()))
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "The Jacobian item " << iter->second.first << " of the " << GetName() << " equation is not finite (= " << __ad.getDerivative() << ");\n";
+                    daeNodeSaveAsContext c(m_pEquation->m_pModel);
+                    e << m_EquationEvaluationNode->SaveAsLatex(&c);
+                    throw e;
+                }
+
+            EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second.first, __ad.getValue());
         }
         //std::cout << std::endl;
         //std::cout << std::endl;
@@ -355,9 +343,13 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
 
-    bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bPrintInfo               = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
+
     if(bPrintInfo)
+    {
         std::cout << "  SensitivityResidual for " << GetName() << std::endl;
+    }
 
 	EC.m_pEquationExecutionInfo = this;
 
@@ -367,29 +359,19 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 		EC.m_nCurrentParameterIndexForSensitivityEvaluation             = narrParameterIndexes[i];
 		EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
 		
-        try
-        {
-            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
-        }
-        catch(std::exception& exc)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Exception raised during calculation of the SensitivityResiduals of the equation [" << GetName() << "] for the EquationIndexInBlock=" << m_nEquationIndexInBlock
-              << " ParameterIndex=" << i << "; " << exc.what();
-            throw e;
-        }
+        __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
 
-        try
-        {
-            EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
-        }
-        catch(std::exception& exc)
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Cannot set SensitivityResiduals item for the equation [" << GetName() << "]: EquationIndexInBlock=" << m_nEquationIndexInBlock
-              << " ParameterIndex=" << i << "; " << exc.what();
-            throw e;
-        }
+        if(bCheckForInfiniteNumbers)
+            if(!check_is_finite(__ad.getDerivative()))
+            {
+                daeDeclareException(exInvalidCall);
+                e << "The sensitivity residual item " << i << " of the " << GetName() << " equation is not finite (= " << __ad.getDerivative() << ");\n";
+                daeNodeSaveAsContext c(m_pEquation->m_pModel);
+                e << m_EquationEvaluationNode->SaveAsLatex(&c);
+                throw e;
+            }
+
+        EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
     }
 }
 
@@ -402,8 +384,12 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 #endif
 
     bool bPrintInfo = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
+    bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
+
     if(bPrintInfo)
+    {
         std::cout << "  SensitivityParametersGradient for " << GetName() << std::endl;
+    }
 
 	EC.m_pEquationExecutionInfo = this;
 

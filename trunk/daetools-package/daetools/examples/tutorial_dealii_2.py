@@ -31,7 +31,7 @@ Mesh:
 Results at t = 500s:
 
 .. image:: _static/tutorial_dealii_2-results.png
-   :width: 500 px
+   :width: 600 px
 """
 
 import os, sys, numpy, json, tempfile
