@@ -386,7 +386,7 @@ const quantity quantity::operator/(const unit& other) const
 const quantity quantity::operator/(double value) const
 {
 	quantity q(value, unit());
-	return (*this / q);
+    return (*this / q);
 }
 
 const quantity quantity::operator^(const quantity& other) const
@@ -467,7 +467,8 @@ const quantity operator*(double value, const quantity& self)
 
 const quantity operator/(double value, const quantity& self)
 {
-	return quantity(value, self.getUnits() ^ (-1));	
+    quantity q(value, unit());
+    return q / self;
 }
 
 const quantity operator+(double value, const quantity& self)
