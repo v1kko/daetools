@@ -133,9 +133,9 @@ The process consists of the following steps:
             variable  = daeVariable(...)
             .. etc.
          
-    because at the exit from the :py:meth:`pyCore.daeModel.__init__` function the objects
-    will go out of scope and get destroyed. However, the model still holds references to them
-    which will result in the segmentation fault.
+     because at the exit from the :py:meth:`pyCore.daeModel.__init__` function the objects
+     will go out of scope and get destroyed. However, the model still holds references to them
+     which will result in the segmentation fault.
     
 3. Declare equations, state transition networks, OnEvent and OnCondition actions
    in the :py:meth:`pyCore.daeModel.DeclareEquations` function.
@@ -1124,35 +1124,35 @@ A typical use-case scenario consists of the following steps:
 1. Instantiation of the :py:class:`~pyDealII.dealiiFiniteElementSystem_nD` object. The constructor accepts the following
    arguments:
       
- - ``meshFilename``
+   - ``meshFilename``
    
-   Path to the mesh file. For the list of supported formats check the `GridIn<dim, spacedim>` class
-   in `deal.II`_ online documentation: `GridIn`_
+     Path to the mesh file. For the list of supported formats check the `GridIn<dim, spacedim>` class
+     in `deal.II`_ online documentation: `GridIn`_
    
- - ``polynomialOrder``
+   - ``polynomialOrder``
 
-   Polynomial order. At the momnt only `FE_Q`_ finite elements are supported that represnt *implementation of a
-   scalar Lagrange finite element ``Qp`` that yields the finite element space of continuous, piecewise polynomials
-   of degree ``polynomialOrder`` in each coordinate direction. This class is realized using tensor product
-   polynomials based on equidistant or given support points*
+     Polynomial order. At the momnt only `FE_Q`_ finite elements are supported that represnt *implementation of a
+     scalar Lagrange finite element ``Qp`` that yields the finite element space of continuous, piecewise polynomials
+     of degree ``polynomialOrder`` in each coordinate direction. This class is realized using tensor product
+     polynomials based on equidistant or given support points*
    
- - ``quadrature``
+   - ``quadrature``
 
-   Quadrature formula (`Quadrature<dim>` derived object). For the list of supported quadrature formulas
-   check the `deal.II`_ online documentation: `Quadrature`_
+     Quadrature formula (`Quadrature<dim>` derived object). For the list of supported quadrature formulas
+     check the `deal.II`_ online documentation: `Quadrature`_
    
- - ``faceQuadrature``
+   - ``faceQuadrature``
 
-   Face quadrature formula (`Quadrature<dim-1>` derived object)
+     Face quadrature formula (`Quadrature<dim-1>` derived object)
  
- - ``functions``
+   - ``functions``
 
-   Dictionary of space dependant functions ``{'Name':Function<dim>}``
+     Dictionary of space dependant functions ``{'Name':Function<dim>}``
  
- - ``equations``
+   - ``equations``
 
-   A list of :py:class:`~pyDealII.dealiiFiniteElementEquation_nD` objects that define
-   contributions to the element's stiffness and mass matrices, element's load vector etc.
+     A list of :py:class:`~pyDealII.dealiiFiniteElementEquation_nD` objects that define
+     contributions to the element's stiffness and mass matrices, element's load vector etc.
 
 
 .. _deal.II: http://dealii.org
@@ -1299,8 +1299,8 @@ when a specified conditon is satisfied. The available actions include:
 .. note:: OnCondition actions can be added to models or to states in State Transition Networks
           (:py:class:`pyCore.daeSTN` or :py:class:`pyCore.daeIF`):
 
-            - When added to a model they will be active throughout the simulation
-            - When added to a state they will be active only when that state is active
+          - When added to a model they will be active throughout the simulation
+          - When added to a state they will be active only when that state is active
             
 .. note:: ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
           are empty by default. The user has to specify at least one action.
@@ -1341,8 +1341,8 @@ in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 .. note:: OnEvent actions can be added to models or to states in State Transition Networks
           (:py:class:`pyCore.daeSTN` or :py:class:`pyCore.daeIF`):
 
-            - When added to a model they will be active throughout the simulation
-            - When added to a state they will be active only when that state is active
+          - When added to a model they will be active throughout the simulation
+          - When added to a state they will be active only when that state is active
 
 .. note:: ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
           are empty by default. The user has to specify at least one action.

@@ -11,9 +11,6 @@ Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. note:: Currently only Mozilla Firefox and Opera 12+ browsers are supported for viewing
-          model reports (MathML rendering issue).
-
 
 .. _whats_the_time:
 

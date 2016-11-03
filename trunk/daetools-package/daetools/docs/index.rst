@@ -1,6 +1,6 @@
-*************
-Documentation
-*************
+***********************
+DAE Tools Documentation
+***********************
 ..
     Copyright (C) Dragan Nikolic, 2016
     DAE Tools is free software; you can redistribute it and/or modify it under the
@@ -35,6 +35,8 @@ Presentations
 
 `Introduction to DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-introduction>`_
 (on `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
+
+`Overview of DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-overview>`_
 
 
 Indices and tables

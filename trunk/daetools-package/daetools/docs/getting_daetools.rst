@@ -336,8 +336,8 @@ DAE Tools can also be compiled from within QtCreator IDE. First install dependen
 * Do not do the shadow build. Uncheck it (for all projects) and build everything in the release folder
 * Choose the right specification file for your platform (usually it is done automatically by the IDE, but double-check it):
     
- * for GNU/Linux use ``-spec linux-g++``
- * for MacOS use ``-spec macx-g++``
+  * for GNU/Linux use ``-spec linux-g++``
+  * for MacOS use ``-spec macx-g++``
 
 * Compile the ``dae`` project (you can add the additional Make argument ``-jN`` to speed-up the compilation process,
   where N is the number of processors plus one; for instance on the quad-core machine you can use ``-j5``)
@@ -345,30 +345,30 @@ DAE Tools can also be compiled from within QtCreator IDE. First install dependen
   ``SuperLU/SuperLU_MT/SuperLU_CUDA`` and ``Bonmin/Ipopt`` share the same code and the same project file so some
   hacking is needed. Here are the instructions how to compile them:
     
- * Compiling ``libcdaeBONMIN_MINLPSolver.a`` and ``pyBONMIN.so``:
+  * Compiling ``libcdaeBONMIN_MINLPSolver.a`` and ``pyBONMIN.so``:
  
-   * Set ``CONFIG += BONMIN`` in ``BONMIN_MINLPSolver.pro``, run ``qmake`` and then compile
-   * Set ``CONFIG += BONMIN`` in ``pyBONMIN.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += BONMIN`` in ``BONMIN_MINLPSolver.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += BONMIN`` in ``pyBONMIN.pro``, run ``qmake`` and then compile
   
- * Compiling ``libcdaeIPOPT_NLPSolver.a`` and ``pyIPOPT.so``:
+  * Compiling ``libcdaeIPOPT_NLPSolver.a`` and ``pyIPOPT.so``:
  
-   * Set ``CONFIG += IPOPT`` in ``BONMIN_MINLPSolver.pro``, run ``qmake`` and then compile
-   * Set ``CONFIG += IPOPT`` in ``pyBONMIN.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += IPOPT`` in ``BONMIN_MINLPSolver.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += IPOPT`` in ``pyBONMIN.pro``, run ``qmake`` and then compile
   
- * Compiling ``libcdaeSuperLU_LASolver.a`` and ``pySuperLU.so``:
+  * Compiling ``libcdaeSuperLU_LASolver.a`` and ``pySuperLU.so``:
  
-   * Set ``CONFIG += SuperLU`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
-   * Set ``CONFIG += SuperLU`` in ``pySuperLU.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += SuperLU`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += SuperLU`` in ``pySuperLU.pro``, run ``qmake`` and then compile
   
- * Compiling ``libcdaeSuperLU_MT_LASolver.a`` and ``pySuperLU_MT.so``:
+  * Compiling ``libcdaeSuperLU_MT_LASolver.a`` and ``pySuperLU_MT.so``:
  
-   * Set ``CONFIG += SuperLU_MT`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
-   * Set ``CONFIG += SuperLU_MT`` in ``pySuperLU.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += SuperLU_MT`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += SuperLU_MT`` in ``pySuperLU.pro``, run ``qmake`` and then compile
   
- * Compiling ``libcdaeSuperLU_CUDA_LASolver.a`` and ``pySuperLU_CUDA.so``:
+  * Compiling ``libcdaeSuperLU_CUDA_LASolver.a`` and ``pySuperLU_CUDA.so``:
  
-   * Set ``CONFIG += SuperLU_CUDA`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
-   * Set ``CONFIG += SuperLU_CUDA`` in ``pySuperLU.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += SuperLU_CUDA`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
+    * Set ``CONFIG += SuperLU_CUDA`` in ``pySuperLU.pro``, run ``qmake`` and then compile
 
 * Compile the ``LA_Trilinos_Amesos`` project
 

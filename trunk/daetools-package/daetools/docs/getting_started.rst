@@ -23,57 +23,57 @@ Running tutorials
 
 1. Start ``DAE Plotter``:
 
-  * GNU/Linux:
-      
-    Run ``Applications/Development/daetools Plotter`` from the system menu or execute the following shell command:
+   * GNU/Linux:
 
-    .. code-block:: bash
+     Run ``Applications/Development/daetools Plotter`` from the system menu or execute the following shell command:
 
-        daeplotter
-      
-  * MacOS:
-
-    Execute the following shell command:
-
-    .. code-block:: bash
+     .. code-block:: bash
 
         daeplotter
+      
+   * MacOS:
 
-  * Windows:
+     Execute the following shell command:
 
-    Run ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
+     .. code-block:: bash
 
-  The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-1`)
+        daeplotter
 
-    .. _Figure-1:
-    .. figure:: _static/Screenshot-DAEPlotter.png
-       :width: 250 pt
-       :figwidth: 300 pt
-       :align: center
+   * Windows:
 
-       DAE Tools Plotter main window.
+     Run ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
+
+   The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-1`)
+
+   .. _Figure-1:
+   .. figure:: _static/Screenshot-DAEPlotter.png
+      :width: 250 pt
+      :figwidth: 300 pt
+      :align: center
+
+      DAE Tools Plotter main window.
 
 2. Start ``DAE Tools Tutorials`` program to try some examples:
 
-  * GNU/Linux:
+   * GNU/Linux:
 
-    Run ``Applications/Development/daetools Examples`` from the system menu or execute the following shell command:
+     Run ``Applications/Development/daetools Examples`` from the system menu or execute the following shell command:
 
-    .. code-block:: bash
-
-        daeexamples
-
-  * MacOS:
-
-    Execute the following shell command:
-
-    .. code-block:: bash
+     .. code-block:: bash
 
         daeexamples
 
-  * Windows:
+   * MacOS:
 
-    Run ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
+     Execute the following shell command:
+
+     .. code-block:: bash
+
+        daeexamples
+
+   * Windows:
+
+     Run ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
 
 The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-2a` while
 the output from the simulation run in :ref:`Figure-2b`. There, tutorials can be run, their source code
@@ -220,16 +220,16 @@ There is a large number of custom data reporters. Some of them are listed below.
 
 * Data reporters that export the results to a specified file format:
 
- * Matlab .mat file (daeMatlabMATFileDataReporter)
- * Excell .xls file (daeExcelFileDataReporter)
- * JSON format (daeJSONFileDataReporter)
- * XML file (daeXMLFileDataReporter)
- * HDF5 file (daeHDF5FileDataReporter)
+  * Matlab .mat file (daeMatlabMATFileDataReporter)
+  * Excell .xls file (daeExcelFileDataReporter)
+  * JSON format (daeJSONFileDataReporter)
+  * XML file (daeXMLFileDataReporter)
+  * HDF5 file (daeHDF5FileDataReporter)
 
 * Other types of data reporters
 
- * Pandas dataset (daePandasDataReporter)
- * Quick matplotlib plots (daePlotDataReporter)
+  * Pandas dataset (daePandasDataReporter)
+  * Quick matplotlib plots (daePlotDataReporter)
 
 
 Models
@@ -243,8 +243,8 @@ The process consists of two steps:
 
 1. Declare all domains, parameters, variables, ports etc.:
 
- * In **pyDAE** declare and instantiate in the :py:meth:`~pyCore.daeModel.__init__` function
- * In **cDAE** declare as class data members and instantiate in the constructor
+   * In **pyDAE** declare and instantiate in the :py:meth:`~pyCore.daeModel.__init__` function
+   * In **cDAE** declare as class data members and instantiate in the constructor
 
 2. Declare equations and state transition networks in the :py:meth:`~pyCore.daeModel.DeclareEquations` function
 
@@ -325,13 +325,13 @@ Definition of a simulation in **DAE Tools** requires the following steps:
 
 1. Deriving a new simulation class from the base simulation class (:py:class:`~pyActivity.daeSimulation`)
 
- * Specification of a model to be simulated
- * Setting the values of parameters
- * Fixing the degrees of freedom by assigning the values to certain variables
- * Setting the initial conditions for differential variables
- * Setting the other variables' information: initial guesses, absolute tolerances, etc
- * Specifation of an operating procedure. It can be either a simple run for a specified period of time (default) or
-   a complex one where various actions can be taken during the simulation
+   * Specification of a model to be simulated
+   * Setting the values of parameters
+   * Fixing the degrees of freedom by assigning the values to certain variables
+   * Setting the initial conditions for differential variables
+   * Setting the other variables' information: initial guesses, absolute tolerances, etc
+   * Specifation of an operating procedure. It can be either a simple run for a specified period of time (default) or
+     a complex one where various actions can be taken during the simulation
 
 2. Specify DAE and LA solvers
 
@@ -551,29 +551,29 @@ Definition of an optimization in **DAE Tools** requires the following steps:
 
 1. Specify the objective function
 
- * Objective function is defined by specifying its residual (similarly to specifying an equation residual);
-   Internally the framework will create a new variable (V_obj) and a new equation (F_obj).
+   * Objective function is defined by specifying its residual (similarly to specifying an equation residual);
+     Internally the framework will create a new variable (V_obj) and a new equation (F_obj).
 
 2. Specify optimization variables
 
- * The optimization variables have to be already defined in the model and their values assigned in the simulation;
-   they can be either non-distributed or distributed.
- * Specify a type of optimization variable values. The variables can be ``continuous`` (floating point values in
-   the given range), ``integer`` (set of integer values in the given range) or ``binary`` (integer value: 0 or 1).
- * Specify the starting point (within the range)
+   * The optimization variables have to be already defined in the model and their values assigned in the simulation;
+     they can be either non-distributed or distributed.
+   * Specify a type of optimization variable values. The variables can be ``continuous`` (floating point values in
+     the given range), ``integer`` (set of integer values in the given range) or ``binary`` (integer value: 0 or 1).
+   * Specify the starting point (within the range)
 
 3. Specify optimization constraints
 
- * Two types of constraints exist in DAE Tools: ``equality`` and ``inequality`` constraints
-   To define an ``equality`` constraint its residual and the value has to be specified;
-   To define an ``inequality`` constraint its residual, the lower and upper bounds have to be specified;
-   Internally the framework will create a new variable (V_constraint[N]) and a new equation (F_constraint[N])
-   for each defined constraint, where N is the ordinal number of the constraint.
+   * Two types of constraints exist in DAE Tools: ``equality`` and ``inequality`` constraints
+     To define an ``equality`` constraint its residual and the value has to be specified;
+     To define an ``inequality`` constraint its residual, the lower and upper bounds have to be specified;
+     Internally the framework will create a new variable (V_constraint[N]) and a new equation (F_constraint[N])
+     for each defined constraint, where N is the ordinal number of the constraint.
 
 4. Specify NLP/MINLP solver
 
- * Currently BONMIN MINLP solver and IPOPT and NLOPT solvers are supported (the BONMIN
-   solver internally uses IPOPT to solve NLP problems)
+   * Currently BONMIN MINLP solver and IPOPT and NLOPT solvers are supported (the BONMIN
+     solver internally uses IPOPT to solve NLP problems)
 
 5. Specify DAE and LA solvers
 
@@ -595,11 +595,11 @@ In **pyDAE**:
     
 .. code-block:: python
 
-    class mySimulation(daeSimulation):
-        ...
+   class mySimulation(daeSimulation):
+       ...
 
-        def SetUpOptimization(self):
-            # Declarations of the obj. function, opt. variables and constraints:
+       def SetUpOptimization(self):
+           # Declarations of the obj. function, opt. variables and constraints:
             ...
 
             

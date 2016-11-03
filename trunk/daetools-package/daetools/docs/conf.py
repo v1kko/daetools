@@ -26,6 +26,8 @@ from daetools.solvers.bonmin import *
 from daetools.solvers.nlopt import *
 from daetools.solvers.deal_II import *
 
+import sphinx_bootstrap_theme
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -59,7 +61,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'DAE Tools Project'
+project = u'Docs'
 copyright = u'2008-2016, Dragan Nikolic'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -116,17 +118,25 @@ pygments_style = 'vs'
 # a list of builtin themes.
 # sphinxdoc, nature, default
 
-html_theme = 'nature'
+html_theme = 'bootstrap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
     #"sidebarwidth" : 250
-    }
+
+    'navbar_links': [
+                      ("Home", "http://www.daetools.com", True)
+                    ],
+    'source_link_position': "footer",
+    'navbar_sidebarrel': False,
+    'navbar_class': "navbar navbar-inverse",
+    'bootswatch_theme': "readable" # cosmo, readable, simplex, paper, flatly, sandstone, journal, yeti
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

@@ -65,11 +65,11 @@ FMI Cross-Check results:
 
    .. code-block:: none
 
-     ./fmuCheck.linux64 -n 10 tutorial20.fmu
+      ./fmuCheck.linux64 -n 10 tutorial20.fmu
 
 3. Results:
 
-  .. code-block:: none
+   .. code-block:: none
 
     [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014
     [INFO][FMUCHK] Will process FMU tutorial20.fmu
