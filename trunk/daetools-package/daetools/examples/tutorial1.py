@@ -64,7 +64,7 @@ In this problem we have to define the following domains:
 
 the following parameters:
 
-- ro: copper density, 8960 kg/m3
+- rho: copper density, 8960 kg/m3
 - cp: copper specific heat capacity, 385 J/(kgK)
 - k:  copper heat conductivity, 401 W/(mK)
 - Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)
@@ -78,7 +78,7 @@ Also, we need to write the following 5 equations:
 
 1) Heat balance::
 
-      ro * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),
+      rho * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),
                                                                        for all y in: (0, Ly)
 
 2) Boundary conditions for the bottom edge::
@@ -133,7 +133,7 @@ class modTutorial(daeModel):
         # All naming conventions (introduced in whats_the_time example) apply here as well.
         self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
         self.Tt = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
-        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
        
@@ -173,7 +173,7 @@ class modTutorial(daeModel):
         #  - eBFDM: backward-finite difference method,
         #  - eFFDM: forward-finite difference method
         #  - eUpwindCCFV: cell-centered finite-volume method with flux limiter
-        eq.Residual = self.ro() * self.cp() * dt(self.T(x,y)) - \
+        eq.Residual = self.rho() * self.cp() * dt(self.T(x,y)) - \
                       self.k() * (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
         # Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags
@@ -221,7 +221,7 @@ class simTutorial(daeSimulation):
         # Parameter values can be set by using a function SetValue.
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
-        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.rho.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1.0e5 * W/(m**2))
         self.m.Tt.SetValue(300 * K)
 

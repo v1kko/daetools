@@ -64,7 +64,7 @@ class modTutorial(daeModel):
         self.k.DistributeOnDomain(self.y)
 
         # In this example the density is now a variable
-        self.ro = daeVariable("&rho;", density_t, self, "Density of the plate")
+        self.rho = daeVariable("&rho;", density_t, self, "Density of the plate")
 
         # Domains that variables/parameters are distributed on can be specified in a constructor:
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate", [self.x, self.y])
@@ -78,7 +78,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.ro() * self.cp(x, y) * self.T.dt(x, y) - self.k(x, y) * \
+        eq.Residual = self.rho() * self.cp(x, y) * self.T.dt(x, y) - self.k(x, y) * \
                      (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
         eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
@@ -171,7 +171,7 @@ class simTutorial(daeSimulation):
         # Therefore, we have to assign a value of one of the variables.
         # This variable cannot be chosen randomly, but must be chosen so that the combination
         # of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).
-        # In our case the only candidate is ro. However, in more complex models there can be many independent combinations of variables.
+        # In our case the only candidate is rho. However, in more complex models there can be many independent combinations of variables.
         # The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:
         self.m.ro.AssignValue(8960 * kg/(m**3))
 

@@ -44,11 +44,11 @@ class modTutorial(daeModel):
         self.dx = daeParameter("&delta;_x", m, self, "Width of the plate")
         self.dy = daeParameter("&delta;_y", m, self, "Height of the plate")
 
-        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
-        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
-        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
-        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
+        self.Qb  = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Qt  = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.cp  = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
         self.Q_int = daeVariable("Q_int", heat_flux_t, self, "The heat flux")
 
@@ -69,7 +69,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = dt( self.ro() * self.cp() * self.T(x, y) ) - \
+        eq.Residual = dt( self.rho() * self.cp() * self.T(x, y) ) - \
                       self.k() * ( d ( d ( self.T(x, y), self.x ), self.x ) + \
                                    d ( d ( self.T(x, y), self.y ), self.y ) )
 
@@ -130,7 +130,7 @@ class simTutorial(daeSimulation):
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
-        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.rho.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1e6 * W/(m**2))
         self.m.Qt.SetValue(0 * W/(m**2))
 

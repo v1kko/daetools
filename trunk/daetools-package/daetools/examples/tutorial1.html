@@ -74,7 +74,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
 <span style='color:#c00000;'>the following parameters:</span>
 
-<span style='color:#c00000;'>- ro: copper density, 8960 kg/m3</span>
+<span style='color:#c00000;'>- rho: copper density, 8960 kg/m3</span>
 <span style='color:#c00000;'>- cp: copper specific heat capacity, 385 J/(kgK)</span>
 <span style='color:#c00000;'>- k:  copper heat conductivity, 401 W/(mK)</span>
 <span style='color:#c00000;'>- Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)</span>
@@ -88,7 +88,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
 <span style='color:#c00000;'>1) Heat balance::</span>
 
-<span style='color:#c00000;'>      ro * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),</span>
+<span style='color:#c00000;'>      rho * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),</span>
 <span style='color:#c00000;'>                                                                       for all y in: (0, Ly)</span>
 
 <span style='color:#c00000;'>2) Boundary conditions for the bottom edge::</span>
@@ -143,7 +143,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'># All naming conventions (introduced in whats_the_time example) apply here as well.</span>
         <span style='color:#0000ff;'>self</span>.Qb <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.Tt <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;T_t&quot;</span>,                K, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature at the top edge of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.ro <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.rho <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Density of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.cp <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Specific heat capacity of the plate&quot;</span>)
         <span style='color:#0000ff;'>self</span>.k  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Thermal conductivity of the plate&quot;</span>)
        
@@ -183,7 +183,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#  - eBFDM: backward-finite difference method,</span>
         <span style='color:#008000;'>#  - eFFDM: forward-finite difference method</span>
         <span style='color:#008000;'>#  - eUpwindCCFV: cell-centered finite-volume method with flux limiter</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
                       <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> (d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x, eCFDM) <b><span style='color:#0000ff;'>+</span></b> d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y, eCFDM))
 
         <span style='color:#008000;'># Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags</span>
@@ -231,7 +231,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'># Parameter values can be set by using a function SetValue.</span>
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.ro.SetValue(<span style='color:#c000c0;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>))
+        <span style='color:#0000ff;'>self</span>.m.rho.SetValue(<span style='color:#c000c0;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>))
         <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1.0e5</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
         <span style='color:#0000ff;'>self</span>.m.Tt.SetValue(<span style='color:#c000c0;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
 

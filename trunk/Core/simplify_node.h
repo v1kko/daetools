@@ -118,6 +118,8 @@ adNodePtr simplify(adNodePtr node)
             {
                 if(bn->eFunction == dae::core::ePlus) // left + 0 => left
                     return left_s;
+                else if(bn->eFunction == dae::core::eMinus) // left - 0 => left
+                    return left_s;
                 else if(bn->eFunction == dae::core::eMulti) // left * 0 => 0 (that is right)
                     return right_s;
             }

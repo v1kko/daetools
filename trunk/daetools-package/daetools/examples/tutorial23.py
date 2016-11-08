@@ -42,11 +42,11 @@ class modTutorial(daeModel):
         self.x = daeDomain("x", self, m, "X axis domain")
         self.y = daeDomain("y", self, m, "Y axis domain")
 
-        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Qt = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
-        self.ro = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
-        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
-        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
+        self.Qb  = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Qt  = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
+        self.cp  = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
         self.T = daeVariable("T", temperature_t, self)
         self.T.DistributeOnDomain(self.x)
@@ -59,13 +59,13 @@ class modTutorial(daeModel):
         # For readibility, get the adouble objects from parameters/variables
         # and create numpy arrays for T and its derivatives in tim and space
         # This will also save a lot of memory (no duplicate adouble objects in equations)
-        Nx = self.x.NumberOfPoints
-        Ny = self.y.NumberOfPoints
-        ro = self.ro()
-        cp = self.cp()
-        k  = self.k()
-        Qb = self.Qb()
-        Qt = self.Qt()
+        Nx  = self.x.NumberOfPoints
+        Ny  = self.y.NumberOfPoints
+        rho = self.rho()
+        cp  = self.cp()
+        k   = self.k()
+        Qb  = self.Qb()
+        Qt  = self.Qt()
 
         T      = numpy.empty((Nx,Ny), dtype=object)
         dTdt   = numpy.empty((Nx,Ny), dtype=object)
@@ -96,7 +96,7 @@ class modTutorial(daeModel):
             #print x,y,eq_type
             eq = self.CreateEquation("HeatBalance", "")
             if eq_type == 'in':
-                eq.Residual = ro*cp*dTdt[x,y] - k*(d2Tdx2[x,y] + d2Tdy2[x,y])
+                eq.Residual = rho*cp*dTdt[x,y] - k*(d2Tdx2[x,y] + d2Tdy2[x,y])
 
             elif eq_type == 'l':
                 eq.Residual = dTdx[x,y]
@@ -125,7 +125,7 @@ class simTutorial(daeSimulation):
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
-        self.m.ro.SetValue(8960 * kg/(m**3))
+        self.m.rho.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1e6 * W/(m**2))
         self.m.Qt.SetValue(0 * W/(m**2))
 

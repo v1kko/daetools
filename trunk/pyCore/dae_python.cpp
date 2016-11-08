@@ -621,6 +621,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
     def("Exp",   &daepython::ad_exp);
     def("Log",   &daepython::ad_log);
+    def("Log10", &daepython::ad_log10);
     def("Sqrt",  &daepython::ad_sqrt);
     def("Sin",   &daepython::ad_sin);
     def("Cos",   &daepython::ad_cos);
@@ -638,7 +639,6 @@ BOOST_PYTHON_MODULE(pyCore)
     def("ATan2", &daepython::ad_atan2);
     def("Erf",   &daepython::ad_erf);
 
-    def("Log10", &daepython::ad_log10);
     def("Ceil",  &daepython::ad_ceil);
     def("Floor", &daepython::ad_floor);
     def("Pow",   &daepython::ad_pow1);
