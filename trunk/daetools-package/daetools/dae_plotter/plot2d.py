@@ -434,28 +434,31 @@ class dae2DPlot(QtGui.QDialog):
     def newFromTemplate(self, template):
         """
         template is a dictionary:
-        {
-           'curves' : [variableName, domainIndexes, domainPoints, lineTitle, style],
-           'updateInterval' : float,
-           'xlabel' : string,
-           'xmin' : float,
-           'xmax' : float,
-           'xscale' : string [linear, log],
-           'xtransform': float,
-           'ylabel' : string,
-           'ymin' : float,
-           'ymax' : float,
-           'yscale' : string [linear, log],
-           'ytransform': float,
-           'legendOn' : Bool,
-           'gridOn' : Bool,
-           'plotTitle' : string,
-           'windowTitle' : string
-           'xmin_policy': int,
-           'xmax_policy': int,
-           'ymin_policy': int,
-           'ymax_policy': int
-        }
+
+        .. code-block:: javascript
+
+           {
+               'curves' : [variableName, domainIndexes, domainPoints, lineTitle, style],
+               'updateInterval' : float,
+               'xlabel' : string,
+               'xmin' : float,
+               'xmax' : float,
+               'xscale' : string [linear, log],
+               'xtransform': float,
+               'ylabel' : string,
+               'ymin' : float,
+               'ymax' : float,
+               'yscale' : string [linear, log],
+               'ytransform': float,
+               'legendOn' : Bool,
+               'gridOn' : Bool,
+               'plotTitle' : string,
+               'windowTitle' : string
+               'xmin_policy': int,
+               'xmax_policy': int,
+               'ymin_policy': int,
+               'ymax_policy': int
+           }
         """
         if len(self.tcpipServer.DataReceivers) == 0:
             return

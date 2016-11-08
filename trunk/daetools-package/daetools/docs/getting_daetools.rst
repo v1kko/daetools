@@ -14,17 +14,21 @@ Getting DAE Tools
 **DAE Tools** (pyDAE module) is installed in ``daetools`` folder within ``site-packages`` (or ``dist-packages``)
 folder under python. The structure of the folders is the following:
 
-* ``daetools``
+.. figure:: _static/daetools_folder_structure.png
+   :align: center
 
-  * ``code_generators``
-  * ``dae_plotter``
-  * ``dae_simulator``
-  * ``docs``
-  * ``examples``
-  * ``pyDAE``
-  * ``solvers``
-  * ``solibs``
-  * ``unit_tests``
+..
+  * ``daetools``
+
+    * ``code_generators``
+    * ``dae_plotter``
+    * ``dae_simulator``
+    * ``docs``
+    * ``examples``
+    * ``pyDAE``
+    * ``solvers``
+    * ``solibs``
+    * ``unit_tests``
 
 System requirements
 ===================
@@ -70,14 +74,8 @@ separately since they are subject to different licencing conditions (not free so
 Getting the packages
 ====================
 
-The instalation files can be downloaded from: `<https://sourceforge.net/projects/daetools/files>`_
-
-**If the SourceForge website is temporarily down, please use the following links until it becomes available:**
-
-- `Windows 32-bit python 2.7 <http://www.daetools.com/daetools-1.5.0-win32-py27.exe>`_
-- `Windows 32-bit python 3.4 <http://www.daetools.com/daetools-1.5.0-win32-py34.exe>`_
-- `GNU/Linux 64-bit python 2.7/3.4 <http://www.daetools.com/daetools-1.5.0-gnu_linux-x86_64.tar.gz>`_
-- `MacOS X universal python 2.7 <http://www.daetools.com/daetools-1.5.0-macosx-universal-py27.zip>`_
+The instalation files can be downloaded from the `downloads <http://daetools.com/downloads.html>`_ section
+or from the `Sorce Forge <https://sourceforge.net/projects/daetools/files>`_ website.
 
 .. note:: From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
 
@@ -100,58 +98,83 @@ Installation
 GNU/Linux
 ---------
 
-First, install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
+Install Python and Python packages
+++++++++++++++++++++++++++++++++++
+Use the system's Python
+///////////////////////
 
-Use the system's package manager or install from shell:
+Use the system's package manager or install the required packages from shell:
 
 * Debian GNU/Linux and derivatives (Ubuntu, Linux Mint)
-    
+
   .. code-block:: bash
 
-    sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2 python-lxml
-    # Optional packages:
-    sudo apt-get install python-xlwt python-h5py python-pandas
+     sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2 python-lxml
+     # Optional packages:
+     sudo apt-get install python-xlwt python-h5py python-pandas
 
 * Red Hat and derivatives (Fedora, CentOS):
-    
+
   .. code-block:: bash
 
-    sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi python-lxml
-    # Optional packages:
-    sudo yum install python-xlwt h5py pandas
+     sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi python-lxml
+     # Optional packages:
+     sudo yum install python-xlwt h5py pandas
 
 * SUSE Linux:
 
   .. code-block:: bash
 
-    sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 python-lxml 
-    # Optional packages:
-    sudo zypper in python-xlwt h5py pandas
-    
+     sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 python-lxml
+     # Optional packages:
+     sudo zypper in python-xlwt h5py pandas
+
 * Arch Linux:
 
   .. code-block:: bash
 
-    sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi python-lxml
-    # Optional packages:
-    sudo pacman -S python2-xlwt python-h5py python-pandas
+     sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi python-lxml
+     # Optional packages:
+     sudo pacman -S python2-xlwt python-h5py python-pandas
 
-    
-Then, unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
+Install one of scientific python distributions
+//////////////////////////////////////////////
+
+* Anaconda `<https://store.continuum.io/cshop/anaconda>`_
+* Miniconda `<http://conda.pydata.org/miniconda.html>`_
+
+  Install dependencies using:
+
+  .. code-block:: bash
+
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
+
+* Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
+
+Install DAE Tools
++++++++++++++++++
+Unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
 the following shell command:
 
 .. code-block:: bash
 
-    sudo python setup.py install
+   sudo python setup.py install
+
+You can also install **DAE Tools** into a python virtual environment:
+
+.. code-block:: bash
+
+   source activate <environment_name>
+   python setup.py install
 
 
 MacOS
 -----
+Install Python and Python packages
+++++++++++++++++++++++++++++++++++
 
-Easy way
-########
-Install one of scientific python distributions:
-    
+Install one of scientific python distributions
+//////////////////////////////////////////////
 * Anaconda `<https://store.continuum.io/cshop/anaconda>`_
 * Miniconda `<http://conda.pydata.org/miniconda.html>`_
 
@@ -163,10 +186,10 @@ Install one of scientific python distributions:
   
 * Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
 
-By hand
-########
-The default python version usually does not work well. Therefore, it is better to install
-a custom python. First, install the mandatory packages: python 2.7, numpy, scipy, matplotlib and pyqt4.
+Use the system's Python
+///////////////////////
+The system's python version usually does not work well (therefore, install a custom python).
+First, install the mandatory packages: python 2.7, numpy, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
 * Python: `<https://www.python.org/ftp/python/2.7.9/python-2.7.9-macosx10.6.pkg>`_
@@ -175,19 +198,28 @@ As a starting point the following links can be used:
 * Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/mac/>`_
 * PyQt4: `<http://www.riverbankcomputing.com/software/pyqt/download>`_
 
-Then unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
+Install DAE Tools
++++++++++++++++++
+Unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
 the following shell command:
 
 .. code-block:: bash
 
     sudo python setup.py install
 
+You can also install **DAE Tools** into a python virtual environment:
+
+.. code-block:: bash
+
+   source activate <environment_name>
+   python setup.py install
+
 
 Windows
 -------
-Easy way
-########
-Install one of available scientific python distributions:
+Install Python and Python packages
+++++++++++++++++++++++++++++++++++
+The easiest way is to install one of available scientific python distributions:
     
 * Anaconda `<https://store.continuum.io/cshop/anaconda>`_
 * Miniconda `<http://conda.pydata.org/miniconda.html>`_
@@ -196,23 +228,23 @@ Install one of available scientific python distributions:
 
   .. code-block:: bash
 
-    conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
   
 * Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
-* Python(x,y) `<http://www.pythonxy.com>`_
+* Python(x,y) `<https://python-xy.github.io/>`_
 
-By hand
-########
 **DAE Tools** is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use **DAE Tools** on
 64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
-First install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
-As a starting point the following links can be used:
 
-* Python 2.7: `<http://www.python.org/ftp/python/2.7.9/python-2.7.9.msi>`_
-* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.9.1/numpy-1.9.1-win32-superpack-python2.7.exe/download>`_
-* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.14.0/scipy-0.14.0-win32-superpack-python2.7.exe/download>`_
-* Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/windows/matplotlib-1.4.2.win32-py2.7.exe/download>`_
-* PyQt4: `<http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt4-4.11.3-gpl-Py2.7-Qt4.8.6-x32.exe>`_
+..
+    First install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
+    As a starting point the following links can be used:
+
+    * Python 2.7: `<http://www.python.org/ftp/python/2.7.9/python-2.7.9.msi>`_
+    * Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.9.1/numpy-1.9.1-win32-superpack-python2.7.exe/download>`_
+    * Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.14.0/scipy-0.14.0-win32-superpack-python2.7.exe/download>`_
+    * Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/windows/matplotlib-1.4.2.win32-py2.7.exe/download>`_
+    * PyQt4: `<http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt4-4.11.3-gpl-Py2.7-Qt4.8.6-x32.exe>`_
 
 To be able to create 3D plots you need to install Mayavi2 package. It can be installed using the following shell command:
 
@@ -223,7 +255,9 @@ To be able to create 3D plots you need to install Mayavi2 package. It can be ins
     
 Alternatively you can install everything needed through `Python(x,y) <http://www.pythonxy.com>`_.
 
-Finally, install **DAE Tools** by double clicking the file daetools_x.x-x-win32_py27.exe and follow the instructions.
+Install DAE Tools
++++++++++++++++++
+Install **DAE Tools** by double clicking the file daetools_x.x-x-win32_py27.exe and follow the instructions.
 To uninstall use the uninstall program in ``Start`` -> ``All Programs`` -> ``DAE Tools`` -> ``Uninstall``.
 
 ..
@@ -248,7 +282,7 @@ To uninstall use the uninstall program in ``Start`` -> ``All Programs`` -> ``DAE
 
     
 Compiling from source
-===============================
+=====================
 
 To compile the **DAE Tools** the following is needed:
     
@@ -270,10 +304,11 @@ GNU/Linux and MacOS
 
 .. _the_easy_way:
 
-.. rubric:: The easy way
-
-First, install all the necessary dependencies by executing ``install_dependencies_linux.sh`` shell script located
-in the ``trunk`` directory. It will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS, Suse Linux,
+From the command line (the easy way)
+++++++++++++++++++++++++++++++++++++
+First, install all the necessary dependencies by executing ``install_python_dependencies_linux.sh`` and
+``install_dependencies_linux.sh`` shell script located in the ``trunk`` directory.
+They will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS, Suse Linux,
 Arch Linux and Fedora are supported but other can be easily added) and install all necessary packages needed for **DAE Tools**
 development.
 
@@ -318,18 +353,13 @@ following is accepted: ``all``, ``core``, ``pydae``, ``solvers``, ``superlu``, `
 
 All python extensions are located in platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.
-**DAE Tools** can be now installed by using the folowing commands:
-    
-.. code-block:: bash
 
-    cd daetools/trunk/daetools-package
-    sudo python setup.py install
-
+**DAE Tools** can be now installed using the information from the sections above.
 
 .. _from_qtcreator_ide:
 
-.. rubric:: From QtCreator IDE
-
+From QtCreator IDE
+++++++++++++++++++
 DAE Tools can also be compiled from within QtCreator IDE. First install dependencies and compile third party libraries
 (as explained in :ref:`The easy way <the_easy_way>`) and then do the following:
     
@@ -378,8 +408,8 @@ DAE Tools support cross-compilation since the version 1.3.0. For more informatio
 read the help sections in compile_libraries_linux.sh and compile_linux.sh scripts.
 
 .. note:: Compiling all third party libraries and **DAE Tools** projects requires a mental gymnastics
-          impossible to describe by any human language so that the pre-compiled libraries are provided in the downloads
-          section (`windows libraries <https://sourceforge.net/projects/daetools/files/windows%20libraries>`_).
+          impossible to describe by any human language.
+
 ..
     Necessary tools: `QtCreator <http://qt.nokia.com/products/developer-tools>`_,
     `Microsoft VC++ <http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=14597>`_
@@ -399,10 +429,4 @@ read the help sections in compile_libraries_linux.sh and compile_linux.sh script
 
     .. note:: superlu_mt and superlu_cuda cannot be compiled on Windows at the moment.
 
-DAE Tools can be installed by using the folowing commands:
-
-.. code-block:: bash
-
-    cd daetools/trunk/daetools-package
-    sudo python setup.py install
-
+**DAE Tools** can be now installed using the information from the sections above.

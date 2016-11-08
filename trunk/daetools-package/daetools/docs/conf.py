@@ -102,7 +102,7 @@ exclude_patterns = []
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'vs'
+pygments_style = 'vs' # vs, colorful, friendly, pastie, manni
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -130,6 +130,7 @@ html_theme_options = {
                       ("Home", "http://www.daetools.com", True)
                     ],
     'source_link_position': "footer",
+    'globaltoc_depth': 1,
     'navbar_sidebarrel': False,
     'navbar_class': "navbar navbar-inverse",
     'bootswatch_theme': "readable" # cosmo, readable, simplex, paper, flatly, sandstone, journal, yeti

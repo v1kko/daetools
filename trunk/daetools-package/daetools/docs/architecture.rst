@@ -24,10 +24,10 @@ Package “core”
 --------------
 
 This package contains the key modelling concepts. The class diagram with interfaces (abstract classes) and their
-interdepedency is presented in :ref:`Figure-1`. The key modelling concepts in DAE Tools are given in :ref:`Table-1`.
-Interface realisations are given in :ref:`Figure-2`.
+interdepedency is presented in :ref:`Figure-Arch-1`. The key modelling concepts in DAE Tools are given in :ref:`Table-Arch-1`.
+Interface realisations are given in :ref:`Figure-Arch-2`.
 
-.. _Figure-1:
+.. _Figure-Arch-1:
 .. figure:: _static/architecture_1.png
    :width: 600 pt
    :figwidth: 650 pt
@@ -36,7 +36,7 @@ Interface realisations are given in :ref:`Figure-2`.
    UML class diagram: the **core** package interfaces
 
 
-.. _Table-1:
+.. _Table-Arch-1:
 .. list-table:: The key modelling concepts in DAE Tools
     :widths: 20 20 80
     :header-rows: 1
@@ -96,7 +96,7 @@ Interface realisations are given in :ref:`Figure-2`.
       - Represents a model
 
 
-.. _Figure-2:
+.. _Figure-Arch-2:
 .. figure:: _static/architecture_2.png
    :width: 500 pt
    :figwidth: 550 pt
@@ -108,9 +108,9 @@ Models in DAE Tools are represented by the :py:class:`~pyCore.daeModel` class an
 parameters, variables, equations, state transition networks, ports, event ports, actions to be performed when a given
 condition is satisfied, actions to be performed when an event is triggered on a given event port, and components
 (instances of other models, used to form a hierarchy of models). The :py:class:`~pyCore.daeModel` UML class diagram
-is presented in :ref:`Figure-3`.
+is presented in :ref:`Figure-Arch-3`.
 
-.. _Figure-3:
+.. _Figure-Arch-3:
 .. figure:: _static/architecture_3.png
    :width: 500 pt
    :figwidth: 550 pt
@@ -133,9 +133,9 @@ Package “solvers”
 
 This package contains interfaces that define an API for numerical solution of systems of differential
 algebraic equations (DAE), systems of linear equations (LA), and (mixed-integer) nonlinear programming problems
-(NLP or MINLP), and auxiliary classes. The class diagram with the defined interfaces is presented in :ref:`Figure-4`.
+(NLP or MINLP), and auxiliary classes. The class diagram with the defined interfaces is presented in :ref:`Figure-Arch-4`.
 
-.. _Figure-4:
+.. _Figure-Arch-4:
 .. figure:: _static/architecture_4.png
    :width: 200 pt
    :figwidth: 250 pt
@@ -159,7 +159,7 @@ algebraic equations (DAE), systems of linear equations (LA), and (mixed-integer)
     * - *daeIDALASolver\_t*
       - Derived from *daeLASolver\_t,* used by Sundials IDAS linear solvers
 
-Interface realizations are given in :ref:`Figure-5`.
+Interface realizations are given in :ref:`Figure-Arch-5`.
 Current implementations include Sundials IDAS DAE solver, IPOPT, BONMIN and NLOPT (MI)NLP
 solvers and SuperLU, SuperLU_MT, PARDISO, Intel PARDISO and Trilinos (Amesos and AztecOO) sparse matrix linear
 solvers. Since all these linear equation solvers use different sparse matrix representations, a generic interface
@@ -172,7 +172,7 @@ two-dimensional arrays), a template class :cpp:class:`daeSparseMatrix\<typename 
 and its realization :cpp:class:`daeCSRMatrix\<typename FLOAT, typename INT\>` implementing the compressed row storage
 (CSR) sparse matrix representation.
 
-.. _Figure-5:
+.. _Figure-Arch-5:
 .. figure:: _static/architecture_5.png
    :width: 400 pt
    :figwidth: 450 pt
@@ -193,9 +193,9 @@ A number of data reporters have been developed for:
 (a) sending the results via TCP/IP protocol to the DAE Tools Plotter application (:py:class:`~pyDataReporting.daeTCPIPDataReporter`),
 (b) plotting the results using the Matplotlib Python library (:py:class:`~pyDataReporting.daePlotDataReporter`), and
 (c) exporting the results to various file formats (such as Matlab MAT, Microsoft Excel, html, xml, json and HDF5).
-An overview of the implemented classes is given in :ref:`Figure-6`.
+An overview of the implemented classes is given in :ref:`Figure-Arch-6`.
 
-.. _Figure-6:
+.. _Figure-Arch-6:
 .. figure:: _static/architecture_6.png
    :width: 600 pt
    :figwidth: 650 pt
@@ -208,13 +208,13 @@ Package “logging”
 -----------------
 
 This package contains only one interface *daeLog\_t* that define an API for sending messages from
-the simulation to the user. Interface realizations are given in :ref:`Figure-7`. Three implementations exist:
+the simulation to the user. Interface realizations are given in :ref:`Figure-Arch-7`. Three implementations exist:
 :py:class:`~pyCore.daeStdOutLog` (prints messages to the standard output),
 :py:class:`~pyCore.daeFileLog` (stores messages to the specified text file), and
 :py:class:`~pyCore.daeTCPIPLog` (sends messages via TCP/IP protocol to the :py:class:`~pyCore.daeTCPIPLogServer`;
 used when a simulation is running on a remote computer).
 
-.. _Figure-7:
+.. _Figure-Arch-7:
 .. figure:: _static/architecture_7.png
    :width: 400 pt
    :figwidth: 450 pt

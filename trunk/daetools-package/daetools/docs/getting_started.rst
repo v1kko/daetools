@@ -41,11 +41,11 @@ Running tutorials
 
    * Windows:
 
-     Run ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
+     Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
 
-   The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-1`)
+   The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-GetStarted-1`)
 
-   .. _Figure-1:
+   .. _Figure-GetStarted-1:
    .. figure:: _static/Screenshot-DAEPlotter.png
       :width: 250 pt
       :figwidth: 300 pt
@@ -73,15 +73,15 @@ Running tutorials
 
    * Windows:
 
-     Run ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
+     Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
 
-The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-2a` while
-the output from the simulation run in :ref:`Figure-2b`. There, tutorials can be run, their source code
+The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-GetStarted-2a` while
+the output from the simulation run in :ref:`Figure-GetStarted-2b`. There, tutorials can be run, their source code
 inspected, model reports generated.
 Model reports open in a new window of the system's default web browser (however, only Mozilla Firefox is currently
 supported because of the MathML rendering issue).
 
-.. _Figure-2a:
+.. _Figure-GetStarted-2a:
 .. figure:: _static/Screenshot-DAEToolsTutorials.png
    :width: 350 pt
    :figwidth: 400 pt
@@ -89,7 +89,7 @@ supported because of the MathML rendering issue).
 
    DAE Tools Examples main window
 
-.. _Figure-2b:
+.. _Figure-GetStarted-2b:
 .. figure:: _static/Screenshot-DAEToolsTutorials-Run.png
    :width: 350 pt
    :figwidth: 400 pt
@@ -109,9 +109,9 @@ Tutorials can also be started from the shell:
     # or
     python tutorial1.py gui
 
-The sample output is given in :ref:`Figure-3`:
+The sample output is given in :ref:`Figure-GetStarted-3`:
 
-.. _Figure-3:
+.. _Figure-GetStarted-3:
 .. figure:: _static/Screenshot-RunningSimulation.png
    :width: 350 pt
    :figwidth: 400 pt
@@ -124,7 +124,7 @@ Processing the results
 
 DAE Tools provide a protocol for reporting the simulation results. It uses a concept of **data reporter** and
 **data receiver** interfaces. **Data reporter** interface is used by a simulation to send the data, while the
-**data receiver** interface is used to receive, store and offer the data to the users.
+**data receiver** interface is used to receive, store and provide the data to users.
 There are two types of data reporters: local (store data locally) and remote (send data to a server,
 i.e. via TCP/IP protocol).
 
@@ -140,12 +140,12 @@ DAE Tools Plotter
 
 The simulation/optimization results can be easily plotted using the **DAE Tools Plotter** application.
 Three types of plots are supported: 2D, animated 2D and 3D plots.
-After choosing a desired type, a **Choose variable** (given in :ref:`Figure-5`)
+After choosing a desired type, a **Choose variable** (given in :ref:`Figure-GetStarted-5`)
 dialog appears where a variable to be plotted can be selected and information about domains
 specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
 (to create a 2D plot one domain must remain free, while for a 3D plot two domains).
 
-.. _Figure-5:
+.. _Figure-GetStarted-5:
 .. figure:: _static/Screenshot-ChooseVariable.png
     :width: 350 pt
     :figwidth: 400 pt
@@ -153,9 +153,9 @@ specified - some domains should be fixed while leaving another free by selecting
 
     Choose variable dialog for a 2D plot
 
-Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
+Typical 2D and 3D plots are given in :ref:`Figure-GetStarted-6` and :ref:`Figure-GetStarted-7`.
 
-.. _Figure-6:
+.. _Figure-GetStarted-6:
 .. figure:: _static/Screenshot-2Dplot.png
     :width: 350 pt
     :figwidth: 400 pt
@@ -163,7 +163,7 @@ Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
 
     Example 2D plot (produced by Matplotlib)
 
-.. _Figure-7:
+.. _Figure-GetStarted-7:
 .. figure:: _static/Screenshot-3Dplot.png
     :width: 350 pt
     :figwidth: 400 pt
@@ -171,8 +171,8 @@ Typical 2D and 3D plots are given in :ref:`Figure-6` and :ref:`Figure-7`.
 
     Example 3D plot (produced by Mayavi2)
 
-2D plots can be saved as a teplate (.pt files).
-    .. code-block:: javascript
+2D plots can be saved as templates (.pt files) which store the information in JSON format.
+  .. code-block:: javascript
 
       {
         "curves": [

@@ -209,6 +209,7 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 		daeDeclareAndThrowException(exInvalidPointer);
 #endif
 
+    adouble __ad ;
     bool bPrintInfo               = m_pEquation->m_pModel->m_pDataProxy->PrintInfo();
     bool bCheckForInfiniteNumbers = m_pEquation->m_pModel->m_pDataProxy->CheckForInfiniteNumbers();
 
@@ -219,7 +220,16 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 
 	EC.m_pEquationExecutionInfo = this;
 
-    adouble __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+    try
+    {
+        __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+    }
+    catch(std::exception& se)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Residual evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+        throw e;
+    }
 
     if(bCheckForInfiniteNumbers)
         if(!check_is_finite(__ad.getValue()))
@@ -282,7 +292,16 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         {
             EC.m_nCurrentVariableIndexForJacobianEvaluation = iter->first;
 
-            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+            try
+            {
+                __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+            }
+            catch(std::exception& se)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Jacobian evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+                throw e;
+            }
 
             if(bCheckForInfiniteNumbers)
                 if(!check_is_finite(__ad.getDerivative()))
@@ -311,7 +330,16 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         {
             EC.m_nCurrentVariableIndexForJacobianEvaluation = -1;
 
-            __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
+            try
+            {
+                __ad = iter->second.second->Evaluate(&EC) * m_dScaling;
+            }
+            catch(std::exception& se)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "Jacobian evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+                throw e;
+            }
 
             if(bCheckForInfiniteNumbers)
                 if(!check_is_finite(__ad.getDerivative()))
@@ -359,7 +387,16 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 		EC.m_nCurrentParameterIndexForSensitivityEvaluation             = narrParameterIndexes[i];
 		EC.m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation = i;
 		
-        __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+        try
+        {
+            __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+        }
+        catch(std::exception& se)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Sensitivity residual evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+            throw e;
+        }
 
         if(bCheckForInfiniteNumbers)
             if(!check_is_finite(__ad.getDerivative()))
