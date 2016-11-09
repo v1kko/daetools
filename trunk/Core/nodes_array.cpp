@@ -3711,8 +3711,8 @@ inline adouble der_unary_f(adUnaryNode* unode)
     }
     else if(unode->eFunction == eCosh)
     {
-        // cosh(n)' = -sinh(n)
-        df = -sinh(n);
+        // cosh(n)' = sinh(n)
+        df = sinh(n);
     }
     else if(unode->eFunction == eTanh)
     {
@@ -3943,16 +3943,16 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr              
             break;
 
         case ePower:
-            if(is_node_zero(l.node) || is_node_zero(r.node))
+            if(is_node_zero(l.node) || is_node_zero(r.node)) // l^0 or 0^r -> der is zero
                 tmp = adNodePtr(new adConstantNode(0));
-            else if(is_node_zero(dl.node) && is_node_zero(dr.node))
+            else if(is_node_zero(dl.node) && is_node_zero(dr.node)) // dl=0 and dr=0 -> der is zero
                 tmp = adNodePtr(new adConstantNode(0));
-            else if(is_node_zero(dl.node))
+            else if(is_node_zero(dl.node)) // dl=0
                 tmp = ( pow(l,r) * (log(l)*dr) ).node;
-            else if(is_node_zero(dr.node))
+            else if(is_node_zero(dr.node)) // dr=0
                 tmp = ( pow(l,r) * (r*dl/l) ).node;
             else
-                tmp = ( pow(l,r) * (r*dl/l + log(l)*dr) ).node;
+                tmp = ( pow(l,r) * (r*dl/l + log(l)*dr) ).node; // ok
             break;
 
         default:
@@ -4035,8 +4035,12 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d2(adNodePtr             
 
         if(is_node_zero(dn.node) || is_node_zero(df.node))
             tmp = adNodePtr(new adConstantNode(0));
+        else if(is_node_zero(d2n.node))
+            tmp = (d2f*dn*dn).node;
+        else if(is_node_zero(d2f.node))
+            tmp = (df*d2n).node;
         else
-            tmp = (d2f*dn*dn + df*d2n).node;
+            tmp = (d2f*dn*dn + df*d2n).node; // ok
     }
     else if( dynamic_cast<adBinaryNode*>(adnode) )
     {
@@ -4073,9 +4077,9 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d2(adNodePtr             
             break;
 
         case eMulti:
-            if(is_node_zero(l.node))
+            if(is_node_zero(l.node) || is_node_zero(r.node))
                 tmp = adNodePtr(new adConstantNode(0));
-            else if(is_node_zero(r.node))
+            else if(is_node_zero(dl.node) && is_node_zero(dr.node))
                 tmp = adNodePtr(new adConstantNode(0));
             else if(is_node_zero(dl.node))
                 tmp = (l*d2r).node;
@@ -4096,7 +4100,7 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d2(adNodePtr             
             else if(is_node_zero(dr.node)) // r is a constant
                 tmp = (d2l/r).node;
             else
-                tmp = (-l*d2r/(r*r) + 2*l*dr*dr/(r*r*r) + d2l/r - 2*dl*dr/(r*r)).node;
+                tmp = (-l*d2r/(r*r) + 2*l*dr*dr/(r*r*r) + d2l/r - 2*dl*dr/(r*r)).node; // ok
             break;
 
         case ePower:
@@ -4110,7 +4114,7 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d2(adNodePtr             
             else if(is_node_zero(dr.node))
                 tmp = ( pow(l,r) * r *(r*dl*dl/l + d2l - dl*dl/l) / l ).node; // ok
             else
-                tmp = ( pow(l,r) * (pow(log(l)*dr + r*dl/l, 2) + log(l)*d2r + r*d2l/l + 2*dl*dr/l - r*dl*dl/(l*l)) ).node;
+                tmp = ( pow(l,r) * (pow(log(l)*dr + r*dl/l, 2) + log(l)*d2r + r*d2l/l + 2*dl*dr/l - r*dl*dl/(l*l)) ).node; // ok
             break;
 
         default:

@@ -21,7 +21,7 @@ In this example we use the same conduction problem as in the tutorial 1.
 
 Here we introduce:
 
- - Third party linear equations solvers
+- Third party linear equations solvers
 
 Currently there are 3rd party linear equations solvers:
 

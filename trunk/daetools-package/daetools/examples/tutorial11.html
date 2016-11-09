@@ -96,11 +96,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.x <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, m, <span style='color:#c00000;'>&quot;X axis domain&quot;</span>)
         <span style='color:#0000ff;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;y&quot;</span>, <span style='color:#0000ff;'>self</span>, m, <span style='color:#c00000;'>&quot;Y axis domain&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Qb <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Qt <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_t&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.ro <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Density of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.cp <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Thermal conductivity of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Qb  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Qt  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;Q_t&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.rho <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.cp  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.k   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Thermal conductivity of the plate&quot;</span>)
 
         <span style='color:#0000ff;'>self</span>.T <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>)
         <span style='color:#0000ff;'>self</span>.T.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x)
@@ -113,13 +113,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'># For readibility, get the adouble objects from parameters/variables</span>
         <span style='color:#008000;'># and create numpy arrays for T and its derivatives in tim and space</span>
         <span style='color:#008000;'># This will also save a lot of memory (no duplicate adouble objects in equations)</span>
-        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.x.NumberOfPoints
-        Ny <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y.NumberOfPoints
-        ro <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ro()
-        cp <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.cp()
-        k  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k()
-        Qb <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qb()
-        Qt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qt()
+        Nx  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.x.NumberOfPoints
+        Ny  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y.NumberOfPoints
+        rho <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.rho()
+        cp  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.cp()
+        k   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k()
+        Qb  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qb()
+        Qt  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qt()
 
         <span style='color:#008000;'># Create numpy ndarrays to keep daetools adouble objects:</span>
         <span style='color:#008000;'>#   T, dT/dt, dT/dx, d2T/dx2, dT/dy and d2T/dy2</span>
@@ -176,7 +176,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
             eq_type <b><span style='color:#0000ff;'>=</span></b> eq_types[x,y]
             eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
             <b>if</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'i'</span>:
-                eq.Residual <b><span style='color:#0000ff;'>=</span></b> ro<b><span style='color:#0000ff;'>*</span></b>cp<b><span style='color:#0000ff;'>*</span></b>dTdt[x,y] <b><span style='color:#0000ff;'>-</span></b> k<b><span style='color:#0000ff;'>*</span></b>(d2Tdx2[x,y] <b><span style='color:#0000ff;'>+</span></b> d2Tdy2[x,y])
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> rho<b><span style='color:#0000ff;'>*</span></b>cp<b><span style='color:#0000ff;'>*</span></b>dTdt[x,y] <b><span style='color:#0000ff;'>-</span></b> k<b><span style='color:#0000ff;'>*</span></b>(d2Tdx2[x,y] <b><span style='color:#0000ff;'>+</span></b> d2Tdy2[x,y])
                 eq.Name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'HeatBalance(inner)'</span>
 
             <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'L'</span>:
@@ -213,7 +213,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.ro.SetValue(<span style='color:#c000c0;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>))
+        <span style='color:#0000ff;'>self</span>.m.rho.SetValue(<span style='color:#c000c0;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>))
         <span style='color:#0000ff;'>self</span>.m.Qb.SetValue(<span style='color:#c000c0;'>1e6</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
         <span style='color:#0000ff;'>self</span>.m.Qt.SetValue(<span style='color:#c000c0;'>0</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
 

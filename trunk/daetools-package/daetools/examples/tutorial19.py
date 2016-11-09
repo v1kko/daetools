@@ -139,7 +139,7 @@ class modTutorial(daeModel):
         
         # Generate the system equations
         for i in range(N):
-            eq = self.CreateEquation("Poisson_ConstantStiffnexMatrix(%d)" % i)
+            eq = self.CreateEquation("Poisson_ConstantStiffnessMatrix(%d)" % i)
             eq.Residual = numpy.sum(A[i, :] * T[:]) - F[i]
 
         ##################################################################################
