@@ -21,10 +21,9 @@ In this example we use the same conduction problem as in the tutorial 1.
 
 Here we introduce:
 
-- daeModel functions d() and dt() which calculate time- or partial-derivative of an expression
 - Initialization files
 - Domains which bounds depend on parameter values
-- How to evaluate integrals of a function
+- Evaluation of integrals
 """
 
 import os, sys

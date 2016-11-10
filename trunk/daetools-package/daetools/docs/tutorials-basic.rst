@@ -87,8 +87,8 @@ Basic Tutorials
                     objects (DAE solver, data reporter, log), simulation run-time
                     options, running a smulation.
 
-.. |t_1| replace:: Using distribution domains, distributing parameters, variables and equations on domains,
-                   setting boundary and initial conditions.
+.. |t_1| replace:: Using distribution domains, distributing parameters/variables/equations on domains,
+                   using derivative functions (dt, d, d2), setting boundary and initial conditions.
 
 .. |t_2| replace:: Using arrays (discrete distribution domains), specifying degrees of freedom, setting initial guesses.
 
@@ -103,13 +103,12 @@ Basic Tutorials
 
 .. |t_7| replace:: Making user-defined operating procedures, resetting the values of degrees of freedom and initial conditions.
 
-.. |t_8| replace:: Using available data reporters (Matlab, MS Excel, JSON, XML, HDF5, Pandas),
-                   and developing custom data reporters.
+.. |t_8| replace:: Using data reporters to write the results into files (Matlab, MS Excel, JSON, XML, HDF5, VTK, Pandas),
+                   developing custom data reporters.
 
 .. |t_9| replace:: Using available linear equations solvers (SuperLU, SuperLU_MT, Trilinos Amesos, IntelPardiso, Pardiso).
 
-.. |t_10| replace:: Using derivative functions: dt(), d(), d2(), saving and restoring initialisation files,
-                    evaluating integrals.
+.. |t_10| replace:: Saving and restoring initialisation files, evaluating integrals.
 
 .. |t_11| replace:: Using iterative linear equations solvers (Trilinos AztecOO) and preconditioners
                     (built-in AztecOO, Ifpack, ML).
