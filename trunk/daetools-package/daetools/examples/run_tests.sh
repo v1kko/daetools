@@ -66,20 +66,19 @@ $PYTHON $ROOT/tutorial17.py console
 echo tutorial18.py
 $PYTHON $ROOT/tutorial18.py console
 
-echo tutorial19.py
-$PYTHON $ROOT/tutorial19.py console
 
-echo tutorial20.py
-$PYTHON $ROOT/tutorial20.py console
+echo tutorial_adv_1.py
+$PYTHON $ROOT/tutorial_adv_1.py console
 
-echo tutorial21.py
-$PYTHON $ROOT/tutorial21.py console
+echo tutorial_adv_2.py
+$PYTHON $ROOT/tutorial_adv_2.py console
 
-#echo tutorial22.py
-#$PYTHON $ROOT/tutorial22.py console
+echo tutorial_adv_3.py
+$PYTHON $ROOT/tutorial_adv_3.py console
 
-echo tutorial23.py
-$PYTHON $ROOT/tutorial23.py console
+echo tutorial_adv_4.py
+$PYTHON $ROOT/tutorial_adv_4.py console
+
 
 echo tutorial_dealii_1.py
 $PYTHON $ROOT/tutorial_dealii_1.py console
@@ -98,6 +97,9 @@ $PYTHON $ROOT/tutorial_dealii_5.py console
 
 echo tutorial_dealii_5.py
 $PYTHON $ROOT/tutorial_dealii_5.py console
+
+echo tutorial_dealii_6.py
+$PYTHON $ROOT/tutorial_dealii_6.py console
 
 echo opt_tutorial1.py
 $PYTHON $ROOT/opt_tutorial1.py console

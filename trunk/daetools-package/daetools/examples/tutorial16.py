@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial16.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2016
+                Copyright (C) Dragan Nikolic, 2013
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -17,214 +17,231 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 4.
+This tutorial shows how to use DAE Tools objects with Numpy arrays to solve a simple
+stationary heat conduction in one dimension (1D Poisson equation) using a simple 
+Finite Elements method (with linear elements):
 
-Here we introduce:
+d2T(x)/dx2 = F(x);  for all x in: (0, Lx)
 
-- Interactive operating procedures
+Linear finite elements discretization and simple FE matrix assembly:
+
+.. code-block:: none
+
+                   phi                 phi
+                      (k-1)               (k)
+                      
+                     *                   *             
+                   * | *               * | *            
+                 *   |   *           *   |   *          
+               *     |     *       *     |     *        
+             *       |       *   *       |       *      
+           *         |         *         |         *        
+         *           |       *   *       |           *      
+       *             |     *       *     |             *    
+     *               |   *           *   |               *  
+   *                 | *  element (k)  * |                 *
+ *-------------------*+++++++++++++++++++*-------------------*-
+                     x                   x
+                      (k-i                (k)
+                    
+                     \_________ _________/
+                               |
+                               dx
 
 """
 
-import sys
-from time import localtime, strftime, sleep
-from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
-import matplotlib
-matplotlib.use('Qt4Agg')
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+import sys, numpy
+from time import localtime, strftime
 from daetools.pyDAE import *
-try:
-    from .tutorial16_ui import Ui_InteractiveRunDialog
-except Exception as e:
-    from tutorial16_ui import Ui_InteractiveRunDialog
 
 # Standard variable types are defined in variable_types.py
-from pyUnits import m, kg, s, K, Pa, mol, J, W, kW
+from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
-        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
-        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
-        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
-        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
+        self.x  = daeDomain("x", self, unit(), "x axis domain")
+        self.L  = daeParameter("L", unit(), self, "Length")
+        self.Ta = daeVariable("Ta", no_t, self, "Temperature - analytical solution", [self.x])
+        self.T1 = daeVariable("T1", no_t, self, "Temperature - first way", [self.x])
+        self.T2 = daeVariable("T2", no_t, self, "Temperature - second way", [self.x])
 
-        self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater")
-        self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate")
+    def local_dof(self, i):
+        return self.mapLocalToGlobalIndices
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
-        eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
+        N = self.x.NumberOfPoints
+        Nelem = N - 1
+        Ndofs_per_elem = 2 # since we use linear elements
+        
+        numpy.set_printoptions(linewidth=1e10)
+        ##################################################################################
+        # Analytical solution
+        ##################################################################################
+        dx = self.L.GetValue() / Nelem
+        m = [0., 5./2, 4., 9./2]
+        for i in range(N):
+            eq = self.CreateEquation("Poisson_Analytical(%d)" % i)
+            eq.Residual = self.Ta(i) - m[i] * dx**2
 
+        ##################################################################################
+        # First way: use constant global stiffness matrix and load array
+        ##################################################################################
+        print('***************************************************************************')
+        print('    First way')
+        print('***************************************************************************')
+        # Create global stiffness matrix and load vector (dtype = float):
+        A = numpy.zeros((N,N))        
+        F = numpy.zeros(N)
+
+        # Maps local indices within an element to the indices in the system's matrix
+        mapLocalToGlobalIndices = [(0, 1), (1, 2), (2, 3)]   
+        # ∆x is equidistant and constant
+        dx = self.L.GetValue() / Nelem
+        for el in range(Nelem):
+            # Get global indices for the current element
+            dof_indices = mapLocalToGlobalIndices[el]
+            
+            # Element stiffness matrix and load vector:
+            #       | 1 -1 |          | 1 |
+            # Ael = |-1  1 |    Fel = | 1 |
+            #       
+            Ael = (1/dx) * numpy.array( [[1, -1], [-1, 1]] )
+            Fel = (dx/2) * numpy.array( [1, 1] )
+            
+            # Loop over element DOFs and update the global matrix and vector 
+            for i in range(Ndofs_per_elem):
+                for j in range(Ndofs_per_elem):
+                    A[dof_indices[i], dof_indices[j]] += Ael[i,j]
+                F[dof_indices[i]] += Fel[i]
+        
+        print('The global stiffness matrix (A) before applying boundary conditions:')
+        print(A)
+        print('The global load vector (F):')
+        print(F)
+        
+        # Boundary conditions:
+        # at x = 0: T(0) = 0     (Dirichlet BC)
+        # at x = 1: dT(1)/dx = 0 (Neumann BC)
+        A[0, 1:-1] = 0
+        F[0] = 0
+        print('The global stiffness matrix (A) after applying boundary conditions:')
+        print(A)
+        print('The global load vector (F) after applying boundary conditions:')
+        print(F)
+        
+        # Create a vector of temperatures:
+        T = numpy.empty(N, dtype=object)
+        T[:] = [self.T1(i) for i in range(N)]
+        
+        # Generate the system equations
+        for i in range(N):
+            eq = self.CreateEquation("Poisson_ConstantStiffnessMatrix(%d)" % i)
+            eq.Residual = numpy.sum(A[i, :] * T[:]) - F[i]
+
+        ##################################################################################
+        # Second way: use global stiffness matrix and load array that depend on DAE Tools
+        #             model parameters/variables (not constant in a general case).
+        #             Obviously, they are constant here - this is only to show the concept
+        ##################################################################################
+        print('***************************************************************************')
+        print('    Second way')
+        print('***************************************************************************')
+        # Create global stiffness matrix and load vector (dtype = object). This matrix and
+        # load vector will be functions of model parameters/variables.  
+        # In this simple example that is not a case; however, the procedure is analogous.
+        A = numpy.zeros((N,N), dtype=object)
+        #A[:] = adouble(0, 0, True)
+        #print A
+        
+        F = numpy.zeros(N, dtype=object)
+        #F[:] = adouble(0, 0, True)
+        #print F
+        
+        # Maps local indices within an element to the indices in the system's matrix
+        mapLocalToGlobalIndices = [(0, 1), (1, 2), (2, 3)]
+        # ∆x is equidistant but not constant (it depends on the parameter 'L')
+        dx = self.L() / Nelem
+        for el in range(Nelem):
+            # Get global indices for the current element
+            dof_indices = mapLocalToGlobalIndices[el]
+            
+            # Element stiffness matrix and load vector are the same:
+            #       | 1 -1 |          | 1 |
+            # Ael = |-1  1 |    Fel = | 1 |
+            #
+            Ael = (1 / dx) * numpy.array( [[1, -1], [-1, 1]] )
+            Fel = (dx / 2) * numpy.array([1, 1])
+            
+            # Loop over element DOFs and update the global matrix and vector 
+            for i in range(Ndofs_per_elem):
+                for j in range(Ndofs_per_elem):
+                    A[dof_indices[i], dof_indices[j]] += Ael[i,j]
+                F[dof_indices[i]] += Fel[i]
+        
+        print('The global stiffness matrix (A) before applying boundary conditions:')
+        print(A)
+        print('The global load vector (F):')
+        print(F)
+        
+        # Boundary conditions:
+        # at x = 0: T(0) = 0     (Dirichlet BC)
+        # at x = 1: dT(1)/dx = 0 (Neumann BC)
+        A[0, 1:-1] = 0
+        F[0] = 0
+        print('The global stiffness matrix (A) after applying boundary conditions:')
+        print(A)
+        print('The global load vector (F) after applying boundary conditions:')
+        print(F)
+        
+        # Create a vector of temperatures:
+        T = numpy.empty(N, dtype=object)
+        T[:] = [self.T2(i) for i in range(N)]
+        
+        # Generate the system equations
+        for i in range(N):
+            eq = self.CreateEquation("Poisson_NonConstantStiffnexMatrix(%d)" % i)
+            eq.Residual = numpy.sum(A[i, :] * T[:]) - F[i]
+            
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial16")
         self.m.Description = __doc__
-
+        
     def SetUpParametersAndDomains(self):
-        self.m.cp.SetValue(385 * J/(kg*K))
-        self.m.m.SetValue(1 * kg)
-        self.m.alpha.SetValue(200 * W/((m**2)*K))
-        self.m.A.SetValue(0.1 * m**2)
-        self.m.Tsurr.SetValue(283 * K)
+        self.m.x.CreateArray(4)
+        self.m.L.SetValue(1)
 
     def SetUpVariables(self):
-        self.m.Qin.AssignValue(1500 * W)
-        self.m.T.SetInitialCondition(283 * K)
-
-    def Run(self):
-        opDlg = InteractiveOP(self)
-        opDlg.exec_()
-        
-class InteractiveOP(QtGui.QDialog):
-    def __init__(self, simulation):
-        QtGui.QDialog.__init__(self)
-
-        self.ui = Ui_InteractiveRunDialog()
-        self.ui.setupUi(self)
-
-        self.setWindowIcon(QtGui.QIcon(join(dirname(__file__), 'daetools-48x48.png')))
-        self.setWindowTitle("Tutorial16 - An Interactive Operating Procedure")
-
-        self.simulation = simulation
-        self.ui.powerSpinBox.setValue(self.simulation.m.Qin.GetValue())
-        self.ui.reportingIntervalSpinBox.setValue(self.simulation.ReportingInterval)
-
-        self.figure = Figure((5.0, 4.0), dpi=100, facecolor='white')
-        self.canvas = FigureCanvas(self.figure)
-        self.canvas.setParent(self.ui.frame)
-        self.canvas.axes = self.figure.add_subplot(111)
-
-        # Add an empty curve
-        self.line, = self.canvas.axes.plot([], [])
-
-        self.fp9  = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='normal', size=9)
-        self.fp10 = matplotlib.font_manager.FontProperties(family='sans-serif', style='normal', variant='normal', weight='bold', size=10)
-
-        self.canvas.axes.set_xlabel('Time, s',        fontproperties=self.fp10)
-        self.canvas.axes.set_ylabel('Temperature, K', fontproperties=self.fp10)
-
-        for xlabel in self.canvas.axes.get_xticklabels():
-            xlabel.set_fontproperties(self.fp9)
-        for ylabel in self.canvas.axes.get_yticklabels():
-            ylabel.set_fontproperties(self.fp9)
-
-        self.canvas.axes.grid(True)
-
-        self.connect(self.ui.runButton, QtCore.SIGNAL('clicked()'), self.integrate)
-
-    def integrate(self):
-        try:
-            # Get the data from the GUI
-            Qin      = float(self.ui.powerSpinBox.value())
-            interval = float(self.ui.intervalSpinBox.value())
-            self.simulation.ReportingInterval = float(self.ui.reportingIntervalSpinBox.value())
-            self.simulation.TimeHorizon       = self.simulation.CurrentTime + interval
-
-            if self.simulation.ReportingInterval > interval:
-                QtGui.QMessageBox.warning(self, "tutorial16", 'Reporting interval must be lower than the integration interval')
-                return
-
-            # Disable the input boxes and buttons
-            self.ui.powerSpinBox.setEnabled(False)
-            self.ui.intervalSpinBox.setEnabled(False)
-            self.ui.reportingIntervalSpinBox.setEnabled(False)
-            self.ui.runButton.setEnabled(False)
-
-            # Reassign the new Qin value, reinitialize the simulation and report the data
-            self.simulation.m.Qin.ReAssignValue(Qin)
-            self.simulation.Reinitialize()
-            self.simulation.ReportData(self.simulation.CurrentTime)
-
-            # Integrate for ReportingInterval until the TimeHorizon is reached
-            # After each integration call update the plot with the new data
-            # Sleep for 0.1 seconds after each integration to give some real-time impression
-            time = self.simulation.IntegrateForTimeInterval(self.simulation.ReportingInterval, eDoNotStopAtDiscontinuity)
-            self.simulation.ReportData(self.simulation.CurrentTime)
-            self._updatePlot()
-            sleep(0.1)
-            
-            while time < self.simulation.TimeHorizon:
-                if time + self.simulation.ReportingInterval > self.simulation.TimeHorizon:
-                    interval = self.simulation.TimeHorizon - time
-                else:
-                    interval = self.simulation.ReportingInterval
-
-                time = self.simulation.IntegrateForTimeInterval(interval, eDoNotStopAtDiscontinuity)
-                self.simulation.ReportData(self.simulation.CurrentTime)
-                self._updatePlot()
-                sleep(0.1)
-
-        except Exception as e:
-            QtGui.QMessageBox.warning(self, "tutorial16", 'Error: %s' % str(e))
-            
-        finally:
-            # Enable the input boxes and buttons again
-            self.ui.powerSpinBox.setEnabled(True)
-            self.ui.intervalSpinBox.setEnabled(True)
-            self.ui.reportingIntervalSpinBox.setEnabled(True)
-            self.ui.runButton.setEnabled(True)
-
-    def _updatePlot(self):
-        temperature = self.simulation.DataReporter.dictVariables['tutorial16.T']
-        x = temperature.TimeValues
-        y = temperature.Values
-        self.line.set_xdata(x)
-        self.line.set_ydata(y)
-        self.canvas.axes.relim()
-        self.canvas.axes.autoscale_view()
-        self.canvas.draw()
-        self.ui.currentTimeEdit.setText(str(self.simulation.CurrentTime) + ' s')
-        QtGui.QApplication.processEvents()
-
+        pass
+    
+# Use daeSimulator class
 def guiRun(app):
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeDataReporterLocal()
-    simulation   = simTutorial()
+    sim = simTutorial()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 10
+    sim.TimeHorizon       = 1000
+    simulator  = daeSimulator(app, simulation=sim)
+    simulator.exec_()
 
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 10000
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-
+# Setup everything manually and run in a console
 def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeDataReporterLocal()
+    datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 10000
+    simulation.ReportingInterval = 10
+    simulation.TimeHorizon = 1000
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -244,11 +261,11 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
-    
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        app = QtGui.QApplication(sys.argv)
         consoleRun()
     else:
+        from PyQt4 import QtCore, QtGui
         app = QtGui.QApplication(sys.argv)
         guiRun(app)

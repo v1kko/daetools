@@ -11,8 +11,6 @@ Basic Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-    are presented in the following tutorials
-
 
 .. rubric:: The key modelling concepts in **DAE Tools**:
 
@@ -76,9 +74,9 @@ Basic Tutorials
 .. rubric:: Interoperability with NumPy:
 
 =======================   =================================================================
-:ref:`tutorial_19`        |t_19|
+:ref:`tutorial_16`        |t_16|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_21`        |t_21|
+:ref:`tutorial_18`        |t_18|
 =======================   =================================================================
 
 
@@ -122,18 +120,12 @@ Basic Tutorials
 
 .. |t_15| replace:: Declaring nested state transitions.
 
-.. |t_17| replace:: Developing interactive operating procedures.
+.. |t_16| replace:: Using DAE Tools variables and NumPy functions to solve a simple stationary 1D heat conduction
+                    by manually assembling Finite Element stiffness matrix and load vector.
 
-.. |t_19| replace:: Using TCPIP Log and TCPIPLogServer.
+.. |t_17| replace:: Using TCPIP Log and TCPIPLogServer.
 
-.. |t_20| replace:: Using code-generators (Modelica, gPROMS, FMI for co-simulation),
-                    exporting GNU Octave/Matlab MEX functions and Simulink S-functions.
-
-.. |t_21| replace:: Using DAE Tools variables and NumPy functions to generate and solve a simple ODE system.
-
-.. |t_23| replace:: Using the C++ MPI code generator.
-
-
+.. |t_18| replace:: Using DAE Tools variables and NumPy functions to generate and solve a simple ODE system.
 
 
 .. _whats_the_time:
@@ -439,6 +431,25 @@ Source code             `tutorial15.py <../../examples/tutorial15.html>`_
 =====================   =================================================================
 
 
+.. _tutorial_16:
+
+Tutorial 16
+===========
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial16
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial16.xml <../../examples/tutorial16.xml>`_
+Runtime model report    `tutorial16-rt.xml <../../examples/tutorial16-rt.xml>`_
+Source code             `tutorial16.py <../../examples/tutorial16.html>`_
+=====================   =================================================================
+
+
 .. _tutorial_17:
 
 Tutorial 17
@@ -458,9 +469,9 @@ Source code             `tutorial17.py <../../examples/tutorial17.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_19:
+.. _tutorial_18:
 
-Tutorial 19
+Tutorial 18
 ===========
 .. rubric:: Description
 
@@ -471,27 +482,8 @@ Tutorial 19
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial19.xml <../../examples/tutorial19.xml>`_
-Runtime model report    `tutorial19-rt.xml <../../examples/tutorial19-rt.xml>`_
-Source code             `tutorial19.py <../../examples/tutorial19.html>`_
-=====================   =================================================================
-
-
-.. _tutorial_21:
-
-Tutorial 21
-===========
-.. rubric:: Description
-
-.. automodule:: daetools.examples.tutorial21
-    :no-members:
-    :no-undoc-members:
-
-.. rubric:: Files
-
-=====================   =================================================================
-Model report            `tutorial21.xml <../../examples/tutorial21.xml>`_
-Runtime model report    `tutorial21-rt.xml <../../examples/tutorial21-rt.xml>`_
-Source code             `tutorial21.py <../../examples/tutorial21.html>`_
+Model report            `tutorial18.xml <../../examples/tutorial18.xml>`_
+Runtime model report    `tutorial18-rt.xml <../../examples/tutorial18-rt.xml>`_
+Source code             `tutorial18.py <../../examples/tutorial18.html>`_
 =====================   =================================================================
 

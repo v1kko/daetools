@@ -127,7 +127,7 @@ html_theme_options = {
     #"sidebarwidth" : 250
 
     'navbar_links': [
-                      ("Home", "http://www.daetools.com", True)
+                      ("Home", "/", True)
                     ],
     'source_link_position': "footer",
     'globaltoc_depth': 1,

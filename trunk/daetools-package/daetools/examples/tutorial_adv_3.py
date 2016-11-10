@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                            tutorial20.py
+                            tutorial_adv_3.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -65,16 +65,16 @@ FMI Cross-Check results:
 
    .. code-block:: none
 
-      ./fmuCheck.linux64 -n 10 tutorial20.fmu
+      ./fmuCheck.linux64 -n 10 tutorial_adv_3.fmu
 
 3. Results:
 
    .. code-block:: none
 
     [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014
-    [INFO][FMUCHK] Will process FMU tutorial20.fmu
+    [INFO][FMUCHK] Will process FMU tutorial_adv_3.fmu
     [INFO][FMILIB] XML specifies FMI standard version 2.0
-    [INFO][FMUCHK] Model name: tutorial20
+    [INFO][FMUCHK] Model name: tutorial_adv_3
     [INFO][FMUCHK] Model GUID: e9654532-0998-11e6-957b-9cb70d5dfdfc
     [INFO][FMUCHK] Model version:
     [INFO][FMUCHK] FMU kind: CoSimulation
@@ -96,7 +96,7 @@ FMI Cross-Check results:
 
     [INFO][FMUCHK] Printing output file header
     time,out_1.y,out_2.y
-    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial20
+    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial_adv_3
     [INFO][FMILIB] Loading 'linux64' binary with 'default' platform types
     [INFO][FMUCHK] Version returned from CS FMU:   2.0
     ***********************************************************************
@@ -220,7 +220,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial20")
+        self.m = modTutorial("tutorial_adv_3")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -251,7 +251,7 @@ def run_code_generators(simulation, log):
         from PyQt4 import QtCore, QtGui
         if not QtGui.QApplication.instance():
             app_ = QtGui.QApplication(sys.argv)
-        QtGui.QMessageBox.warning(None, "tutorial20", msg)
+        QtGui.QMessageBox.warning(None, "tutorial_adv_3", msg)
     except Exception as e:
         log.Message(str(e), 0)
 

@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                            tutorial23.py
+                            tutorial_adv_4.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -116,7 +116,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial23")
+        self.m = modTutorial("tutorial_adv_4")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -151,7 +151,7 @@ def run_code_generators(simulation, log):
         from PyQt4 import QtCore, QtGui
         if not QtGui.QApplication.instance():
             app_ = QtGui.QApplication(sys.argv)
-        QtGui.QMessageBox.warning(None, "tutorial23", msg)
+        QtGui.QMessageBox.warning(None, "tutorial_adv_4", msg)
     except Exception as e:
         log.Message(str(e), 0)
 

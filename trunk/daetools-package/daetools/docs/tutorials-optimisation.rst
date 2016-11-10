@@ -12,6 +12,40 @@ Optimisation Tutorials
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 
+=========================  =================================================================
+:ref:`opt_tutorial_1`      |topt_1|
+-------------------------  -----------------------------------------------------------------
+:ref:`opt_tutorial_2`      |topt_2|
+-------------------------  -----------------------------------------------------------------
+:ref:`opt_tutorial_3`      |topt_3|
+-------------------------  -----------------------------------------------------------------
+:ref:`opt_tutorial_4`      |topt_4|
+-------------------------  -----------------------------------------------------------------
+:ref:`opt_tutorial_5`      |topt_5|
+-------------------------  -----------------------------------------------------------------
+:ref:`opt_tutorial_6`      |topt_6|
+-------------------------  -----------------------------------------------------------------
+:ref:`opt_tutorial_7`      |topt_7|
+=========================  =================================================================
+
+
+.. |topt_1| replace:: IPOPT NLP solver, its setup and options.
+
+.. |topt_2| replace:: Bonmin MINLP solver, its setup and options.
+
+.. |topt_3| replace:: NLOPT NLP solvers, their setup and options.
+
+.. |topt_4| replace:: Interoperability between DAE Tools and 3rd party optimization
+                      software (scipy.optimize) used to minimize the Rosenbrock function.
+
+.. |topt_5| replace:: Interoperability between DAE Tools and 3rd party optimization
+                      software (scipy.optimize) used to fit the simple function with experimental data.
+
+.. |topt_6| replace:: daeMinpackLeastSq solver.
+
+.. |topt_7| replace:: Monitoring the optimisation progress (pyQt GUI).
+
+
 .. _opt_tutorial_1:
 
 Optimization tutorial 1

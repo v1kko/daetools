@@ -17,13 +17,18 @@ python tutorial15.py console
 python tutorial16.py console
 python tutorial17.py console
 python tutorial18.py console
-python tutorial19.py console
-python tutorial20.py console
-python tutorial21.py console
-REM python tutorial22.py console
-python tutorial23.py console
+
+python tutorial_adv_1.py console
+python tutorial_adv_2.py console
+python tutorial_adv_3.py console
+python tutorial_adv_4.py console
+
 python tutorial_dealii_1.py console
 python tutorial_dealii_2.py console
+python tutorial_dealii_3.py console
+python tutorial_dealii_4.py console
+python tutorial_dealii_5.py console
+python tutorial_dealii_6.py console
 
 python opt_tutorial1.py console
 python opt_tutorial2.py console

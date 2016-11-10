@@ -12,6 +12,37 @@ Finite Element Tutorials
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 
+=========================   =================================================================
+:ref:`tutorial_dealii_1`    |tdealii_1|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_2`    |tdealii_2|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_3`    |tdealii_3|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_4`    |tdealii_4|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_5`    |tdealii_5|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_6`    |tdealii_6|
+=========================   =================================================================
+
+
+.. |tdealii_1| replace:: Introductory example to illustrate the support for the finite elements method
+                         in **DAE Tools** (solution of a simple heat conduction equation).
+
+.. |tdealii_2| replace:: Solution of a simple transient heat convection-diffusion equation.
+
+.. |tdealii_3| replace:: Solution of the Cahn-Hilliard equation.
+
+.. |tdealii_4| replace:: Solution of a transient heat conduction using the various types of
+                         boundary conditions.
+
+.. |tdealii_5| replace:: Flow through porous media (Darcy's law).
+
+.. |tdealii_6| replace:: A simple steady-state diffusion and first-order reaction in an irregular catalyst shape.
+
+
+.. _tutorial_dealii_1:
 
 Tutorial deal.II 1
 ==================
@@ -29,6 +60,8 @@ Runtime model report    `tutorial_dealii_1-rt.xml <../../examples/tutorial_deali
 Source code             `tutorial_dealii_1.py <../../examples/tutorial_dealii_1.html>`_
 =====================   =================================================================
 
+.. _tutorial_dealii_2:
+
 Tutorial deal.II 2
 ==================
 .. rubric:: Description
@@ -44,6 +77,8 @@ Model report            `tutorial_dealii_2.xml <../../examples/tutorial_dealii_2
 Runtime model report    `tutorial_dealii_2-rt.xml <../../examples/tutorial_dealii_2-rt.xml>`_
 Source code             `tutorial_dealii_2.py <../../examples/tutorial_dealii_2.html>`_
 =====================   =================================================================
+
+.. _tutorial_dealii_3:
 
 Tutorial deal.II 3
 ==================
@@ -61,6 +96,8 @@ Runtime model report    `tutorial_dealii_3-rt.xml <../../examples/tutorial_deali
 Source code             `tutorial_dealii_3.py <../../examples/tutorial_dealii_3.html>`_
 =====================   =================================================================
 
+.. _tutorial_dealii_4:
+
 Tutorial deal.II 4
 ==================
 .. rubric:: Description
@@ -77,6 +114,8 @@ Runtime model report    `tutorial_dealii_4-rt.xml <../../examples/tutorial_deali
 Source code             `tutorial_dealii_4.py <../../examples/tutorial_dealii_4.html>`_
 =====================   =================================================================
 
+.. _tutorial_dealii_5:
+
 Tutorial deal.II 5
 ==================
 .. rubric:: Description
@@ -92,6 +131,8 @@ Model report            `tutorial_dealii_5.xml <../../examples/tutorial_dealii_5
 Runtime model report    `tutorial_dealii_5-rt.xml <../../examples/tutorial_dealii_5-rt.xml>`_
 Source code             `tutorial_dealii_5.py <../../examples/tutorial_dealii_5.html>`_
 =====================   =================================================================
+
+.. _tutorial_dealii_6:
 
 Tutorial deal.II 6
 ==================

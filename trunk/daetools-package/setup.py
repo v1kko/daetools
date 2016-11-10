@@ -43,10 +43,12 @@ daetools_system   = str(platform.system())
 if platform.system() == 'Darwin':
     daetools_machine = 'universal'
 elif platform.system() == 'Windows':
-    if 'AMD64' in platform.machine():
-        daetools_machine = 'win64'
-    else:
-        daetools_machine = 'win32'
+    daetools_machine = 'win32'
+    # So far there is no win63 port
+    #if 'AMD64' in platform.machine():
+    #    daetools_machine = 'win64'
+    #else:
+    #    daetools_machine = 'win32'
 else:
     daetools_machine = str(platform.machine())
 
@@ -218,6 +220,8 @@ setup(name = 'daetools',
       scripts = ['scripts/create_shortcuts.js',
                  'scripts/daetools_win_install.py',
                  'scripts/daeplotter',
-                 'scripts/daeexamples'],
+                 'scripts/daeexamples',
+                 'scripts/daeplotter.bat',
+                 'scripts/daeexamples.bat'],
       requires = ['numpy', 'scipy', 'matplotlib', 'PyQt4']
      )

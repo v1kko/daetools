@@ -12,76 +12,100 @@ Advanced Tutorials
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 
+=======================   =================================================================
+:ref:`tutorial_adv_1`     |tadv_1|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_adv_2`     |tadv_2|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_adv_3`     |tadv_3|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_adv_4`     |tadv_4|
+=======================   =================================================================
 
-.. _tutorial_16:
 
-Tutorial 16
-===========
+.. |tadv_1| replace:: Interactive operating procedures (pyQt GUI).
+
+.. |tadv_2| replace:: Solution of a discretized population balance using
+                      high resolution upwind schemes with flux limiter.
+
+.. |tadv_3| replace:: Using code-generators (Scilab/GNU_Octave/Matlab MEX functions,
+                      Simulink S-functions, Modelica/gPROMS/FMI code-generators).
+
+.. |tadv_4| replace:: C++ MPI code generator.
+
+
+.. _tutorial_adv_1:
+
+Advanced Tutorial 1
+===================
 .. rubric:: Description
 
-.. automodule:: daetools.examples.tutorial16
+.. automodule:: daetools.examples.tutorial_adv_1
    :no-members:
    :no-undoc-members:
 
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial16.xml <../../examples/tutorial16.xml>`_
-Runtime model report    `tutorial16-rt.xml <../../examples/tutorial16-rt.xml>`_
-Source code             `tutorial16.py <../../examples/tutorial16.html>`_
+Model report            `tutorial_adv_1.xml <../../examples/tutorial_adv_1.xml>`_
+Runtime model report    `tutorial_adv_1-rt.xml <../../examples/tutorial_adv_1-rt.xml>`_
+Source code             `tutorial_adv_1.py <../../examples/tutorial_adv_1.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_18:
+.. _tutorial_adv_2:
 
-Tutorial 18
-===========
+Advanced Tutorial 2
+===================
 .. rubric:: Description
 
-.. automodule:: daetools.examples.tutorial18
+.. automodule:: daetools.examples.tutorial_adv_2
    :no-members:
    :no-undoc-members:
 
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial18.xml <../../examples/tutorial18.xml>`_
-Runtime model report    `tutorial18-rt.xml <../../examples/tutorial18-rt.xml>`_
-Source code             `tutorial18.py <../../examples/tutorial18.html>`_
+Model report            `tutorial_adv_2.xml <../../examples/tutorial_adv_2.xml>`_
+Runtime model report    `tutorial_adv_2-rt.xml <../../examples/tutorial_adv_2-rt.xml>`_
+Source code             `tutorial_adv_2.py <../../examples/tutorial_adv_2.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_20:
+.. _tutorial_adv_3:
 
-Tutorial 20
-===========
+Advanced Tutorial 3
+===================
 .. rubric:: Description
 
-.. automodule:: daetools.examples.tutorial20
+.. automodule:: daetools.examples.tutorial_adv_3
    :no-members:
    :no-undoc-members:
 
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial20.xml <../../examples/tutorial20.xml>`_
-Runtime model report    `tutorial20-rt.xml <../../examples/tutorial20-rt.xml>`_
-Source code             `tutorial20.py <../../examples/tutorial20.html>`_
+Model report            `tutorial_adv_3.xml <../../examples/tutorial_adv_3.xml>`_
+Runtime model report    `tutorial_adv_3-rt.xml <../../examples/tutorial_adv_3-rt.xml>`_
+Source code             `tutorial_adv_3.py <../../examples/tutorial_adv_3.html>`_
 =====================   =================================================================
 
 
-Tutorial 23
-===========
+.. _tutorial_adv_4:
+
+Advanced Tutorial 4
+===================
 .. rubric:: Description
 
-.. automodule:: daetools.examples.tutorial23
+.. automodule:: daetools.examples.tutorial_adv_4
     :no-members:
     :no-undoc-members:
 
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial23.xml <../../examples/tutorial23.xml>`_
-Runtime model report    `tutorial23-rt.xml <../../examples/tutorial23-rt.xml>`_
-Source code             `tutorial23.py <../../examples/tutorial23.html>`_
+Model report            `tutorial_adv_4.xml <../../examples/tutorial_adv_4.xml>`_
+Runtime model report    `tutorial_adv_4-rt.xml <../../examples/tutorial_adv_4-rt.xml>`_
+Source code             `tutorial_adv_4.py <../../examples/tutorial_adv_4.html>`_
 =====================   =================================================================
+

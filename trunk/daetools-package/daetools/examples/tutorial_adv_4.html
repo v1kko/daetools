@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial23.py</title>
+<title>tutorial_adv_4.py</title>
 </head>
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
@@ -13,7 +13,7 @@
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 <span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            tutorial23.py</span>
+<span style='color:#008000;'>                            tutorial_adv_4.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
@@ -126,7 +126,7 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial23&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_adv_4&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
@@ -161,7 +161,7 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
         <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
         <b>if</b> <b><span style='color:#0000ff;'>not</span></b> QtGui.QApplication.instance():
             app_ <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
-        QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;tutorial23&quot;</span>, msg)
+        QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;tutorial_adv_4&quot;</span>, msg)
     <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
         log.Message(<span style='color:#0000ff;'>str</span>(e), <span style='color:#c000c0;'>0</span>)
 
