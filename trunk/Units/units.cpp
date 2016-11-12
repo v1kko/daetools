@@ -34,9 +34,30 @@ inline std::string to_string(const std::string& name, double exponent)
     return (boost::format("%1%%2%%3%") % name % __string_unit_power__ % strExponent).str();
 }
 
+inline std::string to_latex(const std::string& name, double exponent)
+{
+    if(exponent == 0)
+        return std::string();
+    if(exponent == 1)
+        return (boost::format("{%1%}") % name).str();
+
+    // If an exponent is an integer do not format it as a floating point value
+    if(::ceil(exponent) == exponent && ::floor(exponent) == exponent)
+        return (boost::format("{%1% ^ {%2%}}") % name % static_cast<int>(exponent)).str();
+    else
+        return (boost::format("{%1% ^ {%2%}}") % name % exponent).str();
+}
+
 inline void to_string_and_add(const std::string& name, double exponent, std::vector<std::string>& arrUnits)
 {
     std::string res = to_string(name, exponent);
+    if(!res.empty())
+        arrUnits.push_back(res);
+}
+
+inline void to_latex_and_add(const std::string& name, double exponent, std::vector<std::string>& arrUnits)
+{
+    std::string res = to_latex(name, exponent);
     if(!res.empty())
         arrUnits.push_back(res);
 }
@@ -475,8 +496,72 @@ std::string unit::toString(void) const
 
 std::string unit::toLatex(void) const
 {
-    std::string strResult;
+/*
+    int noNegative, noPositive;
+    std::map<std::string, double>::const_iterator iter;
 
+    // If it is an empty return an empty string
+    if(units.empty())
+        return std::string("");
+
+    noNegative = 0;
+    noPositive = 0;
+    for(iter = units.begin(); iter != units.end(); iter++)
+    {
+        if((*iter).second > 0)
+            noPositive += 1;
+        else
+            noNegative += 1;
+    }
+
+    if(noPositive == 0 && noNegative == 0)
+    {
+        // If all are zero return an empty string
+        return std::string("");
+    }
+    else if(noPositive == 0 && noNegative > 0)
+    {
+        // All exponents are negative
+        std::vector<std::string> arrNegative;
+        for(iter = units.begin(); iter != units.end(); iter++)
+        {
+            std::string name = (*iter).first;
+            double      exp  = (*iter).second;
+            to_latex_and_add(name, exp, arrNegative);
+        }
+        return boost::algorithm::join(arrNegative, __string_unit_delimiter__);
+    }
+    else
+    {
+        // There are positive and (perhaps) negative exponents
+        std::string strPositive, strNegative;
+        std::vector<std::string> arrPositive, arrNegative;
+
+        for(iter = units.begin(); iter != units.end(); iter++)
+        {
+            std::string name = (*iter).first;
+            double      exp  = (*iter).second;
+            if(exp > 0)
+                to_latex_and_add(name, exp, arrPositive);
+            else
+                to_latex_and_add(name, ::fabs(exp), arrNegative);
+        }
+
+        strPositive = boost::algorithm::join(arrPositive, __string_unit_delimiter__);
+        strNegative = boost::algorithm::join(arrNegative, __string_unit_delimiter__);
+
+    // If there are multiple units with negative exponents wrap them into ()
+        if(arrNegative.size() > 1)
+            strNegative = "(" + strNegative + ")";
+
+    // If there is positive but not negative return only positive; otherwise pos/neg
+        if(arrNegative.size() == 0)
+            return (boost::format("%1%") % strPositive).str();
+        else
+            return (boost::format("%1%/%2%") % strPositive % strNegative).str();
+    }
+*/
+    std::string strResult;
     for(std::map<std::string, double>::const_iterator iter = units.begin(); iter != units.end(); iter++)
     {
         std::string name = (*iter).first;
@@ -484,7 +569,7 @@ std::string unit::toLatex(void) const
         if(exp == 1)
             strResult += (boost::format("{%1%}") % name).str();
         else
-            strResult += (boost::format("{%1% ^ %2%}") % name % exp).str();
+            strResult += (boost::format("{%1% ^ {%2%}}") % name % exp).str();
     }
     return "{" + strResult + "}";
 }

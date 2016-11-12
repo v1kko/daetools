@@ -495,7 +495,7 @@ can be manipulated by the user:
     myDomain.Points = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.60, 1.00]
 
 The comparison of the effects of uniform and non-uniform grids is given
-in :ref:`Figure-non_uniform_grid` (a simple heat conduction problem from the :ref:`tutorial_3`
+in :numref:`Figure-non_uniform_grid` (a simple heat conduction problem from the :ref:`tutorial_3`
 has been served as a basis for comparison). Here we have the following
 cases:
 
@@ -1007,7 +1007,7 @@ and mathematical operators/functions work in two modes; they can either **build-
 or **calculate a value/derivative of an expression**.
 Once built, the evaluation trees can be used to calculate equation residuals or derivatives to fill
 a Jacobian matrix necessary for a Newton-type iteration.
-A typical evaluation tree is presented in the figure below:
+A typical evaluation tree is presented in the :numref:`Figure-EvaluationTree` below.
 
 .. _Figure-EvaluationTree:
 .. figure:: _static/EvaluationTree.png
@@ -1029,7 +1029,7 @@ and :py:meth:`~pyCore.daeVariable.d2_array`).
 Another useful feature of **DAE Tools** equations is that they can be
 exported into MathML or Latex format and easily visualized.
 
-For example, the equation ``F`` in :ref:`the figure above <Figure-EvaluationTree>`
+For example, the equation ``F`` in :numref:`Figure-EvaluationTree`
 is a result of the following **DAE Tools** equation:
 
 .. code-block:: python

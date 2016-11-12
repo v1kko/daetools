@@ -168,9 +168,17 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        # Functions d() and d2() can be used to calculate partial derivatives of the 1st and 2nd order, respectively.
+        # The arguments of those functions are:
+        #   1. a variable or an expression for which the derivative is sought
+        #   2. a domain for which we want a derivative
+        #   3. discretisation method (optional; the default is the center-finite difference method of 2nd order, eCFDM)
+        #   4. options (optional; a dictionary of options: {string:string}, the default is an empty dictionary)
+        #      Currently, the options accepted include:
+        #        - the DiscretizationOrder (the default is 2 fro eCFDM and 1 for the others)
         # In this example we use (the default) center-finite difference method (eCFDM) of 2nd order
         # to discretize the domains x and y. Other available methods are:
-        #  - eBFDM: backward-finite difference method,
+        #  - eBFDM: backward-finite difference method
         #  - eFFDM: forward-finite difference method
         #  - eUpwindCCFV: cell-centered finite-volume method with flux limiter
         eq.Residual = self.rho() * self.cp() * dt(self.T(x,y)) - \

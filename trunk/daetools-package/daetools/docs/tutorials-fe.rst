@@ -55,9 +55,9 @@ Tutorial deal.II 1
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_dealii_1.xml <../../examples/tutorial_dealii_1.xml>`_
-Runtime model report    `tutorial_dealii_1-rt.xml <../../examples/tutorial_dealii_1-rt.xml>`_
-Source code             `tutorial_dealii_1.py <../../examples/tutorial_dealii_1.html>`_
+Model report            `tutorial_dealii_1.xml <../examples/tutorial_dealii_1.xml>`_
+Runtime model report    `tutorial_dealii_1-rt.xml <../examples/tutorial_dealii_1-rt.xml>`_
+Source code             `tutorial_dealii_1.py <../examples/tutorial_dealii_1.html>`_
 =====================   =================================================================
 
 .. _tutorial_dealii_2:
@@ -73,9 +73,9 @@ Tutorial deal.II 2
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_dealii_2.xml <../../examples/tutorial_dealii_2.xml>`_
-Runtime model report    `tutorial_dealii_2-rt.xml <../../examples/tutorial_dealii_2-rt.xml>`_
-Source code             `tutorial_dealii_2.py <../../examples/tutorial_dealii_2.html>`_
+Model report            `tutorial_dealii_2.xml <../examples/tutorial_dealii_2.xml>`_
+Runtime model report    `tutorial_dealii_2-rt.xml <../examples/tutorial_dealii_2-rt.xml>`_
+Source code             `tutorial_dealii_2.py <../examples/tutorial_dealii_2.html>`_
 =====================   =================================================================
 
 .. _tutorial_dealii_3:
@@ -91,9 +91,9 @@ Tutorial deal.II 3
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_dealii_3.xml <../../examples/tutorial_dealii_3.xml>`_
-Runtime model report    `tutorial_dealii_3-rt.xml <../../examples/tutorial_dealii_3-rt.xml>`_
-Source code             `tutorial_dealii_3.py <../../examples/tutorial_dealii_3.html>`_
+Model report            `tutorial_dealii_3.xml <../examples/tutorial_dealii_3.xml>`_
+Runtime model report    `tutorial_dealii_3-rt.xml <../examples/tutorial_dealii_3-rt.xml>`_
+Source code             `tutorial_dealii_3.py <../examples/tutorial_dealii_3.html>`_
 =====================   =================================================================
 
 .. _tutorial_dealii_4:
@@ -109,9 +109,9 @@ Tutorial deal.II 4
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_dealii_4.xml <../../examples/tutorial_dealii_4.xml>`_
-Runtime model report    `tutorial_dealii_4-rt.xml <../../examples/tutorial_dealii_4-rt.xml>`_
-Source code             `tutorial_dealii_4.py <../../examples/tutorial_dealii_4.html>`_
+Model report            `tutorial_dealii_4.xml <../examples/tutorial_dealii_4.xml>`_
+Runtime model report    `tutorial_dealii_4-rt.xml <../examples/tutorial_dealii_4-rt.xml>`_
+Source code             `tutorial_dealii_4.py <../examples/tutorial_dealii_4.html>`_
 =====================   =================================================================
 
 .. _tutorial_dealii_5:
@@ -127,9 +127,9 @@ Tutorial deal.II 5
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_dealii_5.xml <../../examples/tutorial_dealii_5.xml>`_
-Runtime model report    `tutorial_dealii_5-rt.xml <../../examples/tutorial_dealii_5-rt.xml>`_
-Source code             `tutorial_dealii_5.py <../../examples/tutorial_dealii_5.html>`_
+Model report            `tutorial_dealii_5.xml <../examples/tutorial_dealii_5.xml>`_
+Runtime model report    `tutorial_dealii_5-rt.xml <../examples/tutorial_dealii_5-rt.xml>`_
+Source code             `tutorial_dealii_5.py <../examples/tutorial_dealii_5.html>`_
 =====================   =================================================================
 
 .. _tutorial_dealii_6:
@@ -145,7 +145,7 @@ Tutorial deal.II 6
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_dealii_6.xml <../../examples/tutorial_dealii_6.xml>`_
-Runtime model report    `tutorial_dealii_6-rt.xml <../../examples/tutorial_dealii_6-rt.xml>`_
-Source code             `tutorial_dealii_6.py <../../examples/tutorial_dealii_6.html>`_
+Model report            `tutorial_dealii_6.xml <../examples/tutorial_dealii_6.xml>`_
+Runtime model report    `tutorial_dealii_6-rt.xml <../examples/tutorial_dealii_6-rt.xml>`_
+Source code             `tutorial_dealii_6.py <../examples/tutorial_dealii_6.html>`_
 =====================   =================================================================

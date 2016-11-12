@@ -3297,6 +3297,247 @@ bool adSetupSpecialFunctionNode::IsDifferential(void) const
 }
 
 /*********************************************************************************************
+    Functions needed for derivatives of expressions (time and partial derivatives)
+**********************************************************************************************/
+static adouble der_unary_f(adUnaryNode* unode);
+static adouble der2_unary_f(adUnaryNode* unode);
+static bool is_node_zero(adNodePtr n);
+
+adouble der_unary_f(adUnaryNode* unode)
+{
+    adouble n, df;
+    n.setGatherInfo(true);
+    df.setGatherInfo(true);
+    n.node = unode->node;
+
+    if(unode->eFunction == eSign)
+    {
+        // The same as d(0-n)/dx = -dn/dx
+        df.node = adNodePtr(new adConstantNode(-1));
+    }
+    else if(unode->eFunction == eSqrt)
+    {
+        df = 0.5/sqrt(n);
+    }
+    else if(unode->eFunction == eExp)
+    {
+        // exp(n)' = exp(n)
+        df = exp(n);
+    }
+    else if(unode->eFunction == eLn)
+    {
+        // ln(n)' = 1 / n
+        df = 1 / n;
+    }
+    else if(unode->eFunction == eLog)
+    {
+        // log10(n)' = 1 / [ln(10)*n]
+        df = 1 / (::log(10.0)*n);
+    }
+    else if(unode->eFunction == eAbs)
+    {
+        // abs(n)' = n / abs(n)
+        df = n / abs(n);
+    }
+    else if(unode->eFunction == eSin)
+    {
+        // sin(n)' = cos(n)
+        df = cos(n);
+    }
+    else if(unode->eFunction == eCos)
+    {
+        // cos(n)' = -sin(n)
+        df = -sin(n);
+    }
+    else if(unode->eFunction == eTan)
+    {
+        // tan(n)' = [1/cos(n)] * [1/cos(n)]
+        df = 1 / (cos(n)*cos(n));
+    }
+    else if(unode->eFunction == eArcSin)
+    {
+        // asin(n)' = 1 / sqrt(1 - n^2)
+        df = 1 / sqrt(1 - n*n);
+    }
+    else if(unode->eFunction == eArcCos)
+    {
+        // acos(n)' = -1 / sqrt(1 - n^2)
+        df = -1 / sqrt(1 - n*n);
+    }
+    else if(unode->eFunction == eArcTan)
+    {
+        // atan(n)' = 1 / (1 + n^2)
+        df = 1 / (1 + n*n);
+    }
+
+    else if(unode->eFunction == eSinh)
+    {
+        // sinh(n)' = cosh(n)
+        df = cosh(n);
+    }
+    else if(unode->eFunction == eCosh)
+    {
+        // cosh(n)' = sinh(n)
+        df = sinh(n);
+    }
+    else if(unode->eFunction == eTanh)
+    {
+        // tanh(n)' = [1/cosh(n)] * [1/cosh(n)]
+        df = 1 / (cosh(n)*cosh(n));
+    }
+    else if(unode->eFunction == eArcSinh)
+    {
+        // asinh(n)' = 1 / sqrt(n^2 + 1)
+        df = 1 / sqrt(n*n + 1);
+    }
+    else if(unode->eFunction == eArcCosh)
+    {
+        // acosh(n)' = -1 / sqrt(n^2 - 1)
+        df = -1 / sqrt(n*n - 1);
+    }
+    else if(unode->eFunction == eArcTanh)
+    {
+        // atanh(n)' = 1 / (1 - n^2)
+        df = 1 / (1 - n*n);
+    }
+    else
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The functions d() and dt() do not accept expressions containing some unary functions such as erf, floor, ceil, etc.";
+        throw e;
+    }
+
+    // ACHTUNG, ACHTUNG!!
+    df.node = adNode::SimplifyNode(df.node);
+
+    return df;
+}
+
+adouble der2_unary_f(adUnaryNode* unode)
+{
+    adouble n, d2f;
+    n.setGatherInfo(true);
+    d2f.setGatherInfo(true);
+    n.node = unode->node;
+
+    if(unode->eFunction == eSign)
+    {
+        // The same as d(0-n)/dx = -dn/dx
+        d2f.node = adNodePtr(new adConstantNode(0));
+    }
+    else if(unode->eFunction == eSqrt)
+    {
+        // sqrt(n)' = -1/(4 * n^1.5)
+        d2f = -1/(4*pow(n,1.5));
+    }
+    else if(unode->eFunction == eExp)
+    {
+        // exp(n)'' = exp(n)
+        d2f = exp(n);
+    }
+    else if(unode->eFunction == eLn)
+    {
+        // ln(n)'' = -1 / n^2
+        d2f = -1 / (n*n);
+    }
+    else if(unode->eFunction == eLog)
+    {
+        // log10(n)'' = -1 / [ln(10)*n^2]
+        d2f = -1 / (::log(10.0)*n*n);
+    }
+    else if(unode->eFunction == eAbs)
+    {
+        // abs(n)'' = n / abs(n)
+        d2f.node = adNodePtr(new adConstantNode(0));
+    }
+    else if(unode->eFunction == eSin)
+    {
+        // sin(n)'' = -sin(n)
+        d2f = -sin(n);
+    }
+    else if(unode->eFunction == eCos)
+    {
+        // cos(n)'' = -cos(n)
+        d2f = -cos(n);
+    }
+    else if(unode->eFunction == eTan)
+    {
+        // tan(n)'' = 2 * [1/cos(n)] * [1/cos(n)] * tan(n)
+        d2f = 2 * tan(n) / (cos(n)*cos(n));
+    }
+    else if(unode->eFunction == eArcSin)
+    {
+        // asin(n)'' = n / pow(1 - n^2, 1.5)
+        d2f = n / pow(1 - n*n, 1.5);
+    }
+    else if(unode->eFunction == eArcCos)
+    {
+        // acos(n)'' = -n / pow(1 - n^2, 1.5)
+        d2f = -n / pow(1 - n*n, 1.5);
+    }
+    else if(unode->eFunction == eArcTan)
+    {
+        // atan(n)'' = -2n / (1 + n^2)^2
+        d2f = -2*n / pow(1 + n*n, 2);
+    }
+
+    else if(unode->eFunction == eSinh)
+    {
+        // sinh(n)'' = sinh(n)
+        d2f = sinh(n);
+    }
+    else if(unode->eFunction == eCosh)
+    {
+        // cosh(n)'' = cosh(n)
+        d2f = cosh(n);
+    }
+    else if(unode->eFunction == eTanh)
+    {
+        // tanh(n)'' = -2 * [1/cosh(n)] * [1/cosh(n)] * tanh(n)
+        d2f = -2*tanh(n) / (cosh(n)*cosh(n));
+    }
+    else if(unode->eFunction == eArcSinh)
+    {
+        // asinh(n)'' = -n / pow(n^2 + 1, 1.5)
+        d2f = -n / pow(n*n + 1, 1.5);
+    }
+    else if(unode->eFunction == eArcCosh)
+    {
+        // acosh(n)'' = -n / pow(n^2 - 1, 1.5)
+        d2f = -n / pow(n*n - 1, 1.5);
+    }
+    else if(unode->eFunction == eArcTanh)
+    {
+        // atanh(n)'' = 2n / (1 - n^2)^2
+        d2f = 2*n / pow(1 - n*n, 2);
+    }
+    else
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The function d2() does not accept expressions containing some unary functions such as erf, floor, ceil, etc.";
+        throw e;
+    }
+
+    // ACHTUNG, ACHTUNG!!
+    d2f.node = adNode::SimplifyNode(d2f.node);
+
+    return d2f;
+}
+
+bool is_node_zero(adNodePtr n)
+{
+    if( dynamic_cast<adConstantNode*>(n.get()) )
+    {
+        adConstantNode* cn = dynamic_cast<adConstantNode*>(n.get());
+        if(cn->m_quantity.getValue() == 0)
+            return true;
+        else
+            return false;
+    }
+    return false;
+}
+
+/*********************************************************************************************
     adSetupExpressionDerivativeNode
 **********************************************************************************************/
 adSetupExpressionDerivativeNode::adSetupExpressionDerivativeNode(adNodePtr n)
@@ -3340,7 +3581,21 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
     adnode = n.get();
     if( dynamic_cast<adUnaryNode*>(adnode) )
     {
-        daeDeclareAndThrowException(exNotImplemented);
+        adUnaryNode* unode = dynamic_cast<adUnaryNode*>(adnode);
+
+        // The chain rule: df(n)/dt = (df/dn) * (dn/dt)
+        // Here df(n)/dn is df and dn/dt is dn
+        adouble df, dn;
+        dn.setGatherInfo(true);
+        dn.node = adSetupExpressionDerivativeNode::calc_dt(unode->node, pExecutionContext);
+        df = der_unary_f(unode);
+
+        if(is_node_zero(dn.node))
+            return dn.node;
+        else if(is_node_zero(df.node))
+            return df.node;
+        else
+            tmp = (df * dn).node;
     }
     else if( dynamic_cast<adBinaryNode*>(adnode) )
     {
@@ -3361,18 +3616,51 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
         case ePlus:
             tmp = (dl + dr).node;
             break;
+
         case eMinus:
             tmp = (dl - dr).node;
             break;
+
         case eMulti:
-            tmp = (l * dr + r * dl).node;
+            if(is_node_zero(l.node) || is_node_zero(r.node))
+                tmp = adNodePtr(new adConstantNode(0));
+            else if(is_node_zero(dl.node))
+                tmp = (l * dr).node;
+            else if(is_node_zero(dr.node))
+                tmp = (r * dl).node;
+            else
+                tmp = (l * dr + r * dl).node;
             break;
+
         case eDivide:
-            tmp = ((r * dl - l * dr)/(r * r)).node;
+            if(is_node_zero(l.node))
+                tmp = adNodePtr(new adConstantNode(0));
+            else if(is_node_zero(dl.node) && is_node_zero(dr.node))
+                tmp = adNodePtr(new adConstantNode(0));
+            else if(is_node_zero(dl.node))
+                tmp = ((-l*dr)/(r*r)).node;
+            else if(is_node_zero(dr.node))
+                tmp = (dl/r).node;
+            else
+                tmp = ((r*dl - l*dr)/(r*r)).node;
             break;
+
+        case ePower:
+            if(is_node_zero(l.node) || is_node_zero(r.node)) // l^0 or 0^r -> der is zero
+                tmp = adNodePtr(new adConstantNode(0));
+            else if(is_node_zero(dl.node) && is_node_zero(dr.node)) // dl=0 and dr=0 -> der is zero
+                tmp = adNodePtr(new adConstantNode(0));
+            else if(is_node_zero(dl.node)) // dl=0
+                tmp = ( pow(l,r) * (log(l)*dr) ).node;
+            else if(is_node_zero(dr.node)) // dr=0
+                tmp = ( pow(l,r) * (r*dl/l) ).node;
+            else
+                tmp = ( pow(l,r) * (r*dl/l + log(l)*dr) ).node; // ok
+            break;
+
         default:
             daeDeclareException(exInvalidCall);
-            e << "The function dt() does not accept expressions containing pow, min and max";
+            e << "The function dt() does not accept expressions containing some binary functions, such as min and max";
             throw e;
         }
     }
@@ -3392,8 +3680,11 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
         adouble adres = rtnode->m_pVariable->Calculate_dt(&rtnode->m_narrDomains[0], rtnode->m_narrDomains.size());
         tmp = adres.node;
     }
+    else if( dynamic_cast<adTimeNode*>(adnode) )
+    {
+        tmp = adNodePtr(new adConstantNode(1));
+    }
     else if( dynamic_cast<adConstantNode*>(adnode)          ||
-             dynamic_cast<adTimeNode*>(adnode)              ||
              dynamic_cast<adDomainIndexNode*>(adnode)       ||
              dynamic_cast<adRuntimeParameterNode*>(adnode)  ||
              dynamic_cast<adEventPortDataNode*>(adnode)     ||
@@ -3404,7 +3695,7 @@ adNodePtr adSetupExpressionDerivativeNode::calc_dt(adNodePtr n, const daeExecuti
     else
     {
         daeDeclareException(exInvalidCall);
-        e << "The function dt() does not accept expressions containing special functions or time/partial derivatives";
+        e << "The function dt() does not accept expressions containing erf, min, max, floor, ceil functions or time derivatives";
         throw e;
     }
     return tmp;
@@ -3637,240 +3928,6 @@ const quantity adSetupExpressionPartialDerivativeNode::GetQuantity(void) const
         return quantity();
 }
 
-inline adouble der_unary_f(adUnaryNode* unode)
-{
-    adouble n, df;
-    n.setGatherInfo(true);
-    df.setGatherInfo(true);
-    n.node = unode->node;
-
-    if(unode->eFunction == eSign)
-    {
-        // The same as d(0-n)/dx = -dn/dx
-        df.node = adNodePtr(new adConstantNode(-1));
-    }
-    else if(unode->eFunction == eSqrt)
-    {
-        df = 0.5/sqrt(n);
-    }
-    else if(unode->eFunction == eExp)
-    {
-        // exp(n)' = exp(n)
-        df = exp(n);
-    }
-    else if(unode->eFunction == eLn)
-    {
-        // ln(n)' = 1 / n
-        df = 1 / n;
-    }
-    else if(unode->eFunction == eLog)
-    {
-        // log10(n)' = 1 / [ln(10)*n]
-        df = 1 / (::log(10.0)*n);
-    }
-    else if(unode->eFunction == eAbs)
-    {
-        // abs(n)' = n / abs(n)
-        df = n / abs(n);
-    }
-    else if(unode->eFunction == eSin)
-    {
-        // sin(n)' = cos(n)
-        df = cos(n);
-    }
-    else if(unode->eFunction == eCos)
-    {
-        // cos(n)' = -sin(n)
-        df = -sin(n);
-    }
-    else if(unode->eFunction == eTan)
-    {
-        // tan(n)' = [1/cos(n)] * [1/cos(n)]
-        df = 1 / (cos(n)*cos(n));
-    }
-    else if(unode->eFunction == eArcSin)
-    {
-        // asin(n)' = 1 / sqrt(1 - n^2)
-        df = 1 / sqrt(1 - n*n);
-    }
-    else if(unode->eFunction == eArcCos)
-    {
-        // acos(n)' = -1 / sqrt(1 - n^2)
-        df = -1 / sqrt(1 - n*n);
-    }
-    else if(unode->eFunction == eArcTan)
-    {
-        // atan(n)' = 1 / (1 + n^2)
-        df = 1 / (1 + n*n);
-    }
-
-    else if(unode->eFunction == eSinh)
-    {
-        // sinh(n)' = cosh(n)
-        df = cosh(n);
-    }
-    else if(unode->eFunction == eCosh)
-    {
-        // cosh(n)' = sinh(n)
-        df = sinh(n);
-    }
-    else if(unode->eFunction == eTanh)
-    {
-        // tanh(n)' = [1/cosh(n)] * [1/cosh(n)]
-        df = 1 / (cosh(n)*cosh(n));
-    }
-    else if(unode->eFunction == eArcSinh)
-    {
-        // asinh(n)' = 1 / sqrt(n^2 + 1)
-        df = 1 / sqrt(n*n + 1);
-    }
-    else if(unode->eFunction == eArcCosh)
-    {
-        // acosh(n)' = -1 / sqrt(n^2 - 1)
-        df = -1 / sqrt(n*n - 1);
-    }
-    else if(unode->eFunction == eArcTanh)
-    {
-        // atanh(n)' = 1 / (1 - n^2)
-        df = 1 / (1 - n*n);
-    }
-    else
-    {
-        daeDeclareException(exInvalidCall);
-        e << "The function d() does not accept expressions containing some unary functions such as erf, floor, ceil, etc.";
-        throw e;
-    }
-
-    // ACHTUNG, ACHTUNG!!
-    df.node = adNode::SimplifyNode(df.node);
-
-    return df;
-}
-
-inline adouble der2_unary_f(adUnaryNode* unode)
-{
-    adouble n, d2f;
-    n.setGatherInfo(true);
-    d2f.setGatherInfo(true);
-    n.node = unode->node;
-
-    if(unode->eFunction == eSign)
-    {
-        // The same as d(0-n)/dx = -dn/dx
-        d2f.node = adNodePtr(new adConstantNode(0));
-    }
-    else if(unode->eFunction == eSqrt)
-    {
-        // sqrt(n)' = -1/(4 * n^1.5)
-        d2f = -1/(4*pow(n,1.5));
-    }
-    else if(unode->eFunction == eExp)
-    {
-        // exp(n)'' = exp(n)
-        d2f = exp(n);
-    }
-    else if(unode->eFunction == eLn)
-    {
-        // ln(n)'' = -1 / n^2
-        d2f = -1 / (n*n);
-    }
-    else if(unode->eFunction == eLog)
-    {
-        // log10(n)'' = -1 / [ln(10)*n^2]
-        d2f = -1 / (::log(10.0)*n*n);
-    }
-    else if(unode->eFunction == eAbs)
-    {
-        // abs(n)'' = n / abs(n)
-        d2f.node = adNodePtr(new adConstantNode(0));
-    }
-    else if(unode->eFunction == eSin)
-    {
-        // sin(n)'' = -sin(n)
-        d2f = -sin(n);
-    }
-    else if(unode->eFunction == eCos)
-    {
-        // cos(n)'' = -cos(n)
-        d2f = -cos(n);
-    }
-    else if(unode->eFunction == eTan)
-    {
-        // tan(n)'' = 2 * [1/cos(n)] * [1/cos(n)] * tan(n)
-        d2f = 2 * tan(n) / (cos(n)*cos(n));
-    }
-    else if(unode->eFunction == eArcSin)
-    {
-        // asin(n)'' = n / pow(1 - n^2, 1.5)
-        d2f = n / pow(1 - n*n, 1.5);
-    }
-    else if(unode->eFunction == eArcCos)
-    {
-        // acos(n)'' = -n / pow(1 - n^2, 1.5)
-        d2f = -n / pow(1 - n*n, 1.5);
-    }
-    else if(unode->eFunction == eArcTan)
-    {
-        // atan(n)'' = -2n / (1 + n^2)^2
-        d2f = -2*n / pow(1 + n*n, 2);
-    }
-
-    else if(unode->eFunction == eSinh)
-    {
-        // sinh(n)'' = sinh(n)
-        d2f = sinh(n);
-    }
-    else if(unode->eFunction == eCosh)
-    {
-        // cosh(n)'' = cosh(n)
-        d2f = cosh(n);
-    }
-    else if(unode->eFunction == eTanh)
-    {
-        // tanh(n)'' = -2 * [1/cosh(n)] * [1/cosh(n)] * tanh(n)
-        d2f = -2*tanh(n) / (cosh(n)*cosh(n));
-    }
-    else if(unode->eFunction == eArcSinh)
-    {
-        // asinh(n)'' = -n / pow(n^2 + 1, 1.5)
-        d2f = -n / pow(n*n + 1, 1.5);
-    }
-    else if(unode->eFunction == eArcCosh)
-    {
-        // acosh(n)'' = -n / pow(n^2 - 1, 1.5)
-        d2f = -n / pow(n*n - 1, 1.5);
-    }
-    else if(unode->eFunction == eArcTanh)
-    {
-        // atanh(n)'' = 2n / (1 - n^2)^2
-        d2f = 2*n / pow(1 - n*n, 2);
-    }
-    else
-    {
-        daeDeclareException(exInvalidCall);
-        e << "The function d2() does not accept expressions containing some unary functions such as erf, floor, ceil, etc.";
-        throw e;
-    }
-
-    // ACHTUNG, ACHTUNG!!
-    d2f.node = adNode::SimplifyNode(d2f.node);
-
-    return d2f;
-}
-
-inline bool is_node_zero(adNodePtr n)
-{
-    if( dynamic_cast<adConstantNode*>(n.get()) )
-    {
-        adConstantNode* cn = dynamic_cast<adConstantNode*>(n.get());
-        if(cn->m_quantity.getValue() == 0)
-            return true;
-        else
-            return false;
-    }
-    return false;
-}
-
 // Here we work on runtime nodes!!
 adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr                                 n__,
                                                          daeDomain*                                pDomain,
@@ -3926,7 +3983,14 @@ adNodePtr adSetupExpressionPartialDerivativeNode::calc_d(adNodePtr              
             break;
 
         case eMulti:
-            tmp = (l*dr + r*dl).node;
+            if(is_node_zero(l.node) || is_node_zero(r.node))
+                tmp = adNodePtr(new adConstantNode(0));
+            else if(is_node_zero(dl.node))
+                tmp = (l * dr).node;
+            else if(is_node_zero(dr.node))
+                tmp = (r * dl).node;
+            else
+                tmp = (l * dr + r * dl).node;
             break;
 
         case eDivide:

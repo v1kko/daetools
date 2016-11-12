@@ -47,9 +47,9 @@ Advanced Tutorial 1
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_adv_1.xml <../../examples/tutorial_adv_1.xml>`_
-Runtime model report    `tutorial_adv_1-rt.xml <../../examples/tutorial_adv_1-rt.xml>`_
-Source code             `tutorial_adv_1.py <../../examples/tutorial_adv_1.html>`_
+Model report            `tutorial_adv_1.xml <../examples/tutorial_adv_1.xml>`_
+Runtime model report    `tutorial_adv_1-rt.xml <../examples/tutorial_adv_1-rt.xml>`_
+Source code             `tutorial_adv_1.py <../examples/tutorial_adv_1.html>`_
 =====================   =================================================================
 
 
@@ -66,9 +66,9 @@ Advanced Tutorial 2
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_adv_2.xml <../../examples/tutorial_adv_2.xml>`_
-Runtime model report    `tutorial_adv_2-rt.xml <../../examples/tutorial_adv_2-rt.xml>`_
-Source code             `tutorial_adv_2.py <../../examples/tutorial_adv_2.html>`_
+Model report            `tutorial_adv_2.xml <../examples/tutorial_adv_2.xml>`_
+Runtime model report    `tutorial_adv_2-rt.xml <../examples/tutorial_adv_2-rt.xml>`_
+Source code             `tutorial_adv_2.py <../examples/tutorial_adv_2.html>`_
 =====================   =================================================================
 
 
@@ -85,9 +85,9 @@ Advanced Tutorial 3
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_adv_3.xml <../../examples/tutorial_adv_3.xml>`_
-Runtime model report    `tutorial_adv_3-rt.xml <../../examples/tutorial_adv_3-rt.xml>`_
-Source code             `tutorial_adv_3.py <../../examples/tutorial_adv_3.html>`_
+Model report            `tutorial_adv_3.xml <../examples/tutorial_adv_3.xml>`_
+Runtime model report    `tutorial_adv_3-rt.xml <../examples/tutorial_adv_3-rt.xml>`_
+Source code             `tutorial_adv_3.py <../examples/tutorial_adv_3.html>`_
 =====================   =================================================================
 
 
@@ -104,8 +104,8 @@ Advanced Tutorial 4
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial_adv_4.xml <../../examples/tutorial_adv_4.xml>`_
-Runtime model report    `tutorial_adv_4-rt.xml <../../examples/tutorial_adv_4-rt.xml>`_
-Source code             `tutorial_adv_4.py <../../examples/tutorial_adv_4.html>`_
+Model report            `tutorial_adv_4.xml <../examples/tutorial_adv_4.xml>`_
+Runtime model report    `tutorial_adv_4-rt.xml <../examples/tutorial_adv_4-rt.xml>`_
+Source code             `tutorial_adv_4.py <../examples/tutorial_adv_4.html>`_
 =====================   =================================================================
 

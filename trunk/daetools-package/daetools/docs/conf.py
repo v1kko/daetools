@@ -107,6 +107,7 @@ pygments_style = 'vs' # vs, colorful, friendly, pastie, manni
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+numfig = True
 
 # pngmath
 #pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']

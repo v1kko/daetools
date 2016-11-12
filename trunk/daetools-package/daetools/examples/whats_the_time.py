@@ -88,9 +88,10 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
 
     >> from variable_types import length_t, volume_t, area_t ...
     
-    Here, a very simple dimensionless variable type is declared: typeNone
+    Here, just as an example, a simple variable type with the time units is declared: time_type.
+    Normally the time_t variable type should be used for time.
 """
-typeNone = daeVariableType("typeNone", unit(), 0, 1E10,   0, 1e-5)
+time_type = daeVariableType("typeNone", s, 0, 1E10,   0, 1e-5)
 
 """
 3. Declare a model by deriving a class from the base daeModel class.
@@ -123,7 +124,7 @@ class modTutorial(daeModel):
         """
         daeModel.__init__(self, Name, Parent, Description)
         
-        self.tau = daeVariable("&tau;", typeNone, self, "Time elapsed in the process")
+        self.tau = daeVariable("&tau;", time_type, self, "Time elapsed in the process")
 
     def DeclareEquations(self):
         """
@@ -164,19 +165,23 @@ class modTutorial(daeModel):
 
         As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)
         and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,
-        typically located in /etc/daetools folder) or for particular equations by setting the equation's boolean
-        'CheckUnitsConsistency' property to false. All values and constants must be declared with the information
-        about their units. Units of variables, parameters and domains are specified in their constructor while constants
-        and arrays of constants are instantiated with the built-in Constant() and Array() functions. Obviously, the very
-        strict unit-consistency requires an extra effort during the model development phase and makes models more verbose.
-        However, it helps eliminate some very hard to find errors and might save some NASA orbiters.
-        'quantity' objects consist of the value and the units. The pyDAE.pyUnits module offers the following
-        predefined units:
+        or for particular equations by setting the equation's boolean 'CheckUnitsConsistency' property to false.
+        The config files are searched for in the following directories:
+          - %{HOME}/.daetools directory
+          - .../site-packages/daetools directory
+          - the directory where the executable is located
+        All values and constants must be declared with the information about their units (unless dimensionless).
+        Units of variables, parameters and domains are specified in their constructor while constants
+        and arrays of constants are instantiated with the built-in Constant() and Array() functions.
+        Obviously, the very strict unit-consistency requires an extra effort during the model development phase
+        and makes models more verbose. However, it helps to eliminate some very hard to find errors.
+        'quantity' objects have two properties: the 'value' and the 'units'.
+        The pyDAE.pyUnits module offers the following predefined set of units:
             - All base SI units: m, kg, s, A, K, cd, mol
             - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc
             (see units_pool.h file in trunk/Units folder)
             - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-
-            using the symbols: da, h, k, M, G, T, P, E, Z, Y)
+            using the symbols: da, h, k, M, G, T, P, E, Z, Y
             - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-
             using the symbols: d, c, m, u, n, p, f, a, z, y
 
@@ -184,10 +189,13 @@ class modTutorial(daeModel):
         Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!
 
         Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.
-        In this example we declare a quantity with the value of 1.0 and units s^-1:
+
+        In the equation below we can write:
+           self.tau.dt() - 1.0
+        since the dtau/dt term is dimensionless. However, in a general case, we must use Constant(1.0 * units).
         """
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.tau.dt() - Constant(1.0 * 1/s)
+        eq.Residual = self.tau.dt() - 1.0
 
 # 4. Declare a simulation by deriving a class from the base daeSimulation class
 class simTutorial(daeSimulation):
@@ -200,7 +208,7 @@ class simTutorial(daeSimulation):
         """
         daeSimulation.__init__(self)
 
-        self.m = modTutorial("whats_the_time")
+        self.m = modTutorial("wtt")
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
@@ -216,17 +224,17 @@ class simTutorial(daeSimulation):
         """
         4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.
             Every simulation class must implement SetUpVariables method, even if it is empty.
-            In this example the only thing needed to be done is to set the initial condition for the
-            variable tau to 0. That can be done by using SetInitialCondition function.
+            In this example the only thing needed to be done is to set the initial condition for the variable tau.
+            That can be done using the SetInitialCondition function.
         """
         self.m.tau.SetInitialCondition(0.0)
 
-# Use daeSimulator class
+# Use daeSimulator class (pyQt GUI)
 def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 1000
+    sim.ReportingInterval = 5
+    sim.TimeHorizon       = 100
     simulator  = daeSimulator(app, simulation=sim)
     simulator.exec_()
 
@@ -234,13 +242,11 @@ def guiRun(app):
 def consoleRun():
     """
     5. Create Log, Solver, DataReporter and Simulation object
-       Every simulation requires the following four objects:
-       - log is used to send the messages from other parts of the framework, informs us about the simulation
-         progress or errors
+       Every simulation requires the following three additional objects:
+       - log is used to send the messages from the framework, set the simulation progress or to report errors
        - solver is DAE solver used to solve the underlying system of differential and algebraic equations
        - datareporter is used to send the data from the solver to daePlotter (or any other data receiver).
-         Very often data reporters hold the results and do not send the data.
-       - simulation object
+         Often, it is required to save the results in a specified file format; for more information see Tutorial 8.
     """
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
@@ -249,15 +255,16 @@ def consoleRun():
 
     """
     6. Additional settings
-       Here some additional information can be entered. The most common are:
-       - TimeHorizon: the duration of the simulation
-       - ReportingInterval: the interval to send the variable values
-       - Selection of the variables whose values will be reported. It can be set individually for each variable
-         by using the property var.ReportingOn = True/False, or by the function SetReportingOn in daeModel class
-         which enables reporting of all variables in that model
+       - TimeHorizon: the duration of the simulation, in seconds (required)
+       - ReportingInterval: the time interval after which the results are reported, in seconds (required)
+       - Selection of the variables whose values will be reported.
+         It can be set individually for each variable by using the property variable.ReportingOn = True/False,
+         or by using the function daeModel.SetReportingOn() which enables/disables all variables in the model.
+         The default is that no variable is reported.
+         Here, we enable reporting of all variables in the model.
     """
-    simulation.TimeHorizon = 10
-    simulation.ReportingInterval = 1
+    simulation.TimeHorizon = 100
+    simulation.ReportingInterval = 5
     simulation.m.SetReportingOn(True)
 
     """
@@ -269,38 +276,39 @@ def consoleRun():
            (on this machine) daePlotter listening on the port 50000.
          - Process name; in this example we use the combination of the simulation name and the current date and time
     """
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    simName = "whats_the_time" + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(datareporter.Connect("", simName) == False):
         sys.exit()
 
     """
     8. Run the simulation
      8.1 The simulation initialization
-         The first task is to initialize the simulation by calling the function Initialize.
-         As the 4th argument, it accepts an optional CalculateSensitivities (bool; default is False) which can
-         enable calculation of sensitivities for given opt. variables.
-         After the successful initialization the model reports can be generated (if desired).
-         The function SaveModelReport exports the model report in the XML format which can be rendered
-         in a web browser such Mozilla Firefox, or others that support XHTML+MathMl standard.
-         The function SaveRuntimeModelReport creates a runtime sort of the model report
+         The first task is to initialise the simulation by calling the function Initialize.
+         As the fourth argument, it accepts an optional CalculateSensitivities (bool; default is False) which can
+         enable calculation of sensitivities for given opt. variables (more details in the optimisation tutorials).
+         After the successful initialisation the model reports can be generated.
+         The function SaveModelReport exports the model report in the XML format.
+         The function SaveRuntimeModelReport creates a runtime version of the model report
          (with all run-time information and all equations fully expanded)
     """
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    simulation.m.SaveModelReport("whats_the_time.xml")
+    simulation.m.SaveRuntimeModelReport("whats_the_time-rt.xml")
 
     """
-    8.2 Solve at time = 0 (initialization)
-        The DAE system must be first initialized. The function SolveInitial is used for that purpose.
+    8.2 Solve at time = 0 (initialisation)
+        The DAE system must be solved at the t = 0 where the specified initial conditions
+        are used to calculate all other model variables.
+        The function SolveInitial is used for that purpose.
     """
     simulation.SolveInitial()
 
     """
-    8.3 Call the function Run from the daeSimulation class to start the simulation.
-        It will last for TimeHorizon seconds and the results will be reported after every ReportingInterval
-        number of seconds.
+    8.3 Start the simulation using function daeSimulation.Run().
+        The simulation will be run until the time reaches the specified TimeHorizon (in seconds).
+        During the simulation the results will be reported after every ReportingInterval (in seconds).
     """
     simulation.Run()
 

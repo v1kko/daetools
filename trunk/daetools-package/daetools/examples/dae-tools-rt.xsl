@@ -109,7 +109,7 @@
               <th>Type</th>
               <th>Units</th>
               <th>Description</th>
-
+              <th>Number of Points</th>
               <th>LowerBound</th>
               <th>UpperBound</th>
             <!--
@@ -152,6 +152,10 @@
                 
                 <td>
                   <xsl:value-of select="Description"/>
+                </td>
+
+                <td>
+                  <xsl:value-of select="NumberOfPoints"/>
                 </td>
 
                 <td>

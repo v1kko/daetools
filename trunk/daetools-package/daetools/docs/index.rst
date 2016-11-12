@@ -13,7 +13,7 @@ DAE Tools Documentation
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 2  
 
    introduction
    paradigms

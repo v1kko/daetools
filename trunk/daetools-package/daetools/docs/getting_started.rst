@@ -18,6 +18,13 @@ Getting Started with DAE Tools
 This chapter gives the basic information about exploring examples/tutorials,
 developing models, defining and running a simulation and plotting the simulation results.
 
+**DAE Tools** (pyDAE module) is installed in ``daetools`` folder within ``site-packages`` (or ``dist-packages``)
+folder under python. The structure of the folders is the following:
+
+.. figure:: _static/daetools_folder_structure.png
+   :align: center
+
+
 Running tutorials
 =================
 
@@ -43,7 +50,7 @@ Running tutorials
 
      Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
 
-   The ``DAE Tools Plotter`` main window should appear (given in :ref:`Figure-GetStarted-1`)
+   The ``DAE Tools Plotter`` main window should appear (given in :numref:`Figure-GetStarted-1`)
 
    .. _Figure-GetStarted-1:
    .. figure:: _static/Screenshot-DAEPlotter.png
@@ -75,11 +82,10 @@ Running tutorials
 
      Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
 
-The main window of ``DAE Tools Examples`` application is given in :ref:`Figure-GetStarted-2a` while
-the output from the simulation run in :ref:`Figure-GetStarted-2b`. There, tutorials can be run, their source code
-inspected, model reports generated.
-Model reports open in a new window of the system's default web browser (however, only Mozilla Firefox is currently
-supported because of the MathML rendering issue).
+The main window of ``DAE Tools Examples`` application is given in :numref:`Figure-GetStarted-2a` while
+the output from the simulation run in :numref:`Figure-GetStarted-2b`. There, tutorials can be run, their source code
+inspected, and model reports generated.
+Model reports open in a new window of the system's default web browser.
 
 .. _Figure-GetStarted-2a:
 .. figure:: _static/Screenshot-DAEToolsTutorials.png
@@ -109,7 +115,7 @@ Tutorials can also be started from the shell:
     # or
     python tutorial1.py gui
 
-The sample output is given in :ref:`Figure-GetStarted-3`:
+The sample output is given in :numref:`Figure-GetStarted-3`:
 
 .. _Figure-GetStarted-3:
 .. figure:: _static/Screenshot-RunningSimulation.png
@@ -140,7 +146,7 @@ DAE Tools Plotter
 
 The simulation/optimization results can be easily plotted using the **DAE Tools Plotter** application.
 Three types of plots are supported: 2D, animated 2D and 3D plots.
-After choosing a desired type, a **Choose variable** (given in :ref:`Figure-GetStarted-5`)
+After choosing a desired type, a **Choose variable** (given in :numref:`Figure-GetStarted-5`)
 dialog appears where a variable to be plotted can be selected and information about domains
 specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
 (to create a 2D plot one domain must remain free, while for a 3D plot two domains).
@@ -153,7 +159,7 @@ specified - some domains should be fixed while leaving another free by selecting
 
     Choose variable dialog for a 2D plot
 
-Typical 2D and 3D plots are given in :ref:`Figure-GetStarted-6` and :ref:`Figure-GetStarted-7`.
+Typical 2D and 3D plots are given in :numref:`Figure-GetStarted-6` and :numref:`Figure-GetStarted-7`.
 
 .. _Figure-GetStarted-6:
 .. figure:: _static/Screenshot-2Dplot.png

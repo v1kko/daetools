@@ -61,7 +61,6 @@ and **DAE Tools** for a very simple dynamical model (basically a tank with a liq
 an outlet flow where the outlet flowrate depends on the liquid level in the tank):
 
 +-----------------------+---------------------+------------------------+
-+-----------------------+---------------------+------------------------+
 | |modelica_model|      | |gPROMS_model|      | |daetools_model|       |
 +-----------------------+---------------------+------------------------+
 | **a) Modelica**       | **b) gPROMS**       | **c) DAE Tools**       |

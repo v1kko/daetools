@@ -141,9 +141,9 @@ What's the time? (AKA: Hello world!)
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `whats_the_time.xml <../../examples/whats_the_time.xml>`_
-Runtime model report    `whats_the_time-rt.xml <../../examples/whats_the_time-rt.xml>`_
-Source code             `whats_the_time.py <../../examples/whats_the_time.html>`_
+Model report            `whats_the_time.xml <../examples/whats_the_time.xml>`_
+Runtime model report    `whats_the_time-rt.xml <../examples/whats_the_time-rt.xml>`_
+Source code             `whats_the_time.py <../examples/whats_the_time.html>`_
 =====================   =================================================================
 
 .. _tutorial_1:
@@ -159,9 +159,9 @@ Tutorial 1
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial1.xml <../../examples/tutorial1.xml>`_
-Runtime model report    `tutorial1-rt.xml <../../examples/tutorial1-rt.xml>`_
-Source code             `tutorial1.py <../../examples/tutorial1.html>`_
+Model report            `tutorial1.xml <../examples/tutorial1.xml>`_
+Runtime model report    `tutorial1-rt.xml <../examples/tutorial1-rt.xml>`_
+Source code             `tutorial1.py <../examples/tutorial1.html>`_
 =====================   =================================================================
 
 
@@ -178,9 +178,9 @@ Tutorial 2
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial2.xml <../../examples/tutorial2.xml>`_
-Runtime model report    `tutorial2-rt.xml <../../examples/tutorial2-rt.xml>`_
-Source code             `tutorial2.py <../../examples/tutorial2.html>`_
+Model report            `tutorial2.xml <../examples/tutorial2.xml>`_
+Runtime model report    `tutorial2-rt.xml <../examples/tutorial2-rt.xml>`_
+Source code             `tutorial2.py <../examples/tutorial2.html>`_
 =====================   =================================================================
 
 
@@ -197,9 +197,9 @@ Tutorial 3
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial3.xml <../../examples/tutorial3.xml>`_
-Runtime model report    `tutorial3-rt.xml <../../examples/tutorial3-rt.xml>`_
-Source code             `tutorial3.py <../../examples/tutorial3.html>`_
+Model report            `tutorial3.xml <../examples/tutorial3.xml>`_
+Runtime model report    `tutorial3-rt.xml <../examples/tutorial3-rt.xml>`_
+Source code             `tutorial3.py <../examples/tutorial3.html>`_
 =====================   =================================================================
 
 
@@ -216,9 +216,9 @@ Tutorial 4
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial4.xml <../../examples/tutorial4.xml>`_
-Runtime model report    `tutorial4-rt.xml <../../examples/tutorial4-rt.xml>`_
-Source code             `tutorial4.py <../../examples/tutorial4.html>`_
+Model report            `tutorial4.xml <../examples/tutorial4.xml>`_
+Runtime model report    `tutorial4-rt.xml <../examples/tutorial4-rt.xml>`_
+Source code             `tutorial4.py <../examples/tutorial4.html>`_
 =====================   =================================================================
 
 
@@ -235,9 +235,9 @@ Tutorial 5
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial5.xml <../../examples/tutorial5.xml>`_
-Runtime model report    `tutorial5-rt.xml <../../examples/tutorial5-rt.xml>`_
-Source code             `tutorial5.py <../../examples/tutorial5.html>`_
+Model report            `tutorial5.xml <../examples/tutorial5.xml>`_
+Runtime model report    `tutorial5-rt.xml <../examples/tutorial5-rt.xml>`_
+Source code             `tutorial5.py <../examples/tutorial5.html>`_
 =====================   =================================================================
 
 
@@ -254,9 +254,9 @@ Tutorial 6
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial6.xml <../../examples/tutorial6.xml>`_
-Runtime model report    `tutorial6-rt.xml <../../examples/tutorial6-rt.xml>`_
-Source code             `tutorial6.py <../../examples/tutorial6.html>`_
+Model report            `tutorial6.xml <../examples/tutorial6.xml>`_
+Runtime model report    `tutorial6-rt.xml <../examples/tutorial6-rt.xml>`_
+Source code             `tutorial6.py <../examples/tutorial6.html>`_
 =====================   =================================================================
 
 
@@ -273,9 +273,9 @@ Tutorial 7
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial7.xml <../../examples/tutorial7.xml>`_
-Runtime model report    `tutorial7-rt.xml <../../examples/tutorial7-rt.xml>`_
-Source code             `tutorial7.py <../../examples/tutorial7.html>`_
+Model report            `tutorial7.xml <../examples/tutorial7.xml>`_
+Runtime model report    `tutorial7-rt.xml <../examples/tutorial7-rt.xml>`_
+Source code             `tutorial7.py <../examples/tutorial7.html>`_
 =====================   =================================================================
 
 
@@ -292,9 +292,9 @@ Tutorial 8
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial8.xml <../../examples/tutorial8.xml>`_
-Runtime model report    `tutorial8-rt.xml <../../examples/tutorial8-rt.xml>`_
-Source code             `tutorial8.py <../../examples/tutorial8.html>`_
+Model report            `tutorial8.xml <../examples/tutorial8.xml>`_
+Runtime model report    `tutorial8-rt.xml <../examples/tutorial8-rt.xml>`_
+Source code             `tutorial8.py <../examples/tutorial8.html>`_
 =====================   =================================================================
 
 
@@ -311,9 +311,9 @@ Tutorial 9
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial9.xml <../../examples/tutorial9.xml>`_
-Runtime model report    `tutorial9-rt.xml <../../examples/tutorial9-rt.xml>`_
-Source code             `tutorial9.py <../../examples/tutorial9.html>`_
+Model report            `tutorial9.xml <../examples/tutorial9.xml>`_
+Runtime model report    `tutorial9-rt.xml <../examples/tutorial9-rt.xml>`_
+Source code             `tutorial9.py <../examples/tutorial9.html>`_
 =====================   =================================================================
 
 
@@ -330,9 +330,9 @@ Tutorial 10
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial10.xml <../../examples/tutorial10.xml>`_
-Runtime model report    `tutorial10-rt.xml <../../examples/tutorial10-rt.xml>`_
-Source code             `tutorial10.py <../../examples/tutorial10.html>`_
+Model report            `tutorial10.xml <../examples/tutorial10.xml>`_
+Runtime model report    `tutorial10-rt.xml <../examples/tutorial10-rt.xml>`_
+Source code             `tutorial10.py <../examples/tutorial10.html>`_
 =====================   =================================================================
 
 
@@ -349,9 +349,9 @@ Tutorial 11
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial11.xml <../../examples/tutorial11.xml>`_
-Runtime model report    `tutorial11-rt.xml <../../examples/tutorial11-rt.xml>`_
-Source code             `tutorial11.py <../../examples/tutorial11.html>`_
+Model report            `tutorial11.xml <../examples/tutorial11.xml>`_
+Runtime model report    `tutorial11-rt.xml <../examples/tutorial11-rt.xml>`_
+Source code             `tutorial11.py <../examples/tutorial11.html>`_
 =====================   =================================================================
 
 
@@ -368,9 +368,9 @@ Tutorial 12
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial12.xml <../../examples/tutorial12.xml>`_
-Runtime model report    `tutorial12-rt.xml <../../examples/tutorial12-rt.xml>`_
-Source code             `tutorial12.py <../../examples/tutorial12.html>`_
+Model report            `tutorial12.xml <../examples/tutorial12.xml>`_
+Runtime model report    `tutorial12-rt.xml <../examples/tutorial12-rt.xml>`_
+Source code             `tutorial12.py <../examples/tutorial12.html>`_
 =====================   =================================================================
 
 
@@ -387,9 +387,9 @@ Tutorial 13
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial13.xml <../../examples/tutorial13.xml>`_
-Runtime model report    `tutorial13-rt.xml <../../examples/tutorial13-rt.xml>`_
-Source code             `tutorial13.py <../../examples/tutorial13.html>`_
+Model report            `tutorial13.xml <../examples/tutorial13.xml>`_
+Runtime model report    `tutorial13-rt.xml <../examples/tutorial13-rt.xml>`_
+Source code             `tutorial13.py <../examples/tutorial13.html>`_
 =====================   =================================================================
 
 
@@ -406,9 +406,9 @@ Tutorial 14
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial14.xml <../../examples/tutorial14.xml>`_
-Runtime model report    `tutorial14-rt.xml <../../examples/tutorial14-rt.xml>`_
-Source code             `tutorial14.py <../../examples/tutorial14.html>`_
+Model report            `tutorial14.xml <../examples/tutorial14.xml>`_
+Runtime model report    `tutorial14-rt.xml <../examples/tutorial14-rt.xml>`_
+Source code             `tutorial14.py <../examples/tutorial14.html>`_
 =====================   =================================================================
 
 
@@ -425,9 +425,9 @@ Tutorial 15
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial15.xml <../../examples/tutorial15.xml>`_
-Runtime model report    `tutorial15-rt.xml <../../examples/tutorial15-rt.xml>`_
-Source code             `tutorial15.py <../../examples/tutorial15.html>`_
+Model report            `tutorial15.xml <../examples/tutorial15.xml>`_
+Runtime model report    `tutorial15-rt.xml <../examples/tutorial15-rt.xml>`_
+Source code             `tutorial15.py <../examples/tutorial15.html>`_
 =====================   =================================================================
 
 
@@ -444,9 +444,9 @@ Tutorial 16
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial16.xml <../../examples/tutorial16.xml>`_
-Runtime model report    `tutorial16-rt.xml <../../examples/tutorial16-rt.xml>`_
-Source code             `tutorial16.py <../../examples/tutorial16.html>`_
+Model report            `tutorial16.xml <../examples/tutorial16.xml>`_
+Runtime model report    `tutorial16-rt.xml <../examples/tutorial16-rt.xml>`_
+Source code             `tutorial16.py <../examples/tutorial16.html>`_
 =====================   =================================================================
 
 
@@ -463,9 +463,9 @@ Tutorial 17
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial17.xml <../../examples/tutorial17.xml>`_
-Runtime model report    `tutorial17-rt.xml <../../examples/tutorial17-rt.xml>`_
-Source code             `tutorial17.py <../../examples/tutorial17.html>`_
+Model report            `tutorial17.xml <../examples/tutorial17.xml>`_
+Runtime model report    `tutorial17-rt.xml <../examples/tutorial17-rt.xml>`_
+Source code             `tutorial17.py <../examples/tutorial17.html>`_
 =====================   =================================================================
 
 
@@ -482,8 +482,8 @@ Tutorial 18
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `tutorial18.xml <../../examples/tutorial18.xml>`_
-Runtime model report    `tutorial18-rt.xml <../../examples/tutorial18-rt.xml>`_
-Source code             `tutorial18.py <../../examples/tutorial18.html>`_
+Model report            `tutorial18.xml <../examples/tutorial18.xml>`_
+Runtime model report    `tutorial18-rt.xml <../examples/tutorial18-rt.xml>`_
+Source code             `tutorial18.py <../examples/tutorial18.html>`_
 =====================   =================================================================
 

@@ -11,24 +11,6 @@ Getting DAE Tools
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-**DAE Tools** (pyDAE module) is installed in ``daetools`` folder within ``site-packages`` (or ``dist-packages``)
-folder under python. The structure of the folders is the following:
-
-.. figure:: _static/daetools_folder_structure.png
-   :align: center
-
-..
-  * ``daetools``
-
-    * ``code_generators``
-    * ``dae_plotter``
-    * ``dae_simulator``
-    * ``docs``
-    * ``examples``
-    * ``pyDAE``
-    * ``solvers``
-    * ``solibs``
-    * ``unit_tests``
 
 System requirements
 ===================
@@ -75,7 +57,7 @@ Getting the packages
 ====================
 
 The instalation files can be downloaded from the `downloads <http://daetools.com/downloads.html>`_ section
-or from the `Sorce Forge <https://sourceforge.net/projects/daetools/files>`_ website.
+or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ website.
 
 .. note:: From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
 
@@ -302,10 +284,10 @@ The source code can be downloaded from the SourceForge website or checked out fr
 GNU/Linux and MacOS
 -------------------
 
-.. _the_easy_way:
+.. _from_the_command_line:
 
-From the command line (the easy way)
-++++++++++++++++++++++++++++++++++++
+From the command line
++++++++++++++++++++++
 First, install all the necessary dependencies by executing ``install_python_dependencies_linux.sh`` and
 ``install_dependencies_linux.sh`` shell script located in the ``trunk`` directory.
 They will check the OS you are running (currently Debian, Ubuntu, Linux Mint, CentOS, Suse Linux,
@@ -361,7 +343,7 @@ All python extensions are located in platform-dependent locations in ``trunk/dae
 From QtCreator IDE
 ++++++++++++++++++
 DAE Tools can also be compiled from within QtCreator IDE. First install dependencies and compile third party libraries
-(as explained in :ref:`The easy way <the_easy_way>`) and then do the following:
+(as explained in the compilation :ref:`from the command line <from_the_command_line>`) and then do the following:
     
 * Do not do the shadow build. Uncheck it (for all projects) and build everything in the release folder
 * Choose the right specification file for your platform (usually it is done automatically by the IDE, but double-check it):

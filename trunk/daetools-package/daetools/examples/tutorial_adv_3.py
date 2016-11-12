@@ -316,6 +316,10 @@ def consoleRun():
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 
+    # Save the model report and the runtime model report
+    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+
     # Run code-generators
     run_code_generators(simulation, simulation.Log)
     

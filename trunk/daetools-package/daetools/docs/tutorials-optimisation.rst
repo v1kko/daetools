@@ -59,9 +59,9 @@ Optimization tutorial 1
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial1.xml <../../examples/opt_tutorial1.xml>`_
-Runtime model report    `opt_tutorial1-rt.xml <../../examples/opt_tutorial1-rt.xml>`_
-Source code             `opt_tutorial1.py <../../examples/opt_tutorial1.html>`_
+Model report            `opt_tutorial1.xml <../examples/opt_tutorial1.xml>`_
+Runtime model report    `opt_tutorial1-rt.xml <../examples/opt_tutorial1-rt.xml>`_
+Source code             `opt_tutorial1.py <../examples/opt_tutorial1.html>`_
 =====================   =================================================================
 
 
@@ -78,9 +78,9 @@ Optimization tutorial 2
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial2.xml <../../examples/opt_tutorial2.xml>`_
-Runtime model report    `opt_tutorial2-rt.xml <../../examples/opt_tutorial2-rt.xml>`_
-Source code             `opt_tutorial2.py <../../examples/opt_tutorial2.html>`_
+Model report            `opt_tutorial2.xml <../examples/opt_tutorial2.xml>`_
+Runtime model report    `opt_tutorial2-rt.xml <../examples/opt_tutorial2-rt.xml>`_
+Source code             `opt_tutorial2.py <../examples/opt_tutorial2.html>`_
 =====================   =================================================================
 
 
@@ -97,9 +97,9 @@ Optimization tutorial 3
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial3.xml <../../examples/opt_tutorial3.xml>`_
-Runtime model report    `opt_tutorial3-rt.xml <../../examples/opt_tutorial3-rt.xml>`_
-Source code             `opt_tutorial3.py <../../examples/opt_tutorial3.html>`_
+Model report            `opt_tutorial3.xml <../examples/opt_tutorial3.xml>`_
+Runtime model report    `opt_tutorial3-rt.xml <../examples/opt_tutorial3-rt.xml>`_
+Source code             `opt_tutorial3.py <../examples/opt_tutorial3.html>`_
 =====================   =================================================================
 
 
@@ -116,9 +116,9 @@ Optimization tutorial 4
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial4.xml <../../examples/opt_tutorial4.xml>`_
-Runtime model report    `opt_tutorial4-rt.xml <../../examples/opt_tutorial4-rt.xml>`_
-Source code             `opt_tutorial4.py <../../examples/opt_tutorial4.html>`_
+Model report            `opt_tutorial4.xml <../examples/opt_tutorial4.xml>`_
+Runtime model report    `opt_tutorial4-rt.xml <../examples/opt_tutorial4-rt.xml>`_
+Source code             `opt_tutorial4.py <../examples/opt_tutorial4.html>`_
 =====================   =================================================================
 
 
@@ -135,9 +135,9 @@ Optimization tutorial 5
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial5.xml <../../examples/opt_tutorial4.xml>`_
-Runtime model report    `opt_tutorial5-rt.xml <../../examples/opt_tutorial5-rt.xml>`_
-Source code             `opt_tutorial5.py <../../examples/opt_tutorial5.html>`_
+Model report            `opt_tutorial5.xml <../examples/opt_tutorial4.xml>`_
+Runtime model report    `opt_tutorial5-rt.xml <../examples/opt_tutorial5-rt.xml>`_
+Source code             `opt_tutorial5.py <../examples/opt_tutorial5.html>`_
 =====================   =================================================================
 
 
@@ -154,9 +154,9 @@ Optimization tutorial 6
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial6.xml <../../examples/opt_tutorial6.xml>`_
-Runtime model report    `opt_tutorial6-rt.xml <../../examples/opt_tutorial6-rt.xml>`_
-Source code             `opt_tutorial6.py <../../examples/opt_tutorial6.html>`_
+Model report            `opt_tutorial6.xml <../examples/opt_tutorial6.xml>`_
+Runtime model report    `opt_tutorial6-rt.xml <../examples/opt_tutorial6-rt.xml>`_
+Source code             `opt_tutorial6.py <../examples/opt_tutorial6.html>`_
 =====================   =================================================================
 
 
@@ -173,8 +173,8 @@ Optimization tutorial 7
 .. rubric:: Files
 
 =====================   =================================================================
-Model report            `opt_tutorial7.xml <../../examples/opt_tutorial7.xml>`_
-Runtime model report    `opt_tutorial7-rt.xml <../../examples/opt_tutorial7-rt.xml>`_
-Source code             `opt_tutorial7.py <../../examples/opt_tutorial7.html>`_
+Model report            `opt_tutorial7.xml <../examples/opt_tutorial7.xml>`_
+Runtime model report    `opt_tutorial7-rt.xml <../examples/opt_tutorial7-rt.xml>`_
+Source code             `opt_tutorial7.py <../examples/opt_tutorial7.html>`_
 =====================   =================================================================
 
