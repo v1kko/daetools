@@ -47,7 +47,7 @@ to solve NLP/MINLP optimisation and parameter estimation problems.
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 2 
 
    tutorials-basic
    tutorials-advanced

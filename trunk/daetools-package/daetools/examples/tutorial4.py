@@ -17,22 +17,37 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we model a very simple conduction problem where a piece of copper
-(a plate) is at one side exposed to the source of heat and at the other to the
-surroundings.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Discontinuous equations (symmetrical state transition networks: daeIF statements)
 
-Here we have a very simple heat balance::
+In this example we model a very simple heat transfer problem where a small piece of copper
+is at one side exposed to the source of heat and at the other to the surroundings.
 
-    ro * cp * dT/dt - Qin = h * A * (T - Tsurr)
+The lumped heat balance is given by the following equation::
+
+    rho * cp * dT/dt - Qin = h * A * (T - Tsurr)
+
+where Qin is the power of the heater, h is the heat transfer coefficient,
+A is the surface area and Tsurr is the temperature of the surrounding air.
 
 The process starts at the temperature of the metal of 283K.
-The metal is allowed to warm up for 200 seconds and then the heat source is
+The metal is allowed to warm up for 200 seconds, when the heat source is
 removed and the metal cools down slowly to the ambient temperature.
 
+This can be modelled using the following symmetrical state transition network:
+
+.. code-block:: none
+
+   IF t < 200
+     Qin = 1500 W
+   ELSE
+     Qin = 0 W
+
+The temperature plot:
+
+.. image:: _static/tutorial4-results.png
+   :width: 500px
 """
 
 import sys

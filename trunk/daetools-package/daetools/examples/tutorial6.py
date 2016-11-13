@@ -17,9 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This is the simple port demo.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Ports
 - Port connections

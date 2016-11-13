@@ -85,29 +85,28 @@ class modTutorial(daeModel):
         # Get the flat list of indexes
         indexes = [(x,y) for x,y in itertools.product(range(Nx), range(Ny))]
         eq_types = numpy.empty((Nx,Ny), dtype=object)
-        eq_types[ : , : ] = 'in' # inner region
-        eq_types[  0, : ] = 'l'  # left boundary
-        eq_types[ -1, : ] = 'r'  # right boundary
-        eq_types[ : ,  0] = 'b'  # bottom boundary
-        eq_types[ : , -1] = 't'  # top boundary
-        print(eq_types)
+        eq_types[ : , : ] = 'i' # inner region
+        eq_types[ : ,  0] = 'B' # bottom boundary
+        eq_types[ : , -1] = 'T' # top boundary
+        eq_types[  0, : ] = 'L' # left boundary
+        eq_types[ -1, : ] = 'R' # right boundary
+        print(eq_types.T) # print it transposed to visalise it more easily
         for x,y in indexes:
             eq_type = eq_types[x,y]
-            #print x,y,eq_type
             eq = self.CreateEquation("HeatBalance", "")
-            if eq_type == 'in':
+            if eq_type == 'i':
                 eq.Residual = rho*cp*dTdt[x,y] - k*(d2Tdx2[x,y] + d2Tdy2[x,y])
 
-            elif eq_type == 'l':
+            elif eq_type == 'L':
                 eq.Residual = dTdx[x,y]
 
-            elif eq_type == 'r':
+            elif eq_type == 'R':
                 eq.Residual = dTdx[x,y]
 
-            elif eq_type == 't':
+            elif eq_type == 'T':
                 eq.Residual = -k*dTdy[x,y] - Qt
 
-            elif eq_type == 'b':
+            elif eq_type == 'B':
                 eq.Residual = -k*dTdy[x,y] - Qb
 
             else:

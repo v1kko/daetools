@@ -27,17 +27,43 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>In this example we use the same conduction problem as in the tutorial 4.</span>
-
-<span style='color:#c00000;'>Here we introduce:</span>
+<span style='color:#c00000;'>This tutorial introduces the following concepts:</span>
 
 <span style='color:#c00000;'>- Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)</span>
 
-<span style='color:#c00000;'>Again we have a piece of copper (a plate) is at one side exposed to the source of heat</span>
-<span style='color:#c00000;'>and at the other to the surroundings. The process starts at the temperature of 283K.</span>
-<span style='color:#c00000;'>The metal is allowed to warm up, and then its temperature is kept in the interval</span>
-<span style='color:#c00000;'>[320 - 340] for at 350 seconds. After 350s the heat source is removed and the metal</span>
-<span style='color:#c00000;'>cools down slowly again to the ambient temperature.</span>
+<span style='color:#c00000;'>In this example we use the same heat transfer problem as in the tutorial 4.</span>
+<span style='color:#c00000;'>Again we have a piece of copper which is at one side exposed to the source of heat</span>
+<span style='color:#c00000;'>and at the other to the surroundings.</span>
+
+<span style='color:#c00000;'>The process starts at the temperature of 283K. The metal is allowed to warm up, and then</span>
+<span style='color:#c00000;'>its temperature is kept in the interval (320K - 340K) for 350 seconds. This is performed</span>
+<span style='color:#c00000;'>by switching the heater on when the temperature drops to 320K and by switching the heater</span>
+<span style='color:#c00000;'>off when the temperature reaches 340K.</span>
+<span style='color:#c00000;'>After 350s the heat source is permanently switched off and the metal is allowed to</span>
+<span style='color:#c00000;'>slowly cool down to the ambient temperature.</span>
+
+<span style='color:#c00000;'>This can be modelled using the following non-symmetrical state transition network:</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>   STN Regulator</span>
+<span style='color:#c00000;'>     case Heating:</span>
+<span style='color:#c00000;'>       Qin = 1500 W</span>
+<span style='color:#c00000;'>       on condition T &gt; 340K switch to Regulator.Cooling</span>
+<span style='color:#c00000;'>       on condition t &gt; 350s switch to Regulator.HeaterOff</span>
+
+<span style='color:#c00000;'>     case Cooling:</span>
+<span style='color:#c00000;'>       Qin = 0 W</span>
+<span style='color:#c00000;'>       on condition T &lt; 320K switch to Regulator.Heating</span>
+<span style='color:#c00000;'>       on condition t &gt; 350s switch to Regulator.HeaterOff</span>
+
+<span style='color:#c00000;'>     case HeaterOff:</span>
+<span style='color:#c00000;'>       Qin = 0 W</span>
+
+<span style='color:#c00000;'>The temperature plot:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial5-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys

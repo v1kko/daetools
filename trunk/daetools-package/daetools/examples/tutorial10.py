@@ -17,13 +17,13 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 1.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Initialization files
 - Domains which bounds depend on parameter values
 - Evaluation of integrals
+
+In this example we use the same conduction problem as in the tutorial 1.
 """
 
 import os, sys
@@ -44,7 +44,7 @@ class modTutorial(daeModel):
         self.dy = daeParameter("&delta;_y", m, self, "Height of the plate")
 
         self.Qb  = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Qt  = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.Tt  = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
         self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp  = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
@@ -72,25 +72,25 @@ class modTutorial(daeModel):
                       self.k() * ( d ( d ( self.T(x, y), self.x ), self.x ) + \
                                    d ( d ( self.T(x, y), self.y ), self.y ) )
 
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - d( self.k() * self.T(x, y), self.y) - self.Qb()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qb()
 
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_top", "Dirichlet boundary conditions at the top edge (constant temperature)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - d ( self.k() * self.T(x, y), self.y) - self.Qt()
+        eq.Residual = self.T(x,y) - self.Tt()
 
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = d( self.T(x, y), self.x )
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = d( self.T(x, y), self.x )
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         # Here we have a function that calculates integral of heat fluxes at y = 0: integral(-k * (dT/dy) / dx)|y=0
         # The result should be 1E6 W/m2, which is equal to the input flux
@@ -115,8 +115,6 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 10
-
         # The domain for a semi-circle
         self.m.c.CreateStructuredGrid(100, -1, 1)
 
@@ -124,14 +122,14 @@ class simTutorial(daeSimulation):
         self.m.dy.SetValue(0.1 * m)
 
         # Domain bounds can depend on input parameters:
-        self.m.x.CreateStructuredGrid(n, 0, self.m.dx.GetValue())
-        self.m.y.CreateStructuredGrid(n, 0, self.m.dy.GetValue())
+        self.m.x.CreateStructuredGrid(10, 0, self.m.dx.GetValue())
+        self.m.y.CreateStructuredGrid(10, 0, self.m.dy.GetValue())
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.rho.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1e6 * W/(m**2))
-        self.m.Qt.SetValue(0 * W/(m**2))
+        self.m.Tt.SetValue(300 * K)
 
     def SetUpVariables(self):
         self.m.T.SetInitialGuesses(250*K)

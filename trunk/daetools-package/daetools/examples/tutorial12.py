@@ -17,19 +17,17 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-As of the version 1.1.1 the main linear algebraic equations solver is superLU.
+This tutorial describes the use and available options for superLU direct linear solvers:
 
-It comes in three variaants:
+- Sequential: superLU
+- Multithreaded (OpenMP/posix threads): superLU_MT
 
-- Sequential: superlu
-- Multithreaded (OpenMP/posix threads): superlu_MT
-- CUDA GPU: superlu_CUDA
+The model is the same as the model in tutorial 1, except for the different boundary conditions.
 
-The first two are available in daetools with the addition of a new port: superlu_CUDA
-that works on computers with NVidia CUDA enabled video cards. However, the later is
-still in an early stage of the development.
+The temperature plot (at t=100s, x=0.5, y=*):
 
-In this example, usage and available options of superlu and superlu_MT are explored.
+.. image:: _static/tutorial12-results.png
+   :width: 500px
 """
 
 import sys
@@ -61,30 +59,30 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.rho() * self.cp() * self.T.dt(x, y) - self.k() * \
                      (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
 
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qb()
 
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_top", "Neumann boundary conditions at the top edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qt()
 
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = self.T.d(self.x, x, y)
 
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = self.T.d(self.x, x, y)
 
 class simTutorial(daeSimulation):
@@ -94,10 +92,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 20
-
-        self.m.x.CreateStructuredGrid(n, 0, 0.1)
-        self.m.y.CreateStructuredGrid(n, 0, 0.1)
+        self.m.x.CreateStructuredGrid(20, 0, 0.1)
+        self.m.y.CreateStructuredGrid(20, 0, 0.1)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))

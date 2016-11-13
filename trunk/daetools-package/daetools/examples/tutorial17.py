@@ -17,12 +17,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 4.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - TCPIP Log and TCPIPLogServer
 
+In this example we use the same heat transfer problem as in the tutorial 7.
+
+The screenshot of the TCP/IP log server:
+
+.. image:: _static/tutorial17-screenshot.png
+   :width: 500px
+
+The temperature plot:
+
+.. image:: _static/tutorial17-results.png
+   :width: 500px
 """
 
 import os, sys, threading
@@ -76,6 +85,8 @@ class simTutorial(daeSimulation):
         self.m.T.SetInitialCondition(283 * K)
 
     def Run(self):
+        # The default Run() function is re-implemented here (just the basic version)
+        # to allow simulation to wait for certain period between time intervals
         while self.CurrentTime < self.TimeHorizon:
             self.Log.Message('Integrating from %f to %f ...' % (self.CurrentTime, self.CurrentTime+self.ReportingInterval), 0)
             self.IntegrateForTimeInterval(self.ReportingInterval, eDoNotStopAtDiscontinuity)

@@ -27,13 +27,15 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial shows how to use DAE Tools objects with Numpy arrays to solve a simple</span>
-<span style='color:#c00000;'>stationary heat conduction in one dimension (1D Poisson equation) using a simple </span>
-<span style='color:#c00000;'>Finite Elements method (with linear elements):</span>
+<span style='color:#c00000;'>This tutorial shows how to use DAE Tools objects with NumPy arrays to solve a simple</span>
+<span style='color:#c00000;'>stationary heat conduction in one dimension using the Finite Elements method</span>
+<span style='color:#c00000;'>with linear elements and two ways of manually assembling a stiffness matrix/load vector:</span>
 
-<span style='color:#c00000;'>d2T(x)/dx2 = F(x);  for all x in: (0, Lx)</span>
+<span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>Linear finite elements discretization and simple FE matrix assembly:</span>
+<span style='color:#c00000;'>   d2T(x)/dx2 = F(x);  x in (0, Lx)</span>
+
+<span style='color:#c00000;'>Linear finite elements discretisation and simple FE matrix assembly:</span>
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
@@ -58,6 +60,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>                               |</span>
 <span style='color:#c00000;'>                               dx</span>
 
+<span style='color:#c00000;'>The comparison of the analytical solution and two ways of assembling the system is given</span>
+<span style='color:#c00000;'>in the following plot:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial16-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, numpy
@@ -72,10 +79,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
         <span style='color:#0000ff;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, unit(), <span style='color:#c00000;'>&quot;x axis domain&quot;</span>)
+
         <span style='color:#0000ff;'>self</span>.L  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;L&quot;</span>, unit(), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Length&quot;</span>)
+
         <span style='color:#0000ff;'>self</span>.Ta <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Ta&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - analytical solution&quot;</span>, [<span style='color:#0000ff;'>self</span>.x])
-        <span style='color:#0000ff;'>self</span>.T1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T1&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - first way&quot;</span>, [<span style='color:#0000ff;'>self</span>.x])
-        <span style='color:#0000ff;'>self</span>.T2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T2&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - second way&quot;</span>, [<span style='color:#0000ff;'>self</span>.x])
+        <span style='color:#0000ff;'>self</span>.T1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T1&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - first way&quot;</span>,           [<span style='color:#0000ff;'>self</span>.x])
+        <span style='color:#0000ff;'>self</span>.T2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T2&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - second way&quot;</span>,          [<span style='color:#0000ff;'>self</span>.x])
 
     <b>def</b> local_dof(<span style='color:#0000ff;'>self</span>, i):
         <b>return</b> <span style='color:#0000ff;'>self</span>.mapLocalToGlobalIndices

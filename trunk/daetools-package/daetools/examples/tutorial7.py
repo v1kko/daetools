@@ -17,16 +17,31 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 1.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Custom operating procedures
 - Resetting of degrees of freedom
 - Resetting of initial conditions
 
-Here the heat flux at the bottom edge is defined as a variable. In the simulation its
-value will be fixed and manipulated in the custom operating procedure.
+In this example we use the same heat transfer problem as in the tutorial 4.
+The input power of the heater is defined as a variable. Since there is
+no equation defined to calculate the value of the input power, the system
+contains N variables but only N-1 equations. To create a well-posed DAE system
+one of the variable needs to be "fixed". However the choice of variables is not
+arbitrary and in this example the only variable that can be fixed is Qin. Thus,
+the Qin variable represents a degree of freedom (DOF). Its value will be fixed
+at the beginning of the simulation and later manipulated in the user-defined
+operating procedure in the overloaded function daeSimulation.Run().
+
+The plot of the inlet power:
+
+.. image:: _static/tutorial7-results.png
+   :width: 500px
+
+The temperature plot:
+
+.. image:: _static/tutorial7-results2.png
+   :width: 500px
 """
 
 import sys, math
@@ -40,48 +55,21 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.x  = daeDomain("x", self, m, "X axis domain")
-        self.y  = daeDomain("y", self, m, "Y axis domain")
+        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
+        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
+        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
+        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
+        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
 
-        self.Qb = daeVariable("Q_b",  heat_flux_t, self, "Heat flux at the bottom edge of the plate")
-        self.Qt = daeParameter("Q_t",    W/(m**2), self, "Heat flux at the top edge of the plate")
-
-        self.rho = daeParameter("&rho;",   kg/(m**3), self, "Density of the plate")
-        self.cp  = daeParameter("c_p",      J/(kg*K), self, "Specific heat capacity of the plate")
-        self.k   = daeParameter("&lambda;",  W/(m*K), self, "Thermal conductivity of the plate")
-
-        self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
-        self.T.DistributeOnDomain(self.x)
-        self.T.DistributeOnDomain(self.y)
+        self.Qin  = daeVariable("Q_in",  power_t,       self, "Power of the heater")
+        self.T    = daeVariable("T",     temperature_t, self, "Temperature of the plate")
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
-        x = eq.DistributeOnDomain(self.x, eOpenOpen)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.rho() * self.cp() * self.T.dt(x, y) - self.k() * \
-                     (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
-
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qb()
-
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qt()
-
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
-        x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
-
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
-        x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
+        eq.BuildJacobianExpressions = True
+        eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -90,61 +78,63 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 25
-
-        self.m.x.CreateStructuredGrid(n, 0, 0.1)
-        self.m.y.CreateStructuredGrid(n, 0, 0.1)
-
-        self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
-        self.m.rho.SetValue(8960 * kg/(m**3))
-        self.m.Qt.SetValue(0 * W/(m**2))
+        self.m.m.SetValue(1 * kg)
+        self.m.alpha.SetValue(200 * W/((m**2)*K))
+        self.m.A.SetValue(0.1 * m**2)
+        self.m.Tsurr.SetValue(283 * K)
 
     def SetUpVariables(self):
-        self.m.Qb.AssignValue(1e6 * W/(m**2))
-        for x in range(1, self.m.x.NumberOfPoints - 1):
-            for y in range(1, self.m.y.NumberOfPoints - 1):
-                self.m.T.SetInitialCondition(x, y, 300 * K)
+        self.m.Qin.AssignValue(500 * W)
+        self.m.T.SetInitialCondition(283 * K)
 
-    # daeSimulation class defines the function Run which is called after successful initialization
-    # to run the simulation. By default it runs for time period defined by the TimeHorizon property,
-    # stopping after each period of time defined by the ReportInterval property to send the data to
-    # the data reporter. However, default behaviour can be changed by implementing a user defined
-    # function Run. The functions Integrate, IntegrateUntilTime, and IntegrateForTimeInterval from
-    # daeDynamicSimulation class can be used to advance in time, while functions ReAssignValue and
-    # ReSetInitialCondition from daeVariable class can be used to alter the values of variables.
-    # In this example we first assign the value of Qb to 1E6 and then use the function IntegrateForTimeInterval
-    # to run for 100 seconds. After that we re-assign the variable Qb to a new value (2E6). Note that after
-    # you finished with re-assigning or re-setting the initial conditions you have to call the function
-    # Reinitialize from daeSimulation class. The function Reinitialize reinitializes the DAE solver
-    # and clears all previous data accumulated in the solver. Also, you can call the function ReportData
-    # at any point to send the results to the data reporter. After re-assigning and subsequent reinitialization
-    # we run the simulation until 200 seconds are reached (by using the function IntegrateUntilTime) and
-    # then we again report the data. After that, we again change the value of Qb and also re-set the initial
-    # conditions for the variable T (again to 300K) and then run until the TimeHorizon is reached
-    # (by using the function Integrate).
+    # daeSimulation class provides the function Run() which is called after successful initialisation
+    # to run the simulation. By default, it runs for time period defined by the TimeHorizon property,
+    # stopping after each period of time defined by the ReportInterval property to report the data.
+    # However, the default behaviour can be changed by re-implementing the function Run().
+    # The functions Integrate(), IntegrateUntilTime(), and IntegrateForTimeInterval() from the
+    # daeSimulation class can be used to advance in time, while functions ReAssignValue() and
+    # ReSetInitialCondition() from daeVariable class can be used to alter the values of variables.
+    # In this example we specify the following runtime procedure:
+    #  1. Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
+    #     and report the data using the function daeSimulation.ReportData().
+    #  2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions
+    #     the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.
+    #     Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s
+    #     and report the data.
+    #  3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K
+    #     re-initialise the system, run the simulation until the TimeHorizon is reached using the function
+    #     daeSimulation.Integrate() and report the data.
+    # Nota bene:
+    #  a) The daeLog object (accessed through the simulation.Log property) can be used to print the messages
+    #     and to set the simulation progress (in percents) using the function log.SetProgress().
+    #  b) Integration functions require a flag as a second argument that specifies how to perform the
+    #     integration. It can be one of:
+    #      - eDoNotStopAtDiscontinuity (integrate and do not return even if one of the conditions have been satisfied)
+    #      - eStopAtDiscontinuity (integrate and return if some conditions have been satisfied); in this case,
+    #        the integration has to be performed in a loop until the required time is reached.
     def Run(self):
+        # 1. Integrate for 100s
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
-        self.m.Qb.ReAssignValue(2E6 * W/(m**2))
+        # 2. Set Qin=2000W and integrate until t=200s
+        self.m.Qin.ReAssignValue(750 * W)
         self.Reinitialize()
+        self.ReportData(self.CurrentTime)
         self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
         time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
-        self.m.Qb.ReAssignValue(1.5E6 * W/(m**2))
-        #self.m.Qt.SetValue(2E6)
-        for x in range(1, self.m.x.NumberOfPoints-1):
-            for y in range(1, self.m.y.NumberOfPoints-1):
-                self.m.T.ReSetInitialCondition(x, y, 300 * K)
+        # 3. Set Qin=1.5E6 and integrate until the specified TimeHorizon
+        self.m.Qin.ReAssignValue(1000 * W)
+        self.m.T.ReSetInitialCondition(300 * K)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))  
-
         self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
         time = self.Integrate(eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)

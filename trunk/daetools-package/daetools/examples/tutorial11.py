@@ -17,18 +17,18 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial shows the use of iterative linear solvers (AztecOO from the Trilinos project)
+This tutorial describes the use of iterative linear solvers (AztecOO from the Trilinos project)
 with different preconditioners (built-in AztecOO, Ifpack or ML) and corresponding solver options.
 Also, the range of Trilins Amesos solver options are shown.
 
-The model is identical to the model in tutorial 1, except that the equations are written in
-a different way to maximize the number of items around the diagonal (creating the problem
-with the diagonally dominant matrix). These type of systems can be solved using very simple
-preconditioners such as Jacobi. To do so, the interoperability with the NumPy package
-has been exploited and the package itertools used to iterate through the distribution
-domains in x and y directions.
+The model is very similar to the model in tutorial 1, except for the different boundary conditions
+and that the equations are written in a different way to maximise the number of items around the
+diagonal (creating the problem with the diagonally dominant matrix).
+These type of systems can be solved using very simple preconditioners such as Jacobi. To do so,
+the interoperability with the NumPy package has been exploited and the package itertools used to
+iterate through the distribution domains in x and y directions.
 
-The equations are distributed so that the following incidence matrix is obtained:
+The equations are distributed in such a way that the following incidence matrix is obtained:
 
 .. code-block:: none
 
@@ -68,6 +68,11 @@ The equations are distributed so that the following incidence matrix is obtained
     |                     X     X     X  |
     |                      X     X     X |
     |                                 XXX|
+
+The temperature plot (at t=100s, x=0.5, y=*):
+
+.. image:: _static/tutorial11-results.png
+   :width: 500px
 """
 
 import sys, numpy, itertools
@@ -139,7 +144,7 @@ class modTutorial(daeModel):
           Y axis
             ^
             |
-        Ly -| T T T T T T T T T T T
+        Ly -| L T T T T T T T T T R
             | L i i i i i i i i i R
             | L i i i i i i i i i R
             | L i i i i i i i i i R
@@ -149,17 +154,17 @@ class modTutorial(daeModel):
             | L i i i i i i i i i R
             | L i i i i i i i i i R
             | L i i i i i i i i i R
-         0 -| B B B B B B B B B B B
+         0 -| L B B B B B B B B B R
             --|-------------------|-------> X axis
               0                   Lx
         """
         eq_types = numpy.empty((Nx,Ny), dtype=object)
         eq_types[ : , : ] = 'i'  # inner region
-        eq_types[  0, : ] = 'L'  # left boundary
-        eq_types[ -1, : ] = 'R'  # right boundary
         eq_types[ : ,  0] = 'B'  # bottom boundary
         eq_types[ : , -1] = 'T'  # top boundary
-        print(eq_types)
+        eq_types[  0, : ] = 'L'  # left boundary
+        eq_types[ -1, : ] = 'R'  # right boundary
+        print(eq_types.T) # print it transposed to visalise it more easily
 
         # Finally, create equations based on the equation type
         for x,y in indexes:
@@ -197,9 +202,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 10
-        self.m.x.CreateStructuredGrid(n, 0, 0.1)
-        self.m.y.CreateStructuredGrid(n, 0, 0.1)
+        self.m.x.CreateStructuredGrid(20, 0, 0.1)
+        self.m.y.CreateStructuredGrid(20, 0, 0.1)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))

@@ -20,9 +20,7 @@ __doc__ = """
 What is the time? (AKA Hello world!) is a very simple model. The model consists of
 a single variable (called 'time') and a single differential equation::
 
-        d(time)
-        ------- = 1
-           dt
+  d(time)/dt = 1
 
 This way, the value of the variable 'time' is equal to the elapsed time in the
 simulation at any moment.
@@ -62,6 +60,10 @@ A typical DAETools simulation requires the following 8 tasks:
 
 8. Initializing, running and finalizing the simulation
 
+The 'time' variable plot:
+
+.. image:: _static/whats_the_time-results.png
+   :width: 500px
 """
 
 # 1. Import the modules

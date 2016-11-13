@@ -17,14 +17,23 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 1.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Arrays (discrete distribution domains)
 - Distributed parameters
-- Number of degrees of freedom and how to fix it
-- Initial guess of the variables
+- Degrees of freedom
+- Setting an initial guess for variables (used by a DAE solver during an initial phase)
+
+The model in this example is very similar to the model used in the tutorial 1.
+The differences are:
+
+- The heat capacity is temperature dependent
+- Different boundary conditions are applied
+
+The temperature plot (at t=100s, x=0.5, y=*):
+
+.. image:: _static/tutorial2-results.png
+   :width: 500px
 """
 
 import sys, numpy
@@ -75,32 +84,32 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.rho() * self.cp(x, y) * self.T.dt(x, y) - self.k(x, y) * \
                      (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         # Now we use Q(0) as the heat flux into the bottom edge
         eq.Residual = - self.k(x, y) * d(self.T(x,y), self.y, eCFDM) - self.Q(0)
 
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_top", "Neumann boundary conditions at the top edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         # Now we use Q(1) as the heat flux at the top edge
         eq.Residual = - self.k(x, y) * d(self.T(x,y), self.y, eCFDM) - self.Q(1)
 
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", " Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         # Heat capacity as a function of the temperature
@@ -173,7 +182,7 @@ class simTutorial(daeSimulation):
         # of defined equations and assigned variables produce a well posed system (that is a set of 2*N*N independent equations).
         # In our case the only candidate is rho. However, in more complex models there can be many independent combinations of variables.
         # The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:
-        self.m.ro.AssignValue(8960 * kg/(m**3))
+        self.m.rho.AssignValue(8960 * kg/(m**3))
 
         # To help the DAE solver it is possible to set initial guesses of of the variables.
         # Closer the initial guess is to the solution - faster the solver will converge to the solution

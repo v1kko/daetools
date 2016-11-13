@@ -17,29 +17,37 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use a similar problem as in the tutorial 5.
+This tutorial introduces the following concepts:
 
-Here we introduce a data reporter concept and show how to export results to several formats:
- - Matlab MAT file (needs python-scipy package)
- - MS Excel .xls file (needs python-xlwt package)
- - JSON file (no third party dependencies)
- - XML file (needs python-lxml package)
- - HDF5 file (needs python-h5py package)
- - Pandas dataset (needs python-pandas package)
+- Data reporters and exporting results into the following file formats:
 
-and how to write custom data reporters. Some time it is not enough to send the results
-to daePlotter but it is desirable to export them in certain format for use in other programs.
-Here we show how the custom data reporter can be created.
-In this example the data reporter simply, after the simulation is finished, save the results
-into a plain text file. Obviously, the data can be exported to any format.
+  - Matlab MAT file (requires python-scipy package)
+  - MS Excel .xls file (requires python-xlwt package)
+  - JSON file (no third party dependencies)
+  - VTK file (requires pyevtk and vtk packages)
+  - XML file (requires python-lxml package)
+  - HDF5 file (requires python-h5py package)
+  - Pandas dataset (requires python-pandas package)
 
-In addition, a new type of data reporters (daeDelegateDataReporter) is presented. It
-has the same interface and the functionality like all data reporters. However, it does not do
-any data processing itself but calls the corresponding functions of data reporters which
-are added to it by using the function AddDataReporter. This way it is possible, at the same
-time, to send the results to the daePlotter and save them into a file (or process them in
-some other ways). In this example we will use it to process results in eight different ways
-at the same time.
+- Implementation of user-defined data reporters
+- daeDelegateDataReporter
+
+Some time it is not enough to send the results to the DAE Plotter but it is desirable to
+export them into a specified file format (i.e. for use in other programs). For that purpose,
+daetools provide a range of data reporters that save the simulation results in various formats.
+In adddition, daetools allow implementation of custom, user-defined data reporters.
+As an example, a user-defined data reporter is developed to save the results
+into a plain text file (after the simulation is finished). Obviously, the data can be
+processed in any other fashion.
+Moreover, in certain situation it is required to process the results in more than one way.
+The daeDelegateDataReporter can be used in those cases. It has the same interface and the
+functionality like all data reporters. However, it does not do any data processing itself
+but calls the corresponding functions of data reporters which are added to it using the
+function AddDataReporter. This way it is possible, at the same time, to send the results
+to the DAE Plotter and save them into a file (or process the data in some other ways).
+In this example the results are processed in 10 different ways at the same time.
+
+The model used in this example is very similar to the model in the tutorials 4 and 5.
 """
 
 import sys, tempfile
@@ -120,10 +128,9 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.Qin  = daeParameter("Q_in", W, self, "Power of the heater")
-
-        self.m  = daeParameter("m",   kg, self, "Mass of the plate")
-        self.cp = daeParameter("c_p", J/(kg*K), self, "Specific heat capacity of the plate")
+        self.Qin = daeParameter("Q_in",       W, self, "Power of the heater")
+        self.m   = daeParameter("m",         kg, self, "Mass of the plate")
+        self.cp  = daeParameter("c_p", J/(kg*K), self, "Specific heat capacity of the plate")
 
         self.T = daeVariable("T", temperature_t, self, "Temperature of the plate")
 
@@ -147,13 +154,9 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         self.m.T.SetInitialCondition(300 * K)
 
-# All data reporters should be members of let's say simulation object, otherwise
-# the objects are destroyed at the exit of setupDataReporters function and
-# we get dangling daeDataReporter_t pointers stored in the daeDelegateDataReporter list and
-# receive the 'pure virtual method called' error
 def setupDataReporters(simulation):
     """
-    Create daeDelegateDataReporter and add 9 data reporters:
+    Create daeDelegateDataReporter and add 10 data reporters:
      - MyDataReporterLocal
        User-defined data reporter to write data to the file 'tutorial8.out'
      - daeTCPIPDataReporter
@@ -168,57 +171,62 @@ def setupDataReporters(simulation):
      - daeXMLFileDataReporter
      - daeHDF5FileDataReporter
      - daePandasDataReporter
+     - daeVTKDataReporter
+
+    The daeDelegateDataReporter does not process the data but simply delegate all calls
+    to the contained data reporters.
     """
     datareporter = daeDelegateDataReporter()
 
-    simulation.dr1 = MyDataReporter()
-    simulation.dr2 = daeTCPIPDataReporter()
-    simulation.dr3 = daeMatlabMATFileDataReporter()
-    simulation.dr4 = daePlotDataReporter()
-    simulation.dr5 = daeExcelFileDataReporter()
-    simulation.dr6 = daeJSONFileDataReporter()
-    simulation.dr7 = daeXMLFileDataReporter()
-    simulation.dr8 = daeHDF5FileDataReporter()
-    simulation.dr9 = daePandasDataReporter()
+    dr1  = MyDataReporter()
+    dr2  = daeTCPIPDataReporter()
+    dr3  = daeMatlabMATFileDataReporter()
+    dr4  = daePlotDataReporter()
+    dr5  = daeExcelFileDataReporter()
+    dr6  = daeJSONFileDataReporter()
+    dr7  = daeXMLFileDataReporter()
+    dr8  = daeHDF5FileDataReporter()
+    dr9  = daePandasDataReporter()
+    dr10 = daeVTKDataReporter()
 
-    datareporter.AddDataReporter(simulation.dr1)
-    datareporter.AddDataReporter(simulation.dr2)
-    datareporter.AddDataReporter(simulation.dr3)
-    datareporter.AddDataReporter(simulation.dr4)
-    datareporter.AddDataReporter(simulation.dr5)
-    datareporter.AddDataReporter(simulation.dr6)
-    datareporter.AddDataReporter(simulation.dr7)
-    datareporter.AddDataReporter(simulation.dr8)
-    datareporter.AddDataReporter(simulation.dr9)
+    # Add all data reporters to a list and store the list in the simulation object.
+    # The reason is that the data reporter objects are destroyed at the exit of the
+    # setupDataReporters function resulting in the dangling pointers and either the
+    # segmentation fault or the 'pure virtual method called' errors.
+    simulation._data_reporters_ = [dr1, dr2, dr3, dr4, dr5, dr6, dr7, dr8, dr9, dr10]
+
+    datareporter.AddDataReporter(dr1)
+    datareporter.AddDataReporter(dr2)
+    datareporter.AddDataReporter(dr3)
+    datareporter.AddDataReporter(dr4)
+    datareporter.AddDataReporter(dr5)
+    datareporter.AddDataReporter(dr6)
+    datareporter.AddDataReporter(dr7)
+    datareporter.AddDataReporter(dr8)
+    datareporter.AddDataReporter(dr9)
+    datareporter.AddDataReporter(dr10)
 
     # Connect data reporters
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    filename     = tempfile.gettempdir() + "/tutorial8.out"
-    matfilename  = tempfile.gettempdir() + "/tutorial8.mat"
-    txtfilename  = tempfile.gettempdir() + "/tutorial8.txt"
-    xlsfilename  = tempfile.gettempdir() + "/tutorial8.xls"
-    jsonfilename = tempfile.gettempdir() + "/tutorial8.json"
-    xmlfilename  = tempfile.gettempdir() + "/tutorial8.xml"
-    hdf5filename = tempfile.gettempdir() + "/tutorial8.hdf5"
+    filename      = tempfile.gettempdir() + "/tutorial8.out"
+    mat_filename  = tempfile.gettempdir() + "/tutorial8.mat"
+    txt_filename  = tempfile.gettempdir() + "/tutorial8.txt"
+    xls_filename  = tempfile.gettempdir() + "/tutorial8.xls"
+    json_filename = tempfile.gettempdir() + "/tutorial8.json"
+    xml_filename  = tempfile.gettempdir() + "/tutorial8.xml"
+    hdf5_filename = tempfile.gettempdir() + "/tutorial8.hdf5"
+    vtk_filename  = tempfile.gettempdir() + "/tutorial8.vtk"
 
-    if not simulation.dr1.Connect(filename, simName):
-        sys.exit()
-    if not simulation.dr2.Connect("", simName):
-        sys.exit()
-    if not simulation.dr3.Connect(matfilename, simName):
-        sys.exit()
-    if not simulation.dr4.Connect(txtfilename, simName):
-        sys.exit()
-    if not simulation.dr5.Connect(xlsfilename, simName):
-        sys.exit()
-    if not simulation.dr6.Connect(jsonfilename, simName):
-        sys.exit()
-    if not simulation.dr7.Connect(xmlfilename, simName):
-        sys.exit()
-    if not simulation.dr8.Connect(hdf5filename, simName):
-        sys.exit()
-    if not simulation.dr9.Connect("", simName):
-        sys.exit()
+    dr1.Connect(filename, simName)
+    dr2.Connect("", simName)
+    dr3.Connect(mat_filename, simName)
+    dr4.Connect(txt_filename, simName)
+    dr5.Connect(xls_filename, simName)
+    dr6.Connect(json_filename, simName)
+    dr7.Connect(xml_filename, simName)
+    dr8.Connect(hdf5_filename, simName)
+    dr9.Connect("", simName)
+    dr10.Connect(vtk_filename, simName)
 
     return datareporter
 
@@ -260,7 +268,7 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
-    simulation.dr4.Plot(
+    simulation._data_reporters_[3].Plot(
         simulation.m.T,                       # Subplot 1
         [simulation.m.T, simulation.m.T]      # Subplot 2 (2 sets)
         )
@@ -272,10 +280,10 @@ def consoleRun():
         # 'variable_name':(ndarr_times, ndarr_values, list_domains, string_units)
         # First print the contents of the abovementioned dictionary:
         import pprint
-        pprint.pprint(simulation.dr1.Process.dictVariableValues)
+        pprint.pprint(simulation._data_reporters_[0].Process.dictVariableValues)
 
         # Get the dictionary
-        dvals = simulation.dr1.Process.dictVariableValues
+        dvals = simulation._data_reporters_[0].Process.dictVariableValues
         # Plot some variables
         values,times,domains,units = dvals['tutorial8.T']
         import matplotlib
@@ -285,7 +293,7 @@ def consoleRun():
 
         # Pandas dataset
         print('pandas dataset')
-        print(simulation.dr9.data_frame)
+        print(simulation._data_reporters_[8].data_frame)
     except Exception as e:
         print(str(e))
     

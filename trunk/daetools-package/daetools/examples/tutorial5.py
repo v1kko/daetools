@@ -17,17 +17,43 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 4.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Discontinuous equations (non-symmetrical state transition networks: daeSTN statements)
 
-Again we have a piece of copper (a plate) is at one side exposed to the source of heat
-and at the other to the surroundings. The process starts at the temperature of 283K.
-The metal is allowed to warm up, and then its temperature is kept in the interval
-[320 - 340] for at 350 seconds. After 350s the heat source is removed and the metal
-cools down slowly again to the ambient temperature.
+In this example we use the same heat transfer problem as in the tutorial 4.
+Again we have a piece of copper which is at one side exposed to the source of heat
+and at the other to the surroundings.
+
+The process starts at the temperature of 283K. The metal is allowed to warm up, and then
+its temperature is kept in the interval (320K - 340K) for 350 seconds. This is performed
+by switching the heater on when the temperature drops to 320K and by switching the heater
+off when the temperature reaches 340K.
+After 350s the heat source is permanently switched off and the metal is allowed to
+slowly cool down to the ambient temperature.
+
+This can be modelled using the following non-symmetrical state transition network:
+
+.. code-block:: none
+
+   STN Regulator
+     case Heating:
+       Qin = 1500 W
+       on condition T > 340K switch to Regulator.Cooling
+       on condition t > 350s switch to Regulator.HeaterOff
+
+     case Cooling:
+       Qin = 0 W
+       on condition T < 320K switch to Regulator.Heating
+       on condition t > 350s switch to Regulator.HeaterOff
+
+     case HeaterOff:
+       Qin = 0 W
+
+The temperature plot:
+
+.. image:: _static/tutorial5-results.png
+   :width: 500px
 """
 
 import sys

@@ -35,10 +35,10 @@ Optimisation Tutorials
 
 .. |topt_3| replace:: NLOPT NLP solvers, their setup and options.
 
-.. |topt_4| replace:: Interoperability between DAE Tools and 3rd party optimization
-                      software (scipy.optimize) used to minimize the Rosenbrock function.
+.. |topt_4| replace:: Interoperability between DAE Tools and 3rd party optimisation
+                      software (scipy.optimize) used to minimise the Rosenbrock function.
 
-.. |topt_5| replace:: Interoperability between DAE Tools and 3rd party optimization
+.. |topt_5| replace:: Interoperability between DAE Tools and 3rd party optimisation
                       software (scipy.optimize) used to fit the simple function with experimental data.
 
 .. |topt_6| replace:: daeMinpackLeastSq solver.
@@ -48,7 +48,7 @@ Optimisation Tutorials
 
 .. _opt_tutorial_1:
 
-Optimization tutorial 1
+Optimisation tutorial 1
 =======================
 .. rubric:: Description
 
@@ -67,7 +67,7 @@ Source code             `opt_tutorial1.py <../examples/opt_tutorial1.html>`_
 
 .. _opt_tutorial_2:
 
-Optimization tutorial 2
+Optimisation tutorial 2
 =======================
 .. rubric:: Description
 
@@ -86,7 +86,7 @@ Source code             `opt_tutorial2.py <../examples/opt_tutorial2.html>`_
 
 .. _opt_tutorial_3:
 
-Optimization tutorial 3
+Optimisation tutorial 3
 =======================
 .. rubric:: Description
 
@@ -105,7 +105,7 @@ Source code             `opt_tutorial3.py <../examples/opt_tutorial3.html>`_
 
 .. _opt_tutorial_4:
 
-Optimization tutorial 4
+Optimisation tutorial 4
 =======================
 .. rubric:: Description
 
@@ -124,7 +124,7 @@ Source code             `opt_tutorial4.py <../examples/opt_tutorial4.html>`_
 
 .. _opt_tutorial_5:
 
-Optimization tutorial 5
+Optimisation tutorial 5
 =======================
 .. rubric:: Description
 
@@ -143,7 +143,7 @@ Source code             `opt_tutorial5.py <../examples/opt_tutorial5.html>`_
 
 .. _opt_tutorial_6:
 
-Optimization tutorial 6
+Optimisation tutorial 6
 =======================
 .. rubric:: Description
 
@@ -162,7 +162,7 @@ Source code             `opt_tutorial6.py <../examples/opt_tutorial6.html>`_
 
 .. _opt_tutorial_7:
 
-Optimization tutorial 7
+Optimisation tutorial 7
 =======================
 .. rubric:: Description
 

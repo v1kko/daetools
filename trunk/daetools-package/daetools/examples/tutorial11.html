@@ -27,18 +27,18 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial shows the use of iterative linear solvers (AztecOO from the Trilinos project)</span>
+<span style='color:#c00000;'>This tutorial describes the use of iterative linear solvers (AztecOO from the Trilinos project)</span>
 <span style='color:#c00000;'>with different preconditioners (built-in AztecOO, Ifpack or ML) and corresponding solver options.</span>
 <span style='color:#c00000;'>Also, the range of Trilins Amesos solver options are shown.</span>
 
-<span style='color:#c00000;'>The model is identical to the model in tutorial 1, except that the equations are written in</span>
-<span style='color:#c00000;'>a different way to maximize the number of items around the diagonal (creating the problem</span>
-<span style='color:#c00000;'>with the diagonally dominant matrix). These type of systems can be solved using very simple</span>
-<span style='color:#c00000;'>preconditioners such as Jacobi. To do so, the interoperability with the NumPy package</span>
-<span style='color:#c00000;'>has been exploited and the package itertools used to iterate through the distribution</span>
-<span style='color:#c00000;'>domains in x and y directions.</span>
+<span style='color:#c00000;'>The model is very similar to the model in tutorial 1, except for the different boundary conditions</span>
+<span style='color:#c00000;'>and that the equations are written in a different way to maximise the number of items around the</span>
+<span style='color:#c00000;'>diagonal (creating the problem with the diagonally dominant matrix).</span>
+<span style='color:#c00000;'>These type of systems can be solved using very simple preconditioners such as Jacobi. To do so,</span>
+<span style='color:#c00000;'>the interoperability with the NumPy package has been exploited and the package itertools used to</span>
+<span style='color:#c00000;'>iterate through the distribution domains in x and y directions.</span>
 
-<span style='color:#c00000;'>The equations are distributed so that the following incidence matrix is obtained:</span>
+<span style='color:#c00000;'>The equations are distributed in such a way that the following incidence matrix is obtained:</span>
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
@@ -78,6 +78,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>    |                     X     X     X  |</span>
 <span style='color:#c00000;'>    |                      X     X     X |</span>
 <span style='color:#c00000;'>    |                                 XXX|</span>
+
+<span style='color:#c00000;'>The temperature plot (at t=100s, x=0.5, y=*):</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial11-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, numpy, itertools
@@ -149,7 +154,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#008000;'>          Y axis</span>
 <span style='color:#008000;'>            ^</span>
 <span style='color:#008000;'>            |</span>
-<span style='color:#008000;'>        Ly -| T T T T T T T T T T T</span>
+<span style='color:#008000;'>        Ly -| L T T T T T T T T T R</span>
 <span style='color:#008000;'>            | L i i i i i i i i i R</span>
 <span style='color:#008000;'>            | L i i i i i i i i i R</span>
 <span style='color:#008000;'>            | L i i i i i i i i i R</span>
@@ -159,17 +164,17 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#008000;'>            | L i i i i i i i i i R</span>
 <span style='color:#008000;'>            | L i i i i i i i i i R</span>
 <span style='color:#008000;'>            | L i i i i i i i i i R</span>
-<span style='color:#008000;'>         0 -| B B B B B B B B B B B</span>
+<span style='color:#008000;'>         0 -| L B B B B B B B B B R</span>
 <span style='color:#008000;'>            --|-------------------|-------&gt; X axis</span>
 <span style='color:#008000;'>              0                   Lx</span>
 <span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
         eq_types <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
         eq_types[ : , : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'i'</span>  <span style='color:#008000;'># inner region</span>
-        eq_types[  <span style='color:#c000c0;'>0</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'L'</span>  <span style='color:#008000;'># left boundary</span>
-        eq_types[ <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'R'</span>  <span style='color:#008000;'># right boundary</span>
         eq_types[ : ,  <span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'B'</span>  <span style='color:#008000;'># bottom boundary</span>
         eq_types[ : , <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'T'</span>  <span style='color:#008000;'># top boundary</span>
-        <span style='color:#0000ff;'>print</span>(eq_types)
+        eq_types[  <span style='color:#c000c0;'>0</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'L'</span>  <span style='color:#008000;'># left boundary</span>
+        eq_types[ <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'R'</span>  <span style='color:#008000;'># right boundary</span>
+        <span style='color:#0000ff;'>print</span>(eq_types.T) <span style='color:#008000;'># print it transposed to visalise it more easily</span>
 
         <span style='color:#008000;'># Finally, create equations based on the equation type</span>
         <b>for</b> x,y <b><span style='color:#0000ff;'>in</span></b> indexes:
@@ -207,9 +212,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
-        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(n, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#c000c0;'>20</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
+        <span style='color:#0000ff;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#c000c0;'>20</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.1</span>)
 
         <span style='color:#0000ff;'>self</span>.m.k.SetValue(<span style='color:#c000c0;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
         <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))

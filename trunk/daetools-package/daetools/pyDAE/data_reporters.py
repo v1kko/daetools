@@ -92,7 +92,6 @@ class daeVTKDataReporter(daeDataReporterLocal):
                 f.close()
 
         except Exception as e:
-            raise e
             print(('Cannot write results in .vtk format:\n' + str(e)))
 
 class daeMatlabMATFileDataReporter(daeDataReporterLocal):

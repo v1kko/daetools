@@ -17,14 +17,26 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 1.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Arrays of variable values
 - Functions that operate on arrays of values
 - Functions that create constants and arrays of constant values (Constant and Array)
 - Non-uniform domain grids
+
+The model in this example is identical to the model used in the tutorial 1.
+Some additional equations that calculate the total flux at the bottom edge are added
+to illustrate the array functions.
+
+The temperature plot (at t=100, x=0.5, y=*):
+
+.. image:: _static/tutorial3-results.png
+   :width: 500px
+
+The average temperature plot (considering the whole x-y domain):
+
+.. image:: _static/tutorial3-results2.png
+   :width: 500px
 """
 
 import sys, numpy
@@ -42,7 +54,7 @@ class modTutorial(daeModel):
         self.y  = daeDomain("y", self, m, "Y axis domain")
 
         self.Qb  = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Qt  = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.Tt  = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
         self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp  = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
@@ -61,30 +73,30 @@ class modTutorial(daeModel):
         daeModel.DeclareEquations(self)
 
         # All equations use the default discretisation method (central finite difference)
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on open x and y domains")
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.rho() * self.cp() * dt(self.T(x,y)) - \
                       self.k() * (d2(self.T(x,y), self.x) + d2(self.T(x,y), self.y))
 
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         eq.Residual = - self.k() * d(self.T(x,y), self.y) - self.Qb()
 
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_top", "Dirichlet boundary conditions at the top edge (constant temperature)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * d(self.T(x,y), self.y) - self.Qt()
+        eq.Residual = self.T(x,y) - self.Tt()
 
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x)
 
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x)
 
         # There are several functions that return arrays of values (or time- or partial-derivatives)
@@ -214,11 +226,11 @@ class simTutorial(daeSimulation):
         self.m.y.Points = new_grid
         self.Log.Message("  After: %s" % new_grid, 0)
         
-        self.m.k.SetValue(401   * W/(m*K))
-        self.m.cp.SetValue(385  * J/(kg*K))
+        self.m.k.SetValue(401 * W/(m*K))
+        self.m.cp.SetValue(385 * J/(kg*K))
         self.m.rho.SetValue(8960 * kg/(m**3))
-        self.m.Qb.SetValue(1e6  * W/(m**2))
-        self.m.Qt.SetValue(0    * W/(m**2))
+        self.m.Qb.SetValue(1e6 * W/(m**2))
+        self.m.Tt.SetValue(300 * K)
 
     def SetUpVariables(self):
         for x in range(1, self.m.x.NumberOfPoints - 1):

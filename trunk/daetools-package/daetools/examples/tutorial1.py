@@ -21,21 +21,21 @@ This tutorial introduces several new concepts:
 
 - Distribution domains
 - Distributed parameters, variables and equations
-- Boundary and initial conditions
+- Setting boundary conditions (Neumann and Dirichlet type)
+- Setting initial conditions
 
 In this example we model a simple heat conduction problem: a conduction through
 a very thin, rectangular copper plate.
 
-This example should be sufficiently complex to describe all basic DAE Tools features.
-For this problem, we need a two-dimensional Cartesian grid in X and Y axis
+For this problem, we need a two-dimensional Cartesian grid (x,y)
 (here, for simplicity, divided into 10 x 10 segments):
 
 .. code-block:: none
 
-     Y axis
+     y axis
         ^
         |
-    Ly -| T T T T T T T T T T T
+    Ly -| L T T T T T T T T T R
         | L + + + + + + + + + R
         | L + + + + + + + + + R
         | L + + + + + + + + + R
@@ -45,8 +45,8 @@ For this problem, we need a two-dimensional Cartesian grid in X and Y axis
         | L + + + + + + + + + R
         | L + + + + + + + + + R
         | L + + + + + + + + + R
-     0 -| B B B B B B B B B B B
-        --|-------------------|-------> X axis
+     0 -| L B B B B B B B B B R
+        --|-------------------|-------> x axis
           0                   Lx
 
 Points 'B' at the bottom edge of the plate (for y = 0), and the points 'T' at the
@@ -55,51 +55,51 @@ top edge of the plate (for y = Ly) represent the points where the heat is applie
 The plate is considered insulated at the left (x = 0) and the right edges (x = Lx)
 of the plate (points 'L' and 'R'). To model this type of problem, we have to write
 a heat balance equation for all interior points except the left, right, top and
-bottom edges, where we need to define the Neumann type boundary conditions.
+bottom edges, where we need to specify boundary conditions.
 
-In this problem we have to define the following domains:
+In this problem we have to define two distribution domains:
 
-- x: X axis domain, length Lx = 0.1 m
-- y: Y axis domain, length Ly = 0.1 m
+- x (x axis, length Lx = 0.1 m)
+- y (y axis, length Ly = 0.1 m)
 
 the following parameters:
 
 - rho: copper density, 8960 kg/m3
-- cp: copper specific heat capacity, 385 J/(kgK)
-- k:  copper heat conductivity, 401 W/(mK)
-- Qb: heat flux at the bottom edge of the plate, 1E6 W/m2 (or 100 W/cm2)
-- Qt: heat flux at the top edge of the plate, here set to 0 W/m2
+- cp:  copper specific heat capacity, 385 J/(kgK)
+- k:   copper heat conductivity, 401 W/(mK)
+- Qb:  heat flux at the bottom edge, 1E6 W/m2 (or 100 W/cm2)
+- Tt:  temperature at the top edge, 300 K
 
-and the following variable:
+and a single variable:
 
-- T: the temperature of the plate, K (distributed on x and y domains)
+- T: the temperature of the plate (distributed on x and y domains)
 
-Also, we need to write the following 5 equations:
+The model consists of 5 equations (1 distributed equation + 4 boundary conditions):
 
 1) Heat balance::
 
-      rho * cp * dT(x,y) / dt = k * (d2T(x,y) / dx2 + d2T(x,y) / dy2);  for all x in: (0, Lx),
-                                                                       for all y in: (0, Ly)
+    rho * cp * dT(x,y)/dt = k * [d2T(x,y)/dx2 + d2T(x,y)/dy2];  x in (0, Lx), y in (0, Ly)
 
-2) Boundary conditions for the bottom edge::
+2) Neumann boundary conditions at the bottom edge::
 
-      -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],
-                                and y = 0
+    -k * dT(x,y)/dy = Qb;  x in (0, Lx), y = 0
 
-3) Boundary conditions for the top edge::
+3) Dirichlet boundary conditions at the top edge::
 
-      -k * dT(x,y) / dy = Qin;  for all x in: [0, Lx],
-                                and y = Ly
+    T(x,y) = Tt;  x in (0, Lx), y = Ly
 
-4) Boundary conditions for the left edge::
+4) Neumann boundary conditions at the left edge (insulated)::
 
-      dT(x,y) / dx = 0;  for all y in: (0, Ly),
-                         and x = 0
+    dT(x,y)/dx = 0;  y in [0, Ly], x = 0
 
-5) Boundary conditions for the right edge::
+5) Neumann boundary conditions at the right edge (insulated)::
 
-      dT(x,y) / dx = 0;  for all y in: (0, Ly),
-                         and x = Ln
+    dT(x,y)/dx = 0;  y in [0, Ly], x = Lx
+
+The temperature plot (at t=100s, x=0.5, y=*):
+
+.. image:: _static/tutorial1-results.png
+   :width: 500px
 """
 
 import sys
@@ -131,11 +131,11 @@ class modTutorial(daeModel):
         #  - Parent: daeModel object (indicating the model where the domain will be added)
         #  - Description: string (optional argument; the default value is an empty string)
         # All naming conventions (introduced in whats_the_time example) apply here as well.
-        self.Qb = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Tt = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
+        self.Qb  = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
+        self.Tt  = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
         self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
-        self.cp = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
-        self.k  = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
+        self.cp  = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
+        self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
        
         # In this example we need a variable T which is distributed on the domains x and y. Variables (but also other objects)
         # can be distributed by using a function DistributeOnDomain, which accepts a domain object as
@@ -165,7 +165,7 @@ class modTutorial(daeModel):
         # Also DomainBounds argument can be a list (an array) of points within a domain, for example: x: {0, 3, 4, 6, 8, 10}
         # Since our heat balance equation should exclude the top, bottom, left and right edges,
         # it is distributed on the open x and y domains, thus we use the eOpenOpen flag:
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on open x and y domains")
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         # Functions d() and d2() can be used to calculate partial derivatives of the 1st and 2nd order, respectively.
@@ -187,27 +187,27 @@ class modTutorial(daeModel):
         # Boundary conditions are treated as ordinary equations, and the special eLowerBound and eUpperBound flags
         # are used to define the position of the boundary.
         # The bottom edge is placed at y = 0 coordinate, thus we use eLowerBound for the y domain:
-        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (sinusoidal inlet flux)")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qb()
 
         # The top edge is placed at y = Ly coordinate, thus we use eUpperBound for the y domain:
         eq = self.CreateEquation("BC_top", "Dirichlet boundary conditions at the top edge (constant temperature)")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         eq.Residual = self.T(x,y) - self.Tt()
 
         # The left edge is placed at x = 0 coordinate, thus we use eLowerBound for the x domain:
         eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
         # The right edge is placed at x = Lx coordinate, thus we use eUpperBound for the x domain:
-        eq = self.CreateEquation("BC_right", "Neumann boundary conditions for the right edge (insulated)")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
         
 class simTutorial(daeSimulation):

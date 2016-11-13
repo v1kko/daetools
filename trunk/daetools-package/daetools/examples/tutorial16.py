@@ -17,13 +17,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial shows how to use DAE Tools objects with Numpy arrays to solve a simple
-stationary heat conduction in one dimension (1D Poisson equation) using a simple 
-Finite Elements method (with linear elements):
+This tutorial shows how to use DAE Tools objects with NumPy arrays to solve a simple
+stationary heat conduction in one dimension using the Finite Elements method
+with linear elements and two ways of manually assembling a stiffness matrix/load vector:
 
-d2T(x)/dx2 = F(x);  for all x in: (0, Lx)
+.. code-block:: none
 
-Linear finite elements discretization and simple FE matrix assembly:
+   d2T(x)/dx2 = F(x);  x in (0, Lx)
+
+Linear finite elements discretisation and simple FE matrix assembly:
 
 .. code-block:: none
 
@@ -48,6 +50,11 @@ Linear finite elements discretization and simple FE matrix assembly:
                                |
                                dx
 
+The comparison of the analytical solution and two ways of assembling the system is given
+in the following plot:
+
+.. image:: _static/tutorial16-results.png
+   :width: 500px
 """
 
 import sys, numpy
@@ -62,10 +69,12 @@ class modTutorial(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.x  = daeDomain("x", self, unit(), "x axis domain")
+
         self.L  = daeParameter("L", unit(), self, "Length")
+
         self.Ta = daeVariable("Ta", no_t, self, "Temperature - analytical solution", [self.x])
-        self.T1 = daeVariable("T1", no_t, self, "Temperature - first way", [self.x])
-        self.T2 = daeVariable("T2", no_t, self, "Temperature - second way", [self.x])
+        self.T1 = daeVariable("T1", no_t, self, "Temperature - first way",           [self.x])
+        self.T2 = daeVariable("T2", no_t, self, "Temperature - second way",          [self.x])
 
     def local_dof(self, i):
         return self.mapLocalToGlobalIndices

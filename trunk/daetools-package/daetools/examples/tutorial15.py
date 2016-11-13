@@ -17,12 +17,38 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same problem as in the tutorial 4.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - Nested state transitions
 
+In this example we use the same model as in the tutorial 4 with the more complex STN:
+
+.. code-block:: none
+
+   IF t < 200
+     IF 0 <= t < 100
+        IF 0 <= t < 50
+          Qin = 1600 W
+        ELSE
+          Qin = 1500 W
+     ELSE
+       Qin = 1400 W
+
+   ELSE IF 200 <= t < 300
+     Qin = 1300 W
+
+   ELSE
+     Qin = 0 W
+
+The plot of the 'Qin' variable:
+
+.. image:: _static/tutorial15-results.png
+   :width: 500px
+
+The temperature plot:
+
+.. image:: _static/tutorial15-results2.png
+   :width: 500px
 """
 
 import sys

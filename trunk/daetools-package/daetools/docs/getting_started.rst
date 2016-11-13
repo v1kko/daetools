@@ -19,11 +19,13 @@ This chapter gives the basic information about exploring examples/tutorials,
 developing models, defining and running a simulation and plotting the simulation results.
 
 **DAE Tools** (pyDAE module) is installed in ``daetools`` folder within ``site-packages`` (or ``dist-packages``)
-folder under python. The structure of the folders is the following:
+folder of the Python installation. The structure of the folders is given in :numref:`Figure-GetStarted-0`.
 
+.. _Figure-GetStarted-0:
 .. figure:: _static/daetools_folder_structure.png
    :align: center
 
+   **DAE Tools** folder structure.
 
 Running tutorials
 =================
@@ -58,7 +60,7 @@ Running tutorials
       :figwidth: 300 pt
       :align: center
 
-      DAE Tools Plotter main window.
+      **DAE Tools Plotter** main window.
 
 2. Start ``DAE Tools Tutorials`` program to try some examples:
 
@@ -93,7 +95,7 @@ Model reports open in a new window of the system's default web browser.
    :figwidth: 400 pt
    :align: center
 
-   DAE Tools Examples main window
+   **DAE Tools Examples** main window.
 
 .. _Figure-GetStarted-2b:
 .. figure:: _static/Screenshot-DAEToolsTutorials-Run.png
@@ -101,7 +103,7 @@ Model reports open in a new window of the system's default web browser.
    :figwidth: 400 pt
    :align: center
 
-   A typical optimization output from DAE Tools
+   A typical optimization output from DAE Tools.
 
 Tutorials can also be started from the shell:
 
@@ -123,7 +125,7 @@ The sample output is given in :numref:`Figure-GetStarted-3`:
    :figwidth: 400 pt
    :align: center
 
-   Shell output from the simulation
+   Shell output from the simulation.
 
 Processing the results
 ======================
@@ -157,7 +159,7 @@ specified - some domains should be fixed while leaving another free by selecting
     :figwidth: 400 pt
     :align: center
 
-    Choose variable dialog for a 2D plot
+    Choose variable dialog for a 2D plot.
 
 Typical 2D and 3D plots are given in :numref:`Figure-GetStarted-6` and :numref:`Figure-GetStarted-7`.
 
@@ -167,7 +169,7 @@ Typical 2D and 3D plots are given in :numref:`Figure-GetStarted-6` and :numref:`
     :figwidth: 400 pt
     :align: center
 
-    Example 2D plot (produced by Matplotlib)
+    Example 2D plot (produced by Matplotlib).
 
 .. _Figure-GetStarted-7:
 .. figure:: _static/Screenshot-3Dplot.png
@@ -175,7 +177,7 @@ Typical 2D and 3D plots are given in :numref:`Figure-GetStarted-6` and :numref:`
     :figwidth: 400 pt
     :align: center
 
-    Example 3D plot (produced by Mayavi2)
+    Example 3D plot (produced by Mayavi2).
 
 2D plots can be saved as templates (.pt files) which store the information in JSON format.
   .. code-block:: javascript

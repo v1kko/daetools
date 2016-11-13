@@ -17,16 +17,41 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same problem as in the tutorial 5.
-
-Here we introduce:
+This tutorial introduces the following concepts:
 
 - The event ports
-- ON_CONDITION() function showing the new types of actions that can be executed
+- ON_CONDITION() function illustrating the types of actions that can be executed
   during state transitions
-- ON_EVENT() function showing the new types of actions that can be executed
+- ON_EVENT() function illustrating the types of actions that can be executed
   when an event is triggered
 - User defined actions
+
+In this example we use the very similar model as in the tutorial 5.
+
+The simulation output should show the following messages at t=100s and t=350s:
+
+.. code-block:: none
+
+   ...
+   ********************************************************
+   simpleUserAction2 message:
+   This message should be fired when the time is 100s.
+   ********************************************************
+   ...
+   ********************************************************
+   simpleUserAction executed; input data = 427.464093129832
+   ********************************************************
+   ...
+
+The plot of the 'event' variable:
+
+.. image:: _static/tutorial13-results.png
+   :width: 500px
+
+The temperature plot:
+
+.. image:: _static/tutorial13-results2.png
+   :width: 500px
 """
 
 import sys
@@ -74,7 +99,7 @@ class simpleUserAction2(daeAction):
                 QtGui.QMessageBox.warning(None, 'tutorial13', self.msg)
         finally:
             print('********************************************************')
-            print('tutorial13 simpleUserAction2 message: ')
+            print('simpleUserAction2 message: ')
             print(self.msg)
             print('********************************************************')
             
@@ -114,7 +139,7 @@ class modTutorial(daeModel):
         eq.Residual = self.Qin() - Constant(1500 * W)
 
         """
-                                          ON_CONDITION() function
+        ON_CONDITION() function
         Arguments:
           - Condition that triggers the actions
           - 'switchToStates' is a list of python tuples (STN-name-relative-to-model, State-name) that will be set active
@@ -170,10 +195,9 @@ class modTutorial(daeModel):
                                                      setVariableValues  = [],
                                                      triggerEvents      = [],
                                                      userDefinedActions = [self.action2] )
-
         
         """
-                                   ON_EVENT() function
+        ON_EVENT() function
         The actions executed when the event on the inlet epIn event port is received.
         OnEvent handlers can be also specified as a part of the state definition
         and then they are active only when that particular state is active.

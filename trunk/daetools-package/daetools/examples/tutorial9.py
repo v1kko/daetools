@@ -17,19 +17,24 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 1.
+This tutorial introduces the following concepts:
 
-Here we introduce:
+- Third party **direct** linear equations solvers
 
-- Third party linear equations solvers
-
-Currently there are 3rd party linear equations solvers:
+Currently there are the following linear equations solvers available:
 
 - SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)
 - SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)
-- Trilinos: sequential sparse direct/iterative solver defined in pyTrilinos module (GNU Lesser GPL)
+- Trilinos Amesos: sequential sparse direct solver defined in pyTrilinos module (GNU Lesser GPL)
 - IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)
 - Pardiso: multi-threaded sparse direct solver defined in pyPardiso module (proprietary)
+
+In this example we use the same conduction problem as in the tutorial 1.
+
+The temperature plot (at t=100s, x=0.5, y=*):
+
+.. image:: _static/tutorial9-results.png
+   :width: 500px
 """
 
 import sys
@@ -53,7 +58,7 @@ class modTutorial(daeModel):
         self.y  = daeDomain("y", self, m, "Y axis domain")
 
         self.Qb  = daeParameter("Q_b",         W/(m**2), self, "Heat flux at the bottom edge of the plate")
-        self.Qt  = daeParameter("Q_t",         W/(m**2), self, "Heat flux at the top edge of the plate")
+        self.Tt  = daeParameter("T_t",                K, self, "Temperature at the top edge of the plate")
         self.rho = daeParameter("&rho;",      kg/(m**3), self, "Density of the plate")
         self.cp  = daeParameter("c_p",         J/(kg*K), self, "Specific heat capacity of the plate")
         self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
@@ -65,31 +70,31 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        eq = self.CreateEquation("HeatBalance", "Heat balance equation. Valid on the open x and y domains")
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
         eq.Residual = self.rho() * self.cp() * self.T.dt(x, y) - self.k() * \
                      (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
 
-        eq = self.CreateEquation("BC_bottom", "Boundary conditions for the bottom edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qb()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y, eCFDM) - self.Qb()
 
-        eq = self.CreateEquation("BC_top", "Boundary conditions for the top edge")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        eq = self.CreateEquation("BC_top", "Dirichlet boundary conditions at the top edge (constant temperature)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qt()
+        eq.Residual = self.T(x,y) - self.Tt()
 
-        eq = self.CreateEquation("BC_left", "Boundary conditions at the left edge")
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
-        eq = self.CreateEquation("BC_right", "Boundary conditions for the right edge")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.T.d(self.x, x, y)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = d(self.T(x,y), self.x, eCFDM)
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -98,16 +103,14 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 25
-
-        self.m.x.CreateStructuredGrid(n, 0, 0.1)
-        self.m.y.CreateStructuredGrid(n, 0, 0.1)
+        self.m.x.CreateStructuredGrid(20, 0, 0.1)
+        self.m.y.CreateStructuredGrid(20, 0, 0.1)
 
         self.m.k.SetValue(401 * W/(m*K))
         self.m.cp.SetValue(385 * J/(kg*K))
         self.m.rho.SetValue(8960 * kg/(m**3))
         self.m.Qb.SetValue(1e6 * W/(m**2))
-        self.m.Qt.SetValue(0 * W/(m**2))
+        self.m.Tt.SetValue(300 * K)
 
     def SetUpVariables(self):
         for x in range(1, self.m.x.NumberOfPoints - 1):

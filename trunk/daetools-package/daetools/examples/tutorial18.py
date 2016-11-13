@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
-__doc__ = """Another example of using daetools and numpy.
-This problem is from the Sundials ARKODE (ark_analytic_sys.cpp).
-The following is a simple example problem with analytical solution:
+__doc__ = """
+This tutorial shows one more problem solved using the NumPy arrays that operate on
+DAE Tools variables. The model is taken from the Sundials ARKODE (ark_analytic_sys.cpp).
+The ODE system is defined by the following system of equations:
 
 .. code-block:: none
 
@@ -33,7 +34,9 @@ where:
     Vi = 0.25 * [5 1 -3; 2 2 -2; 1 1 1];
     D = [-0.5 0 0; 0 -0.1 0; 0 0 lam];
 
-lam is a large negative number. The analytical solution to this problem is:
+lam is a large negative number.
+
+The analytical solution to this problem is:
 
 .. code-block:: none
 
@@ -47,7 +50,7 @@ for values with magnitude larger than 100 the problem becomes quite stiff.
 
 In this example, we choose lamda = -100.
 
-Solution:
+The solution:
 
 .. code-block:: none
 
@@ -69,9 +72,14 @@ Solution:
     0.0450   0.24389   0.27053  -0.48109
     0.0500   0.23903   0.26858  -0.48740
    --------------------------------------
+
+The plot of the 'y0', 'y1', 'y2' variables:
+
+.. image:: _static/tutorial18-results.png
+   :width: 500px
 """
 
-import sys, numpy
+import sys, numpy, scipy.linalg
 from time import localtime, strftime
 from daetools.pyDAE import *
 
@@ -85,7 +93,8 @@ class modTutorial(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.x = daeDomain("x", self, unit(), "")
-        self.y = daeVariable("y", typeNone, self, "", [self.x])
+
+        self.y = daeVariable("y",            typeNone, self, "", [self.x])
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -95,20 +104,21 @@ class modTutorial(daeModel):
         V = numpy.array([[1, -1, 1], [-1, 2, 1], [0, -1, 2]])
         Vi = 0.25 * numpy.array([[5, 1, -3], [2, 2, -2], [1, 1, 1]])
         D = numpy.array([[-0.5, 0, 0], [0, -0.1, 0], [0, 0, lamda]])
+        self.y0 = numpy.array([1.0, 1.0, 1.0])
 
         # Create a vector of y's:
         y = numpy.empty(3, dtype=object)
         y[:] = [self.y(i) for i in range(3)]
 
         # Use dot product (numpy arrays don't behave as matrices)
-        # or use numpt.matrix where the operator * performss the dot product.
+        # or use numpy.matrix where the operator * performs the dot product.
         dydt = V.dot(D).dot(Vi).dot(y)
-        print(dydt)
+        #print(dydt)
         for i in range(3):
             eq = self.CreateEquation("y(%d)" % i, "")
             eq.Residual = self.y.dt(i) - dydt[i]
             eq.CheckUnitsConsistency = False
-   
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
@@ -119,8 +129,7 @@ class simTutorial(daeSimulation):
         self.m.x.CreateArray(3)
 
     def SetUpVariables(self):
-        y0 = numpy.array([1.0, 1.0, 1.0])
-        self.m.y.SetInitialConditions(y0)
+        self.m.y.SetInitialConditions(self.m.y0)
 
 # Use daeSimulator class
 def guiRun(app):

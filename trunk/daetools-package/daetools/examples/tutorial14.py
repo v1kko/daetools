@@ -17,12 +17,30 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 5.
+In this tutorial we introduce the external functions concept that can handle and execute
+functions in external libraries. The daeScalarExternalFunction-derived external function
+object is used to calculate the heat transferred and to interpolate a set of values
+using the scipy.interpolate.interp1d object.
 
-Here we introduce the external functions concept that can handle and execute
-functions in external libraries. Here we use daeScalarExternalFunction-derived
-external function object to calculate the heat transferred and interpolate a set of
-values using scipy.interpolate.interp1d object.
+In this example we use the same model as in the tutorial 5 with few additional equations.
+
+The simulation output should show the following messages at the end of simulation:
+
+.. code-block:: none
+
+   ...
+   scipy.interp1d statistics:
+     interp1d called 1703 times (cache value used 770 times)
+
+The plot of the 'Heat_ext' variable:
+
+.. image:: _static/tutorial14-results.png
+   :width: 500px
+
+The plot of the 'Value_interp' variable:
+
+.. image:: _static/tutorial14-results2.png
+   :width: 500px
 """
 
 import sys

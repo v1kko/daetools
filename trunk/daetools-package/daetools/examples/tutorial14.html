@@ -27,12 +27,30 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>In this example we use the same conduction problem as in the tutorial 5.</span>
+<span style='color:#c00000;'>In this tutorial we introduce the external functions concept that can handle and execute</span>
+<span style='color:#c00000;'>functions in external libraries. The daeScalarExternalFunction-derived external function</span>
+<span style='color:#c00000;'>object is used to calculate the heat transferred and to interpolate a set of values</span>
+<span style='color:#c00000;'>using the scipy.interpolate.interp1d object.</span>
 
-<span style='color:#c00000;'>Here we introduce the external functions concept that can handle and execute</span>
-<span style='color:#c00000;'>functions in external libraries. Here we use daeScalarExternalFunction-derived</span>
-<span style='color:#c00000;'>external function object to calculate the heat transferred and interpolate a set of</span>
-<span style='color:#c00000;'>values using scipy.interpolate.interp1d object.</span>
+<span style='color:#c00000;'>In this example we use the same model as in the tutorial 5 with few additional equations.</span>
+
+<span style='color:#c00000;'>The simulation output should show the following messages at the end of simulation:</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>   ...</span>
+<span style='color:#c00000;'>   scipy.interp1d statistics:</span>
+<span style='color:#c00000;'>     interp1d called 1703 times (cache value used 770 times)</span>
+
+<span style='color:#c00000;'>The plot of the 'Heat_ext' variable:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial14-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
+
+<span style='color:#c00000;'>The plot of the 'Value_interp' variable:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial14-results2.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
