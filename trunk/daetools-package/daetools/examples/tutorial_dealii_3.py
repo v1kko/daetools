@@ -21,16 +21,17 @@ In this example the Cahn-Hilliard equation is solved using the finite element me
 This equation describes the process of phase separation, where two components of a
 binary mixture separate and form domains pure in each component.
 
-.. image:: _static/deal.II_tutorial_3-cahn-hilliard.png
-   :alt: dc/dt - D*nabla^2(mu) = 0, mu = c^3 - c - gamma*nabla^2(c) in Omega
-   :width: 200 px
+.. code-block:: none
 
-The mesh is a simple square (0-100)x(0-100).
+   dc/dt - D*nabla^2(mu) = 0, in Omega
+   mu = c^3 - c - gamma*nabla^2(c)
+
+The mesh is a simple square (0-100)x(0-100):
 
 .. image:: _static/square.png
    :width: 300 px
 
-Results at t = 500s:
+The concentration plot at t = 500s:
 
 .. image:: _static/tutorial_dealii_3-results.png
    :width: 400 px

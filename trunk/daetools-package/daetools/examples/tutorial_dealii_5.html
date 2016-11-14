@@ -27,18 +27,20 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>Flow through porous media. Darcy's law (deal.II step-20).</span>
+<span style='color:#c00000;'>In this example a simple flow through porous media is solved (deal.II step-20).</span>
 
-<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_5-porous_media.png</span>
-<span style='color:#c00000;'>   :alt: K^{-1} u + nabla(p) = 0, -div(u) = -f, in Omega; p = g on dGamma</span>
-<span style='color:#c00000;'>   :width: 200 px</span>
+<span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>Mesh:</span>
+<span style='color:#c00000;'>   K^{-1} u + nabla(p) = 0 in Omega</span>
+<span style='color:#c00000;'>   -div(u) = -f in Omega</span>
+<span style='color:#c00000;'>   p = g on dOmega</span>
+
+<span style='color:#c00000;'>The mesh is a simple square:</span>
 
 <span style='color:#c00000;'>.. image:: _static/square(-1,1)x(-1,1)-50x50.png</span>
 <span style='color:#c00000;'>   :width: 300 px</span>
 
-<span style='color:#c00000;'>Results at t = 500s:</span>
+<span style='color:#c00000;'>The velocity plot at t = 500s:</span>
 
 <span style='color:#c00000;'>.. image:: _static/tutorial_dealii_5-results.png</span>
 <span style='color:#c00000;'>   :width: 500 px</span>
@@ -254,7 +256,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

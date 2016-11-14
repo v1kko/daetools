@@ -27,12 +27,21 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>In this example we use the same conduction problem as in the tutorial 4.</span>
+<span style='color:#c00000;'>This tutorial presents a user-defined simulation which instead of simply integrating</span>
+<span style='color:#c00000;'>the system shows the pyQt graphical user interface (GUI) where the simulation can be</span>
+<span style='color:#c00000;'>manipulated (a sort of interactive operating procedure).</span>
 
-<span style='color:#c00000;'>Here we introduce:</span>
+<span style='color:#c00000;'>The model in this example is the same as in the tutorial 4.</span>
 
-<span style='color:#c00000;'>- Interactive operating procedures</span>
+<span style='color:#c00000;'>The simulation.Run() function is modifed to show the graphical user interface (GUI)</span>
+<span style='color:#c00000;'>that allows to specify the input power of the heater (degree of freedom), a time period</span>
+<span style='color:#c00000;'>for integration, and a reporting interval. The GUI also contains the temperature plot</span>
+<span style='color:#c00000;'>updated in real time, as the simulation progresses.</span>
 
+<span style='color:#c00000;'>The screenshot of the pyQt GUI:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_adv_1-screenshot.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys

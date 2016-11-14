@@ -94,7 +94,7 @@ class modTutorial(daeModel):
 
         self.x = daeDomain("x", self, unit(), "")
 
-        self.y = daeVariable("y",            typeNone, self, "", [self.x])
+        self.y = daeVariable("y", typeNone, self, "", [self.x])
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -106,17 +106,22 @@ class modTutorial(daeModel):
         D = numpy.array([[-0.5, 0, 0], [0, -0.1, 0], [0, 0, lamda]])
         self.y0 = numpy.array([1.0, 1.0, 1.0])
 
-        # Create a vector of y's:
+        # Create a vector of y:
         y = numpy.empty(3, dtype=object)
         y[:] = [self.y(i) for i in range(3)]
 
+        # Create a vector of dy/dt:
+        dydt = numpy.empty(3, dtype=object)
+        dydt[:] = [self.y.dt(i) for i in range(3)]
+
+        # Create the ODE system: dy/dt = A*y
         # Use dot product (numpy arrays don't behave as matrices)
         # or use numpy.matrix where the operator * performs the dot product.
-        dydt = V.dot(D).dot(Vi).dot(y)
-        #print(dydt)
+        Ay = V.dot(D).dot(Vi).dot(y)
+        #print(Ay)
         for i in range(3):
             eq = self.CreateEquation("y(%d)" % i, "")
-            eq.Residual = self.y.dt(i) - dydt[i]
+            eq.Residual = dydt[i] - Ay[i]
             eq.CheckUnitsConsistency = False
 
 class simTutorial(daeSimulation):

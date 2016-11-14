@@ -31,19 +31,20 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>This equation describes the process of phase separation, where two components of a</span>
 <span style='color:#c00000;'>binary mixture separate and form domains pure in each component.</span>
 
-<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_3-cahn-hilliard.png</span>
-<span style='color:#c00000;'>   :alt: dc/dt - D*nabla^2(mu) = 0, mu = c^3 - c - gamma*nabla^2(c) in Omega</span>
-<span style='color:#c00000;'>   :width: 200 px</span>
+<span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>The mesh is a simple square (0-100)x(0-100).</span>
+<span style='color:#c00000;'>   dc/dt - D*nabla^2(mu) = 0, in Omega</span>
+<span style='color:#c00000;'>   mu = c^3 - c - gamma*nabla^2(c)</span>
+
+<span style='color:#c00000;'>The mesh is a simple square (0-100)x(0-100):</span>
 
 <span style='color:#c00000;'>.. image:: _static/square.png</span>
-<span style='color:#c00000;'>   :width: 400 px</span>
+<span style='color:#c00000;'>   :width: 300 px</span>
 
-<span style='color:#c00000;'>Results at t = 500s:</span>
+<span style='color:#c00000;'>The concentration plot at t = 500s:</span>
 
 <span style='color:#c00000;'>.. image:: _static/tutorial_dealii_3-results.png</span>
-<span style='color:#c00000;'>   :width: 600 px</span>
+<span style='color:#c00000;'>   :width: 400 px</span>
 
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
@@ -241,7 +242,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

@@ -265,7 +265,7 @@ class daeChooseVariable(QtGui.QDialog):
         return daeChooseVariable.get2DData(self.variable, self.domainIndexes, self.domainPoints)
 
     @staticmethod
-    def get2DData(variable, domainIndexes, domainPoints):
+    def get2DData(variable, domainIndexes_, domainPoints_):
         # Achtung, achtung!!
         # It is important to get TimeValues first since the reporter
         # might add more values to the data receiver (in the meantime)
@@ -273,6 +273,10 @@ class daeChooseVariable(QtGui.QDialog):
         times   = variable.TimeValues
         values  = variable.Values
         domains = variable.Domains
+
+        # deep copy domainIndexes because it is a data member and gets cleared if a new plot is added
+        domainIndexes = list(domainIndexes_)
+        domainPoints  = list(domainPoints_)
 
         xAxisLabel = ""
 
@@ -341,7 +345,7 @@ class daeChooseVariable(QtGui.QDialog):
         return daeChooseVariable.get2DAnimatedData(self.variable, self.domainIndexes, self.domainPoints)
 
     @staticmethod
-    def get2DAnimatedData(variable, domainIndexes, domainPoints):
+    def get2DAnimatedData(variable, domainIndexes_, domainPoints_):
         # Achtung, achtung!!
         # It is important to get TimeValues first since the reporter
         # might add more values to the data receiver (in the meantime)
@@ -349,6 +353,10 @@ class daeChooseVariable(QtGui.QDialog):
         times   = variable.TimeValues
         values  = variable.Values
         domains = variable.Domains
+
+        # deep copy domainIndexes because it is a data member and gets cleared if a new plot is added
+        domainIndexes = list(domainIndexes_)
+        domainPoints  = list(domainPoints_)
 
         timePoints = []
         xPoints = []

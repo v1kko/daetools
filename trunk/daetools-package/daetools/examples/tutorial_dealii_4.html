@@ -27,39 +27,31 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>Transient heat conduction.</span>
+<span style='color:#c00000;'>In this tutorial the transient heat conduction problem is solved using</span>
+<span style='color:#c00000;'>the finite element method:</span>
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>                                                                       --&gt;</span>
-<span style='color:#c00000;'>    ID=0: Sun (45 degrees), gradient heat flux = 2 kW/m**2 in direction n = (1,-1)</span>
-<span style='color:#c00000;'>      \ \ \ \ \ \ \</span>
-<span style='color:#c00000;'>       \ \ \ \ \ \ \         ID=2: Inner tube: constant temperature of 300 K</span>
-<span style='color:#c00000;'>        \ \ \ \ \ \ \       /</span>
-<span style='color:#c00000;'>         \ \ \ \ \ \ \     /</span>
-<span style='color:#c00000;'>          \ \ \ \ \ \ \   /</span>
-<span style='color:#c00000;'>           \ \ \ \ \ ****/</span>
-<span style='color:#c00000;'>            \ \ \ **    / **</span>
-<span style='color:#c00000;'>             \ \**    **    **</span>
-<span style='color:#c00000;'>              \ *    *  *    *</span>
-<span style='color:#c00000;'>    ____________**    **    **_____________</span>
-<span style='color:#c00000;'>                  **      **                y = -0.5</span>
-<span style='color:#c00000;'>                 /   ****</span>
-<span style='color:#c00000;'>                /</span>
-<span style='color:#c00000;'>               /</span>
-<span style='color:#c00000;'>             ID=1: Outer surface below y=-0.5, constant flux of 2 kW/m**2</span>
-
 <span style='color:#c00000;'>   dT/dt - kappa * nabla^2(Τ) = g in Omega</span>
 
-<span style='color:#c00000;'>Mesh:</span>
+<span style='color:#c00000;'>The mesh is a pipe submerged into water receiving the heat of the sun at the</span>
+<span style='color:#c00000;'>45 degrees from the top-left direction, the heat from the suroundings and</span>
+<span style='color:#c00000;'>having the constant temperature of the inner tube.</span>
+<span style='color:#c00000;'>The boundary conditions are thus:</span>
+
+<span style='color:#c00000;'>- [at boundary ID=0] Sun shine at 45 degrees, gradient heat flux = 2 kW/m**2 in direction n = (1,-1)</span>
+<span style='color:#c00000;'>- [at boundary ID=1] Outer surface where y &lt;= -0.5, constant flux of 2 kW/m**2</span>
+<span style='color:#c00000;'>- [at boundary ID=2] Inner tube: constant temperature of 300 K</span>
+
+<span style='color:#c00000;'>The pipe mesh is given below:</span>
 
 <span style='color:#c00000;'>.. image:: _static/pipe.png</span>
-<span style='color:#c00000;'>   :width: 400 px</span>
+<span style='color:#c00000;'>   :width: 300 px</span>
 
-<span style='color:#c00000;'>Results at t = 3600s:</span>
+<span style='color:#c00000;'>The temperature plot at t = 3600s:</span>
 
 <span style='color:#c00000;'>.. image:: _static/tutorial_dealii_4-results.png</span>
-<span style='color:#c00000;'>   :width: 600 px</span>
+<span style='color:#c00000;'>   :width: 500 px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> os, sys, numpy, json, math, tempfile
@@ -302,7 +294,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

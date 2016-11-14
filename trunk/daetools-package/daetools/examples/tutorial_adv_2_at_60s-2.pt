@@ -22,7 +22,7 @@
       }
     ],
     [
-      "tutorial_adv_2.ni_HR_fl",
+      "tutorial_adv_2.ni_I_upwind",
       [
         12,
         -1
@@ -31,7 +31,7 @@
         "60.0",
         "*"
       ],
-      "ni_HR_fl(60.0, *)",
+      "ni_I_upwind(60.0, *)",
       {
         "color": "#0000ff",
         "linestyle": "-",
@@ -41,6 +41,48 @@
         "markerfacecolor": "#0000ff",
         "markersize": 6.0
       }
+    ],
+    [
+      "tutorial_adv_2.ni_II_upwind",
+      [
+        12,
+        -1
+      ],
+      [
+        "60.0",
+        "*"
+      ],
+      "ni_II_upwind(60.0, *)",
+      {
+        "color": "#ff0000",
+        "linestyle": "-",
+        "linewidth": 0.5,
+        "marker": "^",
+        "markeredgecolor": "#000000",
+        "markerfacecolor": "#ff0000",
+        "markersize": 6.0
+      }
+    ],
+    [
+      "tutorial_adv_2.ni_II_central",
+      [
+        12,
+        -1
+      ],
+      [
+        "60.0",
+        "*"
+      ],
+      "ni_II_central(60.0, *)",
+      {
+        "color": "#008000",
+        "linestyle": "-",
+        "linewidth": 0.5,
+        "marker": "p",
+        "markeredgecolor": "#000000",
+        "markerfacecolor": "#008000",
+        "markersize": 6.0
+      }
     ]
   ],
   "gridOn": true,
@@ -48,18 +90,18 @@
   "plotTitle": "",
   "plotType": 0,
   "updateInterval": 0,
-  "windowTitle": "tutorial_adv_2.ni_HR_fl(60.0, *)",
+  "windowTitle": "tutorial_adv_2.ni_II_central(60.0, *)",
   "xlabel": "L (um)",
-  "xmax": 85.0,
+  "xmax": 90.0,
   "xmax_policy": 0,
-  "xmin": 65.0,
+  "xmin": 60.0,
   "xmin_policy": 0,
   "xscale": "linear",
   "xtransform": 1.0,
-  "ylabel": "ni (1/m)",
-  "ymax": 10500000000.0,
+  "ylabel": "ni (#/m)",
+  "ymax": 13464160035.0,
   "ymax_policy": 1,
-  "ymin": -500000000.0,
+  "ymin": -4500000000.0,
   "ymin_policy": 1,
   "yscale": "linear",
   "ytransform": 1.0

@@ -27,16 +27,21 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This is a simple example to test daetools support for:</span>
+<span style='color:#c00000;'>This tutorial introduces the following concepts:</span>
 
-<span style='color:#c00000;'>- Scilab/GNU_Octave/Matlab MEX functions</span>
-<span style='color:#c00000;'>- Simulink S-functions</span>
-<span style='color:#c00000;'>- Modelica code-generator</span>
-<span style='color:#c00000;'>- gPROMS code-generator</span>
-<span style='color:#c00000;'>- FMI code-generator (for Co-Simulation)</span>
+<span style='color:#c00000;'>- DAE Tools code-generators</span>
 
-<span style='color:#c00000;'>The model has two inlet and two outlet ports.</span>
-<span style='color:#c00000;'>The values of the outlets are equal to inputs multiplied by a multiplier &quot;m&quot;:</span>
+<span style='color:#c00000;'>  - Modelica code-generator</span>
+<span style='color:#c00000;'>  - gPROMS code-generator</span>
+<span style='color:#c00000;'>  - FMI code-generator (for Co-Simulation)</span>
+
+<span style='color:#c00000;'>- DAE Tools model-exchange capabilities:</span>
+
+<span style='color:#c00000;'>  - Scilab/GNU_Octave/Matlab MEX functions</span>
+<span style='color:#c00000;'>  - Simulink S-functions</span>
+
+<span style='color:#c00000;'>The model represent a simple multiplier block. It contains two inlet and two outlet ports.</span>
+<span style='color:#c00000;'>The outlets values are equal to inputs values multiplied by a multiplier &quot;m&quot;:</span>
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
@@ -47,13 +52,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>  STN('Multipliers'):</span>
-<span style='color:#c00000;'>      when 'variableMultipliers':</span>
-<span style='color:#c00000;'>          dm1/dt   = p1</span>
-<span style='color:#c00000;'>          dm2[]/dt = p2</span>
-<span style='color:#c00000;'>      when 'constantMultipliers':</span>
-<span style='color:#c00000;'>          dm1/dt   = 0</span>
-<span style='color:#c00000;'>          dm2[]/dt = 0</span>
+<span style='color:#c00000;'>   STN Multipliers</span>
+<span style='color:#c00000;'>      case variableMultipliers:</span>
+<span style='color:#c00000;'>         dm1/dt   = p1</span>
+<span style='color:#c00000;'>         dm2[]/dt = p2</span>
+<span style='color:#c00000;'>      case constantMultipliers:</span>
+<span style='color:#c00000;'>         dm1/dt   = 0</span>
+<span style='color:#c00000;'>         dm2[]/dt = 0</span>
 <span style='color:#c00000;'>        </span>
 <span style='color:#c00000;'>(that is the multipliers can be constant or variable).</span>
 
@@ -66,6 +71,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>1. Inlet ports must be DOFs (that is to have their values asssigned),</span>
 <span style='color:#c00000;'>   for they can't be connected when the model is simulated outside of daetools context.</span>
 <span style='color:#c00000;'>2. Only scalar output ports are supported at the moment!! (Simulink issue)</span>
+
+<span style='color:#c00000;'>The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for</span>
+<span style='color:#c00000;'>the constant multipliers (m1 = 2):</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_adv_3-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
+
+<span style='color:#c00000;'>The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for</span>
+<span style='color:#c00000;'>the variable multipliers (dm1/dt = 10, m1(t=0) = 2):</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_adv_3-results2.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 
 <span style='color:#c00000;'>FMI Cross-Check results:</span>
 
@@ -242,13 +259,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
         nw <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.w.NumberOfPoints
 
-        <span style='color:#0000ff;'>self</span>.m.stnMultipliers.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;variableMultipliers&quot;</span>
+        <span style='color:#0000ff;'>self</span>.m.stnMultipliers.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;constantMultipliers&quot;</span>
 
         <span style='color:#0000ff;'>self</span>.m.in1.y.AssignValue(<span style='color:#c000c0;'>1</span>)
         <span style='color:#0000ff;'>self</span>.m.in2.y.AssignValues(numpy.ones(nw) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>2</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.m1.SetInitialCondition(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.m2.SetInitialConditions(numpy.ones(nw))
+        <span style='color:#0000ff;'>self</span>.m.m1.SetInitialCondition(<span style='color:#c000c0;'>2</span>)
+        <span style='color:#0000ff;'>self</span>.m.m2.SetInitialConditions(<span style='color:#c000c0;'>3</span><b><span style='color:#0000ff;'>*</span></b>numpy.ones(nw))
 
 <b>def</b> run_code_generators(simulation, log):
     <span style='color:#008000;'># Demonstration of daetools code-generators:</span>
@@ -325,6 +342,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
+
+    <span style='color:#008000;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
 
     <span style='color:#008000;'># Run code-generators</span>
     run_code_generators(simulation, simulation.Log)

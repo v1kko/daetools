@@ -29,19 +29,29 @@
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 <span style='color:#c00000;'>In this example a simple transient heat convection-diffusion equation is solved.</span>
 
-<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_2-heat_convection.png</span>
-<span style='color:#c00000;'>   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) + nabla.(uT)= g(T) in Omega</span>
-<span style='color:#c00000;'>   :width: 300 px</span>
+<span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>Mesh:</span>
+<span style='color:#c00000;'>   dT/dt - kappa/(rho*cp)*nabla^2(T) + nabla.(uT) = g(T) in Omega</span>
+
+<span style='color:#c00000;'>The fluid flows from the left side to the right with constant velocity of 0.01 m/s.</span>
+<span style='color:#c00000;'>The inlet temperature for 0.2 &lt;= y &lt;= 0.3 is iven by the following expression:</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>   T_left = T_base + T_offset*|sin(pi*t/25)| on dOmega</span>
+
+<span style='color:#c00000;'>creating a bubble-like regions of higher temperature that flow towards the right end</span>
+<span style='color:#c00000;'>and slowly diffuse into the bulk flow of the fluid due to the heat conduction.</span>
+
+<span style='color:#c00000;'>The mesh is rectangular with the refined elements close to the left/right ends:</span>
 
 <span style='color:#c00000;'>.. image:: _static/rect(1.5,0.5)-100x50.png</span>
 <span style='color:#c00000;'>   :width: 500 px</span>
 
-<span style='color:#c00000;'>Results at t = 500s:</span>
+<span style='color:#c00000;'>The temperature plot at t = 500s:</span>
 
 <span style='color:#c00000;'>.. image:: _static/tutorial_dealii_2-results.png</span>
-<span style='color:#c00000;'>   :width: 500 px</span>
+<span style='color:#c00000;'>   :width: 600 px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> os, sys, numpy, json, tempfile
@@ -272,7 +282,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

@@ -18,25 +18,32 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 __doc__ = """This tutorial demonstrates a solution of a discretized population balance using
 high resolution upwind schemes with flux limiter.
-Source:
-Qamar et al. A comparative study of high resolution schemes for solving population balances
-in crystallization, Computers and Chemical Engineering, 2006.
+Source: Qamar et al. A comparative study of high resolution schemes for solving population
+balances in crystallization, Computers and Chemical Engineering, 2006.
+
 It shows a comparison between the analytical results and various discretization schemes:
 
 - I order upwind scheme
 - II order upwind scheme
 - II order central scheme
-- High resolution Van Leer k-interpolation (k = 1/3) upwind scheme with Koren (1993) flux limiter
+- Cell centered finite volume method solved using the high resolution upwind scheme
+  (Van Leer k-interpolation with k = 1/3 and Koren flux limiter)
 
-The problem is from the section 3.1 Size-independent growth. Could be also found in:
-Motz et al., Comparison of numerical methods for the simulation of 
-dispersed phase systems, Chem. Eng. Sci., 2002
+The problem is from the section 3.1 Size-independent growth.
+Could be also found in: Motz et al., Comparison of numerical methods for the simulation of
+dispersed phase systems, Chem. Eng. Sci., 2002.
 
-Results:
+The comparison of number density functions between the analytical solution and the
+high-resolution scheme:
 
-.. image:: _static/dpb-zoomed.png
-   :height: 300px
-                         
+.. image:: _static/tutorial_adv_2-results.png
+   :width: 500px
+
+The comparison of number density functions between the analytical solution and the
+I order upwind, II order upwind and II order central difference schemes:
+
+.. image:: _static/tutorial_adv_2-results2.png
+   :width: 500px
 """
 
 import sys, numpy
@@ -76,7 +83,7 @@ class modelMoC(daeModel):
         self.ni_I          = daeVariable("ni_I_upwind",    pbm_number_density_t, self, "I order upwind scheme",                     [self.L])
         self.ni_II         = daeVariable("ni_II_upwind",   pbm_number_density_t, self, "II order upwind scheme",                    [self.L])
         self.ni_II_central = daeVariable("ni_II_central",  pbm_number_density_t, self, "II order ceneter finite difference",        [self.L])
-        self.ni_k_int      = daeVariable("ni_VanLeer",     pbm_number_density_t, self, "Van Leer k-interpolation scheme (k = 1/3)", [self.L])
+        self.ni_k_int      = daeVariable("ni_HR_fl",       pbm_number_density_t, self, "Van Leer k-interpolation scheme (k = 1/3)", [self.L])
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)

@@ -17,12 +17,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example we use the same conduction problem as in the tutorial 4.
+This tutorial presents a user-defined simulation which instead of simply integrating
+the system shows the pyQt graphical user interface (GUI) where the simulation can be
+manipulated (a sort of interactive operating procedure).
 
-Here we introduce:
+The model in this example is the same as in the tutorial 4.
 
-- Interactive operating procedures
+The simulation.Run() function is modifed to show the graphical user interface (GUI)
+that allows to specify the input power of the heater (degree of freedom), a time period
+for integration, and a reporting interval. The GUI also contains the temperature plot
+updated in real time, as the simulation progresses.
 
+The screenshot of the pyQt GUI:
+
+.. image:: _static/tutorial_adv_1-screenshot.png
+   :width: 500px
 """
 
 import sys

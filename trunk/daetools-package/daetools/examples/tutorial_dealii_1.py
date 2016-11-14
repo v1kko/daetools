@@ -19,7 +19,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """An introductory example of the support for Finite Elements in daetools.
 The basic idea is to use an external library to perform all low-level tasks such as
 management of mesh elements, degrees of freedom, matrix assembly, management of
-boundary conditions etc. deal.II library (www.dealii.org) provides all these features.
+boundary conditions etc. deal.II library (www.dealii.org) is employed for these tasks.
 The mass and stiffness matrices and the load vector assembled in deal.II library are
 used to generate a set of algebraic/differential equations in the following form:
 [Mij]{dx/dt} + [Aij]{x} = {Fi}.
@@ -37,13 +37,11 @@ In addition, non-linear and DAE finite element systems are automatically support
 In this tutorial the simple transient heat conduction problem is solved using
 the finite element method:
 
-.. image:: _static/deal.II_tutorial_1-heat_conduction.png
-   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) = g(T) in Omega
-   :width: 200 px
+.. code-block:: none
 
+   dT/dt - kappa/(rho*cp)*nabla^2(T) = g(T) in Omega
 
-The mesh is rectangular with two holes and similar
-to the mesh in the step-49 deal.II example:
+The mesh is rectangular with two holes, similar to the mesh in step-49 deal.II example:
 
 .. image:: _static/step-49.png
    :alt:
@@ -52,7 +50,7 @@ to the mesh in the step-49 deal.II example:
 Dirichlet boundary conditions are set to 300 K on the outer rectangle,
 350 K on the inner ellipse and 250 K on the inner diamond.
 
-Sample results (at t = 500s) generated in VisIt:
+The temperature plot at t = 500s (generated in VisIt):
 
 .. image:: _static/tutorial_dealii_1-results.png
    :width: 600 px

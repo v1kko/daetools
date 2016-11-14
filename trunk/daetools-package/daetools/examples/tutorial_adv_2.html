@@ -28,25 +28,32 @@
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span><span style='color:#c00000;'>This tutorial demonstrates a solution of a discretized population balance using</span>
 <span style='color:#c00000;'>high resolution upwind schemes with flux limiter.</span>
-<span style='color:#c00000;'>Source:</span>
-<span style='color:#c00000;'>Qamar et al. A comparative study of high resolution schemes for solving population balances</span>
-<span style='color:#c00000;'>in crystallization, Computers and Chemical Engineering, 2006.</span>
+<span style='color:#c00000;'>Source: Qamar et al. A comparative study of high resolution schemes for solving population</span>
+<span style='color:#c00000;'>balances in crystallization, Computers and Chemical Engineering, 2006.</span>
+
 <span style='color:#c00000;'>It shows a comparison between the analytical results and various discretization schemes:</span>
 
 <span style='color:#c00000;'>- I order upwind scheme</span>
 <span style='color:#c00000;'>- II order upwind scheme</span>
 <span style='color:#c00000;'>- II order central scheme</span>
-<span style='color:#c00000;'>- High resolution Van Leer k-interpolation (k = 1/3) upwind scheme with Koren (1993) flux limiter</span>
+<span style='color:#c00000;'>- Cell centered finite volume method solved using the high resolution upwind scheme</span>
+<span style='color:#c00000;'>  (Van Leer k-interpolation with k = 1/3 and Koren flux limiter)</span>
 
-<span style='color:#c00000;'>The problem is from the section 3.1 Size-independent growth. Could be also found in:</span>
-<span style='color:#c00000;'>Motz et al., Comparison of numerical methods for the simulation of </span>
-<span style='color:#c00000;'>dispersed phase systems, Chem. Eng. Sci., 2002</span>
+<span style='color:#c00000;'>The problem is from the section 3.1 Size-independent growth.</span>
+<span style='color:#c00000;'>Could be also found in: Motz et al., Comparison of numerical methods for the simulation of</span>
+<span style='color:#c00000;'>dispersed phase systems, Chem. Eng. Sci., 2002.</span>
 
-<span style='color:#c00000;'>Results:</span>
+<span style='color:#c00000;'>The comparison of number density functions between the analytical solution and the</span>
+<span style='color:#c00000;'>high-resolution scheme:</span>
 
-<span style='color:#c00000;'>.. image:: _static/dpb-zoomed.png</span>
-<span style='color:#c00000;'>   :height: 300px</span>
-<span style='color:#c00000;'>                         </span>
+<span style='color:#c00000;'>.. image:: _static/tutorial_adv_2-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
+
+<span style='color:#c00000;'>The comparison of number density functions between the analytical solution and the</span>
+<span style='color:#c00000;'>I order upwind, II order upwind and II order central difference schemes:</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_adv_2-results2.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys, numpy
@@ -86,7 +93,7 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <span style='color:#0000ff;'>self</span>.ni_I          <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni_I_upwind&quot;</span>,    pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;I order upwind scheme&quot;</span>,                     [<span style='color:#0000ff;'>self</span>.L])
         <span style='color:#0000ff;'>self</span>.ni_II         <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni_II_upwind&quot;</span>,   pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;II order upwind scheme&quot;</span>,                    [<span style='color:#0000ff;'>self</span>.L])
         <span style='color:#0000ff;'>self</span>.ni_II_central <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni_II_central&quot;</span>,  pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;II order ceneter finite difference&quot;</span>,        [<span style='color:#0000ff;'>self</span>.L])
-        <span style='color:#0000ff;'>self</span>.ni_k_int      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni_VanLeer&quot;</span>,     pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#0000ff;'>self</span>.L])
+        <span style='color:#0000ff;'>self</span>.ni_k_int      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni_HR_fl&quot;</span>,       pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#0000ff;'>self</span>.L])
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)

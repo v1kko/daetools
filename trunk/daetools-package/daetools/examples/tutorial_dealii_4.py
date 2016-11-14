@@ -17,36 +17,28 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Transient heat conduction.
+In this tutorial the transient heat conduction problem is solved using
+the finite element method:
 
 .. code-block:: none
 
-                                                                       -->
-    ID=0: Sun (45 degrees), gradient heat flux = 2 kW/m**2 in direction n = (1,-1)
-      \ \ \ \ \ \ \
-       \ \ \ \ \ \ \         ID=2: Inner tube: constant temperature of 300 K
-        \ \ \ \ \ \ \       /
-         \ \ \ \ \ \ \     /
-          \ \ \ \ \ \ \   /
-           \ \ \ \ \ ****/
-            \ \ \ **    / **
-             \ \**    **    **
-              \ *    *  *    *
-    ____________**    **    **_____________
-                  **      **                y = -0.5
-                 /   ****
-                /
-               /
-             ID=1: Outer surface below y=-0.5, constant flux of 2 kW/m**2
-
    dT/dt - kappa * nabla^2(Τ) = g in Omega
 
-Mesh:
+The mesh is a pipe submerged into water receiving the heat of the sun at the
+45 degrees from the top-left direction, the heat from the suroundings and
+having the constant temperature of the inner tube.
+The boundary conditions are thus:
+
+- [at boundary ID=0] Sun shine at 45 degrees, gradient heat flux = 2 kW/m**2 in direction n = (1,-1)
+- [at boundary ID=1] Outer surface where y <= -0.5, constant flux of 2 kW/m**2
+- [at boundary ID=2] Inner tube: constant temperature of 300 K
+
+The pipe mesh is given below:
 
 .. image:: _static/pipe.png
    :width: 300 px
 
-Results at t = 3600s:
+The temperature plot at t = 3600s:
 
 .. image:: _static/tutorial_dealii_4-results.png
    :width: 500 px

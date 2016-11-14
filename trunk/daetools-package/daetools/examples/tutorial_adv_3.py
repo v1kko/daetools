@@ -17,16 +17,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This is a simple example to test daetools support for:
+This tutorial introduces the following concepts:
 
-- Scilab/GNU_Octave/Matlab MEX functions
-- Simulink S-functions
-- Modelica code-generator
-- gPROMS code-generator
-- FMI code-generator (for Co-Simulation)
+- DAE Tools code-generators
 
-The model has two inlet and two outlet ports.
-The values of the outlets are equal to inputs multiplied by a multiplier "m":
+  - Modelica code-generator
+  - gPROMS code-generator
+  - FMI code-generator (for Co-Simulation)
+
+- DAE Tools model-exchange capabilities:
+
+  - Scilab/GNU_Octave/Matlab MEX functions
+  - Simulink S-functions
+
+The model represent a simple multiplier block. It contains two inlet and two outlet ports.
+The outlets values are equal to inputs values multiplied by a multiplier "m":
 
 .. code-block:: none
 
@@ -37,13 +42,13 @@ where multipliers m1 and m2[] are:
 
 .. code-block:: none
 
-  STN('Multipliers'):
-      when 'variableMultipliers':
-          dm1/dt   = p1
-          dm2[]/dt = p2
-      when 'constantMultipliers':
-          dm1/dt   = 0
-          dm2[]/dt = 0
+   STN Multipliers
+      case variableMultipliers:
+         dm1/dt   = p1
+         dm2[]/dt = p2
+      case constantMultipliers:
+         dm1/dt   = 0
+         dm2[]/dt = 0
         
 (that is the multipliers can be constant or variable).
 
@@ -56,6 +61,18 @@ Notate bene:
 1. Inlet ports must be DOFs (that is to have their values asssigned),
    for they can't be connected when the model is simulated outside of daetools context.
 2. Only scalar output ports are supported at the moment!! (Simulink issue)
+
+The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for
+the constant multipliers (m1 = 2):
+
+.. image:: _static/tutorial_adv_3-results.png
+   :width: 500px
+
+The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for
+the variable multipliers (dm1/dt = 10, m1(t=0) = 2):
+
+.. image:: _static/tutorial_adv_3-results2.png
+   :width: 500px
 
 FMI Cross-Check results:
 
@@ -232,13 +249,13 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         nw = self.m.w.NumberOfPoints
 
-        self.m.stnMultipliers.ActiveState = "variableMultipliers"
+        self.m.stnMultipliers.ActiveState = "constantMultipliers"
 
         self.m.in1.y.AssignValue(1)
         self.m.in2.y.AssignValues(numpy.ones(nw) * 2)
 
-        self.m.m1.SetInitialCondition(1)
-        self.m.m2.SetInitialConditions(numpy.ones(nw))
+        self.m.m1.SetInitialCondition(2)
+        self.m.m2.SetInitialConditions(3*numpy.ones(nw))
 
 def run_code_generators(simulation, log):
     # Demonstration of daetools code-generators:

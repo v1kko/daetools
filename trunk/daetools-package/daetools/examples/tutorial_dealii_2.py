@@ -19,16 +19,26 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 In this example a simple transient heat convection-diffusion equation is solved.
 
-.. image:: _static/deal.II_tutorial_2-heat_convection.png
-   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) + nabla.(uT)= g(T) in Omega
-   :width: 300 px
+.. code-block:: none
 
-Mesh:
+   dT/dt - kappa/(rho*cp)*nabla^2(T) + nabla.(uT) = g(T) in Omega
+
+The fluid flows from the left side to the right with constant velocity of 0.01 m/s.
+The inlet temperature for 0.2 <= y <= 0.3 is iven by the following expression:
+
+.. code-block:: none
+
+   T_left = T_base + T_offset*|sin(pi*t/25)| on dOmega
+
+creating a bubble-like regions of higher temperature that flow towards the right end
+and slowly diffuse into the bulk flow of the fluid due to the heat conduction.
+
+The mesh is rectangular with the refined elements close to the left/right ends:
 
 .. image:: _static/rect(1.5,0.5)-100x50.png
    :width: 500 px
 
-Results at t = 500s:
+The temperature plot at t = 500s:
 
 .. image:: _static/tutorial_dealii_2-results.png
    :width: 600 px

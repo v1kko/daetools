@@ -17,18 +17,20 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Flow through porous media. Darcy's law (deal.II step-20).
+In this example a simple flow through porous media is solved (deal.II step-20).
 
-.. image:: _static/deal.II_tutorial_5-porous_media.png
-   :alt: K^{-1} u + nabla(p) = 0, -div(u) = -f, in Omega; p = g on dGamma
-   :width: 200 px
+.. code-block:: none
 
-Mesh:
+   K^{-1} u + nabla(p) = 0 in Omega
+   -div(u) = -f in Omega
+   p = g on dOmega
+
+The mesh is a simple square:
 
 .. image:: _static/square(-1,1)x(-1,1)-50x50.png
    :width: 300 px
 
-Results at t = 500s:
+The velocity plot at t = 500s:
 
 .. image:: _static/tutorial_dealii_5-results.png
    :width: 500 px

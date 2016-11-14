@@ -29,7 +29,7 @@
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span><span style='color:#c00000;'>An introductory example of the support for Finite Elements in daetools.</span>
 <span style='color:#c00000;'>The basic idea is to use an external library to perform all low-level tasks such as</span>
 <span style='color:#c00000;'>management of mesh elements, degrees of freedom, matrix assembly, management of</span>
-<span style='color:#c00000;'>boundary conditions etc. deal.II library (www.dealii.org) provides all these features.</span>
+<span style='color:#c00000;'>boundary conditions etc. deal.II library (www.dealii.org) is employed for these tasks.</span>
 <span style='color:#c00000;'>The mass and stiffness matrices and the load vector assembled in deal.II library are</span>
 <span style='color:#c00000;'>used to generate a set of algebraic/differential equations in the following form:</span>
 <span style='color:#c00000;'>[Mij]{dx/dt} + [Aij]</span><span style='color:#0057ae;'>{x}</span><span style='color:#c00000;'> = </span><span style='color:#0057ae;'>{Fi}</span><span style='color:#c00000;'>.</span>
@@ -47,13 +47,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>In this tutorial the simple transient heat conduction problem is solved using</span>
 <span style='color:#c00000;'>the finite element method:</span>
 
-<span style='color:#c00000;'>.. image:: _static/deal.II_tutorial_1-heat_conduction.png</span>
-<span style='color:#c00000;'>   :alt: dT/dt - kappa/(rho*cp}*nabla^2(T) = g(T) in Omega</span>
-<span style='color:#c00000;'>   :width: 200 px</span>
+<span style='color:#c00000;'>.. code-block:: none</span>
 
+<span style='color:#c00000;'>   dT/dt - kappa/(rho*cp)*nabla^2(T) = g(T) in Omega</span>
 
-<span style='color:#c00000;'>The mesh is rectangular with two holes and similar</span>
-<span style='color:#c00000;'>to the mesh in the step-49 deal.II example:</span>
+<span style='color:#c00000;'>The mesh is rectangular with two holes, similar to the mesh in step-49 deal.II example:</span>
 
 <span style='color:#c00000;'>.. image:: _static/step-49.png</span>
 <span style='color:#c00000;'>   :alt:</span>
@@ -62,7 +60,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>Dirichlet boundary conditions are set to 300 K on the outer rectangle,</span>
 <span style='color:#c00000;'>350 K on the inner ellipse and 250 K on the inner diamond.</span>
 
-<span style='color:#c00000;'>Sample results (at t = 500s) generated in VisIt:</span>
+<span style='color:#c00000;'>The temperature plot at t = 500s (generated in VisIt):</span>
 
 <span style='color:#c00000;'>.. image:: _static/tutorial_dealii_1-results.png</span>
 <span style='color:#c00000;'>   :width: 600 px</span>
@@ -261,8 +259,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'>#         The weak form expressions are specified using the functions that wrap deal.II</span>
         <span style='color:#008000;'>#         concepts used to assembly the matrices/vectors. The weak forms in daetools</span>
-        <span style='color:#008000;'>#         represent expressions as the would appear in typical nested for loops.</span>
-        <span style='color:#008000;'>#         In deal.II a typical loop in C++ would look like (i.e. a very simple example given step-7):</span>
+        <span style='color:#008000;'>#         represent expressions as they would appear in typical nested for loops.</span>
+        <span style='color:#008000;'>#         In deal.II a typical cell assembly loop (in C++) would look like</span>
+        <span style='color:#008000;'>#         (i.e. a very simple example given in step-7):</span>
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'>#         typename DoFHandler&lt;dim&gt;::active_cell_iterator cell = dof_handler.begin_active(),</span>
         <span style='color:#008000;'>#                                                        endc = dof_handler.end();</span>
@@ -272,7 +271,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#             {</span>
         <span style='color:#008000;'>#                 for(unsigned int i = 0; i &lt; dofs_per_cell; ++i)</span>
         <span style='color:#008000;'>#                 {</span>
-        <span style='color:#008000;'>#                     for(unsigned int i = 0; i &lt; dofs_per_cell; ++i)</span>
+        <span style='color:#008000;'>#                     for(unsigned int j = 0; j &lt; dofs_per_cell; ++j)</span>
         <span style='color:#008000;'>#                     {</span>
         <span style='color:#008000;'>#                         cell_matrix(i,j) += ((fe_values.shape_grad(i,q_point) *</span>
         <span style='color:#008000;'>#                                               fe_values.shape_grad(j,q_point)</span>
@@ -292,8 +291,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#         and only weak form expressions are required - all other data are managed automatically, in a generic way.</span>
         <span style='color:#008000;'>#         Obviously, the generic loops can be used to solve many FE problems but not all.</span>
         <span style='color:#008000;'>#         However, they can support a large number of problems at the moment.</span>
+        <span style='color:#008000;'>#         In the future they will be expanded to support a broader class of problems.</span>
         <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#         A function is provided for the most of the functionality provided by deal.II FEValues&lt;dim&gt; and</span>
+        <span style='color:#008000;'>#         Functions are developed for the most of the functionality provided by deal.II FEValues&lt;dim&gt; and</span>
         <span style='color:#008000;'>#         FEFaceValues&lt;dim&gt; classes used for matrix assembly. The current list include (for 1D, 2D and 3D):</span>
         <span style='color:#008000;'>#          - phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II</span>
         <span style='color:#008000;'>#          - dphi (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II</span>
@@ -341,6 +341,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
                                                   surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> surfaceIntegrals,
                                                   volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> volumeIntegrals)
 
+        <span style='color:#008000;'># Print the assembled weak form as they will be seen from deal.II wrappers:</span>
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Transient heat conduction equation:'</span>)
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Aij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Aij))
         <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Mij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Mij))
@@ -458,7 +459,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
     
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

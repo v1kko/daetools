@@ -18,7 +18,12 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 __doc__ = """
 This tutorial illustrates the C++ MPI code generator.
-The model is identical to the model from the tutorial11.
+The model is identical to the model in the tutorial 11.
+
+The temperature plot (at t=100s, x=0.5128, y=*):
+
+.. image:: _static/tutorial_adv_4-results.png
+   :width: 500px
 """
 
 import sys, numpy, itertools
@@ -132,12 +137,6 @@ class simTutorial(daeSimulation):
         for x in range(1, self.m.x.NumberOfPoints - 1):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
-
-    def DoDataPartitioning(self, equationsOverallIndexes, mapOverallBlockIndexes):
-        #for kv in equationsOverallIndexes.OverallIndexes_Equations:
-        #    print [v for v in kv.data()]
-        #print [str(key_value) for key_value in mapOverallBlockIndexes]
-        pass
 
 def run_code_generators(simulation, log):
     # Demonstration of daetools c++/MPI code-generator:
