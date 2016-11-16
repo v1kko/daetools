@@ -125,10 +125,8 @@ class simTutorial(daeSimulation):
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        n = 10
-
-        self.m.x.CreateStructuredGrid(n, 0, 0.1)
-        self.m.y.CreateStructuredGrid(n, 0, 0.1)
+        self.m.x.CreateStructuredGrid(10, 0, 0.1)
+        self.m.y.CreateStructuredGrid(10, 0, 0.1)
 
         # Nq is an array of size 2
         self.m.Nq.CreateArray(2)

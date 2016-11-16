@@ -1,0 +1,100 @@
+{
+  "curves": [
+    [
+      "tutorial_che_1.Ca",
+      [
+        -1
+      ], 
+      [
+        "*"
+      ], 
+      "tutorial_che_1.Ca(*)",
+      {
+        "color": "black", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "o", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "black", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial_che_1.Cb",
+      [
+        -1
+      ], 
+      [
+        "*"
+      ], 
+      "tutorial_che_1.Cb(*)",
+      {
+        "color": "blue", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "s", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "blue", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial_che_1.Cc",
+      [
+        -1
+      ], 
+      [
+        "*"
+      ], 
+      "tutorial_che_1.Cc(*)",
+      {
+        "color": "red", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "^", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "red", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial_che_1.Cd",
+      [
+        -1
+      ], 
+      [
+        "*"
+      ], 
+      "tutorial_che_1.Cd(*)",
+      {
+        "color": "green", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "p", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "green", 
+        "markersize": 6
+      }
+    ]
+  ], 
+  "gridOn": true, 
+  "legendOn": true, 
+  "plotTitle": "", 
+  "plotType": 0, 
+  "updateInterval": 0, 
+  "windowTitle": "Ca,Cb,Cc,Cd(*)", 
+  "xlabel": "Time (s)", 
+  "xmax": 11340.0, 
+  "xmax_policy": 0, 
+  "xmin": -540.0, 
+  "xmin_policy": 0, 
+  "xscale": "linear", 
+  "xtransform": 1.0, 
+  "ylabel": "C (mol/m**3)", 
+  "ymax": 2646.169818101745, 
+  "ymax_policy": 1, 
+  "ymin": -111.30523748556222, 
+  "ymin_policy": 1, 
+  "yscale": "linear", 
+  "ytransform": 1.0
+}

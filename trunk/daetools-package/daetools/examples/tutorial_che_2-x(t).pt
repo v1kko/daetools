@@ -1,0 +1,45 @@
+{
+  "curves": [
+    [
+      "tutorial_che_2.x", 
+      [
+        120, 
+        -1
+      ], 
+      [
+        "7200.0", 
+        "*"
+      ], 
+      "tutorial_che_2.x(7200.0, *)", 
+      {
+        "color": "#000000", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "o", 
+        "markeredgecolor": "#000000", 
+        "markerfacecolor": "#000000", 
+        "markersize": 6
+      }
+    ]
+  ], 
+  "gridOn": true, 
+  "legendOn": true, 
+  "plotTitle": "", 
+  "plotType": 0, 
+  "updateInterval": 0, 
+  "windowTitle": "tutorial_che_2.x(7200.0, *)", 
+  "xlabel": "Tray number", 
+  "xmax": 33.549999999999997, 
+  "xmax_policy": 0, 
+  "xmin": -0.55000000000000004, 
+  "xmin_policy": 0, 
+  "xscale": "linear", 
+  "xtransform": 1.0, 
+  "ylabel": "x", 
+  "ymax": 0.97896213138513111, 
+  "ymax_policy": 1, 
+  "ymin": 0.0210391591585452, 
+  "ymin_policy": 1, 
+  "yscale": "linear", 
+  "ytransform": 1.0
+}

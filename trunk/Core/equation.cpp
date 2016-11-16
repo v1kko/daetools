@@ -960,8 +960,8 @@ void daeEquation::Save(io::xmlTag_t* pTag) const
 	strName = "EquationType";
 	SaveEnum(pTag, strName, GetEquationType());
 
-    strName = "Expression";
-    adNode::SaveNode(pTag, strName, m_pResidualNode.get());
+    //strName = "Expression";
+    //adNode::SaveNode(pTag, strName, m_pResidualNode.get());
 
     strName = "Residual";
     //SaveNodeAsMathML(pTag, strName);

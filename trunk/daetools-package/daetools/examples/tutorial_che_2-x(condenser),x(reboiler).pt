@@ -1,0 +1,66 @@
+{
+  "curves": [
+    [
+      "tutorial_che_2.x", 
+      [
+        -1, 
+        0
+      ], 
+      [
+        "*", 
+        "1.0"
+      ], 
+      "tutorial_che_2.x(*, 1.0)", 
+      {
+        "color": "black", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "o", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "black", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial_che_2.x", 
+      [
+        -1, 
+        31
+      ], 
+      [
+        "*", 
+        "32.0"
+      ], 
+      "tutorial_che_2.x(*, 32.0)", 
+      {
+        "color": "blue", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "s", 
+        "markeredgecolor": "black", 
+        "markerfacecolor": "blue", 
+        "markersize": 6
+      }
+    ]
+  ], 
+  "gridOn": true, 
+  "legendOn": true, 
+  "plotTitle": "", 
+  "plotType": 0, 
+  "updateInterval": 0, 
+  "windowTitle": "tutorial_che_2.x(*, 32.0)", 
+  "xlabel": "Time (s)", 
+  "xmax": 7560.0, 
+  "xmax_policy": 0, 
+  "xmin": -360.0, 
+  "xmin_policy": 0, 
+  "xscale": "linear", 
+  "xtransform": 1.0, 
+  "ylabel": "tutorial_che_2.x ()", 
+  "ymax": 0.97975258282016942, 
+  "ymax_policy": 1, 
+  "ymin": 0.0044399713471949542, 
+  "ymin_policy": 1, 
+  "yscale": "linear", 
+  "ytransform": 1.0
+}

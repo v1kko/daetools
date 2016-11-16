@@ -1,21 +1,13 @@
 /********************************************
-   AUTHOR:              Erwin Aligam 
-   WEBSITE:             http://www.styleshout.com/
-    TEMPLATE NAME:  PixelGreen
-   TEMPLATE CODE:   S-0010
-   VERSION:          1.2   
-    LAST MODIFIED:    June-05-2007          
- *******************************************/ 
- 
-/********************************************
    HTML ELEMENTS
 ********************************************/ 
 /* top elements */
 * { padding: 0; margin: 0; }
 
 body {
-    margin: 0;  padding: 0;
-    font: normal 75%/1.6em /* 'Trebuchet MS', Tahoma, */ sans-serif;
+    margin: 0;
+    padding: 0;
+    font: normal 75%/1.6em sans-serif;
     color: #555;
     background-color: #FFFFFF;
     text-align: center;     
@@ -26,10 +18,10 @@ a { background: inherit; color: #006633; text-decoration: none; }
 a:hover { background: inherit; color: #006699; text-decoration: underline; }
 
 /* headers */
-h1, h2, h3 { font-family: 1em /* 'Trebuchet MS', Tahoma, */ sans-serif; }
+h1, h2, h3 { font-size: 1em; font-family: sans-serif;}
 
-h1 { font-weight: bold; font-size: 1.6em; color: #006633; /* #65944A;*/ }
-h2 { font-size: 1.4em; /*text-transform: uppercase;*/ }
+h1 { font-weight: bold; font-size: 1.4em; color: #006633; /* #65944A;*/ }
+h2 { font-size: 1.2em; /*text-transform: uppercase;*/ }
 h3 { font-size: 1.0em; }
 
 p {
@@ -70,12 +62,14 @@ ul, ol {
 p.indent { text-indent: 20px; }
 
 pre {
+    font-family: Lucida Console,Lucida Sans Typewriter,monaco,Bitstream Vera Sans Mono,monospace;
     padding: 10px;  
     margin: 10px;
     /*border: 1px solid   #99C68E;*/
     text-align:justify;
+    font-weight: 500;
     white-space:pre-wrap;
-    font: 1.2em /* 'Trebuchet MS', Tahoma, */ sans-serif;
+    font: 0.8em;
 }
 
 /* start - table */
@@ -118,7 +112,7 @@ tfoot td {
 
 
 .MathJax {
-    font-size: 9pt;
+    font-size: 1em;
 }
 
 /***********************
@@ -150,7 +144,7 @@ tfoot td {
 }
 #header-content h1#logo {
     position: absolute; 
-    font: bold 30px /* 'Trebuchet MS', */ sans-serif;
+    font: bold 30px sans-serif;
     letter-spacing: -2px; 
     color: #FFF;
     margin: 0; padding: 0;      
@@ -164,7 +158,7 @@ tfoot td {
 }
 #header-content #slogan {
     position: absolute; 
-    font: bold 12px /* 'Trebuchet Ms', */ sans-serif;
+    font: bold 12px sans-serif;
     text-transform: none;
     color: #FFF;    
     margin: 0; padding: 0;
@@ -177,7 +171,7 @@ tfoot td {
 #header-content ul {
     position: absolute;
     right: -5px; top: 10px;
-    font: bolder 1em /* 'Trebuchet MS', */ sans-serif;
+    font: bolder 1em sans-serif;
     color: #FFF;
     list-style: none;
     margin: 0; padding: 0;      
@@ -225,7 +219,7 @@ tfoot td {
     padding: 5px 5px 5px 5px;
     text-align: center;
     margin: 0;  
-    font: bold 1.3em /* 'Trebuchet MS', Tahoma, */ Sans-serif;
+    font: bold 1.3em sans-serif;
 }
 .sidebox {
     background: #FAFAFA;
@@ -236,7 +230,7 @@ tfoot td {
 /*    padding: 0px 0px 0px 0px; */
     padding-left: 20px;  
     margin: 0;  
-    font: bold 1em /* 'Trebuchet MS', Tahoma, */ Sans-serif;
+    font: bold 1em sans-serif;
 }
 
 /* sidebar menu */
@@ -278,7 +272,7 @@ tfoot td {
 /*  padding-top: 10px; */
 /*  padding-top: 5px; */
 /*    border-bottom: 1px solid #f2f2f2;   */
-    font: bold 1.7em /* 'Trebuchet MS', Tahoma, */ sans-serif;
+    font: bold 1.7em sans-serif;
 }
 #main ul li {
     list-style-image: url(bullet.gif);
@@ -312,7 +306,7 @@ tfoot td {
     clear: both;
     padding: 0; 
     margin: 0;
-    font: normal .95em/1.6em /* 'Trebuchet MS', Tahoma, */ sans-serif;
+    font: normal 0.95em/1.6em sans-serif;
     text-align: left;   
 }
 

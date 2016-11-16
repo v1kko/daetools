@@ -4,8 +4,14 @@
     <html>
       <head>
         <link rel="stylesheet" href="dae-tools.css" type="text/css" media="all" />
-        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+        <script type="text/x-mathjax-config">
+            MathJax.Hub.Config({
+            CommonHTML: { linebreaks: { automatic: false } },
+            "HTML-CSS": { linebreaks: { automatic: false } },
+                   SVG: { linebreaks: { automatic: false } }
+            });
         </script>
+        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
         <title>
             DAE Tools (www.daetools.com) Model Report: <xsl:value-of select="Model/Name"/>
         </title>
@@ -50,18 +56,18 @@
         
           <div class="post">
 
-            <h1>
+            <h3>
                 <a class="dae-tools-project" href="http://www.daetools.com">
                     DAE Tools<span class="gray"> Project,</span> www.daetools.com
                 </a>
-            </h1>
+            </h3>
 
             <h1 style="text-align: center;">
                 Model: <xsl:copy-of select="Model/Name"/> 
             </h1>
 
             <xsl:if test="Model/Description != ''">
-                <pre style="font-family:Monospace">
+                <pre>
                     <xsl:value-of select="Model/Description"/>
                 </pre>
             </xsl:if>
@@ -123,13 +129,13 @@
             <xsl:for-each select="Object">
               <tr>
                 <td>
-                  <a>
+<!--                   <a> -->
                     <xsl:attribute name="name">
                       <xsl:value-of select="@ID"/>
                     </xsl:attribute>
                     <!--<xsl:value-of select="Name"/>-->
                     <xsl:copy-of select="MathMLName"/> 
-                  </a>
+<!--                   </a> -->
                 </td>
 
                 <td>

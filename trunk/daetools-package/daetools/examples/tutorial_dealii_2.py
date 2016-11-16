@@ -189,8 +189,9 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_deal_II_2")
+        self.m = modTutorial("tutorial_dealii_2")
         self.m.Description = __doc__
+        self.m.fe_model.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass

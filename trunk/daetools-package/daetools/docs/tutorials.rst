@@ -15,7 +15,7 @@ Tutorials
 .. _tutorials_basic:
 
 .. rubric:: Basic Tutorials
-The `basic tutorials <tutorials-basic.html>`_ illustrate the fundamental modelling concepts in **DAE Tools**,
+The `Basic Tutorials <tutorials-basic.html>`_ illustrate the fundamental modelling concepts in **DAE Tools**,
 simulation options, use of data reporter, data receiver and log objects, DAE and LA solvers, interoperability
 with NumPy, support for discrete systems and external functions.
 
@@ -23,7 +23,7 @@ with NumPy, support for discrete systems and external functions.
 .. _tutorials_advanced:
 
 .. rubric:: Advanced Tutorials
-The `advanced tutorials <tutorials-advanced.html>`_ illustrate the advanced **DAE Tools**
+The `Advanced Tutorials <tutorials-advanced.html>`_ illustrate the advanced **DAE Tools**
 features such as solution of the discretized population balance equations using high resolution
 upwind schemes with flux limiter, modelling of lithium-ion battery based on porous electrode theory,
 interactive operating procedures, code-generation/co-simulation/model-exchange capabilities.
@@ -32,15 +32,22 @@ interactive operating procedures, code-generation/co-simulation/model-exchange c
 .. _tutorials_fe:
 
 .. rubric:: Finite Element Tutorials
-The `finite element tutorials <tutorials-fe.html>`_ illustrate the support for finite element
+The `Finite Element Tutorials <tutorials-fe.html>`_ illustrate the support for finite element
 method in **DAE Tools** through the deal.II library.
 
 
 .. _tutorials_optimisation:
 
 .. rubric:: Optimisation Tutorials
-The `optimisation tutorials <tutorials-optimisation.html>`_ illustrate **DAE Tools** capabilities
+The `Optimisation Tutorials <tutorials-optimisation.html>`_ illustrate **DAE Tools** capabilities
 to solve NLP/MINLP optimisation and parameter estimation problems.
+
+
+.. _tutorials_chemeng:
+
+.. rubric:: Chemical Engineering Examples
+The `Chemical Engineering Tutorials <tutorials-chemeng.html>`_ illustrate various chemical engineering
+problems solved by **DAE Tools**.
 
 
 .. rubric:: The full list of tutorials:
@@ -53,5 +60,6 @@ to solve NLP/MINLP optimisation and parameter estimation problems.
    tutorials-advanced
    tutorials-fe
    tutorials-optimisation
+   tutorials-chemeng
 
 

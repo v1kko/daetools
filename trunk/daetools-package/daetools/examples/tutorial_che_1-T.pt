@@ -1,0 +1,62 @@
+{
+  "curves": [
+    [
+      "tutorial_che_1.T",
+      [
+        -1
+      ], 
+      [
+        "*"
+      ], 
+      "tutorial_che_1.T(*)",
+      {
+        "color": "#000000", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "o", 
+        "markeredgecolor": "#000000", 
+        "markerfacecolor": "#000000", 
+        "markersize": 6
+      }
+    ], 
+    [
+      "tutorial_che_1.T_k",
+      [
+        -1
+      ], 
+      [
+        "*"
+      ], 
+      "tutorial_che_1.T_k(*)",
+      {
+        "color": "#0000ff", 
+        "linestyle": "-", 
+        "linewidth": 0.5, 
+        "marker": "s", 
+        "markeredgecolor": "#000000", 
+        "markerfacecolor": "#0000ff", 
+        "markersize": 6
+      }
+    ]
+  ], 
+  "gridOn": true, 
+  "legendOn": true, 
+  "plotTitle": "", 
+  "plotType": 0, 
+  "updateInterval": 0, 
+  "windowTitle": "T,Tk(*)", 
+  "xlabel": "Time (s)", 
+  "xmax": 11340.0, 
+  "xmax_policy": 0, 
+  "xmin": -540.0, 
+  "xmin_policy": 0, 
+  "xscale": "linear", 
+  "xtransform": 1.0, 
+  "ylabel": "T (K)", 
+  "ymax": 359.38619661000064, 
+  "ymax_policy": 1, 
+  "ymin": 350.43303825666663, 
+  "ymin_policy": 1, 
+  "yscale": "linear", 
+  "ytransform": 1.0
+}

@@ -11,18 +11,6 @@ DAE Tools Documentation
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. toctree::
-   :numbered:
-   :maxdepth: 2
-
-   introduction
-   paradigms
-   architecture
-   getting_daetools
-   getting_started
-   pyDAE_user_guide
-   pyDAE_api_ref
-   tutorials
 
 Journal Articles
 ================
@@ -37,6 +25,22 @@ Presentations
 (on `ResearchGate <https://www.researchgate.net/publication/303260138_DAE_Tools_-_Introduction>`_)
 
 `Overview of DAE Tools <http://www.slideshare.net/DraganNikoli5/dae-tools-overview>`_
+
+Contents
+========
+
+.. toctree::
+   :numbered:
+   :maxdepth: 2 
+
+   introduction
+   paradigms
+   architecture
+   getting_daetools
+   getting_started
+   pyDAE_user_guide
+   pyDAE_api_ref
+   tutorials
 
 
 Indices and tables
