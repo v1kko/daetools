@@ -16,11 +16,11 @@ Chemical Engineering Tutorials
 :ref:`tutorial_che_1`     |tce_1|
 -----------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_2`     |tce_2|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_3`     |tce_3|
 =======================   =================================================================
 
 ..
-    -----------------------   -----------------------------------------------------------------
-    :ref:`tutorial_che_3`     |tce_3|
     -----------------------   -----------------------------------------------------------------
     :ref:`tutorial_che_4`     |tce_4|
     -----------------------   -----------------------------------------------------------------
@@ -30,9 +30,10 @@ Chemical Engineering Tutorials
 
 .. |tce_2| replace:: Binary distillation column model.
 
-..
-    .. |tce_3| replace:: ...
+.. |tce_3| replace:: Batch reactor seeded crystallisation using the method of moments.
 
+
+..
     .. |tce_4| replace:: ...
 
     .. |tce_5| replace:: ...
@@ -75,26 +76,26 @@ Runtime model report    `tutorial_che_2-rt.xml <../examples/tutorial_che_2-rt.xm
 Source code             `tutorial_che_2.py <../examples/tutorial_che_2.html>`_
 =====================   =================================================================
 
+.. _tutorial_che_3:
+
+Chem. Eng. Tutorial 3
+=====================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_che_3
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_che_3.xml <../examples/tutorial_che_3.xml>`_
+Runtime model report    `tutorial_che_3-rt.xml <../examples/tutorial_che_3-rt.xml>`_
+Source code             `tutorial_che_3.py <../examples/tutorial_che_3.html>`_
+=====================   =================================================================
+
+
 ..
-    .. _tutorial_che_3:
-
-    Chem. Eng. Tutorial 3
-    =====================
-    .. rubric:: Description
-
-    .. automodule:: daetools.examples.tutorial_che_3
-    :no-members:
-    :no-undoc-members:
-
-    .. rubric:: Files
-
-    =====================   =================================================================
-    Model report            `tutorial_che_3.xml <../examples/tutorial_che_3.xml>`_
-    Runtime model report    `tutorial_che_3-rt.xml <../examples/tutorial_che_3-rt.xml>`_
-    Source code             `tutorial_che_3.py <../examples/tutorial_che_3.html>`_
-    =====================   =================================================================
-
-
     .. _tutorial_che_4:
 
     Chem. Eng. Tutorial 4
