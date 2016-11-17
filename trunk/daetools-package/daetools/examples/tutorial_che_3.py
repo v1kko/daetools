@@ -21,21 +21,18 @@ Batch reactor seeded crystallization using the method of moments.
 
 References (model equations and input parameters):
 
-- Mitchell, N.A., Frawley, P.J., 2010. Nucleation kinetics of paracetamol–ethanol solutions
-  from metastable zone widths. Journal of Crystal Growth 312, 2740–2746.
-  doi:10.1016/j.jcrysgro.2010.05.043
-- Mitchell, N.A., O’Ciardha, C.T., Frawley, P.J., 2011. Estimation of the growth kinetics
-  for the cooling crystallisation of paracetamol and ethanol solutions. Journal of Crystal
-  Growth 328, 39–49. doi:10.1016/j.jcrysgro.2011.06.016
-- Frawley, P.J., Mitchell, N.A., Ó’Ciardhá, C.T., Hutton, K.W., 2012. The effects of
-  supersaturation, temperature, agitation and seed surface area on the secondary nucleation
-  of paracetamol in ethanol solutions. Chemical Engineering Science 75, 183–197.
-  doi:10.1016/j.ces.2012.03.041
+- Nikolic D.D., Frawley P.J. (2016) Application of the Lagrangian Meshfree Approach
+  to Modelling of Batch Crystallisation: Part I – Modelling of Stirred Tank Hydrodynamics.
+  Chemical Engineering Science 145:317–328.
+  `doi:10.1016/j.ces.2015.08.052 <http://dx.doi.org/10.1016/j.ces.2015.08.052>`_
+- Mitchell N.A., O’Ciardha C.T., Frawley P.J. (2011) Estimation of the growth kinetics
+  for the cooling crystallisation of paracetamol and ethanol solutions.
+  Journal of Crystal Growth 328:39–49.
+  `doi:10.1016/j.jcrysgro.2011.06.016 <http://dx.doi.org/10.1016/j.jcrysgro.2011.06.016>`_
 
 The main assumptions:
 
 - Seeded crystallization
-- No primary nucleation
 - Ideal mixing
 - Fixed cooling rate
 - Size independent growth

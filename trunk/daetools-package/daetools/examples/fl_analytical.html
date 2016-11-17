@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>fl_analytical.py</title>
+</head>
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
+<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                           fl_analytical.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#0000ff;'>import</span> sys, numpy, scipy.interpolate, math
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> daetools.pyDAE.data_reporters <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>import</span> matplotlib.pyplot
+
+<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, g, kg, s, K, mol, kmol, J, um
+
+pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;pbm_number_density_t&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0e+40</span>,  <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-0</span>)
+
+<b>class</b> extfnTranslateInTime(daeScalarExternalFunction):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Model, units, L, ni0, G, i, Time):
+        arguments <b><span style='color:#0000ff;'>=</span></b> {}
+        arguments[<span style='color:#c00000;'>&quot;t&quot;</span>]  <b><span style='color:#0000ff;'>=</span></b> Time
+
+        <span style='color:#0000ff;'>self</span>.L   <b><span style='color:#0000ff;'>=</span></b> L   <span style='color:#008000;'># quantity ndarray</span>
+        <span style='color:#0000ff;'>self</span>.ni0 <b><span style='color:#0000ff;'>=</span></b> ni0 <span style='color:#008000;'># initial ni ndarray</span>
+        <span style='color:#0000ff;'>self</span>.G   <b><span style='color:#0000ff;'>=</span></b> G   <span style='color:#008000;'># quantity</span>
+        <span style='color:#0000ff;'>self</span>.i   <b><span style='color:#0000ff;'>=</span></b> i   <span style='color:#008000;'># index of the point</span>
+
+        <span style='color:#0000ff;'>self</span>.interp <b><span style='color:#0000ff;'>=</span></b> scipy.interpolate.interp1d([qL.value <b>for</b> qL <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>self</span>.L], [ni0 <b>for</b> ni0 <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>self</span>.ni0])
+
+        <span style='color:#008000;'># During the solver iterations, the function is called very often with the same arguments</span>
+        <span style='color:#008000;'># Therefore, cache the last interpolated value to speed up a simulation</span>
+        <span style='color:#0000ff;'>self</span>.cache <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>
+
+        <span style='color:#008000;'># Counters for performance (just an info; not really needed)</span>
+        <span style='color:#0000ff;'>self</span>.counter       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
+        <span style='color:#0000ff;'>self</span>.cache_counter <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
+
+        daeScalarExternalFunction.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Model, units, arguments)
+
+    <b>def</b> Calculate(<span style='color:#0000ff;'>self</span>, values):
+        <span style='color:#008000;'># Increase the call counter every time the function is called</span>
+        <span style='color:#0000ff;'>self</span>.counter <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#c000c0;'>1</span>
+
+        <span style='color:#008000;'># Get the argument from the dictionary of arguments' values.</span>
+        time <b><span style='color:#0000ff;'>=</span></b> values[<span style='color:#c00000;'>&quot;t&quot;</span>].Value
+
+        <span style='color:#008000;'># Here we do not need to return a derivative for it is not a function of variables.</span>
+
+        <span style='color:#008000;'># First check if an interpolated value was already calculated during the previous call</span>
+        <span style='color:#008000;'># If it was return the cached value (derivative part is always equal to zero in this case)</span>
+        <b>if</b> <span style='color:#0000ff;'>self</span>.cache:
+            <b>if</b> <span style='color:#0000ff;'>self</span>.cache[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>==</span></b> time:
+                <span style='color:#0000ff;'>self</span>.cache_counter <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#c000c0;'>1</span>
+                <b>return</b> adouble(<span style='color:#0000ff;'>self</span>.cache[<span style='color:#c000c0;'>1</span>])
+
+        <span style='color:#008000;'># The time received is not in the cache and has to be calculated.</span>
+        new_L <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L[<span style='color:#0000ff;'>self</span>.i].value <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.G.value <b><span style='color:#0000ff;'>*</span></b> time <span style='color:#008000;'># um/s * s -&gt; um</span>
+        <b>if</b> new_L <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#0000ff;'>self</span>.L[<span style='color:#c000c0;'>0</span>].value:
+            res <b><span style='color:#0000ff;'>=</span></b> adouble(<span style='color:#0000ff;'>self</span>.ni0[<span style='color:#c000c0;'>0</span>])
+        <b>else</b>:
+            interp_value <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>float</span>(<span style='color:#0000ff;'>self</span>.interp(new_L))
+            res <b><span style='color:#0000ff;'>=</span></b> adouble(interp_value, <span style='color:#c000c0;'>0</span>)
+
+        <span style='color:#008000;'>#print 'Point %d' % self.i</span>
+        <span style='color:#008000;'>#print '    time   = %.12f' % (time)</span>
+        <span style='color:#008000;'>#print '    L      = %f' % (self.L[self.i].value)</span>
+        <span style='color:#008000;'>#print '    new_L  = %.20f' % (new_L)</span>
+        <span style='color:#008000;'>#print '    new_ni = %f' % (res.Value)</span>
+
+        <span style='color:#008000;'># Save it in the cache for later use</span>
+        <span style='color:#0000ff;'>self</span>.cache <b><span style='color:#0000ff;'>=</span></b> (time, res.Value)
+
+        <b>return</b> res
+
+<b>class</b> modelAnalyticalSolution(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, G, ni_0, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#0000ff;'>self</span>.G    <b><span style='color:#0000ff;'>=</span></b> G
+        <span style='color:#0000ff;'>self</span>.ni_0 <b><span style='color:#0000ff;'>=</span></b> ni_0
+
+        <span style='color:#0000ff;'>self</span>.L <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;L&quot;</span>,  <span style='color:#0000ff;'>self</span>, um, <span style='color:#c00000;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.ni_analytical <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni&quot;</span>, pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Analytical solution&quot;</span>, [<span style='color:#0000ff;'>self</span>.L])
+        <span style='color:#0000ff;'>self</span>.t             <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;t&quot;</span>,  no_t,                 <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Time elapsed in the process&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Time&quot;</span>, <span style='color:#c00000;'>&quot;The time elapsed in the process.&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.t.dt() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#c000c0;'>1.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>s)
+
+        L  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L.Points
+        qL <b><span style='color:#0000ff;'>=</span></b> L <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.L.Units
+        nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L.NumberOfPoints
+
+        <span style='color:#008000;'># Analytical solution</span>
+        <span style='color:#0000ff;'>self</span>.extfns <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>None</span> <b>for</b> n <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, nL)]
+        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, nL):
+            <span style='color:#0000ff;'>self</span>.extfns[i] <b><span style='color:#0000ff;'>=</span></b> extfnTranslateInTime(<span style='color:#c00000;'>&quot;translate&quot;</span>, <span style='color:#0000ff;'>self</span>, pbm_number_density_t.Units, qL, <span style='color:#0000ff;'>self</span>.ni_0, <span style='color:#0000ff;'>self</span>.G, i, Time())
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;ni_analytical(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#c00000;'>&quot;&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ni_analytical(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.extfns[i]()
+
+<b>class</b> simFluxLimiter(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, modelName, N, L, G, ni_0):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modelAnalyticalSolution(modelName, G, ni_0)
+
+        <span style='color:#0000ff;'>self</span>.N    <b><span style='color:#0000ff;'>=</span></b> N
+        <span style='color:#0000ff;'>self</span>.L    <b><span style='color:#0000ff;'>=</span></b> L
+        <span style='color:#0000ff;'>self</span>.G    <b><span style='color:#0000ff;'>=</span></b> G
+        <span style='color:#0000ff;'>self</span>.ni_0 <b><span style='color:#0000ff;'>=</span></b> ni_0
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#0000ff;'>self</span>.m.L.CreateStructuredGrid(<span style='color:#0000ff;'>self</span>.N, <span style='color:#0000ff;'>min</span>(<span style='color:#0000ff;'>self</span>.L), <span style='color:#0000ff;'>max</span>(<span style='color:#0000ff;'>self</span>.L))
+        <span style='color:#0000ff;'>self</span>.m.L.Points <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L
+
+    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># Initial conditions</span>
+        <span style='color:#0000ff;'>self</span>.m.t.SetInitialCondition(<span style='color:#c000c0;'>0.0</span>)
+
+<b>def</b> run_analytical(simulationPrefix, modelName, N, L, G, ni_0, reportingInterval, timeHorizon):
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    dr_plot      <b><span style='color:#0000ff;'>=</span></b> daePlotDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_plot)
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simFluxLimiter(modelName, N, L, G, ni_0)
+
+    <span style='color:#008000;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> reportingInterval
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> timeHorizon
+
+    <span style='color:#008000;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulationPrefix <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(dr_tcpip.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#008000;'># Save the model report and the runtime model report</span>
+    <span style='color:#008000;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
+    <span style='color:#008000;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#008000;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'</span><span style='color:#c00000;'>\n\n</span><span style='color:#c00000;'>TranslateInTime[0] statistics:'</span>)
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  called </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> times (cache value used </span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'> times)'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.m.extfns[<span style='color:#c000c0;'>0</span>].counter,
+                                                             simulation.m.extfns[<span style='color:#c000c0;'>0</span>].cache_counter))
+
+    <b>return</b> dr_plot.Process
+
+<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
+    <span style='color:#008000;'># Create an initial CSD array and growth rate</span>
+    modelName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'dpb_analytical(1)'</span>
+    N    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
+    L_lb <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
+    L_ub <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100.0</span>
+    G    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>*</span></b> um<b><span style='color:#0000ff;'>/</span></b>s
+    ni_0 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>)
+    L    <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(L_lb, L_ub, N<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>)
+    <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, N<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>):
+        <b>if</b> L[i] <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>10</span> <b><span style='color:#0000ff;'>and</span></b> L[i] <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#c000c0;'>20</span>:
+            ni_0[i] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e10</span>
+    reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
+    timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
+
+    process_analytical <b><span style='color:#0000ff;'>=</span></b> run_analytical(modelName, N, L_lb, L_ub, G, ni_0, reportingInterval, timeHorizon)
+    <span style='color:#0000ff;'>print</span>(process_analytical.dictDomains)
+    <span style='color:#0000ff;'>print</span>(process_analytical.dictVariables)
+
+</pre>
+</body>
+</html>

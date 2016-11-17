@@ -16,22 +16,28 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
-__doc__ = """This tutorial demonstrates a solution of a discretized population balance using
+__doc__ = """
+This tutorial demonstrates a solution of a discretized population balance using
 high resolution upwind schemes with flux limiter.
-Source: Qamar et al. A comparative study of high resolution schemes for solving population
-balances in crystallization, Computers and Chemical Engineering, 2006.
+
+Reference: Qamar S., Elsner M.P., Angelov I.A., Warnecke G., Seidel-Morgenstern A. (2006)
+A comparative study of high resolution schemes for solving population balances in crystallization.
+Computers and Chemical Engineering 30(6-7):1119-1131.
+`doi:10.1016/j.compchemeng.2006.02.012 <http://dx.doi.org/10.1016/j.compchemeng.2006.02.012>`_
 
 It shows a comparison between the analytical results and various discretization schemes:
 
 - I order upwind scheme
-- II order upwind scheme
 - II order central scheme
 - Cell centered finite volume method solved using the high resolution upwind scheme
   (Van Leer k-interpolation with k = 1/3 and Koren flux limiter)
 
 The problem is from the section 3.1 Size-independent growth.
-Could be also found in: Motz et al., Comparison of numerical methods for the simulation of
-dispersed phase systems, Chem. Eng. Sci., 2002.
+
+Could be also found in: Motz S., Mitrović A., Gilles E.-D. (2002)
+Comparison of numerical methods for the simulation of dispersed phase systems.
+Chemical Engineering Science 57(20):4329-4344.
+`doi:10.1016/S0009-2509(02)00349-4 <http://dx.doi.org/10.1016/S0009-2509(02)00349-4>`_
 
 The comparison of number density functions between the analytical solution and the
 high-resolution scheme:
@@ -81,7 +87,6 @@ class modelMoC(daeModel):
 
         self.ni_an_60      = daeVariable("ni_analytical",  pbm_number_density_t, self, "Analytical solution at t = 60s",            [self.L])
         self.ni_I          = daeVariable("ni_I_upwind",    pbm_number_density_t, self, "I order upwind scheme",                     [self.L])
-        self.ni_II         = daeVariable("ni_II_upwind",   pbm_number_density_t, self, "II order upwind scheme",                    [self.L])
         self.ni_II_central = daeVariable("ni_II_central",  pbm_number_density_t, self, "II order ceneter finite difference",        [self.L])
         self.ni_k_int      = daeVariable("ni_HR_fl",       pbm_number_density_t, self, "Van Leer k-interpolation scheme (k = 1/3)", [self.L])
 
@@ -118,18 +123,6 @@ class modelMoC(daeModel):
                 eq = self.CreateEquation("ni_I(%d)" % i, "")
                 eq.Residual = self.ni_I.dt(i) + Constant(G) * (self.ni_I(i) - self.ni_I(i-1)) / (self.L(i) - self.L(i-1))
 
-        # II order upwind scheme
-        for i in range(0, nL):
-            if i == 0:
-                eq = self.CreateEquation("ni_II(%d)" % i, "")
-                eq.Residual = self.ni_II(0)
-            elif i == 1:
-                eq = self.CreateEquation("ni_II(%d)" % i, "")
-                eq.Residual = self.ni_II.dt(i) + Constant(G) * (self.ni_II(i) - self.ni_II(i-1)) / (self.L(i) - self.L(i-1))
-            else:
-                eq = self.CreateEquation("ni_II(%d)" % i, "")
-                eq.Residual = self.ni_II.dt(i) + Constant(G) * (self.ni_II(i-2) - 4*self.ni_II(i-1) + 3*self.ni_II(i)) / (self.L(i) - self.L(i-2))
-
         # II order central scheme
         eq = self.CreateEquation("ni_II_central(0)", "")
         eq.Residual = self.ni_II_central(0)
@@ -165,7 +158,6 @@ class simTutorial(daeSimulation):
         ni_0[0] = None # unset
 
         self.m.ni_I.SetInitialConditions(ni_0)
-        self.m.ni_II.SetInitialConditions(ni_0)
         self.m.ni_II_central.SetInitialConditions(ni_0)
         self.m.ni_k_int.SetInitialConditions(ni_0)
 

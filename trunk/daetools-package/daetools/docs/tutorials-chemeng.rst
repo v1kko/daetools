@@ -1,5 +1,5 @@
 ******************************
-Chemical Engineering Tutorials
+Chemical Engineering Examples
 ******************************
 ..
     Copyright (C) Dragan Nikolic, 2016
@@ -18,13 +18,12 @@ Chemical Engineering Tutorials
 :ref:`tutorial_che_2`     |tce_2|
 -----------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_3`     |tce_3|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_4`     |tce_4|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_5`     |tce_5|
 =======================   =================================================================
 
-..
-    -----------------------   -----------------------------------------------------------------
-    :ref:`tutorial_che_4`     |tce_4|
-    -----------------------   -----------------------------------------------------------------
-    :ref:`tutorial_che_5`     |tce_5|
 
 .. |tce_1| replace:: Continuously Stirred Tank Reactor with energy balance and Van de Vusse reactions.
 
@@ -32,16 +31,15 @@ Chemical Engineering Tutorials
 
 .. |tce_3| replace:: Batch reactor seeded crystallisation using the method of moments.
 
+.. |tce_4| replace:: Solution of a discretized population balance using high resolution upwind schemes with flux limiter.
+                     Effect of flux limiters on the quality of prediction (Case I).
 
-..
-    .. |tce_4| replace:: ...
-
-    .. |tce_5| replace:: ...
-
+.. |tce_5| replace:: Solution of a discretized population balance using high resolution upwind schemes with flux limiter.
+                     Effect of flux limiters on the quality of prediction (Case II).
 
 .. _tutorial_che_1:
 
-Chem. Eng. Tutorial 1
+Chem. Eng. Example 1
 =====================
 .. rubric:: Description
 
@@ -60,7 +58,7 @@ Source code             `tutorial_che_1.py <../examples/tutorial_che_1.html>`_
 
 .. _tutorial_che_2:
 
-Chem. Eng. Tutorial 2
+Chem. Eng. Example 2
 =====================
 .. rubric:: Description
 
@@ -76,9 +74,10 @@ Runtime model report    `tutorial_che_2-rt.xml <../examples/tutorial_che_2-rt.xm
 Source code             `tutorial_che_2.py <../examples/tutorial_che_2.html>`_
 =====================   =================================================================
 
+
 .. _tutorial_che_3:
 
-Chem. Eng. Tutorial 3
+Chem. Eng. Example 3
 =====================
 .. rubric:: Description
 
@@ -95,41 +94,41 @@ Source code             `tutorial_che_3.py <../examples/tutorial_che_3.html>`_
 =====================   =================================================================
 
 
-..
-    .. _tutorial_che_4:
+.. _tutorial_che_4:
 
-    Chem. Eng. Tutorial 4
-    =====================
-    .. rubric:: Description
+Chem. Eng. Example 4
+=====================
+.. rubric:: Description
 
-    .. automodule:: daetools.examples.tutorial_che_4
-        :no-members:
-        :no-undoc-members:
+.. automodule:: daetools.examples.tutorial_che_4
+   :no-members:
+   :no-undoc-members:
 
-    .. rubric:: Files
+.. rubric:: Files
 
-    =====================   =================================================================
-    Model report            `tutorial_che_4.xml <../examples/tutorial_che_4.xml>`_
-    Runtime model report    `tutorial_che_4-rt.xml <../examples/tutorial_che_4-rt.xml>`_
-    Source code             `tutorial_che_4.py <../examples/tutorial_che_4.html>`_
-    =====================   =================================================================
+=====================   =================================================================
+Source code             `tutorial_che_4.py <../examples/tutorial_che_4.html>`_
+Analytical solution     `fl_analytical.py <../examples/fl_analytical.html>`_
+Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
+=====================   =================================================================
 
 
-    .. _tutorial_che_5:
+.. _tutorial_che_5:
 
-    Chem. Eng. Tutorial 5
-    =====================
-    .. rubric:: Description
+Chem. Eng. Example 5
+=====================
+.. rubric:: Description
 
-    .. automodule:: daetools.examples.tutorial_che_5
-        :no-members:
-        :no-undoc-members:
+.. automodule:: daetools.examples.tutorial_che_5
+   :no-members:
+   :no-undoc-members:
 
-    .. rubric:: Files
+.. rubric:: Files
 
-    =====================   =================================================================
-    Model report            `tutorial_che_5.xml <../examples/tutorial_che_5.xml>`_
-    Runtime model report    `tutorial_che_5-rt.xml <../examples/tutorial_che_5-rt.xml>`_
-    Source code             `tutorial_che_5.py <../examples/tutorial_che_5.html>`_
-    =====================   =================================================================
+=====================   =================================================================
+Source code             `tutorial_che_5.py <../examples/tutorial_che_5.html>`_
+Analytical solution     `fl_analytical.py <../examples/fl_analytical.html>`_
+Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
+=====================   =================================================================
+
 

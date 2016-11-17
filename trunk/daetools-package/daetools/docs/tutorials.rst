@@ -46,7 +46,7 @@ to solve NLP/MINLP optimisation and parameter estimation problems.
 .. _tutorials_chemeng:
 
 .. rubric:: Chemical Engineering Examples
-The `Chemical Engineering Tutorials <tutorials-chemeng.html>`_ illustrate various chemical engineering
+The `Chemical Engineering Examples <tutorials-chemeng.html>`_ illustrate various chemical engineering
 problems solved by **DAE Tools**.
 
 
