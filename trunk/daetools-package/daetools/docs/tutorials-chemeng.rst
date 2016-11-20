@@ -22,10 +22,14 @@ Chemical Engineering Examples
 :ref:`tutorial_che_4`     |tce_4|
 -----------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_5`     |tce_5|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_6`     |tce_6|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_7`     |tce_7|
 =======================   =================================================================
 
 
-.. |tce_1| replace:: Continuously Stirred Tank Reactor with energy balance and Van de Vusse reactions.
+.. |tce_1| replace:: Continuously Stirred Tank Reactor (CSTR) with energy balance and Van de Vusse reactions.
 
 .. |tce_2| replace:: Binary distillation column model.
 
@@ -36,6 +40,11 @@ Chemical Engineering Examples
 
 .. |tce_5| replace:: Solution of a discretized population balance using high resolution upwind schemes with flux limiter.
                      Effect of flux limiters on the quality of prediction (Case II).
+
+.. |tce_6| replace:: Model of a lithium-ion battery based on porous electrode theory as developed by John Newman and coworkers.
+
+.. |tce_7| replace:: Steady-state Plug Flow Reactor (PFR) with energy balance and first order reaction.
+
 
 .. _tutorial_che_1:
 
@@ -129,6 +138,44 @@ Chem. Eng. Example 5
 Source code             `tutorial_che_5.py <../examples/tutorial_che_5.html>`_
 Analytical solution     `fl_analytical.py <../examples/fl_analytical.html>`_
 Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_che_6:
+
+Chem. Eng. Example 6
+=====================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_che_6
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_che_6.xml <../examples/tutorial_che_6.xml>`_
+Runtime model report    `tutorial_che_6-rt.xml <../examples/tutorial_che_6-rt.xml>`_
+Source code             `tutorial_che_6.py <../examples/tutorial_che_6.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_che_7:
+
+Chem. Eng. Example 7
+=====================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_che_7
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_che_7.xml <../examples/tutorial_che_7.xml>`_
+Runtime model report    `tutorial_che_7-rt.xml <../examples/tutorial_che_7-rt.xml>`_
+Source code             `tutorial_che_7.py <../examples/tutorial_che_7.html>`_
 =====================   =================================================================
 
 

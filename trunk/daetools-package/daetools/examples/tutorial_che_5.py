@@ -58,6 +58,7 @@ in time by a distance Gt (the growth rate multiplied by the time elapsed in the 
 Comparison of L1- and L2-norms (ni_HR - ni_analytical):
 
 .. code-block:: none
+
    -------------------------------------
            Scheme  L1         L2
    -------------------------------------

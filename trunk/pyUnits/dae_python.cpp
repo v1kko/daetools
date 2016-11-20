@@ -70,7 +70,11 @@ BOOST_PYTHON_MODULE(pyUnits)
 
 		.def(double() * self)
 		.def(double() / self)
-		;
+
+        .def("__truediv__",  &daepython::unit_true_divide1)   // unit / unit
+        .def("__truediv__",  &daepython::unit_true_divide2)   // unit / real_t
+        .def("__truediv__",  &daepython::unit_true_divide3)   // real_t  / unit
+        ;
 
     class_<quantity>("quantity", DOCSTR_quantity)
         .def(init<double, const unit&>(( arg("self"), arg("value"), arg("unit") ), DOCSTR_quantity_init))
@@ -127,7 +131,11 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def(double() <= self)
 		.def(double() >  self)
 		.def(double() >= self)
-		;
+
+        .def("__truediv__",  &daepython::quantity_true_divide1)   // quantity / quantity
+        .def("__truediv__",  &daepython::quantity_true_divide2)   // quantity / real_t
+        .def("__truediv__",  &daepython::quantity_true_divide3)   // real_t  / quantity
+        ;
 	
 
     boost::python::dict all_si_and_derived_units;

@@ -24,7 +24,7 @@ Continuously Stirred Tank Reactor with energy balance and Van de Vusse reactions
 
 Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics
 Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.
-`doi:10.1021/i160048a700 <https://doi.org//10.1021/i160048a700>`_
+`doi:10.1021/i160048a700 <https://doi.org/10.1021/i160048a700>`_
 
 The concentrations plot:
 
@@ -230,7 +230,6 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    # Here the time is given in HOURS!
     simulation.ReportingInterval = 600     # 10 min
     simulation.TimeHorizon       = 3*60*60 # 3 h
 

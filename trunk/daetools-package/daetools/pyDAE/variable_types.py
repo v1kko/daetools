@@ -36,9 +36,10 @@ fraction_t                   = daeVariableType("fraction_t",                   d
 no_t                         = daeVariableType("no_t",                         dimless,    -1.0e+20, 1.0e+20,     0.0, 1e-05)
 
 moles_t                      = daeVariableType("moles_t",                      mol,             0.0, 1.0e+20,     1.0, 1e-05)
-molar_flux_t                 = daeVariableType("molar_flux_t",           mol/((m**2) * s), -1.0e+20, 1.0e+20,   0.001, 1e-05)
-molar_concentration_t        = daeVariableType("molar_concentration_t",        mol/(m**3),      0.0, 1.0e+10,    10.0, 1e-05)
+molar_flux_t                 = daeVariableType("molar_flux_t",             mol/((m**2)*s), -1.0e+20, 1.0e+20,   0.001, 1e-05)
+molar_concentration_t        = daeVariableType("molar_concentration_t",        mol/(m**3),      0.0, 1.0e+10,     1.0, 1e-05)
 molar_flowrate_t             = daeVariableType("molar_flowrate_t",             mol/s,      -1.0e+10, 1.0e+10,     0.0, 1e-05)
+molar_reaction_rate_t        = daeVariableType("molar_reaction_rate_t",        mol/(s*m**3), -1e+10, 1.0e+10,     0.0, 1e-05)
 
 volume_flowrate_t            = daeVariableType("volume_flowrate_t",            (m**3)/s,   -1.0e+10, 1.0e+10,   0.001, 1e-07)
 
