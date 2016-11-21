@@ -72,8 +72,6 @@ BOOST_PYTHON_MODULE(pyUnits)
 		.def(double() / self)
 
         .def("__truediv__",  &daepython::unit_true_divide1)   // unit / unit
-        .def("__truediv__",  &daepython::unit_true_divide2)   // unit / real_t
-        .def("__truediv__",  &daepython::unit_true_divide3)   // real_t  / unit
         ;
 
     class_<quantity>("quantity", DOCSTR_quantity)

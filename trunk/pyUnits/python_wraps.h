@@ -102,16 +102,6 @@ unit unit_true_divide1(const unit &a, const unit &b)
     return a/b;
 }
 
-unit unit_true_divide2(const unit &a, const real_t v)
-{
-    return a/v;
-}
-
-unit unit_true_divide3(const real_t v, const unit &a)
-{
-    return v/a;
-}
-
 /*******************************************************
 	quantity
 *******************************************************/
