@@ -25,7 +25,6 @@
 <span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
-
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>import</span> numpy <span style='color:#0000ff;'>as</span> np
 
@@ -46,7 +45,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>- two porous electrodes are used rather than providing the option for a &quot;half cell&quot; in which</span>
 <span style='color:#c00000;'>  one electrode is lithium foil.</span>
 <span style='color:#c00000;'>- conductivity in the electron-conducting phase is infinite</span>
-<span style='color:#c00000;'>- constant exchange current density and linearized reaction equation (Butler-Volmer)</span>
+<span style='color:#c00000;'>- constant exchange current density in Butler-Volmer reaction expression</span>
 <span style='color:#c00000;'>- no electrolyte convection</span>
 <span style='color:#c00000;'>- constant and uniform solvent concentration (ions vary according to concentrated solution theory)</span>
 <span style='color:#c00000;'>- monodisperse particles in electrode</span>
@@ -187,13 +186,17 @@ rxn_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
         <span style='color:#008000;'># Here, we use a constant exchange current density, but other forms depending on</span>
         <span style='color:#008000;'># solid and electrolyte concentrations are commonly used.</span>
         <span style='color:#008000;'># Thomas et al., Eq 19 and 27</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#c00000;'>&quot;Reaction rate&quot;</span>)
         c_surf <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.c(<span style='color:#0000ff;'>self</span>.r.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1</span>)
         eta <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.phi1(<span style='color:#0000ff;'>self</span>.pindx1) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.phi2(<span style='color:#0000ff;'>self</span>.pindx2) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.U(c_surf<b><span style='color:#0000ff;'>/</span></b><span style='color:#0000ff;'>self</span>.c_ref())
         eta_ndim <b><span style='color:#0000ff;'>=</span></b> eta <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.V_thermal()
-<span style='color:#008000;'>#        eq.Residual = self.j_p() - self.j_0() * (np.exp(-self.alpha()*eta_ndim) - np.exp((1 - self.alpha())*eta_ndim))</span>
         <span style='color:#008000;'># For now, we use a linearization of the reaction rate with respect to the driving force, eta.</span>
+        <span style='color:#0000ff;'>self</span>.IF(Time() <b><span style='color:#0000ff;'>==</span></b> Constant(<span style='color:#c000c0;'>0</span><b><span style='color:#0000ff;'>*</span></b>s))
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#c00000;'>&quot;Reaction rate&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.j_p() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.j_0() <b><span style='color:#0000ff;'>*</span></b> eta_ndim
+        <span style='color:#0000ff;'>self</span>.ELSE()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#c00000;'>&quot;Reaction rate&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.j_p() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.j_0() <b><span style='color:#0000ff;'>*</span></b> (np.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#0000ff;'>self</span>.alpha()<b><span style='color:#0000ff;'>*</span></b>eta_ndim) <b><span style='color:#0000ff;'>-</span></b> np.exp((<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.alpha())<b><span style='color:#0000ff;'>*</span></b>eta_ndim))
+        <span style='color:#0000ff;'>self</span>.END_IF()
 
         <span style='color:#008000;'># For convenience, we also keep track of the average filling fraction in this particle.</span>
         <span style='color:#008000;'># This is obtained from integrating the conservation equation over the spherical</span>

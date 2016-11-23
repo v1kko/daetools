@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>membrane_unit.py (2)</title>
+</head>
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
+<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                           membrane_unit.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#0000ff;'>import</span> sys, tempfile, math, numpy
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+<b>try</b>:
+    <span style='color:#0000ff;'>from</span> .membrane_variable_types <span style='color:#0000ff;'>import</span> molar_flux_t, molar_concentration_t, fraction_t, temperature_t, recovery_t, <b><span style='color:#0000ff;'>\</span></b>
+                                         pressure_t, length_t, diffusivity_t, area_t, volume_flowrate_t, selectivity_t
+    <span style='color:#0000ff;'>from</span> .compartment <span style='color:#0000ff;'>import</span> Compartment
+    <span style='color:#0000ff;'>from</span> .support <span style='color:#0000ff;'>import</span> Support
+    <span style='color:#0000ff;'>from</span> .membrane <span style='color:#0000ff;'>import</span> Membrane
+<b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
+    <span style='color:#0000ff;'>from</span> membrane_variable_types <span style='color:#0000ff;'>import</span> molar_flux_t, molar_concentration_t, fraction_t, temperature_t, recovery_t, <b><span style='color:#0000ff;'>\</span></b>
+                                        pressure_t, length_t, diffusivity_t, area_t, volume_flowrate_t, selectivity_t
+    <span style='color:#0000ff;'>from</span> compartment <span style='color:#0000ff;'>import</span> Compartment
+    <span style='color:#0000ff;'>from</span> support <span style='color:#0000ff;'>import</span> Support
+    <span style='color:#0000ff;'>from</span> membrane <span style='color:#0000ff;'>import</span> Membrane
+
+<b>class</b> MembraneUnit(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#0000ff;'>self</span>.F <b><span style='color:#0000ff;'>=</span></b> Compartment(<span style='color:#c00000;'>&quot;Feed&quot;</span>, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.M <b><span style='color:#0000ff;'>=</span></b> Membrane(<span style='color:#c00000;'>&quot;Membrane&quot;</span>, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.S <b><span style='color:#0000ff;'>=</span></b> Support(<span style='color:#c00000;'>&quot;Support&quot;</span>, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.P <b><span style='color:#0000ff;'>=</span></b> Compartment(<span style='color:#c00000;'>&quot;Permeate&quot;</span>, <span style='color:#0000ff;'>self</span>)
+
+        <span style='color:#0000ff;'>self</span>.Nc <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;Nc&quot;</span>, <span style='color:#0000ff;'>self</span>, unit(), <span style='color:#c00000;'>&quot;Number of components&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.z  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;z&quot;</span>,  <span style='color:#0000ff;'>self</span>, unit(), <span style='color:#c00000;'>&quot;Axial domain&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.Tref  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;T_ref&quot;</span>,  K,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Pref  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;P_ref&quot;</span>,  Pa, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.Tfeed <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;T_feed&quot;</span>, K,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Feed temperature&quot;</span>)
+
+        <span style='color:#0000ff;'>self</span>.Purity_feed        <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Purity_feed&quot;</span>,        fraction_t,        <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [<span style='color:#0000ff;'>self</span>.Nc])
+        <span style='color:#0000ff;'>self</span>.Purity_permeate    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Purity_permeate&quot;</span>,    fraction_t,        <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [<span style='color:#0000ff;'>self</span>.Nc])
+        <span style='color:#0000ff;'>self</span>.Recovery_feed      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Recovery_feed&quot;</span>,      recovery_t,        <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [<span style='color:#0000ff;'>self</span>.Nc])
+        <span style='color:#0000ff;'>self</span>.Selectivity        <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Selectivity&quot;</span>,        selectivity_t,     <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [<span style='color:#0000ff;'>self</span>.Nc, <span style='color:#0000ff;'>self</span>.Nc, <span style='color:#0000ff;'>self</span>.z])
+
+        <span style='color:#0000ff;'>self</span>.Phigh              <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;P_high&quot;</span>,             pressure_t,        <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+        <span style='color:#0000ff;'>self</span>.Plow               <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;P_low&quot;</span>,              pressure_t,        <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+
+        <span style='color:#0000ff;'>self</span>.MembraneArea       <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;MembraneArea&quot;</span>,       area_t,            <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+        <span style='color:#0000ff;'>self</span>.MembraneThickness  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;MembraneThickness&quot;</span>,  length_t,          <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+        <span style='color:#0000ff;'>self</span>.SupportThickness   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;SupportThickness&quot;</span>,   length_t,          <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+
+        <span style='color:#0000ff;'>self</span>.Qfeed_stp          <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Qfeed_stp&quot;</span>,          volume_flowrate_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+        <span style='color:#0000ff;'>self</span>.Qsweep_stp         <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Qsweep_stp&quot;</span>,         volume_flowrate_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [])
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Recovery_feed&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Recovery_feed(i) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.F.Cin(i) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.F.Qin()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.F.Qout() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.F.Cout(i)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Purity_feed&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Purity_feed(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.F.Xout(i)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Purity_permeate&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Purity_permeate(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.P.Xout(i)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Selectivity&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        j <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'j'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Selectivity(i,j,z) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.F.X(i,z) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.P.X(j,z)) <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#0000ff;'>self</span>.P.X(i,z) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.F.X(j,z))
+
+        <span style='color:#008000;'># Fluxes at the Feed-Membrane, Membrane-Support,</span>
+        <span style='color:#008000;'># Support-Retentate compartments are equal</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Feed_Flux&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.F.Flux(i, z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.M.Flux(i, z)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Support_Flux&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.S.Flux(i, z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.M.Flux(i, z)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Permeate_Flux&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.P.Flux(i, z) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.S.Flux(i, z)
+
+        <span style='color:#008000;'># Gas mole fraction at the Feed-Membrane, and Membrane-Support,</span>
+        <span style='color:#008000;'># Support-Retentate compartments</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Membrane_Xinlet&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.F.X(i, z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.M.Xinlet(i, z)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Support_Xinlet&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.S.Xinlet(i, z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.M.Xoutlet(i, z)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Permeate_X&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.P.X(i, z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.S.Xoutlet(i, z)
+
+        <span style='color:#008000;'># Pressures at the Feed-Membrane, and Membrane-Support,</span>
+        <span style='color:#008000;'># Support-Retentate compartments are equal</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Membrane_Pinlet&quot;</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.F.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.F.P(z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.M.Pinlet(z)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Support_Pinlet&quot;</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.S.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.S.Pinlet(z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.M.Poutlet(z)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Support_Poutlet&quot;</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.P.z,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.P.P(z) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.S.Poutlet(z)
+
+        <span style='color:#008000;'># Temperatures at the Feed-Membrane, and Membrane-Support,</span>
+        <span style='color:#008000;'># Support-Retentate compartments are equal</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Feed_T&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.F.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tfeed()
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Membrane_T&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.M.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tfeed()
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Support_S&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.S.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tfeed()
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Permeate_T&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.P.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tfeed()
+
+</pre>
+</body>
+</html>

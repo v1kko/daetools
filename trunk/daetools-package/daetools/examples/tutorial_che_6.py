@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
-
 from daetools.pyDAE import *
 import numpy as np
 
@@ -36,7 +35,7 @@ For example, the following assumptions have (currently) been made:
 - two porous electrodes are used rather than providing the option for a "half cell" in which
   one electrode is lithium foil.
 - conductivity in the electron-conducting phase is infinite
-- constant exchange current density and linearized reaction equation (Butler-Volmer)
+- constant exchange current density in Butler-Volmer reaction expression
 - no electrolyte convection
 - constant and uniform solvent concentration (ions vary according to concentrated solution theory)
 - monodisperse particles in electrode
@@ -177,13 +176,17 @@ class ModParticle(daeModel):
         # Here, we use a constant exchange current density, but other forms depending on
         # solid and electrolyte concentrations are commonly used.
         # Thomas et al., Eq 19 and 27
-        eq = self.CreateEquation("SurfaceRxn", "Reaction rate")
         c_surf = self.c(self.r.NumberOfPoints - 1)
         eta = self.phi1(self.pindx1) - self.phi2(self.pindx2) - self.U(c_surf/self.c_ref())
         eta_ndim = eta / self.V_thermal()
-#        eq.Residual = self.j_p() - self.j_0() * (np.exp(-self.alpha()*eta_ndim) - np.exp((1 - self.alpha())*eta_ndim))
         # For now, we use a linearization of the reaction rate with respect to the driving force, eta.
+        self.IF(Time() == Constant(0*s))
+        eq = self.CreateEquation("SurfaceRxn", "Reaction rate")
         eq.Residual = self.j_p() + self.j_0() * eta_ndim
+        self.ELSE()
+        eq = self.CreateEquation("SurfaceRxn", "Reaction rate")
+        eq.Residual = self.j_p() - self.j_0() * (np.exp(-self.alpha()*eta_ndim) - np.exp((1 - self.alpha())*eta_ndim))
+        self.END_IF()
 
         # For convenience, we also keep track of the average filling fraction in this particle.
         # This is obtained from integrating the conservation equation over the spherical
