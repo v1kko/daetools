@@ -204,8 +204,8 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     simulation = simTutorial()
     simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 5
-    simulation.TimeHorizon       = 200
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon       = 1
     simulator = daeSimulator(app, simulation = simulation)
     simulator.exec_()
 
@@ -217,14 +217,12 @@ def consoleRun():
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
 
-    daesolver.RelativeTolerance = 1e-5
-
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.1
-    simulation.TimeHorizon       = 10
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon       = 1
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())

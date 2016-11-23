@@ -616,6 +616,15 @@ void daeIDASolver::SolveInitial(void)
 
         if(!CheckFlag(retval))
         {
+            // Report the data with the values at the failure (they are already in m_arrValues and m_arrTimeDerivatives)
+            realtype* pdValues			 = NV_DATA_S(m_pIDASolverData->m_vectorVariables);
+            realtype* pdTimeDerivatives	 = NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
+            realtype* srcValues          = m_arrValues.Data();
+            realtype* srcTimeDerivatives = m_arrTimeDerivatives.Data();
+            memcpy(pdValues,          srcValues,          m_nNumberOfEquations*sizeof(realtype));
+            memcpy(pdTimeDerivatives, srcTimeDerivatives, m_nNumberOfEquations*sizeof(realtype));
+            m_pSimulation->ReportData(0);
+
             daeDeclareException(exMiscellanous);
             e << "Sundials IDAS solver cowardly failed to calculate initial conditions at TIME = 0; " << CreateIDAErrorMessage(retval);
             e << string("\n") << m_strLastIDASError;
@@ -690,7 +699,10 @@ void daeIDASolver::SolveInitial(void)
 						  IDA_ONE_STEP);
 		if(!CheckFlag(retval)) 
 		{
-			daeDeclareException(exMiscellanous);
+            // Report the data with the values at the failure
+            m_pSimulation->ReportData(0);
+
+            daeDeclareException(exMiscellanous);
 			e << "Sundials IDAS solver cowardly failed to initialize the system at TIME = 0; " << CreateIDAErrorMessage(retval);
 			throw e;
 		}
@@ -725,6 +737,15 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
         retval = IDACalcIC(m_pIDA, IDA_YA_YDP_INIT, m_dCurrentTime + m_dNextTimeAfterReinitialization);
         if(!CheckFlag(retval))
         {
+            // Report the data with the values at the failure (they are already in m_arrValues and m_arrTimeDerivatives)
+            realtype* pdValues			= NV_DATA_S(m_pIDASolverData->m_vectorVariables);
+            realtype* pdTimeDerivatives	= NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
+            realtype* srcValues          = m_arrValues.Data();
+            realtype* srcTimeDerivatives = m_arrTimeDerivatives.Data();
+            memcpy(pdValues,          srcValues,          m_nNumberOfEquations*sizeof(realtype));
+            memcpy(pdTimeDerivatives, srcTimeDerivatives, m_nNumberOfEquations*sizeof(realtype));
+            m_pSimulation->ReportData(m_dCurrentTime);
+
             daeDeclareException(exMiscellanous);
             e << "Sundials IDAS solver dastardly failed re-initialize the system at TIME = " << m_dCurrentTime << "; "
               << CreateIDAErrorMessage(retval);

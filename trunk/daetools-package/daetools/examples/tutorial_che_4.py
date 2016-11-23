@@ -71,7 +71,7 @@ Comparison of L1- and L2-norms (ni_HR - ni_analytical):
 .. code-block:: none
 
   --------------------------------------
-         Scheme  L1         L2
+           Scheme  L1         L2
   --------------------------------------
          superbee  1.786e+10  7.016e+09
             Sweby  2.817e+10  8.614e+09

@@ -15,6 +15,14 @@ namespace dae
 {
 namespace core 
 {
+template<typename T>
+bool check_is_finite(T arg)
+{
+    return arg == arg &&
+    arg != std::numeric_limits<T>::infinity() &&
+    arg != -std::numeric_limits<T>::infinity();
+}
+    
 bool adDoEnclose(const adNode* node)
 {
 	if(!node)
@@ -1125,6 +1133,12 @@ adouble adRuntimeParameterNode::Evaluate(const daeExecutionContext* pExecutionCo
         throw e;
     }
 
+    if(pExecutionContext->m_pDataProxy->CheckForInfiniteNumbers())
+        if(!check_is_finite(*m_pdValue))
+        {
+            std::cout << "The value of the " << m_pParameter->GetCanonicalName() << " parameter is not finite (= " << *m_pdValue << ")" << std::endl;
+        }
+        
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
 	{
         adouble tmp(*m_pdValue);
@@ -1474,7 +1488,13 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
 	else
 		value = pExecutionContext->m_pBlock->GetValue(m_nBlockIndex);
 	
-	if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
+    if(pExecutionContext->m_pDataProxy->CheckForInfiniteNumbers())
+        if(!check_is_finite(value))
+        {
+            std::cout << "The value of the " << m_pVariable->GetCanonicalName() << " variable is not finite (= " << value << ")" << std::endl;
+        }
+
+    if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityResiduals)
 	{
 	/*
 		If m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex that means that 
@@ -2115,54 +2135,156 @@ adUnaryNode::~adUnaryNode()
 
 adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+    adouble val;
 	switch(eFunction)
 	{
 	case eSign:
-		return -(node->Evaluate(pExecutionContext));
-	case eSin:
-		return sin(node->Evaluate(pExecutionContext));
-	case eCos:
-		return cos(node->Evaluate(pExecutionContext));
-	case eTan:
-		return tan(node->Evaluate(pExecutionContext));
-	case eArcSin:
-		return asin(node->Evaluate(pExecutionContext));
-	case eArcCos:
-		return acos(node->Evaluate(pExecutionContext));
-	case eArcTan:
-		return atan(node->Evaluate(pExecutionContext));
-	case eSqrt:
-		return sqrt(node->Evaluate(pExecutionContext));
-	case eExp:
-		return exp(node->Evaluate(pExecutionContext));
-	case eLn:
-		return log(node->Evaluate(pExecutionContext));
-	case eLog:
-		return log10(node->Evaluate(pExecutionContext));
-	case eAbs:
-		return abs(node->Evaluate(pExecutionContext));
-	case eCeil:
-		return ceil(node->Evaluate(pExecutionContext));
-	case eFloor:
-		return floor(node->Evaluate(pExecutionContext));
+		val = -(node->Evaluate(pExecutionContext));
+        break;
+    case eSin:
+		val = sin(node->Evaluate(pExecutionContext));
+        break;
+    case eCos:
+		val = cos(node->Evaluate(pExecutionContext));
+        break;
+    case eTan:
+		val = tan(node->Evaluate(pExecutionContext));
+        break;
+    case eArcSin:
+		val = asin(node->Evaluate(pExecutionContext));
+        break;
+    case eArcCos:
+		val = acos(node->Evaluate(pExecutionContext));
+        break;
+    case eArcTan:
+		val = atan(node->Evaluate(pExecutionContext));
+        break;
+    case eSqrt:
+		val = sqrt(node->Evaluate(pExecutionContext));
+        break;
+    case eExp:
+		val = exp(node->Evaluate(pExecutionContext));
+        break;
+    case eLn:
+		val = log(node->Evaluate(pExecutionContext));
+        break;
+    case eLog:
+		val = log10(node->Evaluate(pExecutionContext));
+        break;
+    case eAbs:
+		val = abs(node->Evaluate(pExecutionContext));
+        break;
+    case eCeil:
+		val = ceil(node->Evaluate(pExecutionContext));
+        break;
+    case eFloor:
+		val = floor(node->Evaluate(pExecutionContext));
+        break;
     case eSinh:
-		return sinh(node->Evaluate(pExecutionContext));
+		val = sinh(node->Evaluate(pExecutionContext));
+        break;
     case eCosh:
-		return cosh(node->Evaluate(pExecutionContext));
+		val = cosh(node->Evaluate(pExecutionContext));
+        break;
     case eTanh:
-		return tanh(node->Evaluate(pExecutionContext));
+		val = tanh(node->Evaluate(pExecutionContext));
+        break;
     case eArcSinh:
-		return asinh(node->Evaluate(pExecutionContext));
+		val = asinh(node->Evaluate(pExecutionContext));
+        break;
     case eArcCosh:
-		return acosh(node->Evaluate(pExecutionContext));
+		val = acosh(node->Evaluate(pExecutionContext));
+        break;
     case eArcTanh:
-		return atanh(node->Evaluate(pExecutionContext));
+		val = atanh(node->Evaluate(pExecutionContext));
+        break;
     case eErf:
-		return erf(node->Evaluate(pExecutionContext));
-	default:
+		val = erf(node->Evaluate(pExecutionContext));
+        break;
+    default:
 		daeDeclareAndThrowException(exNotImplemented);
 		return adouble();
 	}
+	
+	if(pExecutionContext->m_pDataProxy->CheckForInfiniteNumbers())
+        if(!check_is_finite(val.getValue()))
+        {
+            std::string fun;
+            switch(eFunction)
+            {
+                case eSign:
+                    fun = "-";
+                    break;
+                case eSin:
+                    fun = "sin";
+                    break;
+                case eCos:
+                    fun = "cos";
+                    break;
+                case eTan:
+                    fun = "tan";
+                    break;
+                case eArcSin:
+                    fun = "asin";
+                    break;
+                case eArcCos:
+                    fun = "acos";
+                    break;
+                case eArcTan:
+                    fun = "atan";
+                    break;
+                case eSqrt:
+                    fun = "sqrt";
+                    break;
+                case eExp:
+                    fun = "exp";
+                    break;
+                case eLn:
+                    fun = "log";
+                    break;
+                case eLog:
+                    fun = "log10";
+                    break;
+                case eAbs:
+                    fun = "abs";
+                    break;
+                case eCeil:
+                    fun = "ceil";
+                    break;
+                case eFloor:
+                    fun = "floor";
+                    break;
+                case eSinh:
+                    fun = "sinh";
+                    break;
+                case eCosh:
+                    fun = "cosh";
+                    break;
+                case eTanh:
+                    fun = "atanh";
+                    break;
+                case eArcSinh:
+                    fun = "asinh";
+                    break;
+                case eArcCosh:
+                    fun = "acosh";
+                    break;
+                case eArcTanh:
+                    fun = "atanh";
+                    break;
+                case eErf:
+                    fun = "erf";
+                    break;
+                default:
+                    daeDeclareAndThrowException(exNotImplemented);
+                    return adouble();
+            }
+            daeNodeSaveAsContext c(NULL);
+            std::string n = node->SaveAsLatex(&c);
+            std::cout << "The value of the " << fun << "(" << n << ") expression is not finite (= " << val.getValue() << ")" << std::endl;
+        }
+        
+	return val;
 }
 
 const quantity adUnaryNode::GetQuantity(void) const
@@ -3164,28 +3286,78 @@ adBinaryNode::~adBinaryNode()
 
 adouble adBinaryNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
+    adouble val;
 	switch(eFunction)
 	{
 	case ePlus:
-		return left->Evaluate(pExecutionContext) + right->Evaluate(pExecutionContext);
+		val = left->Evaluate(pExecutionContext) + right->Evaluate(pExecutionContext);
+        break;
 	case eMinus:
-		return left->Evaluate(pExecutionContext) - right->Evaluate(pExecutionContext);
-	case eMulti:
-		return left->Evaluate(pExecutionContext) * right->Evaluate(pExecutionContext);
-	case eDivide:
-		return left->Evaluate(pExecutionContext) / right->Evaluate(pExecutionContext);
-	case ePower:
-		return pow(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
-	case eMin:
-		return min(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
-	case eMax:
-		return max(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
+		val = left->Evaluate(pExecutionContext) - right->Evaluate(pExecutionContext);
+        break;
+    case eMulti:
+		val = left->Evaluate(pExecutionContext) * right->Evaluate(pExecutionContext);
+        break;
+    case eDivide:
+		val = left->Evaluate(pExecutionContext) / right->Evaluate(pExecutionContext);
+        break;
+    case ePower:
+		val = pow(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
+        break;
+    case eMin:
+		val = min(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
+        break;
+    case eMax:
+		val = max(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
+        break;
     case eArcTan2:
-        return atan2(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
-	default:
+        val = atan2(left->Evaluate(pExecutionContext), right->Evaluate(pExecutionContext));
+        break;
+    default:
 		daeDeclareAndThrowException(exInvalidPointer);
 		return adouble();
 	}
+	if(pExecutionContext->m_pDataProxy->CheckForInfiniteNumbers())
+        if(!check_is_finite(val.getValue()))
+        {
+            daeNodeSaveAsContext c(NULL);
+            std::string expression;
+            std::string l = left->SaveAsLatex(&c);
+            std::string r = right->SaveAsLatex(&c);
+            switch(eFunction)
+            {
+                case ePlus:
+                    expression = l + " + " + r;
+                    break;
+                case eMinus:
+                    expression = l + " - " + r;
+                    break;
+                case eMulti:
+                    expression = l + " * " + r;
+                    break;
+                case eDivide:
+                    expression = l + " / " + r;
+                    break;
+                case ePower:
+                    expression = l + " ** " + r;
+                    break;
+                case eMin:
+                    expression = "min(" + l + "," + r + ")";
+                    break;
+                case eMax:
+                    expression = "max(" + l + "," + r + ")";
+                    break;
+                case eArcTan2:
+                    expression = "atan2(" + l + "," + r + ")";
+                    break;
+                default:
+                    daeDeclareAndThrowException(exInvalidPointer);
+                    return adouble();
+            }
+            std::cout << "The value of the " << expression << " expression is not finite (= " << val.getValue() << ")" << std::endl;
+        }
+
+    return val;
 }
 
 const quantity adBinaryNode::GetQuantity(void) const

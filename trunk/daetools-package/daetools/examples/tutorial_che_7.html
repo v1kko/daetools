@@ -134,7 +134,7 @@ K_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <span style='color:#008000;'># Conversion</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;xa&quot;</span>, <span style='color:#c00000;'>&quot;Conversion of A&quot;</span>)
         z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z, eClosedClosed)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> xa(z) <b><span style='color:#0000ff;'>*</span></b> Ca0 <b><span style='color:#0000ff;'>-</span></b> (Ca0 <b><span style='color:#0000ff;'>-</span></b> Ca(z))
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> xa(z)<b><span style='color:#0000ff;'>*</span></b>Ca0 <b><span style='color:#0000ff;'>-</span></b> (Ca0 <b><span style='color:#0000ff;'>-</span></b> Ca(z))
 
         <span style='color:#008000;'># Dimensionless concentration of A</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;ya&quot;</span>, <span style='color:#c00000;'>&quot;Dimensionless concentration of A&quot;</span>)
@@ -214,8 +214,8 @@ K_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 <b>def</b> guiRun(app):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>200</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
     simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> simulation)
     simulator.exec_()
 
@@ -227,14 +227,12 @@ K_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-5</span>
-
     <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.1</span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
 
     <span style='color:#008000;'># Connect data reporter</span>
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())

@@ -26,6 +26,8 @@ Chemical Engineering Examples
 :ref:`tutorial_che_6`     |tce_6|
 -----------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_7`     |tce_7|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_8`     |tce_8|
 =======================   =================================================================
 
 
@@ -44,6 +46,10 @@ Chemical Engineering Examples
 .. |tce_6| replace:: Model of a lithium-ion battery based on porous electrode theory as developed by John Newman and coworkers.
 
 .. |tce_7| replace:: Steady-state Plug Flow Reactor (PFR) with energy balance and first order reaction.
+
+.. |tce_8| replace:: Gas separation using a porous membrane on a metal support.
+                     The model applies generalised Maxwell-Stefan equations to predict the fluxes and the selectivities.
+                     The problem modelled is separation of CH4+C2H6 mixture on a zeolite (silicalite-1) membrane.
 
 
 .. _tutorial_che_1:
@@ -151,6 +157,20 @@ Chem. Eng. Example 6
    :no-members:
    :no-undoc-members:
 
+
+The up to date version of the model is available at Raymond's GitHub repository:
+`<https://github.com/raybsmith/daetools-example-battery>`_.
+
+The voltage plot:
+
+.. image:: _static/tutorial_che_6-results.png
+   :width: 500px
+
+The current plot:
+
+.. image:: _static/tutorial_che_6-results2.png
+   :width: 500px
+
 .. rubric:: Files
 
 =====================   =================================================================
@@ -176,6 +196,30 @@ Chem. Eng. Example 7
 Model report            `tutorial_che_7.xml <../examples/tutorial_che_7.xml>`_
 Runtime model report    `tutorial_che_7-rt.xml <../examples/tutorial_che_7-rt.xml>`_
 Source code             `tutorial_che_7.py <../examples/tutorial_che_7.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_che_8:
+
+Chem. Eng. Example 8
+====================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_che_8
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_che_8.xml <../examples/tutorial_che_8.xml>`_
+Runtime model report    `tutorial_che_8-rt.xml <../examples/tutorial_che_8-rt.xml>`_
+Source code             `tutorial_che_8.py <../examples/tutorial_che_8.html>`_
+Membrane unit           `membrane_unit.py <../examples/membrane_unit.html>`_
+Variable types          `membrane_variable_types.py <../examples/membrane_variable_types.html>`_
+Membrane model          `membrane.py <../examples/membrane.html>`_
+Support model           `support.py <../examples/support.html>`_
+In/out compartment      `compartment.py <../examples/compartment.html>`_
 =====================   =================================================================
 
 

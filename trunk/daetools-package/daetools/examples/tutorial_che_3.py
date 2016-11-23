@@ -53,12 +53,12 @@ Solubility of Paracetamol in ethanol:
    60             | 0.42000                         | 2192.1973
    ---------------------------------------------------------------------------------
 
-The concentration plot:
+The supersaturation plot:
 
 .. image:: _static/tutorial_che_3-results.png
    :width: 500px
 
-The supersaturation plot:
+The concentration plot:
 
 .. image:: _static/tutorial_che_3-results2.png
    :width: 500px

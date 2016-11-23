@@ -111,8 +111,6 @@ adouble pd_upwindCCFV(daePartialDerivativeVariable& /*pdv*/)
 
 adouble pd_BFD(daePartialDerivativeVariable& pdv)
 {
-    daeDeclareAndThrowException(exNotImplemented);
-
     adouble pardev;
 // Index for which we are calculating partial derivative
     const size_t n = pdv.GetPoint();
@@ -155,7 +153,7 @@ adouble pd_BFD(daePartialDerivativeVariable& pdv)
             //   In case of the Neumann bc: dy/dx = 0, the expression below will produce y[1] = y[0] so this should be ok
                 pardev = (pdv[1] - pdv[0]) / (d[1] - d[0]);
             }
-            else // INTERIOR POINTs
+            else // INTERIOR POINTs + RIGHT BOUND
             {
             //	dV(i)/dD = (V[i] - V[i-1]) / (D[i] - D[i-1])
                 pardev = (pdv[n] - pdv[n-1]) / (d[n] - d[n-1]);
@@ -205,8 +203,6 @@ adouble pd_BFD(daePartialDerivativeVariable& pdv)
 
 adouble pd_FFD(daePartialDerivativeVariable& pdv)
 {
-    daeDeclareAndThrowException(exNotImplemented);
-
     adouble pardev;
 // Index for which we are calculating partial derivative
     const size_t n = pdv.GetPoint();
