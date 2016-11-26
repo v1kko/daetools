@@ -14,7 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, platform, shutil
 
-daetools_version = '1.5.0'
+daetools_version = '1.6.0'
 python_major = str(sys.version_info[0])
 python_minor = str(sys.version_info[1])
 

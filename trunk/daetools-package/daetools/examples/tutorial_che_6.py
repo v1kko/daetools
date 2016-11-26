@@ -172,17 +172,18 @@ class ModParticle(daeModel):
         c = self.c(r)
         eq.Residual = self.Ds(c/self.c_ref()) * d(c, self.r, eCFDM) - self.j_p()
 
-        # The rate of electrochemical reaction calculated via the Butler-Volmer
+        # The rate of electrochemical reaction calculated via the Butler-Volmer equation
         # Here, we use a constant exchange current density, but other forms depending on
         # solid and electrolyte concentrations are commonly used.
         # Thomas et al., Eq 19 and 27
         c_surf = self.c(self.r.NumberOfPoints - 1)
         eta = self.phi1(self.pindx1) - self.phi2(self.pindx2) - self.U(c_surf/self.c_ref())
         eta_ndim = eta / self.V_thermal()
-        # For now, we use a linearization of the reaction rate with respect to the driving force, eta.
+        # At time t=0, to aid in initialization, we use a linearized form of the reaction equation
         self.IF(Time() == Constant(0*s))
         eq = self.CreateEquation("SurfaceRxn", "Reaction rate")
         eq.Residual = self.j_p() + self.j_0() * eta_ndim
+        # For the rest of the simulation, we use the full Butler-Volmer equation
         self.ELSE()
         eq = self.CreateEquation("SurfaceRxn", "Reaction rate")
         eq.Residual = self.j_p() - self.j_0() * (np.exp(-self.alpha()*eta_ndim) - np.exp((1 - self.alpha())*eta_ndim))
@@ -479,7 +480,7 @@ class SimBattery(daeSimulation):
         self.process_info["N_n"] = self.N_n
         self.process_info["N_s"] = self.N_s
         self.process_info["N_p"] = self.N_p
-        self.m = ModCell("ModCell", process_info=self.process_info)
+        self.m = ModCell("tutorial_che_6", process_info=self.process_info)
 
     def SetUpParametersAndDomains(self):
         h_n = self.L_n / self.N_n
@@ -601,9 +602,9 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-#    # Save the model report and the runtime model report
-#    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-#    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    # Save the model report and the runtime model report
+    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()

@@ -80,6 +80,33 @@ echo tutorial_adv_4.py
 $PYTHON $ROOT/tutorial_adv_4.py console
 
 
+
+echo tutorial_che_1.py
+$PYTHON $ROOT/tutorial_che_1.py console
+
+echo tutorial_che_2.py
+$PYTHON $ROOT/tutorial_che_2.py console
+
+echo tutorial_che_3.py
+$PYTHON $ROOT/tutorial_che_3.py console
+
+echo tutorial_che_4.py
+$PYTHON $ROOT/tutorial_che_4.py console
+
+echo tutorial_che_5.py
+$PYTHON $ROOT/tutorial_che_5.py console
+
+echo tutorial_che_6.py
+$PYTHON $ROOT/tutorial_che_6.py console
+
+echo tutorial_che_7.py
+$PYTHON $ROOT/tutorial_che_7.py console
+
+echo tutorial_che_8.py
+$PYTHON $ROOT/tutorial_che_8.py console
+
+
+
 echo tutorial_dealii_1.py
 $PYTHON $ROOT/tutorial_dealii_1.py console
 

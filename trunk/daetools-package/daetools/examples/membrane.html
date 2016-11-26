@@ -43,7 +43,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
         <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        The model calculate:</span>
+<span style='color:#008000;'>        The model calculates:</span>
 <span style='color:#008000;'>          - Xoutlet (z)</span>
 <span style='color:#008000;'>          - Poutlet (z)</span>
 <span style='color:#008000;'>          - X (i, z, r)</span>
@@ -112,10 +112,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
                       <span style='color:#0000ff;'>self</span>.B(i) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Xoutlet(i, z) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Poutlet(z) <b><span style='color:#0000ff;'>/</span></b>     <b><span style='color:#0000ff;'>\</span></b>
                       (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>+</span></b> Sum(<span style='color:#0000ff;'>self</span>.B.array(<span style='color:#c00000;'>'*'</span>) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Xoutlet.array(<span style='color:#c00000;'>'*'</span>, z)  <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Poutlet(z)))
 
-        <span style='color:#008000;'># Flux through the porous support</span>
+        <span style='color:#008000;'># Flux through the porous membrane can be calculated in three ways:</span>
+        <span style='color:#008000;'>#  1. Fick law</span>
+        <span style='color:#008000;'>#  2. 'Single file' diffusion: GMS(Dij=oo)</span>
+        <span style='color:#008000;'>#  3. Generalised Maxwell Stefan equations: GMS</span>
         <span style='color:#0000ff;'>self</span>.stnOperatingMode <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.STN(<span style='color:#c00000;'>'OperatingMode'</span>)
 
-        <span style='color:#008000;'># Fick's law Case</span>
+        <span style='color:#008000;'># 1. Fick's law Case</span>
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>'sFickLaw'</span>)
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Flux&quot;</span>)
         i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
@@ -139,7 +142,32 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Gij_dTheta(i, j, z, r)
 
 
-        <span style='color:#008000;'># General Maxwell Stefan Case</span>
+        <span style='color:#008000;'># 2. 'Single file' diffusion Case</span>
+        <span style='color:#008000;'>#    Friction between molecules less important than friction with the wall: Dij much larger than Di</span>
+        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>'sMaxwellStefan_Dijoo'</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Flux&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
+        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.r,  eClosedOpen)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Flux(i, z) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                      <span style='color:#0000ff;'>self</span>.Ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Qsat(i) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Di(i) <b><span style='color:#0000ff;'>*</span></b> Sum(<span style='color:#0000ff;'>self</span>.Gij_dTheta.array(i, <span style='color:#c00000;'>'*'</span>, z, r))
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;J_theta&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        j <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'j'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
+        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.r,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.J_theta(i, j, z, r)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Gij_dTheta&quot;</span>)
+        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
+        j <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'j'</span>)
+        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
+        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.r,  eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Gij_dTheta(i, j, z, r) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                      <span style='color:#0000ff;'>self</span>.Gij(i, j, z, r) <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.Theta(j, z, r), <span style='color:#0000ff;'>self</span>.r) <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.Thickness()
+
+        <span style='color:#008000;'># Generalised Maxwell Stefan equations</span>
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>'sMaxwellStefan'</span>)
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Flux&quot;</span>)
         i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
@@ -159,31 +187,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
                          <span style='color:#0000ff;'>self</span>.Flux(i, z) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Theta(j, z, r) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#0000ff;'>self</span>.Qsat(i) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Dij(i, j, z, r)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
                          <span style='color:#0000ff;'>self</span>.Flux(j, z) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Theta(i, z, r) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#0000ff;'>self</span>.Qsat(j) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Dij(i, j, z, r)) <b><span style='color:#0000ff;'>\</span></b>
                       )
-
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Gij_dTheta&quot;</span>)
-        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
-        j <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'j'</span>)
-        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
-        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.r,  eClosedClosed)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Gij_dTheta(i, j, z, r) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
-                      <span style='color:#0000ff;'>self</span>.Gij(i, j, z, r) <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#0000ff;'>self</span>.Theta(j, z, r), <span style='color:#0000ff;'>self</span>.r) <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.Thickness()
-
-        <span style='color:#008000;'># &quot;Single file&quot; diffusion Case</span>
-        <span style='color:#008000;'># Friction between molecules less important than friction with the wall: Dij much larger than Di</span>
-        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>'sMaxwellStefan_Dijoo'</span>)
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Flux&quot;</span>)
-        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
-        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
-        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.r,  eClosedOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Flux(i, z) <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
-                      <span style='color:#0000ff;'>self</span>.Ro() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Qsat(i) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Di(i) <b><span style='color:#0000ff;'>*</span></b> Sum(<span style='color:#0000ff;'>self</span>.Gij_dTheta.array(i, <span style='color:#c00000;'>'*'</span>, z, r))
-
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;J_theta&quot;</span>)
-        i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)
-        j <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'j'</span>)
-        z <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.z,  eClosedClosed)
-        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.r,  eClosedClosed)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.J_theta(i, j, z, r)
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Gij_dTheta&quot;</span>)
         i <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.Nc, eClosedClosed, <span style='color:#c00000;'>'i'</span>)

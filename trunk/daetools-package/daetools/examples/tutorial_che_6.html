@@ -182,17 +182,18 @@ rxn_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
         c <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.c(r)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Ds(c<b><span style='color:#0000ff;'>/</span></b><span style='color:#0000ff;'>self</span>.c_ref()) <b><span style='color:#0000ff;'>*</span></b> d(c, <span style='color:#0000ff;'>self</span>.r, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.j_p()
 
-        <span style='color:#008000;'># The rate of electrochemical reaction calculated via the Butler-Volmer</span>
+        <span style='color:#008000;'># The rate of electrochemical reaction calculated via the Butler-Volmer equation</span>
         <span style='color:#008000;'># Here, we use a constant exchange current density, but other forms depending on</span>
         <span style='color:#008000;'># solid and electrolyte concentrations are commonly used.</span>
         <span style='color:#008000;'># Thomas et al., Eq 19 and 27</span>
         c_surf <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.c(<span style='color:#0000ff;'>self</span>.r.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1</span>)
         eta <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.phi1(<span style='color:#0000ff;'>self</span>.pindx1) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.phi2(<span style='color:#0000ff;'>self</span>.pindx2) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.U(c_surf<b><span style='color:#0000ff;'>/</span></b><span style='color:#0000ff;'>self</span>.c_ref())
         eta_ndim <b><span style='color:#0000ff;'>=</span></b> eta <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.V_thermal()
-        <span style='color:#008000;'># For now, we use a linearization of the reaction rate with respect to the driving force, eta.</span>
+        <span style='color:#008000;'># At time t=0, to aid in initialization, we use a linearized form of the reaction equation</span>
         <span style='color:#0000ff;'>self</span>.IF(Time() <b><span style='color:#0000ff;'>==</span></b> Constant(<span style='color:#c000c0;'>0</span><b><span style='color:#0000ff;'>*</span></b>s))
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#c00000;'>&quot;Reaction rate&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.j_p() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.j_0() <b><span style='color:#0000ff;'>*</span></b> eta_ndim
+        <span style='color:#008000;'># For the rest of the simulation, we use the full Butler-Volmer equation</span>
         <span style='color:#0000ff;'>self</span>.ELSE()
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#c00000;'>&quot;Reaction rate&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.j_p() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.j_0() <b><span style='color:#0000ff;'>*</span></b> (np.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#0000ff;'>self</span>.alpha()<b><span style='color:#0000ff;'>*</span></b>eta_ndim) <b><span style='color:#0000ff;'>-</span></b> np.exp((<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.alpha())<b><span style='color:#0000ff;'>*</span></b>eta_ndim))
@@ -489,7 +490,7 @@ rxn_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
         <span style='color:#0000ff;'>self</span>.process_info[<span style='color:#c00000;'>&quot;N_n&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.N_n
         <span style='color:#0000ff;'>self</span>.process_info[<span style='color:#c00000;'>&quot;N_s&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.N_s
         <span style='color:#0000ff;'>self</span>.process_info[<span style='color:#c00000;'>&quot;N_p&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.N_p
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> ModCell(<span style='color:#c00000;'>&quot;ModCell&quot;</span>, process_info<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>self</span>.process_info)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> ModCell(<span style='color:#c00000;'>&quot;tutorial_che_6&quot;</span>, process_info<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>self</span>.process_info)
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         h_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L_n <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.N_n
@@ -611,9 +612,9 @@ rxn_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
     <span style='color:#008000;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-<span style='color:#008000;'>#    # Save the model report and the runtime model report</span>
-<span style='color:#008000;'>#    simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
-<span style='color:#008000;'>#    simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+    <span style='color:#008000;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
 
     <span style='color:#008000;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()

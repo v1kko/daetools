@@ -38,6 +38,8 @@ for i in range(1, 19):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 5):
     tutorial_modules.append(('tutorial_adv_%d' % i, []))
+for i in range(1, 9):
+    tutorial_modules.append(('tutorial_che_%d' % i, []))
 for i in range(1, 7):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))
 for i in range(1, 8):

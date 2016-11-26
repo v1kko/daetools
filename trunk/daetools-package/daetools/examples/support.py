@@ -34,7 +34,7 @@ class Support(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         """
-        The model calculate:
+        The model calculates:
           - Xoutlet (z)
           - Poutlet (z)
           - X (i, z, r)

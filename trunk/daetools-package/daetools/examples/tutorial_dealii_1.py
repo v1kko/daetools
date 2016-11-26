@@ -243,9 +243,9 @@ class modTutorial(daeModel):
         #         e) boundaryFaceFi   - boundary face contribution to the load vector
         #         f) innerCellFaceAij - inner cell face contribution to the system stiffness matrix.
         #         g) innerCellFaceFi  - inner cell face contribution to the load vector
-        #         d) functionsDirichletBC - Dirichlet boundary conditions (section 3.3)
-        #         e) surfaceIntegrals - surface integrals (section 3.4)
-        #         f) volumeIntegrals  - volume  integrals (section 3.5)
+        #         h) functionsDirichletBC - Dirichlet boundary conditions (section 3.3)
+        #         i) surfaceIntegrals - surface integrals (section 3.4)
+        #         j) volumeIntegrals  - volume  integrals (section 3.5)
         #
         #         The weak form expressions are specified using the functions that wrap deal.II
         #         concepts used to assembly the matrices/vectors. The weak forms in daetools

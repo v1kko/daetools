@@ -22,7 +22,7 @@ the Generalised Maxwell-Stefan (GMS) equations to predict fluxes and selectiviti
 The membrane unit model represents a generic two-dimensonal model of a porous membrane
 and consists of four models:
 
-- Retentate compartment (isothermal axially dispersed plug flw)
+- Retentate compartment (isothermal axially dispersed plug flow)
 - Micro-porous membrane
 - Macro-porous support layer
 - Permeate compartment (the same transport phenomena as in the retentate compartment)

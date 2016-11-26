@@ -215,18 +215,8 @@ The easiest way is to install one of available scientific python distributions:
 * Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
 * Python(x,y) `<https://python-xy.github.io/>`_
 
-**DAE Tools** is compiled and tested on a 32-bit Windows XP and Windows 7. In order to use **DAE Tools** on
-64-bit versions of Windows the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
-
-..
-    First install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
-    As a starting point the following links can be used:
-
-    * Python 2.7: `<http://www.python.org/ftp/python/2.7.9/python-2.7.9.msi>`_
-    * Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.9.1/numpy-1.9.1-win32-superpack-python2.7.exe/download>`_
-    * Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.14.0/scipy-0.14.0-win32-superpack-python2.7.exe/download>`_
-    * Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/windows/matplotlib-1.4.2.win32-py2.7.exe/download>`_
-    * PyQt4: `<http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-4.11.3/PyQt4-4.11.3-gpl-Py2.7-Qt4.8.6-x32.exe>`_
+**DAE Tools** is compiled for 32-bit Windows. In order to use **DAE Tools** on 64-bit versions of Windows
+the 32-bit versions of python, pyqt, numpy and scipy packages should be installed.
 
 To be able to create 3D plots you need to install Mayavi2 package. It can be installed using the following shell command:
 
@@ -239,8 +229,20 @@ Alternatively you can install everything needed through `Python(x,y) <http://www
 
 Install DAE Tools
 +++++++++++++++++
-Install **DAE Tools** by double clicking the file daetools_x.x-x-win32_py27.exe and follow the instructions.
-To uninstall use the uninstall program in ``Start`` -> ``All Programs`` -> ``DAE Tools`` -> ``Uninstall``.
+No installers are provided for Windows anymore. The installation process is the same for all platforms.
+Unpack the downloaded archive, cd to the ``daetools-X.Y.Z`` folder and install **DAE Tools** by typing
+the following shell command:
+
+.. code-block:: bash
+
+    sudo python setup.py install
+
+You can also install **DAE Tools** into a python virtual environment:
+
+.. code-block:: bash
+
+   source activate <environment_name>
+   python setup.py install
 
 ..
     Additional linear equation solvers (proprietary)

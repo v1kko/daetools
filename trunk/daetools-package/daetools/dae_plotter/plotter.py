@@ -310,8 +310,9 @@ class daeMainWindow(QtGui.QMainWindow):
 
     #@QtCore.pyqtSlot()
     def slotDocumentation(self):
-        docs_dir = os.path.join(os.path.dirname(__file__), '../docs/html/index.html')
-        webbrowser.open(docs_dir, new=0, autoraise=True)
+        docs_index = os.path.join(os.path.dirname(__file__), '../docs/html/index.html')
+        #docs_index = 'http://www.daetools.com/docs/index.html'
+        webbrowser.open(docs_index)
 
 def daeStartPlotter(port = 0):
     try:

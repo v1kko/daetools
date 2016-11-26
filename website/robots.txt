@@ -1,4 +1,0 @@
-Sitemap: http://daetools.sourceforge.net/sitemap.xml
-
-User-agent: *
-Allow: /

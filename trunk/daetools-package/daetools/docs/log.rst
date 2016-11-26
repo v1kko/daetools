@@ -86,4 +86,3 @@ Extra logs
 .. autoclass:: daetools.dae_simulator.simulator.daeTextEditLog
     :members:
     :undoc-members:
-

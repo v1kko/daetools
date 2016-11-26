@@ -23,6 +23,15 @@ python tutorial_adv_2.py console
 python tutorial_adv_3.py console
 python tutorial_adv_4.py console
 
+python tutorial_che_1.py console
+python tutorial_che_2.py console
+python tutorial_che_3.py console
+python tutorial_che_4.py console
+python tutorial_che_5.py console
+python tutorial_che_6.py console
+python tutorial_che_7.py console
+python tutorial_che_8.py console
+
 python tutorial_dealii_1.py console
 python tutorial_dealii_2.py console
 python tutorial_dealii_3.py console

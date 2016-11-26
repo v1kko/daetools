@@ -33,7 +33,7 @@ class Membrane(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         """
-        The model calculate:
+        The model calculates:
           - Xoutlet (z)
           - Poutlet (z)
           - X (i, z, r)
@@ -102,10 +102,13 @@ class Membrane(daeModel):
                       self.B(i) * self.Xoutlet(i, z) * self.Poutlet(z) /     \
                       (1 + Sum(self.B.array('*') * self.Xoutlet.array('*', z)  * self.Poutlet(z)))
 
-        # Flux through the porous support
+        # Flux through the porous membrane can be calculated in three ways:
+        #  1. Fick law
+        #  2. 'Single file' diffusion: GMS(Dij=oo)
+        #  3. Generalised Maxwell Stefan equations: GMS
         self.stnOperatingMode = self.STN('OperatingMode')
 
-        # Fick's law Case
+        # 1. Fick's law Case
         self.STATE('sFickLaw')
         eq = self.CreateEquation("Flux")
         i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
@@ -129,7 +132,32 @@ class Membrane(daeModel):
         eq.Residual = self.Gij_dTheta(i, j, z, r)
 
 
-        # General Maxwell Stefan Case
+        # 2. 'Single file' diffusion Case
+        #    Friction between molecules less important than friction with the wall: Dij much larger than Di
+        self.STATE('sMaxwellStefan_Dijoo')
+        eq = self.CreateEquation("Flux")
+        i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
+        z = eq.DistributeOnDomain(self.z,  eClosedClosed)
+        r = eq.DistributeOnDomain(self.r,  eClosedOpen)
+        eq.Residual = self.Flux(i, z) + \
+                      self.Ro() * self.Qsat(i) * self.Di(i) * Sum(self.Gij_dTheta.array(i, '*', z, r))
+
+        eq = self.CreateEquation("J_theta")
+        i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
+        j = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'j')
+        z = eq.DistributeOnDomain(self.z,  eClosedClosed)
+        r = eq.DistributeOnDomain(self.r,  eClosedClosed)
+        eq.Residual = self.J_theta(i, j, z, r)
+
+        eq = self.CreateEquation("Gij_dTheta")
+        i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
+        j = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'j')
+        z = eq.DistributeOnDomain(self.z,  eClosedClosed)
+        r = eq.DistributeOnDomain(self.r,  eClosedClosed)
+        eq.Residual = self.Gij_dTheta(i, j, z, r) - \
+                      self.Gij(i, j, z, r) * d(self.Theta(j, z, r), self.r) / self.Thickness()
+
+        # Generalised Maxwell Stefan equations
         self.STATE('sMaxwellStefan')
         eq = self.CreateEquation("Flux")
         i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
@@ -149,31 +177,6 @@ class Membrane(daeModel):
                          self.Flux(i, z) * self.Theta(j, z, r) / (self.Qsat(i) * self.Dij(i, j, z, r)) - \
                          self.Flux(j, z) * self.Theta(i, z, r) / (self.Qsat(j) * self.Dij(i, j, z, r)) \
                       )
-
-        eq = self.CreateEquation("Gij_dTheta")
-        i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
-        j = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'j')
-        z = eq.DistributeOnDomain(self.z,  eClosedClosed)
-        r = eq.DistributeOnDomain(self.r,  eClosedClosed)
-        eq.Residual = self.Gij_dTheta(i, j, z, r) - \
-                      self.Gij(i, j, z, r) * d(self.Theta(j, z, r), self.r) / self.Thickness()
-
-        # "Single file" diffusion Case
-        # Friction between molecules less important than friction with the wall: Dij much larger than Di
-        self.STATE('sMaxwellStefan_Dijoo')
-        eq = self.CreateEquation("Flux")
-        i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
-        z = eq.DistributeOnDomain(self.z,  eClosedClosed)
-        r = eq.DistributeOnDomain(self.r,  eClosedOpen)
-        eq.Residual = self.Flux(i, z) + \
-                      self.Ro() * self.Qsat(i) * self.Di(i) * Sum(self.Gij_dTheta.array(i, '*', z, r))
-
-        eq = self.CreateEquation("J_theta")
-        i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')
-        j = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'j')
-        z = eq.DistributeOnDomain(self.z,  eClosedClosed)
-        r = eq.DistributeOnDomain(self.r,  eClosedClosed)
-        eq.Residual = self.J_theta(i, j, z, r)
 
         eq = self.CreateEquation("Gij_dTheta")
         i = eq.DistributeOnDomain(self.Nc, eClosedClosed, 'i')

@@ -28,6 +28,9 @@ Create .tar.gz under GNU/Linux:
 
 import os, sys, platform, shutil
 from distutils.core import setup
+from distutils import dir_util
+
+daetools_version = '1.6.0'
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -74,15 +77,15 @@ if daetools_machine == 'x86_64':
 else:
     usrlib = '/usr/lib'
 
-if 'envs' not in sys.prefix:
+if 'envs' in sys.prefix:
     inside_venv = True
 else:
     inside_venv = False
 
 if platform.system() == 'Linux':
+    print(sys.prefix)
     if not inside_venv:
         data_files = [
-                        #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
                         ('/usr/share/applications', [
                                                     'usr/share/applications/daetools-daeExamples.desktop',
                                                     'usr/share/applications/daetools-daePlotter.desktop'
@@ -92,9 +95,7 @@ if platform.system() == 'Linux':
                                                     'usr/share/menu/daetools-plotter',
                                                     'usr/share/menu/daetools-examples'
                                                     ] ),
-                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
-                        #('/usr/bin',                ['usr/bin/daeexamples']),
-                        #('/usr/bin',                ['usr/bin/daeplotter'])
+                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png'])
                     ]
     else:
         data_files = []
@@ -163,9 +164,7 @@ elif platform.system() == 'Darwin':
                                                     'usr/share/menu/daetools-plotter',
                                                     'usr/share/menu/daetools-examples'
                                                     ] ),
-                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
-                        #('/usr/bin',                ['usr/bin/daeexamples']),
-                        #('/usr/bin',                ['usr/bin/daeplotter'])
+                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png'])
                     ]
     else:
         data_files = []
@@ -173,10 +172,21 @@ elif platform.system() == 'Darwin':
     solibs = ['{0}/*.so'.format(platform_solib_dir)]
     fmi_solibs = 'fmi/{0}/*.dylib'.format(platform_solib_dir)
 
+try:
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+except:
+    root_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+docs_html_folder = os.path.join(root_dir, 'daetools', 'docs', 'html')
+daetools_folder  = os.path.join(root_dir, 'daetools')
+
+docs_html_dirs = [os.path.relpath(f[0], daetools_folder)+'/*.*' for f in os.walk(docs_html_folder)]
+#print('\n'.join(docs_html_dirs))
+
 setup(name = 'daetools',
-      version = '1.6.0',
+      version = daetools_version,
       description = 'DAE Tools',
-      long_description = 'Object-oriented equation-baseds modelling, simulation and optimisation software.',
+      long_description = 'Object-oriented equation-based modelling, simulation and optimisation software.',
       author = 'Dragan Nikolic',
       author_email = 'dnikolic@daetools.com',
       url = 'http://www.daetools.com',
@@ -190,21 +200,13 @@ setup(name = 'daetools',
                    'daetools.dae_plotter',
                    'daetools.dae_simulator',
                    'daetools.examples',
-                   'daetools.parsers',
-                   'daetools.model_library',
                    'daetools.unit_tests'
                  ],
       package_data = {
                        'daetools':                 ['*.txt',
                                                     '*.cfg',
-                                                    'docs/html/*.*',
-                                                    'docs/html/_images/*.*',
-                                                    'docs/html/_static/*.*',
-                                                    'docs/html/_sources/*.*',
-                                                    'docs/html/_modules/*.*',
-                                                    'docs/latex/*.pdf',
                                                     'docs/presentations/*.pdf'
-                                                   ],
+                                                   ] + docs_html_dirs,
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
                        'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)], # ?????
@@ -218,10 +220,22 @@ setup(name = 'daetools',
                      },
       data_files = data_files,
       scripts = ['scripts/create_shortcuts.js',
-                 'scripts/daetools_win_install.py',
                  'scripts/daeplotter',
                  'scripts/daeexamples',
                  'scripts/daeplotter.bat',
                  'scripts/daeexamples.bat'],
       requires = ['numpy', 'scipy', 'matplotlib', 'PyQt4']
      )
+
+if platform.system() == 'Windows':
+    try:
+        script_folder = os.path.dirname(os.path.abspath(__file__))
+    except:
+        script_folder = os.path.abspath(os.path.dirname(sys.argv[0]))
+    script_folder    = os.path.join(script_folder, 'scripts')
+    pythonw_path     = os.path.join(sys.prefix, 'pythonw.exe')
+    python_version   = '%s.%s' % (python_major, python_minor)
+    cmd = 'cscript %s\create_shortcuts.js %s %s %s' % (script_folder, pythonw_path, python_version, daetools_version)
+    print('Creating shortcuts: %s ...' % cmd)
+    os.system(cmd)
+
