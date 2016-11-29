@@ -1,0 +1,214 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+***********************************************************************************
+                           tutorial_che_opt_2.py
+                DAE Tools: pyDAE module, www.daetools.com
+                Copyright (C) Dragan Nikolic, 2016
+***********************************************************************************
+DAE Tools is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free Software
+Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with the
+DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
+************************************************************************************
+"""
+__doc__ = """
+COPS optimisation test 14: Catalyst Mixing.
+
+Determine the optimal mixing policy of two catalysts along the length of a tubular
+plug flow reactor involving several reactions.
+
+Reference: Benchmarking Optimization Software with COPS 3.0, Mathematics and Computer
+Science Division, Argonne National Laboratory, Technical Report ANL/MCS-273, 2004.
+`PDF <http://www.mcs.anl.gov/~more/cops/cops3.pdf>`_
+
+The objective function is -4.802687E-2 (for Nh = 100) and -4.799590E-2 (for Nh = 200).
+
+The control variables plot (for Nh = 100):
+
+.. image:: _static/tutorial_che_opt_2-results.png
+   :width: 500px
+
+The control variables plot (for Nh = 200):
+
+.. image:: _static/tutorial_che_opt_2-results2.png
+   :width: 500px
+"""
+
+import sys
+from time import localtime, strftime
+from daetools.pyDAE import *
+from daetools.solvers.trilinos import pyTrilinos
+from daetools.solvers.ipopt import pyIPOPT
+from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
+
+class modCatalystMixing(daeModel):
+    def __init__(self, dt, Name, Parent = None, Description = ""):
+        daeModel.__init__(self, Name, Parent, Description)
+
+        self.Ni = daeDomain("Ni", self, unit(), "Number of time intervals")
+
+        # Control variables at specific time intervals
+        self.uc = daeVariable("uc", no_t, self, "Control variable at the specified time interval", [self.Ni])
+
+        # Control variable in the current time interval (used in equations)
+        self.u = daeVariable("u",  no_t, self, "Control variable")
+
+        # State variables
+        self.x1 = daeVariable("x1", no_t, self, "Catalyst 1")
+        self.x2 = daeVariable("x2", no_t, self, "Catalyst 2")
+
+    def DeclareEquations(self):
+        # Create adouble objects to make equations more readable
+        x1 = self.x1()
+        x2 = self.x2()
+        u  = self.u()
+        uc = lambda i: self.uc(i)
+
+        # Derivatives
+        dx1_dt = self.x1.dt()
+        dx2_dt = self.x2.dt()
+
+        # Switch to different control variables at different time intervals
+        Ni = self.Ni.NumberOfPoints
+        self.uc_STN = self.STN('uc')
+        for i in range(Ni):
+            self.STATE('u_%d' % i)
+            eq = self.CreateEquation("u_%d" % i, "")
+            eq.Residual = u - uc(i)
+        self.END_STN()
+
+        # x1
+        eq = self.CreateEquation("x1", "")
+        eq.Residual = dx1_dt - u*(10*x2 - x1)
+        eq.CheckUnitsConsistency = False
+
+        # x2
+        eq = self.CreateEquation("x2", "")
+        eq.Residual = dx2_dt - ( u*(x1 - 10*x2) - (1-u)*x2 )
+        eq.CheckUnitsConsistency = False
+
+class simCatalystMixing(daeSimulation):
+    def __init__(self, Ni, dt):
+        daeSimulation.__init__(self)
+        self.m = modCatalystMixing("tutorial_che_opt_2")
+        self.m.Description = __doc__
+        self.Ni = Ni
+        self.dt = dt
+
+    def SetUpParametersAndDomains(self):
+        self.m.Ni.CreateArray(self.Ni)
+
+    def SetUpVariables(self):
+        for i in range(self.m.Ni.NumberOfPoints):
+            self.m.uc.AssignValue(i, 0.0)
+
+        self.m.x1.SetInitialCondition(1.0)
+        self.m.x2.SetInitialCondition(0.0)
+
+    def Run(self):
+        t = 0.0
+        for i in range(self.Ni):
+            tn = self.CurrentTime+self.dt
+            if tn > self.TimeHorizon:
+                tn = self.TimeHorizon
+            self.m.uc_STN.ActiveState = 'u_%d' % i
+            self.Reinitialize()
+            self.Log.Message('Interval %d (u=%f): integrating from %f to %f ...' % (i, self.m.uc.GetValue(i), self.CurrentTime, tn), 0)
+            self.IntegrateUntilTime(tn, eDoNotStopAtDiscontinuity)
+            self.ReportData(self.CurrentTime)
+            self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))
+
+    def SetUpOptimization(self):
+        # Yield of component B (mol)
+        self.ObjectiveFunction.Residual = -1 + self.m.x1() + self.m.x2()
+
+        # Set the constraints (inequality)
+        for i in range(self.Ni):
+            c1 = self.CreateInequalityConstraint("umax") # u - 1 <= 0
+            c1.Residual = self.m.uc(i) - Constant(1.0)
+            c2 = self.CreateInequalityConstraint("umin") # 0 - u <= 0
+            c2.Residual = -self.m.uc(i)
+
+        self.u_opt = []
+        for i in range(self.Ni):
+            self.u_opt.append( self.SetContinuousOptimizationVariable(self.m.uc(i), -10, 10, 0.0) )
+
+def setOptions(nlpsolver):
+    # 1) Set the options manually
+    try:
+        nlpsolver.SetOption('print_level', 0)
+        nlpsolver.SetOption('tol', 1e-5)
+        nlpsolver.SetOption('mu_strategy', 'adaptive')
+        #nlpsolver.SetOption('obj_scaling_factor', 100.0)
+        #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+    except Exception as e:
+        print(str(e))
+        
+# Use daeSimulator class
+def guiRun(app):
+    sim = simCatalystMixing(100, 1.0/100)
+    opt = daeOptimization()
+    nlp = pyIPOPT.daeIPOPT()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 1
+    sim.TimeHorizon       = 1
+    simulator = daeSimulator(app, simulation = sim,
+                                  optimization = opt,
+                                  nlpsolver = nlp,
+                                  nlpsolver_setoptions_fn = setOptions)
+    simulator.exec_()
+
+# Setup everything manually and run in a console
+def consoleRun():
+    # Create Log, Solver, DataReporter and Simulation object
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    nlpsolver    = pyIPOPT.daeIPOPT()
+    datareporter = daeTCPIPDataReporter() #daeNoOpDataReporter()
+    simulation   = simCatalystMixing(200, 1.0/200)
+    optimization = daeOptimization()
+    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    daesolver.SetLASolver(lasolver)
+
+    # Do no print progress
+    log.PrintProgress = True
+    
+    # Enable reporting of all variables
+    simulation.m.SetReportingOn(True)
+
+    # Set the time horizon and the reporting interval
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon       = 1
+
+    # Connect data reporter
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if(datareporter.Connect("", simName) == False):
+        sys.exit()
+
+    # Initialize the optimization
+    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
+
+    # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
+    # Otherwise seg. fault occurs for some reasons.
+    setOptions(nlpsolver)
+
+    # Save the model report and the runtime model report
+    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+
+    # Run
+    optimization.Run()
+    optimization.Finalize()
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+        consoleRun()
+    else:
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
+        guiRun(app)

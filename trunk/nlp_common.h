@@ -315,7 +315,7 @@ protected:
                 m_pSimulation->SetUpVariables();
 
             // 1b. Load initialization values in a temp file
-                m_pSimulation->LoadInitializationValues(m_InitializationFile);
+                //m_pSimulation->LoadInitializationValues(m_InitializationFile);
 
             // 2. Re-assign the optimization variables
                 for(i = 0; i < m_ptrarrOptVariables.size(); i++)

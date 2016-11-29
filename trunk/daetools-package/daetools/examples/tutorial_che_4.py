@@ -151,6 +151,7 @@ class simBatchReactor(daeSimulation):
     def __init__(self, modelName, N, L, G, ni_0, Phi):
         daeSimulation.__init__(self)
         self.m = modelMoC(modelName, G, Phi)
+        self.m.Description = __doc__
 
         self.N    = N
         self.L    = L

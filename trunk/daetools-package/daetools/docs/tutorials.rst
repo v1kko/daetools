@@ -50,16 +50,24 @@ The `Chemical Engineering Examples <tutorials-chemeng.html>`_ illustrate various
 problems solved by **DAE Tools**.
 
 
+.. _tutorials_chemeng_optimisation:
+
+.. rubric:: Chemical Engineering Optimisation Examples
+The `Chemical Engineering Optimisation Examples <tutorials-chemeng-optimisation.html>`_ illustrate various
+chemical engineering optimisation problems solved by **DAE Tools**.
+
+
 .. rubric:: The full list of tutorials:
 
 .. toctree::
    :numbered:
-   :maxdepth: 2 
+   :maxdepth: 2
 
    tutorials-basic
    tutorials-advanced
    tutorials-fe
    tutorials-optimisation
    tutorials-chemeng
+   tutorials-chemeng-optimisation
 
 

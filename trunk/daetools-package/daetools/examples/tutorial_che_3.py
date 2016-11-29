@@ -254,6 +254,7 @@ class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial_che_3")
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         self.m.Nm.CreateArray(6)

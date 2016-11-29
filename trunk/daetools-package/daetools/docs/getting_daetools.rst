@@ -235,7 +235,7 @@ the following shell command:
 
 .. code-block:: bash
 
-    sudo python setup.py install
+    python setup.py install
 
 You can also install **DAE Tools** into a python virtual environment:
 

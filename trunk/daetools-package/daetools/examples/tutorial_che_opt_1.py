@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""********************************************************************************
-                            tutorial_che_1.py
-                 DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2016
+"""
+***********************************************************************************
+                           tutorial_che_opt_1.py
+                DAE Tools: pyDAE module, www.daetools.com
+                Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -13,40 +14,26 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FO
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-********************************************************************************"""
+************************************************************************************
+"""
 __doc__ = """
-Continuously Stirred Tank Reactor with energy balance and Van de Vusse reactions:
-
-.. code-block:: none
-
-    A -> B -> C
-   2A -> D
+Optimisation of the CSTR model and Van de Vusse reactions given in tutorial_che_1:
 
 Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics
 Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.
 `doi:10.1021/i160048a700 <https://doi.org/10.1021/i160048a700>`_
-
-The concentrations plot:
-
-.. image:: _static/tutorial_che_1-results.png
-   :width: 500px
-
-The temperatures plot:
-
-.. image:: _static/tutorial_che_1-results2.png
-   :width: 500px
 """
 
 import sys
-from daetools.pyDAE import *
 from time import localtime, strftime
-# Standard variable types are defined in variable_types.py
+from daetools.pyDAE import *
+from daetools.solvers.ipopt import pyIPOPT
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
 K_t  = daeVariableType("k",  s**(-1),        0, 1E20,   0, 1e-5)
 K2_t = daeVariableType("k2", m**3/(mol*s),   0, 1E20,   0, 1e-5)
 
-class modTutorial(daeModel):
+class CSTR(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
         # Parameters
@@ -171,10 +158,10 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("EnergyBalanceCooling", "")
         eq.Residual = mK * cpK * dTk_dt - (Qk + kw * AR * (T - Tk))
 
-class simTutorial(daeSimulation):
+class simCSTR(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_che_1")
+        self.m = CSTR("tutorial_che_opt_1")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -208,13 +195,47 @@ class simTutorial(daeSimulation):
         self.m.T.SetInitialCondition((273.15 + 79.591) * K)
         self.m.Tk.SetInitialCondition((273.15 + 77.69) * K)
 
+    def SetUpOptimization(self):
+        # Yield of component B (mol)
+        self.ObjectiveFunction.Residual = -self.m.rho() * self.m.Cb()
+
+        # Set the constraints (inequality, equality)
+        self.c1 = self.CreateInequalityConstraint("Tmax") # T - 350K <= 0
+        self.c1.Residual = self.m.T() - Constant(350*K)
+
+        self.c2 = self.CreateInequalityConstraint("Tmin") # 345K - T <= 0
+        self.c2.Residual = Constant(345*K) - self.m.T()
+
+        # Set the optimization variables, their lower/upper bounds and the starting point
+        #self.VR  = self.SetContinuousOptimizationVariable(self.m.VR, 0.005, 0.030, 0.010);
+        #self.F   = self.SetContinuousOptimizationVariable(self.m.F, 1e-7, 10e-6, 3.942e-6);
+        #self.Ca0 = self.SetContinuousOptimizationVariable(self.m.Ca0, 1, 20000, 5100);
+        #self.T0  = self.SetContinuousOptimizationVariable(self.m.T0, 350, 400, 378.05);
+        self.Qk  = self.SetContinuousOptimizationVariable(self.m.Qk, -1000, 0, -438.75);
+
+def setOptions(nlpsolver):
+    # 1) Set the options manually
+    try:
+        nlpsolver.SetOption('print_level', 5)
+        nlpsolver.SetOption('tol', 1e-5)
+        nlpsolver.SetOption('mu_strategy', 'adaptive')
+        #nlpsolver.SetOption('obj_scaling_factor', 0.00001)
+        nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+    except Exception as e:
+        print(str(e))
+        
 # Use daeSimulator class
 def guiRun(app):
-    simulation = simTutorial()
-    simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 600     # 10 min
-    simulation.TimeHorizon       = 3*60*60 # 3 h
-    simulator = daeSimulator(app, simulation = simulation)
+    sim = simCSTR()
+    opt = daeOptimization()
+    nlp = pyIPOPT.daeIPOPT()
+    sim.m.SetReportingOn(True)
+    sim.ReportingInterval = 600     # 10 min
+    sim.TimeHorizon       = 5*60*60 # 3 h
+    simulator = daeSimulator(app, simulation = sim,
+                                  optimization = opt,
+                                  nlpsolver = nlp,
+                                  nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -222,34 +243,40 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    nlpsolver    = pyIPOPT.daeIPOPT()
+    datareporter = daeTCPIPDataReporter() #daeNoOpDataReporter()
+    simulation   = simCSTR()
+    optimization = daeOptimization()
 
+    # Do no print progress
+    log.PrintProgress = True
+    
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 600     # 10 min
-    simulation.TimeHorizon       = 3*60*60 # 3 h
+    simulation.TimeHorizon       = 5*60*60 # 3 h
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if(datareporter.Connect("", simName) == False):
         sys.exit()
 
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
+    # Initialize the optimization
+    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
+
+    # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
+    # Otherwise seg. fault occurs for some reasons.
+    setOptions(nlpsolver)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
     # Run
-    simulation.Run()
-    simulation.Finalize()
+    optimization.Run()
+    optimization.Finalize()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

@@ -481,6 +481,7 @@ class SimBattery(daeSimulation):
         self.process_info["N_s"] = self.N_s
         self.process_info["N_p"] = self.N_p
         self.m = ModCell("tutorial_che_6", process_info=self.process_info)
+        self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         h_n = self.L_n / self.N_n
