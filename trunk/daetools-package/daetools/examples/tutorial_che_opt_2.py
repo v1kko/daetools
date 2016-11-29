@@ -47,7 +47,7 @@ from daetools.solvers.ipopt import pyIPOPT
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
 class modCatalystMixing(daeModel):
-    def __init__(self, dt, Name, Parent = None, Description = ""):
+    def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.Ni = daeDomain("Ni", self, unit(), "Number of time intervals")
@@ -170,7 +170,7 @@ def consoleRun():
     daesolver    = daeIDAS()
     nlpsolver    = pyIPOPT.daeIPOPT()
     datareporter = daeTCPIPDataReporter() #daeNoOpDataReporter()
-    simulation   = simCatalystMixing(200, 1.0/200)
+    simulation   = simCatalystMixing(100, 1.0/100)
     optimization = daeOptimization()
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     daesolver.SetLASolver(lasolver)
