@@ -16,14 +16,18 @@ Chemical Engineering Optimisation Examples
 :ref:`tutorial_che_opt_1`    |tceo_1|
 --------------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_opt_2`    |tceo_2|
+--------------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_opt_3`    |tceo_3|
 ==========================   =================================================================
 
 
 .. |tceo_1| replace:: Optimisation of the CSTR with energy balance and Van de Vusse reactions
                       from the tutorial_che_1.
 
-.. |tceo_2| replace:: COPS optimisation test 14: Catalyst Mixing.
+.. |tceo_2| replace:: COPS test 14 (optimisation): Catalyst mixing in a tubular plug flow reactor.
 
+.. |tceo_3| replace:: COPS test 5 (parameter estimation): Determination of the reaction coefficients
+                      in the thermal isometrization of α-pinene.
 
 .. _tutorial_che_opt_1:
 
@@ -60,6 +64,25 @@ Chem. Eng. Example 2
 Model report            `tutorial_che_opt_2.xml <../examples/tutorial_che_opt_2.xml>`_
 Runtime model report    `tutorial_che_opt_2-rt.xml <../examples/tutorial_che_opt_2-rt.xml>`_
 Source code             `tutorial_che_opt_2.py <../examples/tutorial_che_opt_2.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_che_opt_3:
+
+Chem. Eng. Example 3
+=====================
+.. rubric:: Description
+
+.. automodule:: daetools.examples.tutorial_che_opt_3
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_che_opt_3.xml <../examples/tutorial_che_opt_3.xml>`_
+Runtime model report    `tutorial_che_opt_3-rt.xml <../examples/tutorial_che_opt_3-rt.xml>`_
+Source code             `tutorial_che_opt_3.py <../examples/tutorial_che_opt_3.html>`_
 =====================   =================================================================
 
 

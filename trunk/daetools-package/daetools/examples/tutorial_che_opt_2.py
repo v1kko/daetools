@@ -26,7 +26,7 @@ Reference: Benchmarking Optimization Software with COPS 3.0, Mathematics and Com
 Science Division, Argonne National Laboratory, Technical Report ANL/MCS-273, 2004.
 `PDF <http://www.mcs.anl.gov/~more/cops/cops3.pdf>`_
 
-The objective function is -4.802687E-2 (for Nh = 100) and -4.799590E-2 (for Nh = 200).
+The objective function is -4.79479E-2 (for Nh = 100) and -4.78676E-02 (for Nh = 200).
 
 The control variables plot (for Nh = 100):
 
@@ -46,6 +46,8 @@ from daetools.solvers.trilinos import pyTrilinos
 from daetools.solvers.ipopt import pyIPOPT
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
+x_t  = daeVariableType("x_t", unit(), -1.0e+20, 1.0e+20, 0.0, 1e-07)
+
 class modCatalystMixing(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
@@ -59,8 +61,8 @@ class modCatalystMixing(daeModel):
         self.u = daeVariable("u",  no_t, self, "Control variable")
 
         # State variables
-        self.x1 = daeVariable("x1", no_t, self, "Catalyst 1")
-        self.x2 = daeVariable("x2", no_t, self, "Catalyst 2")
+        self.x1 = daeVariable("x1", x_t, self, "Catalyst 1")
+        self.x2 = daeVariable("x2", x_t, self, "Catalyst 2")
 
     def DeclareEquations(self):
         # Create adouble objects to make equations more readable
@@ -127,28 +129,20 @@ class simCatalystMixing(daeSimulation):
         # Yield of component B (mol)
         self.ObjectiveFunction.Residual = -1 + self.m.x1() + self.m.x2()
 
-        # Set the constraints (inequality)
-        for i in range(self.Ni):
-            c1 = self.CreateInequalityConstraint("umax") # u - 1 <= 0
-            c1.Residual = self.m.uc(i) - Constant(1.0)
-            c2 = self.CreateInequalityConstraint("umin") # 0 - u <= 0
-            c2.Residual = -self.m.uc(i)
+        # Set the inequality constraints.
+        # Nota bene:
+        #  Not required here since the bounds can be enforced in the continuous optimization variables.
+        #
+        #for i in range(self.Ni):
+        #    c1 = self.CreateInequalityConstraint("umax") # u - 1 <= 0
+        #    c1.Residual = self.m.uc(i) - Constant(1.0)
+        #    c2 = self.CreateInequalityConstraint("umin") # 0 - u <= 0
+        #    c2.Residual = -self.m.uc(i)
 
         self.u_opt = []
         for i in range(self.Ni):
-            self.u_opt.append( self.SetContinuousOptimizationVariable(self.m.uc(i), -10, 10, 0.0) )
+            self.u_opt.append( self.SetContinuousOptimizationVariable(self.m.uc(i), 0.0, 1.0, 0.0) )
 
-def setOptions(nlpsolver):
-    # 1) Set the options manually
-    try:
-        nlpsolver.SetOption('print_level', 0)
-        nlpsolver.SetOption('tol', 1e-5)
-        nlpsolver.SetOption('mu_strategy', 'adaptive')
-        #nlpsolver.SetOption('obj_scaling_factor', 100.0)
-        #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
-    except Exception as e:
-        print(str(e))
-        
 # Use daeSimulator class
 def guiRun(app):
     sim = simCatalystMixing(100, 1.0/100)
@@ -175,6 +169,8 @@ def consoleRun():
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     daesolver.SetLASolver(lasolver)
 
+    daesolver.RelativeTolerance = 1e-6
+
     # Do no print progress
     log.PrintProgress = True
     
@@ -195,7 +191,11 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    setOptions(nlpsolver)
+    nlpsolver.SetOption('print_level', 0)
+    nlpsolver.SetOption('tol', 5e-5)
+    nlpsolver.SetOption('mu_strategy', 'adaptive')
+    #nlpsolver.SetOption('obj_scaling_factor', 100.0)
+    #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

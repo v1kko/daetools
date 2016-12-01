@@ -61,7 +61,7 @@ chemical engineering optimisation problems solved by **DAE Tools**.
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 2 
 
    tutorials-basic
    tutorials-advanced
