@@ -934,6 +934,9 @@ public:
     virtual real_t GetValue(void) const = 0;
     virtual void GetGradients(const daeMatrix<real_t>& matSensitivities, real_t* gradients, size_t Nparams) const = 0;
     virtual void GetGradients(real_t* gradients, size_t Nparams) const = 0;
+    virtual real_t GetAbsTolerance() const = 0;
+    virtual void   SetAbsTolerance(real_t abstol) = 0;
+
 
     virtual void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const = 0;
     virtual size_t GetNumberOfOptimizationVariables(void) const = 0;

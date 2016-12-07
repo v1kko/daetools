@@ -374,7 +374,7 @@ void daeNLOPTSolver::SetOptimizationVariables(void)
 	m_darrLBs.resize(Nv, 0);
 	m_darrUBs.resize(Nv, 0);
 	m_darrX.resize(Nv, 0);
-	m_darrLastX.resize(Nv, 0);
+	m_darrLastX.resize(Nv, -1e30);
 
 	for(i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{

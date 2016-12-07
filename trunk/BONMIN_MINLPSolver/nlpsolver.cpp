@@ -268,8 +268,8 @@ bool daeMINLP::eval_f(Index n,
 {
 	try
 	{
-		if(new_x)
-			daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
+        if(new_x)
+            daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 		
 		daeNLPCommon::Calculate_fobj(obj_value);	
     }
@@ -314,7 +314,7 @@ bool daeMINLP::eval_g(Index n,
 	
 		if(m != m_ptrarrConstraints.size())
 			daeDeclareAndThrowException(exInvalidCall)
-		if(new_x)
+        if(new_x)
 			daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 	
 		for(i = 0; i < m_ptrarrConstraints.size(); i++)
@@ -404,7 +404,7 @@ bool daeMINLP::eval_jac_g(Index n,
 		else
 		{
 		// Return the values
-			if(new_x)
+            if(new_x)
 				daeNLPCommon::CopyOptimizationVariablesToSimulationAndRun(x);
 	
 			daeMatrix<real_t>& matSens = m_pDAESolver->GetSensitivities();
@@ -684,22 +684,22 @@ daeBONMINSolver::daeBONMINSolver(void)
 	string strValue;
 	daeConfig& cfg = daeConfig::GetConfig();
 
-	strValue = cfg.Get<string>("daetools.BONMIN.IPOPT.linearSolver", "mumps");
-	SetOption("linear_solver", strValue);
+    strValue = cfg.Get<string>("daetools.BONMIN.IPOPT.linearSolver", "mumps");
+    SetOption("linear_solver", strValue);
 
-	strValue = cfg.Get<string>("daetools.BONMIN.IPOPT.hessianApproximation", "limited-memory");
-	SetOption("hessian_approximation", strValue);
+    strValue = cfg.Get<string>("daetools.BONMIN.IPOPT.hessianApproximation", "limited-memory");
+    SetOption("hessian_approximation", strValue);
 #endif
 #ifdef daeIPOPT
 	m_Application = IpoptApplicationFactory();
 	
 	daeConfig& cfg = daeConfig::GetConfig();
 
-	real_t tol                   = cfg.Get<real_t>("daetools.activity.ipopt_tol",                   1E-6);
-	int    print_level           = cfg.Get<int>("daetools.activity.ipopt_print_level",              0);
-	string linear_solver         = cfg.Get<string>("daetools.activity.ipopt_linear_solver",         "mumps");
-	string mu_strategy           = cfg.Get<string>("daetools.activity.ipopt_mu_strategy",           "adaptive");
-	string hessian_approximation = cfg.Get<string>("daetools.activity.ipopt_hessian_approximation", "limited-memory");
+    real_t tol                   = cfg.Get<real_t>("daetools.BONMIN.IPOPT.tol",                   1E-6);
+    int    print_level           = cfg.Get<int>("daetools.BONMIN.IPOPT.print_level",              0);
+    string linear_solver         = cfg.Get<string>("daetools.BONMIN.IPOPT.linear_solver",         "mumps");
+    string mu_strategy           = cfg.Get<string>("daetools.BONMIN.IPOPT.mu_strategy",           "adaptive");
+    string hessian_approximation = cfg.Get<string>("daetools.BONMIN.IPOPT.hessian_approximation", "limited-memory");
 
 	SetOption("hessian_approximation", hessian_approximation);
 	SetOption("tol",			       tol);

@@ -17,21 +17,17 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-COPS test 5: Isomerization of α-pinene (parameter estimation of a dynamic system).
+COPS test 6: Marine Population Dynamics.
 
-Determine the reaction coefficients in the thermal isometrization of α-pinene (y1) to
-dipentene (y2) and allo-ocimen (y3) which in turn produces α- and β-pyronene (y4)
-and a dimer (y5).
+Given estimates of the abundance of the population of a marine species at each stage
+(for example, nauplius, juvenile, adult) as a function of time, determine stage specific
+growth and mortality rates.
 
 Reference: Benchmarking Optimization Software with COPS 3.0, Mathematics and Computer
 Science Division, Argonne National Laboratory, Technical Report ANL/MCS-273, 2004.
 `PDF <http://www.mcs.anl.gov/~more/cops/cops3.pdf>`_
 
-Experimental data taken from:  Rocha A.M.A.C., Martins M.C., Costa M.F.P.,
-Fernandes, E.M.G.P. (2016) Direct sequential based firefly algorithm for the α-pinene
-isomerization problem. 16th International Conference on Computational Science and Its
-Applications, ICCSA 2016, Beijing, China.
-`doi:10.1007/978-3-319-42085-1_30 <http://doi.org/10.1007/978-3-319-42085-1_30>`_
+Experimental data generated following the procedure described in the COPS test.
 
 Run options:
 
@@ -43,16 +39,16 @@ Currently, the parameter estimation results are (solver options/scaling should b
 
 .. code-block:: none
 
-   Fobj = 72.254115362
-   p1   =  5.7980692e-5
-   p2   =  2.9414018e-5
-   p3   =  1.7105707e-5
-   p4   = 14.0633061e-5
-   p5   =  0.6501559e-5
+   Fobj = e+7
 
-The concentration plots (for optimal 'p' from the literature):
+The distribution moments 1,2,5,6 plots (for optimal results from the literature):
 
 .. image:: _static/tutorial_che_opt_3-results.png
+   :width: 500px
+
+The distribution moments 3,4,7,8 plots (for optimal results from the literature):
+
+.. image:: _static/tutorial_che_opt_3-results2.png
    :width: 500px
 """
 
@@ -63,114 +59,78 @@ from daetools.solvers.trilinos import pyTrilinos
 from daetools.solvers.ipopt import pyIPOPT
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
-y_t  = daeVariableType("y_t",  unit(), -1.0e+20, 1.0e+20, 0.0, 1e-07)
-L2_t = daeVariableType("L2_t", unit(), -1.0e+20, 1.0e+20, 0.0, 1e-07)
+y_t  = daeVariableType("y_t",  unit(), -1.0e+20, 1.0e+20, 0.0, 1e-06)
+L2_t = daeVariableType("L2_t", unit(), -1.0e+20, 1.0e+20, 0.0, 1e-06)
 
 #########################################################
-#                 Isomerization of α-pinene
+#             Marine Population Dynamics
 #########################################################
 # Mathematical model
-class modAlphaPinene(daeModel):
-    p_scaling = 1e5
-
+class modMarinePopulation(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        # Reaction coefficients
-        self.p1 = daeVariable("p1",  no_t, self, "Reaction coefficient 1")
-        self.p2 = daeVariable("p2",  no_t, self, "Reaction coefficient 2")
-        self.p3 = daeVariable("p3",  no_t, self, "Reaction coefficient 3")
-        self.p4 = daeVariable("p4",  no_t, self, "Reaction coefficient 4")
-        self.p5 = daeVariable("p5",  no_t, self, "Reaction coefficient 5")
+        self.Ns = daeDomain("Ns", self, unit(), "Number of species in the population")
+
+        # Population growth/mortality rates
+        self.m = daeVariable("m",  no_t, self, "Mortality rate", [self.Ns])
+        self.g = daeVariable("g",  no_t, self, "Growth rate",    [self.Ns])
 
         # State variables
-        self.y1 = daeVariable("y1", y_t, self, "α-pinene concentration")
-        self.y2 = daeVariable("y2", y_t, self, "Dipentene concentration")
-        self.y3 = daeVariable("y3", y_t, self, "Allo-ocimen concentration")
-        self.y4 = daeVariable("y4", y_t, self, "α- and β-pyronene concentration")
-        self.y5 = daeVariable("y5", y_t, self, "Dimer concentration")
+        self.y = daeVariable("y",  y_t, self, "Population moments", [self.Ns])
 
     def DeclareEquations(self):
         # Create adouble objects to make equations more readable
-        y1 = self.y1()
-        y2 = self.y2()
-        y3 = self.y3()
-        y4 = self.y4()
-        y5 = self.y5()
-        p1 = self.p1()
-        p2 = self.p2()
-        p3 = self.p3()
-        p4 = self.p4()
-        p5 = self.p5()
+        m = lambda i: self.m(i)
+        g = lambda i: self.g(i)
+        y = lambda i: self.y(i)
 
         # Derivatives
-        dy1_dt = self.y1.dt()
-        dy2_dt = self.y2.dt()
-        dy3_dt = self.y3.dt()
-        dy4_dt = self.y4.dt()
-        dy5_dt = self.y5.dt()
+        dy_dt = lambda i: dt(self.y(i))
 
-        # y1
-        eq = self.CreateEquation("y1", "")
-        eq.Residual = dy1_dt + (p1+p2)*y1 / modAlphaPinene.p_scaling
+        # y[0]
+        eq = self.CreateEquation("y0", "")
+        eq.Residual = dy_dt(0) + (m(0) + g(0)) * y(0)
         eq.CheckUnitsConsistency = False
 
-        # y2
-        eq = self.CreateEquation("y2", "")
-        eq.Residual = dy2_dt - p1*y1  / modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency = False
+        Ns = self.Ns.NumberOfPoints
+        # y[1-6]
+        for j in range(1,Ns-1):
+            eq = self.CreateEquation("y%d" % j, "")
+            eq.Residual = dy_dt(j) - (g(j-1)*y(j-1) - (m(j) + g(j)) * y(j))
+            eq.CheckUnitsConsistency = False
 
-        # y3
-        eq = self.CreateEquation("y3", "")
-        eq.Residual = dy3_dt - (p2*y1 - (p3+p4)*y3 + p5*y5) / modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency = False
-
-        # y4
-        eq = self.CreateEquation("y4", "")
-        eq.Residual = dy4_dt - p3*y3 / modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency = False
-
-        # y5
-        eq = self.CreateEquation("y5", "")
-        eq.Residual = dy5_dt - (p4*y3 - p5*y5) / modAlphaPinene.p_scaling
+        # y[Ns-1]
+        j = Ns-1
+        eq = self.CreateEquation("y%d" % j, "")
+        eq.Residual = dy_dt(j) - (g(j-1)*y(j-1) - m(j)*y(j))
         eq.CheckUnitsConsistency = False
 
 # Simulation (can be run independently from optimisation)
-class simAlphaPinene(daeSimulation):
+class simMarinePopulation(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modAlphaPinene("tutorial_che_opt_3")
+        self.m = modMarinePopulation("tutorial_che_opt_3")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        pass
+        self.m.Ns.CreateArray(8)
 
     def SetUpVariables(self):
-        # The reaction coefficients below are optimal results found in the literature.
-        # They should produce L2 norm of 19.872393107.
-        self.m.p1.AssignValue( 5.9256e-5 * modAlphaPinene.p_scaling)
-        self.m.p2.AssignValue( 2.9632e-5 * modAlphaPinene.p_scaling)
-        self.m.p3.AssignValue( 2.0450e-5 * modAlphaPinene.p_scaling)
-        self.m.p4.AssignValue(27.4730e-5 * modAlphaPinene.p_scaling)
-        self.m.p5.AssignValue( 4.0073e-5 * modAlphaPinene.p_scaling)
-
-        self.m.y1.SetInitialCondition(100.0)
-        self.m.y2.SetInitialCondition(  0.0)
-        self.m.y3.SetInitialCondition(  0.0)
-        self.m.y4.SetInitialCondition(  0.0)
-        self.m.y5.SetInitialCondition(  0.0)
+        self.m.m.AssignValues(m_opt)
+        self.m.g.AssignValues(g_opt)
+        self.m.y.SetInitialConditions(y_t0)
 
 #########################################################
 #               Parameter Estimation Part
 #########################################################
 # We need some additional variables to determine reaction coefficients.
-# Derive a new class from modAlphaPinene and add extra data.
+# Derive a new class from modMarinePopulation and add extra data.
 # Nota Bene:
-#   modAlphaPinene_Opt inherits all parameters/variables from the base class
-#   and still behaves as an ordinary daeModel object.
-class modAlphaPinene_Opt(modAlphaPinene):
+#   modMarinePopulation_Opt inherits all parameters/variables from the base class.
+class modMarinePopulation_Opt(modMarinePopulation):
     def __init__(self, Name, Parent = None, Description = ""):
-        modAlphaPinene.__init__(self, Name, Parent, Description)
+        modMarinePopulation.__init__(self, Name, Parent, Description)
 
         # Observed values at the specific time interval
         self.y1_obs = daeVariable("y1_obs", no_t, self, "Observed value 1 at the specified time interval")
@@ -178,59 +138,61 @@ class modAlphaPinene_Opt(modAlphaPinene):
         self.y3_obs = daeVariable("y3_obs", no_t, self, "Observed value 3 at the specified time interval")
         self.y4_obs = daeVariable("y4_obs", no_t, self, "Observed value 4 at the specified time interval")
         self.y5_obs = daeVariable("y5_obs", no_t, self, "Observed value 5 at the specified time interval")
+        self.y6_obs = daeVariable("y6_obs", no_t, self, "Observed value 6 at the specified time interval")
+        self.y7_obs = daeVariable("y7_obs", no_t, self, "Observed value 7 at the specified time interval")
+        self.y8_obs = daeVariable("y8_obs", no_t, self, "Observed value 8 at the specified time interval")
 
         # This L2 norm sums all L2 norms in the previous time intervals
         self.L2      = daeVariable("L2",      L2_t, self, "Current L2 norm: ||yi(t) - yi_obs(t)||^2")
         self.L2_prev = daeVariable("L2_prev", L2_t, self, "L2 norm in previous time intrvals")
 
     def DeclareEquations(self):
-        modAlphaPinene.DeclareEquations(self)
+        modMarinePopulation.DeclareEquations(self)
 
         # L2-norm ||yi(t) - yi_obs(t)||^2
         # L2 norm is a sum of the L2 norm in the previous time steps (L2_prev)
-        # and the current norm: s1 + s2 + s3 + s4 + s5.
+        # and the current norm: s1 + s2.
         # L2_prev will be reset after every time interval where we have observed values.
-        s1 = (self.y1() - self.y1_obs())**2
-        s2 = (self.y2() - self.y2_obs())**2
-        s3 = (self.y3() - self.y3_obs())**2
-        s4 = (self.y4() - self.y4_obs())**2
-        s5 = (self.y5() - self.y5_obs())**2
+        s1 = (self.y(0) - self.y1_obs())**2
+        s2 = (self.y(1) - self.y2_obs())**2
+        s3 = (self.y(2) - self.y3_obs())**2
+        s4 = (self.y(3) - self.y4_obs())**2
+        s5 = (self.y(4) - self.y5_obs())**2
+        s6 = (self.y(5) - self.y6_obs())**2
+        s7 = (self.y(6) - self.y7_obs())**2
+        s8 = (self.y(7) - self.y8_obs())**2
         eq = self.CreateEquation("L2", "")
-        eq.Residual = self.L2() - (self.L2_prev() + s1 + s2 + s3 + s4 + s5)
+        eq.Residual = self.L2() - (self.L2_prev() + s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8)
         eq.CheckUnitsConsistency = False
 
 # Simulation class that will be used by the optimisation.
-# It is derived from the daeSimulation and will initialise modAlphaPinene data
-# using simAlphaPinene functions SetUpParametersAndDomains() and SetUpVariables()
-# since they are just ordinary python functions.
-# In addition, it needs to initialise the data from modAlphaPinene_Opt class.
-class simAlphaPinene_opt(daeSimulation):
+class simMarinePopulation_opt(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modAlphaPinene_Opt("tutorial_che_opt_3")
+        self.m = modMarinePopulation_Opt("tutorial_che_opt_3")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
-        # Although we do not inherit from simAlphaPinene we can call its
-        # SetUpParametersAndDomains() function (it is just a function in python)
-        # to initialise modAlphaPinene parameters.
-        simAlphaPinene.SetUpParametersAndDomains(self)
+        self.m.Ns.CreateArray(8)
 
     def SetUpVariables(self):
-        # Although we do not inherit from simAlphaPinene we can call its
-        # SetUpVariables() function (it is just a function in python)
-        # to initialise modAlphaPinene variables.
-        simAlphaPinene.SetUpVariables(self)
+        # modMarinePopulation part
+        self.m.m.AssignValues(m_opt)
+        self.m.g.AssignValues(g_opt)
+        self.m.y.SetInitialConditions(y_t0)
 
-        # Initialise modAlphaPinene_Opt additional variables.
+        # Initialise variables required for parameter estimation.
         # Notate bene:
         #   Observed values should match initial conditions at t = 0
         #   L2_prev should be 0.0 initially
-        self.m.y1_obs.AssignValue(100.0)
-        self.m.y2_obs.AssignValue(  0.0)
-        self.m.y3_obs.AssignValue(  0.0)
-        self.m.y4_obs.AssignValue(  0.0)
-        self.m.y5_obs.AssignValue(  0.0)
+        self.m.y1_obs.AssignValue(y_t0[0])
+        self.m.y2_obs.AssignValue(y_t0[1])
+        self.m.y3_obs.AssignValue(y_t0[2])
+        self.m.y4_obs.AssignValue(y_t0[3])
+        self.m.y5_obs.AssignValue(y_t0[4])
+        self.m.y6_obs.AssignValue(y_t0[5])
+        self.m.y7_obs.AssignValue(y_t0[6])
+        self.m.y8_obs.AssignValue(y_t0[7])
         self.m.L2_prev.AssignValue(0.0)
 
     def Run(self):
@@ -243,11 +205,14 @@ class simAlphaPinene_opt(daeSimulation):
                 self.m.L2_prev.ReAssignValue(L2)
 
             # Reset observed values to match the current interval end time
-            self.m.y1_obs.ReAssignValue(y1_obs[t])
-            self.m.y2_obs.ReAssignValue(y2_obs[t])
-            self.m.y3_obs.ReAssignValue(y3_obs[t])
-            self.m.y4_obs.ReAssignValue(y4_obs[t])
-            self.m.y5_obs.ReAssignValue(y5_obs[t])
+            self.m.y1_obs.ReAssignValue(y_obs[t,0])
+            self.m.y2_obs.ReAssignValue(y_obs[t,1])
+            self.m.y3_obs.ReAssignValue(y_obs[t,2])
+            self.m.y4_obs.ReAssignValue(y_obs[t,3])
+            self.m.y5_obs.ReAssignValue(y_obs[t,4])
+            self.m.y6_obs.ReAssignValue(y_obs[t,5])
+            self.m.y7_obs.ReAssignValue(y_obs[t,6])
+            self.m.y8_obs.ReAssignValue(y_obs[t,7])
 
             # Reinitialise the DAE system after all changes made above
             self.Reinitialize()
@@ -260,30 +225,80 @@ class simAlphaPinene_opt(daeSimulation):
 
     def SetUpOptimization(self):
         # Minimise L2-norm ||yi(t) - yi_obs(t)||^2
-        self.ObjectiveFunction.Residual = self.m.L2()
+        self.ObjectiveFunction.Residual = self.m.L2() * 1e-8 # scale Fobj
+        #self.ObjectiveFunction.AbsTolerance = 1e-6
 
-        p_lb   = 0.0
-        p_ub   = 5e-4 * modAlphaPinene.p_scaling
-        p_init = 0.0
+        m_lb   =  0.0
+        m_ub   = 10.0
+        m_init =  1.0
+        m1 = self.SetContinuousOptimizationVariable(self.m.m(0), m_lb, m_ub, m_init)
+        m2 = self.SetContinuousOptimizationVariable(self.m.m(1), m_lb, m_ub, m_init)
+        m3 = self.SetContinuousOptimizationVariable(self.m.m(2), m_lb, m_ub, m_init)
+        m4 = self.SetContinuousOptimizationVariable(self.m.m(3), m_lb, m_ub, m_init)
+        m5 = self.SetContinuousOptimizationVariable(self.m.m(4), m_lb, m_ub, m_init)
+        m6 = self.SetContinuousOptimizationVariable(self.m.m(5), m_lb, m_ub, m_init)
+        m7 = self.SetContinuousOptimizationVariable(self.m.m(6), m_lb, m_ub, m_init)
+        m8 = self.SetContinuousOptimizationVariable(self.m.m(7), m_lb, m_ub, m_init)
 
-        #                                                        LB,   UB, Initial value
-        p1 = self.SetContinuousOptimizationVariable(self.m.p1,  p_lb, p_ub, p_init)
-        p2 = self.SetContinuousOptimizationVariable(self.m.p2,  p_lb, p_ub, p_init)
-        p3 = self.SetContinuousOptimizationVariable(self.m.p3,  p_lb, p_ub, p_init)
-        p4 = self.SetContinuousOptimizationVariable(self.m.p4,  p_lb, p_ub, p_init)
-        p5 = self.SetContinuousOptimizationVariable(self.m.p5,  p_lb, p_ub, p_init)
+        g_lb   =  0.0
+        g_ub   = 10.0
+        g_init =  1.0
+        g1 = self.SetContinuousOptimizationVariable(self.m.g(0), g_lb, g_ub, g_init)
+        g2 = self.SetContinuousOptimizationVariable(self.m.g(1), g_lb, g_ub, g_init)
+        g3 = self.SetContinuousOptimizationVariable(self.m.g(2), g_lb, g_ub, g_init)
+        g4 = self.SetContinuousOptimizationVariable(self.m.g(3), g_lb, g_ub, g_init)
+        g5 = self.SetContinuousOptimizationVariable(self.m.g(4), g_lb, g_ub, g_init)
+        g6 = self.SetContinuousOptimizationVariable(self.m.g(5), g_lb, g_ub, g_init)
+        g7 = self.SetContinuousOptimizationVariable(self.m.g(6), g_lb, g_ub, g_init)
+        #g8 = self.SetContinuousOptimizationVariable(self.m.g(7), g_lb, g_ub, g_init)
 
-# Experimental data (8 measurements)
-times  = numpy.array([1230.00, 3060.0, 4920.0, 7800.0, 10680.0, 15030.0, 22620.0, 36420.0])
-y1_obs = numpy.array([  88.35,   76.4,   65.1,   50.4,    37.5,    25.9,    14.0,     4.5])
-y2_obs = numpy.array([   7.30,   15.6,   23.1,   32.9,    42.7,    49.1,    57.4,    63.1])
-y3_obs = numpy.array([   2.30,    4.5,    5.3,    6.0,     6.0,     5.9,     5.1,     3.8])
-y4_obs = numpy.array([   0.40,    0.7,    1.1,    1.5,     1.9,     2.2,     2.6,     2.9])
-y5_obs = numpy.array([   1.75,    2.8,    5.8,    9.3,    12.0,    17.0,    21.0,    25.7])
+        def constraint(p, LB, UB, name):
+            return
+            c1 = self.CreateInequalityConstraint("%smax" % name) # p - UB <= 0
+            c1.Residual = p - UB
+            c2 = self.CreateInequalityConstraint("%smin" % name) # LB - p <= 0
+            c2.Residual = LB - p
+
+        for i in range(8):
+            constraint(self.m.g(i), g_lb, g_ub, 'g')
+        for i in range(7):
+            constraint(self.m.m(i), m_lb, m_ub, 'm')
+
+# Experimental data (21 measurements) generated by the simulation below
+times  = numpy.array([1e-10, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0,
+                      6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0])
+# yobs[species,time]
+y_obs = numpy.array([
+    20000, 17000, 10000, 15000, 12000, 9000, 7000, 3000,
+    12445, 15411, 13040, 13338, 13484, 8426, 6615, 4022,
+     7705, 13074, 14623, 11976, 12453, 9272, 6891, 5020,
+     4664,  8579, 12434, 12603, 11738, 9710, 6821, 5722,
+     2977,  7053, 11219, 11340, 13665, 8534, 6242, 5695,
+     1769,  5054, 10065, 11232, 12112, 9600, 6647, 7034,
+      943,  3907,  9473, 10334, 11115, 8826, 6842, 7348,
+      581,  2624,  7421, 10297, 12427, 8747, 7199, 7684,
+      355,  1744,  5369,  7748, 10057, 8698, 6542, 7410,
+      223,  1272,  4713,  6869,  9564, 8766, 6810, 6961,
+      137,   821,  3451,  6050,  8671, 8291, 6827, 7525,
+       87,   577,  2649,  5454,  8430, 7411, 6423, 8388,
+       49,   337,  2058,  4115,  7435, 7627, 6268, 7189,
+       32,   228,  1440,  3790,  6474, 6658, 5859, 7467,
+       17,   168,  1178,  3087,  6524, 5880, 5562, 7144,
+       11,    99,   919,  2596,  5360, 5762, 4480, 7256,
+        7,    65,   647,  1873,  4556, 5058, 4944, 7538,
+        4,    44,   509,  1571,  4009, 4527, 4233, 6649,
+        2,    27,   345,  1227,  3677, 4229, 3805, 6378,
+        1,    20,   231,   934,  3197, 3695, 3159, 6454,
+        1,    12,   198,   707,  2562, 3163, 3232, 5566], dtype=float).reshape((21,8))
+# Initial conditions
+y_t0 = numpy.array([2.0e4, 1.7e4, 1.0e4, 1.5e4, 1.2e4, 0.9e4, 0.7e4, 0.3e4])
+# Approximate optimal rates
+m_opt = numpy.array([0.28, 0.10, 0.25, 0.12, 1e-3, 1e-9, 0.32, 0.43])
+g_opt = numpy.array([0.70, 0.81, 0.47, 0.48, 0.49, 0.65, 0.54, 0.0])
 
 # Use daeSimulator class
 def guiRun(app):
-    sim = simAlphaPinene_opt()
+    sim = simMarinePopulation_opt()
     opt = daeOptimization()
     nlp = pyIPOPT.daeIPOPT()
     sim.m.SetReportingOn(True)
@@ -300,8 +315,8 @@ def consoleRun():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     nlpsolver    = pyIPOPT.daeIPOPT()
-    datareporter = daeTCPIPDataReporter() #daeNoOpDataReporter()
-    simulation   = simAlphaPinene_opt()
+    datareporter = daeNoOpDataReporter()
+    simulation   = simMarinePopulation_opt()
     optimization = daeOptimization()
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     daesolver.SetLASolver(lasolver)
@@ -327,10 +342,10 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    nlpsolver.SetOption('print_level', 5)
-    nlpsolver.SetOption('tol', 1e-6)
-    #nlpsolver.SetOption('mu_strategy', 'adaptive')
-    nlpsolver.SetOption('obj_scaling_factor', 1e-3)
+    nlpsolver.SetOption('print_level', 0)
+    nlpsolver.SetOption('tol', 1e-5)
+    nlpsolver.SetOption('mu_strategy', 'adaptive')
+    nlpsolver.SetOption('obj_scaling_factor', 1e3)
     nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
 
     # Run
@@ -341,18 +356,24 @@ def consoleSimulation():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simAlphaPinene_opt()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simMarinePopulation_opt()
+
+    dr_tcpip     = daeTCPIPDataReporter()
+    dr_data      = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingTimes = times.tolist()
+    simulation.ReportingInterval = 10.0/20
+    simulation.TimeHorizon       = 10.0
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+    if(dr_tcpip.Connect("", simName) == False):
         sys.exit()
 
     # Initialize the simulation

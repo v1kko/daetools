@@ -177,9 +177,9 @@ def run_simulation(simPrefix, modelName, N, L, G, ni_0, reportingInterval, timeH
     daesolver    = daeIDAS()
     datareporter = daeDelegateDataReporter()
     dr_tcpip     = daeTCPIPDataReporter()
-    dr_plot      = daePlotDataReporter()
+    dr_data      = daeNoOpDataReporter()
     datareporter.AddDataReporter(dr_tcpip)
-    datareporter.AddDataReporter(dr_plot)
+    datareporter.AddDataReporter(dr_data)
     simulation   = simBatchReactor(modelName, N, L, G, ni_0, Phi)
 
     # Enable reporting of all variables
@@ -207,7 +207,7 @@ def run_simulation(simPrefix, modelName, N, L, G, ni_0, reportingInterval, timeH
     # Run
     simulation.Run()
     simulation.Finalize()
-    return dr_plot.Process
+    return dr_data.Process
 
 if __name__ == "__main__":
     # Create an initial CSD array and growth rate

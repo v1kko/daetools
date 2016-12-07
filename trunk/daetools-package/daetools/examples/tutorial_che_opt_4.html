@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_che_opt_4.py</title>
+</head>
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#008000;'>#!/usr/bin/env python</span>
+<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>                           tutorial_che_opt_4.py</span>
+<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>***********************************************************************************</span>
+<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#008000;'>************************************************************************************</span>
+<span style='color:#008000;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#c00000;'>COPS test 12: Catalytic Cracking of Gas Oil.</span>
+
+<span style='color:#c00000;'>Determine the reaction coefficients for the catalytic cracking of gas oil into gas and other</span>
+<span style='color:#c00000;'>byproducts.</span>
+
+<span style='color:#c00000;'>Reference: Benchmarking Optimization Software with COPS 3.0, Mathematics and Computer</span>
+<span style='color:#c00000;'>Science Division, Argonne National Laboratory, Technical Report ANL/MCS-273, 2004.</span>
+<span style='color:#c00000;'>`PDF &lt;http://www.mcs.anl.gov/~more/cops/cops3.pdf&gt;`_</span>
+
+<span style='color:#c00000;'>Experimental data generated following the procedure described in the COPS test.</span>
+
+<span style='color:#c00000;'>Run options:</span>
+
+<span style='color:#c00000;'>- Simulation with optimal parameters: python tutorial_che_opt_4.py simulation</span>
+<span style='color:#c00000;'>- Parameter estimation console run:   python tutorial_che_opt_4.py console</span>
+<span style='color:#c00000;'>- Parameter estimation GUI run:       python tutorial_che_opt_4.py gui</span>
+
+<span style='color:#c00000;'>Currently, the parameter estimation results are (solver options/scaling should be tuned):</span>
+
+<span style='color:#c00000;'>.. code-block:: none</span>
+
+<span style='color:#c00000;'>   Fobj = 4.841995e-3</span>
+<span style='color:#c00000;'>   p1   = 10.95289</span>
+<span style='color:#c00000;'>   p2   =  7.70601</span>
+<span style='color:#c00000;'>   p3   =  2.89625</span>
+
+<span style='color:#c00000;'>The concentration plots (for optimal 'p' from the literature):</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_che_opt_4-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
+<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#0000ff;'>import</span> sys
+<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#0000ff;'>from</span> daetools.solvers.trilinos <span style='color:#0000ff;'>import</span> pyTrilinos
+<span style='color:#0000ff;'>from</span> daetools.solvers.ipopt <span style='color:#0000ff;'>import</span> pyIPOPT
+<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
+
+y_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;y_t&quot;</span>,  unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-07</span>)
+L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;L2_t&quot;</span>, unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-07</span>)
+
+<span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+<span style='color:#008000;'>#             Catalytic Cracking of Gas Oil</span>
+<span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+<span style='color:#008000;'># Mathematical model</span>
+<b>class</b> modOilCracking(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#008000;'># Reaction coefficients</span>
+        <span style='color:#0000ff;'>self</span>.p1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;p1&quot;</span>,  no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction coefficient 1&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.p2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;p2&quot;</span>,  no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction coefficient 2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.p3 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;p3&quot;</span>,  no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction coefficient 3&quot;</span>)
+
+        <span style='color:#008000;'># State variables</span>
+        <span style='color:#0000ff;'>self</span>.y1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y1&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;1 concentration&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.y2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y2&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;2 concentration&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># Create adouble objects to make equations more readable</span>
+        y1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y1()
+        y2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y2()
+        p1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.p1()
+        p2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.p2()
+        p3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.p3()
+
+        <span style='color:#008000;'># Derivatives</span>
+        dy1_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y1.dt()
+        dy2_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y2.dt()
+
+        <span style='color:#008000;'># y1</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y1&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy1_dt <b><span style='color:#0000ff;'>+</span></b> (p1<b><span style='color:#0000ff;'>+</span></b>p3)<b><span style='color:#0000ff;'>*</span></b>(y1<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
+
+        <span style='color:#008000;'># y2</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y2&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy2_dt <b><span style='color:#0000ff;'>-</span></b> (p1<b><span style='color:#0000ff;'>*</span></b>(y1<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>) <b><span style='color:#0000ff;'>-</span></b> p2<b><span style='color:#0000ff;'>*</span></b>y2)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
+
+<span style='color:#008000;'># Simulation (can be run independently from optimisation)</span>
+<b>class</b> simOilCracking(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modOilCracking(<span style='color:#c00000;'>&quot;tutorial_che_opt_4&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+        <b>pass</b>
+
+    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># The reaction coefficients below are optimal results found in the literature.</span>
+        <span style='color:#008000;'># They should produce L2 norm of 4.12164e-03.</span>
+        <span style='color:#0000ff;'>self</span>.m.p1.AssignValue(<span style='color:#c000c0;'>12</span>)
+        <span style='color:#0000ff;'>self</span>.m.p2.AssignValue(<span style='color:#c000c0;'>8</span>)
+        <span style='color:#0000ff;'>self</span>.m.p3.AssignValue(<span style='color:#c000c0;'>2</span>)
+
+        <span style='color:#0000ff;'>self</span>.m.y1.SetInitialCondition(y1_t0)
+        <span style='color:#0000ff;'>self</span>.m.y2.SetInitialCondition(y2_t0)
+
+<span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+<span style='color:#008000;'>#               Parameter Estimation Part</span>
+<span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+<span style='color:#008000;'># We need some additional variables to determine reaction coefficients.</span>
+<span style='color:#008000;'># Derive a new class from modOilCracking and add extra data.</span>
+<span style='color:#008000;'># Nota Bene:</span>
+<span style='color:#008000;'>#   modOilCracking_Opt inherits all parameters/variables from the base class.</span>
+<b>class</b> modOilCracking_Opt(modOilCracking):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
+        modOilCracking.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#008000;'># Observed values at the specific time interval</span>
+        <span style='color:#0000ff;'>self</span>.y1_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y1_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 1 at the specified time interval&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.y2_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y2_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 2 at the specified time interval&quot;</span>)
+
+        <span style='color:#008000;'># This L2 norm sums all L2 norms in the previous time intervals</span>
+        <span style='color:#0000ff;'>self</span>.L2      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;L2&quot;</span>,      L2_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Current L2 norm: ||yi(t) - yi_obs(t)||^2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.L2_prev <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;L2_prev&quot;</span>, L2_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;L2 norm in previous time intrvals&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
+        modOilCracking.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+
+        <span style='color:#008000;'># L2-norm ||yi(t) - yi_obs(t)||^2</span>
+        <span style='color:#008000;'># L2 norm is a sum of the L2 norm in the previous time steps (L2_prev)</span>
+        <span style='color:#008000;'># and the current norm: s1 + s2.</span>
+        <span style='color:#008000;'># L2_prev will be reset after every time interval where we have observed values.</span>
+        s1 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y1() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y1_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
+        s2 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y2() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y2_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;L2&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L2() <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#0000ff;'>self</span>.L2_prev() <b><span style='color:#0000ff;'>+</span></b> s1 <b><span style='color:#0000ff;'>+</span></b> s2)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
+
+<span style='color:#008000;'># Simulation class that will be used by the optimisation.</span>
+<b>class</b> simOilCracking_opt(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modOilCracking_Opt(<span style='color:#c00000;'>&quot;tutorial_che_opt_4&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+        <b>pass</b>
+
+    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># modOilCracking part</span>
+        <span style='color:#0000ff;'>self</span>.m.p1.AssignValue(<span style='color:#c000c0;'>0</span>)
+        <span style='color:#0000ff;'>self</span>.m.p2.AssignValue(<span style='color:#c000c0;'>0</span>)
+        <span style='color:#0000ff;'>self</span>.m.p3.AssignValue(<span style='color:#c000c0;'>0</span>)
+
+        <span style='color:#0000ff;'>self</span>.m.y1.SetInitialCondition(y1_t0)
+        <span style='color:#0000ff;'>self</span>.m.y2.SetInitialCondition(y2_t0)
+
+        <span style='color:#008000;'># Initialise variables required for parameter estimation.</span>
+        <span style='color:#008000;'># Notate bene:</span>
+        <span style='color:#008000;'>#   Observed values should match initial conditions at t = 0</span>
+        <span style='color:#008000;'>#   L2_prev should be 0.0 initially</span>
+        <span style='color:#0000ff;'>self</span>.m.y1_obs.AssignValue(y1_t0)
+        <span style='color:#0000ff;'>self</span>.m.y2_obs.AssignValue(y2_t0)
+        <span style='color:#0000ff;'>self</span>.m.L2_prev.AssignValue(<span style='color:#c000c0;'>0.0</span>)
+
+    <b>def</b> Run(<span style='color:#0000ff;'>self</span>):
+        <b>for</b> t, tn <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>enumerate</span>(times):
+            <span style='color:#008000;'># Reset L2_prev value to the current L2</span>
+            <b>if</b> t <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c000c0;'>0</span>:
+                <span style='color:#0000ff;'>self</span>.m.L2_prev.ReAssignValue(<span style='color:#c000c0;'>0.0</span>)
+            <b>else</b>:
+                L2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L2.GetValue()
+                <span style='color:#0000ff;'>self</span>.m.L2_prev.ReAssignValue(L2)
+
+            <span style='color:#008000;'># Reset observed values to match the current interval end time</span>
+            <span style='color:#0000ff;'>self</span>.m.y1_obs.ReAssignValue(y1_obs[t])
+            <span style='color:#0000ff;'>self</span>.m.y2_obs.ReAssignValue(y2_obs[t])
+
+            <span style='color:#008000;'># Reinitialise the DAE system after all changes made above</span>
+            <span style='color:#0000ff;'>self</span>.Reinitialize()
+
+            <span style='color:#008000;'># Integrate, report data and set progress</span>
+            <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#c00000;'>'Integrating from </span><span style='color:#0057ae;'>%f</span><span style='color:#c00000;'> to </span><span style='color:#0057ae;'>%f</span><span style='color:#c00000;'> ...'</span> <b><span style='color:#0000ff;'>%</span></b> (<span style='color:#0000ff;'>self</span>.CurrentTime, tn), <span style='color:#c000c0;'>0</span>)
+            <span style='color:#0000ff;'>self</span>.IntegrateUntilTime(tn, eDoNotStopAtDiscontinuity)
+            <span style='color:#0000ff;'>self</span>.ReportData(<span style='color:#0000ff;'>self</span>.CurrentTime)
+            <span style='color:#0000ff;'>self</span>.Log.SetProgress(<span style='color:#0000ff;'>int</span>(<span style='color:#c000c0;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#0000ff;'>self</span>.TimeHorizon))
+
+    <b>def</b> SetUpOptimization(<span style='color:#0000ff;'>self</span>):
+        <span style='color:#008000;'># Minimise L2-norm ||yi(t) - yi_obs(t)||^2</span>
+        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L2()
+
+        p_lb   <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>0.0</span>
+        p_ub   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>50.0</span>
+        p_init <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>0.0</span>
+
+        p1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p1, p_lb, p_ub, p_init)
+        p2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p2, p_lb, p_ub, p_init)
+        p3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p3, p_lb, p_ub, p_init)
+
+<span style='color:#008000;'># Experimental data (20 measurements, skip t=0) generated by the simulation below</span>
+times  <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.050000</span>, <span style='color:#c000c0;'>0.100000</span>, <span style='color:#c000c0;'>0.150000</span>, <span style='color:#c000c0;'>0.200000</span>, <span style='color:#c000c0;'>0.250000</span>, <span style='color:#c000c0;'>0.300000</span>,
+                      <span style='color:#c000c0;'>0.350000</span>, <span style='color:#c000c0;'>0.400000</span>, <span style='color:#c000c0;'>0.450000</span>, <span style='color:#c000c0;'>0.500000</span>, <span style='color:#c000c0;'>0.550000</span>, <span style='color:#c000c0;'>0.600000</span>, <span style='color:#c000c0;'>0.650000</span>,
+                      <span style='color:#c000c0;'>0.700000</span>, <span style='color:#c000c0;'>0.750000</span>, <span style='color:#c000c0;'>0.800000</span>, <span style='color:#c000c0;'>0.850000</span>, <span style='color:#c000c0;'>0.900000</span>, <span style='color:#c000c0;'>0.950000</span>, <span style='color:#c000c0;'>1.000000</span>])
+y1_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.539650</span>, <span style='color:#c000c0;'>0.436582</span>, <span style='color:#c000c0;'>0.335315</span>, <span style='color:#c000c0;'>0.260760</span>, <span style='color:#c000c0;'>0.214197</span>, <span style='color:#c000c0;'>0.175340</span>,
+                      <span style='color:#c000c0;'>0.157290</span>, <span style='color:#c000c0;'>0.156552</span>, <span style='color:#c000c0;'>0.131268</span>, <span style='color:#c000c0;'>0.113094</span>, <span style='color:#c000c0;'>0.114047</span>, <span style='color:#c000c0;'>0.102947</span>, <span style='color:#c000c0;'>0.095513</span>,
+                      <span style='color:#c000c0;'>0.094655</span>, <span style='color:#c000c0;'>0.081459</span>, <span style='color:#c000c0;'>0.083441</span>, <span style='color:#c000c0;'>0.077560</span>, <span style='color:#c000c0;'>0.066267</span>, <span style='color:#c000c0;'>0.072420</span>, <span style='color:#c000c0;'>0.067343</span>])
+y2_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.277036</span>, <span style='color:#c000c0;'>0.298480</span>, <span style='color:#c000c0;'>0.269163</span>, <span style='color:#c000c0;'>0.209315</span>, <span style='color:#c000c0;'>0.176883</span>, <span style='color:#c000c0;'>0.135813</span>,
+                      <span style='color:#c000c0;'>0.115819</span>, <span style='color:#c000c0;'>0.085196</span>, <span style='color:#c000c0;'>0.073238</span>, <span style='color:#c000c0;'>0.051577</span>, <span style='color:#c000c0;'>0.040534</span>, <span style='color:#c000c0;'>0.036138</span>, <span style='color:#c000c0;'>0.028266</span>,
+                      <span style='color:#c000c0;'>0.022489</span>, <span style='color:#c000c0;'>0.019750</span>, <span style='color:#c000c0;'>0.016626</span>, <span style='color:#c000c0;'>0.013837</span>, <span style='color:#c000c0;'>0.011396</span>, <span style='color:#c000c0;'>0.010749</span>, <span style='color:#c000c0;'>0.009493</span>])
+<span style='color:#008000;'># Initial conditions</span>
+y1_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.0</span>
+y2_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
+
+<span style='color:#008000;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    sim <b><span style='color:#0000ff;'>=</span></b> simOilCracking_opt()
+    opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
+    nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
+    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    sim.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
+    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
+                                  optimization <b><span style='color:#0000ff;'>=</span></b> opt,
+                                  nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
+                                  nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
+    simulator.exec_()
+
+<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<b>def</b> consoleRun():
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simOilCracking_opt()
+    optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
+    lasolver     <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+    daesolver.SetLASolver(lasolver)
+
+    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+
+    <span style='color:#008000;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>True</span>
+    
+    <span style='color:#008000;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
+
+    <span style='color:#008000;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <span style='color:#008000;'># Initialize the optimization</span>
+    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
+
+    <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
+    <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
+    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>5</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-6</span>)
+    <span style='color:#008000;'>#nlpsolver.SetOption('mu_strategy', 'adaptive')</span>
+    nlpsolver.SetOption(<span style='color:#c00000;'>'obj_scaling_factor'</span>, <span style='color:#c000c0;'>10.0</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
+
+    <span style='color:#008000;'># Run</span>
+    optimization.Run()
+    optimization.Finalize()
+
+<b>def</b> consoleSimulation():
+    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simOilCracking()
+
+    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
+
+    <span style='color:#008000;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+
+    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.0</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>20</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.0</span>
+
+    <span style='color:#008000;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(dr_tcpip.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+        sys.exit()
+
+    <span style='color:#008000;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#008000;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+
+    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#008000;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+
+    dvars <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
+    <span style='color:#008000;'># Skip the</span>
+    ts <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_4.y1'</span>].TimeValues[<span style='color:#c000c0;'>1</span>:]
+    y1 <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_4.y1'</span>].Values[<span style='color:#c000c0;'>1</span>:]
+    y2 <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_4.y2'</span>].Values[<span style='color:#c000c0;'>1</span>:]
+    nt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(ts)
+    y1_exp <b><span style='color:#0000ff;'>=</span></b> numpy.array([y <b><span style='color:#0000ff;'>+</span></b> numpy.random.uniform(<b><span style='color:#0000ff;'>-</span></b>y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>, y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>) <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> y1])
+    y2_exp <b><span style='color:#0000ff;'>=</span></b> numpy.array([y <b><span style='color:#0000ff;'>+</span></b> numpy.random.uniform(<b><span style='color:#0000ff;'>-</span></b>y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>, y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>) <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> y2])
+
+    float_formatter <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#c00000;'>&quot;</span><span style='color:#0057ae;'>%.6f</span><span style='color:#c00000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> x
+    numpy.set_printoptions(formatter<b><span style='color:#0000ff;'>=</span></b>{<span style='color:#c00000;'>'float_kind'</span>:float_formatter})
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'times  = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(ts))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y1     = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y1))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y1_obs = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y1_exp))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y2     = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y2))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y2_obs = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y2_exp))
+
+<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+        consoleRun()
+    <b>elif</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'simulation'</span>):
+        consoleSimulation()
+    <b>else</b>:
+        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        guiRun(app)
+</pre>
+</body>
+</html>

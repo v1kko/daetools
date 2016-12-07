@@ -43,8 +43,8 @@ from time import localtime, strftime
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
-K_t  = daeVariableType("k",  s**(-1),        0, 1E20,   0, 1e-5)
-K2_t = daeVariableType("k2", m**3/(mol*s),   0, 1E20,   0, 1e-5)
+K_t  = daeVariableType("K_t",  s**(-1),        0, 1E20,   0, 1e-5)
+K2_t = daeVariableType("K2_t", m**3/(mol*s),   0, 1E20,   0, 1e-5)
 
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
@@ -68,10 +68,10 @@ class modTutorial(daeModel):
 
         # Degrees of freedom (for optimisation)
         self.VR    = daeVariable("V_r",  volume_t,              self, "Reactor volume")
-        self.F     = daeVariable("F",    volume_flowrate_t,     self, "Feed flowrate")
         self.Qk    = daeVariable("Q_k",  power_t,               self, "Jacket cooling rate")
-        self.Ca0   = daeVariable("Ca_0", molar_concentration_t, self, "Inlet feed concentration")
-        self.T0    = daeVariable("T_0",  temperature_t,         self, "Inlet feed temperature")
+        self.Qf    = daeVariable("Qf",   volume_flowrate_t,     self, "Feed flowrate")
+        self.Caf   = daeVariable("Caf",  molar_concentration_t, self, "Feed concentration")
+        self.Tf    = daeVariable("Tf",   temperature_t,         self, "Feed temperature")
 
         # Variables
         self.Ca = daeVariable("Ca",   molar_concentration_t, self, "Concentration of A")
@@ -85,6 +85,23 @@ class modTutorial(daeModel):
         self.k1 = daeVariable("k_1",  K_t,  self, "Reaction A->B rate constant")
         self.k2 = daeVariable("k_2",  K_t,  self, "Reaction B->C rate constant")
         self.k3 = daeVariable("k_3",  K2_t, self, "Reaction 2A->D rate constant")
+
+        self.V0      = daeVariable("V0",        volume_t,   self, "Minimum reactor volume")
+        self.Vm      = daeVariable("Vm",        volume_t,   self, "Maximum reactor volume")
+        self.V0_star = daeVariable("V0_star",   no_t,       self, "Dimensionless minimum volume")
+        self.Ca_star = daeVariable("Ca_star",   no_t,       self, "Dimensionless concentration of A")
+        self.Cb_star = daeVariable("Cb_star",   no_t,       self, "Dimensionless concentration of B")
+        self.P1      = daeVariable("P1",        no_t,       self, "Dimensionless A->B reaction rate constant")
+        self.P2      = daeVariable("P2",        no_t,       self, "Dimensionless B->C reaction rate constant")
+        self.P3      = daeVariable("P3",        no_t,       self, "Dimensionless 2A->D reaction rate constant")
+        self.theta   = daeVariable("theta",     no_t,       self, "Dimensionless time")
+        #self.tau_ref = daeVariable("tau_ref",   time_t,     self, "Mean residence time of the reference reactor")
+        self.sigma_f = daeVariable("sigma_f",   no_t,       self, "The proportion of the semibatch cycle occupied by filling")
+        self.sigma_b = daeVariable("sigma_b",   no_t,       self, "The proportion of the semibatch cycle occupied by batch")
+        self.sigma_e = daeVariable("sigma_e",   no_t,       self, "The proportion of the semibatch cycle occupied by emptying")
+        self.time_f  = daeVariable("time_f",    time_t,     self, "The time duration of filling phase")
+        self.time_b  = daeVariable("time_b",    time_t,     self, "The time duration of batch phase")
+        self.time_e  = daeVariable("time_e",    time_t,     self, "The time duration of emptying phase")
 
     def DeclareEquations(self):
         # Create adouble objects to make equations more readable
@@ -104,10 +121,10 @@ class modTutorial(daeModel):
         E1  = self.E1()
         E2  = self.E2()
         E3  = self.E3()
-        F   = self.F()
+        Qf   = self.Qf()
         VR  = self.VR()
-        T0  = self.T0()
-        Ca0 = self.Ca0()
+        Tf  = self.Tf()
+        Caf = self.Caf()
         # Variables
         k1  = self.k1()
         k2  = self.k2()
@@ -118,23 +135,44 @@ class modTutorial(daeModel):
         Cb  = self.Cb()
         Cc  = self.Cc()
         Cd  = self.Cd()
+        V0      = self.V0()
+        Vm      = self.Vm()
+        V0_star = self.V0_star()
+        Ca_star = self.Ca_star()
+        Cb_star = self.Cb_star()
+        P1      = self.P1()
+        P2      = self.P2()
+        P3      = self.P3()
+        theta   = self.theta()
+        #tau_ref = self.tau_ref()
+        sigma_f = self.sigma_f()
+        sigma_b = self.sigma_b()
+        sigma_e = self.sigma_e()
+        time_f  = self.time_f()
+        time_b  = self.time_b()
+        time_e  = self.time_e()
         # Derivatives
-        dCa_dt = self.Ca.dt()
-        dCb_dt = self.Cb.dt()
-        dCc_dt = self.Cc.dt()
-        dCd_dt = self.Cd.dt()
-        dT_dt  = self.T.dt()
-        dTk_dt = self.Tk.dt()
+        dVr_dt   = dt(self.VR())
+        dVrCa_dt = dt(self.VR() * self.Ca())
+        dVrCb_dt = dt(self.VR() * self.Cb())
+        dVrCc_dt = dt(self.VR() * self.Cc())
+        dVrCd_dt = dt(self.VR() * self.Cd())
+        dVrT_dt  = dt(self.VR() * self.T())
+        dTk_dt   = dt(self.Tk())
 
         # Intermediates
         r1 = k1 * VR * Ca
         r2 = k2 * VR * Cb
         r3 = k3 * VR * (Ca**2)
 
-        ra = -r1 - 2*r3 + F*(Ca0-Ca)
-        rb =  r1   - r2 - F*Cb
-        rc =  r2        - F*Cc
-        rd =  r3        - F*Cd
+        ra = -r1 - 2*r3 + Qf*(Caf-Ca)
+        rb =  r1   - r2 - Qf*Cb
+        rc =  r2        - Qf*Cc
+        rd =  r3        - Qf*Cd
+
+        # Volume (constant in this case)
+        eq = self.CreateEquation("k1", "")
+        eq.Residual = dVr_dt #- Qf
 
         # Reaction rate constants
         eq = self.CreateEquation("k1", "")
@@ -148,28 +186,66 @@ class modTutorial(daeModel):
 
         # Mass balance
         eq = self.CreateEquation("Ca", "")
-        eq.Residual = VR * dCa_dt - ra
+        eq.Residual = dVrCa_dt - ra
 
         eq = self.CreateEquation("Cb", "")
-        eq.Residual = VR * dCb_dt - rb
+        eq.Residual = dVrCb_dt - rb
 
         eq = self.CreateEquation("Cc", "")
-        eq.Residual = VR * dCc_dt - rc
+        eq.Residual = dVrCc_dt - rc
 
         eq = self.CreateEquation("Cd", "")
-        eq.Residual = VR * dCd_dt - rd
+        eq.Residual = dVrCd_dt - rd
 
         # Energy balance - reactor
         eq = self.CreateEquation("EnergyBalanceReactor", "")
-        eq.Residual = rho * cp * VR * dT_dt - (  F * rho * cp * (T0 - T) \
-                                               - r1 * dHr1 \
-                                               - r2 * dHr2 \
-                                               - r3 * dHr3 \
-                                               + kw * AR * (Tk - T) )
+        eq.Residual = rho * cp * dVrT_dt - (  Qf * rho * cp * (Tf - T) \
+                                            - r1 * dHr1 \
+                                            - r2 * dHr2 \
+                                            - r3 * dHr3 \
+                                            + kw * AR * (Tk - T)
+                                           )
 
         # Energy balance - cooling fluid
         eq = self.CreateEquation("EnergyBalanceCooling", "")
         eq.Residual = mK * cpK * dTk_dt - (Qk + kw * AR * (T - Tk))
+
+        # V0*
+        eq = self.CreateEquation("V0_star", "")
+        eq.Residual = V0_star - V0/Vm
+        # Ca*
+        eq = self.CreateEquation("Ca_star", "")
+        eq.Residual = Ca_star * Caf - Ca
+        # Cb*
+        eq = self.CreateEquation("Cb_star", "")
+        eq.Residual = Cb_star * Caf - Cb
+        # P1
+        eq = self.CreateEquation("P1", "")
+        eq.Residual = P1 * Qf - k1*Vm
+        eq.CheckUnitsConsistency = False
+        # P2
+        eq = self.CreateEquation("P2", "")
+        eq.Residual = P2 * Qf - k2*Vm
+        eq.CheckUnitsConsistency = False
+        # P3
+        eq = self.CreateEquation("P3", "")
+        eq.Residual = P3 * Qf - k3*Vm
+        eq.CheckUnitsConsistency = False
+        # theta
+        eq = self.CreateEquation("theta", "")
+        eq.Residual = theta - Time() * Qf / Vm
+        # tau_ref
+        #eq = self.CreateEquation("tau_ref", "")
+        #eq.Residual = tau_ref * (sigma_f * Qf) - Vm
+        # sigma_f
+        eq = self.CreateEquation("sigma_f", "")
+        eq.Residual = sigma_f * (time_f + time_b + time_e) - time_f
+        # sigma_b
+        eq = self.CreateEquation("sigma_b", "")
+        eq.Residual = sigma_b * (time_f + time_b + time_e) - time_b
+        # sigma_e
+        eq = self.CreateEquation("sigma_e", "")
+        eq.Residual = sigma_e * (time_f + time_b + time_e) - time_e
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -195,12 +271,17 @@ class simTutorial(daeSimulation):
         self.m.cpK.SetValue(2 * kJ/(kg*K))
 
     def SetUpVariables(self):
-        self.m.F.AssignValue(14.19 * l/hour)
+        self.m.time_f.AssignValue( 1.0 / 16.0)
+        self.m.time_b.AssignValue(14.0 / 16.0)
+        self.m.time_e.AssignValue( 1.0 / 16.0)
+        self.m.V0.AssignValue(1 * l)
+        self.m.Vm.AssignValue(100 * l)
+        self.m.Qf.AssignValue(14.19 * l/hour)
         self.m.Qk.AssignValue(-1579.5 * kJ/hour)
-        self.m.Ca0.AssignValue(5.1 * mol/l)
-        self.m.T0.AssignValue((273.15 + 104.9) * K)
-        self.m.VR.AssignValue(10.0 * l)
+        self.m.Caf.AssignValue(5.1 * mol/l)
+        self.m.Tf.AssignValue((273.15 + 104.9) * K)
 
+        self.m.VR.SetInitialCondition(10.0 * l)
         self.m.Ca.SetInitialCondition(2.2291 * mol/l)
         self.m.Cb.SetInitialCondition(1.0417 * mol/l)
         self.m.Cc.SetInitialCondition(0.91397 * mol/l)

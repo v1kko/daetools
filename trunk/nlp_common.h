@@ -371,7 +371,7 @@ protected:
 	{
 		string strMessage;
 		real_t obj_value = m_pObjectiveFunction->GetValue();
-		strMessage = "Fobj = " + toStringFormatted<real_t>(obj_value, -1, 10, true);
+        strMessage = "Fobj = " + toStringFormatted<real_t>(obj_value, -1, 20, true);
 		m_pLog->Message(strMessage, 0);
 	}
 	
@@ -387,7 +387,7 @@ protected:
 				
 			strMessage = pOptVariable->GetName() + 
 						 " = " + 
-						 toStringFormatted<real_t>(pOptVariable->GetValue(), -1, 10, true);
+                         toStringFormatted<real_t>(pOptVariable->GetValue(), -1, 20, true);
 			m_pLog->Message(strMessage, 0);
 		}	
 	}
@@ -405,7 +405,7 @@ protected:
 				daeDeclareAndThrowException(exInvalidPointer)
 				
 			strMessage = pConstraint->GetName() + " = " + 
-						 toStringFormatted<real_t>(pConstraint->GetValue(), -1, 10, true);
+                         toStringFormatted<real_t>(pConstraint->GetValue(), -1, 20, true);
 			m_pLog->Message(strMessage, 0);
 		}	
 	}

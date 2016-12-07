@@ -3606,6 +3606,9 @@ public:
 	void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const;
 	size_t GetNumberOfOptimizationVariables(void) const;
 
+    real_t GetAbsTolerance() const;
+    void   SetAbsTolerance(real_t abstol);
+
 	void	 SetResidual(adouble res);
 	adouble	 GetResidual(void) const;
 	

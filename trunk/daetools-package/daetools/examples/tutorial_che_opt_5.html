@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial_che_opt_2.py</title>
+<title>tutorial_che_opt_5.py</title>
 </head>
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
@@ -13,7 +13,7 @@
 
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 <span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                           tutorial_che_opt_2.py</span>
+<span style='color:#008000;'>                           tutorial_che_opt_5.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
 <span style='color:#008000;'>***********************************************************************************</span>
@@ -27,42 +27,41 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>COPS test 5: Isomerization of α-pinene (parameter estimation of a dynamic system).</span>
+<span style='color:#c00000;'>COPS test 13: Methanol to Hydrocarbons.</span>
 
-<span style='color:#c00000;'>Determine the reaction coefficients in the thermal isometrization of α-pinene (y1) to</span>
-<span style='color:#c00000;'>dipentene (y2) and allo-ocimen (y3) which in turn produces α- and β-pyronene (y4)</span>
-<span style='color:#c00000;'>and a dimer (y5).</span>
+<span style='color:#c00000;'>Determine the reaction coefficients for the conversion of methanol into various hydrocarbons.</span>
 
 <span style='color:#c00000;'>Reference: Benchmarking Optimization Software with COPS 3.0, Mathematics and Computer</span>
 <span style='color:#c00000;'>Science Division, Argonne National Laboratory, Technical Report ANL/MCS-273, 2004.</span>
 <span style='color:#c00000;'>`PDF &lt;http://www.mcs.anl.gov/~more/cops/cops3.pdf&gt;`_</span>
 
-<span style='color:#c00000;'>Experimental data taken from:  Rocha A.M.A.C., Martins M.C., Costa M.F.P.,</span>
-<span style='color:#c00000;'>Fernandes, E.M.G.P. (2016) Direct sequential based firefly algorithm for the α-pinene</span>
-<span style='color:#c00000;'>isomerization problem. 16th International Conference on Computational Science and Its</span>
-<span style='color:#c00000;'>Applications, ICCSA 2016, Beijing, China.</span>
-<span style='color:#c00000;'>`doi:10.1007/978-3-319-42085-1_30 &lt;http://doi.org/10.1007/978-3-319-42085-1_30&gt;`_</span>
+<span style='color:#c00000;'>Experimental data generated following the procedure described in the COPS test.</span>
 
 <span style='color:#c00000;'>Run options:</span>
 
-<span style='color:#c00000;'>- Simulation with optimal parameters: python tutorial_che_opt_2.py simulation</span>
-<span style='color:#c00000;'>- Parameter estimation console run:   python tutorial_che_opt_2.py console</span>
-<span style='color:#c00000;'>- Parameter estimation GUI run:       python tutorial_che_opt_2.py gui</span>
+<span style='color:#c00000;'>- Simulation with optimal parameters: python tutorial_che_opt_5.py simulation</span>
+<span style='color:#c00000;'>- Parameter estimation console run:   python tutorial_che_opt_5.py console</span>
+<span style='color:#c00000;'>- Parameter estimation GUI run:       python tutorial_che_opt_5.py gui</span>
 
 <span style='color:#c00000;'>Currently, the parameter estimation results are (solver options/scaling should be tuned):</span>
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>    Fobj  57.83097</span>
-<span style='color:#c00000;'>    p1    5.63514e-05</span>
-<span style='color:#c00000;'>    p2    2.89711e-05</span>
-<span style='color:#c00000;'>    p3    1.39979e-05</span>
-<span style='color:#c00000;'>    p4   18.67874e-05</span>
-<span style='color:#c00000;'>    p5    2.23770e-05</span>
+<span style='color:#c00000;'>   Fobj = 1.274997e-2</span>
+<span style='color:#c00000;'>   p1 = 2.641769</span>
+<span style='color:#c00000;'>   p2 = 1.466245</span>
+<span style='color:#c00000;'>   p3 = 1.884254</span>
+<span style='color:#c00000;'>   p4 = 1.023885</span>
+<span style='color:#c00000;'>   p5 = 0.471067</span>
 
 <span style='color:#c00000;'>The concentration plots (for optimal 'p' from the literature):</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_che_opt_2-results.png</span>
+<span style='color:#c00000;'>.. image:: _static/tutorial_che_opt_5-results.png</span>
+<span style='color:#c00000;'>   :width: 500px</span>
+
+<span style='color:#c00000;'>The concentration plots (for optimal 'p' from this optimisation):</span>
+
+<span style='color:#c00000;'>.. image:: _static/tutorial_che_opt_5-results2.png</span>
 <span style='color:#c00000;'>   :width: 500px</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
@@ -70,19 +69,17 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> daetools.solvers.trilinos <span style='color:#0000ff;'>import</span> pyTrilinos
-<span style='color:#0000ff;'>from</span> daetools.solvers.ipopt <span style='color:#0000ff;'>import</span> pyIPOPT
+<span style='color:#0000ff;'>from</span> daetools.solvers.nlopt <span style='color:#0000ff;'>import</span> pyNLOPT
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
-y_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;y_t&quot;</span>,  unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-06</span>)
-L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;L2_t&quot;</span>, unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-06</span>)
+y_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;y_t&quot;</span>,  unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-07</span>)
+L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;L2_t&quot;</span>, unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-07</span>)
 
 <span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-<span style='color:#008000;'>#                 Isomerization of α-pinene</span>
+<span style='color:#008000;'>#             Methanol to Hydrocarbons</span>
 <span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
 <span style='color:#008000;'># Mathematical model</span>
-<b>class</b> modAlphaPinene(daeModel):
-    p_scaling <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e5</span>
-
+<b>class</b> modMethanol2Hydrocarbons(daeModel):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
@@ -94,19 +91,15 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <span style='color:#0000ff;'>self</span>.p5 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;p5&quot;</span>,  no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction coefficient 5&quot;</span>)
 
         <span style='color:#008000;'># State variables</span>
-        <span style='color:#0000ff;'>self</span>.y1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y1&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;α-pinene concentration&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y2&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Dipentene concentration&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y3 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y3&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Allo-ocimen concentration&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y4 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y4&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;α- and β-pyronene concentration&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y5 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y5&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Dimer concentration&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.y1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y1&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;1 concentration&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.y2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y2&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;2 concentration&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.y3 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y3&quot;</span>, y_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;3 concentration&quot;</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
         <span style='color:#008000;'># Create adouble objects to make equations more readable</span>
         y1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y1()
         y2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y2()
         y3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y3()
-        y4 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y4()
-        y5 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y5()
         p1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.p1()
         p2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.p2()
         p3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.p3()
@@ -117,120 +110,100 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         dy1_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y1.dt()
         dy2_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y2.dt()
         dy3_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y3.dt()
-        dy4_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y4.dt()
-        dy5_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y5.dt()
 
         <span style='color:#008000;'># y1</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y1&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy1_dt <b><span style='color:#0000ff;'>+</span></b> (p1<b><span style='color:#0000ff;'>+</span></b>p2)<b><span style='color:#0000ff;'>*</span></b>y1 <b><span style='color:#0000ff;'>/</span></b> modAlphaPinene.p_scaling
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy1_dt <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#c000c0;'>2</span><b><span style='color:#0000ff;'>*</span></b>p1 <b><span style='color:#0000ff;'>-</span></b> p1<b><span style='color:#0000ff;'>*</span></b>y2<b><span style='color:#0000ff;'>/</span></b>((p2<b><span style='color:#0000ff;'>+</span></b>p5)<b><span style='color:#0000ff;'>*</span></b>y1<b><span style='color:#0000ff;'>+</span></b>y2<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1e-10</span>) <b><span style='color:#0000ff;'>+</span></b> p3 <b><span style='color:#0000ff;'>+</span></b> p4)<b><span style='color:#0000ff;'>*</span></b>y1
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
 
         <span style='color:#008000;'># y2</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y2&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy2_dt <b><span style='color:#0000ff;'>-</span></b> p1<b><span style='color:#0000ff;'>*</span></b>y1  <b><span style='color:#0000ff;'>/</span></b> modAlphaPinene.p_scaling
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy2_dt <b><span style='color:#0000ff;'>-</span></b> (p1<b><span style='color:#0000ff;'>*</span></b>y1<b><span style='color:#0000ff;'>*</span></b>(p2<b><span style='color:#0000ff;'>*</span></b>y1<b><span style='color:#0000ff;'>-</span></b>y2)<b><span style='color:#0000ff;'>/</span></b>((p2<b><span style='color:#0000ff;'>+</span></b>p5)<b><span style='color:#0000ff;'>*</span></b>y1<b><span style='color:#0000ff;'>+</span></b>y2<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1e-10</span>) <b><span style='color:#0000ff;'>+</span></b> p3<b><span style='color:#0000ff;'>*</span></b>y1)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
 
         <span style='color:#008000;'># y3</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y3&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy3_dt <b><span style='color:#0000ff;'>-</span></b> (p2<b><span style='color:#0000ff;'>*</span></b>y1 <b><span style='color:#0000ff;'>-</span></b> (p3<b><span style='color:#0000ff;'>+</span></b>p4)<b><span style='color:#0000ff;'>*</span></b>y3 <b><span style='color:#0000ff;'>+</span></b> p5<b><span style='color:#0000ff;'>*</span></b>y5) <b><span style='color:#0000ff;'>/</span></b> modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
-
-        <span style='color:#008000;'># y4</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y4&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy4_dt <b><span style='color:#0000ff;'>-</span></b> p3<b><span style='color:#0000ff;'>*</span></b>y3 <b><span style='color:#0000ff;'>/</span></b> modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
-
-        <span style='color:#008000;'># y5</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y5&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy5_dt <b><span style='color:#0000ff;'>-</span></b> (p4<b><span style='color:#0000ff;'>*</span></b>y3 <b><span style='color:#0000ff;'>-</span></b> p5<b><span style='color:#0000ff;'>*</span></b>y5) <b><span style='color:#0000ff;'>/</span></b> modAlphaPinene.p_scaling
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy3_dt <b><span style='color:#0000ff;'>-</span></b> (p1<b><span style='color:#0000ff;'>*</span></b>y1<b><span style='color:#0000ff;'>*</span></b>(y2<b><span style='color:#0000ff;'>+</span></b>p5<b><span style='color:#0000ff;'>*</span></b>y1)<b><span style='color:#0000ff;'>/</span></b>((p2<b><span style='color:#0000ff;'>+</span></b>p5)<b><span style='color:#0000ff;'>*</span></b>y1<b><span style='color:#0000ff;'>+</span></b>y2<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1e-10</span>) <b><span style='color:#0000ff;'>+</span></b> p4<b><span style='color:#0000ff;'>*</span></b>y1)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
 
 <span style='color:#008000;'># Simulation (can be run independently from optimisation)</span>
-<b>class</b> simAlphaPinene(daeSimulation):
+<b>class</b> simMethanol2Hydrocarbons(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modAlphaPinene(<span style='color:#c00000;'>&quot;tutorial_che_opt_2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modMethanol2Hydrocarbons(<span style='color:#c00000;'>&quot;tutorial_che_opt_5&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># The reaction coefficients below are optimal results found in the literature.</span>
-        <span style='color:#008000;'># They should produce L2 norm of 19.872393107.</span>
-        <span style='color:#0000ff;'>self</span>.m.p1.AssignValue( <span style='color:#c000c0;'>5.9256e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p2.AssignValue( <span style='color:#c000c0;'>2.9632e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p3.AssignValue( <span style='color:#c000c0;'>2.0450e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p4.AssignValue(<span style='color:#c000c0;'>27.4730e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p5.AssignValue( <span style='color:#c000c0;'>4.0073e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
+        <span style='color:#008000;'># The reaction coefficients below are used to generate the experimental data.</span>
+        <span style='color:#008000;'># The noise</span>
+        <span style='color:#0000ff;'>self</span>.m.p1.AssignValue(<span style='color:#c000c0;'>2.69</span>)
+        <span style='color:#0000ff;'>self</span>.m.p2.AssignValue(<span style='color:#c000c0;'>0.5</span>)
+        <span style='color:#0000ff;'>self</span>.m.p3.AssignValue(<span style='color:#c000c0;'>3.02</span>)
+        <span style='color:#0000ff;'>self</span>.m.p4.AssignValue(<span style='color:#c000c0;'>0.5</span>)
+        <span style='color:#0000ff;'>self</span>.m.p5.AssignValue(<span style='color:#c000c0;'>0.5</span>)
 
         <span style='color:#0000ff;'>self</span>.m.y1.SetInitialCondition(y1_t0)
         <span style='color:#0000ff;'>self</span>.m.y2.SetInitialCondition(y2_t0)
         <span style='color:#0000ff;'>self</span>.m.y3.SetInitialCondition(y3_t0)
-        <span style='color:#0000ff;'>self</span>.m.y4.SetInitialCondition(y4_t0)
-        <span style='color:#0000ff;'>self</span>.m.y5.SetInitialCondition(y5_t0)
 
 <span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
 <span style='color:#008000;'>#               Parameter Estimation Part</span>
 <span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
 <span style='color:#008000;'># We need some additional variables to determine reaction coefficients.</span>
-<span style='color:#008000;'># Derive a new class from modAlphaPinene and add extra data.</span>
+<span style='color:#008000;'># Derive a new class from modMethanol2Hydrocarbons and add extra data.</span>
 <span style='color:#008000;'># Nota Bene:</span>
-<span style='color:#008000;'>#   modAlphaPinene_Opt inherits all parameters/variables from the base class.</span>
-<b>class</b> modAlphaPinene_Opt(modAlphaPinene):
+<span style='color:#008000;'>#   modMethanol2Hydrocarbons_Opt inherits all parameters/variables from the base class.</span>
+<b>class</b> modMethanol2Hydrocarbons_Opt(modMethanol2Hydrocarbons):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        modAlphaPinene.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+        modMethanol2Hydrocarbons.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
 
         <span style='color:#008000;'># Observed values at the specific time interval</span>
         <span style='color:#0000ff;'>self</span>.y1_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y1_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 1 at the specified time interval&quot;</span>)
         <span style='color:#0000ff;'>self</span>.y2_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y2_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 2 at the specified time interval&quot;</span>)
         <span style='color:#0000ff;'>self</span>.y3_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y3_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 3 at the specified time interval&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y4_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y4_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 4 at the specified time interval&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.y5_obs <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y5_obs&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Observed value 5 at the specified time interval&quot;</span>)
 
         <span style='color:#008000;'># This L2 norm sums all L2 norms in the previous time intervals</span>
         <span style='color:#0000ff;'>self</span>.L2      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;L2&quot;</span>,      L2_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Current L2 norm: ||yi(t) - yi_obs(t)||^2&quot;</span>)
         <span style='color:#0000ff;'>self</span>.L2_prev <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;L2_prev&quot;</span>, L2_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;L2 norm in previous time intrvals&quot;</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        modAlphaPinene.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+        modMethanol2Hydrocarbons.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
         <span style='color:#008000;'># L2-norm ||yi(t) - yi_obs(t)||^2</span>
         <span style='color:#008000;'># L2 norm is a sum of the L2 norm in the previous time steps (L2_prev)</span>
-        <span style='color:#008000;'># and the current norm: s1 + s2 + s3 + s4 + s5.</span>
+        <span style='color:#008000;'># and the current norm: s1 + s2.</span>
         <span style='color:#008000;'># L2_prev will be reset after every time interval where we have observed values.</span>
         s1 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y1() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y1_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
         s2 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y2() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y2_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
         s3 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y3() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y3_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
-        s4 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y4() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y4_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
-        s5 <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.y5() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.y5_obs())<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;L2&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L2() <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#0000ff;'>self</span>.L2_prev() <b><span style='color:#0000ff;'>+</span></b> s1 <b><span style='color:#0000ff;'>+</span></b> s2 <b><span style='color:#0000ff;'>+</span></b> s3 <b><span style='color:#0000ff;'>+</span></b> s4 <b><span style='color:#0000ff;'>+</span></b> s5)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L2() <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#0000ff;'>self</span>.L2_prev() <b><span style='color:#0000ff;'>+</span></b> s1 <b><span style='color:#0000ff;'>+</span></b> s2 <b><span style='color:#0000ff;'>+</span></b> s3)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
 
 <span style='color:#008000;'># Simulation class that will be used by the optimisation.</span>
-<b>class</b> simAlphaPinene_opt(daeSimulation):
+<b>class</b> simMethanol2Hydrocarbons_opt(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modAlphaPinene_Opt(<span style='color:#c00000;'>&quot;tutorial_che_opt_2&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modMethanol2Hydrocarbons_Opt(<span style='color:#c00000;'>&quot;tutorial_che_opt_5&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
 
     <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># modAlphaPinene part</span>
-        <span style='color:#0000ff;'>self</span>.m.p1.AssignValue( <span style='color:#c000c0;'>5.9256e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p2.AssignValue( <span style='color:#c000c0;'>2.9632e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p3.AssignValue( <span style='color:#c000c0;'>2.0450e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p4.AssignValue(<span style='color:#c000c0;'>27.4730e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
-        <span style='color:#0000ff;'>self</span>.m.p5.AssignValue( <span style='color:#c000c0;'>4.0073e-5</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling)
+        <span style='color:#008000;'># modMethanol2Hydrocarbons part</span>
+        <span style='color:#0000ff;'>self</span>.m.p1.AssignValue(<span style='color:#c000c0;'>2.69</span>)
+        <span style='color:#0000ff;'>self</span>.m.p2.AssignValue(<span style='color:#c000c0;'>0.5</span>)
+        <span style='color:#0000ff;'>self</span>.m.p3.AssignValue(<span style='color:#c000c0;'>3.02</span>)
+        <span style='color:#0000ff;'>self</span>.m.p4.AssignValue(<span style='color:#c000c0;'>0.5</span>)
+        <span style='color:#0000ff;'>self</span>.m.p5.AssignValue(<span style='color:#c000c0;'>0.5</span>)
 
         <span style='color:#0000ff;'>self</span>.m.y1.SetInitialCondition(y1_t0)
         <span style='color:#0000ff;'>self</span>.m.y2.SetInitialCondition(y2_t0)
         <span style='color:#0000ff;'>self</span>.m.y3.SetInitialCondition(y3_t0)
-        <span style='color:#0000ff;'>self</span>.m.y4.SetInitialCondition(y4_t0)
-        <span style='color:#0000ff;'>self</span>.m.y5.SetInitialCondition(y5_t0)
 
         <span style='color:#008000;'># Initialise variables required for parameter estimation.</span>
         <span style='color:#008000;'># Notate bene:</span>
@@ -239,8 +212,6 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <span style='color:#0000ff;'>self</span>.m.y1_obs.AssignValue(y1_t0)
         <span style='color:#0000ff;'>self</span>.m.y2_obs.AssignValue(y2_t0)
         <span style='color:#0000ff;'>self</span>.m.y3_obs.AssignValue(y3_t0)
-        <span style='color:#0000ff;'>self</span>.m.y4_obs.AssignValue(y4_t0)
-        <span style='color:#0000ff;'>self</span>.m.y5_obs.AssignValue(y5_t0)
         <span style='color:#0000ff;'>self</span>.m.L2_prev.AssignValue(<span style='color:#c000c0;'>0.0</span>)
 
     <b>def</b> Run(<span style='color:#0000ff;'>self</span>):
@@ -256,8 +227,6 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
             <span style='color:#0000ff;'>self</span>.m.y1_obs.ReAssignValue(y1_obs[t])
             <span style='color:#0000ff;'>self</span>.m.y2_obs.ReAssignValue(y2_obs[t])
             <span style='color:#0000ff;'>self</span>.m.y3_obs.ReAssignValue(y3_obs[t])
-            <span style='color:#0000ff;'>self</span>.m.y4_obs.ReAssignValue(y4_obs[t])
-            <span style='color:#0000ff;'>self</span>.m.y5_obs.ReAssignValue(y5_obs[t])
 
             <span style='color:#008000;'># Reinitialise the DAE system after all changes made above</span>
             <span style='color:#0000ff;'>self</span>.Reinitialize()
@@ -270,12 +239,12 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
     <b>def</b> SetUpOptimization(<span style='color:#0000ff;'>self</span>):
         <span style='color:#008000;'># Minimise L2-norm ||yi(t) - yi_obs(t)||^2</span>
-        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L2()
-        <span style='color:#008000;'>#self.ObjectiveFunction.AbsTolerance = 1e-6</span>
+        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L2() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1e4</span> <span style='color:#008000;'># scale Fobj</span>
+        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.AbsTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
 
-        p_lb   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
-        p_ub   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5e-4</span> <b><span style='color:#0000ff;'>*</span></b> modAlphaPinene.p_scaling
-        p_init <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
+        p_lb   <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>0.0</span>
+        p_ub   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>20.0</span>
+        p_init <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>1.0</span>
 
         p1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p1, p_lb, p_ub, p_init)
         p2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p2, p_lb, p_ub, p_init)
@@ -283,49 +252,27 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         p4 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p4, p_lb, p_ub, p_init)
         p5 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p5, p_lb, p_ub, p_init)
 
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p1max&quot;</span>) <span style='color:#008000;'># p1 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p1() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p1min&quot;</span>) <span style='color:#008000;'># LB - p1 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p1()
-
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p2max&quot;</span>) <span style='color:#008000;'># p2 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p2() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p2min&quot;</span>) <span style='color:#008000;'># LB - p2 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p2()
-
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p3max&quot;</span>) <span style='color:#008000;'># p3 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p3() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p3min&quot;</span>) <span style='color:#008000;'># LB - p3 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p3()
-
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p4max&quot;</span>) <span style='color:#008000;'># p4 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p4() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p4min&quot;</span>) <span style='color:#008000;'># LB - p4 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p4()
-
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p5max&quot;</span>) <span style='color:#008000;'># p5 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p5() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p5min&quot;</span>) <span style='color:#008000;'># LB - p5 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p5()
-
-<span style='color:#008000;'># Experimental data (8 measurements)</span>
-times  <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>1230.00</span>, <span style='color:#c000c0;'>3060.0</span>, <span style='color:#c000c0;'>4920.0</span>, <span style='color:#c000c0;'>7800.0</span>, <span style='color:#c000c0;'>10680.0</span>, <span style='color:#c000c0;'>15030.0</span>, <span style='color:#c000c0;'>22620.0</span>, <span style='color:#c000c0;'>36420.0</span>])
-y1_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([  <span style='color:#c000c0;'>88.35</span>,   <span style='color:#c000c0;'>76.4</span>,   <span style='color:#c000c0;'>65.1</span>,   <span style='color:#c000c0;'>50.4</span>,    <span style='color:#c000c0;'>37.5</span>,    <span style='color:#c000c0;'>25.9</span>,    <span style='color:#c000c0;'>14.0</span>,     <span style='color:#c000c0;'>4.5</span>])
-y2_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([   <span style='color:#c000c0;'>7.30</span>,   <span style='color:#c000c0;'>15.6</span>,   <span style='color:#c000c0;'>23.1</span>,   <span style='color:#c000c0;'>32.9</span>,    <span style='color:#c000c0;'>42.7</span>,    <span style='color:#c000c0;'>49.1</span>,    <span style='color:#c000c0;'>57.4</span>,    <span style='color:#c000c0;'>63.1</span>])
-y3_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([   <span style='color:#c000c0;'>2.30</span>,    <span style='color:#c000c0;'>4.5</span>,    <span style='color:#c000c0;'>5.3</span>,    <span style='color:#c000c0;'>6.0</span>,     <span style='color:#c000c0;'>6.0</span>,     <span style='color:#c000c0;'>5.9</span>,     <span style='color:#c000c0;'>5.1</span>,     <span style='color:#c000c0;'>3.8</span>])
-y4_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([   <span style='color:#c000c0;'>0.40</span>,    <span style='color:#c000c0;'>0.7</span>,    <span style='color:#c000c0;'>1.1</span>,    <span style='color:#c000c0;'>1.5</span>,     <span style='color:#c000c0;'>1.9</span>,     <span style='color:#c000c0;'>2.2</span>,     <span style='color:#c000c0;'>2.6</span>,     <span style='color:#c000c0;'>2.9</span>])
-y5_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([   <span style='color:#c000c0;'>1.75</span>,    <span style='color:#c000c0;'>2.8</span>,    <span style='color:#c000c0;'>5.8</span>,    <span style='color:#c000c0;'>9.3</span>,    <span style='color:#c000c0;'>12.0</span>,    <span style='color:#c000c0;'>17.0</span>,    <span style='color:#c000c0;'>21.0</span>,    <span style='color:#c000c0;'>25.7</span>])
-
+<span style='color:#008000;'># Experimental data (20 measurements, skip t=0) generated by the simulation below</span>
+times  <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.071875</span>, <span style='color:#c000c0;'>0.143750</span>, <span style='color:#c000c0;'>0.215625</span>, <span style='color:#c000c0;'>0.287500</span>, <span style='color:#c000c0;'>0.359375</span>, <span style='color:#c000c0;'>0.431250</span>,
+                      <span style='color:#c000c0;'>0.503125</span>, <span style='color:#c000c0;'>0.575000</span>, <span style='color:#c000c0;'>0.646875</span>, <span style='color:#c000c0;'>0.718750</span>, <span style='color:#c000c0;'>0.790625</span>, <span style='color:#c000c0;'>0.862500</span>,
+                      <span style='color:#c000c0;'>0.934375</span>, <span style='color:#c000c0;'>1.006250</span>, <span style='color:#c000c0;'>1.078125</span>, <span style='color:#c000c0;'>1.150000</span>])
+y1_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.552208</span>, <span style='color:#c000c0;'>0.300598</span>, <span style='color:#c000c0;'>0.196879</span>, <span style='color:#c000c0;'>0.101175</span>, <span style='color:#c000c0;'>0.065684</span>, <span style='color:#c000c0;'>0.045096</span>,
+                      <span style='color:#c000c0;'>0.028880</span>, <span style='color:#c000c0;'>0.018433</span>, <span style='color:#c000c0;'>0.011509</span>, <span style='color:#c000c0;'>0.006215</span>, <span style='color:#c000c0;'>0.004278</span>, <span style='color:#c000c0;'>0.002698</span>,
+                      <span style='color:#c000c0;'>0.001944</span>, <span style='color:#c000c0;'>0.001116</span>, <span style='color:#c000c0;'>0.000732</span>, <span style='color:#c000c0;'>0.000426</span>])
+y2_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.187768</span>, <span style='color:#c000c0;'>0.262406</span>, <span style='color:#c000c0;'>0.350412</span>, <span style='color:#c000c0;'>0.325110</span>, <span style='color:#c000c0;'>0.367181</span>, <span style='color:#c000c0;'>0.348264</span>,
+                      <span style='color:#c000c0;'>0.325085</span>, <span style='color:#c000c0;'>0.355673</span>, <span style='color:#c000c0;'>0.361805</span>, <span style='color:#c000c0;'>0.363117</span>, <span style='color:#c000c0;'>0.327266</span>, <span style='color:#c000c0;'>0.330211</span>,
+                      <span style='color:#c000c0;'>0.385798</span>, <span style='color:#c000c0;'>0.358132</span>, <span style='color:#c000c0;'>0.380497</span>, <span style='color:#c000c0;'>0.383051</span>])
+y3_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.117684</span>, <span style='color:#c000c0;'>0.175074</span>, <span style='color:#c000c0;'>0.236679</span>, <span style='color:#c000c0;'>0.234442</span>, <span style='color:#c000c0;'>0.270303</span>, <span style='color:#c000c0;'>0.272637</span>,
+                      <span style='color:#c000c0;'>0.274075</span>, <span style='color:#c000c0;'>0.278981</span>, <span style='color:#c000c0;'>0.297151</span>, <span style='color:#c000c0;'>0.297797</span>, <span style='color:#c000c0;'>0.298722</span>, <span style='color:#c000c0;'>0.326645</span>,
+                      <span style='color:#c000c0;'>0.303198</span>, <span style='color:#c000c0;'>0.277822</span>, <span style='color:#c000c0;'>0.284194</span>, <span style='color:#c000c0;'>0.301471</span>])
 <span style='color:#008000;'># Initial conditions</span>
-y1_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100.0</span>
-y2_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;'>0.0</span>
-y3_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;'>0.0</span>
-y4_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;'>0.0</span>
-y5_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;'>0.0</span>
+y1_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.0</span>
+y2_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
+y3_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
 
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simAlphaPinene_opt()
+    sim <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
     opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
     nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
@@ -341,9 +288,9 @@ y5_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;
     <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simAlphaPinene_opt()
+    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#c00000;'>'NLOPT_LD_SLSQP'</span>)
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
     optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
     lasolver     <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
     daesolver.SetLASolver(lasolver)
@@ -369,11 +316,10 @@ y5_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;
 
     <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
     <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
-    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>0</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-4</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'obj_scaling_factor'</span>, <span style='color:#c000c0;'>1e-3</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
+    nlpsolver.xtol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    nlpsolver.xtol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    nlpsolver.ftol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    nlpsolver.ftol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
 
     <span style='color:#008000;'># Run</span>
     optimization.Run()
@@ -383,18 +329,24 @@ y5_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;
     <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simAlphaPinene()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
+
+    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
     <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
     <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.15</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>16</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.15</span>
 
     <span style='color:#008000;'># Connect data reporter</span>
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <b>if</b>(dr_tcpip.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
         sys.exit()
 
     <span style='color:#008000;'># Initialize the simulation</span>
@@ -410,6 +362,27 @@ y5_t0 <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#c000c0;
     <span style='color:#008000;'># Run</span>
     simulation.Run()
     simulation.Finalize()
+
+    dvars <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
+    <span style='color:#008000;'># Skip the</span>
+    ts <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_5.y1'</span>].TimeValues[<span style='color:#c000c0;'>1</span>:]
+    y1 <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_5.y1'</span>].Values[<span style='color:#c000c0;'>1</span>:]
+    y2 <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_5.y2'</span>].Values[<span style='color:#c000c0;'>1</span>:]
+    y3 <b><span style='color:#0000ff;'>=</span></b> dvars[<span style='color:#c00000;'>'tutorial_che_opt_5.y3'</span>].Values[<span style='color:#c000c0;'>1</span>:]
+    nt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(ts)
+    y1_exp <b><span style='color:#0000ff;'>=</span></b> numpy.array([y <b><span style='color:#0000ff;'>+</span></b> numpy.random.uniform(<b><span style='color:#0000ff;'>-</span></b>y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>, y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>) <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> y1])
+    y2_exp <b><span style='color:#0000ff;'>=</span></b> numpy.array([y <b><span style='color:#0000ff;'>+</span></b> numpy.random.uniform(<b><span style='color:#0000ff;'>-</span></b>y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>, y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>) <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> y2])
+    y3_exp <b><span style='color:#0000ff;'>=</span></b> numpy.array([y <b><span style='color:#0000ff;'>+</span></b> numpy.random.uniform(<b><span style='color:#0000ff;'>-</span></b>y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>, y<b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>0.1</span>) <b>for</b> y <b><span style='color:#0000ff;'>in</span></b> y3])
+
+    float_formatter <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#c00000;'>&quot;</span><span style='color:#0057ae;'>%.6f</span><span style='color:#c00000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> x
+    numpy.set_printoptions(formatter<b><span style='color:#0000ff;'>=</span></b>{<span style='color:#c00000;'>'float_kind'</span>:float_formatter})
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'times  = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(ts))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y1     = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y1))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y1_obs = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y1_exp))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y2     = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y2))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y2_obs = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y2_exp))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y3     = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y3))
+    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'y3_obs = numpy.</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>repr</span>(y3_exp))
 
 <b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
     <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):

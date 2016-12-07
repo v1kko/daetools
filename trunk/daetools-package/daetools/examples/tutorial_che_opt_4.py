@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial_che_opt_2.py
+                           tutorial_che_opt_4.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic, 2016
 ***********************************************************************************
@@ -17,42 +17,35 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-COPS test 5: Isomerization of α-pinene (parameter estimation of a dynamic system).
+COPS test 12: Catalytic Cracking of Gas Oil.
 
-Determine the reaction coefficients in the thermal isometrization of α-pinene (y1) to
-dipentene (y2) and allo-ocimen (y3) which in turn produces α- and β-pyronene (y4)
-and a dimer (y5).
+Determine the reaction coefficients for the catalytic cracking of gas oil into gas and other
+byproducts.
 
 Reference: Benchmarking Optimization Software with COPS 3.0, Mathematics and Computer
 Science Division, Argonne National Laboratory, Technical Report ANL/MCS-273, 2004.
 `PDF <http://www.mcs.anl.gov/~more/cops/cops3.pdf>`_
 
-Experimental data taken from:  Rocha A.M.A.C., Martins M.C., Costa M.F.P.,
-Fernandes, E.M.G.P. (2016) Direct sequential based firefly algorithm for the α-pinene
-isomerization problem. 16th International Conference on Computational Science and Its
-Applications, ICCSA 2016, Beijing, China.
-`doi:10.1007/978-3-319-42085-1_30 <http://doi.org/10.1007/978-3-319-42085-1_30>`_
+Experimental data generated following the procedure described in the COPS test.
 
 Run options:
 
-- Simulation with optimal parameters: python tutorial_che_opt_2.py simulation
-- Parameter estimation console run:   python tutorial_che_opt_2.py console
-- Parameter estimation GUI run:       python tutorial_che_opt_2.py gui
+- Simulation with optimal parameters: python tutorial_che_opt_4.py simulation
+- Parameter estimation console run:   python tutorial_che_opt_4.py console
+- Parameter estimation GUI run:       python tutorial_che_opt_4.py gui
 
 Currently, the parameter estimation results are (solver options/scaling should be tuned):
 
 .. code-block:: none
 
-    Fobj  57.83097
-    p1    5.63514e-05
-    p2    2.89711e-05
-    p3    1.39979e-05
-    p4   18.67874e-05
-    p5    2.23770e-05
+   Fobj = 4.841995e-3
+   p1   = 10.95289
+   p2   =  7.70601
+   p3   =  2.89625
 
 The concentration plots (for optimal 'p' from the literature):
 
-.. image:: _static/tutorial_che_opt_2-results.png
+.. image:: _static/tutorial_che_opt_4-results.png
    :width: 500px
 """
 
@@ -63,16 +56,14 @@ from daetools.solvers.trilinos import pyTrilinos
 from daetools.solvers.ipopt import pyIPOPT
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
-y_t  = daeVariableType("y_t",  unit(), -1.0e+20, 1.0e+20, 0.0, 1e-06)
-L2_t = daeVariableType("L2_t", unit(), -1.0e+20, 1.0e+20, 0.0, 1e-06)
+y_t  = daeVariableType("y_t",  unit(), -1.0e+20, 1.0e+20, 0.0, 1e-07)
+L2_t = daeVariableType("L2_t", unit(), -1.0e+20, 1.0e+20, 0.0, 1e-07)
 
 #########################################################
-#                 Isomerization of α-pinene
+#             Catalytic Cracking of Gas Oil
 #########################################################
 # Mathematical model
-class modAlphaPinene(daeModel):
-    p_scaling = 1e5
-
+class modOilCracking(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
@@ -80,66 +71,38 @@ class modAlphaPinene(daeModel):
         self.p1 = daeVariable("p1",  no_t, self, "Reaction coefficient 1")
         self.p2 = daeVariable("p2",  no_t, self, "Reaction coefficient 2")
         self.p3 = daeVariable("p3",  no_t, self, "Reaction coefficient 3")
-        self.p4 = daeVariable("p4",  no_t, self, "Reaction coefficient 4")
-        self.p5 = daeVariable("p5",  no_t, self, "Reaction coefficient 5")
 
         # State variables
-        self.y1 = daeVariable("y1", y_t, self, "α-pinene concentration")
-        self.y2 = daeVariable("y2", y_t, self, "Dipentene concentration")
-        self.y3 = daeVariable("y3", y_t, self, "Allo-ocimen concentration")
-        self.y4 = daeVariable("y4", y_t, self, "α- and β-pyronene concentration")
-        self.y5 = daeVariable("y5", y_t, self, "Dimer concentration")
+        self.y1 = daeVariable("y1", y_t, self, "1 concentration")
+        self.y2 = daeVariable("y2", y_t, self, "2 concentration")
 
     def DeclareEquations(self):
         # Create adouble objects to make equations more readable
         y1 = self.y1()
         y2 = self.y2()
-        y3 = self.y3()
-        y4 = self.y4()
-        y5 = self.y5()
         p1 = self.p1()
         p2 = self.p2()
         p3 = self.p3()
-        p4 = self.p4()
-        p5 = self.p5()
 
         # Derivatives
         dy1_dt = self.y1.dt()
         dy2_dt = self.y2.dt()
-        dy3_dt = self.y3.dt()
-        dy4_dt = self.y4.dt()
-        dy5_dt = self.y5.dt()
 
         # y1
         eq = self.CreateEquation("y1", "")
-        eq.Residual = dy1_dt + (p1+p2)*y1 / modAlphaPinene.p_scaling
+        eq.Residual = dy1_dt + (p1+p3)*(y1**2)
         eq.CheckUnitsConsistency = False
 
         # y2
         eq = self.CreateEquation("y2", "")
-        eq.Residual = dy2_dt - p1*y1  / modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency = False
-
-        # y3
-        eq = self.CreateEquation("y3", "")
-        eq.Residual = dy3_dt - (p2*y1 - (p3+p4)*y3 + p5*y5) / modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency = False
-
-        # y4
-        eq = self.CreateEquation("y4", "")
-        eq.Residual = dy4_dt - p3*y3 / modAlphaPinene.p_scaling
-        eq.CheckUnitsConsistency = False
-
-        # y5
-        eq = self.CreateEquation("y5", "")
-        eq.Residual = dy5_dt - (p4*y3 - p5*y5) / modAlphaPinene.p_scaling
+        eq.Residual = dy2_dt - (p1*(y1**2) - p2*y2)
         eq.CheckUnitsConsistency = False
 
 # Simulation (can be run independently from optimisation)
-class simAlphaPinene(daeSimulation):
+class simOilCracking(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modAlphaPinene("tutorial_che_opt_2")
+        self.m = modOilCracking("tutorial_che_opt_4")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -147,80 +110,64 @@ class simAlphaPinene(daeSimulation):
 
     def SetUpVariables(self):
         # The reaction coefficients below are optimal results found in the literature.
-        # They should produce L2 norm of 19.872393107.
-        self.m.p1.AssignValue( 5.9256e-5 * modAlphaPinene.p_scaling)
-        self.m.p2.AssignValue( 2.9632e-5 * modAlphaPinene.p_scaling)
-        self.m.p3.AssignValue( 2.0450e-5 * modAlphaPinene.p_scaling)
-        self.m.p4.AssignValue(27.4730e-5 * modAlphaPinene.p_scaling)
-        self.m.p5.AssignValue( 4.0073e-5 * modAlphaPinene.p_scaling)
+        # They should produce L2 norm of 4.12164e-03.
+        self.m.p1.AssignValue(12)
+        self.m.p2.AssignValue(8)
+        self.m.p3.AssignValue(2)
 
         self.m.y1.SetInitialCondition(y1_t0)
         self.m.y2.SetInitialCondition(y2_t0)
-        self.m.y3.SetInitialCondition(y3_t0)
-        self.m.y4.SetInitialCondition(y4_t0)
-        self.m.y5.SetInitialCondition(y5_t0)
 
 #########################################################
 #               Parameter Estimation Part
 #########################################################
 # We need some additional variables to determine reaction coefficients.
-# Derive a new class from modAlphaPinene and add extra data.
+# Derive a new class from modOilCracking and add extra data.
 # Nota Bene:
-#   modAlphaPinene_Opt inherits all parameters/variables from the base class.
-class modAlphaPinene_Opt(modAlphaPinene):
+#   modOilCracking_Opt inherits all parameters/variables from the base class.
+class modOilCracking_Opt(modOilCracking):
     def __init__(self, Name, Parent = None, Description = ""):
-        modAlphaPinene.__init__(self, Name, Parent, Description)
+        modOilCracking.__init__(self, Name, Parent, Description)
 
         # Observed values at the specific time interval
         self.y1_obs = daeVariable("y1_obs", no_t, self, "Observed value 1 at the specified time interval")
         self.y2_obs = daeVariable("y2_obs", no_t, self, "Observed value 2 at the specified time interval")
-        self.y3_obs = daeVariable("y3_obs", no_t, self, "Observed value 3 at the specified time interval")
-        self.y4_obs = daeVariable("y4_obs", no_t, self, "Observed value 4 at the specified time interval")
-        self.y5_obs = daeVariable("y5_obs", no_t, self, "Observed value 5 at the specified time interval")
 
         # This L2 norm sums all L2 norms in the previous time intervals
         self.L2      = daeVariable("L2",      L2_t, self, "Current L2 norm: ||yi(t) - yi_obs(t)||^2")
         self.L2_prev = daeVariable("L2_prev", L2_t, self, "L2 norm in previous time intrvals")
 
     def DeclareEquations(self):
-        modAlphaPinene.DeclareEquations(self)
+        modOilCracking.DeclareEquations(self)
 
         # L2-norm ||yi(t) - yi_obs(t)||^2
         # L2 norm is a sum of the L2 norm in the previous time steps (L2_prev)
-        # and the current norm: s1 + s2 + s3 + s4 + s5.
+        # and the current norm: s1 + s2.
         # L2_prev will be reset after every time interval where we have observed values.
         s1 = (self.y1() - self.y1_obs())**2
         s2 = (self.y2() - self.y2_obs())**2
-        s3 = (self.y3() - self.y3_obs())**2
-        s4 = (self.y4() - self.y4_obs())**2
-        s5 = (self.y5() - self.y5_obs())**2
         eq = self.CreateEquation("L2", "")
-        eq.Residual = self.L2() - (self.L2_prev() + s1 + s2 + s3 + s4 + s5)
+        eq.Residual = self.L2() - (self.L2_prev() + s1 + s2)
         eq.CheckUnitsConsistency = False
 
 # Simulation class that will be used by the optimisation.
-class simAlphaPinene_opt(daeSimulation):
+class simOilCracking_opt(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modAlphaPinene_Opt("tutorial_che_opt_2")
+        self.m = modOilCracking_Opt("tutorial_che_opt_4")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
         pass
 
     def SetUpVariables(self):
-        # modAlphaPinene part
-        self.m.p1.AssignValue( 5.9256e-5 * modAlphaPinene.p_scaling)
-        self.m.p2.AssignValue( 2.9632e-5 * modAlphaPinene.p_scaling)
-        self.m.p3.AssignValue( 2.0450e-5 * modAlphaPinene.p_scaling)
-        self.m.p4.AssignValue(27.4730e-5 * modAlphaPinene.p_scaling)
-        self.m.p5.AssignValue( 4.0073e-5 * modAlphaPinene.p_scaling)
+        # modOilCracking part
+        self.m.p1.AssignValue(0)
+        self.m.p2.AssignValue(0)
+        self.m.p3.AssignValue(0)
 
         self.m.y1.SetInitialCondition(y1_t0)
         self.m.y2.SetInitialCondition(y2_t0)
-        self.m.y3.SetInitialCondition(y3_t0)
-        self.m.y4.SetInitialCondition(y4_t0)
-        self.m.y5.SetInitialCondition(y5_t0)
 
         # Initialise variables required for parameter estimation.
         # Notate bene:
@@ -228,9 +175,6 @@ class simAlphaPinene_opt(daeSimulation):
         #   L2_prev should be 0.0 initially
         self.m.y1_obs.AssignValue(y1_t0)
         self.m.y2_obs.AssignValue(y2_t0)
-        self.m.y3_obs.AssignValue(y3_t0)
-        self.m.y4_obs.AssignValue(y4_t0)
-        self.m.y5_obs.AssignValue(y5_t0)
         self.m.L2_prev.AssignValue(0.0)
 
     def Run(self):
@@ -245,9 +189,6 @@ class simAlphaPinene_opt(daeSimulation):
             # Reset observed values to match the current interval end time
             self.m.y1_obs.ReAssignValue(y1_obs[t])
             self.m.y2_obs.ReAssignValue(y2_obs[t])
-            self.m.y3_obs.ReAssignValue(y3_obs[t])
-            self.m.y4_obs.ReAssignValue(y4_obs[t])
-            self.m.y5_obs.ReAssignValue(y5_obs[t])
 
             # Reinitialise the DAE system after all changes made above
             self.Reinitialize()
@@ -261,61 +202,32 @@ class simAlphaPinene_opt(daeSimulation):
     def SetUpOptimization(self):
         # Minimise L2-norm ||yi(t) - yi_obs(t)||^2
         self.ObjectiveFunction.Residual = self.m.L2()
-        #self.ObjectiveFunction.AbsTolerance = 1e-6
 
-        p_lb   = 0.0
-        p_ub   = 5e-4 * modAlphaPinene.p_scaling
-        p_init = 0.0
+        p_lb   =  0.0
+        p_ub   = 50.0
+        p_init =  0.0
 
         p1 = self.SetContinuousOptimizationVariable(self.m.p1, p_lb, p_ub, p_init)
         p2 = self.SetContinuousOptimizationVariable(self.m.p2, p_lb, p_ub, p_init)
         p3 = self.SetContinuousOptimizationVariable(self.m.p3, p_lb, p_ub, p_init)
-        p4 = self.SetContinuousOptimizationVariable(self.m.p4, p_lb, p_ub, p_init)
-        p5 = self.SetContinuousOptimizationVariable(self.m.p5, p_lb, p_ub, p_init)
 
-        c1 = self.CreateInequalityConstraint("p1max") # p1 - UB <= 0
-        c1.Residual = self.m.p1() - p_ub
-        c2 = self.CreateInequalityConstraint("p1min") # LB - p1 <= 0
-        c2.Residual = p_lb - self.m.p1()
-
-        c1 = self.CreateInequalityConstraint("p2max") # p2 - UB <= 0
-        c1.Residual = self.m.p2() - p_ub
-        c2 = self.CreateInequalityConstraint("p2min") # LB - p2 <= 0
-        c2.Residual = p_lb - self.m.p2()
-
-        c1 = self.CreateInequalityConstraint("p3max") # p3 - UB <= 0
-        c1.Residual = self.m.p3() - p_ub
-        c2 = self.CreateInequalityConstraint("p3min") # LB - p3 <= 0
-        c2.Residual = p_lb - self.m.p3()
-
-        c1 = self.CreateInequalityConstraint("p4max") # p4 - UB <= 0
-        c1.Residual = self.m.p4() - p_ub
-        c2 = self.CreateInequalityConstraint("p4min") # LB - p4 <= 0
-        c2.Residual = p_lb - self.m.p4()
-
-        c1 = self.CreateInequalityConstraint("p5max") # p5 - UB <= 0
-        c1.Residual = self.m.p5() - p_ub
-        c2 = self.CreateInequalityConstraint("p5min") # LB - p5 <= 0
-        c2.Residual = p_lb - self.m.p5()
-
-# Experimental data (8 measurements)
-times  = numpy.array([1230.00, 3060.0, 4920.0, 7800.0, 10680.0, 15030.0, 22620.0, 36420.0])
-y1_obs = numpy.array([  88.35,   76.4,   65.1,   50.4,    37.5,    25.9,    14.0,     4.5])
-y2_obs = numpy.array([   7.30,   15.6,   23.1,   32.9,    42.7,    49.1,    57.4,    63.1])
-y3_obs = numpy.array([   2.30,    4.5,    5.3,    6.0,     6.0,     5.9,     5.1,     3.8])
-y4_obs = numpy.array([   0.40,    0.7,    1.1,    1.5,     1.9,     2.2,     2.6,     2.9])
-y5_obs = numpy.array([   1.75,    2.8,    5.8,    9.3,    12.0,    17.0,    21.0,    25.7])
-
+# Experimental data (20 measurements, skip t=0) generated by the simulation below
+times  = numpy.array([0.050000, 0.100000, 0.150000, 0.200000, 0.250000, 0.300000,
+                      0.350000, 0.400000, 0.450000, 0.500000, 0.550000, 0.600000, 0.650000,
+                      0.700000, 0.750000, 0.800000, 0.850000, 0.900000, 0.950000, 1.000000])
+y1_obs = numpy.array([0.539650, 0.436582, 0.335315, 0.260760, 0.214197, 0.175340,
+                      0.157290, 0.156552, 0.131268, 0.113094, 0.114047, 0.102947, 0.095513,
+                      0.094655, 0.081459, 0.083441, 0.077560, 0.066267, 0.072420, 0.067343])
+y2_obs = numpy.array([0.277036, 0.298480, 0.269163, 0.209315, 0.176883, 0.135813,
+                      0.115819, 0.085196, 0.073238, 0.051577, 0.040534, 0.036138, 0.028266,
+                      0.022489, 0.019750, 0.016626, 0.013837, 0.011396, 0.010749, 0.009493])
 # Initial conditions
-y1_t0 = 100.0
-y2_t0 =   0.0
-y3_t0 =   0.0
-y4_t0 =   0.0
-y5_t0 =   0.0
+y1_t0 = 1.0
+y2_t0 = 0.0
 
 # Use daeSimulator class
 def guiRun(app):
-    sim = simAlphaPinene_opt()
+    sim = simOilCracking_opt()
     opt = daeOptimization()
     nlp = pyIPOPT.daeIPOPT()
     sim.m.SetReportingOn(True)
@@ -332,8 +244,8 @@ def consoleRun():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     nlpsolver    = pyIPOPT.daeIPOPT()
-    datareporter = daeNoOpDataReporter()
-    simulation   = simAlphaPinene_opt()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simOilCracking_opt()
     optimization = daeOptimization()
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     daesolver.SetLASolver(lasolver)
@@ -359,10 +271,10 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    nlpsolver.SetOption('print_level', 0)
-    nlpsolver.SetOption('tol', 1e-4)
-    nlpsolver.SetOption('mu_strategy', 'adaptive')
-    nlpsolver.SetOption('obj_scaling_factor', 1e-3)
+    nlpsolver.SetOption('print_level', 5)
+    nlpsolver.SetOption('tol', 1e-6)
+    #nlpsolver.SetOption('mu_strategy', 'adaptive')
+    nlpsolver.SetOption('obj_scaling_factor', 10.0)
     nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
 
     # Run
@@ -373,18 +285,24 @@ def consoleSimulation():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simAlphaPinene()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simOilCracking()
+
+    dr_tcpip     = daeTCPIPDataReporter()
+    dr_data      = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingTimes = times.tolist()
+    simulation.ReportingInterval = 1.0/20
+    simulation.TimeHorizon       = 1.0
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+    if(dr_tcpip.Connect("", simName) == False):
         sys.exit()
 
     # Initialize the simulation
@@ -400,6 +318,23 @@ def consoleSimulation():
     # Run
     simulation.Run()
     simulation.Finalize()
+
+    dvars = dr_data.Process.dictVariables
+    # Skip the
+    ts = dvars['tutorial_che_opt_4.y1'].TimeValues[1:]
+    y1 = dvars['tutorial_che_opt_4.y1'].Values[1:]
+    y2 = dvars['tutorial_che_opt_4.y2'].Values[1:]
+    nt = len(ts)
+    y1_exp = numpy.array([y + numpy.random.uniform(-y*0.1, y*0.1) for y in y1])
+    y2_exp = numpy.array([y + numpy.random.uniform(-y*0.1, y*0.1) for y in y2])
+
+    float_formatter = lambda x: "%.6f" % x
+    numpy.set_printoptions(formatter={'float_kind':float_formatter})
+    print('times  = numpy.%s' % repr(ts))
+    print('y1     = numpy.%s' % repr(y1))
+    print('y1_obs = numpy.%s' % repr(y1_exp))
+    print('y2     = numpy.%s' % repr(y2))
+    print('y2_obs = numpy.%s' % repr(y2_exp))
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

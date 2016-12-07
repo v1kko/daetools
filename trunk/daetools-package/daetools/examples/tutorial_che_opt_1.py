@@ -106,12 +106,13 @@ class CSTR(daeModel):
         Cc  = self.Cc()
         Cd  = self.Cd()
         # Derivatives
-        dCa_dt = self.Ca.dt()
-        dCb_dt = self.Cb.dt()
-        dCc_dt = self.Cc.dt()
-        dCd_dt = self.Cd.dt()
-        dT_dt  = self.T.dt()
-        dTk_dt = self.Tk.dt()
+        dVr_dt   = dt(self.VR())
+        dVrCa_dt = dt(self.VR() * self.Ca())
+        dVrCb_dt = dt(self.VR() * self.Cb())
+        dVrCc_dt = dt(self.VR() * self.Cc())
+        dVrCd_dt = dt(self.VR() * self.Cd())
+        dVrT_dt  = dt(self.VR() * self.T())
+        dTk_dt   = dt(self.Tk())
 
         # Intermediates
         r1 = k1 * VR * Ca
@@ -122,6 +123,10 @@ class CSTR(daeModel):
         rb =  r1   - r2 - F*Cb
         rc =  r2        - F*Cc
         rd =  r3        - F*Cd
+
+        # Volume
+        eq = self.CreateEquation("k1", "")
+        eq.Residual = dVr_dt - F
 
         # Reaction rate constants
         eq = self.CreateEquation("k1", "")
@@ -135,24 +140,25 @@ class CSTR(daeModel):
 
         # Mass balance
         eq = self.CreateEquation("Ca", "")
-        eq.Residual = VR * dCa_dt - ra
+        eq.Residual = dVrCa_dt - ra
 
         eq = self.CreateEquation("Cb", "")
-        eq.Residual = VR * dCb_dt - rb
+        eq.Residual = dVrCb_dt - rb
 
         eq = self.CreateEquation("Cc", "")
-        eq.Residual = VR * dCc_dt - rc
+        eq.Residual = dVrCc_dt - rc
 
         eq = self.CreateEquation("Cd", "")
-        eq.Residual = VR * dCd_dt - rd
+        eq.Residual = dVrCd_dt - rd
 
         # Energy balance - reactor
         eq = self.CreateEquation("EnergyBalanceReactor", "")
-        eq.Residual = rho * cp * VR * dT_dt - (  F * rho * cp * (T0 - T) \
-                                               - r1 * dHr1 \
-                                               - r2 * dHr2 \
-                                               - r3 * dHr3 \
-                                               + kw * AR * (Tk - T) )
+        eq.Residual = rho * cp * dVrT_dt - (  F * rho * cp * (T0 - T) \
+                                            - r1 * dHr1 \
+                                            - r2 * dHr2 \
+                                            - r3 * dHr3 \
+                                            + kw * AR * (Tk - T)
+                                           )
 
         # Energy balance - cooling fluid
         eq = self.CreateEquation("EnergyBalanceCooling", "")
@@ -186,8 +192,8 @@ class simCSTR(daeSimulation):
         self.m.Qk.AssignValue(-1579.5 * kJ/hour)
         self.m.Ca0.AssignValue(5.1 * mol/l)
         self.m.T0.AssignValue((273.15 + 104.9) * K)
-        self.m.VR.AssignValue(10.0 * l)
 
+        self.m.VR.SetInitialCondition(10.0 * l)
         self.m.Ca.SetInitialCondition(2.2291 * mol/l)
         self.m.Cb.SetInitialCondition(1.0417 * mol/l)
         self.m.Cc.SetInitialCondition(0.91397 * mol/l)

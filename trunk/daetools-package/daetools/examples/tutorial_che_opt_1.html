@@ -116,12 +116,13 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         Cc  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cc()
         Cd  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cd()
         <span style='color:#008000;'># Derivatives</span>
-        dCa_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Ca.dt()
-        dCb_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cb.dt()
-        dCc_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cc.dt()
-        dCd_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cd.dt()
-        dT_dt  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T.dt()
-        dTk_dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Tk.dt()
+        dVr_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR())
+        dVrCa_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Ca())
+        dVrCb_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Cb())
+        dVrCc_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Cc())
+        dVrCd_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Cd())
+        dVrT_dt  <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T())
+        dTk_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.Tk())
 
         <span style='color:#008000;'># Intermediates</span>
         r1 <b><span style='color:#0000ff;'>=</span></b> k1 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> Ca
@@ -132,6 +133,10 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         rb <b><span style='color:#0000ff;'>=</span></b>  r1   <b><span style='color:#0000ff;'>-</span></b> r2 <b><span style='color:#0000ff;'>-</span></b> F<b><span style='color:#0000ff;'>*</span></b>Cb
         rc <b><span style='color:#0000ff;'>=</span></b>  r2        <b><span style='color:#0000ff;'>-</span></b> F<b><span style='color:#0000ff;'>*</span></b>Cc
         rd <b><span style='color:#0000ff;'>=</span></b>  r3        <b><span style='color:#0000ff;'>-</span></b> F<b><span style='color:#0000ff;'>*</span></b>Cd
+
+        <span style='color:#008000;'># Volume</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;k1&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVr_dt <b><span style='color:#0000ff;'>-</span></b> F
 
         <span style='color:#008000;'># Reaction rate constants</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;k1&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
@@ -145,24 +150,25 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
         <span style='color:#008000;'># Mass balance</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Ca&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> VR <b><span style='color:#0000ff;'>*</span></b> dCa_dt <b><span style='color:#0000ff;'>-</span></b> ra
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCa_dt <b><span style='color:#0000ff;'>-</span></b> ra
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Cb&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> VR <b><span style='color:#0000ff;'>*</span></b> dCb_dt <b><span style='color:#0000ff;'>-</span></b> rb
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCb_dt <b><span style='color:#0000ff;'>-</span></b> rb
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Cc&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> VR <b><span style='color:#0000ff;'>*</span></b> dCc_dt <b><span style='color:#0000ff;'>-</span></b> rc
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCc_dt <b><span style='color:#0000ff;'>-</span></b> rc
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Cd&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> VR <b><span style='color:#0000ff;'>*</span></b> dCd_dt <b><span style='color:#0000ff;'>-</span></b> rd
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCd_dt <b><span style='color:#0000ff;'>-</span></b> rd
 
         <span style='color:#008000;'># Energy balance - reactor</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;EnergyBalanceReactor&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> rho <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> dT_dt <b><span style='color:#0000ff;'>-</span></b> (  F <b><span style='color:#0000ff;'>*</span></b> rho <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> (T0 <b><span style='color:#0000ff;'>-</span></b> T) <b><span style='color:#0000ff;'>\</span></b>
-                                               <b><span style='color:#0000ff;'>-</span></b> r1 <b><span style='color:#0000ff;'>*</span></b> dHr1 <b><span style='color:#0000ff;'>\</span></b>
-                                               <b><span style='color:#0000ff;'>-</span></b> r2 <b><span style='color:#0000ff;'>*</span></b> dHr2 <b><span style='color:#0000ff;'>\</span></b>
-                                               <b><span style='color:#0000ff;'>-</span></b> r3 <b><span style='color:#0000ff;'>*</span></b> dHr3 <b><span style='color:#0000ff;'>\</span></b>
-                                               <b><span style='color:#0000ff;'>+</span></b> kw <b><span style='color:#0000ff;'>*</span></b> AR <b><span style='color:#0000ff;'>*</span></b> (Tk <b><span style='color:#0000ff;'>-</span></b> T) )
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> rho <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> dVrT_dt <b><span style='color:#0000ff;'>-</span></b> (  F <b><span style='color:#0000ff;'>*</span></b> rho <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> (T0 <b><span style='color:#0000ff;'>-</span></b> T) <b><span style='color:#0000ff;'>\</span></b>
+                                            <b><span style='color:#0000ff;'>-</span></b> r1 <b><span style='color:#0000ff;'>*</span></b> dHr1 <b><span style='color:#0000ff;'>\</span></b>
+                                            <b><span style='color:#0000ff;'>-</span></b> r2 <b><span style='color:#0000ff;'>*</span></b> dHr2 <b><span style='color:#0000ff;'>\</span></b>
+                                            <b><span style='color:#0000ff;'>-</span></b> r3 <b><span style='color:#0000ff;'>*</span></b> dHr3 <b><span style='color:#0000ff;'>\</span></b>
+                                            <b><span style='color:#0000ff;'>+</span></b> kw <b><span style='color:#0000ff;'>*</span></b> AR <b><span style='color:#0000ff;'>*</span></b> (Tk <b><span style='color:#0000ff;'>-</span></b> T)
+                                           )
 
         <span style='color:#008000;'># Energy balance - cooling fluid</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;EnergyBalanceCooling&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
@@ -196,8 +202,8 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <span style='color:#0000ff;'>self</span>.m.Qk.AssignValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1579.5</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>hour)
         <span style='color:#0000ff;'>self</span>.m.Ca0.AssignValue(<span style='color:#c000c0;'>5.1</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
         <span style='color:#0000ff;'>self</span>.m.T0.AssignValue((<span style='color:#c000c0;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>104.9</span>) <b><span style='color:#0000ff;'>*</span></b> K)
-        <span style='color:#0000ff;'>self</span>.m.VR.AssignValue(<span style='color:#c000c0;'>10.0</span> <b><span style='color:#0000ff;'>*</span></b> l)
 
+        <span style='color:#0000ff;'>self</span>.m.VR.SetInitialCondition(<span style='color:#c000c0;'>10.0</span> <b><span style='color:#0000ff;'>*</span></b> l)
         <span style='color:#0000ff;'>self</span>.m.Ca.SetInitialCondition(<span style='color:#c000c0;'>2.2291</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
         <span style='color:#0000ff;'>self</span>.m.Cb.SetInitialCondition(<span style='color:#c000c0;'>1.0417</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
         <span style='color:#0000ff;'>self</span>.m.Cc.SetInitialCondition(<span style='color:#c000c0;'>0.91397</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
