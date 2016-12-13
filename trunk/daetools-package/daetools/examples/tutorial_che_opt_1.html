@@ -32,6 +32,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics</span>
 <span style='color:#c00000;'>Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.</span>
 <span style='color:#c00000;'>`doi:10.1021/i160048a700 &lt;https://doi.org/10.1021/i160048a700&gt;`_</span>
+
+<span style='color:#c00000;'>No fully implemented yet.</span>
 <span style='color:#c00000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#0000ff;'>import</span> sys
@@ -230,15 +232,11 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <span style='color:#0000ff;'>self</span>.Qk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.Qk, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1000</span>, <span style='color:#c000c0;'>0</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>438.75</span>)<b><span style='color:#0000ff;'>;</span></b>
 
 <b>def</b> setOptions(nlpsolver):
-    <span style='color:#008000;'># 1) Set the options manually</span>
-    <b>try</b>:
-        nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>5</span>)
-        nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-5</span>)
-        nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
-        <span style='color:#008000;'>#nlpsolver.SetOption('obj_scaling_factor', 0.00001)</span>
-        nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
-    <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-        <span style='color:#0000ff;'>print</span>(<span style='color:#0000ff;'>str</span>(e))
+    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>5</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-5</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
+    <span style='color:#008000;'>#nlpsolver.SetOption('obj_scaling_factor', 0.00001)</span>
+    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
         
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):

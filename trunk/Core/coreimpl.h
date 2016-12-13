@@ -3557,7 +3557,10 @@ public:
 
 	void SetUB(real_t value);
 	real_t GetUB(void) const;
-	
+
+    real_t GetScaling() const;
+    void   SetScaling(real_t scaling);
+
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	
 	void Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
@@ -3570,6 +3573,7 @@ protected:
 	daeeOptimizationVariableType	m_eType;
 	size_t							m_nOptimizationVariableIndex; // index in the array of opt. variables: 0 - Nopt.vars. 
 	std::vector<size_t>				m_narrDomainIndexes;
+    real_t                          m_dScaling;
 };
 
 /******************************************************************
@@ -3609,6 +3613,9 @@ public:
     real_t GetAbsTolerance() const;
     void   SetAbsTolerance(real_t abstol);
 
+    real_t GetScaling() const;
+    void   SetScaling(real_t scaling);
+
 	void	 SetResidual(adouble res);
 	adouble	 GetResidual(void) const;
 	
@@ -3629,6 +3636,7 @@ protected:
 	size_t							m_nVariableIndexInBlock;
 	size_t							m_nNumberOfOptimizationVariables;
 	std::vector<size_t>				m_narrOptimizationVariablesIndexes;
+    real_t                          m_dScaling;
 };
 
 /******************************************************************

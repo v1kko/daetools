@@ -252,6 +252,7 @@ const char* DOCSTR_daeOptimizationVariable = "";
     const char* DOCSTR_daeOptimizationVariable_LowerBound = "";  
     const char* DOCSTR_daeOptimizationVariable_UpperBound = "";  
     const char* DOCSTR_daeOptimizationVariable_StartingPoint = "";  
+    const char* DOCSTR_daeOptimizationVariable_Scaling = "";
 
 const char* DOCSTR_daeObjectiveFunction = "";  
     const char* DOCSTR_daeObjectiveFunction_init = "";  
@@ -260,6 +261,7 @@ const char* DOCSTR_daeObjectiveFunction = "";
     const char* DOCSTR_daeObjectiveFunction_Value = "";  
     const char* DOCSTR_daeObjectiveFunction_Gradients = "";  
     const char* DOCSTR_daeObjectiveFunction_AbsTolerance = "";  
+    const char* DOCSTR_daeObjectiveFunction_Scaling = "";
 
 const char* DOCSTR_daeOptimizationConstraint = "";  
     const char* DOCSTR_daeOptimizationConstraint_init = "";  
@@ -269,6 +271,7 @@ const char* DOCSTR_daeOptimizationConstraint = "";
     const char* DOCSTR_daeOptimizationConstraint_Value = "";  
     const char* DOCSTR_daeOptimizationConstraint_Gradients = "";  
     const char* DOCSTR_daeOptimizationConstraint_AbsTolerance = "";  
+    const char* DOCSTR_daeOptimizationConstraint_Scaling = "";
 
 const char* DOCSTR_daeMeasuredVariable = "";  
     const char* DOCSTR_daeMeasuredVariable_init = "";  
@@ -277,7 +280,8 @@ const char* DOCSTR_daeMeasuredVariable = "";
     const char* DOCSTR_daeMeasuredVariable_Value = "";  
     const char* DOCSTR_daeMeasuredVariable_Gradients = "";  
     const char* DOCSTR_daeMeasuredVariable_AbsTolerance = "";  
-    
+    const char* DOCSTR_daeMeasuredVariable_Scaling = "";
+
 const char* DOCSTR_daeOnEventActions = "";
     const char* DOCSTR_daeOnEventActions_EventPort = "";
     const char* DOCSTR_daeOnEventActions_Actions = "";

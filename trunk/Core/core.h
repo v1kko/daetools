@@ -917,6 +917,9 @@ public:
 
     virtual void SetUB(real_t value) = 0;
     virtual real_t GetUB(void) const = 0;
+
+    virtual real_t GetScaling() const = 0;
+    virtual void   SetScaling(real_t scaling) = 0;
 };
 
 /******************************************************************
@@ -936,6 +939,8 @@ public:
     virtual void GetGradients(real_t* gradients, size_t Nparams) const = 0;
     virtual real_t GetAbsTolerance() const = 0;
     virtual void   SetAbsTolerance(real_t abstol) = 0;
+    virtual real_t GetScaling() const = 0;
+    virtual void   SetScaling(real_t scaling) = 0;
 
 
     virtual void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const = 0;

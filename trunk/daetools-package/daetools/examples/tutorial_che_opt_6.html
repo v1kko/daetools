@@ -165,16 +165,29 @@ x_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#0000ff;'>self</span>.Ni):
             <span style='color:#0000ff;'>self</span>.u_opt.append( <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.uc(i), <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>0.0</span>) )
 
+<b>def</b> setOptions(nlpsolver):
+    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>0</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>5e-5</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
+    <span style='color:#008000;'>#nlpsolver.SetOption('obj_scaling_factor', 100.0)</span>
+    <span style='color:#008000;'>#nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')</span>
+
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <b><span style='color:#0000ff;'>=</span></b> simCatalystMixing(<span style='color:#c000c0;'>100</span>, <span style='color:#c000c0;'>1.0</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>100</span>)
     opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
+    dae <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+    dae.SetLASolver(lasolver)
+    dae.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
     sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
     sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
     simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
                                   optimization <b><span style='color:#0000ff;'>=</span></b> opt,
+                                  daesolver <b><span style='color:#0000ff;'>=</span></b> dae,
+                                  lasolver <b><span style='color:#0000ff;'>=</span></b> lasolver,
                                   nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
                                   nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
     simulator.exec_()
@@ -213,11 +226,7 @@ x_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
     <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
     <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
-    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>0</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>5e-5</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
-    <span style='color:#008000;'>#nlpsolver.SetOption('obj_scaling_factor', 100.0)</span>
-    <span style='color:#008000;'>#nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')</span>
+    setOptions(nlpsolver)
 
     <span style='color:#008000;'># Save the model report and the runtime model report</span>
     simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)

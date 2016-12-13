@@ -54,7 +54,9 @@ problems solved by **DAE Tools**.
 
 .. rubric:: Chemical Engineering Optimisation Examples
 The `Chemical Engineering Optimisation Examples <tutorials-chemeng-optimisation.html>`_ illustrate various
-chemical engineering optimisation problems solved by **DAE Tools**.
+chemical engineering optimisation problems solved by **DAE Tools**. This section contains 5
+`Constrained Optimization Problem Set (COPS) <http://www.mcs.anl.gov/~more/cops>`_ optimisation,
+parameter estimation and optimal control tests.
 
 
 .. rubric:: The full list of tutorials:

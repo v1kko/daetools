@@ -155,16 +155,29 @@ class simCatalystMixing(daeSimulation):
         for i in range(self.Ni):
             self.u_opt.append( self.SetContinuousOptimizationVariable(self.m.uc(i), 0.0, 1.0, 0.0) )
 
+def setOptions(nlpsolver):
+    nlpsolver.SetOption('print_level', 0)
+    nlpsolver.SetOption('tol', 5e-5)
+    nlpsolver.SetOption('mu_strategy', 'adaptive')
+    #nlpsolver.SetOption('obj_scaling_factor', 100.0)
+    #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simCatalystMixing(100, 1.0/100)
     opt = daeOptimization()
+    dae = daeIDAS()
     nlp = pyIPOPT.daeIPOPT()
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    dae.SetLASolver(lasolver)
+    dae.RelativeTolerance = 1e-6
     sim.m.SetReportingOn(True)
     sim.ReportingInterval = 1
     sim.TimeHorizon       = 1
     simulator = daeSimulator(app, simulation = sim,
                                   optimization = opt,
+                                  daesolver = dae,
+                                  lasolver = lasolver,
                                   nlpsolver = nlp,
                                   nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
@@ -203,11 +216,7 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    nlpsolver.SetOption('print_level', 0)
-    nlpsolver.SetOption('tol', 5e-5)
-    nlpsolver.SetOption('mu_strategy', 'adaptive')
-    #nlpsolver.SetOption('obj_scaling_factor', 100.0)
-    #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+    setOptions(nlpsolver)
 
     # Save the model report and the runtime model report
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")

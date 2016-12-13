@@ -27,7 +27,7 @@
 <span style='color:#008000;'>************************************************************************************</span>
 <span style='color:#008000;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>COPS test 6: Marine Population Dynamics.</span>
+<span style='color:#c00000;'>COPS test 6: Marine Population Dynamics. (Not working properly)</span>
 
 <span style='color:#c00000;'>Given estimates of the abundance of the population of a marine species at each stage</span>
 <span style='color:#c00000;'>(for example, nauplius, juvenile, adult) as a function of time, determine stage specific</span>
@@ -45,11 +45,27 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>- Parameter estimation console run:   python tutorial_che_opt_3.py console</span>
 <span style='color:#c00000;'>- Parameter estimation GUI run:       python tutorial_che_opt_3.py gui</span>
 
-<span style='color:#c00000;'>Currently, the parameter estimation results are (solver options/scaling should be tuned):</span>
+<span style='color:#c00000;'>Currently, the parameter estimation results are (suboptimal results obtained, solver</span>
+<span style='color:#c00000;'>options/scaling should be tuned):</span>
 
 <span style='color:#c00000;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>   Fobj = e+7</span>
+<span style='color:#c00000;'>    Fobj =  1.920139e+8</span>
+<span style='color:#c00000;'>    m(0)    3.358765e-01</span>
+<span style='color:#c00000;'>    m(1)    4.711709e-01</span>
+<span style='color:#c00000;'>    m(2)    1.120524e-01</span>
+<span style='color:#c00000;'>    m(3)    8.509170e-02</span>
+<span style='color:#c00000;'>    m(4)    9.683579e-02</span>
+<span style='color:#c00000;'>    m(5)    1.919142e-01</span>
+<span style='color:#c00000;'>    m(6)    2.418778e-01</span>
+<span style='color:#c00000;'>    m(7)    2.421000e-01</span>
+<span style='color:#c00000;'>    g(0)    1.152995e+00</span>
+<span style='color:#c00000;'>    g(1)    7.529383e-01</span>
+<span style='color:#c00000;'>    g(2)    5.024174e-01</span>
+<span style='color:#c00000;'>    g(3)    5.704327e-01</span>
+<span style='color:#c00000;'>    g(4)    4.180333e-01</span>
+<span style='color:#c00000;'>    g(5)    3.185407e-01</span>
+<span style='color:#c00000;'>    g(6)    2.250250e-01</span>
 
 <span style='color:#c00000;'>The distribution moments 1,2,5,6 plots (for optimal results from the literature):</span>
 
@@ -66,11 +82,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
 <span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#0000ff;'>from</span> daetools.solvers.trilinos <span style='color:#0000ff;'>import</span> pyTrilinos
-<span style='color:#0000ff;'>from</span> daetools.solvers.ipopt <span style='color:#0000ff;'>import</span> pyIPOPT
+<span style='color:#0000ff;'>from</span> daetools.solvers.nlopt <span style='color:#0000ff;'>import</span> pyNLOPT
+<span style='color:#008000;'>#from daetools.solvers.ipopt import pyIPOPT</span>
 <span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
-y_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;y_t&quot;</span>,  unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-06</span>)
-L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;L2_t&quot;</span>, unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-06</span>)
+y_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;y_t&quot;</span>,  unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-07</span>)
+L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;L2_t&quot;</span>, unit(), <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>1.0e+20</span>, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-07</span>)
 
 <span style='color:#008000;'>######################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
 <span style='color:#008000;'>#             Marine Population Dynamics</span>
@@ -235,7 +252,7 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
     <b>def</b> SetUpOptimization(<span style='color:#0000ff;'>self</span>):
         <span style='color:#008000;'># Minimise L2-norm ||yi(t) - yi_obs(t)||^2</span>
-        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L2() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1e-8</span> <span style='color:#008000;'># scale Fobj</span>
+        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L2() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1e-6</span> <span style='color:#008000;'># scale Fobj</span>
         <span style='color:#008000;'>#self.ObjectiveFunction.AbsTolerance = 1e-6</span>
 
         m_lb   <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>0.0</span>
@@ -262,7 +279,7 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         g7 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.g(<span style='color:#c000c0;'>6</span>), g_lb, g_ub, g_init)
         <span style='color:#008000;'>#g8 = self.SetContinuousOptimizationVariable(self.m.g(7), g_lb, g_ub, g_init)</span>
 
-        <b>def</b> constraint(p, LB, UB, name):
+        <b>def</b> add_constraint(p, LB, UB, name):
             <b>return</b>
             c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>max&quot;</span> <b><span style='color:#0000ff;'>%</span></b> name) <span style='color:#008000;'># p - UB &lt;= 0</span>
             c1.Residual <b><span style='color:#0000ff;'>=</span></b> p <b><span style='color:#0000ff;'>-</span></b> UB
@@ -270,12 +287,12 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
             c2.Residual <b><span style='color:#0000ff;'>=</span></b> LB <b><span style='color:#0000ff;'>-</span></b> p
 
         <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>8</span>):
-            constraint(<span style='color:#0000ff;'>self</span>.m.g(i), g_lb, g_ub, <span style='color:#c00000;'>'g'</span>)
+            add_constraint(<span style='color:#0000ff;'>self</span>.m.g(i), g_lb, g_ub, <span style='color:#c00000;'>'g'</span>)
         <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>7</span>):
-            constraint(<span style='color:#0000ff;'>self</span>.m.m(i), m_lb, m_ub, <span style='color:#c00000;'>'m'</span>)
+            add_constraint(<span style='color:#0000ff;'>self</span>.m.m(i), m_lb, m_ub, <span style='color:#c00000;'>'m'</span>)
 
 <span style='color:#008000;'># Experimental data (21 measurements) generated by the simulation below</span>
-times  <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>1e-10</span>, <span style='color:#c000c0;'>0.5</span>, <span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>1.5</span>, <span style='color:#c000c0;'>2.0</span>, <span style='color:#c000c0;'>2.5</span>, <span style='color:#c000c0;'>3.0</span>, <span style='color:#c000c0;'>3.5</span>, <span style='color:#c000c0;'>4.0</span>, <span style='color:#c000c0;'>4.5</span>, <span style='color:#c000c0;'>5.0</span>, <span style='color:#c000c0;'>5.5</span>, <span style='color:#c000c0;'>6.0</span>,
+times <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>1e-10</span>, <span style='color:#c000c0;'>0.5</span>, <span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>1.5</span>, <span style='color:#c000c0;'>2.0</span>, <span style='color:#c000c0;'>2.5</span>, <span style='color:#c000c0;'>3.0</span>, <span style='color:#c000c0;'>3.5</span>, <span style='color:#c000c0;'>4.0</span>, <span style='color:#c000c0;'>4.5</span>, <span style='color:#c000c0;'>5.0</span>, <span style='color:#c000c0;'>5.5</span>, <span style='color:#c000c0;'>6.0</span>,
                       <span style='color:#c000c0;'>6.5</span>, <span style='color:#c000c0;'>7.0</span>, <span style='color:#c000c0;'>7.5</span>, <span style='color:#c000c0;'>8.0</span>, <span style='color:#c000c0;'>8.5</span>, <span style='color:#c000c0;'>9.0</span>, <span style='color:#c000c0;'>9.5</span>, <span style='color:#c000c0;'>10.0</span>])
 <span style='color:#008000;'># yobs[species,time]</span>
 y_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([
@@ -306,11 +323,22 @@ y_t0 <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='colo
 m_opt <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.28</span>, <span style='color:#c000c0;'>0.10</span>, <span style='color:#c000c0;'>0.25</span>, <span style='color:#c000c0;'>0.12</span>, <span style='color:#c000c0;'>1e-3</span>, <span style='color:#c000c0;'>1e-9</span>, <span style='color:#c000c0;'>0.32</span>, <span style='color:#c000c0;'>0.43</span>])
 g_opt <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>0.70</span>, <span style='color:#c000c0;'>0.81</span>, <span style='color:#c000c0;'>0.47</span>, <span style='color:#c000c0;'>0.48</span>, <span style='color:#c000c0;'>0.49</span>, <span style='color:#c000c0;'>0.65</span>, <span style='color:#c000c0;'>0.54</span>, <span style='color:#c000c0;'>0.0</span>])
 
+<b>def</b> setOptions(nlpsolver):
+    nlpsolver.xtol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-8</span>
+    nlpsolver.xtol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-8</span>
+    nlpsolver.ftol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-8</span>
+    nlpsolver.ftol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-8</span>
+    <span style='color:#008000;'>#nlpsolver.SetOption('print_level', 9)</span>
+    <span style='color:#008000;'>#nlpsolver.SetOption('tol', 1e-4)</span>
+    <span style='color:#008000;'>#nlpsolver.SetOption('mu_strategy', 'adaptive')</span>
+    <span style='color:#008000;'>#nlpsolver.SetOption('obj_scaling_factor', 1e-8)</span>
+    <span style='color:#008000;'>#nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')</span>
+
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <b><span style='color:#0000ff;'>=</span></b> simMarinePopulation_opt()
     opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-    nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
+    nlp <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#c00000;'>'NLOPT_LD_SLSQP'</span>)
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
     sim.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
     simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
@@ -324,8 +352,9 @@ g_opt <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='col
     <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#c00000;'>'NLOPT_LD_SLSQP'</span>)
+    <span style='color:#008000;'>#nlpsolver    = pyIPOPT.daeIPOPT()</span>
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simMarinePopulation_opt()
     optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
     lasolver     <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
@@ -352,11 +381,7 @@ g_opt <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='col
 
     <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
     <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
-    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>0</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-5</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'obj_scaling_factor'</span>, <span style='color:#c000c0;'>1e3</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
+    setOptions(nlpsolver)
 
     <span style='color:#008000;'># Run</span>
     optimization.Run()

@@ -32,6 +32,13 @@ python tutorial_che_6.py console
 python tutorial_che_7.py console
 python tutorial_che_8.py console
 
+tutorial_che_opt_1.py console
+tutorial_che_opt_2.py console
+tutorial_che_opt_3.py console
+tutorial_che_opt_4.py console
+tutorial_che_opt_5.py console
+tutorial_che_opt_6.py console
+
 python tutorial_dealii_1.py console
 python tutorial_dealii_2.py console
 python tutorial_dealii_3.py console

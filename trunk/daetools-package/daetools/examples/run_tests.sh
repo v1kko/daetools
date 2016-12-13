@@ -106,6 +106,24 @@ echo tutorial_che_8.py
 $PYTHON $ROOT/tutorial_che_8.py console
 
 
+echo tutorial_che_opt_1.py
+$PYTHON $ROOT/tutorial_che_opt_1.py console
+
+echo tutorial_che_opt_2.py
+$PYTHON $ROOT/tutorial_che_opt_2.py console
+
+echo tutorial_che_opt_3.py
+$PYTHON $ROOT/tutorial_che_opt_3.py console
+
+echo tutorial_che_opt_4.py
+$PYTHON $ROOT/tutorial_che_opt_4.py console
+
+echo tutorial_che_opt_5.py
+$PYTHON $ROOT/tutorial_che_opt_5.py console
+
+echo tutorial_che_opt_6.py
+$PYTHON $ROOT/tutorial_che_opt_6.py console
+
 
 echo tutorial_dealii_1.py
 $PYTHON $ROOT/tutorial_dealii_1.py console

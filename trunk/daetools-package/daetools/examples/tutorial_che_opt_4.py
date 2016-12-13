@@ -225,16 +225,28 @@ y2_obs = numpy.array([0.277036, 0.298480, 0.269163, 0.209315, 0.176883, 0.135813
 y1_t0 = 1.0
 y2_t0 = 0.0
 
+def setOptions(nlpsolver):
+    nlpsolver.SetOption('print_level', 5)
+    nlpsolver.SetOption('tol', 1e-6)
+    #nlpsolver.SetOption('mu_strategy', 'adaptive')
+    nlpsolver.SetOption('obj_scaling_factor', 10.0)
+    nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+
 # Use daeSimulator class
 def guiRun(app):
+    dae = daeIDAS()
     sim = simOilCracking_opt()
     opt = daeOptimization()
     nlp = pyIPOPT.daeIPOPT()
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    dae.RelativeTolerance = 1e-6
     sim.m.SetReportingOn(True)
     sim.ReportingTimes = times.tolist()
     simulator = daeSimulator(app, simulation = sim,
                                   optimization = opt,
+                                  daesolver = dae,
                                   nlpsolver = nlp,
+                                  lasolver = lasolver,
                                   nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
 
@@ -271,11 +283,7 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    nlpsolver.SetOption('print_level', 5)
-    nlpsolver.SetOption('tol', 1e-6)
-    #nlpsolver.SetOption('mu_strategy', 'adaptive')
-    nlpsolver.SetOption('obj_scaling_factor', 10.0)
-    nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+    setOptions(nlpsolver)
 
     # Run
     optimization.Run()

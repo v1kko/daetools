@@ -313,16 +313,28 @@ y3_t0 =   0.0
 y4_t0 =   0.0
 y5_t0 =   0.0
 
+def setOptions(nlpsolver):
+    nlpsolver.SetOption('print_level', 0)
+    nlpsolver.SetOption('tol', 1e-4)
+    nlpsolver.SetOption('mu_strategy', 'adaptive')
+    nlpsolver.SetOption('obj_scaling_factor', 1e-3)
+    nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+
 # Use daeSimulator class
 def guiRun(app):
     sim = simAlphaPinene_opt()
     opt = daeOptimization()
     nlp = pyIPOPT.daeIPOPT()
+    dae = daeIDAS()
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    dae.RelativeTolerance = 1e-6
     sim.m.SetReportingOn(True)
     sim.ReportingTimes = times.tolist()
     simulator = daeSimulator(app, simulation = sim,
                                   optimization = opt,
                                   nlpsolver = nlp,
+                                  daesolver = dae,
+                                  lasolver = lasolver,
                                   nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
 
@@ -332,7 +344,7 @@ def consoleRun():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     nlpsolver    = pyIPOPT.daeIPOPT()
-    datareporter = daeNoOpDataReporter()
+    datareporter = daeTCPIPDataReporter()
     simulation   = simAlphaPinene_opt()
     optimization = daeOptimization()
     lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
@@ -359,11 +371,7 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    nlpsolver.SetOption('print_level', 0)
-    nlpsolver.SetOption('tol', 1e-4)
-    nlpsolver.SetOption('mu_strategy', 'adaptive')
-    nlpsolver.SetOption('obj_scaling_factor', 1e-3)
-    nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+    setOptions(nlpsolver)
 
     # Run
     optimization.Run()

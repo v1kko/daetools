@@ -18,6 +18,7 @@ daeFunctionWithGradients::daeFunctionWithGradients(void)
 	m_nVariableIndexInBlock          = ULONG_MAX;
 	m_pEquationExecutionInfo         = NULL;
 	m_nNumberOfOptimizationVariables = 0;
+    m_dScaling                       = 1.0;
 }
 
 daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
@@ -50,7 +51,7 @@ daeFunctionWithGradients::daeFunctionWithGradients(daeModel* pModel,
 
 	m_pEquationExecutionInfo         = NULL;
 	m_nNumberOfOptimizationVariables = 0;
-	
+    m_dScaling                       = 1.0;
 }
 
 daeFunctionWithGradients::~daeFunctionWithGradients(void)
@@ -96,7 +97,7 @@ real_t daeFunctionWithGradients::GetValue(void) const
 	if(!m_pModel || !m_pModel->m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
-	return m_pModel->m_pDataProxy->GetValue( m_pVariable->GetOverallIndex() );
+    return m_dScaling * m_pModel->m_pDataProxy->GetValue( m_pVariable->GetOverallIndex() );
 }
 
 real_t daeFunctionWithGradients::GetAbsTolerance() const
@@ -107,6 +108,16 @@ real_t daeFunctionWithGradients::GetAbsTolerance() const
 void daeFunctionWithGradients::SetAbsTolerance(real_t abstol)
 {
     m_pVariable->m_VariableType.SetAbsoluteTolerance(abstol);
+}
+
+real_t daeFunctionWithGradients::GetScaling() const
+{
+    return m_dScaling;
+}
+
+void daeFunctionWithGradients::SetScaling(real_t scaling)
+{
+    m_dScaling = scaling;
 }
 
 /*
@@ -162,7 +173,8 @@ void daeFunctionWithGradients::GetGradients(const daeMatrix<real_t>& matSensitiv
 	{
 		paramIndex = m_narrOptimizationVariablesIndexes[j];
 		gradients[paramIndex] = matSensitivities.GetItem(paramIndex, // Index of the parameter
-														 varIndex);  // Index of the variable
+                                                         varIndex)   // Index of the variable
+                                * m_dScaling;
 	}
 }
 
@@ -413,6 +425,7 @@ daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t 
 	m_eType							= eIntegerVariable;
 	m_narrDomainIndexes 			= narrDomainIndexes;
 	m_nOptimizationVariableIndex	= nOptimizationVariableIndex;
+    m_dScaling                      = 1.0;
 }
 
 daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, bool defaultValue)
@@ -427,6 +440,7 @@ daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t 
 	m_eType							= eBinaryVariable;
 	m_narrDomainIndexes				= narrDomainIndexes;
 	m_nOptimizationVariableIndex	= nOptimizationVariableIndex;
+    m_dScaling                      = 1.0;
 }
 
 daeOptimizationVariable::~daeOptimizationVariable(void)
@@ -471,6 +485,16 @@ void daeOptimizationVariable::SetUB(real_t value)
 real_t daeOptimizationVariable::GetUB(void) const
 {
 	return m_dUB;	
+}
+
+real_t daeOptimizationVariable::GetScaling() const
+{
+    return m_dScaling;
+}
+
+void daeOptimizationVariable::SetScaling(real_t scaling)
+{
+    m_dScaling = scaling;
 }
 
 size_t daeOptimizationVariable::GetOverallIndex(void) const

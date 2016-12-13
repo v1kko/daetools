@@ -41,6 +41,8 @@ for i in range(1, 5):
 for i in range(1, 9):
     tutorial_modules.append(('tutorial_che_%d' % i, []))
 for i in range(1, 7):
+    tutorial_modules.append(('tutorial_che_opt_%d' % i, []))
+for i in range(1, 7):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))
 for i in range(1, 8):
     tutorial_modules.append(('opt_tutorial%d' % i, []))

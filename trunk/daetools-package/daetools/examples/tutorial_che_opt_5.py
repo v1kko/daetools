@@ -260,16 +260,28 @@ y1_t0 = 1.0
 y2_t0 = 0.0
 y3_t0 = 0.0
 
+def setOptions(nlpsolver):
+    nlpsolver.xtol_rel = 1e-6
+    nlpsolver.xtol_abs = 1e-6
+    nlpsolver.ftol_rel = 1e-6
+    nlpsolver.ftol_abs = 1e-6
+
 # Use daeSimulator class
 def guiRun(app):
+    dae = daeIDAS()
     sim = simMethanol2Hydrocarbons_opt()
     opt = daeOptimization()
-    nlp = pyIPOPT.daeIPOPT()
+    nlp = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    dae.SetLASolver(lasolver)
+    dae.RelativeTolerance = 1e-6
     sim.m.SetReportingOn(True)
     sim.ReportingTimes = times.tolist()
     simulator = daeSimulator(app, simulation = sim,
                                   optimization = opt,
                                   nlpsolver = nlp,
+                                  daesolver = dae,
+                                  lasolver = lasolver,
                                   nlpsolver_setoptions_fn = setOptions)
     simulator.exec_()
 
@@ -289,7 +301,7 @@ def consoleRun():
 
     # Do no print progress
     log.PrintProgress = True
-    
+
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
@@ -306,10 +318,7 @@ def consoleRun():
 
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
-    nlpsolver.xtol_rel = 1e-6
-    nlpsolver.xtol_abs = 1e-6
-    nlpsolver.ftol_rel = 1e-6
-    nlpsolver.ftol_abs = 1e-6
+    setOptions(nlpsolver)
 
     # Run
     optimization.Run()

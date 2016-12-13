@@ -402,12 +402,15 @@ void daeNLOPTSolver::CheckAndRun(const double* x)
 	size_t i;
 	bool bPreviousRun;
 	daeOptimizationVariable_t* pOptVariable;
+    static real_t tolerance = std::numeric_limits<real_t>::denorm_min();
 	
 // If all values are equal then do not run again
 	bPreviousRun = true;
 	for( i = 0; i < m_ptrarrOptVariables.size(); i++)
 	{
-		if(m_darrLastX[i] != x[i])
+        // If any opt. variable is different from the previous run
+        // execute the simulation. Otherwise skip running it.
+        if(::fabs(m_darrLastX[i] - x[i]) > tolerance)
 		{
 			bPreviousRun = false;
 			break;

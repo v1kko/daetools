@@ -26,8 +26,20 @@ Chemical Engineering Optimisation Examples
 :ref:`tutorial_che_opt_6`    |tceo_6|
 ==========================   =================================================================
 
+The implementations of the `COPS <http://www.mcs.anl.gov/~more/cops>`_ tests differ from the
+original ones in following:
 
-.. |tceo_1| replace:: Optimisation of the CSTR with energy balance and Van de Vusse reactions.
+- The Direct Sequential Approach has been applied while the original tests use
+  the Direct Simultaneous Approach
+- The analytical sensitivity Hessian matrix is not available. The limited memory
+  Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) algorithm from IPOPT is used.
+
+As a consequence, the results slightly differ from the published results.
+In addition, the solver options should be tuned to achieve faster convergence.
+
+
+.. |tceo_1| replace:: Optimisation of the CSTR with energy balance and Van de Vusse reactions
+                      (not fully implemented yet).
 
 .. |tceo_2| replace:: COPS test 5 (parameter estimation): Determination of the reaction coefficients
                       in the thermal isometrization of α-pinene.
@@ -41,7 +53,7 @@ Chemical Engineering Optimisation Examples
 .. |tceo_5| replace:: COPS test 13 (parameter estimation): Determination of the reaction coefficients
                       for the conversion of methanol into various hydrocarbons.
 
-.. |tceo_6| replace:: COPS test 14 (nonlinear optimisation): Catalyst mixing in a tubular plug flow reactor.
+.. |tceo_6| replace:: COPS test 14 (optimal control): Catalyst mixing in a tubular plug flow reactor.
 
 
 .. _tutorial_che_opt_1:

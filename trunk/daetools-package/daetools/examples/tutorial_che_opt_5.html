@@ -270,16 +270,28 @@ y1_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>
 y2_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
 y3_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
 
+<b>def</b> setOptions(nlpsolver):
+    nlpsolver.xtol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    nlpsolver.xtol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    nlpsolver.ftol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    nlpsolver.ftol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
+    dae <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     sim <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
     opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-    nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
+    nlp <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#c00000;'>'NLOPT_LD_SLSQP'</span>)
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+    dae.SetLASolver(lasolver)
+    dae.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
     sim.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
     simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
                                   optimization <b><span style='color:#0000ff;'>=</span></b> opt,
                                   nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
+                                  daesolver <b><span style='color:#0000ff;'>=</span></b> dae,
+                                  lasolver <b><span style='color:#0000ff;'>=</span></b> lasolver,
                                   nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
     simulator.exec_()
 
@@ -299,7 +311,7 @@ y3_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>
 
     <span style='color:#008000;'># Do no print progress</span>
     log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>True</span>
-    
+
     <span style='color:#008000;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
 
@@ -316,10 +328,7 @@ y3_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>
 
     <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
     <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
-    nlpsolver.xtol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
-    nlpsolver.xtol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
-    nlpsolver.ftol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
-    nlpsolver.ftol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    setOptions(nlpsolver)
 
     <span style='color:#008000;'># Run</span>
     optimization.Run()

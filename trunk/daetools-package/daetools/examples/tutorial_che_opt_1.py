@@ -22,6 +22,8 @@ Optimisation of the CSTR model and Van de Vusse reactions given in tutorial_che_
 Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics
 Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.
 `doi:10.1021/i160048a700 <https://doi.org/10.1021/i160048a700>`_
+
+No fully implemented yet.
 """
 
 import sys
@@ -220,15 +222,11 @@ class simCSTR(daeSimulation):
         self.Qk  = self.SetContinuousOptimizationVariable(self.m.Qk, -1000, 0, -438.75);
 
 def setOptions(nlpsolver):
-    # 1) Set the options manually
-    try:
-        nlpsolver.SetOption('print_level', 5)
-        nlpsolver.SetOption('tol', 1e-5)
-        nlpsolver.SetOption('mu_strategy', 'adaptive')
-        #nlpsolver.SetOption('obj_scaling_factor', 0.00001)
-        nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
-    except Exception as e:
-        print(str(e))
+    nlpsolver.SetOption('print_level', 5)
+    nlpsolver.SetOption('tol', 1e-5)
+    nlpsolver.SetOption('mu_strategy', 'adaptive')
+    #nlpsolver.SetOption('obj_scaling_factor', 0.00001)
+    nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
         
 # Use daeSimulator class
 def guiRun(app):

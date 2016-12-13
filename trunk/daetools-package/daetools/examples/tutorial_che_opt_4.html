@@ -235,16 +235,28 @@ y2_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='co
 y1_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.0</span>
 y2_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
 
+<b>def</b> setOptions(nlpsolver):
+    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>5</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-6</span>)
+    <span style='color:#008000;'>#nlpsolver.SetOption('mu_strategy', 'adaptive')</span>
+    nlpsolver.SetOption(<span style='color:#c00000;'>'obj_scaling_factor'</span>, <span style='color:#c000c0;'>10.0</span>)
+    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
+
 <span style='color:#008000;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
+    dae <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     sim <b><span style='color:#0000ff;'>=</span></b> simOilCracking_opt()
     opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
     nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#c00000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+    dae.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
     sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
     sim.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
     simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
                                   optimization <b><span style='color:#0000ff;'>=</span></b> opt,
+                                  daesolver <b><span style='color:#0000ff;'>=</span></b> dae,
                                   nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
+                                  lasolver <b><span style='color:#0000ff;'>=</span></b> lasolver,
                                   nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
     simulator.exec_()
 
@@ -281,11 +293,7 @@ y2_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>
 
     <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
     <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
-    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>5</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-6</span>)
-    <span style='color:#008000;'>#nlpsolver.SetOption('mu_strategy', 'adaptive')</span>
-    nlpsolver.SetOption(<span style='color:#c00000;'>'obj_scaling_factor'</span>, <span style='color:#c000c0;'>10.0</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
+    setOptions(nlpsolver)
 
     <span style='color:#008000;'># Run</span>
     optimization.Run()
