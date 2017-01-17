@@ -128,10 +128,13 @@ public:
             cfg_app_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end());
             cfg_app_folder = cfg_app_folder.parent_path();  // i.e. app_folder
 
-            cfg_python_daetools_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end()); // i.e. daetools/pyDAE/Windows_win32_py27/pyCore.pyd
-            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE/Windows_win32_py27
-            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE
-            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
+            // If we are in daetools module, GetModuleFileName returns a path of the python exectable, i.e. c:\Python34\python.exe
+            cfg_python_daetools_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end());
+            cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // python root, i.e. c:\Python34
+            // Now we need to append "/Lib/site-packages/daetools" to the python root firectory
+            cfg_python_daetools_folder /= "Lib";
+            cfg_python_daetools_folder /= "site-packages";
+            cfg_python_daetools_folder /= "daetools";
         }
 #else
         char* szUserProfile = getenv("HOME");

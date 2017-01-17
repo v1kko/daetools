@@ -355,7 +355,8 @@ public:
 	adouble	operator()(size_t nIndex) const;
 	
     void CreateArray(size_t nNoPoints);
-    void CreateStructuredGrid(/*daeeDiscretizationMethod eMethod, size_t nOrder,*/ size_t nNoIntervals, real_t dLB, real_t dRB);
+    void CreateStructuredGrid(size_t nNoIntervals, real_t dLB, real_t dUB);
+    void CreateStructuredGrid(size_t nNoIntervals, quantity qLB, quantity qUB);
     void CreateUnstructuredGrid(const std::vector<daePoint>& coordinates);
 
     daePort* GetParentPort(void) const;
@@ -3560,6 +3561,8 @@ public:
 
     real_t GetScaling() const;
     void   SetScaling(real_t scaling);
+
+    unit GetUnits() const;
 
 	bool CheckObject(std::vector<string>& strarrErrors) const;
 	

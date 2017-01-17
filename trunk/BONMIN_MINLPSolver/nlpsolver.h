@@ -123,7 +123,13 @@ public:
 									Index m, 
 									bool init_lambda,
 									Number* lambda);
-  
+
+    virtual bool get_scaling_parameters(Number& obj_scaling,
+                                        bool& use_x_scaling, Index n,
+                                        Number* x_scaling,
+                                        bool& use_g_scaling, Index m,
+                                        Number* g_scaling);
+
 	virtual bool eval_f(Index n, 
 						const Number* x, 
 						bool new_x, 

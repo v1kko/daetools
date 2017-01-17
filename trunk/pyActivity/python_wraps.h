@@ -404,11 +404,16 @@ public:
         this->daeSimulation::SetUpSensitivityAnalysis();
     }
 
-	daeOptimizationVariable* SetContinuousOptimizationVariable1(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
+    daeOptimizationVariable* SetContinuousOptimizationVariable11(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 	{
         return this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);
 	}
-	
+
+    daeOptimizationVariable* SetContinuousOptimizationVariable12(daeVariable& variable, quantity qLB, quantity qUB, quantity qdefaultValue)
+    {
+        return this->daeSimulation::SetContinuousOptimizationVariable(variable, qLB, qUB, qdefaultValue);
+    }
+
 	daeOptimizationVariable* SetBinaryOptimizationVariable1(daeVariable& variable, bool defaultValue)
 	{
         return this->daeSimulation::SetBinaryOptimizationVariable(variable, defaultValue);
@@ -419,11 +424,16 @@ public:
         return this->daeSimulation::SetIntegerOptimizationVariable(variable, LB, UB, defaultValue);
 	}
 	
-	daeOptimizationVariable* SetContinuousOptimizationVariable2(adouble a, real_t LB, real_t UB, real_t defaultValue)
+    daeOptimizationVariable* SetContinuousOptimizationVariable21(adouble a, real_t LB, real_t UB, real_t defaultValue)
 	{
         return this->daeSimulation::SetContinuousOptimizationVariable(a, LB, UB, defaultValue);
 	}
-	
+
+    daeOptimizationVariable* SetContinuousOptimizationVariable22(adouble a, real_t qLB, real_t qUB, real_t qdefaultValue)
+    {
+        return this->daeSimulation::SetContinuousOptimizationVariable(a, qLB, qUB, qdefaultValue);
+    }
+
 	daeOptimizationVariable* SetBinaryOptimizationVariable2(adouble a, bool defaultValue)
 	{
         return this->daeSimulation::SetBinaryOptimizationVariable(a, defaultValue);

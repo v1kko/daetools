@@ -253,6 +253,7 @@ const char* DOCSTR_daeOptimizationVariable = "";
     const char* DOCSTR_daeOptimizationVariable_UpperBound = "";  
     const char* DOCSTR_daeOptimizationVariable_StartingPoint = "";  
     const char* DOCSTR_daeOptimizationVariable_Scaling = "";
+    const char* DOCSTR_daeOptimizationVariable_Units = "";
 
 const char* DOCSTR_daeObjectiveFunction = "";  
     const char* DOCSTR_daeObjectiveFunction_init = "";  

@@ -150,6 +150,16 @@ void daeIDASolver::SetLASolver(daeeIDALASolverType eLASolverType)
 	m_pLASolver = NULL;
 }
 
+void daeIDASolver::SetTimeHorizon(real_t timeHorizon)
+{
+    if(!m_pIDA)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(timeHorizon <= 0)
+        daeDeclareAndThrowException(exInvalidCall);
+
+    IDASetStopTime(m_pIDA, timeHorizon);
+}
+
 std::string daeIDASolver::GetName(void) const
 {
 	return string("Sundials IDAS");

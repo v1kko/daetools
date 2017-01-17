@@ -261,6 +261,45 @@ bool daeMINLP::get_starting_point(Index n,
 	}
 }
 
+bool daeMINLP::get_scaling_parameters(Number& obj_scaling,
+                                      bool& use_x_scaling, Index n,
+                                      Number* x_scaling,
+                                      bool& use_g_scaling, Index m,
+                                      Number* g_scaling)
+{
+    size_t i;
+    real_t scaling;
+    daeOptimizationVariable_t* pOptVariable;
+    daeOptimizationConstraint_t* pConstraint;
+
+    // Objective function scaling
+    obj_scaling = m_pObjectiveFunction->GetScaling();
+    printf("obj_scaling = %e\n", obj_scaling);
+
+    // Optimisation variables scaling
+    // use_x_scaling is true
+    use_x_scaling = true;
+    for(i = 0; i < m_ptrarrOptVariables.size(); i++)
+    {
+        pOptVariable = m_ptrarrOptVariables[i];
+
+        scaling = pOptVariable->GetScaling();
+        x_scaling[i] = scaling;
+    }
+
+    // Optimisation constraints scaling
+    // use_g_scaling is true
+    use_g_scaling = true;
+    for(i = 0; i < m_ptrarrConstraints.size(); i++)
+    {
+        pConstraint = m_ptrarrConstraints[i];
+        scaling = pConstraint->GetScaling();
+        g_scaling[i] = scaling;
+    }
+
+    return true;
+}
+
 bool daeMINLP::eval_f(Index n, 
 					  const Number* x, 
 					  bool new_x, 

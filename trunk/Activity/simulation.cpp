@@ -776,6 +776,20 @@ daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(daeVar
     return pVar.get();
 }
 
+daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(daeVariable& variable, quantity qLB, quantity qUB, quantity qdefaultValue)
+{
+    unit u = variable.GetVariableType()->GetUnits();
+    real_t LB = qLB.scaleTo(u).getValue();
+    real_t UB = qUB.scaleTo(u).getValue();
+    real_t defaultValue = qdefaultValue.scaleTo(u).getValue();
+
+    std::vector<size_t> narrDomainIndexes;
+    size_t nOptVarIndex = m_arrOptimizationVariables.size();
+    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(&variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    m_arrOptimizationVariables.push_back(pVar);
+    return pVar.get();
+}
+
 daeOptimizationVariable* daeSimulation::SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue)
 {
     std::vector<size_t> narrDomainIndexes;
@@ -801,6 +815,24 @@ daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(adoubl
 
     daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
     size_t nOptVarIndex = m_arrOptimizationVariables.size();
+    boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
+    m_arrOptimizationVariables.push_back(pVar);
+    return pVar.get();
+}
+
+daeOptimizationVariable* daeSimulation::SetContinuousOptimizationVariable(adouble a, quantity qLB, quantity qUB, quantity qdefaultValue)
+{
+    daeVariable* variable;
+    std::vector<size_t> narrDomainIndexes;
+
+    daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
+    size_t nOptVarIndex = m_arrOptimizationVariables.size();
+
+    unit u = variable->GetVariableType()->GetUnits();
+    real_t LB = qLB.scaleTo(u).getValue();
+    real_t UB = qUB.scaleTo(u).getValue();
+    real_t defaultValue = qdefaultValue.scaleTo(u).getValue();
+
     boost::shared_ptr<daeOptimizationVariable> pVar(new daeOptimizationVariable(variable, nOptVarIndex, narrDomainIndexes, LB, UB, defaultValue));
     m_arrOptimizationVariables.push_back(pVar);
     return pVar.get();
@@ -1081,6 +1113,7 @@ void daeSimulation::SetTimeHorizon(real_t dTimeHorizon)
 {
     if(dTimeHorizon <= 0)
         return;
+
     m_dTimeHorizon = dTimeHorizon;
 
     m_darrReportingTimes.clear();
@@ -1143,6 +1176,11 @@ real_t daeSimulation::Integrate(daeeStopCriterion eStopCriterion, bool bReportDa
     // Reset the last satisfied condition pointer
     m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
 
+    // Inform the DAE solver about the time past which the solution is not to proceed.
+    // For instance, IDA solver can take time steps past the time horizon since the
+    // default stop time is infinity and that can cause errors sometimes.
+    m_pDAESolver->SetTimeHorizon(m_dTimeHorizon);
+
     m_dCurrentTime = m_pDAESolver->Solve(m_dTimeHorizon, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;
 }
@@ -1160,6 +1198,11 @@ real_t daeSimulation::IntegrateForTimeInterval(real_t time_interval, daeeStopCri
     // Reset the last satisfied condition pointer
     m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
 
+    // Inform the DAE solver about the time past which the solution is not to proceed.
+    // For instance, IDA solver can take time steps past the time horizon since the
+    // default stop time is infinity and that can cause errors sometimes.
+    m_pDAESolver->SetTimeHorizon(m_dTimeHorizon);
+
     m_dCurrentTime = m_pDAESolver->Solve(m_dCurrentTime + time_interval, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;
 }
@@ -1176,6 +1219,11 @@ real_t daeSimulation::IntegrateUntilTime(real_t time, daeeStopCriterion eStopCri
 
     // Reset the last satisfied condition pointer
     m_pModel->GetDataProxy()->SetLastSatisfiedCondition(NULL);
+
+    // Inform the DAE solver about the time past which the solution is not to proceed.
+    // For instance, IDA solver can take time steps past the time horizon since the
+    // default stop time is infinity and that can cause errors sometimes.
+    m_pDAESolver->SetTimeHorizon(m_dTimeHorizon);
 
     m_dCurrentTime = m_pDAESolver->Solve(time, eStopCriterion, bReportDataAroundDiscontinuities);
     return m_dCurrentTime;

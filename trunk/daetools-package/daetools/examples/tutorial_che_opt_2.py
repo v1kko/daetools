@@ -272,7 +272,7 @@ class simAlphaPinene_opt(daeSimulation):
         p3 = self.SetContinuousOptimizationVariable(self.m.p3, p_lb, p_ub, p_init)
         p4 = self.SetContinuousOptimizationVariable(self.m.p4, p_lb, p_ub, p_init)
         p5 = self.SetContinuousOptimizationVariable(self.m.p5, p_lb, p_ub, p_init)
-
+        """
         c1 = self.CreateInequalityConstraint("p1max") # p1 - UB <= 0
         c1.Residual = self.m.p1() - p_ub
         c2 = self.CreateInequalityConstraint("p1min") # LB - p1 <= 0
@@ -297,7 +297,7 @@ class simAlphaPinene_opt(daeSimulation):
         c1.Residual = self.m.p5() - p_ub
         c2 = self.CreateInequalityConstraint("p5min") # LB - p5 <= 0
         c2.Residual = p_lb - self.m.p5()
-
+        """
 # Experimental data (8 measurements)
 times  = numpy.array([1230.00, 3060.0, 4920.0, 7800.0, 10680.0, 15030.0, 22620.0, 36420.0])
 y1_obs = numpy.array([  88.35,   76.4,   65.1,   50.4,    37.5,    25.9,    14.0,     4.5])

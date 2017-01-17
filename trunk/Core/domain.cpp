@@ -219,11 +219,15 @@ void daeDomain::SaveRuntime(io::xmlTag_t* pTag) const
     //pTag->Save(strName, m_nDiscretizationOrder);
 }
 
-void daeDomain::CreateStructuredGrid(/*daeeDiscretizationMethod eMethod,
-                                     size_t nOrder,*/
-                                     size_t nNoIntervals,
-                                     real_t dLB,
-                                     real_t dUB)
+void daeDomain::CreateStructuredGrid(size_t nNoIntervals, quantity qLB, quantity qUB)
+{
+    real_t dLB = qLB.scaleTo(m_Unit).getValue();
+    real_t dUB = qUB.scaleTo(m_Unit).getValue();
+
+    CreateStructuredGrid(nNoIntervals, dLB, dUB);
+}
+
+void daeDomain::CreateStructuredGrid(size_t nNoIntervals, real_t dLB, real_t dUB)
 {
 /*
     if(eMethod != eCFDM)

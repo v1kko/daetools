@@ -889,15 +889,12 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("CreateArray",						&daeDomain::CreateArray, ( arg("self"),
                                                                            arg("noPoints")
                                                                          ), DOCSTR_daeDomain_CreateArray)
-        // CreateStructuredGrid that sets discr.method and order is deprecated; use new CreateStructuredGrid instead
-        .def("CreateStructuredGrid",			&daepython::CreateStructuredGrid_old, ( arg("self"),
-                                                                                        arg("dicretizationMethod"),
-                                                                                        arg("dicretizationOrder"),
-                                                                                        arg("numberOfIntervals"),
-                                                                                        arg("lowerBound"),
-                                                                                        arg("upperBound")
-                                                                                      ), DOCSTR_daeDomain_CreateStructuredGrid)
-        .def("CreateStructuredGrid",			&daeDomain::CreateStructuredGrid, ( arg("self"),
+        .def("CreateStructuredGrid",			&daepython::qCreateStructuredGrid, ( arg("self"),
+                                                                                     arg("numberOfIntervals"),
+                                                                                     arg("qlowerBound"),
+                                                                                     arg("qupperBound")
+                                                                                   ), DOCSTR_daeDomain_CreateStructuredGrid)
+        .def("CreateStructuredGrid",			&daepython::CreateStructuredGrid, ( arg("self"),
                                                                                     arg("numberOfIntervals"),
                                                                                     arg("lowerBound"),
                                                                                     arg("upperBound")
@@ -1387,13 +1384,14 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daeOptimizationVariable, bases<daeOptimizationVariable_t> >("daeOptimizationVariable", DOCSTR_daeOptimizationVariable, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeOptimizationVariable_init))
 
-        .add_property("Name",           &daeOptimizationVariable::GetName, DOCSTR_daeOptimizationVariable_Name)
-        .add_property("Type",           &daeOptimizationVariable::GetType,          &daeOptimizationVariable::SetType, DOCSTR_daeOptimizationVariable_Type)
-        .add_property("Value",          &daeOptimizationVariable::GetValue,         &daeOptimizationVariable::SetValue, DOCSTR_daeOptimizationVariable_Value)
-        .add_property("LowerBound",     &daeOptimizationVariable::GetLB,            &daeOptimizationVariable::SetLB, DOCSTR_daeOptimizationVariable_LowerBound)
-        .add_property("UpperBound",     &daeOptimizationVariable::GetUB,            &daeOptimizationVariable::SetUB, DOCSTR_daeOptimizationVariable_UpperBound)
+        .add_property("Name",           &daeOptimizationVariable::GetName,                                                      DOCSTR_daeOptimizationVariable_Name)
+        .add_property("Type",           &daeOptimizationVariable::GetType,          &daeOptimizationVariable::SetType,          DOCSTR_daeOptimizationVariable_Type)
+        .add_property("Value",          &daeOptimizationVariable::GetValue,         &daeOptimizationVariable::SetValue,         DOCSTR_daeOptimizationVariable_Value)
+        .add_property("LowerBound",     &daeOptimizationVariable::GetLB,            &daeOptimizationVariable::SetLB,            DOCSTR_daeOptimizationVariable_LowerBound)
+        .add_property("UpperBound",     &daeOptimizationVariable::GetUB,            &daeOptimizationVariable::SetUB,            DOCSTR_daeOptimizationVariable_UpperBound)
         .add_property("StartingPoint",  &daeOptimizationVariable::GetStartingPoint, &daeOptimizationVariable::SetStartingPoint, DOCSTR_daeOptimizationVariable_StartingPoint)
-        .add_property("Scaling",        &daeOptimizationVariable::GetScaling,       &daeOptimizationVariable::SetScaling, DOCSTR_daeOptimizationVariable_Scaling)
+        .add_property("Scaling",        &daeOptimizationVariable::GetScaling,       &daeOptimizationVariable::SetScaling,       DOCSTR_daeOptimizationVariable_Scaling)
+        .add_property("Units",          &daeOptimizationVariable::GetUnits,                                                     DOCSTR_daeOptimizationVariable_Units)
 
         .def("__str__",				&daepython::daeOptimizationVariable__str__)
         .def("__repr__",			&daepython::daeOptimizationVariable__repr__)

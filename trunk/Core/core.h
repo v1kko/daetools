@@ -920,6 +920,8 @@ public:
 
     virtual real_t GetScaling() const = 0;
     virtual void   SetScaling(real_t scaling) = 0;
+
+    virtual unit GetUnits() const = 0;
 };
 
 /******************************************************************
@@ -941,7 +943,6 @@ public:
     virtual void   SetAbsTolerance(real_t abstol) = 0;
     virtual real_t GetScaling() const = 0;
     virtual void   SetScaling(real_t scaling) = 0;
-
 
     virtual void GetOptimizationVariableIndexes(std::vector<size_t>& narrOptimizationVariablesIndexes) const = 0;
     virtual size_t GetNumberOfOptimizationVariables(void) const = 0;

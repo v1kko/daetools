@@ -93,10 +93,12 @@ public:
     daeOptimizationConstraint* CreateEqualityConstraint(string strDescription = "");  // == 0
 
     daeOptimizationVariable* SetContinuousOptimizationVariable(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue);
+    daeOptimizationVariable* SetContinuousOptimizationVariable(daeVariable& variable, quantity qLB, quantity qUB, quantity qdefaultValue);
     daeOptimizationVariable* SetIntegerOptimizationVariable(daeVariable& variable, int LB, int UB, int defaultValue);
     daeOptimizationVariable* SetBinaryOptimizationVariable(daeVariable& variable, bool defaultValue);
 
     daeOptimizationVariable* SetContinuousOptimizationVariable(adouble a, real_t LB, real_t UB, real_t defaultValue);
+    daeOptimizationVariable* SetContinuousOptimizationVariable(adouble a, quantity qLB, quantity qUB, quantity qdefaultValue);
     daeOptimizationVariable* SetIntegerOptimizationVariable(adouble a, int LB, int UB, int defaultValue);
     daeOptimizationVariable* SetBinaryOptimizationVariable(adouble a, bool defaultValue);
 

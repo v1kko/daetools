@@ -97,7 +97,7 @@ real_t daeFunctionWithGradients::GetValue(void) const
 	if(!m_pModel || !m_pModel->m_pDataProxy)
 		daeDeclareAndThrowException(exInvalidPointer)
 		
-    return m_dScaling * m_pModel->m_pDataProxy->GetValue( m_pVariable->GetOverallIndex() );
+    return m_pModel->m_pDataProxy->GetValue( m_pVariable->GetOverallIndex() );
 }
 
 real_t daeFunctionWithGradients::GetAbsTolerance() const
@@ -173,8 +173,7 @@ void daeFunctionWithGradients::GetGradients(const daeMatrix<real_t>& matSensitiv
 	{
 		paramIndex = m_narrOptimizationVariablesIndexes[j];
 		gradients[paramIndex] = matSensitivities.GetItem(paramIndex, // Index of the parameter
-                                                         varIndex)   // Index of the variable
-                                * m_dScaling;
+                                                         varIndex);   // Index of the variable
 	}
 }
 
@@ -397,6 +396,7 @@ daeOptimizationVariable::daeOptimizationVariable(void)
 	m_dUB						 = 0;
 	m_dDefaultValue				 = 0;
 	m_nOptimizationVariableIndex = ULONG_MAX;
+    m_dScaling                   = 1.0;
 }
 
 daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, real_t LB, real_t UB, real_t defaultValue)
@@ -411,6 +411,7 @@ daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t 
 	m_eType							= eContinuousVariable;
 	m_narrDomainIndexes 			= narrDomainIndexes;
 	m_nOptimizationVariableIndex	= nOptimizationVariableIndex;
+    m_dScaling                      = 1.0;
 }
 
 daeOptimizationVariable::daeOptimizationVariable(daeVariable* pVariable, size_t nOptimizationVariableIndex, const std::vector<size_t>& narrDomainIndexes, int LB, int UB, int defaultValue)
@@ -495,6 +496,14 @@ real_t daeOptimizationVariable::GetScaling() const
 void daeOptimizationVariable::SetScaling(real_t scaling)
 {
     m_dScaling = scaling;
+}
+
+unit daeOptimizationVariable::GetUnits() const
+{
+    if(!m_pVariable)
+        daeDeclareAndThrowException(exInvalidPointer)
+
+    return m_pVariable->m_VariableType.GetUnits();
 }
 
 size_t daeOptimizationVariable::GetOverallIndex(void) const

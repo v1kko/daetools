@@ -152,7 +152,7 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{16 May 2016} 
+\date{21 December 2016} 
 
 \hypersetup{
 pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -413,7 +413,7 @@ Current approaches to mathematical modelling:
         \item Support for the \alert{parallel} computation (OpenMP, GPGPU, MPI)
         \item Support for a large number of \alert{DAE}, \alert{LA} and \alert{NLP} solvers 
         \item Support for the generation of \alert{model reports} (XML + MathML, Latex)
-        \item \alert{Export} of the \alert{simulation results} to various file formats (Matlab, Excel, json, xml, HDF5, Pandas)
+        \item \alert{Export} of the \alert{simulation results} to various file formats (Matlab, Excel, json, xml, HDF5, Pandas, VTK)
     \end{itemize}
 \end{frame}
 
@@ -699,12 +699,6 @@ Current approaches to mathematical modelling:
 }
 \end{frame}
 
-% \begin{frame}{Package core (cont'd)}
-%     \begin{center}
-%         \includegraphics[width=0.9\paperwidth]{Supplemental_Figure_S1.png}      
-%     \end{center}
-% \end{frame}
-
 \begin{frame}{Package \textsc{core} - interface implementations}
     \begin{center}
         \begin{figure}
@@ -827,7 +821,33 @@ Current approaches to mathematical modelling:
 % 
 \section{Use Cases} 
 
-\begin{frame}[plain]{Use Case 1 - Multi-scale modelling}
+\begin{frame}[plain]{Use Case 1 - Chemical Engineering}
+    \begin{center}
+        \alert{Simulation, optimisation, parameter estimation}
+    \end{center}  
+    {\small
+      \begin{itemize}
+        \item Sample models: 
+            \begin{itemize}
+                \item CSTR/PFR
+                \item Distillation column
+                \item Batch crystalliser
+                \item Discretised Population Balance equations
+                \item Li-ion battery (Newman porous electrode theory) 
+                \item Generalised Maxwell-Stefan equations for gas separation
+            \end{itemize}
+        \item Finite Element problems:
+            \begin{itemize}
+                \item Transient heat conduction/convection
+                \item Cahn-Hilliard equation
+                \item Flow through the porous media
+            \end{itemize}
+        \item Optimisation, parameter estimation and optimal control (Constrained Optimization Problem Set tests, COPS)
+    \end{itemize}
+    }
+\end{frame}
+
+\begin{frame}[plain]{Use Case 2 - Multi-scale modelling}
     \begin{center}
         \alert{Multi-scale model of phase-separating battery electrodes}
         \footnote{\tiny{Li et al. (2014) \textit{Current-induced transition
@@ -860,7 +880,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}{Use Case 1 - Multi-scale modelling (cont'd)}
+\begin{frame}{Use Case 2 - Multi-scale modelling (cont'd)}
     \begin{columns}[c]
       \begin{column}{0.55\paperwidth}
         {\scriptsize
@@ -904,7 +924,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 2 - Embedded simulator (back end)}
+\begin{frame}[plain]{Use Case 3 - Embedded simulator (back end)}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   
@@ -954,7 +974,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 3 - Web application / Web service}
+\begin{frame}[plain]{Use Case 4 - Web application / Web service}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   

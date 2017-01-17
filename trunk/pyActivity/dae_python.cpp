@@ -178,15 +178,19 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("CreateInequalityConstraint",  &daeSimulation::CreateInequalityConstraint, return_internal_reference<>(),
                                             ( arg("self"), arg("description") ), DOCSTR_daeSimulation_CreateInequalityConstraint)
 
-        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable1,
+        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable11,
                                                     return_internal_reference<>(), ( arg("self"), arg("variable"), arg("lowerBound"), arg("upperBound"), arg("defaultValue") ), DOCSTR_daeSimulation_SetContinuousOptimizationVariable)
+        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable12,
+                                                    return_internal_reference<>(), ( arg("self"), arg("variable"), arg("qlowerBound"), arg("qupperBound"), arg("qdefaultValue") ), DOCSTR_daeSimulation_SetContinuousOptimizationVariable)
         .def("SetIntegerOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetIntegerOptimizationVariable1,
                                                     return_internal_reference<>(), ( arg("self"), arg("variable"), arg("lowerBound"), arg("upperBound"), arg("defaultValue") ), DOCSTR_daeSimulation_SetIntegerOptimizationVariable)
         .def("SetBinaryOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetBinaryOptimizationVariable1,
                                                     return_internal_reference<>(), ( arg("self"), arg("variable"), arg("defaultValue") ), DOCSTR_daeSimulation_SetBinaryOptimizationVariable)
 
-        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable2,
+        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable21,
                                                     return_internal_reference<>(), ( arg("self"), arg("ad"), arg("lowerBound"), arg("upperBound"), arg("defaultValue") ), DOCSTR_daeSimulation_SetContinuousOptimizationVariable)
+        .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable22,
+                                                    return_internal_reference<>(), ( arg("self"), arg("ad"), arg("qlowerBound"), arg("qupperBound"), arg("qdefaultValue") ), DOCSTR_daeSimulation_SetContinuousOptimizationVariable)
         .def("SetIntegerOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetIntegerOptimizationVariable2,
                                                     return_internal_reference<>(), ( arg("self"), arg("ad"), arg("lowerBound"), arg("upperBound"), arg("defaultValue") ), DOCSTR_daeSimulation_SetIntegerOptimizationVariable)
         .def("SetBinaryOptimizationVariable",		&daepython::daeDefaultSimulationWrapper::SetBinaryOptimizationVariable2,

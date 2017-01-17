@@ -49,7 +49,8 @@ public:
 	virtual void						Reset(void);
 	virtual daeMatrix<real_t>&			GetSensitivities(void);
 	virtual std::string					GetName(void) const;
-	
+    virtual void                        SetTimeHorizon(real_t timeHorizon);
+
     virtual void OnCalculateResiduals();
     virtual void OnCalculateConditions() ;
     virtual void OnCalculateJacobian();

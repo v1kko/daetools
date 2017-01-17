@@ -396,8 +396,8 @@ void SetDomainPoints(daeDomain& domain, boost::python::object points);
 adouble_array DomainArray(daeDomain& domain, boost::python::object indexes);
 boost::python::list GetDomainCoordinates(daeDomain& domain);
 void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords);
-void CreateStructuredGrid_old(daeDomain& domain, daeeDiscretizationMethod eMethod,
-                              size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dUB);
+void CreateStructuredGrid(daeDomain& domain, size_t nNoIntervals, real_t LB, real_t UB);
+void qCreateStructuredGrid(daeDomain& domain, size_t nNoIntervals, quantity qLB, quantity qUB);
 
 daeIndexRange* __init__daeIndexRange(daeDomain* pDomain, boost::python::list CustomPoints);
 daeDomain* daeIndexRange_GetDomain(daeIndexRange& self);

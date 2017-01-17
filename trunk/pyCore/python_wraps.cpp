@@ -1579,14 +1579,14 @@ boost::python::list GetDomainCoordinates(daeDomain& domain)
     return l;
 }
 
-void CreateStructuredGrid_old(daeDomain& domain, daeeDiscretizationMethod eMethod,
-                              size_t nOrder, size_t nNoIntervals, real_t dLB, real_t dUB)
+void CreateStructuredGrid(daeDomain& domain, size_t nNoIntervals, real_t LB, real_t UB)
 {
-    daeDeclareException(exDeprecated);
-    e << "The function daeDomain.CreateStructuredGrid(method, order, numberOfIntervals, lowerBound, upperBound) "
-      << "is deprecated. Use CreateStructuredGrid(numberOfIntervals, lowerBound, upperBound) instead "
-      << "and set the discretization method in functions d/d2(expression, domain, discretizationMethod, options)";
-    throw e;
+    domain.CreateStructuredGrid(nNoIntervals, LB, UB);
+}
+
+void qCreateStructuredGrid(daeDomain& domain, size_t nNoIntervals, quantity qLB, quantity qUB)
+{
+    domain.CreateStructuredGrid(nNoIntervals, qLB, qUB);
 }
 
 void CreateUnstructuredGrid(daeDomain& domain, boost::python::list coords)

@@ -90,6 +90,7 @@ public:
 	virtual daeMatrix<real_t>&			GetSensitivities(void)										= 0;
 	virtual std::string					GetName(void) const											= 0;
     virtual void                        SetLASolver(daeLASolver_t* pLASolver)                       = 0;
+    virtual void                        SetTimeHorizon(real_t timeHorizon)                          = 0;
 
     virtual void                        OnCalculateResiduals()                                      = 0;
     virtual void                        OnCalculateConditions()                                     = 0;
