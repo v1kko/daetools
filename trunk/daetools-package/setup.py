@@ -62,6 +62,7 @@ platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine
 shared_libs_dir = os.path.realpath('daetools/solibs')
 shared_libs_dir = os.path.join(shared_libs_dir, '%s_%s' % (daetools_system, daetools_machine))
 
+"""
 if daetools_machine == 'x86_64':
     if os.path.exists('/usr/lib') and os.path.exists('/usr/lib64'):
         # There are both /usr/lib and /usr/lib64
@@ -76,8 +77,12 @@ if daetools_machine == 'x86_64':
         usrlib = '/usr/lib'
 else:
     usrlib = '/usr/lib'
+"""
+def _is_in_venv():
+    return (getattr(sys, 'base_prefix', sys.prefix) != sys.prefix or
+            hasattr(sys, 'real_prefix'))
 
-if 'envs' in sys.prefix:
+if _is_in_venv():
     inside_venv = True
 else:
     inside_venv = False

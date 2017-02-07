@@ -151,9 +151,9 @@ class modTutorial(daeModel):
         
         Nx = self.x.NumberOfPoints
         # These equations are just a mental gymnastics to illustrate various functions such as
-        # daeVariable's array() and d_array() and global functions Constant() and Array().
+        # daeVariable's array() and global functions d_array(), Constant() and Array().
         #  - daeVariable.array() creates an array of values stored in a adouble_array object
-        #  - daeVariable.d_array() creates an array of partial derivatives stored in a adouble_array object
+        #  - d_array() creates an array of partial derivatives stored in a adouble_array object
         #  - The function Constant() creates a constant quantity that contains a value and units
         #  - The function Array() creates an array of constant quantities that contain a value and units
         # Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)
@@ -173,7 +173,7 @@ class modTutorial(daeModel):
         eq.Residual = self.Qsum1() + Sum( Array(values) * self.k() * dTdy_array / Constant(2 * K) )
 
         # Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.
-        # In those cases the functions such as array(), d_array(), dt_array(), Array() etc
+        # In those cases the functions such as daeVariable.array(), d_array(), dt_array(), Array() etc
         # are NOT applicable since they return adouble_array objects.
         # However, we can create a numpy array of adouble objects, apply numpy functions on them
         # and finally create adouble_array object from resulting numpy arrays of adouble objects, if necessary.

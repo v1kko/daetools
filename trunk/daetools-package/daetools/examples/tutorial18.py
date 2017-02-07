@@ -112,7 +112,7 @@ class modTutorial(daeModel):
 
         # Create a vector of dy/dt:
         dydt = numpy.empty(3, dtype=object)
-        dydt[:] = [self.y.dt(i) for i in range(3)]
+        dydt[:] = [dt(self.y(i)) for i in range(3)]
 
         # Create the ODE system: dy/dt = A*y
         # Use dot product (numpy arrays don't behave as matrices)

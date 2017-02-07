@@ -20,7 +20,9 @@ Importing DAE Tools modules
 
     from daetools.pyDAE import *
 
-This will set the python ``sys.path`` for importing the platform dependent c extension modules,
+This will set the python ``sys.path`` for importing the platform dependent c extension modules
+(i.e. ``.../daetools/pyDAE/Windows_win32_py34`` and ``.../daetools/solvers/Windows_win32_py34`` in Windows,
+``.../daetools/pyDAE/Linux_x86_64_py34`` and ``.../daetools/solvers/Linux_x86_64_py34`` in GNU/Linux),
 import all symbols from all ``pyDAE`` modules: ``pyCore``, ``pyActivity``, ``pyDataReporting``,
 ``pyIDAS``, ``pyUnits`` and import some platfom independent modules: ``logs``,
 ``variable_types`` and ``dae_simulator``.
@@ -35,7 +37,7 @@ extension modules accessed using fully qualified names. For instance:
     model = daetools.pyDAE.pyCore.daeModel("name")
 
 Once the ``pyDAE`` module is imported, the other modules (such as third party linear solvers,
-optimization solvers etc.) can be imported in the following way:
+optimisation solvers etc.) can be imported in the following way:
 
 .. code-block:: python
 
@@ -54,7 +56,7 @@ optimization solvers etc.) can be imported in the following way:
     # Import BONMIN MINLP solver:
     from daetools.solvers.bonmin import pyBONMIN
 
-    # Import NLOPT set of optimization solvers:
+    # Import NLOPT set of optimisation solvers:
     from daetools.solvers.nlopt import pyNLOPT
    
 Since domains, parameters and variables in **DAE Tools** have a numerical value in terms
@@ -66,14 +68,14 @@ units and variable types must be imported. They can be imported in the following
     from daetools.pyDAE.variable_types import length_t, area_t, volume_t
     from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, J, W
 
-For the complete list of units and variable types have a look in
+The complete list of units and variable types can be found in
 :doc:`variable_types` and :doc:`units` modules.
 
 Developing models
 =================
 
-In **DAE Tools** models are developed by deriving a new class from the base model class
-(:py:class:`pyCore.daeModel`). A template/an empty model is given below:
+In **DAE Tools** models are developed by deriving a new class from the base :py:class:`pyCore.daeModel` class.
+An empty model definition is presented below:
 
 .. code-block:: python
 
@@ -90,68 +92,66 @@ In **DAE Tools** models are developed by deriving a new class from the base mode
 
 The process consists of the following steps:
 
-1. Call the base class constructor:
+1. Calling the base class constructor:
 
    .. code-block:: python
 
       daeModel.__init__(self, name, parent, description)
       
-2. Declare all domains, parameters, variables, ports, components etc. in the
+2. Declaring domains, parameters, variables, ports, components etc. in the
    :py:meth:`pyCore.daeModel.__init__` function:
 
-   * One of the fundamental ideas in **DAE Tools** is separation of the model definition
-     from the activities that can be carried out on that model: this way we can have one
-     model definition and several simulation scenarios. Consequently, all objects are defined in
-     two stages:
+   One of the fundamental ideas in **DAE Tools** is separation of the model specification
+   from the activities that can be carried out on that model: this way several simulation scenarios
+   can be developed based on a single model definition. Thus, all objects are defined in two stages:
          
-     * Declaration in the :py:meth:`pyCore.daeModel.__init__` function
-     * Initialization in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` or
-       :py:meth:`pyActivity.daeSimulation.SetUpVariables` functions.
+   * Declaration in the :py:meth:`pyCore.daeModel.__init__` function
+   * Initialisation in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` or
+     :py:meth:`pyActivity.daeSimulation.SetUpVariables` functions.
 
-     Therefore, parameters, domains and variables are only declared here, while their initialization
-     (setting the value, setting up the domain, assigning or setting an initial condition) is 
-     postponed and will be done in the simulation class
+   Therefore, parameters, domains and variables are only declared here, while their initialisation
+   (setting the parameter value, setting up the domain, assigning or setting an initial condition etc.) is
+   postponed and will be done in the simulation class
    
-   * These objects must be declared as data members of the model since the base :py:class:`pyCore.daeModel`
-     class keeps only week references and does not own them. Therefore, use:
+   All objects must be declared as data members of the model since the base :py:class:`pyCore.daeModel`
+   class keeps only week references and does not own them:
 
-     .. code-block:: python
+   .. code-block:: python
 
-        def __init__(self, name, parent = None, description = ""):
-            self.domain    = daeDomain(...)
-            self.parameter = daeParameter(...)
-            self.variable  = daeVariable(...)
-            .. etc.
+      def __init__(self, name, parent = None, description = ""):
+          self.domain    = daeDomain(...)
+          self.parameter = daeParameter(...)
+          self.variable  = daeVariable(...)
+          ... etc.
 
-     and not:
+   and not:
 
-     .. code-block:: python
+   .. code-block:: python
 
-        def __init__(self, name, parent = None, description = ""):
-            domain    = daeDomain(...)
-            parameter = daeParameter(...)
-            variable  = daeVariable(...)
-            .. etc.
+      def __init__(self, name, parent = None, description = ""):
+          domain    = daeDomain(...)
+          parameter = daeParameter(...)
+          variable  = daeVariable(...)
+          ... etc.
          
-     because at the exit from the :py:meth:`pyCore.daeModel.__init__` function the objects
-     will go out of scope and get destroyed. However, the model still holds references to them
-     which will result in the segmentation fault.
+   because at the exit from the :py:meth:`pyCore.daeModel.__init__` function the objects
+   will go out of scope and get destroyed. However, the underlying c++ model object still holds
+   references to them which will eventually result in the segmentation fault.
     
-3. Declare equations, state transition networks, OnEvent and OnCondition actions
+3. Declaring equations, state transition networks, and ``OnEvent`` and ``OnCondition`` actions
    in the :py:meth:`pyCore.daeModel.DeclareEquations` function.
 
-   * The :py:meth:`pyCore.daeModel.DeclareEquations` function will be called automatically
-     by the framework.
-
-     .. note:: This function is never called directly by the user!
+   .. note:: This function is never called directly by the user and will be called automatically
+             by the framework.
      
-   * Initialization of the simulation object is done in several phases. At the point when this function
-     is called by the framework the model parameters, domains, variables etc. are fully initialized.
-     Therefore, it is safe to get the values of the parameters or domain points and use them to
-     create equations, for example.
-     However, the **variable values** are obviously **not available** at this moment (for they get
-     initialized at the later stage). Anyway, obtaining variable values while still developing a model
-     is meaningless.
+   Initialisation of the simulation object is done in several phases. At the point when this function
+   is called by the framework the model parameters, domains, variables etc. are fully initialised.
+   Therefore, it is safe to obtain the values of parameters or domain points and use them to
+   create equations at the run-time.
+
+   .. note:: However, the **variable values** are obviously **not available** at this moment (they get
+             initialised at the later stage) and using the variable values during the model specification
+             phase is not allowed.
 
 A simplest **DAE Tools** model with a description of all steps/tasks necessary to develop a model
 can be found in the :ref:`whats_the_time` tutorial
@@ -163,17 +163,17 @@ Parameters
 
 Parameters are time invariant quantities that do not change during
 a simulation. Usually a good choice what should be a parameter is a
-physical constant, number of discretization points in a domain etc.
+physical constant, number of discretisation points in a domain etc.
 
 There are two types of parameters in **DAE Tools**:
 
 * Ordinary
-* Distributed.
+* Distributed
 
-The process of defining parameters is two-fold:
+The process of defining parameters is again carried out in two phases:
     
-* Declaring a parameter in the model
-* Initialize it (by setting its value) in the simulation
+* Declaration in the :py:meth:`pyCore.daeModel.__init__` function
+* Initialisation (by setting its value) in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` function
 
 Declaring parameters
 ~~~~~~~~~~~~~~~~~~~~
@@ -195,24 +195,34 @@ declared in the following way:
    # Or simply:
    self.myParam = daeParameter("myParam", units, parentModel, "description", [myDomain])
 
-Initializing parameters
+Initialising parameters
 ~~~~~~~~~~~~~~~~~~~~~~~
-Parameters are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
-function. To set a value of an ordinary parameter use the following:
+Parameters are initialised in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
+function. To set a value of an ordinary parameter the following can be used:
 
 .. code-block:: python
 
    myParam.SetValue(value)
 
-while to set a value of distributed parameters (one-dimensional for example) use:
+where value can be a floating point value or the quantity object,
+while to set a value of distributed parameters (one-dimensional for example):
 
 .. code-block:: python
 
-   for i in range(0, myDomain.NumberOfPoints):
+   for i in range(myDomain.NumberOfPoints):
        myParam.SetValue(i, value)
 
-where the ``value`` can be either a ``float`` or the :py:class:`pyUnits.quantity` object
-(for instance ``1.34 * W/(m*K)``).
+where the ``value`` can be either a ``float`` (i.e. ``1.34``) or the :py:class:`pyUnits.quantity` object
+(i.e. ``1.34 * W/(m*K)``). If the simple floats are used it is assumed that they
+represent values with the same units as in the parameter definition.
+
+In addition, all values can be set at once using:
+
+.. code-block:: python
+
+   myParam.SetValues(values)
+
+where ``values`` is a numpy array of floats/quantity objects.
 
 Using parameters
 ~~~~~~~~~~~~~~~~
@@ -224,89 +234,83 @@ The most commonly used functions are:
   object that holds an array of parameter values
 * Distributed parameters have the :py:attr:`pyCore.daeParameter.npyValues` property which
   returns the parameter values as a numpy multi-dimensional array (with ``numpy.float`` data type)
-* The functions :py:class:`pyCore.daeParameter.SetValue` and :py:class:`pyCore.daeParameter.GetValue`
-  which get/set the parameter value as ``float`` or the :py:class:`pyUnits.quantity` object
+* The functions :py:class:`pyCore.daeParameter.SetValue`, :py:class:`pyCore.daeParameter.GetValue`,
+  and :py:class:`pyCore.daeParameter.SetValues`
+  which get/set the parameter value(s) using the ``float`` or the :py:class:`pyUnits.quantity` object(s)
 
 .. note:: The functions :py:meth:`pyCore.daeParameter.__call__` and :py:meth:`pyCore.daeParameter.array`
           can only be used to build equations' residual expressions.
-          On the other hand, the functions :py:class:`pyCore.daeParameter.GetValue`
-          , :py:class:`pyCore.daeParameter.SetValue` and :py:attr:`pyCore.daeParameter.npyValues`
-          can be used to access the parameters real data at any point.
+          Other functions can be used to access the parameters data at any point.
 
 1. To get a value of the ordinary parameter the :py:meth:`pyCore.daeParameter.__call__`
-   function (``operator ()``) can be used. For instance, if we want the variable ``myVar`` to be
+   function (``operator ()``) can be used. For instance, if the variable ``myVar`` has to be
    equal to the sum of the parameter ``myParam`` and ``15``:
 
    .. math::
         myVar = myParam + 15
    
-   we can write the following:
+   in **DAE Tools** it is specified in the following acausal way:
 
    .. code-block:: python
 
      # Notation:
-     #  - eq is a daeEquation object
+     #  - eq is a daeEquation object created using the model.CreateEquation(...) function
      #  - myParam is an ordinary daeParameter object (not distributed)
      #  - myVar is an ordinary daeVariable (not distributed)
-     eq.Residual = myVar() - myParam() - 15
+
+     eq.Residual = myVar() - (myParam() + 15)
 
 2. To get a value of a distributed parameter the :py:meth:`pyCore.daeParameter.__call__`
-   function (``operator ()``) can be used again. For instance, if we want the distributed
-   variable ``myVar`` to be equal to the sum of the parameter ``myParam`` and ``15`` at each
+   function (``operator ()``) can be used again. For instance, if the distributed
+   variable ``myVar`` has to be equal to the sum of the parameter ``myParam`` and ``15`` at each
    point of the domain ``myDomain``:
 
    .. math::
         myVar(i) = myParam(i) + 15; \forall i \in [0, d_n]
         
-   we can write:
+   in **DAE Tools** it is specified in the following acausal way:
 
    .. code-block:: python
 
      # Notation:
      #  - myDomain is daeDomain object
-     #  - n is the number of points in the myDomain
      #  - eq is a daeEquation object distributed on the myDomain
-     #  - d is daeDEDI object (used to iterate through the domain points)
+     #  - i is daeDistributedEquationDomainInfo object (used to iterate through the domain points)
      #  - myParam is daeParameter object distributed on the myDomain
      #  - myVar is daeVariable object distributed on the myDomain
-     d = eq.DistributeOnDomain(myDomain, eClosedClosed)
-     eq.Residual = myVar(d) - myParam(d) - 15
+     i = eq.DistributeOnDomain(myDomain, eClosedClosed)
+     eq.Residual = myVar(i) - (myParam(i) + 15)
 
-   This code translates into a set of ``n`` equations.
+   This code translates into a set of ``n`` algebraic equations.
 
-   Obviously, a parameter can be distributed on more than one domain. If we want to
-   write an identical equation like in the previous case:
+   Obviously, a parameter can be distributed on more than one domain. In the case of two domains:
        
    .. math::
         myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]
    
-   we can write the following:
+   the following can be used:
 
    .. code-block:: python
 
      # Notation:
      #  - myDomain1, myDomain2 are daeDomain objects
-     #  - n is the number of points in the myDomain1
-     #  - m is the number of points in the myDomain2
      #  - eq is a daeEquation object distributed on the domains myDomain1 and myDomain2
-     #  - d is daeDEDI object (used to iterate through the domain points)
+     #  - i1, i2 are daeDistributedEquationDomainInfo objects (used to iterate through the domain points)
      #  - myParam is daeParameter object distributed on the myDomain1 and myDomain2
      #  - myVar is daeVariable object distributed on the myDomaina and myDomain2
-     d1 = eq.DistributeOnDomain(myDomain1, eClosedClosed)
-     d2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)
-     eq.Residual = myVar(d1,d2) - myParam(d1,d2) - 15
+     i1 = eq.DistributeOnDomain(myDomain1, eClosedClosed)
+     i2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)
+     eq.Residual = myVar(i1,i2) - (myParam(i1,i2) + 15)
 
 3. To get an array of parameter values the function :py:meth:`pyCore.daeParameter.array`
    can be used, which returns the :py:class:`pyCore.adouble_array` object.
-   Arrays of values can only be used in conjunction with mathematical functions that operate
-   on :py:class:`pyCore.adouble_array` objects such as:
-   :py:meth:`pyCore.Sum`, :py:meth:`pyCore.Product`, :py:meth:`pyCore.Sqrt`, :py:meth:`pyCore.Sin`,
-   :py:meth:`pyCore.Cos`, :py:meth:`pyCore.Min`, :py:meth:`pyCore.Max`, :py:meth:`pyCore.Log`, 
-   :py:meth:`pyCore.Log10`, etc.
+   The ordinary mathematical functions can be used with the :py:class:`pyCore.adouble_array` objects:
+   :py:meth:`pyCore.Sqrt`, :py:meth:`pyCore.Sin`, :py:meth:`pyCore.Cos`, :py:meth:`pyCore.Min`, :py:meth:`pyCore.Max`,
+   :py:meth:`pyCore.Log`, :py:meth:`pyCore.Log10`, etc. In addition, some additional functions are available such as
+   :py:meth:`pyCore.Sum` and :py:meth:`pyCore.Product`.
 
-   For instance, if we want the variable ``myVar`` to be equal to the sum of values of the parameter
-   ``myParam`` for all points in the domain ``myDomain``, we can use the function
-   :py:meth:`pyCore.Sum` which accepts the :py:meth:`pyCore.adouble_array` objects.
+   For instance, if the variable ``myVar`` has to be equal to the sum of values of the parameter
+   ``myParam`` for all points in the domain ``myDomain``, the function :py:meth:`pyCore.Sum` can be used.
 
    The :py:meth:`pyCore.daeParameter.array` function accepts the following arguments:
 
@@ -338,55 +342,55 @@ The most commonly used functions are:
       In this case the returned :py:class:`pyCore.adouble_array` object will contain the
       parameter values at the points in the specified domain defined by the slice object.
 
-   Let assume that we want the variable ``myVar`` to be equal to the sum of values in
+   Suppose that the variable ``myVar`` has to be equal to the sum of values in
    the array ``values`` that holds values from the parameter ``myParam`` at the
    specified indexes in the domains ``myDomain1`` and ``myDomain2``:
 
    .. math::
         myVar = \sum values
 
-   Now we can explore different scenarios for creating the array ``values`` from the parameter
+   There are several different scenarios for creating the array ``values`` from the parameter
    ``myParam`` distributed on two domains:
    
    .. code-block:: python
 
         # Notation:
         #  - myDomain1, myDomain2 are daeDomain objects
-        #  - eq is daeEquation object
-        #  - myVar is daeVariable object
-        #  - myParam is daeParameter object distributed on myDomain1 and myDomain2
+        #  - n1, n2 are the number of points in the myDomain1 and myDomain2 domains
+        #  - eq1, eq2 are daeEquation objects
+        #  - mySum is daeVariable object
+        #  - myParam is daeParameter object distributed on myDomain1 and myDomain2 domains
         #  - values is the adouble_array object 
 
-        # Case 1. An array contains the following values from the myParam:
-        #  - at the first point in the domain myDomain1
+        # Case 1. An array contains the following values from myParam:
+        #  - the first point in the domain myDomain1
         #  - all points from the domain myDomain2
         # All expressions below are equivalent:
-        values = self.T.array(0, '*')
-        values = self.T.array(0, -1)
-        values = self.T.array(0, [])
+        values = myParam.array(0, '*')
+        values = myParam.array(0, [])
 
-        eq1.Residual = myVar() - Sum(values)
+        eq1.Residual = mySum() - Sum(values)
             
-        # Case 2. An array contains the following values from the myParam:
+        # Case 2. An array contains the following values from myParam:
         #  - the first three points in the domain myDomain1
         #  - all even points from the domain myDomain2
-        values = self.T.array([0,1,2], slice(0, myDomain2.NumberOfPoints+1, 2))
+        values = myParam.array([0,1,2], slice(0, myDomain2.NumberOfPoints, 2))
 
-        eq2.Residual = myVar() - Sum(values)
+        eq2.Residual = mySum() - Sum(values)
 
    The ``case 1.`` translates into:
 
    .. math::
-      myVar = myParam(0,0) + myParam(0,1) + ... + myParam(0,n_2)
+      mySum = myParam(0,0) + myParam(0,1) + ... + myParam(0,n_2-1)
       
    where ``n2`` is the number of points in the domain ``myDomain2``.
 
    The ``case 2.`` translates into:
 
    .. math::
-      myVar = & myParam(0,0) + myParam(0,2) + myParam(0,4) + ... + \\
-              & myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + \\
-              & myParam(2,0) + myParam(2,2) + myParam(2,4) + ...
+      mySum = & myParam(0,0) + myParam(0,2) + myParam(0,4) + ... + myParam(0,\frac{n_2}{2}) + \\
+              & myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + myParam(1,\frac{n_2}{2}) + \\
+              & myParam(2,0) + myParam(2,2) + myParam(2,4) + ... + myParam(2,\frac{n_2}{2})
 
 More information about parameters can be found in the API reference :py:class:`pyCore.daeParameter`
 and in :doc:`tutorials`.
@@ -394,8 +398,7 @@ and in :doc:`tutorials`.
 Variable types
 --------------
 
-Variable types are used in **DAE Tools** to describe variables. They hold
-the following information:
+Variable types are used in **DAE Tools** to describe variables and they contain the following information:
 
 * Name: string
 * Units: :py:class:`pyUnits.unit` object
@@ -404,8 +407,7 @@ the following information:
 * InitialGuess: float
 * AbsoluteTolerance: float
 
-Declaration of variable types is commonly done outside of the model
-definition (in the module scope).
+Declaration of variable types is commonly done outside of the model definition (in the module scope).
 
 Declaring variable types
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -413,8 +415,8 @@ A variable type can be declared in the following way:
 
 .. code-block:: python
 
-    # Temperature, units: Kelvin, limits: 100 - 1000K, Def.value: 273K, Abs.Tol: 1E-5
-    typeTemperature = daeVariableType("Temperature", "K", 100, 1000, 273, 1E-5)
+    # Temperature type with units Kelvin, limits 100-1000K, the default value 273K and the absolute tolerance 1E-5
+    typeTemperature = daeVariableType("Temperature", K, 100, 1000, 273, 1E-5)
 
 
 Distribution domains
@@ -423,42 +425,33 @@ Distribution domains
 There are two types of domains in **DAE Tools**:
     
 * Simple arrays
-* Distributed domains (used to distribute variables,
-  parameters and equations in space)
+* Distributed domains (used to distribute variables, parameters, and equations in space)
 
-Distributed domains can have a uniform (default) or a user-specified non-uniform grid.
-At the moment, only the following finite difference methods are implemented:
-
-* Backward finite difference method (BFD)
-* Forward finite difference method (FFD)
-* Center finite difference method (CFD)
-
+Distributed domains can form uniform grids (the default) or non-uniform grids (user-specified).
 In **DAE Tools** many objects can be distributed on domains: parameters, variables, equations,
-even models and ports. Obviously it does not have a physical meaning to distribute a model on
-a domain. However, that can be useful for modelling of complex processes where each point in
-a distributed domain have a corresponding model attached. In addition, domain points values
-can be obtained as numpy one-dimensional array; this way **DAE Tools** can be easily used in
-conjuction with other scientific python libraries: `NumPy <http://numpy.scipy.org>`_,
+even models and ports. Distributing a model on a domain (that is in space) can be useful for
+modelling of complex multi-scale systems where each point in the domain have a corresponding model instance.
+In addition, domain points values can be obtained as a numpy one-dimensional array; this way **DAE Tools**
+can be easily used in conjunction with other scientific python libraries: `NumPy <http://numpy.scipy.org>`_,
 `SciPy <http://www.scipy.org>`_ and many `other <http://www.scipy.org/Projects>`_.
 
-The process of defining domains is two-fold:
+Again, the domains are defined in two phases:
 
 * Declaring a domain in the model
-* Initialize it in the simulation
+* Initialising it in the simulation
 
 Declaring domains
 ~~~~~~~~~~~~~~~~~
-Domains are declared in the :py:meth:`pyCore.daeModel.__init__` function.
+Domains are declared in the :py:meth:`pyCore.daeModel.__init__` function:
 
 .. code-block:: python
 
    self.myDomain = daeDomain("myDomain", parentModel, units, "description")
 
-Initializing domains
+Initialising domains
 ~~~~~~~~~~~~~~~~~~~~
-Domains are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
-function. To set up a domain as a simple array the function
-:py:meth:`pyCore.daeDomain.CreateArray` can be used:
+Domains are initialised in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` function.
+To set up a domain as a simple array the function :py:meth:`pyCore.daeDomain.CreateArray` can be used:
 
 .. code-block:: python
 
@@ -470,14 +463,12 @@ while to set up a domain distributed on a structured grid the function
 
 .. code-block:: python
 
-    # Center finite diff of the 2nd order with 10 elements and bounds: 0.0 to 1.0
-    myDomain.CreateStructuredGrid(eCFDM, 2, 10, 0.0,  1.0)
+    # Uniform sructured grid with 10 elements and bounds 0.0 - 1.0
+    myDomain.CreateStructuredGrid(10, 0.0, 1.0)
 
 It is also possible to create an unstructured grid (for use in Finite Element models). However, creation
-and setup of such domains is an implementation detail of corresponding modules (i.e. deal.II).
+and setup of such domains is an implementation detail of corresponding modules (i.e. pyDealII).
 
-Non-uniform structured grids
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In certain situations it is not desired to have a uniform distribution
 of the points within the given interval, defined by the lower and upper bounds.
 In these cases, a non-uniform structured grid can be specified using the attribute
@@ -486,22 +477,20 @@ can be manipulated by the user:
 
 .. code-block:: python
 
-    # First create a distributed domain (distributed on a structured grid)
-    myDomain.CreateStructuredGrid(eCFDM, 2, 10, 0.0,  1.0)
+    # First create a structured grid domain
+    myDomain.CreateStructuredGrid(10, 0.0, 1.0)
 
     # The original 11 points are: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    # If we are have a stiff profile at the beginning of the domain,
-    # then we can place more points there
+    # If the system is stiff at the beginning of the domain more points can be placed there
     myDomain.Points = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.60, 1.00]
 
-The comparison of the effects of uniform and non-uniform grids is given
+The effect of uniform and non-uniform grids is given
 in :numref:`Figure-non_uniform_grid` (a simple heat conduction problem from the :ref:`tutorial_3`
-has been served as a basis for comparison). Here we have the following
-cases:
+has been served as a basis for comparison). Here, there are three cases:
 
+* Black line: the analytic solution
 * Blue line (10 intervals): uniform grid - a very rough prediction
 * Red line (10 intervals): non-uniform grid - more points at the beginning of the domain
-* Black line: the analytical solution
 
 .. _Figure-non_uniform_grid:
 .. figure:: _static/NonUniformGrid.png
@@ -511,8 +500,8 @@ cases:
 
    Effect of uniform and non-uniform grids on numerical solution
 
-We can clearly observe that much more precise results are obtained by using
-denser grid at the beginning of the domain.
+It can be clearly observed that in this problem the more precise results are obtained by using
+denser grid at the beginning of the interval.
 
 Using domains
 ~~~~~~~~~~~~~
@@ -532,28 +521,26 @@ The most commonly used functions are:
           On the other hand, the function :py:attr:`pyCore.daeDomain.npyPoints` can be used to access the
           domain points at any point.
 
-The function :py:meth:`pyCore.daeDomain.array` is called in the same way as explained in
-`Using parameters`_.
+The arguments of the :py:meth:`pyCore.daeDomain.array` function are the same as explained in `Using parameters`_.
 
 1. To get a point at the specified index within the domain the :py:meth:`pyCore.daeDomain.__getitem__`
-   function (``operator []``) can be used. For instance, if we want the variable ``myVar`` to be
+   function (``operator []``) can be used. For instance, if the variable ``myVar`` has to be
    equal to the sixth point in the domain ``myDomain``:
 
    .. math::
         myVar = myDomain[5]
 
-   we can write the following:
+   the following can be used:
 
    .. code-block:: python
 
      # Notation:
      #  - eq is a daeEquation object
      #  - myDomain is daeDomain object
-     #  - myVar is an daeVariable object
+     #  - myVar is daeVariable object
      eq.Residual = myVar() - myDomain[5]
 
-More information about domains can be found in :py:class:`pyCore.daeDomain`
-and in on :doc:`tutorials`.
+More information about domains can be found in the API reference :py:class:`pyCore.daeDomain` and in :doc:`tutorials`.
 
     
 Variables
@@ -568,12 +555,12 @@ and:
 
 * Algebraic
 * Differential
-* Constant (that is their value is assigned by fixing the number of degrees of freedom)
+* Constant (that is their value is assigned by fixing the number of degrees of freedom - DOF)
 
-The process of defining variables is two-fold:
+Again, variables are defined in two phases:
 
 * Declaring a variable in the model
-* Initialize it (by assigning its value or setting an initial condition) in the simulation
+* Initialising it (by assigning its value or setting an initial condition) in the simulation
 
 Declaring variables
 ~~~~~~~~~~~~~~~~~~~
@@ -584,7 +571,7 @@ An ordinary variable can be declared in the following way:
 
    self.myVar = daeVariable("myVar", variableType, parentModel, "description")
 
-Variables can be distributed on domains. A distributed variable can be
+Variables can also be distributed on domains. A distributed variable can be
 declared in the following way:
 
 .. code-block:: python
@@ -595,12 +582,11 @@ declared in the following way:
    # Or simply:
    self.myVar = daeVariable("myVar", variableType, parentModel, "description", [myDomain])
    
-Initializing variables
+Initialising variables
 ~~~~~~~~~~~~~~~~~~~~~~
-Variables are initialized in the :py:meth:`pyActivity.daeSimulation.SetUpVariables`
-function:
+Variables are initialised in the :py:meth:`pyActivity.daeSimulation.SetUpVariables` function:
 
-* To assign the variable value/fix the degrees of freedom use the following:
+* To assign the variable value/fix the degrees of freedom the following can be used:
 
   .. code-block:: python
 
@@ -610,11 +596,16 @@ function:
 
   .. code-block:: python
 
-     for i in range(0, myDomain.NumberOfPoints):
+     for i in range(myDomain.NumberOfPoints):
          myVar.AssignValue(i, value)
 
-  where the ``value`` can be either a ``float`` or the :py:class:`pyUnits.quantity` object
-  (for instance ``1.34 * W/(m*K)``).
+     # or using a numpy array of values
+     myVar.AssignValues(values)
+
+  where ``value`` can be either a ``float`` (i.e. ``1.34``) or the :py:class:`pyUnits.quantity` object
+  (i.e. ``1.34 * W/(m*K)``), and ``values`` is a numpy array of floats or :py:class:`pyUnits.quantity` objects.
+  If the simple floats are used it is assumed that they represent values with the same units as in the
+  variable type definition.
 
 * To set an initial condition use the following:
 
@@ -626,10 +617,16 @@ function:
 
   .. code-block:: python
 
-     for i in range(0, myDomain.NumberOfPoints):
+     for i in range(myDomain.NumberOfPoints):
          myVar.SetInitialCondition(i, value)
 
-  where the ``value`` can again be either a ``float`` or the :py:class:`pyUnits.quantity` object.
+     # or using a numpy array of values
+     myVar.SetInitialConditions(values)
+
+  where the ``value`` can again be either a ``float`` or the :py:class:`pyUnits.quantity` object,
+  and ``values`` is a numpy array of floats or :py:class:`pyUnits.quantity` objects.
+  If the simple floats are used it is assumed that they represent values with the same units as in the
+  variable type definition.
 
 * To set an absolute tolerance the following can be used:
 
@@ -650,7 +647,11 @@ function:
      for i in range(0, myDomain.NumberOfPoints):
          myVar.SetInitialGuess(i, value)
 
-  where the ``value`` can again be either a ``float`` or the :py:class:`pyUnits.quantity` object.
+     # or using a numpy array of values
+     myVar.SetInitialGuesses(values)
+
+  where the ``value`` can again be either a ``float`` or the :py:class:`pyUnits.quantity` object
+  and ``values`` is a numpy array of floats or :py:class:`pyUnits.quantity` objects.
 
 Using variables
 ~~~~~~~~~~~~~~~
@@ -659,63 +660,65 @@ The most commonly used functions are:
 * The function call operator :py:meth:`pyCore.daeVariable.__call__` (``operator ()``)
   which returns the :py:class:`pyCore.adouble` object that holds the variable value
   
-* The function :py:meth:`pyCore.daeVariable.dt` which returns the :py:class:`pyCore.adouble` object
+* The function :py:meth:`pyCore.dt` which returns the :py:class:`pyCore.adouble` object
   that holds the value of a time derivative of the variable
   
-* The functions :py:meth:`pyCore.daeVariable.d` and :py:meth:`pyCore.daeVariable.d2` which return
+* The functions :py:meth:`pyCore.d` and :py:meth:`pyCore.d2` which return
   the :py:class:`pyCore.adouble` object that holds the value of a partial derivative of the variable
   of the first and second order, respectively
   
-* The functions :py:meth:`pyCore.daeVariable.array`, :py:meth:`pyCore.daeVariable.dt_array`,
-  :py:meth:`pyCore.daeVariable.d_array` and :py:meth:`pyCore.daeVariable.d2_array` which return the
+* The functions :py:meth:`pyCore.daeVariable.array`, :py:meth:`pyCore.dt_array`,
+  :py:meth:`pyCore.d_array` and :py:meth:`pyCore.d2_array` which return the
   :py:class:`pyCore.adouble_array` object that holds an array of variable values, time derivatives,
   partial derivative of the first order and partial derivative of the second order, respectively
   
 * Distributed parameters have the :py:attr:`pyCore.daeVariable.npyValues` property which
   returns the variable values as a numpy multi-dimensional array (with ``numpy.float`` data type)
   
-* The functions :py:class:`pyCore.daeVariable.SetValue` and :py:class:`pyCore.daeVariable.GetValue`
+* The functions :py:class:`pyCore.daeVariable.SetValue` and :py:class:`pyCore.daeVariable.GetValue` /
+  :py:class:`pyCore.daeVariable.GetQuantity`
   which get/set the variable value as ``float`` or the :py:class:`pyUnits.quantity` object
 
-* The functions :py:meth:`pyCore.daeVariable.ReAssignValue` and
-  :py:meth:`pyCore.daeVariable.ReSetInitialCondition` can be used to re-assign or re-initialize
+* The functions :py:meth:`pyCore.daeVariable.ReAssignValue`, :py:meth:`pyCore.daeVariable.ReAssignValues`,
+  :py:meth:`pyCore.daeVariable.ReSetInitialCondition` and :py:meth:`pyCore.daeVariable.ReSetInitialConditions`
+  can be used to re-assign or re-initialise
   variables **only during a simulation** (in the function :py:meth:`pyActivity.daeSimulation.Run`)
 
-.. note:: The functions :py:meth:`pyCore.daeVariable.__call__`, :py:meth:`pyCore.daeVariable.dt`
-          , :py:meth:`pyCore.daeVariable.d`, :py:meth:`pyCore.daeVariable.d2`, :py:meth:`pyCore.daeVariable.array`
-          , :py:meth:`pyCore.daeVariable.dt_array`, :py:meth:`pyCore.daeVariable.d_array` 
-          and :py:meth:`pyCore.daeVariable.d2_array` can only be used to build equations' residual expressions.
-          On the other hand, the functions :py:class:`pyCore.daeVariable.GetValue` 
-          , :py:class:`pyCore.daeVariable.SetValue` and :py:attr:`pyCore.daeVariable.npyValues` can be used
-          to access the variables real data at any point.
+.. note:: The functions :py:meth:`pyCore.daeVariable.__call__`, :py:meth:`pyCore.dt`,
+          :py:meth:`pyCore.d`, :py:meth:`pyCore.d2`, :py:meth:`pyCore.daeVariable.array`,
+          :py:meth:`pyCore.dt_array`, :py:meth:`pyCore.d_array`
+          and :py:meth:`pyCore.d2_array` can only be used to build equations' residual expressions.
+          On the other hand, the functions :py:class:`pyCore.daeVariable.GetValue`,
+          :py:class:`pyCore.daeVariable.SetValue` and :py:attr:`pyCore.daeVariable.npyValues` can be used
+          to access the variable data at any point.
 
 All above mentioned functions are called in the same way as explained in `Using parameters`_.
 More information will be given here on getting time and partial derivatives.
 
-1. To get a time derivative of the ordinary variable the function :py:meth:`pyCore.daeVariable.dt`
-   can be used. For instance, if we want a time derivative of the variable ``myVar`` to be equal
+1. To get a time derivative of the ordinary variable the function :py:meth:`pyCore.dt`
+   can be used. For instance, if a time derivative of the variable ``myVar`` has to be equal
    to some constant, let's say 1.0:
 
    .. math::
         { d(myVar) \over {d}{t} } = 1
 
-   we can write the following:
+   the following can be used:
 
    .. code-block:: python
 
      # Notation:
      #  - eq is a daeEquation object
-     #  - myVar is an ordinary daeVariable (not distributed)
-     eq.Residual = myVar.dt() - 1.0
+     #  - myVar is an ordinary daeVariable
+     eq.Residual = dt(myVar()) - 1.0
 
-2. To get a time derivative of a distributed variable the :py:meth:`pyCore.daeVariable.dt`
-   function can be used again. For instance, if we want a time derivative of the distributed variable
-   ``myVar`` to be equal to some constant at each point of the domain ``myDomain``:
+2. To get a time derivative of a distributed variable the :py:meth:`pyCore.dt` function can be used again.
+   For instance, if a time derivative of the distributed variable ``myVar`` has to be equal to some constant
+   at each point of the domain ``myDomain``:
 
    .. math::
-        {\partial myVar(i) \over \partial t} = 1; \forall i \in [0, d_n]
+        {\partial myVar(i) \over \partial t} = 1; \forall i \in [0, n]
 
-   we can write:
+   the following can be used:
 
    .. code-block:: python
 
@@ -726,37 +729,39 @@ More information will be given here on getting time and partial derivatives.
      #  - d is daeDEDI object (used to iterate through the domain points)
      #  - myVar is daeVariable object distributed on the myDomain
      d = eq.DistributeOnDomain(myDomain, eClosedClosed)
-     eq.Residual = myVar.dt(d) - 1.0
+     eq.Residual = dt(myVar(d)) - 1.0
 
    This code translates into a set of ``n`` equations.
    
-   Obviously, a variable can be distributed on more than one domain. If we want to
-   write an identical equation like in the previous case:
+   Obviously, a variable can be distributed on more than one domain.
+   To write a similar equation for a two-dimensional variable:
 
    .. math::
-        {d(myVar(d_1, d_2)) \over dt} = 1; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]
+        {d(myVar(d_1, d_2)) \over dt} = 1; \forall d_1 \in [0, n_1], \forall d_2 \in [0, n_2]
 
-   we can write the following:
+   the following can be used:
 
    .. code-block:: python
 
      # Notation:
      #  - myDomain1, myDomain2 are daeDomain objects
-     #  - n is the number of points in the myDomain1
-     #  - m is the number of points in the myDomain2
+     #  - n1 is the number of points in the myDomain1
+     #  - n2 is the number of points in the myDomain2
      #  - eq is a daeEquation object distributed on the domains myDomain1 and myDomain2
      #  - d is daeDEDI object (used to iterate through the domain points)
      #  - myVar is daeVariable object distributed on the myDomaina and myDomain2
      d1 = eq.DistributeOnDomain(myDomain1, eClosedClosed)
      d2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)
-     eq.Residual = myVar.dt(d1,d2) - 1.0
+     eq.Residual = dt(myVar(d1,d2)) - 1.0
 
-3. To get a partial derivative of a distributed variable the functions :py:meth:`pyCore.daeVariable.d`
-   and :py:meth:`pyCore.daeVariable.d2` can be used. For instance, if we want a partial derivative of
-   the distributed variable ``myVar`` to be equal to 0.0 at each point of the domain ``myDomain``:
+   This code translates into a set of ``n1 * n2`` equations.
+
+3. To get a partial derivative of a distributed variable the functions :py:meth:`pyCore.d`
+   and :py:meth:`pyCore.d2` can be used. For instance, if a partial derivative of
+   the distributed variable ``myVar`` has to be equal to 1.0 at each point of the domain ``myDomain``:
 
    .. math::
-        {\partial myVar(i) \over \partial myDomain} = 0.0; \forall i \in [0, d_n]
+        {\partial myVar(d) \over \partial myDomain} = 1.0; \forall d \in [0, n]
 
    we can write:
 
@@ -769,9 +774,21 @@ More information will be given here on getting time and partial derivatives.
      #  - d is daeDEDI object (used to iterate through the domain points)
      #  - myVar is daeVariable object distributed on the myDomain
      d = eq.DistributeOnDomain(myDomain, eClosedClosed)
-     eq.Residual = myVar.d(myDomain, d) - 0.0
+     eq.Residual = d(myVar(d), myDomain, discretizationMethod=eCFDM, options={}) - 1.0
+
+     # since the defaults are eCFDM and an empty options dictionary the above is equivalent to:
+     eq.Residual = d(myVar(d), myDomain) - 1.0
 
    Again, this code translates into a set of ``n`` equations.
+
+   The default discretisation method is center finite difference method (``eCFDM``) and the default
+   discretisation order is 2 and can be specified in the ``options`` dictionary: ``options["DiscretizationOrder"] = integer``.
+   At the moment, only the finite difference discretisation methods are supported by default
+   (but the finite volume and finite elements implementations exist through the third party libraries):
+
+   * Center finite difference method (``eCFDM``)
+   * Backward finite difference method (``eBFDM``)
+   * Forward finite difference method (``eFFDM``)
 
 More information about variables can be found in the API reference :py:class:`pyCore.daeVariable`
 and in :doc:`tutorials`.
@@ -779,12 +796,13 @@ and in :doc:`tutorials`.
 Ports
 -----
 
-Ports are used to connect two models. Like models, ports
-can contain domains, parameters and variables.
+Ports can be used to provide an interface of a model, that is the model inputs and outputs.
+The models with ports can be used to create flowsheets where models are inter-connected by (the same type of) ports.
+Ports can be defined as inlet or outlet depending on whether they represent model inputs or model outputs.
+Like models, ports can contain domains, parameters and variables.
 
-In **DAE Tools** ports
-are defined by deriving a new class from the base port class
-(:py:class:`pyCore.daePort`). A template/an empty port is given below:
+In **DAE Tools** ports are defined by deriving a new class from the base :py:class:`pyCore.daePort` class.
+An empty port definition is presented below:
 
 .. code-block:: python
 
@@ -797,13 +815,13 @@ are defined by deriving a new class from the base port class
 
 The process consists of the following steps:
 
-1. Call the base class constructor:
+1. Calling the base class constructor:
 
    .. code-block:: python
 
       daePort.__init__(self, name, type, parent, description)
 
-2. Declare all domains, parameters and variables in the
+2. Declaring domains, parameters and variables in the
    :py:meth:`pyCore.daePort.__init__` function
 
    The same rules apply as described in the `Developing models`_ section.
@@ -844,22 +862,21 @@ Event ports are instantiated in the :py:meth:`pyCore.daeModel.__init__` function
 Equations
 ---------
 
-There are three types of equations in **DAE Tools**:
+There are four types of equations in **DAE Tools**:
     
-* Ordinary
-* Distributed
-* Discontinuous
+* Ordinary or distributed
+* Continuous or discontinuous
 
 Distributed equations are equations which are distributed on one or more domains
 and valid on the selected points within those domains.
 Equations can be distributed on a whole domain, on a portion of it or even on
-a single point (useful fsor specifying boundary conditions).
+a single point (useful for specifying boundary conditions).
 
 Declaring equations
 ~~~~~~~~~~~~~~~~~~~
 Equations are declared in the :py:meth:`pyCore.daeModel.DeclareEquations` function.
 To declare an ordinary equation the :py:meth:`pyCore.daeModel.CreateEquation`
-function is used:
+function can be used:
 
 .. code-block:: python
 
@@ -934,15 +951,15 @@ white squares represent excluded portions.
     :width: 250pt
     
 
-Defining equations (equation residual expression)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Equation in **DAE Tools** are given in implicit form. Therefore, it is necessary to specify its residual.
+Defining equations (equation residual expressions)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Equations in **DAE Tools** are given in implicit (acausal) form and specified as residual expressions.
 For instance, to define a residual expression of an ordinary equation:
 
 .. math::
     {\partial V_{14} \over \partial t} + {V_1 \over V_{14} + 2.5} + sin(3.14 \cdot V_3) = 0
 
-we can write the following:
+the following can be used:
     
 .. code-block:: python
 
@@ -954,10 +971,10 @@ To define a residual expression of a distributed equation:
 
 .. math::
     {\partial V_{14}(x,y)) \over \partial t} + {V_1 \over V_{14}(x,y) + 2.5} + sin(3.14 \cdot V_3(x,y)) = 0;
-    \forall x \in [0, x_n], \forall y \in (0, x_y)
+    \forall x \in [0, nx], \forall y \in (0, ny)
 
-we can write the following:
-    
+the following can be used:
+
 .. code-block:: python
 
     # Notation:
@@ -966,7 +983,7 @@ we can write the following:
     eq = model.CreateEquation("MyEquation")
     dx = eq.DistributeOnDomain(x, eClosedClosed)
     dy = eq.DistributeOnDomain(y, eOpenOpen)
-    eq.Residal = V14.dt(dx,dy) + V1() / ( V14(dx,dy) + 2.5) + sin(3.14 * V3(dx,dy) )
+    eq.Residal = dt(V14(dx,dy)) + V1() / ( V14(dx,dy) + 2.5) + sin(3.14 * V3(dx,dy) )
 
 where ``dx`` and ``dy`` are :py:class:`pyCore.daeDEDI` (which is short for
 ``daeDistributedEquationDomainInfo``) objects. These objects are used internally by the framework
@@ -985,7 +1002,68 @@ current index in the domain which is being iterated. Hence, the equation above i
             eq = model.CreateEquation("MyEquation_%d_%d" % (dx, dy) )
             eq.Residal = V14.dt(dx,dy) + V1() / ( V14(dx,dy) + 2.5) + sin(3.14 * V3(dx,dy) )
     
-However, the former is much more elegant and we do not have to take care of indexing etc.
+The second way can be used for writing equations that are different
+for different points within domains.
+
+:py:class:`pyCore.daeDEDI` class has the :py:class:`pyCore.daeDEDI.__call__` (``operator ()``) function defined
+which returns the current index as the ``adouble`` object. In addition, the class provides operators ``+`` and ``-``
+which can be used to return the current index offset by the specified integer.
+For instance, to define the equation below:
+
+.. math::
+    V_1(x) = V_2(x) + V_2(x+1); \forall x \in [0, nx)
+
+the following can be used:
+
+.. code-block:: python
+
+    # Notation:
+    #  - V1 and V2 are variables distributed on the x domain
+    eq = model.CreateEquation("MyEquation")
+    dx = eq.DistributeOnDomain(x, eClosedOpen)
+    eq.Residal = V1(dx) - ( V2(dx) + V2(dx+1) )
+
+Supported mathematical operations and functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**DAE Tools** support five basic mathematical operations (``+, -, *, /, **``) and the following
+standard mathematical functions: ``sqrt, pow, log, log10, exp, min, max, floor, ceil, abs,
+sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2, erf``).
+The basic mathematical operations and functions are re-defined to operate on the :py:class:`~pyCore.adouble`
+class and with NumPy library in mind. Therefore it is equivalent to use NumPy functions on
+:py:class:`~pyCore.adouble` arguments. For instance, to define the equation below:
+
+.. math::
+    V_1 = exp(V_2)
+
+the following can be used:
+
+.. code-block:: python
+
+    # Notation:
+    #  - V1 and V2 are ordinary variables
+    eq.Residal = V1() - Exp(V2())
+    # or:
+    eq.Residal = V1() - numpy.exp(V2())
+
+since the numpy function ``exp`` is redefined for :py:class:`~pyCore.adouble` arguments
+and calls the **DAE Tools** :py:meth:`~pyCore.Exp` function. The same stands for all other mathematical functions.
+
+To define conditions the following comparison operators:
+``<`` (less than),
+``<=`` (less than or equal),
+``==`` (equal),
+``!=`` (not equal),
+``>`` (greater),
+``>=`` (greater than or equal)
+and the following logical operators:
+``&`` (logical AND),
+``|`` (logical OR),
+``~`` (logical NOT)
+can be used.
+
+.. note:: Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
+          cannot be used to define logical conditions; therefore, the custom operators ``&``, ``|`` and ``~`` are defined
+          and should be used instead.
 
 Details on autodifferentiation support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -996,12 +1074,11 @@ technique for `automatic differentiation <http://en.wikipedia.org/wiki/Automatic
 (adopted from `ADOL-C <https://projects.coin-or.org/ADOL-C>`_ library) using the concept of representing
 equations as **evaluation trees**.
 Evaluation trees consist of binary or unary nodes, each node representing a basic mathematical
-operation (``+, -, *, /, **``) or a standard mathematical function
-(``sin, cos, tan, sqrt, pow, log, ln, exp, min, max, floor, ceil, abs, sum, product, ...``).
+operation or the standard mathematical function.
 The basic mathematical operations and functions are re-defined to operate on **a heavily
 modified ADOL-C** class :py:class:`~pyCore.adouble` (which has been extended to contain information about
-domains/parameters/variables etc). In adition, a new :py:class:`~pyCore.adouble_array` class has been
-introduced to support all above-mentioned operations on arrays of parameters and variables.
+domains/parameters/variables etc). In addition, a new :py:class:`~pyCore.adouble_array` class has been
+introduced to support all above-mentioned operations on arrays.
 What is different here is that :py:class:`~pyCore.adouble`/:py:class:`~pyCore.adouble_array` classes
 and mathematical operators/functions work in two modes; they can either **build-up an evaluation tree**
 or **calculate a value/derivative of an expression**.
@@ -1021,13 +1098,12 @@ As it has been described in the previous sections, domains, parameters, and vari
 that return :py:class:`~pyCore.adouble`/:py:class:`~pyCore.adouble_array` objects used to construct the
 evaluation trees. These functions include functions to get a value of
 a domain/parameter/variable (``operator ()``), to get a time or a partial derivative of a variable
-(functions :py:meth:`~pyCore.daeVariable.dt`, :py:meth:`~pyCore.daeVariable.d`, or :py:meth:`~pyCore.daeVariable.d2`)
+(functions :py:meth:`~pyCore.dt`, :py:meth:`~pyCore.d`, or :py:meth:`~pyCore.d2`)
 or functions to obtain an array of values, time or partial derivatives (:py:meth:`~pyCore.daeVariable.array`,
-:py:meth:`~pyCore.daeVariable.dt_array`, :py:meth:`~pyCore.daeVariable.d_array`,
-and :py:meth:`~pyCore.daeVariable.d2_array`).
+:py:meth:`~pyCore.dt_array`, :py:meth:`~pyCore.d_array`, and :py:meth:`~pyCore.d2_array`).
 
 Another useful feature of **DAE Tools** equations is that they can be
-exported into MathML or Latex format and easily visualized.
+exported into MathML or Latex format and easily visualised.
 
 For example, the equation ``F`` in :numref:`Figure-EvaluationTree`
 is a result of the following **DAE Tools** equation:
@@ -1035,145 +1111,160 @@ is a result of the following **DAE Tools** equation:
 .. code-block:: python
 
     eq = model.CreateEquation("F", "F description")
-    eq.Residal = V14.dt() + V1() / (V14() + 2.5) + Sin(3.14 * V3())
+    eq.Residal = dt(V14()) + V1() / (V14() + 2.5) + Sin(3.14 * V3())
 
 Defining boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Assume that we are modelling a simple heat conduction through a very thin
-rectangular plate. At one side (y = 0) we have a constant temperature
-(500 K) while at the opposide end we have a constant flux (1E6 W/m2).
-The problem can be described by a single distributed equatoin:
+Assume that a simple heat transfer needs to be modelled:
+heat conduction through a very thin rectangular plate.
+At one side (at y = 0) we have a constant temperature (500 K)
+while at the opposite end we have a constant flux (1E6 W/m2).
+The problem can be described by a single distributed equation:
 
 .. code-block:: python
 
     # Notation:
-    #  - T is a variable distributed on domains x and y
-    #  - ro, k, and cp are parameters
+    #  - T is a variable distributed on x and y domains
+    #  - rho, k, and cp are parameters
     eq = model.CreateEquation("MyEquation")
     dx = eq.DistributeOnDomain(x, eClosedClosed)
     dy = eq.DistributeOnDomain(y, eOpenOpen)
-    eq.Residual = ro() * cp() * T.dt(dx,dy) - k() * ( T.d2(y, dx,dy) + T.d2(y, dx,dy) )
+    eq.Residual = rho() * cp() * dt(T(dx,dy)) - k() * ( d2(T(dx,dy), x) + d2(T(dx,dy), y) )
 
-The equation is defined on the domain ``y`` open on both ends. Consequently, we have
-to specify some additional equations (boundary conditions, for the ``y = y0`` and
-``y = yn``) to make our system well posed:
+The equation is defined on the ``y`` domain open on both ends; thus, the additional equations
+(boundary conditions at ``y = 0`` and ``y = ny`` points) need to be specified to make the system well posed:
 
 .. math::
-    T(x,y) = 500; \forall x \in [0, x_n], y = 0
+    T(x,y) = 500; \forall x \in [0, nx], y = 0
 
-    -k \cdot {\partial T(x,y) \over \partial y} = 1E6; \forall x \in [0, x_n], y = y_n
+    -k \cdot {\partial T(x,y) \over \partial y} = 1E6; \forall x \in [0, nx], y = ny
 
 To do so, the following equations can be used:
 
 .. code-block:: python
 
-    # "Left" boundary conditions:
-    lbc = model.CreateEquation("Left_BC")
-    dx = lbc.DistributeOnDomain(x, eClosedClosed)
-    dy = lbc.DistributeOnDomain(y, eLowerBound)
-    lbc.Residal = T(dx,dy) - 500  # Constant temperature (500 K)
+    # "Bottom edge" boundary conditions:
+    bceq = model.CreateEquation("Bottom_BC")
+    dx = bceq.DistributeOnDomain(x, eClosedClosed)
+    dy = bceq.DistributeOnDomain(y, eLowerBound)
+    bceq.Residal = T(dx,dy) - Constant(500 * K)  # Constant temperature (500 K)
 
-    # "Right" boundary conditions:
-    rbc = model.CreateEquation("Right_BC")
-    dx = rbc.DistributeOnDomain(x, eClosedClosed)
-    dy = rbc.DistributeOnDomain(y, eUpperBound)
-    rbc.Residal = - k() * T.d(y, dx,dy) - 1E6  # Constant flux (1E6 W/m2)
+    # "Top edge" boundary conditions:
+    bceq = model.CreateEquation("Top_BC")
+    dx = bceq.DistributeOnDomain(x, eClosedClosed)
+    dy = bceq.DistributeOnDomain(y, eUpperBound)
+    bceq.Residal = - k() * d(T(dx,dy), y) - Constant(1E6 * W/m**2)  # Constant flux (1E6 W/m2)
 
     
 PDE on unstructured grids using the Finite Elements Method
 -----------------------------------------------------------
-DAE Tools support numerical simulation of partial differential equations on adaptive
-unstructured grids using Finite Elements Method. Currently, DAE Tools use `deal.II`_ library
-for low-level tasks such as mesh loading and refinement, assembly of the system
-stiffness and mass matrices and the system load vector, and the generation of the results.
-After an initial assembly phase the `deal.II`_ structures are used to
-generate daetools equations which are solved together with the rest of the model
-equations. All details about the mesh, basis functions, quadrature rules, refinement
-etc. are handled by the `deal.II`_ library and can be to some extent configured by the users.
-The advantage of this concept are:
+DAE Tools support numerical simulation of partial differential equations on
+unstructured grids using the Finite Elements method. Currently, DAE Tools use the `deal.II`_ library
+for low-level tasks such as mesh loading, assembly of the system stiffness and mass matrices and the
+system load vector, management of boundary conditions, quadrature formulas, management of degrees of freedom,
+and the generation of the results.
+After an initial assembly phase the matrices are used to generate **DAE Tools** equations which are
+solved together with the rest of the system.
+All details about the mesh, basis functions, quadrature rules, refinement
+etc. are handled by the `deal.II`_ library and can be to some extent configured by the modeller.
 
-* that the generated equations (linear, nonlinear or differential -
-  depending on the class of the system) can be coupled with other FE-unrelated equations and solved
-  together by daetools solvers
-* system discontinuities can be handled as usual in daetools
-* modelled processes can be optimized
+The unique feature of this approach is a capability to use **DAE Tools** variables
+to specify boundary conditions, time varying coefficients and non-linear terms,
+and evaluate quantities such as surface/volume integrals.
+This way, the finite element model is fully integrated with the rest of the model
+and multiple FE systems can be created and coupled together.
+In addition, non-linear finite element systems are automatically supported
+and the equation discontinuities can be handled as usual in **DAE Tools**.
 
-Support for FE is provided through the following DAE Tools classes:
+**DAE Tools** provide four main classes to support the deal.II library:
 
-* :py:class:`~pyCore.daeFiniteElementObject` (abstract class)
-* :py:class:`~pyCore.daeFiniteElementModel`
-* :py:class:`~pyCore.daeFiniteElementEquation`
+1) :py:class:`~pyDealII.dealiiFiniteElementDOF_nD`
 
-and the :py:class:`~pyCore.daeFiniteElementObject` implementation based on the `deal.II`_ library:
+   In deal.II it represents a degree of freedom distributed on a finite element domain.
+   In **DAE Tools** it represents a variable distributed on a finite element domain.
+2) :py:class:`~pyDealII.dealiiFiniteElementSystem_nD` (implements :py:class:`~pyCore.daeFiniteElementObject`)
 
-* :py:class:`~pyDealII.dealiiFiniteElementSystem_1D`, :py:class:`~pyDealII.dealiiFiniteElementSystem_2D`,
-  :py:class:`~pyDealII.dealiiFiniteElementSystem_3D`
-* :py:class:`~pyDealII.dealiiFiniteElementEquation_1D`, :py:class:`~pyDealII.dealiiFiniteElementEquation_2D`,
-  :py:class:`~pyDealII.dealiiFiniteElementEquation_3D`
-* large number of auxiliary classes and functions
+   It is a wrapper around deal.II ``FESystem<dim>`` class and handles all finite element related details.
+   It uses information about the mesh, quadrature and face quadrature formulas, degrees of freedom
+   and the FE weak formulation to assemble the system's mass matrix (Mij), stiffness matrix (Aij)
+   and the load vector (Fi).
+3) :py:class:`~pyDealII.dealiiFiniteElementWeakForm_nD`
 
-:py:class:`~pyDealII.dealiiFiniteElementSystem_nD` is a generic wrapper around the `deal.II`_ library (more specifically
-around `FESystem<dim, spacedim>` class) capable to solve systems of scalar/vector FE equations. *This class
-provides an interface to group several elements together into one. To the outside world, the resulting object
-looks just like a usual finite element object, which is composed of several other finite elements that are possibly of
-different type. The result is then a vector-valued finite element.* More information can be found in `deal.II`_
-online documentation: `FESystem`_.
+   Contains weak form expressions for the contribution of FE cells to the system/stiffness matrices,
+   the load vector, boundary conditions and (optionally) surface/volume integrals (as an output).
+4) :py:class:`~pyCore.daeFiniteElementModel`
+
+   ``daeModel``-derived class that use system matrices/vectors from the :py:class:`~pyDealII.dealiiFiniteElementSystem_nD`
+   object to generate a system of equations in the following form:
+
+   .. math::
+       \left[ M_{ij} \right] \left\{ {dx_j}\over{dt} \right\} + \left[ A_{ij} \right] \left\{ x_j \right\} = \left\{ F_i \right\}
+
+   This system is in a general case a DAE system, although it can also be a linear or a non-linear system
+   (if the mass matrix is zero).
 
 A typical use-case scenario consists of the following steps:
 
-1. Instantiation of the :py:class:`~pyDealII.dealiiFiniteElementSystem_nD` object. The constructor accepts the following
-   arguments:
-      
-   - ``meshFilename``
-   
-     Path to the mesh file. For the list of supported formats check the `GridIn<dim, spacedim>` class
-     in `deal.II`_ online documentation: `GridIn`_
-   
-   - ``polynomialOrder``
+1. The starting point is a definition of the :py:class:`~pyDealII.dealiiFiniteElementSystem_nD` class
+   (where ``nD`` can be ``1D``, ``2D`` or ``3D``).
+   That includes specification of:
 
-     Polynomial order. At the momnt only `FE_Q`_ finite elements are supported that represnt *implementation of a
-     scalar Lagrange finite element ``Qp`` that yields the finite element space of continuous, piecewise polynomials
-     of degree ``polynomialOrder`` in each coordinate direction. This class is realized using tensor product
-     polynomials based on equidistant or given support points*
-   
-   - ``quadrature``
+   * Mesh file in one of the formats supported by deal.II (`GridIn`_)
+   * Degrees of freedom (as a python list of :py:class:`~pyDealII.dealiiFiniteElementDOF_nD` objects).
+     Every dof has a name which will be also used to declare **DAE Tools** variable with the same name,
+     description, finite element space `FE`_ (``deal.II FiniteElement<dim>`` instance) and the multiplicity
+   * `Quadrature`_ formulas for elements and their faces
+2. Creation of :py:class:`~pyCore.daeFiniteElementModel` object (similarly to the ordinary **DAE Tools** model)
+   with the finite element system object as the last argument.
+3. Definition of the weak form of the problem using the functions provided by **DAE Tools** (for 1D, 2D and 3D):
 
-     Quadrature formula (`Quadrature<dim>` derived object). For the list of supported quadrature formulas
-     check the `deal.II`_ online documentation: `Quadrature`_
-   
-   - ``faceQuadrature``
+   - :py:meth:`~pyDealII.phi`: corresponds to ``shape_value`` in deal.II
+   - :py:meth:`~pyDealII.dphi`: corresponds to ``shape_grad`` in deal.II
+   - :py:meth:`~pyDealII.d2phi`: corresponds to ``shape_hessian`` in deal.II
+   - :py:meth:`~pyDealII.phi_vector`: corresponds to ``shape_value`` of vector dofs in deal.II
+   - :py:meth:`~pyDealII.dphi_vector`: corresponds to ``shape_grad`` of vector dofs in deal.II
+   - :py:meth:`~pyDealII.d2phi_vector`: corresponds to ``shape_hessian`` of vector dofs in deal.II
+   - :py:meth:`~pyDealII.div_phi`: corresponds to divergence in deal.II
+   - :py:meth:`~pyDealII.JxW`: corresponds to the mapped quadrature weight in deal.II
+   - :py:meth:`~pyDealII.xyz`: returns the point for the specified quadrature point in deal.II
+   - :py:meth:`~pyDealII.normal`: corresponds to the ``normal_vector`` in deal.II
+   - :py:meth:`~pyDealII.function_value`: wraps ``Function<dim>`` object that returns a value
+   - :py:meth:`~pyDealII.function_gradient`: wraps ``Function<dim>`` object that returns a gradient
+   - :py:meth:`~pyDealII.function_adouble_value`: wraps ``Function<dim>`` object that returns adouble value
+   - :py:meth:`~pyDealII.function_adouble_gradient`: wraps ``Function<dim>`` object that returns adouble gradient
+   - :py:meth:`~pyDealII.dof`: returns daetools variable at the given index (adouble object)
+   - :py:meth:`~pyDealII.dof_approximation`: returns FE approximation of a quantity as a daetools variable (adouble object)
+   - :py:meth:`~pyDealII.dof_gradient_approximation`: returns FE gradient approximation of a quantity as a daetools variable (adouble object)
+   - :py:meth:`~pyDealII.dof_hessian_approximation`: returns FE hessian approximation of a quantity as a daetools variable (adouble object)
+   - :py:meth:`~pyDealII.vector_dof_approximation`: returns FE approximation of a vector quantity as a daetools variable (adouble object)
+   - :py:meth:`~pyDealII.vector_dof_gradient_approximation`: returns FE approximation of a vector quantity as a daetools variable (adouble object)
+   - :py:meth:`~pyDealII.adouble`: wraps any daetools expression to be used in matrix assembly
+   - :py:meth:`~pyDealII.tensor1`: wraps deal.II ``Tensor<rank=1>``
+   - :py:meth:`~pyDealII.tensor2`: wraps deal.II ``Tensor<rank=2>``
+   - :py:meth:`~pyDealII.tensor2`: wraps deal.II ``Tensor<rank=3>``
 
-     Face quadrature formula (`Quadrature<dim-1>` derived object)
- 
-   - ``functions``
-
-     Dictionary of space dependant functions ``{'Name':Function<dim>}``
- 
-   - ``equations``
-
-     A list of :py:class:`~pyDealII.dealiiFiniteElementEquation_nD` objects that define
-     contributions to the element's stiffness and mass matrices, element's load vector etc.
-
+More information about the finite element method in **DAE Tools** can be found in the API reference
+and in :doc:`tutorials-fe` (in particular the :ref:`tutorial_dealii_1` source code).
 
 .. _deal.II: http://dealii.org
 .. _FESystem: http://www.dealii.org/developer/doxygen/deal.II/classFESystem.html
-.. _FE_Q: http://www.dealii.org/developer/doxygen/deal.II/classFE__Q.html
+.. _FE: http://www.dealii.org/developer/doxygen/deal.II/group__fe.html
 .. _GridIn: http://www.dealii.org/developer/doxygen/deal.II/classGridIn.html
 .. _Quadrature: http://www.dealii.org/developer/doxygen/deal.II/group__Quadrature.html
 
 State Transition Networks
 -------------------------
 Discontinuous equations are equations that take different forms subject to certain conditions. For example,
-if we want to model a flow through a pipe we may observe three different flow regimes:
+to model a flow through a pipe one can observe three different flow regimes:
 
 * Laminar: if Reynolds number is less than 2,100
 * Transient: if Reynolds number is greater than 2,100 and less than 10,000
 * Turbulent: if Reynolds number is greater than 10,000
 
-What we can see is that from any of these three states we can go to any other state.
+From any of these three states the system can go to any other state.
 This type of discontinuities is called a **reversible discontinuity** and can be described using
 :py:meth:`~pyCore.daeModel.IF`, :py:meth:`~pyCore.daeModel.ELSE_IF`, :py:meth:`~pyCore.daeModel.ELSE`
-functions:
+and :py:meth:`~pyCore.daeModel.END_IF` functions:
 
 .. code-block:: python
 
@@ -1187,27 +1278,6 @@ functions:
     #... (equations go here)
 
     END_IF()
-
-To define conditions the following comparison operators:
-
-- ``<`` (less than)
-- ``<=`` (less than or equal)
-- ``==`` (equal)
-- ``!=`` (not equal)
-- ``>`` (greater)
-- ``>=`` (greater than or equal)
-
-and the following logical operators:
-    
-- ``&`` (logical AND)
-- ``|`` (logical OR)
-- ``~`` (logical NOT)
-
-can be used.
-
-.. note:: Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
-          cannot be used to define logical conditions; therefore, the custom operators ``&``, ``|`` and ``~`` are defined
-          and should be used instead.
 
 The comparison operators operate on :py:class:`pyCore.adouble` objects and ``Float`` values.
 Units consistency is strictly checked and expressions including ``Float`` values
@@ -1225,14 +1295,14 @@ The following expressions are valid:
    T() < Constant(0.5 * K)
 
    # (T >= 300 K) or (m < 1 kg)
-   T() >= Constant(300 * K) | m < Constant(0.5 * kg)
+   (T() >= Constant(300 * K)) | (m < Constant(0.5 * kg))
 
    # p <= 25.3 (use of the Constant function not necessary)
    p() <= 25.3
    
 
 **Reversible discontinuities** can be **symmetrical** and **non-symmetrical**. The above example is **symmetrical**.
-However, if we have a CPU and we want to model its power dissipation we may have three operating modes with the
+However, to model a CPU and its power dissipation one can observe three operating modes with the
 following state transitions:
 
 * **Normal** mode
@@ -1250,12 +1320,11 @@ following state transitions:
   * Damn, no escape from here... go to the nearest shop and buy a new one!
     Or, donate some money to DAE Tools project :-)
 
-What we can see is that from the **Normal** mode we can either go to the **Power saving** mode or to the **Fried** mode.
-The same stands for the **Power saving** mode: we can either go to the **Normal** mode or to the **Fried** mode.
-However, once the temperature exceeds 110 degrees the CPU dies (let's say we heavily overclocked it) and there
-is no return. This type of discontinuities is called an **irreversible discontinuity** and can be described
-using :py:meth:`~pyCore.daeModel.STN`, :py:meth:`~pyCore.daeModel.STATE`, :py:meth:`~pyCore.daeModel.END_STN`
-functions:
+What can be seen is that from the **Normal** mode the system can either go to the **Power saving** mode or to the **Fried** mode.
+The same stands for the **Power saving** mode: the system can either go to the **Normal** mode or to the **Fried** mode.
+However, once the temperature exceeds 110 degrees the CPU dies (let's say it is heavily overclocked) and there is no return.
+This type of discontinuities is called an **irreversible discontinuity** and can be described
+using :py:meth:`~pyCore.daeModel.STN`, :py:meth:`~pyCore.daeModel.STATE`, :py:meth:`~pyCore.daeModel.END_STN` functions:
 
 .. code-block:: python
 
@@ -1271,13 +1340,13 @@ functions:
     ON_CONDITION( CPULoad() >= 0.05,      switchToStates = [ ("CPU", "Normal") ] )
     ON_CONDITION( T() > Constant(110*K),  switchToStates = [ ("CPU", "Fried") ] )
 
-    STATE("Normal")
+    STATE("Fried")
     #... (equations go here)
 
     END_STN()
 
 The function :py:meth:`pyCore.daeModel.ON_CONDITION` is used to define actions to be performed
-when the specified conditon is satisfied. In addition, the function :py:meth:`pyCore.daeModel.ON_EVENT`
+when the specified condition is satisfied. In addition, the function :py:meth:`pyCore.daeModel.ON_EVENT`
 can be used to define actions to be performed when an event is trigerred on a specified event port.
 Details on how to use :py:meth:`pyCore.daeModel.ON_CONDITION` and :py:meth:`pyCore.daeModel.ON_EVENT`
 functions can be found in the `OnCondition actions`_ and `OnEvent actions`_ sections, respectively.
@@ -1289,11 +1358,11 @@ More information about state transition networks can be found in :py:class:`pyCo
 OnCondition actions
 -------------------
 The function :py:meth:`~pyCore.daeModel.ON_CONDITION` can be used to define actions to be performed
-when a specified conditon is satisfied. The available actions include:
+when a specified condition is satisfied. The available actions include:
 
 * Changing the active state in specified State Transition Networks (argument ``switchToStates``)
-* Re-assigning or re-ininitializing specified variables (argument ``setVariableValues``)
-* Triggerring an event on specified event ports (argument ``triggerEvents``)
+* Re-assigning or re-ininitialising specified variables (argument ``setVariableValues``)
+* Triggering an event on the specified event ports (argument ``triggerEvents``)
 * Executing user-defined actions (argument ``userDefinedActions``)
 
 .. note:: OnCondition actions can be added to models or to states in State Transition Networks
@@ -1305,8 +1374,7 @@ when a specified conditon is satisfied. The available actions include:
 .. note:: ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
           are empty by default. The user has to specify at least one action.
           
-For instance, if we want to execute some actions when the temperature becomes greater
-than 340 K we can write:
+For instance, to execute some actions when the temperature becomes greater than 340 K the following can be used:
     
 .. code-block:: python
 
@@ -1347,8 +1415,7 @@ in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 .. note:: ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
           are empty by default. The user has to specify at least one action.
 
-For instance, if we want to execute some actions when an event is trigerred on an event port
-we can write:
+For instance, to execute some actions when an event is triggered on an event port the following can be used:
 
 .. code-block:: python
 
@@ -1367,31 +1434,32 @@ is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look
 on :ref:`tutorial_13`.
 
-Code generators
-===============
-
-Modelica
---------
-
-gPROMS
-------
-
-c99
----
-
-
-Co-Simulation
-=============
-
-FMI
----
-
-Matlab MEX-functions
---------------------
-
-Simulink S-functions
---------------------
 ..
+    Code generators
+    ===============
+
+    Modelica
+    --------
+
+    gPROMS
+    ------
+
+    c99
+    ---
+
+
+    Co-Simulation
+    =============
+
+    FMI
+    ---
+
+    Matlab MEX-functions
+    --------------------
+
+    Simulink S-functions
+    --------------------
+
     Simulation
     ==========
 
@@ -1408,7 +1476,7 @@ Simulink S-functions
     ----------------
 
 
-    Optimization
+    Optimisation
     ============
 
     Parameter estimation

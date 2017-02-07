@@ -87,7 +87,7 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.rho() * self.cp(x, y) * self.T.dt(x, y) - self.k(x, y) * \
+        eq.Residual = self.rho() * self.cp(x, y) * dt(self.T(x, y)) - self.k(x, y) * \
                      (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
 
         eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")

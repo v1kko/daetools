@@ -58,16 +58,19 @@ LIBRARY:
 CROSS-COMPILATION (GNU/Linux -> Windows):
 Prerequisities:
   1. Install the mingw-w64 package from the main Debian repository.
- 
-  2. Install Python using the binary from the python.org website 
-     and copy it to trunk/PythonXY-arch (i.e. Python35-win32). 
- 
+
+  2. Install Python on Windows using the binary from the python.org website
+     and copy it to trunk/PythonXY-arch (i.e. Python34-win32).
+     Modify PYTHON_MAJOR and PYTHON_MINOR in the crossCompile section in the dae.pri file (line ~90):
+        PYTHON_MAJOR = 3
+        PYTHON_MINOR = 4
+
   3. cmake cross-compilation requires the toolchain file: set it up using -DCMAKE_TOOLCHAIN_FILE=[path_to_toolchain_file].cmake
      Cross-compile .cmake files are provided by daetools and located in the trunk folder.
        cross-compile-i686-w64-mingw32.cmake   file targets a toolchain located in /usr/mingw32-i686 directory.
        cross-compile-x86_64-w64-mingw32.cmake file targets a toolchain located in /usr/mingw32-x86_64 directory.
-      
-  4. deal.II specific options: 
+
+  4. deal.II specific options:
      The native "expand_instantiations_exe" is required but cannot be run under the build architecture.
      and must be used from the native build.
      Therefore, set up a native deal.II build directory first and run the following command in it:
@@ -75,8 +78,8 @@ Prerequisities:
      Typically, it is located in the deal.II/common/scripts directory.
      That directory will be added to the PATH environment variable by this script.
      If necessary, modify the line 'export PATH=...:${PATH}' to match the actual location.
-      
-  5. Boost specific options: 
+
+  5. Boost specific options:
      boost-python linking will fail. Append the value of:
         ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a
      at the end of the failed linking command, re-run it, and manually copy the stage/lib/*.dll(s) to the "daetools/solibs/${PLATFORM}_${HOST_ARCH}" directory.
@@ -84,11 +87,11 @@ Prerequisities:
       - Python 2.7 won't compile (probably issues with the MS Universal CRT voodoo mojo)
       - dl and util libraries are missing when compiling with x86_64-w64-mingw32.
         solution: just remove -ldl and -lutil from the linking line.
-     
+
   6. Trilinos specific options
      i686-w64-mingw32 specific:
-       1. In the file: 
-            - trilinos/packages/teuchos/src/Teuchos_BLAS.cpp  
+       1. In the file:
+            - trilinos/packages/teuchos/src/Teuchos_BLAS.cpp
           "template BLAS<...>" (lines 96-104)
              #ifdef _WIN32
              #ifdef HAVE_TEUCHOS_COMPLEX
@@ -100,16 +103,16 @@ Prerequisities:
              #endif
           should be replaced by "template class BLAS<...>"
        2. In the files:
-            - trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp, 
+            - trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp,
             - trilinos/packages/ml/src/Utils/ml_utils.c
             - trilinos/packages/ml/src/MLAPI/MLAPI_Workspace.cpp:
            the functions "gethostname" and "sleep" do not exist
              a) Add include file:
-                   #include <winsock2.h> 
+                   #include <winsock2.h>
                 and if that does not work (getting unresolved _gethostname function in pyTrilinos),
                 then comment-out all "gethostname" occurences (they are not important - just for printing some info)
              b) Rename sleep() to Sleep() (if needed, wasn't needed for 10.12.2)
-     
+
      x86_64-w64-mingw32 specific:
        All the same as above. Additionally:
        1. trilinos/packages/teuchos/src/Teuchos_SerializationTraits.hpp
@@ -117,19 +120,19 @@ Prerequisities:
        2. trilinos/packages/epetra/src/Epetra_C_wrappers.cpp
           Add lines at the beggining of the file:
             #pragma GCC diagnostic push
-            #pragma GCC diagnostic warning "-fpermissive"          
-     
+            #pragma GCC diagnostic warning "-fpermissive"
+
 Cross compiling notes:
   1. Requirements for Boost:
-       --with-python-version 3.5
+       --with-python-version 3.4
        --cross-compile-python-root .../trunk/Python35-win32
        --host i686-w64-mingw32
-    
+
   2. The other libraries:
        --host i686-w64-mingw32 (the only necessary)
-                
+
 Example cross-compile call:
-    sh compile_libraries_linux.sh --with-python-version 3.5 --cross-compile-python-root ~/daetools-win32-cross/trunk/Python35-win32 --host i686-w64-mingw32 boost
+    sh compile_libraries_linux.sh --with-python-version 3.4 --cross-compile-python-root ~/daetools-win32-cross/trunk/Python34-win32 --host i686-w64-mingw32 boost
     sh compile_libraries_linux.sh --host i686-w64-mingw32 ref_blas_lapack umfpack idas superlu superlu_mt trilinos bonmin nlopt deal.ii
 EOF
 }

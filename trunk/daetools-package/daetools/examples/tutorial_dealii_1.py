@@ -177,7 +177,7 @@ class modTutorial(daeModel):
         self.fun_Diffusivity = ConstantFunction_2D(alpha)
         self.fun_Generation  = ConstantFunction_2D(0.0)
 
-        # The physial boundaries in the mesh file are specified using integers.
+        # The physical boundaries in the mesh file are specified using integers.
         # In our example they are the following:
         outerRectangle = 0 # outer boundary
         innerEllipse   = 1 # inner ellipse at the left side

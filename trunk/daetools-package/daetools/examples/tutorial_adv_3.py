@@ -217,20 +217,20 @@ class modTutorial(daeModel):
         self.STATE("variableMultipliers") # Variable multipliers
 
         eq = self.CreateEquation("m1", "Multiplier 1 (Variable)")
-        eq.Residual = self.m1.dt() - self.p1()
+        eq.Residual = dt(self.m1()) - self.p1()
 
         for w in range(nw):
             eq = self.CreateEquation("m2(%d)" % w, "Multiplier 2 (Variable)")
-            eq.Residual = self.m2.dt(w) - self.p2()
+            eq.Residual = dt(self.m2(w)) - self.p2()
 
         self.STATE("constantMultipliers") # Constant multipliers
 
         eq = self.CreateEquation("m1", "Multiplier 1 (Constant)")
-        eq.Residual = self.m1.dt()
+        eq.Residual = dt(self.m1())
 
         for w in range(nw):
             eq = self.CreateEquation("m2(%d)" % w, "Multiplier 2 (Constant)")
-            eq.Residual = self.m2.dt(w)
+            eq.Residual = dt(self.m2(w))
 
         self.END_STN()
    

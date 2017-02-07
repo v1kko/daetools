@@ -197,7 +197,7 @@ class modTutorial(daeModel):
         since the dtau/dt term is dimensionless. However, in a general case, we must use Constant(1.0 * units).
         """
         eq = self.CreateEquation("Time", "Differential equation to calculate the time elapsed in the process.")
-        eq.Residual = self.tau.dt() - 1.0
+        eq.Residual = dt(self.tau()) - 1.0
 
 # 4. Declare a simulation by deriving a class from the base daeSimulation class
 class simTutorial(daeSimulation):

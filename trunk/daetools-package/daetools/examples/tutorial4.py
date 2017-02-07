@@ -75,7 +75,7 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.BuildJacobianExpressions = True
-        eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
+        eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
         # Symmetrical STNs in DAE Tools can be created by using IF/ELSE_IF/ELSE/END_IF statements.
         # These statements are more or less used as normal if/else if/else blocks in all programming languages.

@@ -65,7 +65,7 @@ class modTutorial(daeModel):
         daeModel.DeclareEquations(self)
 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
-        eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
+        eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
 class simTutorial(daeSimulation):
     def __init__(self):

@@ -175,13 +175,13 @@ class modTutorial(daeModel):
         #
         # Create external function
         # It has to be created in DeclareEquations since it accesses the params/vars values
-        self.exfnHeat = extfnHeatTransferred("Heat", self, W, self.m(), self.cp(), self.T.dt())
+        self.exfnHeat = extfnHeatTransferred("Heat", self, W, self.m(), self.cp(), dt(self.T()))
 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
-        eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
+        eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
         eq = self.CreateEquation("Heat", "")
-        eq.Residual = self.Heat() - self.m() * self.cp() * self.T.dt()
+        eq.Residual = self.Heat() - self.m() * self.cp() * dt(self.T())
 
         eq = self.CreateEquation("Heat_ext", "")
         eq.Residual = self.Heat_ext() - self.exfnHeat()

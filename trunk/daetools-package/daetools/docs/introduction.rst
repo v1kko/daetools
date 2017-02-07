@@ -17,12 +17,12 @@ About DAE Tools
 .. begin-command
 
 **DAE Tools** is a cross-platform equation-based and object-oriented process
-modelling and optimization software. It is not a modelling language nor a collection of numerical
+modelling and optimisation software. It is not a modelling language nor a collection of numerical
 libraries but rather a higher level structure – an architectural design of interdependent
 software components providing an API for:
    
 * Model development/specification
-* Activities on developed models, such as simulation, optimization, and parameter estimation
+* Activities on developed models, such as simulation, optimisation, and parameter estimation
 * Processing of the results, such as plotting and exporting to various file formats
 * Report generation
 * Code generation, co-simulation and model exchange
@@ -36,7 +36,7 @@ under the `GNU General Public Licence <http://www.gnu.org/licenses/licenses.html
 **DAE Tools** is initially developed to model and simulate processes in chemical process industry
 (mass, heat and momentum transfers, chemical reactions, separation processes, thermodynamics).
 However, **DAE Tools** can be used to develop high-accuracy models of (in general) many different
-kind of processes/phenomena, simulate/optimize them, visualize and analyse the results.
+kind of processes/phenomena, simulate/optimise them, visualise and analyse the results.
 
 The following approaches/paradigms are adopted in **DAE Tools**:
 
@@ -54,7 +54,7 @@ The following approaches/paradigms are adopted in **DAE Tools**:
 * Separation of the model definition from the activities that can be carried out on that model.
   The structure of the model (parameters, variables, equations, state transition networks etc.)
   is given in the model class while the runtime information in the simulation class. This way,
-  based on a single model definition, one or more different simulation/optimization scenarios
+  based on a single model definition, one or more different simulation/optimisation scenarios
   can be defined.
 
 * Core libraries are written in standard c++, however `Python <http://www.python.org>`_ is used as
@@ -74,7 +74,7 @@ Type of activities that can be performed on models developed in **DAE Tools**:
 
 * Simulation (steady-state or dynamic, with simple or complex operating procedures)
 
-* Optimization (NLP and MINLP problems)
+* Optimisation (NLP and MINLP problems)
 
 * Parameter estimation (the least squares method:
   `Levenberg–Marquardt algorithm <https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm>`_)

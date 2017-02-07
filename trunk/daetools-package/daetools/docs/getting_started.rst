@@ -34,7 +34,7 @@ Running tutorials
 
    * GNU/Linux:
 
-     Run ``Applications/Development/daetools Plotter`` from the system menu or execute the following shell command:
+     Run ``Applications/Development/daetools-daePlotter.desktop`` from the system menu or execute the following shell command:
 
      .. code-block:: bash
 
@@ -50,7 +50,21 @@ Running tutorials
 
    * Windows:
 
-     Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu.
+     Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu or execute the following batch file:
+
+     .. code-block:: bash
+
+        daeplotter.bat
+
+   .. note:: ``daeplotter`` script is located in the ``Scripts`` folder (in Windows) or the ``bin`` folder (GNU/Linux)
+             of the python installation. Typically, those locations are added to the ``PATH`` by the python installation.
+
+   Alternatively, execute the following command from the command line (platform independent):
+
+   .. code-block:: bash
+
+      python -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"
+
 
    The ``DAE Tools Plotter`` main window should appear (given in :numref:`Figure-GetStarted-1`)
 
@@ -66,7 +80,7 @@ Running tutorials
 
    * GNU/Linux:
 
-     Run ``Applications/Development/daetools Examples`` from the system menu or execute the following shell command:
+     Run ``Applications/Development/daetools-daeExamples.desktop`` from the system menu or execute the following shell command:
 
      .. code-block:: bash
 
@@ -82,7 +96,20 @@ Running tutorials
 
    * Windows:
 
-     Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu.
+     Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu or execute the following batch file:
+
+     .. code-block:: bash
+
+        daeexamples.bat
+
+   .. note:: ``daeexamples`` script is located in the ``Scripts`` folder (in Windows) or the ``bin`` folder (GNU/Linux)
+             of the python installation. Typically, those locations are added to the ``PATH`` by the python installation.
+
+   Alternatively, execute the following command from the command line (platform independent):
+
+   .. code-block:: bash
+
+      python -c "from daetools.examples.run_examples import daeRunExamples; daeRunExamples()"
 
 The main window of ``DAE Tools Examples`` application is given in :numref:`Figure-GetStarted-2a` while
 the output from the simulation run in :numref:`Figure-GetStarted-2b`. There, tutorials can be run, their source code
@@ -103,15 +130,15 @@ Model reports open in a new window of the system's default web browser.
    :figwidth: 400 pt
    :align: center
 
-   A typical optimization output from DAE Tools.
+   A typical simulation output.
 
 Tutorials can also be started from the shell:
 
 .. code-block:: bash
 
-    cd /usr/local/lib/python2.7/dist-packages/daetools/examples
+    cd .../daetools/examples
     # Or in windows:
-    # cd C:\PythonX.Y\Lib\site-packages\daetools\examples
+    # cd ...\daetools\examples
     
     python tutorial1.py console
     # or
@@ -140,14 +167,15 @@ There are three ways to obtain the results from the simulation:
 
 * Through DAE Tools Plotter GUI
 * Programmatically, using one of many different types of local data reporters
-* Develop a custom user-defined data reporter by creating one of bese classes (daeDataReporter_t,
+* Develop a custom user-defined data reporter by creating one of base classes (daeDataReporter_t,
   daeDataReporterLocal, daeDataReporterFile)
 
 DAE Tools Plotter
 -----------------
 
-The simulation/optimization results can be easily plotted using the **DAE Tools Plotter** application.
-Three types of plots are supported: 2D, animated 2D and 3D plots.
+The simulation/optimisation results can be easily plotted using the **DAE Tools Plotter** application.
+Several types of plots are supported: Matplotlib-based 2D, animated 2D, auto-update 2D plots, user-defined plot,
+plot from the user-specified data, Mayavi 3D plot, and VTK file plot.
 After choosing a desired type, a **Choose variable** (given in :numref:`Figure-GetStarted-5`)
 dialog appears where a variable to be plotted can be selected and information about domains
 specified - some domains should be fixed while leaving another free by selecting ``*`` from the list
@@ -209,16 +237,20 @@ Typical 2D and 3D plots are given in :numref:`Figure-GetStarted-6` and :numref:`
         "plotTitle": "",
         "updateInterval": 0,
         "windowTitle": "tutorial4.T(*)",
-        "xlabel": "Time",
+        "xlabel": "Time (s)",
         "xmax": 525.0,
+        "xmax_policy": 0,
         "xmin": -25.0,
+        "xmin_policy": 0,
         "xscale": "linear",
         "xtransform": 1.0,
-        "ylabel": "tutorial4.T",
+        "ylabel": "T (K)",
         "ymax": 361.74772465755922,
+        "ymax_policy": 1,
         "ymin": 279.2499308975365,
+        "ymin_policy": 1,
         "yscale": "linear",
-        "ytransform": 1.0
+        "ytransform": 1.0,
       }
 
 Getting the results programmatically
@@ -228,16 +260,27 @@ There is a large number of custom data reporters. Some of them are listed below.
 
 * Data reporters that export the results to a specified file format:
 
-  * Matlab .mat file (daeMatlabMATFileDataReporter)
-  * Excell .xls file (daeExcelFileDataReporter)
-  * JSON format (daeJSONFileDataReporter)
-  * XML file (daeXMLFileDataReporter)
-  * HDF5 file (daeHDF5FileDataReporter)
+  * Matlab .mat file (:py:class:`~daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter`)
+  * Excell .xls file (:py:class:`~daetools.pyDAE.data_reporters.daeExcelFileDataReporter`)
+  * JSON format (:py:class:`~daetools.pyDAE.data_reporters.daeJSONFileDataReporter`)
+  * XML file (:py:class:`~daetools.pyDAE.data_reporters.daeXMLFileDataReporter`)
+  * HDF5 file (:py:class:`~daetools.pyDAE.data_reporters.daeHDF5FileDataReporter`)
+  * VTK file (:py:class:`~daetools.pyDAE.data_reporters.daeVTKFileDataReporter`)
 
 * Other types of data reporters
 
-  * Pandas dataset (daePandasDataReporter)
-  * Quick matplotlib plots (daePlotDataReporter)
+  * Pandas dataset (:py:class:`~daetools.pyDAE.data_reporters.daePandasDataReporter`)
+  * Quick matplotlib plots (:py:class:`~daetools.pyDAE.data_reporters.daePlotDataReporter`)
+  * Acts as a container and delegates all call to the contained data reporters; can contain
+    one or more data reporters; useful to produce results in more than one format
+    (:py:class:`~pyDataReporting.daeDelegateDataReporter`)
+
+* Base-classes that can be used for development of custom data reporters:
+
+  * :py:class:`~pyDataReporting.daeDataReporterLocal` (stores results internally; can be used for any type of processing)
+  * :py:class:`~pyDataReporting.daeNoOpDataReporter` (stores results internally but does nothing with them)
+  * :py:class:`~pyDataReporting.daeDataReporterFile` (saves the results into a file in the WriteDataToFile virtual member function)
+  * :py:class:`~pyDataReporting.daeBlackHoleDataReporter` (does not store the results and does not process them; useful when the results are not needed)
 
 
 Models
@@ -294,8 +337,8 @@ The same model developed in **cDAE** (using c++ programming language):
         daeParameter alpha;
         daeParameter A;
         daeParameter T_surr;
-        daeVariable Q_in;
-        daeVariable T;
+        daeVariable  Q_in;
+        daeVariable  T;
 
     public:
         myModel(string strName, daeModel* pParent = NULL, string strDescription = "")
@@ -338,7 +381,7 @@ Definition of a simulation in **DAE Tools** requires the following steps:
    * Fixing the degrees of freedom by assigning the values to certain variables
    * Setting the initial conditions for differential variables
    * Setting the other variables' information: initial guesses, absolute tolerances, etc
-   * Specifation of an operating procedure. It can be either a simple run for a specified period of time (default) or
+   * Specification of an operating procedure. It can be either a simple run for a specified period of time (default) or
      a complex one where various actions can be taken during the simulation
 
 2. Specify DAE and LA solvers
@@ -347,7 +390,7 @@ Definition of a simulation in **DAE Tools** requires the following steps:
 
 4. Set a time horizon, reporting interval, etc
 
-5. Do the initialization of the DAE system
+5. Do the initialisation of the DAE system
 
 6. Save model report and/or runtime model report (to inspect expanded equations etc)
 
@@ -428,7 +471,7 @@ The same simulation in **cDAE**:
 
 Simulations in **pyDAE** can be set-up to run in two modes:
 
-1. From th PyQt4 graphical user interface (**pyDAE** only):
+1. From the PyQt4 graphical user interface (**pyDAE** only):
 
    Here the default log, and data reporter objects will be used, while the user can choose DAE and LA solvers and
    specify time horizon and reporting interval.
@@ -543,34 +586,34 @@ Simulations are started by executing the following shell commands:
     python mySimulation.py
 
 
-Optimization
+Optimisation
 ============
 
-Setting up an optimization
+Setting up an optimisation
 --------------------------
 
-To define an optimization problem it is first necessary to develop a model of the process and to define
-a simulation (as explained above). Having done these tasks (working model and simulation) the optimization
-in **DAE Tools** can be defined by specifying the objective function, optimization variables and optimization
-constraints. It is intentionally chosen to keep simulation and optimization tightly coupled. The optimization
+To define an optimisation problem it is first necessary to develop a model of the process and to define
+a simulation (as explained above). Having done these tasks (working model and simulation) the optimisation
+in **DAE Tools** can be defined by specifying the objective function, optimisation variables and optimisation
+constraints. It is intentionally chosen to keep simulation and optimisation tightly coupled. The optimisation
 problem should be specified in the function :py:meth:`~pyActivity.daeSimulation.SetUpOptimization`.
 
-Definition of an optimization in **DAE Tools** requires the following steps:
+Definition of an optimisation in **DAE Tools** requires the following steps:
 
 1. Specify the objective function
 
    * Objective function is defined by specifying its residual (similarly to specifying an equation residual);
      Internally the framework will create a new variable (V_obj) and a new equation (F_obj).
 
-2. Specify optimization variables
+2. Specify optimisation variables
 
-   * The optimization variables have to be already defined in the model and their values assigned in the simulation;
+   * The optimisation variables have to be already defined in the model and their values assigned in the simulation;
      they can be either non-distributed or distributed.
-   * Specify a type of optimization variable values. The variables can be ``continuous`` (floating point values in
+   * Specify a type of optimisation variable values. The variables can be ``continuous`` (floating point values in
      the given range), ``integer`` (set of integer values in the given range) or ``binary`` (integer value: 0 or 1).
    * Specify the starting point (within the range)
 
-3. Specify optimization constraints
+3. Specify optimisation constraints
 
    * Two types of constraints exist in DAE Tools: ``equality`` and ``inequality`` constraints
      To define an ``equality`` constraint its residual and the value has to be specified;
@@ -591,11 +634,11 @@ Definition of an optimization in **DAE Tools** requires the following steps:
 
 8. Set the options of the (MI)NLP solver
 
-9. Initialize the optimization
+9. Initialise the optimisation
 
 10. Save model report and/or runtime model report (to inspect expanded equations etc)
 
-11. Run the optimization
+11. Run the optimisation
 
 :py:meth:`~pyActivity.daeSimulation.SetUpOptimization` function should be declared in the simulation class:
 
@@ -625,7 +668,7 @@ In **cDAE**:
         }
     };
 
-Optimizations, like simulations can be set-up to run in two modes:
+Optimisations, like simulations can be set-up to run in two modes:
 
 1. From the PyQt4 graphical user interface (**pyDAE** only)
 
@@ -649,7 +692,7 @@ Optimizations, like simulations can be set-up to run in two modes:
      # Report ALL variables in the model
      sim.m.SetReportingOn(True)
 
-     # Show the daeSimulator window to choose the other information needed for optimization
+     # Show the daeSimulator window to choose the other information needed for optimisation
      simulator = daeSimulator(app, simulation=sim, nlpsolver=nlp)
      simulator.show()
 
@@ -682,7 +725,7 @@ Optimizations, like simulations can be set-up to run in two modes:
      if(datareporter.Connect("", simName) == False):
          sys.exit()
 
-     # Initialize the opimization
+     # Initialise the optimisation
      optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
      # Run
@@ -715,7 +758,7 @@ Optimizations, like simulations can be set-up to run in two modes:
     if(!pDataReporter->Connect("", strName))
         return;
 
-    // Initialize the optimization
+    // Initialise the optimisation
     pOptimization->Initialize(pSimulation.get(),
                               pNLPSolver.get(),
                               pDAESolver.get(),
@@ -731,6 +774,6 @@ Optimizations, like simulations can be set-up to run in two modes:
 More information about simulation can be found in :doc:`pyDAE_user_guide` and :py:class:`~pyActivity.daeOptimization`.
 Also, do not forget to have a look on :doc:`tutorials`.
 
-Starting an optimization
+Starting an optimisation
 ------------------------
-Starting the optimization problems is analogous to running a simulation.
+Starting the optimisation problems is analogous to running a simulation.

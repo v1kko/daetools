@@ -62,28 +62,28 @@ class modTutorial(daeModel):
         eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.rho() * self.cp() * self.T.dt(x, y) - self.k() * \
-                     (self.T.d2(self.x, x, y) + self.T.d2(self.y, x, y))
+        eq.Residual = self.rho() * self.cp() * dt(self.T(x,y)) - self.k() * \
+                      (d2(self.T(x,y), self.x) + d2(self.T(x,y), self.y))
 
         eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qb()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y) - self.Qb()
 
         eq = self.CreateEquation("BC_top", "Neumann boundary conditions at the top edge (constant flux)")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
-        eq.Residual = - self.k() * self.T.d(self.y, x, y) - self.Qt()
+        eq.Residual = - self.k() * d(self.T(x,y), self.y) - self.Qt()
 
         eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x)
 
         eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
-        eq.Residual = self.T.d(self.x, x, y)
+        eq.Residual = d(self.T(x,y), self.x)
 
 class simTutorial(daeSimulation):
     def __init__(self):

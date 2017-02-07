@@ -121,7 +121,7 @@ class modelMoC(daeModel):
                 eq.Residual = self.ni_I(0) # Boundary conditions: here G*ni = 0
             else:
                 eq = self.CreateEquation("ni_I(%d)" % i, "")
-                eq.Residual = self.ni_I.dt(i) + Constant(G) * (self.ni_I(i) - self.ni_I(i-1)) / (self.L(i) - self.L(i-1))
+                eq.Residual = dt(self.ni_I(i)) + Constant(G) * (self.ni_I(i) - self.ni_I(i-1)) / (self.L(i) - self.L(i-1))
 
         # II order central scheme
         eq = self.CreateEquation("ni_II_central(0)", "")
@@ -129,7 +129,7 @@ class modelMoC(daeModel):
 
         eq = self.CreateEquation("ni_II_central(n)", "")
         l = eq.DistributeOnDomain(self.L, eOpenClosed)
-        eq.Residual = self.ni_II_central.dt(l) + Constant(G) * self.ni_II_central.d(self.L, l)
+        eq.Residual = dt(self.ni_II_central(l)) + Constant(G) * d(self.ni_II_central(l), self.L)
 
         # k-interpolation (van Leer 1985)
         for i in range(0, nL):
@@ -138,7 +138,7 @@ class modelMoC(daeModel):
                 eq.Residual = self.ni_k_int(0) # Boundary condition: here G*ni = 0
             else:
                 eq = self.CreateEquation("ni_k_int(%d)" % i, "")
-                eq.Residual = self.ni_k_int.dt(i) + Constant(G) * (ni_edge_plus(i,self.ni_k_int,nL) - ni_edge_plus(i-1,self.ni_k_int,nL)) / (self.L(i) - self.L(i-1))
+                eq.Residual = dt(self.ni_k_int(i)) + Constant(G) * (ni_edge_plus(i,self.ni_k_int,nL) - ni_edge_plus(i-1,self.ni_k_int,nL)) / (self.L(i) - self.L(i-1))
 
 class simTutorial(daeSimulation):
     def __init__(self):

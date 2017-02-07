@@ -85,8 +85,12 @@ elif [ ${DISTRIBUTOR_ID} = "suse linux" ]; then
                  python-xlwt python-lxml h5py python-pandas
                  
 elif [ ${DISTRIBUTOR_ID} = "arch" ]; then
-  sudo pacman -S python2-pyqt4 python2-numpy python2-scipy python2-matplotlib mayavi \
-                 python2-xlwt python-lxml python-h5py python-pandas
+  # python 2
+  #sudo pacman -S python2-pyqt4 python2-numpy python2-scipy python2-matplotlib mayavi python2-xlwt \
+  #               python-lxml python-h5py python-pandas
+  # python 3
+  sudo pacman -S python-pyqt4 python-numpy python-scipy python-matplotlib mayavi python-xlwt \
+                 python-lxml python-h5py python-pandas
 
 else
   echo "ERROR: unsupported GNU/Linux distribution; please edit the script to add support for: ${DISTRIBUTOR_ID}/${CODENAME}"
