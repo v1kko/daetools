@@ -306,9 +306,12 @@ class modTutorial(daeModel):
         #          - vector_dof_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)
         #          - vector_dof_gradient_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)
         #          - adouble (ad): wraps any daetools expression to be used in matrix assembly
-        #          - tensor1 (t): wraps deal.II Tensor<rank=1>
-        #          - tensor2 (t): wraps deal.II Tensor<rank=2>
-        #          - tensor2 (t): wraps deal.II Tensor<rank=3>
+        #          - tensor1 (t): wraps deal.II Tensor<rank=1,double>
+        #          - tensor2 (t): wraps deal.II Tensor<rank=2,double>
+        #          - tensor3 (t): wraps deal.II Tensor<rank=3,double>
+        #          - adouble_tensor1 (t): wraps deal.II Tensor<rank=1,adouble>
+        #          - adouble_tensor2 (t): wraps deal.II Tensor<rank=1,adouble>
+        #          - adouble_tensor3 (t): wraps deal.II Tensor<rank=1,adouble>
 
         #         First, we need to wrap Function<dim> objects to be used in the weak form using the function_value function:
         Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))

@@ -11,9 +11,6 @@ Code generators and model exchange
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-Model exchange
-##############
-
 Code Generators
 ###############
 
@@ -58,6 +55,18 @@ C99
     :undoc-members:
 
 .. autoclass:: daetools.code_generators.c99.daeCodeGenerator_c99
+    :members:
+    :undoc-members:
+
+C++_MPI
+=======
+.. py:module:: daetools.code_generators.cxx_mpi
+
+.. autoclass:: daetools.code_generators.cxx_mpi.daeCodeGenerator_cxx_mpi
+    :members:
+    :undoc-members:
+
+.. autoclass:: daetools.code_generators.cxx_mpi.daeCodeGenerator_cxx_mpi
     :members:
     :undoc-members:
 

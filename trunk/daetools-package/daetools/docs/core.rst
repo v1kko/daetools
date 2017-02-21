@@ -30,9 +30,10 @@ Classes
     daeParameter
     daeVariable
     daeModel
+    daeEquation
+    daeEquationExecutionInfo
     daeSTN
     daeIF
-    daeEquation
     daeState
     daePort
     daeEventPort
@@ -50,7 +51,6 @@ Classes
     daeObjectiveFunction
     daeOptimizationConstraint
     daeMeasuredVariable
-    daeEquationExecutionInfo
 
 .. autoclass:: pyCore.daeVariableType
     :members:
@@ -100,12 +100,16 @@ Classes
 
     .. method:: SetValues((daeParameter)self, (float)values) -> None
 
-        Sets all values of the parameter.
+        Sets all values using a single float value.
 
     .. method:: SetValues((daeParameter)self, (quantity)values) -> None
 
-        Sets all values of the parameter.
-    
+        Sets all values using a single quantity object.
+
+    .. method:: SetValues((daeParameter)self, (ndarray(dtype=float|quantity))values) -> None
+
+        Sets all values using a numpy array of simple floats or quantity objects.
+
     .. method:: array((daeParameter)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
 
         Gets the array of parameter's values at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
@@ -117,7 +121,6 @@ Classes
         * python ``list`` (to select a list of indexes from a domain)
         * python ``slice`` (to select a range of indexes from a domain: start_index, end_index, step)
         * character ``'*'`` (to select all points from a domain)
-        * integer ``-1`` (to select all points from a domain)
         * empty python list ``[]`` (to select all points from a domain)
 
     .. method:: __call__((daeParameter)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
@@ -155,13 +158,9 @@ Classes
         Sets the value of the variable at the specified domain indexes. How many arguments ``index1, ..., index8`` are used
         depends on the number of domains that the variable is distributed on.
 
-    .. method:: SetValues((daeVariable)self, (float)values) -> None
+    .. method:: SetValues((daeVariable)self, (ndarray(dtype=float|quantity))values) -> None
 
-        Sets all values of the variable.
-
-    .. method:: SetValues((daeVariable)self, (quantity)values) -> None
-
-        Sets all values of the variable.
+        Sets all values using a numpy array of simple floats or quantity objects.
 
     .. method:: AssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)value) -> None
 
@@ -171,6 +170,8 @@ Classes
 
     .. method:: AssignValues((daeVariable)self, (quantity)values) -> None
 
+    .. method:: AssignValues((daeVariable)self, (ndarray(dtype=float|quantity))values) -> None
+
     .. method:: ReAssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)value) -> None
 
     .. method:: ReAssignValue((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)value) -> None
@@ -178,6 +179,8 @@ Classes
     .. method:: ReAssignValues((daeVariable)self, (float)values) -> None
 
     .. method:: ReAssignValues((daeVariable)self, (quantity)values) -> None
+
+    .. method:: ReAssignValues((daeVariable)self, (ndarray(dtype=float|quantity))values) -> None
 
     .. method:: SetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)initialCondition) -> None
 
@@ -187,6 +190,8 @@ Classes
 
     .. method:: SetInitialConditions((daeVariable)self, (quantity)initialConditions) -> None
 
+    .. method:: SetInitialConditions((daeVariable)self, (ndarray(dtype=float|quantity))initialConditions) -> None
+
     .. method:: ReSetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)initialCondition) -> None
 
     .. method:: ReSetInitialCondition((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (quantity)initialCondition) -> None
@@ -194,6 +199,8 @@ Classes
     .. method:: ReSetInitialConditions((daeVariable)self, (float)initialConditions) -> None
 
     .. method:: ReSetInitialConditions((daeVariable)self, (quantity)initialConditions) -> None
+
+    .. method:: ReSetInitialConditions((daeVariable)self, (ndarray(dtype=float|quantity))initialConditions) -> None
 
     .. method:: SetInitialGuess((daeVariable)self, [(int)index1[, ...[, (int)index8]]], (float)initialGuess) -> None
 
@@ -203,6 +210,8 @@ Classes
 
     .. method:: SetInitialGuesses((daeVariable)self, (quantity)initialGuesses) -> None
 
+    .. method:: SetInitialGuesses((daeVariable)self, (ndarray(dtype=float|quantity))initialGuesses) -> None
+
     .. method:: SetAbsoluteTolerances((daeVariable)self, (float)tolerances) -> None
 
     .. method:: array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
@@ -211,66 +220,25 @@ Classes
         depends on the number of domains that the variable is distributed on. Argument types are the same
         as those described in :py:meth:`pyCore.daeParameter.array`
 
-    .. method:: d_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of partial derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`.
-
-    .. method:: d2_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of partial derivatives of the second order at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`.
-
-    .. method:: dt_array((daeVariable)self, [(object)index1[, ...[, (object)index8]]]) -> adouble_array
-
-        Gets the array of time derivatives at the specified domain indexes (used to build equation residuals only). How many arguments ``index1, ..., index8`` are used
-        depends on the number of domains that the variable is distributed on. Argument types are the same
-        as those described in :py:meth:`pyCore.daeParameter.array`.
-
-    .. method:: __call__((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the value of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: d((daeVariable)self, (daeDomain)domain, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the partial derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: d2((daeVariable)self, (daeDomain)domain, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the partial derivative of second order of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-    .. method:: dt((daeVariable)self, [(int)index1[, ...[, (int)index8]]]) -> adouble
-
-        Gets the time derivative of the variable at the specified domain indexes (used to build equation residuals only). How many arguments ``index1``, ..., ``index8`` are used
-        depends on the number of domains that the variable is distributed on.
-
-
 .. autoclass:: pyCore.daeModel
     :members:
     :undoc-members:
 
     .. automethod:: __init__
 
-.. autoclass:: pyCore.daeFiniteElementObject
+.. autoclass:: pyCore.daeEquation
     :members:
     :undoc-members:
 
-    .. automethod:: __init__
-    
+.. autoclass:: pyCore.daeEquationExecutionInfo
+    :members:
+    :undoc-members:
+
 .. autoclass:: pyCore.daeSTN
     :members:
     :undoc-members:
 
 .. autoclass:: pyCore.daeIF
-    :members:
-    :undoc-members:
-
-.. autoclass:: pyCore.daeEquation
     :members:
     :undoc-members:
 
@@ -291,6 +259,10 @@ Classes
     .. automethod:: __init__
 
 .. autoclass:: pyCore.daePortConnection
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeEventPortConnection
     :members:
     :undoc-members:
 
@@ -371,10 +343,6 @@ Classes
 
     .. automethod:: __init__
 
-.. autoclass:: pyCore.daeEquationExecutionInfo
-    :members:
-    :undoc-members:
-    
 Functions
 ---------
 .. autosummary::
@@ -408,8 +376,8 @@ Functions
 .. autofunction:: pyCore.Integral
 .. autofunction:: pyCore.Average
 
-Autodifferentiation and equation evaluation tree support
-========================================================
+Auto-differentiation and equation evaluation tree support
+=========================================================
 
 Classes
 -------
@@ -432,13 +400,22 @@ Classes
 .. autoclass:: pyCore.daeCondition
     :members:
 
+    Since it is not allowed to overload Python’s operators ``and``, ``or`` and ``not`` they cannot be used
+    to define logical comparison operations; therefore, the bitwise operators ``&``, ``|`` and ``~`` are
+    overloaded and should be used instead.
+
     .. method:: __or__((daeCondition)self, (daeCondition)right) -> daeCondition
 
-    Logical operator ``or``
+    Bitwise operator or (``\``) in **DAE Tools** is used as a logical comparison operator ``or``.
 
     .. method:: __and__((daeCondition)self, (daeCondition)right) -> daeCondition
 
-    Logical operator ``and``
+    Bitwise operator and (``&``) in **DAE Tools** is used as a logical comparison operator ``and``.
+
+    .. method:: __inv__((daeCondition)self, (daeCondition)right) -> daeCondition
+
+    Bitwise inversion operator (``~``) in **DAE Tools** is used as a logical comparison operator ``not``.
+
 
 Mathematical functions
 ----------------------
@@ -449,6 +426,7 @@ Mathematical functions
     Log
     Log10
     Sqrt
+    Pow
     Sin
     Cos
     Tan
@@ -462,9 +440,9 @@ Mathematical functions
     ACosh
     ATanh
     ATan2
+    Erf
     Ceil
     Floor
-    Pow
     Abs
     Min
     Max
@@ -473,6 +451,7 @@ Mathematical functions
 .. autofunction:: pyCore.Log
 .. autofunction:: pyCore.Log10
 .. autofunction:: pyCore.Sqrt
+.. autofunction:: pyCore.Pow
 .. autofunction:: pyCore.Sin
 .. autofunction:: pyCore.Cos
 .. autofunction:: pyCore.Tan
@@ -486,9 +465,9 @@ Mathematical functions
 .. autofunction:: pyCore.ACosh
 .. autofunction:: pyCore.ATanh
 .. autofunction:: pyCore.ATan2
+.. autofunction:: pyCore.Erf
 .. autofunction:: pyCore.Ceil
 .. autofunction:: pyCore.Floor
-.. autofunction:: pyCore.Pow
 .. autofunction:: pyCore.Abs
 .. autofunction:: pyCore.Min
 .. autofunction:: pyCore.Max

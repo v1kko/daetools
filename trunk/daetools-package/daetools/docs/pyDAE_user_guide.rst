@@ -1094,6 +1094,13 @@ A typical evaluation tree is presented in the :numref:`Figure-EvaluationTree` be
 
     Equation evaluation tree in DAE Tools
 
+The equation ``F`` in :numref:`Figure-EvaluationTree` is a result of the following **DAE Tools** equation:
+
+.. code-block:: python
+
+    eq = model.CreateEquation("F", "F description")
+    eq.Residal = dt(V14()) + V1() / (V14() + 2.5) + Sin(3.14 * V3())
+
 As it has been described in the previous sections, domains, parameters, and variables contain functions
 that return :py:class:`~pyCore.adouble`/:py:class:`~pyCore.adouble_array` objects used to construct the
 evaluation trees. These functions include functions to get a value of
@@ -1104,14 +1111,6 @@ or functions to obtain an array of values, time or partial derivatives (:py:meth
 
 Another useful feature of **DAE Tools** equations is that they can be
 exported into MathML or Latex format and easily visualised.
-
-For example, the equation ``F`` in :numref:`Figure-EvaluationTree`
-is a result of the following **DAE Tools** equation:
-
-.. code-block:: python
-
-    eq = model.CreateEquation("F", "F description")
-    eq.Residal = dt(V14()) + V1() / (V14() + 2.5) + Sin(3.14 * V3())
 
 Defining boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1135,9 +1134,8 @@ The equation is defined on the ``y`` domain open on both ends; thus, the additio
 (boundary conditions at ``y = 0`` and ``y = ny`` points) need to be specified to make the system well posed:
 
 .. math::
-    T(x,y) = 500; \forall x \in [0, nx], y = 0
-
-    -k \cdot {\partial T(x,y) \over \partial y} = 1E6; \forall x \in [0, nx], y = ny
+    T(x,y) &= 500; \forall x \in [0, nx], y = 0 \\
+    -k \cdot {\partial T(x,y) \over \partial y} &= 1E6; \forall x \in [0, nx], y = ny
 
 To do so, the following equations can be used:
 
@@ -1433,6 +1431,237 @@ is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look
 on :ref:`tutorial_13`.
+
+Units and quantities
+====================
+There are three classes in the framework: :py:class:`pyUnits.base_unit`, :py:class:`pyUnits.unit` and
+:py:class:`pyUnits.quantity`.
+The :py:class:`pyUnits.base_unit` class handles seven SI base dimensions: ``length``, ``mass``, ``time``,
+``electric current``, ``temperature``, ``amount of substance``, and ``luminous intensity``
+(``m``, ``kg``, ``s``, ``A``, ``K``, ``mol``, ``cd``).
+The :py:class:`pyUnits.unit` class operates on base units defined using the base seven dimensions.
+The :py:class:`pyUnits.quantity` class defines a numerical value in terms of a unit of measurement
+(it contains the value and its units).
+
+There is a large pool of ``base units`` and ``units`` defined (all base and derived SI units) in the
+:py:class:`pyUnits` module:
+
+- m
+- s
+- cd
+- A
+- mol
+- kg
+- g
+- t
+- K
+- rad
+- sr
+- min
+- hour
+- day
+- l
+- dl
+- ml
+- N
+- J
+- W
+- V
+- C
+- F
+- Ohm
+- T
+- H
+- S
+- Wb
+- Pa
+- P
+- St
+- Bq
+- Gy
+- Sv
+- lx
+- lm
+- kat
+- knot
+- bar
+- b
+- Ci
+- R
+- rd
+- rem
+
+and all above with 20 SI prefixes:
+
+- yotta = 1E+24 (symbol Y)
+- zetta = 1E+21 (symbol Z)
+- exa   = 1E+18 (symbol E)
+- peta  = 1E+15 (symbol P)
+- tera  = 1E+12 (symbol T)
+- giga  = 1E+9 (symbol G)
+- mega  = 1E+6 (symbol M)
+- kilo  = 1E+3 (symbol k)
+- hecto = 1E+2 (symbol h)
+- deka  = 1E+1 (symbol da)
+- deci  = 1E-1 (symbol d)
+- centi = 1E-2 (symbol c)
+- milli = 1E-3 (symbol m)
+- micro = 1E-6 (symbol u)
+- nano  = 1E-9 (symbol n)
+- pico  = 1E-12 (symbol p)
+- femto = 1E-15 (symbol f)
+- atto  = 1E-18 (symbol a)
+- zepto = 1E-21 (symbol z)
+- yocto = 1E-24 (symbol y)
+
+for instance: kmol (kilo mol), MW (mega Watt), ug (micro gram) etc.
+
+New units can be defined in the following way:
+
+.. code-block:: python
+
+   rho = unit({"kg":1, "dm":-3})
+
+The constructor accepts a dictionary of ``base_unit : exponent`` items as its argument.
+The above defines a new density unit :math:`\frac{kg}{dm^3}`.
+
+The unit class defines mathematical operators ``*``, ``/`` and ``**`` to allow creation of derived units.
+Thus, the density unit can be also defined in the following way:
+
+.. code-block:: python
+
+   mass   = unit({"kg" : 1})
+   volume = unit({"dm" : 3})
+   rho = mass / volume
+
+Quantities are created by multiplying a value with desired units:
+
+.. code-block:: python
+
+   heat = 1.5 * J
+
+The :py:class:`pyUnits.quantity` class defines all mathematical operators (``+, -, *, / and **``) and mathematical functions.
+
+.. code-block:: python
+
+   heat = 1.5 * J
+   time = 12 * s
+   power = heat / time
+
+Units-consistency of equations and logical conditions is strictly enforced (although it can be switched off, if required).
+For instance, the operation below is not allowed:
+
+.. code-block:: python
+
+   power = heat + time
+
+since their units are not consistent (``J + s``).
+
+
+Data Reporters
+==============
+There is a large number of available data reporters in **DAE Tools**:
+
+* Data reporters that export results to a specified file format:
+
+  * Matlab .mat file (:py:class:`~daetools.pyDAE.data_reporters.daeMatlabMATFileDataReporter`)
+  * Excell .xls file (:py:class:`~daetools.pyDAE.data_reporters.daeExcelFileDataReporter`)
+  * JSON format (:py:class:`~daetools.pyDAE.data_reporters.daeJSONFileDataReporter`)
+  * XML file (:py:class:`~daetools.pyDAE.data_reporters.daeXMLFileDataReporter`)
+  * HDF5 file (:py:class:`~daetools.pyDAE.data_reporters.daeHDF5FileDataReporter`)
+  * VTK file (:py:class:`~daetools.pyDAE.data_reporters.daeVTKFileDataReporter`)
+
+* Simple data reporters
+
+  * Data reporter that only stores results internally but does nothing with the data
+    (:py:class:`~pyDataReporting.daeNoOpDataReporter`)
+  * Data reporter that does not store and does not process the results;
+    useful when the results are not needed (:py:class:`~pyDataReporting.daeBlackHoleDataReporter`)
+
+* Other types of data reporters
+
+  * Pandas dataset (:py:class:`~daetools.pyDAE.data_reporters.daePandasDataReporter`)
+  * Quick matplotlib plots (:py:class:`~daetools.pyDAE.data_reporters.daePlotDataReporter`)
+  * A container that delegates all calls to the contained data reporters; can contain
+    one or more data reporters; useful to produce results in more than one format
+    (:py:class:`~pyDataReporting.daeDelegateDataReporter`)
+
+* Base-classes that can be used for development of custom data reporters:
+
+  * :py:class:`~pyDataReporting.daeDataReporterLocal`
+    (stores results internally; can be used for any type of processing)
+  * :py:class:`~pyDataReporting.daeDataReporterFile`
+    (saves the results into a file in the :py:meth:`~pyDataReporting.daeDataReporterFile.WriteDataToFile` virtual member function)
+
+The best starting point in creating custom data reporters is :py:class:`~pyDataReporting.daeDataReporterLocal` class.
+It internally does all the processing and offers to users the :py:attr:`~pyDataReporting.daeDataReporterLocal.Process`
+property which contains all domains, parameters and variables in the simulation.
+
+The following functions have to be implemented (overloaded):
+
+- :py:meth:`~pyDataReporting.daeDataReporterLocal.Connect`:
+  Connects the data reporter. In the case when the local data reporter is used
+  it may contain a file name, for instance.
+
+- :py:meth:`~pyDataReporting.daeDataReporterLocal.Disconnect`:
+  Disconnects the data reporter.
+
+- :py:meth:`~pyDataReporting.daeDataReporterLocal.IsConnected`:
+  Checks if the data reporter is connected or not.
+
+All functions must return ``True`` if successful or ``False`` otherwise.
+
+An empty custom data reporter is presented below:
+
+.. code-block:: python
+
+    class MyDataReporter(daeDataReporterLocal):
+        def __init__(self):
+            daeDataReporterLocal.__init__(self)
+
+        def Connect(self, ConnectString, ProcessName):
+            ...
+            return True
+
+        def Disconnect(self):
+            ...
+            return True
+
+        def IsConnected(self):
+            ...
+            return True
+
+To write the results into a file the :py:class:`~pyDataReporting.daeDataReporterFile` base class can be used.
+It writes the data into a file in the :py:meth:`~pyDataReporting.daeDataReporterFile.WriteDataToFile` function
+called in the :py:meth:`~pyDataReporting.daeDataReporterFile.Disconnect` function.
+The only function that needs to be overloaded is :py:meth:`~pyDataReporting.daeDataReporterFile.WriteDataToFile`
+while the base class handles all other operations.
+
+The example below shows how to save the results to the Matlab .mat file:
+
+.. code-block:: python
+
+    class MyDataReporter(daeDataReporterFile):
+        def __init__(self):
+            daeDataReporterFile.__init__(self)
+
+        def WriteDataToFile(self):
+            mdict = {}
+            for var in self.Process.Variables:
+                mdict[var.Name] = var.Values
+
+
+            import scipy.io
+            scipy.io.savemat(self.ConnectString,
+                             mdict,
+                             appendmat=False,
+                             format='5',
+                             long_field_names=False,
+                             do_compression=False,
+                             oned_as='row')
+
+The filename is provided as the first argument (``connectString``) of the
+:py:meth:`~pyDataReporting.daeDataReporterLocal.Connect` function.
 
 ..
     Code generators

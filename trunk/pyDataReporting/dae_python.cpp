@@ -74,7 +74,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
         .add_property("ProcessName",	&daeDataReporter_t::GetProcessName,   &daeDataReporter_t::SetProcessName,   DOCSTR_daeDataReporter_t_ProcessName)
 
         .def("Connect",				pure_virtual(&daeDataReporter_t::Connect),           ( arg("self"),
-                                                                                           arg("connectionString"),
+                                                                                           arg("connectString"),
                                                                                            arg("processName")
                                                                                          ), DOCSTR_daeDataReporter_t_Connect)
         .def("Disconnect",			pure_virtual(&daeDataReporter_t::Disconnect),        ( arg("self") ), DOCSTR_daeDataReporter_t_Disconnect)

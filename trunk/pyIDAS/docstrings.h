@@ -20,6 +20,7 @@ const char* DOCSTR_daeIDAS = "";
     const char* DOCSTR_daeIDAS_SetLASolver1 = "";
     const char* DOCSTR_daeIDAS_SetLASolver2 = "";
     const char* DOCSTR_daeIDAS_SaveMatrixAsXPM = "";
+    const char* DOCSTR_daeIDAS_SetTimeHorizon = "";
     const char* DOCSTR_daeIDAS_LASolver = "";
     const char* DOCSTR_daeIDAS_EstLocalErrors = "";
     const char* DOCSTR_daeIDAS_ErrWeights = "";

@@ -510,9 +510,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("RuntimeNode",    make_function(&daeCondition::getRuntimeNodeRawPtr, return_internal_reference<>()), DOCSTR_daeCondition_RuntimeNode)
         .add_property("Expressions",    &daepython::daeCondition_GetExpressions,                                           DOCSTR_daeCondition_Expressions)
 
-        .def(self | self) // Logical operator OR
-        .def(self & self) // Logical operator AND
-        .def(~ self)      // Logical unary operator NOT, since we do not want to overload operator __nonzero__ (operator 'not')
+        .def(self | self) // Bitwise operator OR is used in daetools as a logical comparison operator OR
+        .def(self & self) // Bitwise operator AND is  used in daetools as a logical comparison operator AND
+        .def(~ self)      // Bitwise operator INVERT is used in daetools as a logical negation operator NOT
 
         .def("SetupNodeAsPlainText",    &daeCondition::SetupNodeAsPlainText)
         .def("SetupNodeAsLatex",        &daeCondition::SetupNodeAsLatex)
@@ -921,13 +921,15 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daeParameter, bases<daeObject>, boost::noncopyable>("daeParameter", DOCSTR_daeParameter, no_init)
-        .def("__init__", make_constructor(&daepython::daeParameter_init1, default_call_policies(), ( arg("name"),
+        .def("__init__", make_constructor(&daepython::daeParameter_init1, default_call_policies(), ( arg("self"),
+                                                                                                     arg("name"),
                                                                                                      arg("units"),
                                                                                                      arg("parentModel"),
                                                                                                      arg("description") = "",
                                                                                                      arg("domains") =  boost::python::list()
                                                                                                    ) ), DOCSTR_daeParameter_init1)
-        .def("__init__", make_constructor(&daepython::daeParameter_init2, default_call_policies(), ( arg("name"),
+        .def("__init__", make_constructor(&daepython::daeParameter_init2, default_call_policies(), ( arg("self"),
+                                                                                                     arg("name"),
                                                                                                      arg("units"),
                                                                                                      arg("parentPort"),
                                                                                                      arg("description") = "",

@@ -15,7 +15,7 @@ import os, sys, numpy
 from pyCore import *
 from pyDataReporting import *
 
-class daeVTKDataReporter(daeDataReporterLocal):
+class daeVTKDataReporter(daeDataReporterFile):
     """
     Saves data in the VTK format (.vtk) using pyEVTK module avaialable
     at https://bitbucket.org/somada141/pyevtk. Install using: "pip install pyevtk".
@@ -24,21 +24,7 @@ class daeVTKDataReporter(daeDataReporterLocal):
     Does not require VTK installed.
     """
     def __init__(self):
-        daeDataReporterLocal.__init__(self)
-        self.ProcessName   = ""
-        self.ConnectString = ""
-
-    def Connect(self, ConnectString, ProcessName):
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
-        return True
-
-    def IsConnected(self):
-        return True
-
-    def Disconnect(self):
-        self.WriteDataToFile()
-        return True
+        daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         try:
@@ -94,29 +80,13 @@ class daeVTKDataReporter(daeDataReporterLocal):
         except Exception as e:
             print(('Cannot write results in .vtk format:\n' + str(e)))
 
-class daeMatlabMATFileDataReporter(daeDataReporterLocal):
+class daeMatlabMATFileDataReporter(daeDataReporterFile):
     """
     Saves data in Matlab MAT format format (.mat) using scipy.io.savemat function.
     Does not need Matlab installed.
     """
     def __init__(self):
-        daeDataReporterLocal.__init__(self)
-        self.ProcessName   = ""
-        self.ConnectString = ""
-
-    def Connect(self, ConnectString, ProcessName):
-        print(ConnectString, ProcessName)
-        
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
-        return True
-
-    def IsConnected(self):
-        return True
-
-    def Disconnect(self):
-        self.WriteDataToFile()
-        return True
+        daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         mdict = {}
@@ -137,25 +107,12 @@ class daeMatlabMATFileDataReporter(daeDataReporterLocal):
             print(('Cannot write results in .mat format:\n' + str(e)))
 
 
-class daeJSONFileDataReporter(daeDataReporterLocal):
+class daeJSONFileDataReporter(daeDataReporterFile):
     """
     Saves data in JSON text format using python json library.
     """
     def __init__(self):
-        daeDataReporterLocal.__init__(self)
-        self.ProcessName = ""
-
-    def Connect(self, ConnectString, ProcessName):
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
-        return True
-
-    def IsConnected(self):
-        return True
-
-    def Disconnect(self):
-        self.WriteDataToFile()
-        return True
+        daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         mdict = {}
@@ -175,25 +132,12 @@ class daeJSONFileDataReporter(daeDataReporterLocal):
         except Exception as e:
             print(('Cannot write data in JSON format:\n' + str(e)))
    
-class daeHDF5FileDataReporter(daeDataReporterLocal):
+class daeHDF5FileDataReporter(daeDataReporterFile):
     """
     Saves data in HDF5 format using python h5py library.
     """
     def __init__(self):
-        daeDataReporterLocal.__init__(self)
-        self.ProcessName = ""
-
-    def Connect(self, ConnectString, ProcessName):
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
-        return True
-
-    def IsConnected(self):
-        return True
-
-    def Disconnect(self):
-        self.WriteDataToFile()
-        return True
+        daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         try:
@@ -211,25 +155,12 @@ class daeHDF5FileDataReporter(daeDataReporterLocal):
         except Exception as e:
             print(('Cannot write data in HDF5 format:\n' + str(e)))
 
-class daeXMLFileDataReporter(daeDataReporterLocal):
+class daeXMLFileDataReporter(daeDataReporterFile):
     """
     Saves data in XML format (.xml) using python xml library.
     """
     def __init__(self):
-        daeDataReporterLocal.__init__(self)
-        self.ProcessName = ""
-
-    def Connect(self, ConnectString, ProcessName):
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
-        return True
-
-    def IsConnected(self):
-        return True
-
-    def Disconnect(self):
-        self.WriteDataToFile()
-        return True
+        daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         try:
@@ -339,26 +270,13 @@ class daeXMLFileDataReporter(daeDataReporterLocal):
             print(('Cannot write data in XML format:\n' + str(e)))
 
            
-class daeExcelFileDataReporter(daeDataReporterLocal):
+class daeExcelFileDataReporter(daeDataReporterFile):
     """
     Saves data in MS Excel format (.xls) using python xlwt library.
     Does not need Excel installed (works under GNU/Linux too).
     """
     def __init__(self):
-        daeDataReporterLocal.__init__(self)
-        self.ProcessName = ""
-
-    def Connect(self, ConnectString, ProcessName):
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
-        return True
-
-    def IsConnected(self):
-        return True
-
-    def Disconnect(self):
-        self.WriteDataToFile()
-        return True
+        daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         try:
@@ -389,12 +307,9 @@ class daePandasDataReporter(daeDataReporterLocal):
     """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
-        self.ProcessName = ""
-        self.data_frame  = None
+        self.data_frame = None
 
     def Connect(self, ConnectString, ProcessName):
-        self.ProcessName   = ProcessName
-        self.ConnectString = ConnectString
         return True
 
     def IsConnected(self):
@@ -434,7 +349,7 @@ class daePlotDataReporter(daeDataReporterLocal):
         self.ProcessName = ""
 
     def Connect(self, ConnectString, ProcessName):
-        self.ProcessName      = ProcessName
+        self.ProcessName   = ProcessName
         self.ConnectString = ConnectString
         return True
 

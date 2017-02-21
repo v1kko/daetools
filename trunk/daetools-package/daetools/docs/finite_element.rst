@@ -18,12 +18,11 @@ Base Classes
 .. autosummary::
     :nosignatures:
 
-    daeFiniteElementObject_t
     daeFiniteElementModel
-
-.. autoclass:: pyCore.daeFiniteElementObject_t
-    :no-members:
-    :no-undoc-members:
+    daeFiniteElementEquation
+    daeFiniteElementVariableInfo
+    daeFiniteElementObjectInfo
+    daeFiniteElementObject_t
 
 .. autoclass:: pyCore.daeFiniteElementModel
     :no-members:
@@ -31,7 +30,27 @@ Base Classes
 
     .. automethod:: __init__
 
-   
+.. autoclass:: pyCore.daeFiniteElementModel
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeFiniteElementEquation
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeFiniteElementVariableInfo
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeFiniteElementObjectInfo
+    :members:
+    :undoc-members:
+
+.. autoclass:: pyCore.daeFiniteElementObject_t
+    :members:
+    :undoc-members:
+
+
 deal.II Main FE Classes
 =======================
 .. py:module:: solvers.deal_II.pyDealII

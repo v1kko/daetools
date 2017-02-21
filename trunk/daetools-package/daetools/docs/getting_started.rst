@@ -256,7 +256,7 @@ Typical 2D and 3D plots are given in :numref:`Figure-GetStarted-6` and :numref:`
 Getting the results programmatically
 ------------------------------------
 
-There is a large number of custom data reporters. Some of them are listed below.
+There is a large number of available data reporters. Some of them are listed below.
 
 * Data reporters that export the results to a specified file format:
 
@@ -271,7 +271,7 @@ There is a large number of custom data reporters. Some of them are listed below.
 
   * Pandas dataset (:py:class:`~daetools.pyDAE.data_reporters.daePandasDataReporter`)
   * Quick matplotlib plots (:py:class:`~daetools.pyDAE.data_reporters.daePlotDataReporter`)
-  * Acts as a container and delegates all call to the contained data reporters; can contain
+  * A container that delegates all calls to the contained data reporters; can contain
     one or more data reporters; useful to produce results in more than one format
     (:py:class:`~pyDataReporting.daeDelegateDataReporter`)
 

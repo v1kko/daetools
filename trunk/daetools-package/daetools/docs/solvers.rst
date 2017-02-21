@@ -136,7 +136,7 @@ IntelPardiso
     :exclude-members: SaveAsXPM, Name
 
     
-Optimization solvers
+Optimisation solvers
 ====================
 .. py:currentmodule:: pyCore
 

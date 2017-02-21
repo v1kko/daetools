@@ -79,10 +79,10 @@ class MyDataReporter(daeDataReporterLocal):
         daeDataReporterLocal.__init__(self)
         self.ProcessName = ""
 
-    def Connect(self, ConnectionString, ProcessName):
+    def Connect(self, ConnectString, ProcessName):
         self.ProcessName = ProcessName
         try:
-            self.f = open(ConnectionString, "w")
+            self.f = open(ConnectString, "w")
         except IOError:
             return False
         return True
@@ -227,6 +227,10 @@ def setupDataReporters(simulation):
     dr8.Connect(hdf5_filename, simName)
     dr9.Connect("", simName)
     dr10.Connect(vtk_filename, simName)
+
+    # Print the connection status for all data reporters
+    for dr in simulation._data_reporters_:
+        print('%s (%s): %s' % (dr.__class__.__name__, dr.ConnectString, 'connected' if dr.IsConnected() else 'NOT connected'))
 
     return datareporter
 
