@@ -49,7 +49,7 @@ LIBRARY:
     umfpack          Umfpack solver
     idas             IDAS solver
     superlu          SuperLU solver
-    superlu_mt       SuperLU solver
+    superlu_mt       SuperLU_MT solver
     bonmin           Bonmin solver
     nlopt            NLopt solver 
     trilinos         Trilinos Amesos and AztecOO solvers

@@ -2,7 +2,7 @@
 Programming paradigms
 *********************
 ..
-    Copyright (C) Dragan Nikolic, 2016
+    Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -16,36 +16,38 @@ Programming paradigms
 The Hybrid approach
 ===================
 
-In general, there are two types of approaches that can be applied to process modelling:
-Domain Specific Language approach and a general-purpose programming language approach (such as
-c/c++, Java or Python). A Domain Specific Language (DSL) is a special-purpose programming or
-specification language dedicated to a particular problem domain and so designed that it directly
-supports the key concepts necessary to describe the underlying problems. A domain-specific
-language is created specifically to solve problems in a particular domain and is usually not
-intended to be able to solve problems outside it (although that may be technically possible in
-some cases). In contrast, general-purpose languages are created to solve problems in a wide
-variety of application domains.
+In general, two main approaches to mathematical modelling currently exist:
+(a) use of modelling languages, either domain specific or multi-domain such as Modelica, Ascend,
+gPROMS, GAMS, Dymola, APMonitor, and
+(b) use of general-purpose programming languages, either lower level third-generation languages
+such as C, C++ and Fortran (i.e. PETSc and SUNDIALS),
+or higher level fourth-generation languages such as Python (i.e. Assimulo) and
+multi-paradigm numerical languages: Matlab, Mathematica, Maple, Scilab, and GNU Octave.
+Domain Specific Languages (DSL) are a special-purpose programming or specification languages
+dedicated to a particular problem domain and directly support the key concepts necessary to describe the underlying
+problems. They are created specifically to solve problems in a particular domain and usually not intended to be able to
+solve problems outside it (although that may be technically possible in some cases). More versatile, multi-domain
+modelling languages (such as Modelica or gPROMS) are capable of solving problems in different application domains.
+Despite their versatility, modelling languages commonly lack or have a limited access to the operating system,
+third-party numerical libraries and other capabilities that characterise full-featured programming languages, scripting
+or otherwise.
+In contrast, general-purpose languages are created to solve problems in a wide variety of application
+domains, do not support concepts from any domain, and have a direct access to the operating system, low-level
+functions and third-party libraries.
 
-Domain-specific languages are languages with very specific goals in design and implementation and
-commonly lack low-level functions for filesystem access, interprocess control, and other functions
-that characterize full-featured programming languages, scripting or otherwise. 
+**DAE Tools** approach is a type of a hybrid approach:
 
-A good example of a multi-domain modelling language is `Modelica <http://www.modelica.org>`_
-while single-domain (chemical processing industry related) DSLs are `gPROMS <http://www.psenterprise.com/gproms>`_,
-`Ascend <http://ascend4.org>`_, `SpeedUp <http://www.aspentech.com>`_ etc.
+* it is implemented using the general-purpose programming languages such as C++ and Python
 
-**DAE Tools** approach is a sort of the hybrid approach:
+but
 
-* it applies general-purpose programming languages such as c++ and Python
-  
-but offers:
-    
-* a class-hierarchy/API that resembles a syntax of a DSL as much as possible
-* an access to the low-level functions
-* an access to a large number of standard and third party libraries
-* state of the art free/open-source software components to accomplish particular tasks (calculating
-  derivatives and sensitivities, solving systems of differential and algebraic systems of equations and
-  optimization problems, processing and plotting results etc).
+* provides the Application Programming Interface (API) that resembles a syntax of modelling languages as much as possible
+
+and
+
+* takes advantage of of the higher level general purpose languages to offer an access to the operating system,
+  low-level functions and large number of numerical libraries to solve various numerical problems
+  (i.e. calculating derivatives and sensitivities, solving linear and DAE systems and optimisation problems)
 
 .. |modelica_model| image:: _static/modelica_model.png
                      :width: 200 pt

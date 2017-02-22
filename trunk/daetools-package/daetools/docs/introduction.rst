@@ -2,7 +2,7 @@
 Introduction
 ************
 ..
-    Copyright (C) Dragan Nikolic, 2016
+    Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -16,8 +16,8 @@ About DAE Tools
 
 .. begin-command
 
-**DAE Tools** is a cross-platform equation-based and object-oriented process
-modelling and optimisation software. It is not a modelling language nor a collection of numerical
+**DAE Tools** is a cross-platform equation-based object-oriented modelling, simulation
+and optimisation software. It is not a modelling language nor a collection of numerical
 libraries but rather a higher level structure – an architectural design of interdependent
 software components providing an API for:
    
@@ -27,7 +27,50 @@ software components providing an API for:
 * Report generation
 * Code generation, co-simulation and model exchange
 
-**DAE Tools** runs on all major operating systems (Windows, GNU Linux and Mac OS X)
+The following class of problems can be solved by **DAE Tools**:
+
+* Initial value problems of implicit form, described by a system of linear, non-linear, and (partial-)differential
+  algebraic equations
+* Index-1 DAE systems
+* With lumped or distributed parameters: Finite Difference or Finite Elements Methods (still experimental)
+* Steady-state or dynamic
+* Continuous with some elements of event-driven systems (discontinuous equations, state transition networks
+  and discrete events)
+
+Type of activities that can be performed on models developed in **DAE Tools**:
+
+* Simulation (steady-state or dynamic, with simple or complex operating procedures)
+
+* Optimisation (NLP and MINLP problems)
+
+* Parameter estimation
+
+* Generation of model reports (in XML + MathML format with XSL transformations for XHTML code generation)
+
+* Code generation for other modelling or general-purpose programming languages
+
+  * `Modelica <http://www.modelica.org>`_
+  * `gPROMS <http://www.psenterprise.com/gproms.html>`_
+  * `Standard ISO C (c99) <http://www.open-std.org/jtc1/sc22/wg14/www/standards>`_
+  * C++/MPI
+
+* Simulation in other simulators using standard co-simulation interfaces
+
+  * `Functional Mockup Interface (FMI) for Co-Simulation <https://www.fmi-standard.org>`_
+  * `Matlab MEX-functions <http://www.mathworks.com/help/matlab/matlab_external/introducing-mex-files.html>`_
+  * `Simulink user-defined S-functions <http://www.mathworks.com/help/simulink/sfg/what-is-an-s-function.html>`_
+
+* Export of the simulation results to various file formats:
+
+  * `Matlab MAT (.mat) <http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf>`_
+  * `Microsoft Excel (.xls) <http://office.microsoft.com/en-gb/excel>`_
+  * `JSON (.json) <http://www.json.org>`_
+  * `XML (.xml) <http://www.w3.org/XML>`_
+  * `Hierarchical Data Format (.hdf5) <http://www.hdfgroup.org/HDF5>`_
+  * `Pandas (Python Data Analysis) data sets <http://pandas.pydata.org>`_
+  * `VTK (.vtk) <http://www.vtk.org>`_
+
+**DAE Tools** run on all major operating systems (Windows, GNU Linux and Mac OS X)
 and architectures (x86, x86_64, arm).
 
 It is free to use, since it is `free software <http://www.gnu.org/>`_ and released
@@ -59,48 +102,6 @@ The following approaches/paradigms are adopted in **DAE Tools**:
 
 * Core libraries are written in standard c++, however `Python <http://www.python.org>`_ is used as
   the main modelling language (more information: :ref:`python_programming_language`).
-
-Class of problems that can be solved by **DAE Tools**:
-    
-* Initial value problems of implicit form, described by a system of linear, non-linear, and (partial-)differential
-  algebraic equations
-* Index-1 DAE systems
-* With lumped or distributed parameters: Finite Difference or Finite Elements Methods (still experimental)
-* Steady-state or dynamic
-* Continuous with some elements of event-driven systems (discontinuous equations, state transition networks
-  and discrete events) 
-
-Type of activities that can be performed on models developed in **DAE Tools**:
-
-* Simulation (steady-state or dynamic, with simple or complex operating procedures)
-
-* Optimisation (NLP and MINLP problems)
-
-* Parameter estimation (the least squares method:
-  `Levenberg–Marquardt algorithm <https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm>`_)
-
-* Generation of model reports (in XML + MathML format with XSL transformations for XHTML code generation)
-
-* Code generation for other modelling or general-purpose programming languages
-
-  * `Modelica <http://www.modelica.org>`_
-  * `gPROMS <http://www.psenterprise.com/gproms.html>`_
-  * `Standard ISO C (c99) <http://www.open-std.org/jtc1/sc22/wg14/www/standards>`_
-  
-* Simulation in other simulators using standard co-simulation interfaces
-
-  * `Functional Mockup Interface (FMI) for Co-Simulation <https://www.fmi-standard.org>`_
-  * `Matlab MEX-functions <http://www.mathworks.com/help/matlab/matlab_external/introducing-mex-files.html>`_
-  * `Simulink user-defined S-functions <http://www.mathworks.com/help/simulink/sfg/what-is-an-s-function.html>`_
-
-* Export of the simulation results to various file formats:
-
-  * `Matlab MAT (.mat) <http://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf>`_
-  * `Microsoft Excel (.xls) <http://office.microsoft.com/en-gb/excel>`_
-  * `JSON (.json) <http://www.json.org>`_
-  * `XML (.xml) <http://www.w3.org/XML>`_
-  * `Hierarchical Data Format (.hdf5) <http://www.hdfgroup.org/HDF5>`_
-  * `Pandas (Python Data Analysis) data sets <http://pandas.pydata.org>`_
 
 .. end-command
 

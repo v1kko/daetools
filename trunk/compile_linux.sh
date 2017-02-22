@@ -49,22 +49,22 @@ PROJECT:
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
-        core                Build Core c++ library and its python extension module.
-        activity            Build Activity c++ library and its python extension module.
-        data_reporting      Build DataReporting c++ library and its python extension module.
-        idas                Build IDAS c++ library and its python extension module.
-        units               Build Units c++ library and its python extension module.
+        core                Build Core c++ library and its python extension module (pyCore).
+        activity            Build Activity c++ library and its python extension module (pyActivity).
+        data_reporting      Build DataReporting c++ library and its python extension module (pyDataReporting).
+        idas                Build IDAS c++ library and its python extension module (pyIDAS).
+        units               Build Units c++ library and its python extension module (pyUnits).
         simulation_loader   Build simulation_loader shared library.
         fmi                 Build FMI wrapper shared library.
-        trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module.
-        superlu             Build SuperLU linear solver and its python extension module.
-        superlu_mt          Build SuperLU_MT linear solver and its python extension module.
-        pardiso             Build PARDISO linear solver and its python extension module.
-        intel_pardiso       Build Intel PARDISO linear solver and its python extension module.
-        bonmin              Build BONMIN minlp solver and its python extension module.
-        ipopt               Build IPOPT nlp solver and its python extension module.
-        nlopt               Build NLOPT nlp solver and its python extension module.
-        deal.ii             Build deal.II FEM solvers and its python extension module.
+        trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
+        superlu             Build SuperLU linear solver and its python extension module (pySuperLU).
+        superlu_mt          Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
+        pardiso             Build PARDISO linear solver and its python extension module (pyPardiso).
+        intel_pardiso       Build Intel PARDISO linear solver and its python extension module (pyIntelPardiso).
+        bonmin              Build BONMIN minlp solver and its python extension module (pyBONMIN).
+        ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
+        nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
+        deal.ii             Build deal.II FEM solvers and its python extension module (pyDealII).
 EOF
 }
 

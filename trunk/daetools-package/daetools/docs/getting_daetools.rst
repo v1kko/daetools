@@ -2,7 +2,7 @@
 Getting DAE Tools
 *****************
 ..
-    Copyright (C) Dragan Nikolic, 2016
+    Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -17,7 +17,7 @@ System requirements
 
 Supported platforms:
     
-* GNU/Linux (i686, x86_64, arm)
+* GNU/Linux (i686, x86_64)
 * Windows (32 bit and 32 bit version of DAE Tools on 64 bit)
 * MacOS (x86, x86_64)
 
@@ -26,7 +26,7 @@ The software works on both python 2 and 3. The binaries are provided for 2.7, 3.
 Mandatory packages:
 
 * Python (2.7, 3.4\ :sup:`+`): `<http://www.python.org>`_
-* Numpy (1.8\ :sup:`+`): `<http://numpy.scipy.org>`_
+* Numpy (1.8\ :sup:`+`): `<http://www.numpy.org>`_
 * Scipy (0.14\ :sup:`+`): `<http://www.scipy.org>`_
 * Matplotlib (1.4\ :sup:`+`): `<http://matplotlib.sourceforge.net>`_
 * pyQt4: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
@@ -45,8 +45,8 @@ Optional packages (proprietary):
 * Intel Pardiso linear solver: `<https://software.intel.com/en-us/intel-mkl>`_
 
 For more information on how to install packages please refer to the documentation for the specific library.
-By default all versions (GNU/Linux, Windows and MacOS) come with the Sundials dense LU and Lapack linear
-solvers, SuperLU, SuperLU_MT, Trilinos Amesos (with built-in support for KLU, SuperLU and Lapack linear solvers),
+By default all versions (GNU/Linux, Windows and MacOS) come with the Sundials dense LU linear solver,
+SuperLU, SuperLU_MT, Trilinos Amesos (with built-in support for KLU, SuperLU and Lapack linear solvers),
 Trilinos AztecOO (with built-in support for Ifpack and ML preconditioners), NLOPT and IPOPT/BONMIN
 (with MUMPS linear solver and PORD ordering).
 
@@ -127,8 +127,8 @@ Use the system's Python
 Install one of scientific python distributions
 //////////////////////////////////////////////
 
-* Anaconda `<https://store.continuum.io/cshop/anaconda>`_
-* Miniconda `<http://conda.pydata.org/miniconda.html>`_
+* `Anaconda <https://www.continuum.io/downloads>`_
+* `Miniconda <https://conda.io/miniconda.html>`_
 
   Install dependencies using:
 
@@ -136,7 +136,7 @@ Install one of scientific python distributions
 
      conda install numpy scipy matplotlib pyqt=4.11 lxml pandas h5py xlwt
 
-* Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
+* `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
 Install DAE Tools
 +++++++++++++++++
@@ -162,8 +162,8 @@ Install Python and Python packages
 
 Install one of scientific python distributions
 //////////////////////////////////////////////
-* Anaconda `<https://store.continuum.io/cshop/anaconda>`_
-* Miniconda `<http://conda.pydata.org/miniconda.html>`_
+* `Anaconda <https://www.continuum.io/downloads>`_
+* `Miniconda <https://conda.io/miniconda.html>`_
 
   Install dependencies using:
       
@@ -171,7 +171,7 @@ Install one of scientific python distributions
 
     conda install numpy scipy matplotlib pyqt=4.11 lxml pandas h5py xlwt
   
-* Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
+* `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
 Use the system's Python
 ///////////////////////
@@ -179,11 +179,11 @@ The system's python version usually does not work well (therefore, install a cus
 First, install the mandatory packages: python 2.7, numpy, scipy, matplotlib and pyqt4.
 As a starting point the following links can be used:
 
-* Python: `<https://www.python.org/ftp/python/2.7.9/python-2.7.9-macosx10.6.pkg>`_
-* Numpy: `<http://sourceforge.net/projects/numpy/files/NumPy/1.9.1>`_
-* Scipy: `<http://sourceforge.net/projects/scipy/files/scipy/0.14.0>`_
-* Matplotlib: `<http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.4.2/mac/>`_
-* PyQt4: `<http://www.riverbankcomputing.com/software/pyqt/download>`_
+* `Python <http://www.python.org>`_
+* `NumPy <http://sourceforge.net/projects/numpy/files/NumPy>`_
+* `SciPy <http://sourceforge.net/projects/scipy/files/scipy>`_
+* `Matplotlib <http://sourceforge.net/projects/matplotlib/files/matplotlib>`_
+* `PyQt4 <http://www.riverbankcomputing.com/software/pyqt/download>`_
 
 Install DAE Tools
 +++++++++++++++++
@@ -208,8 +208,8 @@ Install Python and Python packages
 ++++++++++++++++++++++++++++++++++
 The easiest way is to install one of available scientific python distributions:
     
-* Anaconda `<https://store.continuum.io/cshop/anaconda>`_
-* Miniconda `<http://conda.pydata.org/miniconda.html>`_
+* `Anaconda <https://www.continuum.io/downloads>`_
+* `Miniconda <https://conda.io/miniconda.html>`_
   
   Install dependencies using:
 
@@ -217,8 +217,8 @@ The easiest way is to install one of available scientific python distributions:
 
      conda install numpy scipy matplotlib pyqt=4.11 lxml pandas h5py xlwt
   
-* Enthought Canopy (former EPD) `<https://www.enthought.com/products/canopy>`_
-* Python(x,y) `<https://python-xy.github.io/>`_
+* `Enthought Canopy <https://www.enthought.com/products/canopy>`_
+* `Python(x,y) <https://python-xy.github.io/>`_
 
 .. note:: Only 32-bit version of **DAE Tools** is available for Windows. However, **DAE Tools** can be used on 64-bit
           versions of Windows by installing the 32-bit python.
@@ -229,8 +229,6 @@ To be able to create 3D plots you need to install Mayavi2 package. It can be ins
 
     easy_install "Mayavi[app]"
 
-    
-Alternatively you can install everything needed through `Python(x,y) <http://www.pythonxy.com>`_.
 
 Install DAE Tools
 +++++++++++++++++
@@ -333,7 +331,7 @@ It is also possible to compile individual libraries using one of the following o
       umfpack          Umfpack solver
       idas             IDAS solver
       superlu          SuperLU solver
-      superlu_mt       SuperLU solver
+      superlu_mt       SuperLU_MT solver
       bonmin           Bonmin solver
       nlopt            NLopt solver
       trilinos         Trilinos Amesos and AztecOO solvers
@@ -361,22 +359,22 @@ It is also possible to compile individual libraries using one of the following o
     pydae           Build daetools core python extension modules only.
 
     Individual projects:
-        core                Build Core c++ library and its python extension module.
-        activity            Build Activity c++ library and its python extension module.
-        data_reporting      Build DataReporting c++ library and its python extension module.
-        idas                Build IDAS c++ library and its python extension module.
-        units               Build Units c++ library and its python extension module.
+        core                Build Core c++ library and its python extension module (pyCore).
+        activity            Build Activity c++ library and its python extension module (pyActivity).
+        data_reporting      Build DataReporting c++ library and its python extension module (pyDataReporting).
+        idas                Build IDAS c++ library and its python extension module (pyIDAS).
+        units               Build Units c++ library and its python extension module (pyUnits).
         simulation_loader   Build simulation_loader shared library.
         fmi                 Build FMI wrapper shared library.
-        trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module.
-        superlu             Build SuperLU linear solver and its python extension module.
-        superlu_mt          Build SuperLU_MT linear solver and its python extension module.
-        pardiso             Build PARDISO linear solver and its python extension module.
-        intel_pardiso       Build Intel PARDISO linear solver and its python extension module.
-        bonmin              Build BONMIN minlp solver and its python extension module.
-        ipopt               Build IPOPT nlp solver and its python extension module.
-        nlopt               Build NLOPT nlp solver and its python extension module.
-        deal.ii             Build deal.II FEM solvers and its python extension module.
+        trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
+        superlu             Build SuperLU linear solver and its python extension module (pySuperLU).
+        superlu_mt          Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
+        pardiso             Build PARDISO linear solver and its python extension module (pyPardiso).
+        intel_pardiso       Build Intel PARDISO linear solver and its python extension module (pyIntelPardiso).
+        bonmin              Build BONMIN minlp solver and its python extension module (pyBONMIN).
+        ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
+        nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
+        deal.ii             Build deal.II FEM solvers and its python extension module (pyDealII).
 
 All python extensions are located in the platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.
@@ -422,7 +420,9 @@ DAE Tools can also be compiled from within QtCreator IDE. First install dependen
     * Set ``CONFIG += SuperLU_MT`` in ``LA_SuperLU.pro``, run ``qmake`` and then compile
     * Set ``CONFIG += SuperLU_MT`` in ``pySuperLU.pro``, run ``qmake`` and then compile
 
-* Compile the ``LA_Trilinos_Amesos`` project
+* Compile the ``LA_Trilinos_Amesos`` and then ``pyTrilinos`` project
+* Compile the ``NLOPT_NLPSolver`` and then ``pyNLOPT`` project
+* Compile the ``pyDealII`` project (no compile needed for ``FE_DealII`` project since all files there are header files/templates)
 
 Windows
 -------

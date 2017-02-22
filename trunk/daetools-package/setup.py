@@ -2,7 +2,7 @@
 """********************************************************************************
                                setup.py
                  DAE Tools: pyDAE module, www.daetools.com
-                 Copyright (C) Dragan Nikolic, 2016
+                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -88,7 +88,6 @@ else:
     inside_venv = False
 
 if platform.system() == 'Linux':
-    print(sys.prefix)
     if not inside_venv:
         data_files = [
                         ('/usr/share/applications', [
@@ -143,13 +142,7 @@ elif platform.system() == 'Windows':
         shutil.copy(f, 'daetools/solvers/{0}'.format(platform_solib_dir))
 
     # Achtung!! data files dir must be '' in Windows
-    data_files = [
-                    #('', ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
-                    #('', [
-                    #       'usr/share/applications/daeExamples.lnk',
-                    #       'usr/share/applications/daePlotter.lnk'
-                    #     ] ),
-                 ]
+    data_files = []
     solibs = [
                '{0}/*.pyd'.format(platform_solib_dir),
                '{0}/*.dll'.format(platform_solib_dir)

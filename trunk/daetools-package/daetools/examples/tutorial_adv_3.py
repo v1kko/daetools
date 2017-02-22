@@ -5,7 +5,7 @@
 ***********************************************************************************
                             tutorial_adv_3.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2016
+                Copyright (C) Dragan Nikolic
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -118,7 +118,7 @@ FMI Cross-Check results:
     [INFO][FMUCHK] Version returned from CS FMU:   2.0
     ***********************************************************************
                                      Version:   1.5.0
-                                     Copyright: Dragan Nikolic, 2016
+                                     Copyright: Dragan Nikolic
                                      Homepage:  http://www.daetools.com
            @                       @
            @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@

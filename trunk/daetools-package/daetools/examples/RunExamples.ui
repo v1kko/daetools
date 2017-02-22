@@ -81,7 +81,7 @@
              </property>
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>200</width>
                <height>0</height>
               </size>
              </property>
@@ -171,19 +171,6 @@
            </property>
            <property name="text">
             <string>Show runtime model report ... *</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>* Currently Mozilla Firefox is supported</string>
            </property>
           </widget>
          </item>

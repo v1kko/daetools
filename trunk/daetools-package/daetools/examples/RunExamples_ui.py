@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'RunExamples.ui'
 #
-# Created: Tue May 21 20:31:18 2013
-#      by: PyQt4 UI code generator 4.9.3
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +11,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_RunExamplesDialog(object):
     def setupUi(self, RunExamplesDialog):
@@ -32,8 +40,8 @@ class Ui_RunExamplesDialog(object):
         self.verticalLayout_3.setSpacing(2)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
-        self.horizontalLayout_2.setSpacing(15)
         self.horizontalLayout_2.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
+        self.horizontalLayout_2.setSpacing(15)
         self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
@@ -55,7 +63,7 @@ class Ui_RunExamplesDialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.comboBoxExample.sizePolicy().hasHeightForWidth())
         self.comboBoxExample.setSizePolicy(sizePolicy)
-        self.comboBoxExample.setMinimumSize(QtCore.QSize(150, 0))
+        self.comboBoxExample.setMinimumSize(QtCore.QSize(200, 0))
         self.comboBoxExample.setObjectName(_fromUtf8("comboBoxExample"))
         self.horizontalLayout.addWidget(self.comboBoxExample)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
@@ -101,14 +109,6 @@ class Ui_RunExamplesDialog(object):
         self.toolButtonRuntimeModelReport.setMinimumSize(QtCore.QSize(0, 0))
         self.toolButtonRuntimeModelReport.setObjectName(_fromUtf8("toolButtonRuntimeModelReport"))
         self.verticalLayout.addWidget(self.toolButtonRuntimeModelReport)
-        self.label_2 = QtGui.QLabel(RunExamplesDialog)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
-        self.label_2.setSizePolicy(sizePolicy)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.verticalLayout.addWidget(self.label_2)
         self.horizontalLayout_2.addLayout(self.verticalLayout)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.docstringEdit = QtGui.QTextEdit(RunExamplesDialog)
@@ -137,12 +137,11 @@ class Ui_RunExamplesDialog(object):
         QtCore.QMetaObject.connectSlotsByName(RunExamplesDialog)
 
     def retranslateUi(self, RunExamplesDialog):
-        RunExamplesDialog.setWindowTitle(QtGui.QApplication.translate("RunExamplesDialog", "DAE Tools Tutorials", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("RunExamplesDialog", "Choose tutorial:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("RunExamplesDialog", "Tutorial description:", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButtonCode.setText(QtGui.QApplication.translate("RunExamplesDialog", "Show code...", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButtonRun.setText(QtGui.QApplication.translate("RunExamplesDialog", "Run...", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButtonModelReport.setText(QtGui.QApplication.translate("RunExamplesDialog", "Show model report ... *", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButtonRuntimeModelReport.setText(QtGui.QApplication.translate("RunExamplesDialog", "Show runtime model report ... *", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("RunExamplesDialog", "* Currently Mozilla Firefox is supported", None, QtGui.QApplication.UnicodeUTF8))
+        RunExamplesDialog.setWindowTitle(_translate("RunExamplesDialog", "DAE Tools Tutorials", None))
+        self.label.setText(_translate("RunExamplesDialog", "Choose tutorial:", None))
+        self.label_3.setText(_translate("RunExamplesDialog", "Tutorial description:", None))
+        self.toolButtonCode.setText(_translate("RunExamplesDialog", "Show code...", None))
+        self.toolButtonRun.setText(_translate("RunExamplesDialog", "Run...", None))
+        self.toolButtonModelReport.setText(_translate("RunExamplesDialog", "Show model report ... *", None))
+        self.toolButtonRuntimeModelReport.setText(_translate("RunExamplesDialog", "Show runtime model report ... *", None))
 

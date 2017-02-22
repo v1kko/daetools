@@ -5,7 +5,7 @@
 ***********************************************************************************
                            tutorial_che_opt_3.py
                 DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic, 2016
+                Copyright (C) Dragan Nikolic
 ***********************************************************************************
 DAE Tools is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 3 as published by the Free Software
@@ -72,8 +72,8 @@ import sys
 from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.solvers.trilinos import pyTrilinos
-from daetools.solvers.nlopt import pyNLOPT
-#from daetools.solvers.ipopt import pyIPOPT
+#from daetools.solvers.nlopt import pyNLOPT
+from daetools.solvers.ipopt import pyIPOPT
 from pyUnits import m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
 y_t  = daeVariableType("y_t",  unit(), -1.0e+20, 1.0e+20, 0.0, 1e-07)
@@ -242,8 +242,9 @@ class simMarinePopulation_opt(daeSimulation):
 
     def SetUpOptimization(self):
         # Minimise L2-norm ||yi(t) - yi_obs(t)||^2
-        self.ObjectiveFunction.Residual = self.m.L2() * 1e-6 # scale Fobj
+        self.ObjectiveFunction.Residual = self.m.L2() * 1e-8 # scale Fobj
         #self.ObjectiveFunction.AbsTolerance = 1e-6
+        self.ObjectiveFunction.Scaling = 1#e-8
 
         m_lb   =  0.0
         m_ub   = 10.0
@@ -270,7 +271,7 @@ class simMarinePopulation_opt(daeSimulation):
         #g8 = self.SetContinuousOptimizationVariable(self.m.g(7), g_lb, g_ub, g_init)
 
         def add_constraint(p, LB, UB, name):
-            return
+            #return
             c1 = self.CreateInequalityConstraint("%smax" % name) # p - UB <= 0
             c1.Residual = p - UB
             c2 = self.CreateInequalityConstraint("%smin" % name) # LB - p <= 0
@@ -314,15 +315,16 @@ m_opt = numpy.array([0.28, 0.10, 0.25, 0.12, 1e-3, 1e-9, 0.32, 0.43])
 g_opt = numpy.array([0.70, 0.81, 0.47, 0.48, 0.49, 0.65, 0.54, 0.0])
 
 def setOptions(nlpsolver):
-    nlpsolver.xtol_rel = 1e-8
-    nlpsolver.xtol_abs = 1e-8
-    nlpsolver.ftol_rel = 1e-8
-    nlpsolver.ftol_abs = 1e-8
-    #nlpsolver.SetOption('print_level', 9)
-    #nlpsolver.SetOption('tol', 1e-4)
+    #nlpsolver.xtol_rel = 1e-8
+    #nlpsolver.xtol_abs = 1e-8
+    #nlpsolver.ftol_rel = 1e-8
+    #nlpsolver.ftol_abs = 1e-8
+    nlpsolver.SetOption('print_level', 5)
+    nlpsolver.SetOption('tol', 1e-5)
+    nlpsolver.SetOption('acceptable_tol', 1e-4)
     #nlpsolver.SetOption('mu_strategy', 'adaptive')
     #nlpsolver.SetOption('obj_scaling_factor', 1e-8)
-    #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
+    nlpsolver.SetOption('nlp_scaling_method', 'user-scaling') # none or user-scaling)
 
 # Use daeSimulator class
 def guiRun(app):
@@ -342,8 +344,8 @@ def consoleRun():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    nlpsolver    = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
-    #nlpsolver    = pyIPOPT.daeIPOPT()
+    #nlpsolver    = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
+    nlpsolver    = pyIPOPT.daeIPOPT()
     datareporter = daeTCPIPDataReporter()
     simulation   = simMarinePopulation_opt()
     optimization = daeOptimization()

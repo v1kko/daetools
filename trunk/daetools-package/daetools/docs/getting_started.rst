@@ -2,7 +2,7 @@
 Getting Started with DAE Tools
 ******************************
 ..
-    Copyright (C) Dragan Nikolic, 2016
+    Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
     terms of the GNU General Public License version 3 as published by the Free Software
     Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
@@ -64,7 +64,6 @@ Running tutorials
    .. code-block:: bash
 
       python -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"
-
 
    The ``DAE Tools Plotter`` main window should appear (given in :numref:`Figure-GetStarted-1`)
 
@@ -136,7 +135,7 @@ Tutorials can also be started from the shell:
 
 .. code-block:: bash
 
-    cd .../daetools/examples
+    # cd .../daetools/examples
     # Or in windows:
     # cd ...\daetools\examples
     
@@ -165,10 +164,10 @@ i.e. via TCP/IP protocol).
 
 There are three ways to obtain the results from the simulation:
 
-* Through DAE Tools Plotter GUI
+* Through ``DAE Tools Plotter`` GUI
 * Programmatically, using one of many different types of local data reporters
-* Develop a custom user-defined data reporter by creating one of base classes (daeDataReporter_t,
-  daeDataReporterLocal, daeDataReporterFile)
+* Develop a custom user-defined data reporter by deriving from one of the available base classes
+  (``daeDataReporter_t``, ``daeDataReporterLocal``, ``daeDataReporterFile`` etc.)
 
 DAE Tools Plotter
 -----------------
