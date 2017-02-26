@@ -20,7 +20,7 @@ Importing DAE Tools modules
 
     from daetools.pyDAE import *
 
-This will set the python ``sys.path`` for importing the platform dependent c extension modules
+This will set the python ``sys.path`` for importing the platform dependent ``c++`` extension modules
 (i.e. ``.../daetools/pyDAE/Windows_win32_py34`` and ``.../daetools/solvers/Windows_win32_py34`` in Windows,
 ``.../daetools/pyDAE/Linux_x86_64_py34`` and ``.../daetools/solvers/Linux_x86_64_py34`` in GNU/Linux),
 import all symbols from all ``pyDAE`` modules: ``pyCore``, ``pyActivity``, ``pyDataReporting``,
@@ -98,7 +98,7 @@ The process consists of the following steps:
 
       daeModel.__init__(self, name, parent, description)
       
-2. Declaring domains, parameters, variables, ports, components etc. in the
+2. Declaring the model structure (domains, parameters, variables, ports, components etc.) in the
    :py:meth:`pyCore.daeModel.__init__` function:
 
    One of the fundamental ideas in **DAE Tools** is separation of the model specification
@@ -138,20 +138,25 @@ The process consists of the following steps:
    will go out of scope and get destroyed. However, the underlying c++ model object still holds
    references to them which will eventually result in the segmentation fault.
     
-3. Declaring equations, state transition networks, and ``OnEvent`` and ``OnCondition`` actions
+3. Specification of the model functionality (equations, state transition networks,
+   and ``OnEvent`` and ``OnCondition`` actions)
    in the :py:meth:`pyCore.daeModel.DeclareEquations` function.
 
-   .. note:: This function is never called directly by the user and will be called automatically
-             by the framework.
+   .. topic:: Nota bene
+
+              This function is never called directly by the user and will be called automatically
+              by the framework.
      
    Initialisation of the simulation object is done in several phases. At the point when this function
    is called by the framework the model parameters, domains, variables etc. are fully initialised.
    Therefore, it is safe to obtain the values of parameters or domain points and use them to
    create equations at the run-time.
 
-   .. note:: However, the **variable values** are obviously **not available** at this moment (they get
-             initialised at the later stage) and using the variable values during the model specification
-             phase is not allowed.
+   .. topic:: Nota bene
+
+              However, the **variable values** are obviously **not available** at this moment (they get
+              initialised at the later stage) and using the variable values during the model specification
+              phase is not allowed.
 
 A simplest **DAE Tools** model with a description of all steps/tasks necessary to develop a model
 can be found in the :ref:`whats_the_time` tutorial
@@ -216,6 +221,11 @@ where the ``value`` can be either a ``float`` (i.e. ``1.34``) or the :py:class:`
 (i.e. ``1.34 * W/(m*K)``). If the simple floats are used it is assumed that they
 represent values with the same units as in the parameter definition.
 
+.. topic:: Nota bene
+
+           ``DAE Tools`` (as it is the case in C/C++ and Python) use ``zero-based arrays``
+           in which the ``initial element of a sequence is assigned the index 0``, rather than 1.
+
 In addition, all values can be set at once using:
 
 .. code-block:: python
@@ -238,9 +248,17 @@ The most commonly used functions are:
   and :py:class:`pyCore.daeParameter.SetValues`
   which get/set the parameter value(s) using the ``float`` or the :py:class:`pyUnits.quantity` object(s)
 
-.. note:: The functions :py:meth:`pyCore.daeParameter.__call__` and :py:meth:`pyCore.daeParameter.array`
-          can only be used to build equations' residual expressions.
-          Other functions can be used to access the parameters data at any point.
+.. topic:: Notate bene
+
+           The functions :py:meth:`pyCore.daeParameter.__call__` and :py:meth:`pyCore.daeParameter.array`
+           return :py:class:`pyCore.adouble` and :py:class:`pyCore.adouble_array` objects, respectively
+           and does not contain values. They are only used to specify equations' residual expressions
+           which are stored in the :py:meth:`pyCore.adouble.Node` / :py:meth:`pyCore.adouble_array.Node` attributes.
+
+           Other functions (such as :py:attr:`pyCore.daeParameter.npyValues` and :py:attr:`pyCore.daeParameter.GetValue`)
+           can be used to access the values data during the simulation.
+
+           All above stands for similar functions in :py:class:`pyCore.daeDomain` and :py:class:`pyCore.daeVariable` classes.
 
 1. To get a value of the ordinary parameter the :py:meth:`pyCore.daeParameter.__call__`
    function (``operator ()``) can be used. For instance, if the variable ``myVar`` has to be
@@ -266,7 +284,7 @@ The most commonly used functions are:
    point of the domain ``myDomain``:
 
    .. math::
-        myVar(i) = myParam(i) + 15; \forall i \in [0, d_n]
+        myVar(i) = myParam(i) + 15; \forall i \in [0, n_d - 1]
         
    in **DAE Tools** it is specified in the following acausal way:
 
@@ -286,7 +304,7 @@ The most commonly used functions are:
    Obviously, a parameter can be distributed on more than one domain. In the case of two domains:
        
    .. math::
-        myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, d_{1n}], \forall d_2 \in [0, d_{2n}]
+        myVar(d_1,d_2) = myParam(d_1,d_2) + 15; \forall d_1 \in [0, n_{d1} - 1], \forall d_2 \in [0, n_{d2} - 1]
    
    the following can be used:
 
@@ -318,7 +336,6 @@ The most commonly used functions are:
    * python list (to select a list of indexes from a domain)
    * python slice (to select a portion of indexes from a domain: startIndex, endIindex, step)
    * character ``*`` (to select all points from a domain)
-   * integer ``-1`` (to select all points from a domain)
    * empty python list ``[]`` (to select all points from a domain)
 
    Basically all arguments listed above are internally used to create the
@@ -381,16 +398,16 @@ The most commonly used functions are:
    The ``case 1.`` translates into:
 
    .. math::
-      mySum = myParam(0,0) + myParam(0,1) + ... + myParam(0,n_2-1)
+      mySum = myParam(0,0) + myParam(0,1) + ... + myParam(0,n_2 - 1)
       
    where ``n2`` is the number of points in the domain ``myDomain2``.
 
    The ``case 2.`` translates into:
 
    .. math::
-      mySum = & myParam(0,0) + myParam(0,2) + myParam(0,4) + ... + myParam(0,\frac{n_2}{2}) + \\
-              & myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + myParam(1,\frac{n_2}{2}) + \\
-              & myParam(2,0) + myParam(2,2) + myParam(2,4) + ... + myParam(2,\frac{n_2}{2})
+      mySum = & myParam(0,0) + myParam(0,2) + myParam(0,4) + ... + myParam(0, n_2 - 1) + \\
+              & myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + myParam(1, n_2 - 1) + \\
+              & myParam(2,0) + myParam(2,2) + myParam(2,4) + ... + myParam(2, n_2 - 1)
 
 More information about parameters can be found in the API reference :py:class:`pyCore.daeParameter`
 and in :doc:`tutorials`.
@@ -455,16 +472,30 @@ To set up a domain as a simple array the function :py:meth:`pyCore.daeDomain.Cre
 
 .. code-block:: python
 
-    # Array of 10 elements
-    myDomain.CreateArray(10)
+    # Array of N elements
+    myDomain.CreateArray(N)
 
 while to set up a domain distributed on a structured grid the function
 :py:meth:`pyCore.daeDomain.CreateStructuredGrid`:
 
 .. code-block:: python
 
-    # Uniform sructured grid with 10 elements and bounds 0.0 - 1.0
-    myDomain.CreateStructuredGrid(10, 0.0, 1.0)
+    # Uniform structured grid with N elements and bounds [lowerBound, upperBound]
+    myDomain.CreateStructuredGrid(N, lowerBound, upperBound)
+
+where the lower and upper bounds can be simple floats or quantity objects.
+If the simple floats are used it is assumed that they
+represent values with the same units as in the domain definition.
+Typically, it is better to use quantities to avoid mistakes with wrong units:
+
+.. code-block:: python
+
+    # Uniform structured grid with 10 elements and bounds [0,1] in centimeters:
+    myDomain.CreateStructuredGrid(10, 0.0 * cm, 1.0 * cm)
+
+.. topic:: Nota bene
+
+    Domains with ``N`` elements consists of ``N+1`` points.
 
 It is also possible to create an unstructured grid (for use in Finite Element models). However, creation
 and setup of such domains is an implementation detail of corresponding modules (i.e. pyDealII).
@@ -498,7 +529,7 @@ has been served as a basis for comparison). Here, there are three cases:
    :figwidth: 450 pt
    :align: center
 
-   Effect of uniform and non-uniform grids on numerical solution
+   Effect of uniform and non-uniform grids on numerical solution (zoomed to the first 5 points)
 
 It can be clearly observed that in this problem the more precise results are obtained by using
 denser grid at the beginning of the interval.
@@ -516,10 +547,12 @@ The most commonly used functions are:
 * The :py:attr:`pyCore.daeDomain.npyPoints` property which returns the points in the domain
   as a numpy one-dimensional array (with ``numpy.float`` data type)
 
-.. note:: The functions :py:meth:`pyCore.daeDomain.__call__`, :py:meth:`pyCore.daeDomain.__getitem__`
+.. topic:: Nota bene
+
+          The functions :py:meth:`pyCore.daeDomain.__call__`, :py:meth:`pyCore.daeDomain.__getitem__`
           and :py:meth:`pyCore.daeDomain.array` can only be used to build equations' residual expressions.
-          On the other hand, the function :py:attr:`pyCore.daeDomain.npyPoints` can be used to access the
-          domain points at any point.
+          On the other hand, the attributes :py:attr:`pyCore.daeDomain.Points` and :py:attr:`pyCore.daeDomain.npyPoints`
+          can be used to access the domain points at any point.
 
 The arguments of the :py:meth:`pyCore.daeDomain.array` function are the same as explained in `Using parameters`_.
 
@@ -560,7 +593,7 @@ and:
 Again, variables are defined in two phases:
 
 * Declaring a variable in the model
-* Initialising it (by assigning its value or setting an initial condition) in the simulation
+* Initialising it, if required (by assigning its value or setting an initial condition) in the simulation
 
 Declaring variables
 ~~~~~~~~~~~~~~~~~~~
@@ -684,7 +717,9 @@ The most commonly used functions are:
   can be used to re-assign or re-initialise
   variables **only during a simulation** (in the function :py:meth:`pyActivity.daeSimulation.Run`)
 
-.. note:: The functions :py:meth:`pyCore.daeVariable.__call__`, :py:meth:`pyCore.dt`,
+.. topic:: Nota bene
+
+          The functions :py:meth:`pyCore.daeVariable.__call__`, :py:meth:`pyCore.dt`,
           :py:meth:`pyCore.d`, :py:meth:`pyCore.d2`, :py:meth:`pyCore.daeVariable.array`,
           :py:meth:`pyCore.dt_array`, :py:meth:`pyCore.d_array`
           and :py:meth:`pyCore.d2_array` can only be used to build equations' residual expressions.
@@ -1061,7 +1096,9 @@ and the following logical operators:
 ``~`` (logical NOT)
 can be used.
 
-.. note:: Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
+.. topic:: Nota bene
+
+          Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
           cannot be used to define logical conditions; therefore, the custom operators ``&``, ``|`` and ``~`` are defined
           and should be used instead.
 
@@ -1363,13 +1400,17 @@ when a specified condition is satisfied. The available actions include:
 * Triggering an event on the specified event ports (argument ``triggerEvents``)
 * Executing user-defined actions (argument ``userDefinedActions``)
 
-.. note:: OnCondition actions can be added to models or to states in State Transition Networks
+.. topic:: Nota bene
+
+          OnCondition actions can be added to models or to states in State Transition Networks
           (:py:class:`pyCore.daeSTN` or :py:class:`pyCore.daeIF`):
 
           - When added to a model they will be active throughout the simulation
           - When added to a state they will be active only when that state is active
             
-.. note:: ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
+.. topic:: Nota bene
+
+          ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
           are empty by default. The user has to specify at least one action.
           
 For instance, to execute some actions when the temperature becomes greater than 340 K the following can be used:
@@ -1404,13 +1445,17 @@ The function :py:meth:`~pyCore.daeModel.ON_EVENT` can be used to define actions 
 when an event is triggered on the specified event port. The available actions are the same as
 in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 
-.. note:: OnEvent actions can be added to models or to states in State Transition Networks
+.. topic:: Nota bene
+
+          OnEvent actions can be added to models or to states in State Transition Networks
           (:py:class:`pyCore.daeSTN` or :py:class:`pyCore.daeIF`):
 
           - When added to a model they will be active throughout the simulation
           - When added to a state they will be active only when that state is active
 
-.. note:: ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
+.. topic:: Nota bene
+
+          ``switchToStates``,  ``setVariableValues``, ``triggerEvents`` and ``userDefinedActions``
           are empty by default. The user has to specify at least one action.
 
 For instance, to execute some actions when an event is triggered on an event port the following can be used:
@@ -1432,15 +1477,144 @@ is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look
 on :ref:`tutorial_13`.
 
+Configuration file
+==================
+Various options used by **DAE Tools** objects are located in the ``daetools/daetools.cfg`` config file (in JSON format).
+The configuration file can be obtained using the global function :py:meth:`~pyCore.daeGetConfig`:
+
+.. code-block:: python
+
+    cfg = daeGetConfig()
+
+which returns the :py:class:`~pyCore.daeConfig` object.
+The configuration file is first searched in the ``HOME`` directory, the application folder and finally in the default location.
+It also can be specified manually using the function :py:meth:`~pyCore.daeSetConfigFile`.
+However, this has to be done before the **DAE Tools** objects are created.
+The current configuration file name can be retrieved using the :py:attr:`~pyCore.daeConfig.ConfigFileName` attribute.
+The options can also be programmatically changed using the ``Get``/``Set`` functions i.e.
+:py:meth:`~pyCore.daeConfig.GetBoolean`/:py:meth:`~pyCore.daeConfig.SetBoolean`:
+
+.. code-block:: python
+
+    cfg = daeGetConfig()
+    checkUnitsConsistency = cfg.GetBoolean("daetools.core.checkUnitsConsistency")
+    cfg.SetBoolean("daetools.core.checkUnitsConsistency", True)
+
+Supported data types are: ``Boolean``, ``Integer``, ``Float`` and ``String``.
+The whole configuration file with all options can be printed using:
+
+.. code-block:: python
+
+    cfg = daeGetConfig()
+    print(cfg)
+
+The sample configuration file is given below:
+
+.. code-block:: json
+
+    {
+        "daetools":
+        {
+            "core":
+            {
+                "checkForInfiniteNumbers": false,
+                "eventTolerance": 1E-7,
+                "logIndent": "    ",
+                "pythonIndent": "    ",
+                "checkUnitsConsistency": true,
+                "resetLAMatrixAfterDiscontinuity": true,
+                "printInfo": false,
+                "deepCopyClonedNodes": true
+            },
+            "activity":
+            {
+                "timeHorizon": 100.0,
+                "reportingInterval": 1.0,
+                "printHeader": true,
+                "objFunctionAbsoluteTolerance": 1E-8,
+                "constraintsAbsoluteTolerance": 1E-8,
+                "measuredVariableAbsoluteTolerance": 1E-8
+            },
+            "datareporting":
+            {
+                "tcpipDataReceiverAddress": "127.0.0.1",
+                "tcpipDataReceiverPort": 50000
+            },
+            "logging":
+            {
+                "tcpipLogAddress": "127.0.0.1",
+                "tcpipLogPort": 51000
+            },
+            "minlpsolver":
+            {
+                "printInfo": false
+            },
+            "IDAS":
+            {
+                "relativeTolerance": 1E-5,
+                "nextTimeAfterReinitialization": 1E-7,
+                "printInfo": false,
+                "numberOfSTNRebuildsDuringInitialization": 1000,
+                "SensitivitySolutionMethod": "Staggered",
+                "SensErrCon": false,
+                "maxNonlinIters": 3,
+                "sensRelativeTolerance": 1E-5,
+                "sensAbsoluteTolerance": 1E-5,
+                "MaxOrd": 5,
+                "MaxNumSteps": 1000,
+                "InitStep": 0.0,
+                "MaxStep": 0.0,
+                "MaxErrTestFails": 10,
+                "MaxNonlinIters": 4,
+                "MaxConvFails": 10,
+                "NonlinConvCoef": 0.33,
+                "SuppressAlg": false,
+                "NoInactiveRootWarn": false,
+                "NonlinConvCoefIC": 0.0033,
+                "MaxNumStepsIC": 5,
+                "MaxNumJacsIC": 4,
+                "MaxNumItersIC": 10,
+                "LineSearchOffIC": false
+            },
+            "superlu":
+            {
+                "factorizationMethod": "SamePattern_SameRowPerm",
+                "useUserSuppliedWorkSpace": false,
+                "workspaceSizeMultiplier": 3.0,
+                "workspaceMemoryIncrement": 1.5
+            },
+            "BONMIN":
+            {
+                "IPOPT":
+                {
+                    "print_level": 0,
+                    "tol":1E-5,
+                    "linear_solver": "mumps",
+                    "hessianApproximation": "limited-memory",
+                    "mu_strategy": "adaptive"
+                }
+            },
+            "NLOPT":
+            {
+                "printInfo": true,
+                "xtol_rel": 1E-6,
+                "xtol_abs": 1E-6,
+                "ftol_rel": 1E-6,
+                "ftol_abs": 1E-6,
+                "constr_tol": 1E-6
+            }
+        }
+    }
+
 Units and quantities
 ====================
-There are three classes in the framework: :py:class:`pyUnits.base_unit`, :py:class:`pyUnits.unit` and
-:py:class:`pyUnits.quantity`.
-The :py:class:`pyUnits.base_unit` class handles seven SI base dimensions: ``length``, ``mass``, ``time``,
+There are three classes in the framework: :py:class:`~pyUnits.base_unit`, :py:class:`~pyUnits.unit` and
+:py:class:`~pyUnits.quantity`.
+The :py:class:`~pyUnits.base_unit` class handles seven SI base dimensions: ``length``, ``mass``, ``time``,
 ``electric current``, ``temperature``, ``amount of substance``, and ``luminous intensity``
 (``m``, ``kg``, ``s``, ``A``, ``K``, ``mol``, ``cd``).
-The :py:class:`pyUnits.unit` class operates on base units defined using the base seven dimensions.
-The :py:class:`pyUnits.quantity` class defines a numerical value in terms of a unit of measurement
+The :py:class:`~pyUnits.unit` class operates on base units defined using the base seven dimensions.
+The :py:class:`~pyUnits.quantity` class defines a numerical value in terms of a unit of measurement
 (it contains the value and its units).
 
 There is a large pool of ``base units`` and ``units`` defined (all base and derived SI units) in the
@@ -1540,7 +1714,7 @@ Quantities are created by multiplying a value with desired units:
 
    heat = 1.5 * J
 
-The :py:class:`pyUnits.quantity` class defines all mathematical operators (``+, -, *, / and **``) and mathematical functions.
+The :py:class:`~pyUnits.quantity` class defines all mathematical operators (``+, -, *, / and **``) and mathematical functions.
 
 .. code-block:: python
 
@@ -1595,7 +1769,7 @@ There is a large number of available data reporters in **DAE Tools**:
 
 The best starting point in creating custom data reporters is :py:class:`~pyDataReporting.daeDataReporterLocal` class.
 It internally does all the processing and offers to users the :py:attr:`~pyDataReporting.daeDataReporterLocal.Process`
-property which contains all domains, parameters and variables in the simulation.
+property (:py:class:`~pyDataReporting.daeDataReceiverProcess` instance) which contains all domains, parameters and variables in the simulation.
 
 The following functions have to be implemented (overloaded):
 
@@ -1637,6 +1811,17 @@ called in the :py:meth:`~pyDataReporting.daeDataReporterFile.Disconnect` functio
 The only function that needs to be overloaded is :py:meth:`~pyDataReporting.daeDataReporterFile.WriteDataToFile`
 while the base class handles all other operations.
 
+:py:class:`~pyDataReporting.daeDataReceiverProcess` class contains the following properties that can be used
+to obtain the results data from a data reporter:
+
+- :py:attr:`~pyDataReporting.daeDataReceiverProcess.Domains` (list of :py:class:`~pyDataReporting.daeDataReceiverDomain` objects)
+- :py:attr:`~pyDataReporting.daeDataReceiverProcess.Variables` (list of :py:class:`~pyDataReporting.daeDataReceiverVariable` objects)
+- :py:attr:`~pyDataReporting.daeDataReceiverProcess.dictDomains` (dictionary {"domain_name" \: :py:class:`~pyDataReporting.daeDataReceiverDomain` object})
+- :py:attr:`~pyDataReporting.daeDataReceiverProcess.dictVariables` (dictionary {"variable_name" \: :py:class:`~pyDataReporting.daeDataReceiverVariable` object})
+- :py:attr:`~pyDataReporting.daeDataReceiverProcess.dictVariableValues` (dictionary {"variable_name" \: (ndarray_values, ndarray_time_points, domain_names, units)})
+  where ``ndarray_values`` is numpy array with values at every time point, ``ndarray_time_points`` is numpy array of time points,
+  ``domains`` is a list of domain points for every domain on which the variable is distributed, and ``units`` is string with the units.
+
 The example below shows how to save the results to the Matlab .mat file:
 
 .. code-block:: python
@@ -1649,7 +1834,6 @@ The example below shows how to save the results to the Matlab .mat file:
             mdict = {}
             for var in self.Process.Variables:
                 mdict[var.Name] = var.Values
-
 
             import scipy.io
             scipy.io.savemat(self.ConnectString,

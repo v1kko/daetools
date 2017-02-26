@@ -245,10 +245,23 @@ def consoleRun():
     """
     5. Create Log, Solver, DataReporter and Simulation object
        Every simulation requires the following three additional objects:
-       - log is used to send the messages from the framework, set the simulation progress or to report errors
-       - solver is DAE solver used to solve the underlying system of differential and algebraic equations
-       - datareporter is used to send the data from the solver to daePlotter (or any other data receiver).
-         Often, it is required to save the results in a specified file format; for more information see Tutorial 8.
+        - log is used to send the messages from the framework, set the simulation progress or to report errors
+        - solver is DAE solver used to solve the underlying system of differential and algebraic equations
+        - datareporter is used to send the data from the solver to daePlotter (or any other data receiver).
+          Often, it is required to save the results in a specified file format; for more information see Tutorial 8.
+
+       Various options used by daetools objects are located in the daetools/daetools.cfg config file (in JSON format).
+       The config file can be obtained using the global function daeGetConfig:
+           cfg  = daeGetConfig()
+       The config file is first searched in the HOME directory, the application folder and finally in the default location.
+       It also can be specified manually using the function daeSetConfigFile('path_to_daetools.cfg').
+       However, this has to be done before the daetools objects are created.
+       The options can also be programmatically changed using the Get/Set functions i.e. GetBoolean/SetBoolean:
+           checkUnitsConsistency = cfg.GetBoolean("daetools.core.checkUnitsConsistency")
+           cfg.SetBoolean("daetools.core.checkUnitsConsistency", True)
+       Supported data types are: Bool, Integer, Float and String.
+       The whole config file with all options can be printed using:
+           print(cfg)
     """
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()

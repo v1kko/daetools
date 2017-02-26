@@ -19,6 +19,7 @@ LIBS += $${SOLIBS_RPATH}
 
 LIBS +=	$${DAE_IDAS_SOLVER_LIB} \
         $${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${SUNDIALS_LIBS} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \

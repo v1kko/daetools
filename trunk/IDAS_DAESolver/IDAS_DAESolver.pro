@@ -9,7 +9,8 @@ INCLUDEPATH += $${BOOSTDIR} \
                $${MPI_INCLUDE}
 
 QMAKE_LIBDIR += $${SUNDIALS_LIBDIR}
-LIBS +=	$${SUNDIALS_LIBS} \
+LIBS +=	$${DAE_CONFIG_LIB} \
+        $${SUNDIALS_LIBS} \
         $${MPI_LIBS}
 
 SOURCES += stdafx.cpp \

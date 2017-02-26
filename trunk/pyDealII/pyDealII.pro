@@ -32,6 +32,7 @@ LIBS += $${SOLIBS_RPATH}
 LIBS += $${DEALII_LIBS} \
         $${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${RT}

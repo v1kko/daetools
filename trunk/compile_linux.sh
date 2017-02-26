@@ -49,6 +49,7 @@ PROJECT:
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
+        config              Build Config shared c++ library.
         core                Build Core c++ library and its python extension module (pyCore).
         activity            Build Activity c++ library and its python extension module (pyActivity).
         data_reporting      Build DataReporting c++ library and its python extension module (pyDataReporting).
@@ -208,6 +209,7 @@ for project in "$@"
 do
   case "$project" in
     all)              ;;
+    config)           ;;
     core)             ;;
     activity)         ;;
     data_reporting)   ;;
@@ -291,10 +293,13 @@ do
                 #fi
                 ;;
         
+        config) compile Config "-j1"
+                ;;
+
         core)  compile Core   "-j5"
                compile pyCore "-j1"
                ;;
-        
+
         activity) compile Activity   "-j5"
                   compile pyActivity "-j1"
                   ;;

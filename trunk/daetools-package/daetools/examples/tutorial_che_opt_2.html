@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                           tutorial_che_opt_2.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -282,32 +282,32 @@ L2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
         p3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p3, p_lb, p_ub, p_init)
         p4 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p4, p_lb, p_ub, p_init)
         p5 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.p5, p_lb, p_ub, p_init)
+        <span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#008000;'>        c1 = self.CreateInequalityConstraint(&quot;p1max&quot;) # p1 - UB &lt;= 0</span>
+<span style='color:#008000;'>        c1.Residual = self.m.p1() - p_ub</span>
+<span style='color:#008000;'>        c2 = self.CreateInequalityConstraint(&quot;p1min&quot;) # LB - p1 &lt;= 0</span>
+<span style='color:#008000;'>        c2.Residual = p_lb - self.m.p1()</span>
 
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p1max&quot;</span>) <span style='color:#008000;'># p1 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p1() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p1min&quot;</span>) <span style='color:#008000;'># LB - p1 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p1()
+<span style='color:#008000;'>        c1 = self.CreateInequalityConstraint(&quot;p2max&quot;) # p2 - UB &lt;= 0</span>
+<span style='color:#008000;'>        c1.Residual = self.m.p2() - p_ub</span>
+<span style='color:#008000;'>        c2 = self.CreateInequalityConstraint(&quot;p2min&quot;) # LB - p2 &lt;= 0</span>
+<span style='color:#008000;'>        c2.Residual = p_lb - self.m.p2()</span>
 
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p2max&quot;</span>) <span style='color:#008000;'># p2 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p2() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p2min&quot;</span>) <span style='color:#008000;'># LB - p2 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p2()
+<span style='color:#008000;'>        c1 = self.CreateInequalityConstraint(&quot;p3max&quot;) # p3 - UB &lt;= 0</span>
+<span style='color:#008000;'>        c1.Residual = self.m.p3() - p_ub</span>
+<span style='color:#008000;'>        c2 = self.CreateInequalityConstraint(&quot;p3min&quot;) # LB - p3 &lt;= 0</span>
+<span style='color:#008000;'>        c2.Residual = p_lb - self.m.p3()</span>
 
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p3max&quot;</span>) <span style='color:#008000;'># p3 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p3() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p3min&quot;</span>) <span style='color:#008000;'># LB - p3 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p3()
+<span style='color:#008000;'>        c1 = self.CreateInequalityConstraint(&quot;p4max&quot;) # p4 - UB &lt;= 0</span>
+<span style='color:#008000;'>        c1.Residual = self.m.p4() - p_ub</span>
+<span style='color:#008000;'>        c2 = self.CreateInequalityConstraint(&quot;p4min&quot;) # LB - p4 &lt;= 0</span>
+<span style='color:#008000;'>        c2.Residual = p_lb - self.m.p4()</span>
 
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p4max&quot;</span>) <span style='color:#008000;'># p4 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p4() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p4min&quot;</span>) <span style='color:#008000;'># LB - p4 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p4()
-
-        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p5max&quot;</span>) <span style='color:#008000;'># p5 - UB &lt;= 0</span>
-        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.p5() <b><span style='color:#0000ff;'>-</span></b> p_ub
-        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;p5min&quot;</span>) <span style='color:#008000;'># LB - p5 &lt;= 0</span>
-        c2.Residual <b><span style='color:#0000ff;'>=</span></b> p_lb <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.p5()
-
+<span style='color:#008000;'>        c1 = self.CreateInequalityConstraint(&quot;p5max&quot;) # p5 - UB &lt;= 0</span>
+<span style='color:#008000;'>        c1.Residual = self.m.p5() - p_ub</span>
+<span style='color:#008000;'>        c2 = self.CreateInequalityConstraint(&quot;p5min&quot;) # LB - p5 &lt;= 0</span>
+<span style='color:#008000;'>        c2.Residual = p_lb - self.m.p5()</span>
+<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
 <span style='color:#008000;'># Experimental data (8 measurements)</span>
 times  <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#c000c0;'>1230.00</span>, <span style='color:#c000c0;'>3060.0</span>, <span style='color:#c000c0;'>4920.0</span>, <span style='color:#c000c0;'>7800.0</span>, <span style='color:#c000c0;'>10680.0</span>, <span style='color:#c000c0;'>15030.0</span>, <span style='color:#c000c0;'>22620.0</span>, <span style='color:#c000c0;'>36420.0</span>])
 y1_obs <b><span style='color:#0000ff;'>=</span></b> numpy.array([  <span style='color:#c000c0;'>88.35</span>,   <span style='color:#c000c0;'>76.4</span>,   <span style='color:#c000c0;'>65.1</span>,   <span style='color:#c000c0;'>50.4</span>,    <span style='color:#c000c0;'>37.5</span>,    <span style='color:#c000c0;'>25.9</span>,    <span style='color:#c000c0;'>14.0</span>,     <span style='color:#c000c0;'>4.5</span>])

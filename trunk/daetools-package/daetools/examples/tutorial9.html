@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial9.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -83,8 +83,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Heat balance equation valid on the open x and y domains&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)
         y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.y, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt(x, y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <b><span style='color:#0000ff;'>\</span></b>
-                     (<span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.x, x, y) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.T.d2(<span style='color:#0000ff;'>self</span>.y, x, y))
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                     (d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.x) <b><span style='color:#0000ff;'>+</span></b> d2(<span style='color:#0000ff;'>self</span>.T(x,y), <span style='color:#0000ff;'>self</span>.y))
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;BC_bottom&quot;</span>, <span style='color:#c00000;'>&quot;Neumann boundary conditions at the bottom edge (constant flux)&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#0000ff;'>self</span>.x, eOpenOpen)

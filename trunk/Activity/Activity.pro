@@ -7,7 +7,8 @@ CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
 	           $${MPI_INCLUDE}
 
-LIBS += $${DAE_CORE_LIB} \
+LIBS += $${DAE_CONFIG_LIB} \
+        $${DAE_CORE_LIB} \
         $${MPI_LIBS}
 
 HEADERS += stdafx.h \

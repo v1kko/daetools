@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial8.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -89,10 +89,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         daeDataReporterLocal.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
         <span style='color:#0000ff;'>self</span>.ProcessName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>
 
-    <b>def</b> Connect(<span style='color:#0000ff;'>self</span>, ConnectionString, ProcessName):
+    <b>def</b> Connect(<span style='color:#0000ff;'>self</span>, ConnectString, ProcessName):
         <span style='color:#0000ff;'>self</span>.ProcessName <b><span style='color:#0000ff;'>=</span></b> ProcessName
         <b>try</b>:
-            <span style='color:#0000ff;'>self</span>.f <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(ConnectionString, <span style='color:#c00000;'>&quot;w&quot;</span>)
+            <span style='color:#0000ff;'>self</span>.f <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>open</span>(ConnectString, <span style='color:#c00000;'>&quot;w&quot;</span>)
         <b>except</b> <b><span style='color:#054d00;'>IOError</span></b>:
             <b>return</b> <span style='color:#0000ff;'>False</span>
         <b>return</b> <span style='color:#0000ff;'>True</span>
@@ -148,7 +148,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Integral heat balance equation.&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin()
 
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
@@ -237,6 +237,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
     dr8.Connect(hdf5_filename, simName)
     dr9.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName)
     dr10.Connect(vtk_filename, simName)
+
+    <span style='color:#008000;'># Print the connection status for all data reporters</span>
+    <b>for</b> dr <b><span style='color:#0000ff;'>in</span></b> simulation._data_reporters_:
+        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'> (</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>): </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (dr.__class__.<span style='color:#0000ff;'>__name__</span>, dr.ConnectString, <span style='color:#c00000;'>'connected'</span> <b>if</b> dr.IsConnected() <b>else</b> <span style='color:#c00000;'>'NOT connected'</span>))
 
     <b>return</b> datareporter
 

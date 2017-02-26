@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                        tutorial_dealii_1.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -187,7 +187,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.fun_Diffusivity <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(alpha)
         <span style='color:#0000ff;'>self</span>.fun_Generation  <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(<span style='color:#c000c0;'>0.0</span>)
 
-        <span style='color:#008000;'># The physial boundaries in the mesh file are specified using integers.</span>
+        <span style='color:#008000;'># The physical boundaries in the mesh file are specified using integers.</span>
         <span style='color:#008000;'># In our example they are the following:</span>
         outerRectangle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span> <span style='color:#008000;'># outer boundary</span>
         innerEllipse   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span> <span style='color:#008000;'># inner ellipse at the left side</span>
@@ -253,9 +253,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#         e) boundaryFaceFi   - boundary face contribution to the load vector</span>
         <span style='color:#008000;'>#         f) innerCellFaceAij - inner cell face contribution to the system stiffness matrix.</span>
         <span style='color:#008000;'>#         g) innerCellFaceFi  - inner cell face contribution to the load vector</span>
-        <span style='color:#008000;'>#         d) functionsDirichletBC - Dirichlet boundary conditions (section 3.3)</span>
-        <span style='color:#008000;'>#         e) surfaceIntegrals - surface integrals (section 3.4)</span>
-        <span style='color:#008000;'>#         f) volumeIntegrals  - volume  integrals (section 3.5)</span>
+        <span style='color:#008000;'>#         h) functionsDirichletBC - Dirichlet boundary conditions (section 3.3)</span>
+        <span style='color:#008000;'>#         i) surfaceIntegrals - surface integrals (section 3.4)</span>
+        <span style='color:#008000;'>#         j) volumeIntegrals  - volume  integrals (section 3.5)</span>
         <span style='color:#008000;'>#</span>
         <span style='color:#008000;'>#         The weak form expressions are specified using the functions that wrap deal.II</span>
         <span style='color:#008000;'>#         concepts used to assembly the matrices/vectors. The weak forms in daetools</span>
@@ -316,9 +316,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#008000;'>#          - vector_dof_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
         <span style='color:#008000;'>#          - vector_dof_gradient_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
         <span style='color:#008000;'>#          - adouble (ad): wraps any daetools expression to be used in matrix assembly</span>
-        <span style='color:#008000;'>#          - tensor1 (t): wraps deal.II Tensor&lt;rank=1&gt;</span>
-        <span style='color:#008000;'>#          - tensor2 (t): wraps deal.II Tensor&lt;rank=2&gt;</span>
-        <span style='color:#008000;'>#          - tensor2 (t): wraps deal.II Tensor&lt;rank=3&gt;</span>
+        <span style='color:#008000;'>#          - tensor1 (t): wraps deal.II Tensor&lt;rank=1,double&gt;</span>
+        <span style='color:#008000;'>#          - tensor2 (t): wraps deal.II Tensor&lt;rank=2,double&gt;</span>
+        <span style='color:#008000;'>#          - tensor3 (t): wraps deal.II Tensor&lt;rank=3,double&gt;</span>
+        <span style='color:#008000;'>#          - adouble_tensor1 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#008000;'>#          - adouble_tensor2 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#008000;'>#          - adouble_tensor3 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
 
         <span style='color:#008000;'>#         First, we need to wrap Function&lt;dim&gt; objects to be used in the weak form using the function_value function:</span>
         Diffusivity <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#c00000;'>'Diffusivity'</span>, <span style='color:#0000ff;'>self</span>.fun_Diffusivity, xyz_2D(fe_q))
@@ -368,9 +371,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_deal_II_1&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_dealii_1&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
-        
+        <span style='color:#0000ff;'>self</span>.m.fe_model.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
 

@@ -718,6 +718,7 @@ unix::MPI_LIBS           = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
 #####################################################################################
 #                                  DAE Tools
 #####################################################################################
+win32-msvc2008::DAE_CONFIG_LIB               = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
 win32-msvc2008::DAE_CORE_LIB                 = cdaeCore.lib
 win32-msvc2008::DAE_DATAREPORTING_LIB        = cdaeDataReporting.lib
 win32-msvc2008::DAE_ACTIVITY_LIB             = cdaeActivity.lib
@@ -736,6 +737,7 @@ win32-msvc2008::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
 win32-msvc2008::DAE_SIMULATION_LOADER_LIB    = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
 win32-msvc2008::DAE_DAETOOLS_FMI_CS_LIB      = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}.lib
 
+win32-g++-*::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_CORE_LIB                 = -lcdaeCore
 win32-g++-*::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
 win32-g++-*::DAE_ACTIVITY_LIB             = -lcdaeActivity
@@ -754,6 +756,7 @@ win32-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 win32-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
+win64-g++-*::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_CORE_LIB                 = -lcdaeCore
 win64-g++-*::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
 win64-g++-*::DAE_ACTIVITY_LIB             = -lcdaeActivity
@@ -772,6 +775,7 @@ win64-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 win64-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
+unix::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_CORE_LIB                 = -lcdaeCore
 unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
 unix::DAE_ACTIVITY_LIB             = -lcdaeActivity

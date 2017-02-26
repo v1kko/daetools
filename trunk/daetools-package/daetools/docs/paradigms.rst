@@ -1,5 +1,5 @@
 *********************
-Programming paradigms
+Programming Paradigms
 *********************
 ..
     Copyright (C) Dragan Nikolic

@@ -359,6 +359,7 @@ It is also possible to compile individual libraries using one of the following o
     pydae           Build daetools core python extension modules only.
 
     Individual projects:
+        config              Build Config shared c++ library.
         core                Build Core c++ library and its python extension module (pyCore).
         activity            Build Activity c++ library and its python extension module (pyActivity).
         data_reporting      Build DataReporting c++ library and its python extension module (pyDataReporting).

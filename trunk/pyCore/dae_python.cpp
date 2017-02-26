@@ -246,7 +246,8 @@ BOOST_PYTHON_MODULE(pyCore)
 /**************************************************************
     Global functions
 ***************************************************************/
-    def("daeGetConfig",		&daepython::daeGetConfig, DOCSTR_global_daeGetConfig);
+    def("daeSetConfigFile",	&daeSetConfigFile);
+    def("daeGetConfig",		&daepython::pydaeGetConfig);
     def("daeVersion",		&dae::daeVersion, ( arg("includeBuild") = false ), DOCSTR_global_daeVersion);
     def("daeVersionMajor",  &dae::daeVersionMajor, DOCSTR_global_daeVersionMajor);
     def("daeVersionMinor",  &dae::daeVersionMinor, DOCSTR_global_daeVersionMinor);
@@ -283,7 +284,9 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Variable",      make_function(&daepython::daeVariableWrapper_GetVariable, return_internal_reference<>()), DOCSTR_daeVariableWrapper_)
     ;
 
-    class_<daeConfig>("daeConfig", DOCSTR_daeConfig_)
+    class_<daeConfig>("daeConfig", DOCSTR_daeConfig_, no_init)
+        .add_property("ConfigFileName",	&daeConfig::GetConfigFileName, DOCSTR_daeConfig_)
+
         .def("GetBoolean",	   &daepython::GetBoolean1, ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
         .def("GetFloat",	   &daepython::GetFloat1,   ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
         .def("GetInteger",	   &daepython::GetInteger1, ( arg("self"), arg("propertyPath"), arg("defaultValue") ), DOCSTR_daeConfig_)
@@ -921,15 +924,13 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<daeParameter, bases<daeObject>, boost::noncopyable>("daeParameter", DOCSTR_daeParameter, no_init)
-        .def("__init__", make_constructor(&daepython::daeParameter_init1, default_call_policies(), ( arg("self"),
-                                                                                                     arg("name"),
+        .def("__init__", make_constructor(&daepython::daeParameter_init1, default_call_policies(), ( arg("name"),
                                                                                                      arg("units"),
                                                                                                      arg("parentModel"),
                                                                                                      arg("description") = "",
                                                                                                      arg("domains") =  boost::python::list()
                                                                                                    ) ), DOCSTR_daeParameter_init1)
-        .def("__init__", make_constructor(&daepython::daeParameter_init2, default_call_policies(), ( arg("self"),
-                                                                                                     arg("name"),
+        .def("__init__", make_constructor(&daepython::daeParameter_init2, default_call_policies(), ( arg("name"),
                                                                                                      arg("units"),
                                                                                                      arg("parentPort"),
                                                                                                      arg("description") = "",

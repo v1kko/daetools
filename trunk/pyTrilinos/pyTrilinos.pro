@@ -30,6 +30,7 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR}
 LIBS += $${SOLIBS_RPATH}
 
 LIBS += $${DAE_TRILINOS_SOLVER_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${TRILINOS_LIBS} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \

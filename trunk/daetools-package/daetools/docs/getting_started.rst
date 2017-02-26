@@ -291,12 +291,13 @@ Developing a model
 In **DAE Tools** models are developed by deriving a new class from the base model class (:py:class:`~pyCore.daeModel`).
 The process consists of two steps:
 
-1. Declare all domains, parameters, variables, ports etc.:
+1. Declaration of the model structure (parameters, variables, distribution domains, ports etc.):
 
-   * In **pyDAE** declare and instantiate in the :py:meth:`~pyCore.daeModel.__init__` function
-   * In **cDAE** declare as class data members and instantiate in the constructor
+   * In **pyDAE** declaration and instantiation in the :py:meth:`~pyCore.daeModel.__init__` function
+   * In **cDAE** declaration as class data members and instantiation in the constructor
 
-2. Declare equations and state transition networks in the :py:meth:`~pyCore.daeModel.DeclareEquations` function
+2. Specification of the model functionality (equations and state transition networks)
+   in the :py:meth:`~pyCore.daeModel.DeclareEquations` function
 
 An example model developed in **pyDAE** (using python programming language):
 
@@ -319,7 +320,7 @@ An example model developed in **pyDAE** (using python programming language):
             self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
 
         def DeclareEquations(self):
-            # Declaration of equations and state transitions:
+            # Specification of equations and state transitions:
             eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
             eq.Residual = self.m() * self.cp() * self.T.dt() - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
@@ -356,7 +357,7 @@ The same model developed in **cDAE** (using c++ programming language):
 
         void DeclareEquations(void)
         {
-            // Declaration of equations and state transitions:
+            // Specification of equations and state transitions:
             daeEquation* eq = CreateEquation("HeatBalance", "Integral heat balance equation");
             eq->SetResidual( mass() * c_p() * T.dt() - Q_in() + alpha() * A() * (T() - T_surr()) );
         }
@@ -373,7 +374,7 @@ Setting up a simulation
 
 Definition of a simulation in **DAE Tools** requires the following steps:
 
-1. Deriving a new simulation class from the base simulation class (:py:class:`~pyActivity.daeSimulation`)
+1. Derivation of a new class from the base simulation class (:py:class:`~pyActivity.daeSimulation`)
 
    * Specification of a model to be simulated
    * Setting the values of parameters
@@ -383,17 +384,17 @@ Definition of a simulation in **DAE Tools** requires the following steps:
    * Specification of an operating procedure. It can be either a simple run for a specified period of time (default) or
      a complex one where various actions can be taken during the simulation
 
-2. Specify DAE and LA solvers
+2. Specification of DAE and LA solvers
 
-3. Specify a data reporter and a data receiver, and connect them
+3. Specification of a data reporter and its connection
 
-4. Set a time horizon, reporting interval, etc
+4. Setting a time horizon, reporting interval, etc
 
-5. Do the initialisation of the DAE system
+5. Initialisation of the DAE system
 
-6. Save model report and/or runtime model report (to inspect expanded equations etc)
+6. (Optionally) Saving a model report and/or a runtime model report (to inspect expanded equations etc)
 
-7. Run the simulation
+7. Running the simulation
 
 
 An example simulation developed in **pyDAE**:
@@ -599,12 +600,12 @@ problem should be specified in the function :py:meth:`~pyActivity.daeSimulation.
 
 Definition of an optimisation in **DAE Tools** requires the following steps:
 
-1. Specify the objective function
+1. Specification of the objective function
 
    * Objective function is defined by specifying its residual (similarly to specifying an equation residual);
      Internally the framework will create a new variable (V_obj) and a new equation (F_obj).
 
-2. Specify optimisation variables
+2. Specification of optimisation variables
 
    * The optimisation variables have to be already defined in the model and their values assigned in the simulation;
      they can be either non-distributed or distributed.
@@ -612,7 +613,7 @@ Definition of an optimisation in **DAE Tools** requires the following steps:
      the given range), ``integer`` (set of integer values in the given range) or ``binary`` (integer value: 0 or 1).
    * Specify the starting point (within the range)
 
-3. Specify optimisation constraints
+3. Specification of optimisation constraints
 
    * Two types of constraints exist in DAE Tools: ``equality`` and ``inequality`` constraints
      To define an ``equality`` constraint its residual and the value has to be specified;
@@ -620,24 +621,22 @@ Definition of an optimisation in **DAE Tools** requires the following steps:
      Internally the framework will create a new variable (V_constraint[N]) and a new equation (F_constraint[N])
      for each defined constraint, where N is the ordinal number of the constraint.
 
-4. Specify NLP/MINLP solver
+4. Specification of a NLP/MINLP solver
 
    * Currently BONMIN MINLP solver and IPOPT and NLOPT solvers are supported (the BONMIN
      solver internally uses IPOPT to solve NLP problems)
 
-5. Specify DAE and LA solvers
+5. Specification of DAE and LA solvers
 
-6. Specify a data reporter and a data receiver, and connect them
+6. Specification of a data reporter and its connection
 
-7. Set a time horizon, reporting interval, etc
+7. Setting a time horizon, reporting interval, etc
 
-8. Set the options of the (MI)NLP solver
+8. Setting the options of the (MI)NLP solver
 
-9. Initialise the optimisation
+9. Initialisation of the optimisation
 
-10. Save model report and/or runtime model report (to inspect expanded equations etc)
-
-11. Run the optimisation
+10. Running the optimisation
 
 :py:meth:`~pyActivity.daeSimulation.SetUpOptimization` function should be declared in the simulation class:
 

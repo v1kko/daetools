@@ -21,6 +21,7 @@ LIBS += $${DAE_ACTIVITY_LIB} \
         $${DAE_IDAS_SOLVER_LIB} \
         $${DAE_NLPSOLVER_LIB} \
         $${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${MPI_LIBS}

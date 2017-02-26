@@ -20,7 +20,8 @@ HEADERS += stdafx.h \
 INCLUDEPATH += $${BOOSTDIR}
 
 LIBS += $${SOLIBS_RPATH_SL}
-LIBS += $${DAE_SIMULATION_LOADER_LIB}
+LIBS += $${DAE_CONFIG_LIB} \
+        $${DAE_SIMULATION_LOADER_LIB}
 LIBS += $${BOOST_LIBS}
 
 # Achtung, Achtung!!

@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial18.py (3)</title>
+<title>tutorial18.py (2)</title>
 </head>
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial18.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -122,7 +122,7 @@ typeNone <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span styl
 
         <span style='color:#008000;'># Create a vector of dy/dt:</span>
         dydt <b><span style='color:#0000ff;'>=</span></b> numpy.empty(<span style='color:#c000c0;'>3</span>, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
-        dydt[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.y.dt(i) <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>3</span>)]
+        dydt[:] <b><span style='color:#0000ff;'>=</span></b> [dt(<span style='color:#0000ff;'>self</span>.y(i)) <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>3</span>)]
 
         <span style='color:#008000;'># Create the ODE system: dy/dt = A*y</span>
         <span style='color:#008000;'># Use dot product (numpy arrays don't behave as matrices)</span>

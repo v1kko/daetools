@@ -46,6 +46,7 @@ CONFIG(SuperLU, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU
 LIBS += $${DAE_SUPERLU_SOLVER_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${SUPERLU_LIBS} $${BLAS_LAPACK_LIBS} #-lbtf
 LIBS += $${SOLIBS_RPATH}
 LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
@@ -61,30 +62,13 @@ CONFIG(SuperLU_MT, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_MT) {
 
 QMAKE_CXXFLAGS += -DdaeSuperLU_MT
 LIBS += $${DAE_SUPERLU_MT_SOLVER_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${SUPERLU_MT_LIBS} $${BLAS_LAPACK_LIBS}
 LIBS += $${SOLIBS_RPATH}
 LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
 INCLUDEPATH += $${SUPERLU_MT_INCLUDE}
 pyObject = pySuperLU_MT
 }
-
-######################################################################################
-#                                SuperLU_CUDA
-# compile it with: make --file=gpuMakefile
-######################################################################################
-CONFIG(SuperLU_CUDA, SuperLU|SuperLU_MT|SuperLU_CUDA):message(SuperLU_CUDA) { 
-
-QMAKE_CXXFLAGS += -DdaeSuperLU_CUDA
-LIBS += $${SUPERLU_CUDA_LIBS} \
-        $${CUDA_LIBS} \
-        $${DAE_SUPERLU_CUDA_SOLVER_LIB}
-LIBS += $${SOLIBS_RPATH}
-LIBS += $${BOOST_PYTHON_LIB} $${BOOST_LIBS}
-INCLUDEPATH += $${SUPERLU_CUDA_INCLUDE}
-pyObject = pySuperLU_CUDA
-}
-
-OTHER_FILES += superlu_mt_gpu.cu gpuMakefile
 
 #######################################################
 #                Install files

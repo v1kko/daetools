@@ -17,6 +17,7 @@ LIBS += $${SOLIBS_RPATH}
 
 LIBS +=	$${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
+        $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${MPI_LIBS}

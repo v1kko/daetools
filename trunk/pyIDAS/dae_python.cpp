@@ -74,7 +74,6 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver1, ( arg("self"), arg("laSolverType") ), DOCSTR_daeIDAS_SetLASolver1)
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("laSolver") ),     DOCSTR_daeIDAS_SetLASolver2)
         .def("SaveMatrixAsXPM",	&daeIDASolver::SaveMatrixAsXPM,                ( arg("self"), arg("xpmFilename") ),  DOCSTR_daeIDAS_SaveMatrixAsXPM)
-        .def("SetTimeHorizon",	daeIDASolver::SetTimeHorizon,                  ( arg("self"), arg("timeHorizon") ),  DOCSTR_daeIDAS_SetTimeHorizon)
 
             
         .def("OnCalculateResiduals",		    &daeDAESolver_t::OnCalculateResiduals, &daepython::daeIDASolverWrapper::def_OnCalculateResiduals, 

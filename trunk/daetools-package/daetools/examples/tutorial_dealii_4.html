@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                        tutorial_dealii_4.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -212,9 +212,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_deal_II_4&quot;</span>)
+        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_dealii_4&quot;</span>)
         <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
-        
+        <span style='color:#0000ff;'>self</span>.m.fe_model.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
     <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
         <b>pass</b>
 

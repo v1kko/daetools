@@ -209,7 +209,7 @@ class modTutorial(daeModel):
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = d(self.T(x,y), self.x, eCFDM)
-        
+
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)

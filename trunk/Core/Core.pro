@@ -8,7 +8,8 @@ CONFIG += staticlib
 INCLUDEPATH += $${BOOSTDIR} \
 	           $${MPI_INCLUDE}
 
-LIBS +=	$${MPI_LIBS}
+LIBS +=	$${DAE_CONFIG_LIB} \
+        $${MPI_LIBS}
 
 SOURCES += xmlreadstream.cpp \
     xmlfunctions.cpp \

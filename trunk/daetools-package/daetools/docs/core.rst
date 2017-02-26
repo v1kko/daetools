@@ -13,14 +13,8 @@ Module pyCore
 
 .. py:module:: pyCore
 
-Overview
-========
-
-
 Key modelling concepts
 ======================
-...
-
 
 Classes
 --------
@@ -500,17 +494,19 @@ Auxiliary functions
 .. autosummary::
     :nosignatures:
     
-    daeGetConfig
     daeVersion
     daeVersionMajor
     daeVersionMinor
     daeVersionBuild
+    daeGetConfig
+    daeSetConfigFile
 
-.. autofunction:: pyCore.daeGetConfig
 .. autofunction:: pyCore.daeVersion
 .. autofunction:: pyCore.daeVersionMajor
 .. autofunction:: pyCore.daeVersionMinor
 .. autofunction:: pyCore.daeVersionBuild
+.. autofunction:: pyCore.daeGetConfig
+.. autofunction:: pyCore.daeSetConfigFile
 
 Enumerations
 ============

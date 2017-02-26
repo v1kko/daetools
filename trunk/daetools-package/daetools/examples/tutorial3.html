@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial3.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -161,9 +161,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         
         Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.x.NumberOfPoints
         <span style='color:#008000;'># These equations are just a mental gymnastics to illustrate various functions such as</span>
-        <span style='color:#008000;'># daeVariable's array() and d_array() and global functions Constant() and Array().</span>
+        <span style='color:#008000;'># daeVariable's array() and global functions d_array(), Constant() and Array().</span>
         <span style='color:#008000;'>#  - daeVariable.array() creates an array of values stored in a adouble_array object</span>
-        <span style='color:#008000;'>#  - daeVariable.d_array() creates an array of partial derivatives stored in a adouble_array object</span>
+        <span style='color:#008000;'>#  - d_array() creates an array of partial derivatives stored in a adouble_array object</span>
         <span style='color:#008000;'>#  - The function Constant() creates a constant quantity that contains a value and units</span>
         <span style='color:#008000;'>#  - The function Array() creates an array of constant quantities that contain a value and units</span>
         <span style='color:#008000;'># Both functions also accept plain floats (for instance, Constant(4.5) returns a dimensionless constant 4.5)</span>
@@ -183,7 +183,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qsum1() <b><span style='color:#0000ff;'>+</span></b> Sum( Array(values) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> dTdy_array <b><span style='color:#0000ff;'>/</span></b> Constant(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> K) )
 
         <span style='color:#008000;'># Often, it is desired to apply numpy/scipy numerical functions on arrays of adouble objects.</span>
-        <span style='color:#008000;'># In those cases the functions such as array(), d_array(), dt_array(), Array() etc</span>
+        <span style='color:#008000;'># In those cases the functions such as daeVariable.array(), d_array(), dt_array(), Array() etc</span>
         <span style='color:#008000;'># are NOT applicable since they return adouble_array objects.</span>
         <span style='color:#008000;'># However, we can create a numpy array of adouble objects, apply numpy functions on them</span>
         <span style='color:#008000;'># and finally create adouble_array object from resulting numpy arrays of adouble objects, if necessary.</span>

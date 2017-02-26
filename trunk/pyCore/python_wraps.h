@@ -200,7 +200,7 @@ daeArrayRange  CreateArrayRange(boost::python::object& o, daeDomain* pDomain);
 boost::python::list daeVariableWrapper_GetDomainIndexes(daeVariableWrapper &self);
 daeVariable* daeVariableWrapper_GetVariable(daeVariableWrapper &self);
 
-boost::python::object daeGetConfig(void);
+boost::python::object pydaeGetConfig(void);
 bool        GetBoolean(daeConfig& self, const std::string& strPropertyPath);
 real_t      GetFloat(daeConfig& self, const std::string& strPropertyPath);
 int         GetInteger(daeConfig& self, const std::string& strPropertyPath);

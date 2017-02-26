@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial15.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -85,7 +85,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Integral heat balance equation&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
 
         <span style='color:#008000;'># IF-1</span>
         <span style='color:#0000ff;'>self</span>.IF(Time() <b><span style='color:#0000ff;'>&lt;</span></b> Constant(<span style='color:#c000c0;'>200</span><b><span style='color:#0000ff;'>*</span></b>s)) <span style='color:#008000;'># --------------------------------------------------&gt; 1</span>

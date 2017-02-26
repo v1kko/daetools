@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS = Core \
+SUBDIRS = Config \
+    Core \
     DataReporting \
     Activity \
     IDAS_DAESolver \ 

@@ -15,7 +15,7 @@
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>                            tutorial_adv_3.py</span>
 <span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic, 2016</span>
+<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#008000;'>***********************************************************************************</span>
 <span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
 <span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
@@ -128,7 +128,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
 <span style='color:#c00000;'>    [INFO][FMUCHK] Version returned from CS FMU:   2.0</span>
 <span style='color:#c00000;'>    ***********************************************************************</span>
 <span style='color:#c00000;'>                                     Version:   1.5.0</span>
-<span style='color:#c00000;'>                                     Copyright: Dragan Nikolic, 2016</span>
+<span style='color:#c00000;'>                                     Copyright: Dragan Nikolic</span>
 <span style='color:#c00000;'>                                     Homepage:  http://www.daetools.com</span>
 <span style='color:#c00000;'>           @                       @</span>
 <span style='color:#c00000;'>           @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@</span>
@@ -227,20 +227,20 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;variableMultipliers&quot;</span>) <span style='color:#008000;'># Variable multipliers</span>
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m1&quot;</span>, <span style='color:#c00000;'>&quot;Multiplier 1 (Variable)&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m1.dt() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p1()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m1()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p1()
 
         <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
             eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;Multiplier 2 (Variable)&quot;</span>)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m2.dt(w) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p2()
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m2(w)) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p2()
 
         <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;constantMultipliers&quot;</span>) <span style='color:#008000;'># Constant multipliers</span>
 
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m1&quot;</span>, <span style='color:#c00000;'>&quot;Multiplier 1 (Constant)&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m1.dt()
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m1())
 
         <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
             eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;Multiplier 2 (Constant)&quot;</span>)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m2.dt(w)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m2(w))
 
         <span style='color:#0000ff;'>self</span>.END_STN()
    

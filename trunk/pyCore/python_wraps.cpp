@@ -156,9 +156,14 @@ daeVariable* daeVariableWrapper_GetVariable(daeVariableWrapper &self)
     return boost::ref(self.m_pVariable);
 }
 
-boost::python::object daeGetConfig(void)
+boost::python::object pydaeGetConfig(void)
 {
-    return boost::python::object( boost::ref(daeConfig::GetConfig()) );
+    return boost::python::object( boost::ref(daeGetConfig()) );
+}
+
+std::string GetConfigFileName(daeConfig& self)
+{
+    return self.GetConfigFileName();
 }
 
 bool GetBoolean(daeConfig& self, const std::string& strPropertyPath)
@@ -334,50 +339,18 @@ void daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::pyt
 
     if(bool_.check())
     {
-        boost::optional<bool> v = self.GetPropertyTree().get_optional<bool>(str_key());
-        if(!v.is_initialized())
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Failed to set the value of the key: the wrong data type" << str_key();
-            throw e;
-        }
-
         self.Set<bool>(str_key(), bool_());
     }
     else if(int_.check())
     {
-        boost::optional<int> v = self.GetPropertyTree().get_optional<int>(str_key());
-        if(!v.is_initialized())
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Failed to set the value of the key: the wrong data type" << str_key();
-            throw e;
-        }
-
         self.Set<int>(str_key(), int_());
     }
     else if(float_.check())
     {
-        boost::optional<double> v = self.GetPropertyTree().get_optional<double>(str_key());
-        if(!v.is_initialized())
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Failed to set the value of the key: the wrong data type" << str_key();
-            throw e;
-        }
-
         self.Set<double>(str_key(), float_());
     }
     else if(string_.check())
     {
-        boost::optional<string> v = self.GetPropertyTree().get_optional<string>(str_key());
-        if(!v.is_initialized())
-        {
-            daeDeclareException(exInvalidCall);
-            e << "Failed to set the value of the key: the wrong data type" << str_key();
-            throw e;
-        }
-
         self.Set<string>(str_key(), string_());
     }
     else
