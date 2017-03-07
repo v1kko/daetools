@@ -11,7 +11,7 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 6
+DAE_TOOLS_MINOR = 7
 DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)
@@ -526,26 +526,6 @@ win32-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${R
 win64-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
 unix::SUPERLU_MT_LIBS           = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
 
-
-######################################################################################
-#                                SuperLU_CUDA
-######################################################################################
-win32-msvc2008::CUDA_PATH =
-win32-g++-*::CUDA_PATH    =
-win64-g++-*::CUDA_PATH    =
-linux-g++::CUDA_PATH      = /usr/local/cuda
-
-SUPERLU_CUDA_PATH    = ../superlu_mt-GPU
-SUPERLU_CUDA_LIBPATH = $${SUPERLU_CUDA_PATH}/lib
-SUPERLU_CUDA_INCLUDE = $${SUPERLU_CUDA_PATH} \
-                       $${CUDA_PATH}/include
-
-win32-msvc2008::CUDA_LIBS =
-win32-g++-*::CUDA_LIBS    =
-win64-g++-*::CUDA_LIBS    =
-linux-g++::CUDA_LIBS      = -L$${CUDA_PATH}/lib -lcuda -lcudart
-
-
 ######################################################################################
 #                           Umfpack + AMD + CHOLMOD
 ######################################################################################
@@ -594,28 +574,43 @@ unix::TRILINOS_INCLUDE           = $${TRILINOS_DIR}/include
 
 win32-msvc2008::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                                 $${SUPERLU_LIBS} \
-                                aztecoo.lib ml.lib ifpack.lib amesos.lib epetra.lib epetraext.lib teuchos.lib
+                                aztecoo.lib ml.lib ifpack.lib \
+                                amesos.lib epetraext.lib triutils.lib epetra.lib teuchoskokkoscomm.lib \
+                                teuchoskokkoscompat.lib teuchosremainder.lib teuchosnumerics.lib teuchoscomm.lib \
+                                teuchosparameterlist.lib teuchoscore.lib kokkoscore.lib
 
 win32-g++-*::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                              -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+                              -laztecoo -lml -lifpack \
+                              -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
+                              -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                              -lteuchosparameterlist -lteuchoscore -lkokkoscore \
                                $${UMFPACK_LIBS} \
                                $${SUPERLU_LIBS}
 
 win64-g++-*::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                              -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+                              -laztecoo -lml -lifpack \
+                              -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
+                              -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                              -lteuchosparameterlist -lteuchoscore -lkokkoscore \
                                $${UMFPACK_LIBS} \
                                $${SUPERLU_LIBS}
 
 # -lteuchosparameterlist -lteuchoscomm -lteuchosnumerics -lteuchoscore                               
-linux-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                            -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
+linux-g++::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
+                           -laztecoo -lml -lifpack \
+                           -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
+                           -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                           -lteuchosparameterlist -lteuchoscore -lkokkoscore \
                             $${UMFPACK_LIBS} \
                             $${SUPERLU_LIBS}
 
 macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/local/lib \
-                           -laztecoo -lml -lifpack -lamesos -lepetra -lepetraext -lteuchos \
-                            $${UMFPACK_LIBS} \
-                            $${SUPERLU_LIBS}
+                           -laztecoo -lml -lifpack \
+                           -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
+                           -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                           -lteuchosparameterlist -lteuchoscore -lkokkoscore \
+                           $${UMFPACK_LIBS} \
+                           $${SUPERLU_LIBS}
 
 ######################################################################################
 #                                INTEL Pardiso

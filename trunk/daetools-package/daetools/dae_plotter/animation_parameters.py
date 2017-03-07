@@ -14,15 +14,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 import sys
 from os.path import join, realpath, dirname
 import numpy
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 from .animation_params_ui import Ui_AnimationParameters
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeAnimationParameters(QtGui.QDialog):
+class daeAnimationParameters(QtWidgets.QDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_AnimationParameters()
         self.ui.setupUi(self)
 

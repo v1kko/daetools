@@ -35,7 +35,7 @@ The temperature plot:
 """
 
 import os, sys, threading
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
 from subprocess import Popen, call
@@ -114,9 +114,9 @@ class tcpipLogServer(daeTCPIPLogServer):
         self.textEdit.verticalScrollBar().setSliderPosition(self.textEdit.verticalScrollBar().maximum())
         self.app.processEvents()
 
-class tcpipLogServerMainWindow(QtGui.QMainWindow):
+class tcpipLogServerMainWindow(QtWidgets.QMainWindow):
     def __init__(self, app):
-        QtGui.QMainWindow.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
 
         self.ui = Ui_tcpipLogServerMainWindow()
         self.ui.setupUi(self)
@@ -222,7 +222,7 @@ def consoleRun(app):
     st.join()
 
 if __name__ == "__main__":
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun(app)
     else:

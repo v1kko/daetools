@@ -13,15 +13,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import sys, numpy
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 from .user_data_ui import Ui_UserData
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeUserData(QtGui.QDialog):
+class daeUserData(QtWidgets.QDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_UserData()
         self.ui.setupUi(self)
 
@@ -44,23 +44,23 @@ class daeUserData(QtGui.QDialog):
         self.lineLabel = str(self.ui.editLineLabel.text())
 
         if not self.xLabel:
-            QtGui.QMessageBox.warning(self, "User-data", "X axes label is empty")
+            QtWidgets.QMessageBox.warning(self, "User-data", "X axes label is empty")
             return
         if not self.yLabel:
-            QtGui.QMessageBox.warning(self, "User-data", "Y axes label is empty")
+            QtWidgets.QMessageBox.warning(self, "User-data", "Y axes label is empty")
             return
         if not self.lineLabel:
-            QtGui.QMessageBox.warning(self, "User-data", "Line label is empty")
+            QtWidgets.QMessageBox.warning(self, "User-data", "Line label is empty")
             return
         if self.xPoints.ndim != 1 or self.xPoints.size == 0:
-            QtGui.QMessageBox.warning(self, "User-data", "Invalid x data array")
+            QtWidgets.QMessageBox.warning(self, "User-data", "Invalid x data array")
             return
         if self.yPoints.ndim != 1 or self.yPoints.size == 0:
-            QtGui.QMessageBox.warning(self, "User-data", "Invalid x data array")
+            QtWidgets.QMessageBox.warning(self, "User-data", "Invalid x data array")
             return
         if self.xPoints.size != self.yPoints.size:
-            QtGui.QMessageBox.warning(self, "User-data", "The size of x and y data arrays does not match")
+            QtWidgets.QMessageBox.warning(self, "User-data", "The size of x and y data arrays does not match")
             return
 
-        return QtGui.QDialog.accept(self)
+        return QtWidgets.QDialog.accept(self)
 

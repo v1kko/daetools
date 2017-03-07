@@ -22,6 +22,8 @@ results and the discretised population balance equations results solved using th
 centered finite volume method employing the high resolution upwind scheme (Van Leer
 k-interpolation with k = 1/3) and a range of flux limiters.
 
+This tutorial can be run from the console only.
+
 The problem is from the section 4.1.2 Size-independent growth II of the following article:
 
 - Nikolic D.D., Frawley P.J. Application of the Lagrangian Meshfree Approach to

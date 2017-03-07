@@ -11,13 +11,13 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 from .about_ui import Ui_About
 
-class daeAboutDialog(QtGui.QDialog):
+class daeAboutDialog(QtWidgets.QDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_About()
         self.ui.setupUi(self)
         self.setWindowTitle("DAE Tools Project v" + daeVersion(True))

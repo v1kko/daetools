@@ -77,9 +77,7 @@ class simpleUserAction(daeAction):
         # Try to show a message box if there is application instance already defined
         # that is we are in the 'gui' mode
         try:
-            from PyQt4 import QtCore, QtGui
-            if QtCore.QCoreApplication.instance():
-                QtGui.QMessageBox.warning(None, 'tutorial13', msg)
+            daeQtMessage('tutorial13', msg)
         finally:
             print('********************************************************')
             print(msg)
@@ -94,9 +92,7 @@ class simpleUserAction2(daeAction):
         # Try to show a message box if there is application instance already defined
         # that is we are in the 'gui' mode
         try:
-            from PyQt4 import QtCore, QtGui
-            if QtCore.QCoreApplication.instance():
-                QtGui.QMessageBox.warning(None, 'tutorial13', self.msg)
+            daeQtMessage('tutorial13', self.msg)
         finally:
             print('********************************************************')
             print('simpleUserAction2 message: ')
@@ -290,6 +286,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)

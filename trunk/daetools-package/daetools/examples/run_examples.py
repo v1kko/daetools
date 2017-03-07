@@ -19,7 +19,7 @@ import os, platform, sys, subprocess, webbrowser, traceback, numpy
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -57,8 +57,9 @@ for m_name, data  in tutorial_modules:
         data.append(doc)
     except Exception as e:
         exc_traceback = sys.exc_info()[2]
+        print('[daeRunExamples]: Cannot load Tutorial module %s\n Error: %s' % (m_name, str(e)))
         print('\n'.join(traceback.format_tb(exc_traceback)))
-        print('[daeRunExamples]: Cannot load Tutorials modules\n Error: ', str(e))
+        print('------------------------------------------------------------')
 
 try:
     _examples_dir = dirname(__file__)
@@ -91,9 +92,9 @@ except:
     # In case we are running the module on its own (i.e. as __main__)
     images_dir = realpath(dirname(sys.argv[0]))
 
-class RunExamples(QtGui.QDialog):
+class RunExamples(QtWidgets.QDialog):
     def __init__(self, app):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_RunExamplesDialog()
         self.ui.setupUi(self)
         self.app = app
@@ -113,11 +114,11 @@ class RunExamples(QtGui.QDialog):
         self.setWindowTitle("DAE Tools Examples v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
-        self.connect(self.ui.toolButtonRun,                QtCore.SIGNAL('clicked()'), self.slotRunTutorial)
-        self.connect(self.ui.toolButtonCode,               QtCore.SIGNAL('clicked()'), self.slotShowCode)
-        self.connect(self.ui.toolButtonModelReport,        QtCore.SIGNAL('clicked()'), self.slotShowModelReport)
-        self.connect(self.ui.toolButtonRuntimeModelReport, QtCore.SIGNAL('clicked()'), self.slotShowRuntimeModelReport)
-        self.connect(self.ui.comboBoxExample,              QtCore.SIGNAL("currentIndexChanged(int)"), self.slotTutorialChanged)
+        self.ui.toolButtonRun.clicked.connect(self.slotRunTutorial)
+        self.ui.toolButtonCode.clicked.connect(self.slotShowCode)
+        self.ui.toolButtonModelReport.clicked.connect(self.slotShowModelReport)
+        self.ui.toolButtonRuntimeModelReport.clicked.connect(self.slotShowRuntimeModelReport)
+        self.ui.comboBoxExample.currentIndexChanged.connect(self.slotTutorialChanged)
 
         for m_name, data  in tutorial_modules:
             if len(data) == 2:
@@ -146,6 +147,7 @@ class RunExamples(QtGui.QDialog):
             wv.setWindowTitle(title)
             wv.exec_()
         except Exception as e:
+            print(str(e))
             firefox.open_new_tab(address)
             
     #@QtCore.pyqtSlot()
@@ -201,7 +203,7 @@ class RunExamples(QtGui.QDialog):
             sys.stdout = saveout
 
 def daeRunExamples():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     main = RunExamples(app)
     main.show()
     app.exec_()

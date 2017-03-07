@@ -55,19 +55,19 @@ if [ ${DISTRIBUTOR_ID} = "debian" ]; then
   #sudo apt-get update
   sudo apt-get install libqt4-dev qtcreator qt4-designer \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
-                       wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
+                       wget subversion fakeroot libfreetype6-dev swig python-dev libpng-dev libxext-dev libbz2-dev
 
 elif [ ${DISTRIBUTOR_ID} = "ubuntu" ]; then
   #sudo apt-get update
   sudo apt-get install libqt4-dev qtcreator qt4-designer \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
-                       wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
+                       wget subversion fakeroot libfreetype6-dev swig python-dev libpng-dev libxext-dev libbz2-dev
 
 elif [ ${DISTRIBUTOR_ID} = "linuxmint" ]; then
   #sudo apt-get update
   sudo apt-get install libqt4-dev qtcreator qt4-designer \
                        autotools-dev automake make pkg-config autoconf gcc g++ gfortran binutils cmake patch \
-                       wget subversion fakeroot libfreetype6-dev swig python-dev libpng12-dev libxext-dev libbz2-dev
+                       wget subversion fakeroot libfreetype6-dev swig python-dev libpng-dev libxext-dev libbz2-dev
 
 elif [ ${DISTRIBUTOR_ID} = "fedora" ]; then
   #sudo yum check-update

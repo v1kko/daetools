@@ -197,7 +197,8 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
         // Read the points
             if(pDomain->m_eType == eUnstructuredGrid)
             {
-                std::cout << pDomain->m_strName << " points: " << std::endl;
+                //std::cout << pDomain->m_strName << " points: " << std::endl;
+
                 daePoint point;
                 pDomain->m_arrCoordinates.resize(pDomain->m_nNumberOfPoints);
                 for(size_t i = 0; i < pDomain->m_nNumberOfPoints; i++)
@@ -213,7 +214,7 @@ void daeTCPIPDataReceiver::ParseMessage(unsigned char* data, boost::int32_t msgS
 
                     pDomain->m_arrCoordinates[i] = point;
 
-                    std::cout << pDomain->m_arrCoordinates[i].x << ", " <<  pDomain->m_arrCoordinates[i].y << std::endl;
+                    //std::cout << pDomain->m_arrCoordinates[i].x << ", " <<  pDomain->m_arrCoordinates[i].y << std::endl;
                 }
             }
             else

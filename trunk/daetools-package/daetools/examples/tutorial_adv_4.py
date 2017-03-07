@@ -146,10 +146,7 @@ def run_code_generators(simulation, log):
     log.Message(msg, 0)
 
     try:
-        from PyQt4 import QtCore, QtGui
-        if not QtGui.QApplication.instance():
-            app_ = QtGui.QApplication(sys.argv)
-        QtGui.QMessageBox.warning(None, "tutorial_adv_4", msg)
+        daeQtMessage("tutorial_adv_4", msg)
     except Exception as e:
         log.Message(str(e), 0)
 
@@ -240,6 +237,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)

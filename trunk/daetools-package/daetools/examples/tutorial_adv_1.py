@@ -37,11 +37,11 @@ The screenshot of the pyQt GUI:
 import sys
 from time import localtime, strftime, sleep
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib
-matplotlib.use('Qt4Agg')
+matplotlib.use('Qt5Agg')
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from daetools.pyDAE import *
 try:
     from .tutorial_adv_1_ui import Ui_InteractiveRunDialog
@@ -91,9 +91,9 @@ class simTutorial(daeSimulation):
         opDlg = InteractiveOP(self)
         opDlg.exec_()
         
-class InteractiveOP(QtGui.QDialog):
+class InteractiveOP(QtWidgets.QDialog):
     def __init__(self, simulation):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
 
         self.ui = Ui_InteractiveRunDialog()
         self.ui.setupUi(self)
@@ -126,7 +126,7 @@ class InteractiveOP(QtGui.QDialog):
 
         self.canvas.axes.grid(True)
 
-        self.connect(self.ui.runButton, QtCore.SIGNAL('clicked()'), self.integrate)
+        self.ui.runButton.clicked.connect(self.integrate)
 
     def integrate(self):
         try:
@@ -137,7 +137,7 @@ class InteractiveOP(QtGui.QDialog):
             self.simulation.TimeHorizon       = self.simulation.CurrentTime + interval
 
             if self.simulation.ReportingInterval > interval:
-                QtGui.QMessageBox.warning(self, "tutorial_adv_1", 'Reporting interval must be lower than the integration interval')
+                QtWidgets.QMessageBox.warning(self, "tutorial_adv_1", 'Reporting interval must be lower than the integration interval')
                 return
 
             # Disable the input boxes and buttons
@@ -171,7 +171,7 @@ class InteractiveOP(QtGui.QDialog):
                 sleep(0.1)
 
         except Exception as e:
-            QtGui.QMessageBox.warning(self, "tutorial_adv_1", 'Error: %s' % str(e))
+            QtWidgets.QMessageBox.warning(self, "tutorial_adv_1", 'Error: %s' % str(e))
             
         finally:
             # Enable the input boxes and buttons again
@@ -190,7 +190,7 @@ class InteractiveOP(QtGui.QDialog):
         self.canvas.axes.autoscale_view()
         self.canvas.draw()
         self.ui.currentTimeEdit.setText(str(self.simulation.CurrentTime) + ' s')
-        QtGui.QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
 
 def guiRun(app):
     # Create Log, Solver, DataReporter and Simulation object
@@ -256,8 +256,8 @@ def consoleRun():
     
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         consoleRun()
     else:
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         guiRun(app)

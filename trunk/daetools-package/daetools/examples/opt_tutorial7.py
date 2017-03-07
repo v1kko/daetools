@@ -221,9 +221,8 @@ def consoleRun(app):
     optimization.Finalize()
 
 if __name__ == "__main__":
-    from PyQt4 import QtCore, QtGui
-    app = QtGui.QApplication(sys.argv)
-
+    app = daeCreateQtApplication(sys.argv)
+ 
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun(app)
     else:

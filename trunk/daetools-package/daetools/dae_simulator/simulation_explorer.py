@@ -17,7 +17,7 @@ import sys, tempfile, numpy, json, traceback
 from time import localtime, strftime
 from os.path import join, dirname
 from daetools.pyDAE import *
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .simulation_explorer_ui import Ui_SimulationExplorer
 from .simulation_inspector import daeSimulationInspector
@@ -30,7 +30,7 @@ images_dir = join(dirname(__file__), 'images')
 def simulate(simulation, **kwargs):
     qt_app = kwargs.get('qt_app', None)
     if not qt_app:
-        qt_app = QtGui.QApplication(sys.argv)
+        qt_app = QtWidgets.QApplication(sys.argv)
     explorer = daeSimulationExplorer(qt_app, simulation = simulation, **kwargs)
     explorer.exec_()
     return explorer
@@ -38,14 +38,14 @@ def simulate(simulation, **kwargs):
 def optimize(optimization, **kwargs):
     qt_app = kwargs.get('qt_app', None)
     if not qt_app:
-        qt_app = QtGui.QApplication(sys.argv)
+        qt_app = QtWidgets.QApplication(sys.argv)
     explorer = daeSimulationExplorer(qt_app, simulation = simulation, optimization = optimization, **kwargs)
     explorer.exec_()
     return explorer
 
-class daeExceptionDialog(QtGui.QDialog):
+class daeExceptionDialog(QtWidgets.QDialog):
     def __init__(self, parent, e, tb):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self._ui = Ui_ExceptionDialog()
         self._ui.setupUi(self)
         
@@ -56,9 +56,9 @@ class daeExceptionDialog(QtGui.QDialog):
         
         self.setWindowTitle('Exception raised')
         
-class daeSimulationExplorer(QtGui.QDialog):
+class daeSimulationExplorer(QtWidgets.QDialog):
     def __init__(self, qt_app, simulation, **kwargs):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self._ui = Ui_SimulationExplorer()
         self._ui.setupUi(self)
 
@@ -86,17 +86,17 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._initialize(simulation)
 
         # First populate trees and set values. Only after that connect signals to slots (otherwise the event handlers might be triggered in the process)
-        self.connect(self._ui.buttonCancel,                    QtCore.SIGNAL('clicked()'),                          self._slotCancel)
-        self.connect(self._ui.buttonUpdateSimulationAndClose,  QtCore.SIGNAL('clicked()'),                          self._slotUpdateSimulationAndClose)
-        self.connect(self._ui.buttonGenerateCode,              QtCore.SIGNAL('clicked()'),                          self._slotGenerateCode)
-        self.connect(self._ui.buttonSaveRuntimeSettingsAsJSON, QtCore.SIGNAL('clicked()'),                          self._slotSaveRuntimeSettingsAsJSON)        
-        self.connect(self._ui.treeParameters,                  QtCore.SIGNAL("itemSelectionChanged()"),             self._slotParameterTreeItemSelectionChanged)
-        self.connect(self._ui.treeOutputVariables,             QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotOutputVariablesTreeItemChanged)
-        self.connect(self._ui.treeSTNs,                        QtCore.SIGNAL("itemChanged(QTreeWidgetItem*, int)"), self._slotSTNsTreeItemChanged)
-        self.connect(self._ui.treeDomains,                     QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDomainsTreeItemChanged)
-        self.connect(self._ui.treeDOFs,                        QtCore.SIGNAL("itemSelectionChanged()"),             self._slotDOFsTreeItemChanged)
-        self.connect(self._ui.treeInitialConditions,           QtCore.SIGNAL("itemSelectionChanged()"),             self._slotInitialConditionsTreeItemChanged)
-        #self.connect(self._ui.treeSTNs,                       QtCore.SIGNAL("itemSelectionChanged()"),             self._slotSTNsTreeItemChanged)
+        self._ui.buttonCancel.clicked.connect(self._slotCancel)
+        self._ui.buttonUpdateSimulationAndClose.clicked.connect(self._slotUpdateSimulationAndClose)
+        self._ui.buttonGenerateCode.clicked.connect(self._slotGenerateCode)
+        self._ui.buttonSaveRuntimeSettingsAsJSON.clicked.connect(self._slotSaveRuntimeSettingsAsJSON)        
+        self._ui.treeParameters.itemSelectionChanged.connect(self._slotParameterTreeItemSelectionChanged)
+        self._ui.treeOutputVariables.itemChanged.connect(self._slotOutputVariablesTreeItemChanged)
+        self._ui.treeSTNs.itemChanged.connect(self._slotSTNsTreeItemChanged)
+        self._ui.treeDomains.itemSelectionChanged.connect(self._slotDomainsTreeItemChanged)
+        self._ui.treeDOFs.itemSelectionChanged.connect(self._slotDOFsTreeItemChanged)
+        self._ui.treeInitialConditions.itemSelectionChanged.connect(self._slotInitialConditionsTreeItemChanged)
+        #self._ui.treeSTNs.itemSelectionChanged.connect(self._slotSTNsTreeItemChanged)
 
     def updateSimulation(self, verbose = False):
         # Update runtime data
@@ -238,87 +238,87 @@ class daeSimulationExplorer(QtGui.QDialog):
         if not language in ['c99', 'c++ (MPI)', 'Modelica', 'gPROMS', 'FMI (Co-Simulation)']:
             return
         
+        options = QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks
+        
         if language == 'c99':
             from daetools.code_generators.c99 import daeCodeGenerator_c99
-            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
-                                                                            '', 
-                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
-            if directory == '':
+            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
+                                                                       '', 
+                                                                       options)
+            if not directory:
                 return
             cg = daeCodeGenerator_c99()
-            cg.generateSimulation(self._simulation, directory)
+            cg.generateSimulation(self._simulation, str(directory))
         
         elif language == 'c++ (MPI)':
-            nproc, ok = QtGui.QInputDialog.getInteger(self, "Code generator", "Set the # of MPI processes:", 4, min=2)
+            nproc, ok = QtWidgets.QInputDialog.getInt(self, "Code generator", "Set the # of MPI processes:", 4, min=2)
             if not ok:
                 return
 
             from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
-            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
-                                                                            '',
-                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
-            if directory == '':
+            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
+                                                                       '',
+                                                                       options)
+            if not directory:
                 return
             cg = daeCodeGenerator_cxx_mpi()
-            cg.generateSimulation(self._simulation, directory, nproc)
+            cg.generateSimulation(self._simulation, str(directory), nproc)
 
         elif language == 'Modelica':
             from daetools.code_generators.modelica import daeCodeGenerator_Modelica
-            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
-                                                                            '',
-                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
-            if directory == '':
+            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
+                                                                       '',
+                                                                       options)
+            if not directory:
                 return
             cg = daeCodeGenerator_Modelica()
-            cg.generateSimulation(self._simulation, directory)
+            cg.generateSimulation(self._simulation, str(directory))
         
         elif language == 'gPROMS':
             from daetools.code_generators.gproms import daeCodeGenerator_gPROMS
-            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
-                                                                            '',
-                                                                            QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
-            if directory == '':
+            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language,
+                                                                   '',
+                                                                   options)
+            if not directory:
                 return
             cg = daeCodeGenerator_gPROMS()
-            cg.generateSimulation(self._simulation, directory)
+            cg.generateSimulation(self._simulation, str(directory))
 
         elif language == 'FMI (Co-Simulation)':
             from daetools.code_generators.fmi import daeCodeGenerator_FMI
-            directory = str(QtGui.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
-                                                                         "",
-                                                                         QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
-            if directory == '':
+            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
+                                                                   "",
+                                                                   options)
+            if not directory:
                 return
 
-            qt_files = QtGui.QFileDialog.getOpenFileNames(self, "Select python files to pack in the .FMU file",
+            qt_file, ok = QtWidgets.QFileDialog.getOpenFileName(self, "Select python file to pack in the .FMU file",
                                                                 "",
                                                                 "Python files (*.py *.*)")
-            if len(qt_files) == 0:
+            if not ok:
                 return
-            py_files = []
-            for qt_file in qt_files:
-                py_files.append(str(qt_file))
+            py_file = str(qt_file)
 
-            qt_callable_name, ok = QtGui.QInputDialog.getText(self, "FMU Code generator", "Insert the name of python callable object:")
+            qt_callable_name, ok = QtWidgets.QInputDialog.getText(self, "FMU Code generator", "Insert the name of python callable object:")
             if not ok:
                 return
             callable_name = str(qt_callable_name)
 
-            qt_arguments, ok = QtGui.QInputDialog.getText(self, "FMU Code generator", "Insert the arguments for the python callable object:")
+            qt_arguments, ok = QtWidgets.QInputDialog.getText(self, "FMU Code generator", "Insert the arguments for the python callable object:")
             if not ok:
                 return
             arguments = str(qt_arguments)
 
             cg = daeCodeGenerator_FMI()
-            cg.generateSimulation(self._simulation, directory, py_files, callable_name, arguments, [])
+            cg.generateSimulation(self._simulation, str(directory), py_file, callable_name, arguments, [])
             
-        QtGui.QMessageBox.information(self, "Code generator: %s" % language, 'Code generated successfuly!')
+        QtWidgets.QMessageBox.information(self, "Code generator: %s" % language, 'Code generated successfuly!')
 
     @staticmethod
     def generateHTMLForm(simulation, htmlOutputFile, find_files_dir = '.'):
         # Create application in case there is not one already created
-        if not QtGui.QApplication.instance():
-            app_ = QtGui.QApplication(sys.argv)
+        if not QtWidgets.QApplication.instance():
+            app_ = QtWidgets.QApplication(sys.argv)
 
         _inspector = daeSimulationInspector(simulation)
 
@@ -355,8 +355,8 @@ class daeSimulationExplorer(QtGui.QDialog):
     def generateJSONSettings(simulation):
         try:
             # Create application in case there is not one already created
-            if not QtGui.QApplication.instance():
-                app_ = QtGui.QApplication(sys.argv)
+            if not QtWidgets.QApplication.instance():
+                app_ = QtWidgets.QApplication(sys.argv)
 
             _inspector = daeSimulationInspector(simulation)
 
@@ -622,17 +622,17 @@ class daeSimulationExplorer(QtGui.QDialog):
         self._runtimeSettings['Outputs']               = self._inspector.treeOutputVariables.toDictionary()
 
     def _slotCancel(self):
-        self.done(QtGui.QDialog.Rejected)
+        self.done(QtWidgets.QDialog.Rejected)
 
     def reject(self):
-        QtGui.QDialog.reject(self)
+        QtWidgets.QDialog.reject(self)
         
     def _slotUpdateSimulationAndClose(self):
         try:
             cfg = daeGetConfig()
             printInfo = cfg.GetBoolean('daetools.core.printInfo', False)
             self.updateSimulation(verbose = True)
-            self.done(QtGui.QDialog.Accepted)
+            self.done(QtWidgets.QDialog.Accepted)
             
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -642,16 +642,16 @@ class daeSimulationExplorer(QtGui.QDialog):
     def _slotSaveRuntimeSettingsAsJSON(self):
         try:
             name = self._simulation.m.GetStrippedName() + ".json"
-            jsonFilename = str(QtGui.QFileDialog.getSaveFileName(self, "Save Runtime Settings As JSON File", name, "JSON Files (*.json)"))
-            if jsonFilename == '':
+            jsonFilename, ok = QtWidgets.QFileDialog.getSaveFileName(self, "Save Runtime Settings As JSON File", name, "JSON Files (*.json)")
+            if not ok:
                 return
             
             self._processInputs()
-            f = open(jsonFilename, 'w')
+            f = open(str(jsonFilename), 'w')
             f.write(self.jsonRuntimeSettings)
             f.close()
             
-            QtGui.QMessageBox.information(self, "Save Runtime Settings As JSON File", 'JSON file successfuly saved!')
+            QtWidgets.QMessageBox.information(self, "Save Runtime Settings As JSON File", 'JSON file successfuly saved!')
             
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -661,11 +661,11 @@ class daeSimulationExplorer(QtGui.QDialog):
     """
     def _slotLoadRuntimeSettingsAsJSON(self):
         try:
-            jsonFilename = str(QtGui.QFileDialog.getOpenFileName(self, "Load Runtime Settings As JSON File", "", "JSON Files (*.json)"))
-            if jsonFilename == '':
+            jsonFilename, ok = QtWidgets.QFileDialog.getOpenFileName(self, "Load Runtime Settings As JSON File", "", "JSON Files (*.json)")
+            if not ok:
                 return
 
-            f = open(jsonFilename, 'r')
+            f = open(str(jsonFilename), 'r')
             json_str = f.read()
             f.close()
 
@@ -673,7 +673,7 @@ class daeSimulationExplorer(QtGui.QDialog):
             self.updateSimulation(verbose = False)
             self._initialize(self._simulation)
 
-            QtGui.QMessageBox.information(self, "Load Runtime Settings As JSON File", 'JSON file successfuly loaded!')
+            QtWidgets.QMessageBox.information(self, "Load Runtime Settings As JSON File", 'JSON file successfuly loaded!')
 
         except Exception as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -682,18 +682,18 @@ class daeSimulationExplorer(QtGui.QDialog):
     """
     
     def _slotGenerateCode(self):
-        try:
-            languages = ['Modelica', 'gPROMS', 'c99', 'c++ (MPI)', 'FMI (Co-Simulation)']
-            language, ok = QtGui.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
-            if not ok:
-                return
+        #try:
+        languages = ['Modelica', 'gPROMS', 'c99', 'c++ (MPI)', 'FMI (Co-Simulation)']
+        language, ok = QtWidgets.QInputDialog.getItem(self, "Code generator", "Choose the target language:", languages, 0, False)
+        if not ok:
+            return
+        
+        self.generateCode(language)
             
-            self.generateCode(language)
-            
-        except Exception as e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            dlg = daeExceptionDialog(self, e, exc_traceback)
-            dlg.exec_()
+        #except Exception as e:
+            #exc_type, exc_value, exc_traceback = sys.exc_info()
+            #dlg = daeExceptionDialog(self, e, exc_traceback)
+            #dlg.exec_()
 
     def _slotParameterTreeItemSelectionChanged(self):
         currentItem = self._ui.treeParameters.selectedItems()[0]

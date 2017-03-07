@@ -352,6 +352,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)

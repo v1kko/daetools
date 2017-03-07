@@ -19,17 +19,17 @@ __doc__ = """
 import sys
 from daetools.pyDAE import *
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import matplotlib
-matplotlib.use('Qt4Agg')
+matplotlib.use('Qt5Agg')
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeOptimizationProgressMonitor(QtGui.QDialog):
+class daeOptimizationProgressMonitor(QtWidgets.QDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
         self.move(QtCore.QPoint(0, 50))
@@ -39,7 +39,7 @@ class daeOptimizationProgressMonitor(QtGui.QDialog):
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowSystemMenuHint
                                                | QtCore.Qt.WindowMinMaxButtonsHint)
 
-        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
 
         self.figure = Figure((7.0, 4.0), dpi=100, facecolor='white')
         self.canvas = FigureCanvas(self.figure)

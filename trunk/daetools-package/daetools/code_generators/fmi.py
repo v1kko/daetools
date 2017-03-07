@@ -25,6 +25,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
     
     def generateSimulation(self, simulation, directory, py_simulation_file, callable_object_name, arguments, py_additional_files = []):
         try:
+            tmp_folder = ''
             if not simulation:
                 raise RuntimeError('Invalid simulation object')
             if not os.path.isdir(directory):
@@ -82,7 +83,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Copy the python file with the simulation class and all additional files to the 'resources' folder
             files_to_copy = py_additional_files + [py_simulation_file]
             for py_file in files_to_copy:
-                py_path, py_filename = os.path.split(py_file)
+                py_path, py_filename = os.path.split(str(py_file))
                 shutil.copy2(py_file, os.path.join(resources_dir, py_filename))
 
             # Copy all available libcdaeFMU_CS-pyXY.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder

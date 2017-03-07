@@ -283,11 +283,9 @@ vBOOST=1.52.0
 vBOOST_=1_52_0
 vBONMIN=1.8.4
 vLAPACK=3.4.1
-vSUPERLU=4.1
-vSUPERLU_MT=2.0
-vNLOPT=2.4.1
-vIDAS=1.1.0
-vTRILINOS=10.8.0
+vNLOPT=2.4.2
+vIDAS=1.3.0
+vTRILINOS=12.10.1
 vUMFPACK=5.6.2
 vAMD=2.3.1
 vMETIS=5.1.0
@@ -298,6 +296,9 @@ vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
 vDEALII=8.4.1
+# Old versions (require changes in makefiles)
+vSUPERLU=4.1
+vSUPERLU_MT=2.0
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
@@ -879,16 +880,28 @@ configure_idas()
   if [ ! -e idas-${vIDAS}.tar.gz ]; then
     wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
   fi
-  if [ ! -e idasMakefile.in.patch ]; then
-    wget ${DAETOOLS_HTTP}/idasMakefile.in.patch
-  fi
   tar -xzf idas-${vIDAS}.tar.gz
   mv idas-${vIDAS} idas
   cd idas
-  patch < ../idasMakefile.in.patch
-  
-  ./configure ${DAE_CROSS_COMPILE_FLAGS} --prefix=${TRUNK}/idas/build --with-pic --enable-mpi --enable-static=yes --enable-shared=no --enable-examples --enable-lapack F77=gfortran CFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}"
-  
+
+  mkdir -p build
+  cd build
+
+  export IDAS_HOME="${TRUNK}/idas"
+  EXTRA_ARGS=
+
+  cmake \
+    -DCMAKE_BUILD_TYPE:STRING=RELEASE \
+    -DBUILD_SHARED_LIBS:BOOL=OFF \
+    -DCMAKE_INSTALL_PREFIX:PATH=. \
+    -DEXAMPLES_INSTALL:BOOL=OFF \
+    -DEXAMPLES_INSTALL_PATH:PATH=. \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    $EXTRA_ARGS \
+    ${IDAS_HOME}
+    
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -898,10 +911,10 @@ configure_idas()
 compile_idas() 
 {
   cd idas
+  cd build
   echo ""
   echo "[*] Building idas..."
   echo ""
-  make all
   make install
   echo ""
   echo "[*] Done!"
@@ -1201,7 +1214,7 @@ configure_trilinos()
     -DTPL_ENABLE_MPI:BOOL=OFF \
     -DDART_TESTING_TIMEOUT:STRING=600 \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
-    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG -fpermissive ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     $EXTRA_ARGS \

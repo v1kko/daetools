@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial_dealii_3.py
+                           tutorial_dealii_6.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -17,25 +17,30 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example the Cahn-Hilliard equation is solved using the finite element method.
-This equation describes the process of phase separation, where two components of a
-binary mixture separate and form domains pure in each component.
+A simple steady-state diffusion and first-order reaction in an irregular catalyst shape
+(Proc. 6th Int. Conf. on Mathematical Modelling, Math. Comput. Modelling, Vol. 11, 375-319, 1988)
+applying Dirichlet and Robin type of boundary conditions.
 
 .. code-block:: none
 
-   dc/dt - D*nabla^2(mu) = 0, in Omega
-   mu = c^3 - c - gamma*nabla^2(c)
+   D_eA * nabla^2(C_A) - k_r * C_A = 0 in Omega
+   D_eA * nabla(C_A) = k_m * (C_A - C_Ab) on dOmega1
+   C_A = C_Ab on dOmega2
 
-The mesh is a simple square (0-100)x(0-100):
+The catalyst pellet mesh:
 
-.. image:: _static/square.png
-   :width: 300 px
-
-The concentration plot at t = 500s:
-
-.. image:: _static/tutorial_dealii_3-results.png
+.. image:: _static/ssdr.png
    :width: 400 px
 
+The concentration plot:
+
+.. image:: _static/tutorial_dealii_6-results1.png
+   :width: 500 px
+
+The concentration plot for Ca=Cab on all boundaries:
+
+.. image:: _static/tutorial_dealii_6-results2.png
+   :width: 500 px
 """
 
 import os, sys, numpy, json, tempfile, random
@@ -51,19 +56,13 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        dofs = [dealiiFiniteElementDOF_2D(name='c',
+        dofs = [dealiiFiniteElementDOF_2D(name='Ca',
                                           description='Concentration',
                                           fe = FE_Q_2D(1),
-                                          multiplicity=1),
-                dealiiFiniteElementDOF_2D(name='mu',
-                                          description='Chemical potential',
-                                          fe = FE_Q_2D(1),
                                           multiplicity=1)]
-        self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        # This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,100)x(0,100)-50x50.msh
-        mesh_file  = os.path.join(meshes_dir, 'square(0,100)x(0,100)-30x30.msh')
+        mesh_file  = os.path.join(meshes_dir, 'ssdr.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -71,54 +70,40 @@ class modTutorial(daeModel):
                                                       faceQuadrature  = QGauss_1D(3),  # face quadrature formula
                                                       dofs            = dofs)          # degrees of freedom
 
-        self.fe_model = daeFiniteElementModel('CahnHilliard', self, 'Cahn-Hilliard equation', self.fe_system)
+        self.fe_model = daeFiniteElementModel('DiffusionReaction', self, 'Diffusion-reaction in a catalyst', self.fe_system)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        left_edge   = 0
-        top_edge    = 1
-        right_edge  = 2
-        bottom_edge = 3
+        De  = 0.1 # Diffusivity, m**2/s
+        km  = 0.1 # Mass transfer coefficient, mol
+        kr  = 1.0 # First-order reaction rate constant
+        Cab = 1.0 # Boundary concentration
 
         dirichletBC = {}
-        surfaceIntegrals = {}
-
-        # FE approximation of a quantity at the specified quadrature point (adouble object)
-        c = dof_approximation_2D('c', fe_q)
-
-        self.useWikipedia_fc = True
-
-        # 1) f(c) from the Wikipedia (https://en.wikipedia.org/wiki/Cahn-Hilliard_equation)
-        if self.useWikipedia_fc:
-            Diffusivity = 1.0
-            gamma       = 1.0
-            def f(c):
-                return c**3 - c
-
-        # 2) f(c) used by Raymond Smith (M.Z.Bazant's group, MIT) for phase-separating battery electrodes
-        if not self.useWikipedia_fc:
-            Diffusivity = 1
-            gamma       = 1
-            Omg_a       = 3.4
-            log_fe = feExpression_2D.log
-            def f(c):
-                return log_fe(c/(1-c)) + Omg_a*(1-2*c)
+        dirichletBC[1] = [('Ca', adoubleConstantFunction_2D(adouble(Cab)))]
 
         # FE weak form terms
-        c_accumulation    = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q)
-        mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * Diffusivity * JxW_2D(fe_q)
-        mu                = phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q) * JxW_2D(fe_q)
-        c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * gamma * JxW_2D(fe_q)
-        fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * f(c)
+        diffusion    = -(dphi_2D('Ca', fe_i, fe_q) * dphi_2D('Ca', fe_j, fe_q)) * De * JxW_2D(fe_q)
+        reaction     = -kr * phi_2D('Ca', fe_i, fe_q) * phi_2D('Ca', fe_j, fe_q) * JxW_2D(fe_q)
+        accumulation = 0.0 * JxW_2D(fe_q)
+        rhs          = 0.0 * JxW_2D(fe_q)
+        # Robin type BC's:
+        faceAij = {
+                    2: km * phi_2D('Ca', fe_i, fe_q) * phi_2D('Ca', fe_j, fe_q) * JxW_2D(fe_q)
+                  }
+        faceFi  = {
+                    2: km * Cab * phi_2D('Ca', fe_i, fe_q) * JxW_2D(fe_q)
+                  }
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
-                                                  Mij = c_accumulation,
-                                                  Fi  = fun_c,
-                                                  functionsDirichletBC = dirichletBC,
-                                                  surfaceIntegrals = surfaceIntegrals)
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + reaction,
+                                                  Mij = accumulation,
+                                                  Fi  = rhs,
+                                                  boundaryFaceAij = faceAij,
+                                                  boundaryFaceFi  = faceFi,
+                                                  functionsDirichletBC = dirichletBC)
 
-        print('Cahn-Hilliard equation:')
+        print('Diffusion-reaction in a catalyst equations:')
         print('    Aij = %s' % str(weakForm.Aij))
         print('    Mij = %s' % str(weakForm.Mij))
         print('    Fi  = %s' % str(weakForm.Fi))
@@ -126,16 +111,14 @@ class modTutorial(daeModel):
         print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
         print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
         print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals  = %s' % str([item for item in weakForm.surfaceIntegrals]))
+        print('    surfaceIntegrals = %s' % str([item for item in weakForm.surfaceIntegrals]))
 
-        # Setting the weak form of the FE system will declare a set of equations:
-        # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
         self.fe_system.WeakForm = weakForm
 
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial_dealii_3")
+        self.m = modTutorial("tutorial_dealii_6")
         self.m.Description = __doc__
         self.m.fe_model.Description = __doc__
 
@@ -143,22 +126,7 @@ class simTutorial(daeSimulation):
         pass
 
     def SetUpVariables(self):
-        numpy.random.seed(124)
-
-        def c_with_noise_wiki(index):
-            c0     = 0.0
-            stddev = 0.1
-            return numpy.random.normal(c0, stddev)
-
-        def c_with_noise_ray(index):
-            c0     = 0.5
-            stddev = 0.1
-            return numpy.random.normal(c0, stddev)
-
-        if self.m.useWikipedia_fc:
-            setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', c_with_noise_wiki)
-        else:
-            setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'c', c_with_noise_ray)
+        pass
 
 # Use daeSimulator class
 def guiRun(app):
@@ -167,10 +135,10 @@ def guiRun(app):
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
+    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_6-')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -182,11 +150,15 @@ def guiRun(app):
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
-    daeQtMessage("deal.II", "The simulation results will be located in: %s" % results_folder)
+    try:
+        from PyQt4 import QtCore, QtGui
+        QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
+    except Exception as e:
+        print(str(e))
 
     simulation.m.SetReportingOn(True)
-    simulation.TimeHorizon       = 1.0
-    simulation.ReportingInterval = simulation.TimeHorizon/100
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon       = 1
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
 
@@ -202,10 +174,10 @@ def consoleRun():
     daesolver.SetLASolver(lasolver)
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_3-results')
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_6-results')
 
     # Create two data reporters:
-    # 1. deal.II
+    # 1. DealII
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -221,8 +193,8 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.TimeHorizon       = 500.0
-    simulation.ReportingInterval = simulation.TimeHorizon/100
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon = 1
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
@@ -242,5 +214,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        app = daeCreateQtApplication(sys.argv)
+        from PyQt4 import QtCore, QtGui
+        app = QtGui.QApplication(sys.argv)
         guiRun(app)

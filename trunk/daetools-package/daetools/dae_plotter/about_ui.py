@@ -2,233 +2,229 @@
 
 # Form implementation generated from reading ui file 'about.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_About(object):
     def setupUi(self, About):
-        About.setObjectName(_fromUtf8("About"))
+        About.setObjectName("About")
         About.resize(750, 450)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8("images/app.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("images/app.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         About.setWindowIcon(icon)
-        self.verticalLayout_9 = QtGui.QVBoxLayout(About)
-        self.verticalLayout_9.setMargin(5)
+        self.verticalLayout_9 = QtWidgets.QVBoxLayout(About)
+        self.verticalLayout_9.setContentsMargins(5, 5, 5, 5)
         self.verticalLayout_9.setSpacing(3)
-        self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
-        self.tabWidget = QtGui.QTabWidget(About)
-        self.tabWidget.setTabPosition(QtGui.QTabWidget.North)
-        self.tabWidget.setTabShape(QtGui.QTabWidget.Rounded)
+        self.verticalLayout_9.setObjectName("verticalLayout_9")
+        self.tabWidget = QtWidgets.QTabWidget(About)
+        self.tabWidget.setTabPosition(QtWidgets.QTabWidget.North)
+        self.tabWidget.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.tabWidget.setDocumentMode(True)
-        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
-        self.tab = QtGui.QWidget()
-        self.tab.setObjectName(_fromUtf8("tab"))
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.tab)
-        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.verticalLayout = QtGui.QVBoxLayout()
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.textDAETools = QtGui.QTextEdit(self.tab)
+        self.tabWidget.setObjectName("tabWidget")
+        self.tab = QtWidgets.QWidget()
+        self.tab.setObjectName("tab")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.tab)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.textDAETools = QtWidgets.QTextEdit(self.tab)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textDAETools.setFont(font)
-        self.textDAETools.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textDAETools.setFrameShadow(QtGui.QFrame.Plain)
+        self.textDAETools.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textDAETools.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textDAETools.setUndoRedoEnabled(False)
-        self.textDAETools.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textDAETools.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         self.textDAETools.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textDAETools.setObjectName(_fromUtf8("textDAETools"))
+        self.textDAETools.setObjectName("textDAETools")
         self.verticalLayout.addWidget(self.textDAETools)
         self.verticalLayout_2.addLayout(self.verticalLayout)
-        self.tabWidget.addTab(self.tab, _fromUtf8(""))
-        self.tab_4 = QtGui.QWidget()
-        self.tab_4.setObjectName(_fromUtf8("tab_4"))
-        self.verticalLayout_6 = QtGui.QVBoxLayout(self.tab_4)
-        self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
-        self.verticalLayout_5 = QtGui.QVBoxLayout()
-        self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
-        self.textSundials_2 = QtGui.QTextEdit(self.tab_4)
+        self.tabWidget.addTab(self.tab, "")
+        self.tab_4 = QtWidgets.QWidget()
+        self.tab_4.setObjectName("tab_4")
+        self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.tab_4)
+        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_6.setObjectName("verticalLayout_6")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.textSundials_2 = QtWidgets.QTextEdit(self.tab_4)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_2.setFont(font)
-        self.textSundials_2.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_2.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_2.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_2.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_2.setUndoRedoEnabled(False)
-        self.textSundials_2.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        self.textSundials_2.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.textSundials_2.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_2.setObjectName(_fromUtf8("textSundials_2"))
+        self.textSundials_2.setObjectName("textSundials_2")
         self.verticalLayout_5.addWidget(self.textSundials_2)
         self.verticalLayout_6.addLayout(self.verticalLayout_5)
-        self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
-        self.tab_9 = QtGui.QWidget()
-        self.tab_9.setObjectName(_fromUtf8("tab_9"))
-        self.verticalLayout_19 = QtGui.QVBoxLayout(self.tab_9)
-        self.verticalLayout_19.setObjectName(_fromUtf8("verticalLayout_19"))
-        self.verticalLayout_18 = QtGui.QVBoxLayout()
-        self.verticalLayout_18.setObjectName(_fromUtf8("verticalLayout_18"))
-        self.textSundials_7 = QtGui.QTextEdit(self.tab_9)
+        self.tabWidget.addTab(self.tab_4, "")
+        self.tab_9 = QtWidgets.QWidget()
+        self.tab_9.setObjectName("tab_9")
+        self.verticalLayout_19 = QtWidgets.QVBoxLayout(self.tab_9)
+        self.verticalLayout_19.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_19.setObjectName("verticalLayout_19")
+        self.verticalLayout_18 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_18.setObjectName("verticalLayout_18")
+        self.textSundials_7 = QtWidgets.QTextEdit(self.tab_9)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_7.setFont(font)
-        self.textSundials_7.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_7.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_7.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_7.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_7.setUndoRedoEnabled(False)
-        self.textSundials_7.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        self.textSundials_7.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.textSundials_7.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_7.setObjectName(_fromUtf8("textSundials_7"))
+        self.textSundials_7.setObjectName("textSundials_7")
         self.verticalLayout_18.addWidget(self.textSundials_7)
         self.verticalLayout_19.addLayout(self.verticalLayout_18)
-        self.tabWidget.addTab(self.tab_9, _fromUtf8(""))
-        self.tab_3 = QtGui.QWidget()
-        self.tab_3.setObjectName(_fromUtf8("tab_3"))
-        self.verticalLayout_8 = QtGui.QVBoxLayout(self.tab_3)
-        self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
-        self.verticalLayout_7 = QtGui.QVBoxLayout()
-        self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
-        self.textDAETools_2 = QtGui.QTextEdit(self.tab_3)
+        self.tabWidget.addTab(self.tab_9, "")
+        self.tab_3 = QtWidgets.QWidget()
+        self.tab_3.setObjectName("tab_3")
+        self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.tab_3)
+        self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_8.setObjectName("verticalLayout_8")
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_7.setObjectName("verticalLayout_7")
+        self.textDAETools_2 = QtWidgets.QTextEdit(self.tab_3)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textDAETools_2.setFont(font)
-        self.textDAETools_2.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textDAETools_2.setFrameShadow(QtGui.QFrame.Plain)
+        self.textDAETools_2.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textDAETools_2.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textDAETools_2.setUndoRedoEnabled(False)
-        self.textDAETools_2.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textDAETools_2.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         self.textDAETools_2.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textDAETools_2.setObjectName(_fromUtf8("textDAETools_2"))
+        self.textDAETools_2.setObjectName("textDAETools_2")
         self.verticalLayout_7.addWidget(self.textDAETools_2)
         self.verticalLayout_8.addLayout(self.verticalLayout_7)
-        self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
-        self.tab_2 = QtGui.QWidget()
-        self.tab_2.setObjectName(_fromUtf8("tab_2"))
-        self.verticalLayout_4 = QtGui.QVBoxLayout(self.tab_2)
-        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.verticalLayout_3 = QtGui.QVBoxLayout()
-        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.textSundials = QtGui.QTextEdit(self.tab_2)
+        self.tabWidget.addTab(self.tab_3, "")
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.tab_2)
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.textSundials = QtWidgets.QTextEdit(self.tab_2)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials.setFont(font)
-        self.textSundials.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials.setUndoRedoEnabled(False)
-        self.textSundials.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        self.textSundials.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.textSundials.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials.setObjectName(_fromUtf8("textSundials"))
+        self.textSundials.setObjectName("textSundials")
         self.verticalLayout_3.addWidget(self.textSundials)
         self.verticalLayout_4.addLayout(self.verticalLayout_3)
-        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
-        self.tab_5 = QtGui.QWidget()
-        self.tab_5.setObjectName(_fromUtf8("tab_5"))
-        self.verticalLayout_15 = QtGui.QVBoxLayout(self.tab_5)
-        self.verticalLayout_15.setObjectName(_fromUtf8("verticalLayout_15"))
-        self.verticalLayout_10 = QtGui.QVBoxLayout()
-        self.verticalLayout_10.setObjectName(_fromUtf8("verticalLayout_10"))
-        self.textSundials_3 = QtGui.QTextEdit(self.tab_5)
+        self.tabWidget.addTab(self.tab_2, "")
+        self.tab_5 = QtWidgets.QWidget()
+        self.tab_5.setObjectName("tab_5")
+        self.verticalLayout_15 = QtWidgets.QVBoxLayout(self.tab_5)
+        self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_15.setObjectName("verticalLayout_15")
+        self.verticalLayout_10 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_10.setObjectName("verticalLayout_10")
+        self.textSundials_3 = QtWidgets.QTextEdit(self.tab_5)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_3.setFont(font)
-        self.textSundials_3.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_3.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_3.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_3.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_3.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.textSundials_3.setUndoRedoEnabled(False)
-        self.textSundials_3.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textSundials_3.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         self.textSundials_3.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_3.setObjectName(_fromUtf8("textSundials_3"))
+        self.textSundials_3.setObjectName("textSundials_3")
         self.verticalLayout_10.addWidget(self.textSundials_3)
         self.verticalLayout_15.addLayout(self.verticalLayout_10)
-        self.tabWidget.addTab(self.tab_5, _fromUtf8(""))
-        self.tab_6 = QtGui.QWidget()
-        self.tab_6.setObjectName(_fromUtf8("tab_6"))
-        self.verticalLayout_14 = QtGui.QVBoxLayout(self.tab_6)
-        self.verticalLayout_14.setObjectName(_fromUtf8("verticalLayout_14"))
-        self.verticalLayout_11 = QtGui.QVBoxLayout()
-        self.verticalLayout_11.setObjectName(_fromUtf8("verticalLayout_11"))
-        self.textSundials_4 = QtGui.QTextEdit(self.tab_6)
+        self.tabWidget.addTab(self.tab_5, "")
+        self.tab_6 = QtWidgets.QWidget()
+        self.tab_6.setObjectName("tab_6")
+        self.verticalLayout_14 = QtWidgets.QVBoxLayout(self.tab_6)
+        self.verticalLayout_14.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_14.setObjectName("verticalLayout_14")
+        self.verticalLayout_11 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_11.setObjectName("verticalLayout_11")
+        self.textSundials_4 = QtWidgets.QTextEdit(self.tab_6)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_4.setFont(font)
-        self.textSundials_4.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_4.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_4.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_4.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_4.setUndoRedoEnabled(False)
-        self.textSundials_4.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        self.textSundials_4.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.textSundials_4.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_4.setObjectName(_fromUtf8("textSundials_4"))
+        self.textSundials_4.setObjectName("textSundials_4")
         self.verticalLayout_11.addWidget(self.textSundials_4)
         self.verticalLayout_14.addLayout(self.verticalLayout_11)
-        self.tabWidget.addTab(self.tab_6, _fromUtf8(""))
-        self.tab_7 = QtGui.QWidget()
-        self.tab_7.setObjectName(_fromUtf8("tab_7"))
-        self.verticalLayout_13 = QtGui.QVBoxLayout(self.tab_7)
-        self.verticalLayout_13.setObjectName(_fromUtf8("verticalLayout_13"))
-        self.verticalLayout_12 = QtGui.QVBoxLayout()
-        self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
-        self.textSundials_5 = QtGui.QTextEdit(self.tab_7)
+        self.tabWidget.addTab(self.tab_6, "")
+        self.tab_7 = QtWidgets.QWidget()
+        self.tab_7.setObjectName("tab_7")
+        self.verticalLayout_13 = QtWidgets.QVBoxLayout(self.tab_7)
+        self.verticalLayout_13.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_13.setObjectName("verticalLayout_13")
+        self.verticalLayout_12 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_12.setObjectName("verticalLayout_12")
+        self.textSundials_5 = QtWidgets.QTextEdit(self.tab_7)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_5.setFont(font)
-        self.textSundials_5.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_5.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_5.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_5.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_5.setUndoRedoEnabled(False)
-        self.textSundials_5.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        self.textSundials_5.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.textSundials_5.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_5.setObjectName(_fromUtf8("textSundials_5"))
+        self.textSundials_5.setObjectName("textSundials_5")
         self.verticalLayout_12.addWidget(self.textSundials_5)
         self.verticalLayout_13.addLayout(self.verticalLayout_12)
-        self.tabWidget.addTab(self.tab_7, _fromUtf8(""))
-        self.tab_10 = QtGui.QWidget()
-        self.tab_10.setObjectName(_fromUtf8("tab_10"))
-        self.verticalLayout_21 = QtGui.QVBoxLayout(self.tab_10)
-        self.verticalLayout_21.setObjectName(_fromUtf8("verticalLayout_21"))
-        self.verticalLayout_20 = QtGui.QVBoxLayout()
-        self.verticalLayout_20.setObjectName(_fromUtf8("verticalLayout_20"))
-        self.textSundials_8 = QtGui.QTextEdit(self.tab_10)
+        self.tabWidget.addTab(self.tab_7, "")
+        self.tab_10 = QtWidgets.QWidget()
+        self.tab_10.setObjectName("tab_10")
+        self.verticalLayout_21 = QtWidgets.QVBoxLayout(self.tab_10)
+        self.verticalLayout_21.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_21.setObjectName("verticalLayout_21")
+        self.verticalLayout_20 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_20.setObjectName("verticalLayout_20")
+        self.textSundials_8 = QtWidgets.QTextEdit(self.tab_10)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_8.setFont(font)
-        self.textSundials_8.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_8.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_8.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_8.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_8.setUndoRedoEnabled(False)
-        self.textSundials_8.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textSundials_8.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         self.textSundials_8.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_8.setObjectName(_fromUtf8("textSundials_8"))
+        self.textSundials_8.setObjectName("textSundials_8")
         self.verticalLayout_20.addWidget(self.textSundials_8)
         self.verticalLayout_21.addLayout(self.verticalLayout_20)
-        self.tabWidget.addTab(self.tab_10, _fromUtf8(""))
-        self.tab_8 = QtGui.QWidget()
-        self.tab_8.setObjectName(_fromUtf8("tab_8"))
-        self.verticalLayout_16 = QtGui.QVBoxLayout(self.tab_8)
-        self.verticalLayout_16.setObjectName(_fromUtf8("verticalLayout_16"))
-        self.verticalLayout_22 = QtGui.QVBoxLayout()
-        self.verticalLayout_22.setObjectName(_fromUtf8("verticalLayout_22"))
-        self.textSundials_9 = QtGui.QTextEdit(self.tab_8)
+        self.tabWidget.addTab(self.tab_10, "")
+        self.tab_8 = QtWidgets.QWidget()
+        self.tab_8.setObjectName("tab_8")
+        self.verticalLayout_16 = QtWidgets.QVBoxLayout(self.tab_8)
+        self.verticalLayout_16.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_16.setObjectName("verticalLayout_16")
+        self.verticalLayout_22 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_22.setObjectName("verticalLayout_22")
+        self.textSundials_9 = QtWidgets.QTextEdit(self.tab_8)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Sans Serif"))
+        font.setFamily("Sans Serif")
         self.textSundials_9.setFont(font)
-        self.textSundials_9.setFrameShape(QtGui.QFrame.NoFrame)
-        self.textSundials_9.setFrameShadow(QtGui.QFrame.Plain)
+        self.textSundials_9.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.textSundials_9.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textSundials_9.setUndoRedoEnabled(False)
-        self.textSundials_9.setLineWrapMode(QtGui.QTextEdit.WidgetWidth)
+        self.textSundials_9.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         self.textSundials_9.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextBrowserInteraction|QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
-        self.textSundials_9.setObjectName(_fromUtf8("textSundials_9"))
+        self.textSundials_9.setObjectName("textSundials_9")
         self.verticalLayout_22.addWidget(self.textSundials_9)
         self.verticalLayout_16.addLayout(self.verticalLayout_22)
-        self.tabWidget.addTab(self.tab_8, _fromUtf8(""))
+        self.tabWidget.addTab(self.tab_8, "")
         self.verticalLayout_9.addWidget(self.tabWidget)
 
         self.retranslateUi(About)
@@ -236,7 +232,8 @@ class Ui_About(object):
         QtCore.QMetaObject.connectSlotsByName(About)
 
     def retranslateUi(self, About):
-        About.setWindowTitle(_translate("About", "DAE Tools Project", None))
+        _translate = QtCore.QCoreApplication.translate
+        About.setWindowTitle(_translate("About", "DAE Tools Project"))
         self.textDAETools.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -276,8 +273,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">NOTE:</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">It is YOUR RESPONSIBILITY to ensure that you are entitled to download and use </span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt; font-weight:600;\">these third-party proprietary libraries.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt; font-weight:600;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("About", "DAE Tools", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt; font-weight:600;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("About", "DAE Tools"))
         self.textSundials_2.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -956,8 +953,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">the library.  If this is what you want to do, use the GNU Lesser General</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Public License instead of this License.  But first, please read</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">&lt;http://www.gnu.org/philosophy/why-not-lgpl.html&gt;.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("About", "GNU GPL 3", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("About", "GNU GPL 3"))
         self.textSundials_7.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1410,8 +1407,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">DAMAGES.</span></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_9), _translate("About", "GNU LGPL 2.1", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_9), _translate("About", "GNU LGPL 2.1"))
         self.textDAETools_2.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1629,8 +1626,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Agreement will bring a legal action under this Agreement more than one year</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">after the cause of action arose. Each party waives its rights to a jury trial in</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">any resulting litigation.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("About", "CPL 1.0", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("About", "CPL 1.0"))
         self.textSundials.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1698,8 +1695,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">herein do not necessarily state or reflect those of the United States</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Government or the University of California, and shall not be used for</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">advertising or product endorsement purposes.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("About", "Sundials", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("About", "Sundials"))
         self.textSundials_3.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1747,8 +1744,8 @@ class Ui_About(object):
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">If Recipient institutes patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Program itself (excluding combinations of the Program with other software or hardware) infringes such Recipient\'s patent(s), then such Recipient\'s rights granted under Section 2(b) shall terminate as of the date such litigation is filed. </span></p>\n"
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">All Recipient\'s rights under this Agreement shall terminate if it fails to comply with any of the material terms or conditions of this Agreement and does not cure such failure in a reasonable period of time after becoming aware of such noncompliance. If all Recipient\'s rights under this Agreement terminate, Recipient agrees to cease use and distribution of the Program as soon as reasonably practicable. However, Recipient\'s obligations under this Agreement and any licenses granted by Recipient relating to the Program shall continue and survive. </span></p>\n"
 "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">Everyone is permitted to copy and distribute copies of this Agreement, but in order to avoid inconsistency the Agreement is copyrighted and may only be modified in the following manner. The Agreement Steward reserves the right to publish new versions (including revisions) of this Agreement from time to time. No one other than the Agreement Steward has the right to modify this Agreement. The Eclipse Foundation is the initial Agreement Steward. The Eclipse Foundation may assign the responsibility to serve as the Agreement Steward to a suitable separate entity. Each new version of the Agreement will be given a distinguishing version number. The Program (including Contributions) may always be distributed subject to the version of the Agreement under which it was received. In addition, after a new version of the Agreement is published, Contributor may elect to distribute the Program (including its Contributions) under the new version. Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives no rights or licenses to the intellectual property of any Contributor under this Agreement, whether expressly, by implication, estoppel or otherwise. All rights in the Program not expressly granted under this Agreement are reserved. </span></p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation. </span></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("About", "EPL 1.0", None))
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation. </span></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("About", "EPL 1.0"))
         self.textSundials_4.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1776,8 +1773,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">DEALINGS IN THE SOFTWARE.</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("About", "Boost", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("About", "Boost"))
         self.textSundials_5.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1810,8 +1807,8 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), _translate("About", "SuperLU", None))
+"<p style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), _translate("About", "SuperLU"))
         self.textSundials_8.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1822,8 +1819,8 @@ class Ui_About(object):
 "<ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" font-size:9pt;\" style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.</li>\n"
 "<li style=\" font-size:9pt;\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</li>\n"
 "<li style=\" font-size:9pt;\" style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Neither the name of the NumPy Developers nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.</li></ul>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_10), _translate("About", "NumPy", None))
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:9pt;\">THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_10), _translate("About", "NumPy"))
         self.textSundials_9.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -1863,6 +1860,6 @@ class Ui_About(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  </span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Courier New,courier\'; font-size:9pt;\">OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. </span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Courier New,courier\'; font-size:9pt;\"><br /></p></body></html>", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_8), _translate("About", "Netlib", None))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'Courier New,courier\'; font-size:9pt;\"><br /></p></body></html>"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_8), _translate("About", "Netlib"))
 

@@ -13,15 +13,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, numpy, json
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Matplotlib imports
 import matplotlib
-matplotlib.use('Qt4Agg')
+matplotlib.use('Qt5Agg')
 matplotlib.rcParams.update({'figure.autolayout': True})
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.animation as animation
 
 # daetools imports
@@ -67,7 +67,7 @@ class daePlot2dDefaults:
         pd.markeredgecolor  = d['markeredgecolor']
         return pd
 
-class dae2DPlot(QtGui.QDialog):
+class dae2DPlot(QtWidgets.QDialog):
     plotDefaults = [daePlot2dDefaults('black', 0.5, 'solid', 'o', 6, 'black', 'black'),
                     daePlot2dDefaults('blue',  0.5, 'solid', 's', 6, 'blue',  'black'),
                     daePlot2dDefaults('red',   0.5, 'solid', '^', 6, 'red',   'black'),
@@ -96,7 +96,7 @@ class dae2DPlot(QtGui.QDialog):
                     daePlot2dDefaults('y',     0.5, 'dotted', 'x', 6, 'y',     'black') ]
 
     def __init__(self, parent, tcpipServer, updateInterval = 0, animated = False):
-        QtGui.QDialog.__init__(self, parent, QtCore.Qt.Window)
+        QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.Window)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.tcpipServer = tcpipServer
@@ -126,83 +126,83 @@ class dae2DPlot(QtGui.QDialog):
         self.setWindowTitle("2D plot")
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'line-chart.png')))
 
-        exit = QtGui.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
+        exit = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'close.png')), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
-        self.connect(exit, QtCore.SIGNAL('triggered()'), self.close)
+        exit.triggered.connect(self.close)
 
-        export = QtGui.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Export template', self)
+        export = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'template.png')), 'Export template', self)
         export.setShortcut('Ctrl+X')
         export.setStatusTip('Export template')
-        self.connect(export, QtCore.SIGNAL('triggered()'), self.slotExportTemplate)
+        export.triggered.connect(self.slotExportTemplate)
 
-        properties = QtGui.QAction(QtGui.QIcon(join(images_dir, 'preferences.png')), 'Options', self)
+        properties = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'preferences.png')), 'Options', self)
         properties.setShortcut('Ctrl+P')
         properties.setStatusTip('Options')
-        self.connect(properties, QtCore.SIGNAL('triggered()'), self.slotProperties)
+        properties.triggered.connect(self.slotProperties)
 
-        grid = QtGui.QAction(QtGui.QIcon(join(images_dir, 'grid.png')), 'Grid on/off', self)
+        grid = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'grid.png')), 'Grid on/off', self)
         grid.setShortcut('Ctrl+G')
         grid.setStatusTip('Grid on/off')
-        self.connect(grid, QtCore.SIGNAL('triggered()'), self.slotToggleGrid)
+        grid.triggered.connect(self.slotToggleGrid)
 
-        legend = QtGui.QAction(QtGui.QIcon(join(images_dir, 'legend.png')), 'Legend on/off', self)
+        legend = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'legend.png')), 'Legend on/off', self)
         legend.setShortcut('Ctrl+L')
         legend.setStatusTip('Legend on/off')
-        self.connect(legend, QtCore.SIGNAL('triggered()'), self.slotToggleLegend)
+        legend.triggered.connect(self.slotToggleLegend)
 
-        viewdata = QtGui.QAction(QtGui.QIcon(join(images_dir, 'data.png')), 'View tabular data', self)
+        viewdata = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'data.png')), 'View tabular data', self)
         viewdata.setShortcut('Ctrl+T')
         viewdata.setStatusTip('View tabular data')
-        self.connect(viewdata, QtCore.SIGNAL('triggered()'), self.slotViewTabularData)
+        viewdata.triggered.connect(self.slotViewTabularData)
 
-        export_csv = QtGui.QAction(QtGui.QIcon(join(images_dir, 'csv.png')), 'Export CSV', self)
+        export_csv = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'csv.png')), 'Export CSV', self)
         export_csv.setShortcut('Ctrl+S')
         export_csv.setStatusTip('Export CSV')
-        self.connect(export_csv, QtCore.SIGNAL('triggered()'), self.slotExportCSV)
+        export_csv.triggered.connect(self.slotExportCSV)
 
-        fromUserData = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add-user-data.png')), 'Add line from the user-provided data...', self)
+        fromUserData = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'add-user-data.png')), 'Add line from the user-provided data...', self)
         fromUserData.setShortcut('Ctrl+D')
         fromUserData.setStatusTip('Add line from the user-provided data')
-        self.connect(fromUserData, QtCore.SIGNAL('triggered()'), self.slotFromUserData)
+        fromUserData.triggered.connect(self.slotFromUserData)
 
-        remove_line = QtGui.QAction(QtGui.QIcon(join(images_dir, 'remove.png')), 'Remove line', self)
+        remove_line = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'remove.png')), 'Remove line', self)
         remove_line.setShortcut('Ctrl+R')
         remove_line.setStatusTip('Remove line')
-        self.connect(remove_line, QtCore.SIGNAL('triggered()'), self.slotRemoveLine)
+        remove_line.triggered.connect(self.slotRemoveLine)
 
-        new_line = QtGui.QAction(QtGui.QIcon(join(images_dir, 'add.png')), 'Add line', self)
+        new_line = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'add.png')), 'Add line', self)
         new_line.setShortcut('Ctrl+A')
         new_line.setStatusTip('Add line')
-        self.connect(new_line, QtCore.SIGNAL('triggered()'), self.newCurve)
+        new_line.triggered.connect(self.newCurve)
 
-        play_animation = QtGui.QAction(QtGui.QIcon(join(images_dir, 'media-playback-start.png')), 'Start animation', self)
+        play_animation = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'media-playback-start.png')), 'Start animation', self)
         play_animation.setShortcut('Ctrl+S')
         play_animation.setStatusTip('Start animation')
-        self.connect(play_animation, QtCore.SIGNAL('triggered()'), self.playAnimation)
+        play_animation.triggered.connect(self.playAnimation)
         self.play_animation = play_animation # save it
 
-        stop_animation = QtGui.QAction(QtGui.QIcon(join(images_dir, 'media-playback-stop.png')), 'Stop animation', self)
+        stop_animation = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'media-playback-stop.png')), 'Stop animation', self)
         stop_animation.setShortcut('Ctrl+E')
         stop_animation.setStatusTip('Stop animation')
-        self.connect(stop_animation, QtCore.SIGNAL('triggered()'), self.stopAnimation)
+        stop_animation.triggered.connect(self.stopAnimation)
         self.stop_animation = stop_animation # save it
 
-        export_video = QtGui.QAction(QtGui.QIcon(join(images_dir, 'save-video.png')), 'Export video/sequence of images', self)
+        export_video = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'save-video.png')), 'Export video/sequence of images', self)
         export_video.setShortcut('Ctrl+V')
         export_video.setStatusTip('Export video/sequence of images')
-        self.connect(export_video, QtCore.SIGNAL('triggered()'), self.exportVideo)
+        export_video.triggered.connect(self.exportVideo)
 
         self.actions_to_disable = [export, viewdata, export_csv, grid, legend, properties]
         self.actions_to_disable_permanently = [new_line, fromUserData, remove_line]
 
-        self.toolbar_widget = QtGui.QWidget(self)
-        layoutToolbar = QtGui.QVBoxLayout(self.toolbar_widget)
+        self.toolbar_widget = QtWidgets.QWidget(self)
+        layoutToolbar = QtWidgets.QVBoxLayout(self.toolbar_widget)
         layoutToolbar.setContentsMargins(0,0,0,0)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.toolbar_widget.setSizePolicy(sizePolicy)
 
-        layoutPlot = QtGui.QVBoxLayout(self)
+        layoutPlot = QtWidgets.QVBoxLayout(self)
         layoutPlot.setContentsMargins(2,2,2,2)
         self.figure = Figure((8, 6.5), dpi=100, facecolor='white')#"#E5E5E5")
         self.canvas = FigureCanvas(self.figure)
@@ -263,7 +263,7 @@ class dae2DPlot(QtGui.QDialog):
         if self._timer:
             self._timer.stop()
 
-        return QtGui.QDialog.closeEvent(self, event)
+        return QtWidgets.QDialog.closeEvent(self, event)
 
     def updateCurves(self):
         try:
@@ -329,8 +329,8 @@ class dae2DPlot(QtGui.QDialog):
 
             s = json.dumps(template, indent=2, sort_keys=True)
 
-            filename = QtGui.QFileDialog.getSaveFileName(self, "Save 2D plot template", "template.pt", "Templates (*.pt)")
-            if not filename:
+            filename, ok = QtWidgets.QFileDialog.getSaveFileName(self, "Save 2D plot template", "template.pt", "Templates (*.pt)")
+            if not ok:
                 return
 
             f = open(filename, 'w')
@@ -360,8 +360,8 @@ class dae2DPlot(QtGui.QDialog):
         strInitialFilename += "/untitled.csv";
         strExt = "Comma separated files (*.csv)"
         strCaption = "Save file"
-        fileName = QtGui.QFileDialog.getSaveFileName(self, strCaption, strInitialFilename, strExt)
-        if(fileName.isEmpty()):
+        fileName, ok = QtWidgets.QFileDialog.getSaveFileName(self, strCaption, strInitialFilename, strExt)
+        if not ok:
             return
 
         datafile = open(str(fileName), 'w')
@@ -404,7 +404,7 @@ class dae2DPlot(QtGui.QDialog):
             y = line.get_ydata()
             horHeader.append(ylabel)
             for k in range(0, len(x)):
-                newItem = QtGui.QTableWidgetItem(str(y[k]))
+                newItem = QtWidgets.QTableWidgetItem(str(y[k]))
                 table.setItem(k, i, newItem)
             for k in range(0, len(x)):
                 verHeader.append(str(x[k]))
@@ -422,7 +422,7 @@ class dae2DPlot(QtGui.QDialog):
             label = line.get_label()
             items.append(label)
 
-        nameToRemove, ok = QtGui.QInputDialog.getItem(self, "Choose line to remove", "Lines:", items, 0, False)
+        nameToRemove, ok = QtWidgets.QInputDialog.getItem(self, "Choose line to remove", "Lines:", items, 0, False)
         if ok:
             for i, line in enumerate(lines):
                 label = line.get_label()
@@ -568,16 +568,16 @@ class dae2DPlot(QtGui.QDialog):
         return True
 
     def showSelectProcessDialog(self, windowTitle, label, items):
-        dlg = QtGui.QInputDialog(self)
+        dlg = QtWidgets.QInputDialog(self)
         dlg.resize(500, 300)
         dlg.setWindowTitle(windowTitle)
         dlg.setLabelText(label)
         dlg.setComboBoxItems(items)
 
         dlg.setComboBoxEditable(False)
-        dlg.setOption(QtGui.QInputDialog.UseListViewForComboBoxItems)
+        dlg.setOption(QtWidgets.QInputDialog.UseListViewForComboBoxItems)
 
-        if dlg.exec_() == QtGui.QDialog.Accepted:
+        if dlg.exec_() == QtWidgets.QDialog.Accepted:
             return str(dlg.textValue()), True
         else:
             return '', False
@@ -722,7 +722,7 @@ class dae2DPlot(QtGui.QDialog):
         dlg.ui.lineeditExtraArgs.setText(json.dumps([])) # ['-pix_fmt', 'yuv420p']
         dlg.ui.spinBitrate.setValue(-1)
 
-        if dlg.exec_() != QtGui.QDialog.Accepted:
+        if dlg.exec_() != QtWidgets.QDialog.Accepted:
             return False
 
         filename   = str(dlg.ui.lineeditFilename.text())
@@ -753,7 +753,7 @@ class dae2DPlot(QtGui.QDialog):
 
     def slotFromUserData(self):
         dlg = daeUserData()
-        if dlg.exec_() != QtGui.QDialog.Accepted:
+        if dlg.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         self.newCurveFromUserData(dlg.xLabel, dlg.yLabel, dlg.lineLabel, dlg.xPoints, dlg.yPoints)
@@ -776,7 +776,7 @@ class dae2DPlot(QtGui.QDialog):
             self._cv_dlg = daeChooseVariable(self.plotType)
         self._cv_dlg.updateProcessesList(processes)
         self._cv_dlg.setWindowTitle('Choose variable for 2D plot')
-        if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
+        if self._cv_dlg.exec_() != QtWidgets.QDialog.Accepted:
             return False
 
         variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = self._cv_dlg.getPlot2DData()
@@ -793,11 +793,11 @@ class dae2DPlot(QtGui.QDialog):
             self._cv_dlg = daeChooseVariable(self.plotType)
         self._cv_dlg.updateProcessesList(processes)
         self._cv_dlg.setWindowTitle('Choose variable for animated 2D plot')
-        if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
+        if self._cv_dlg.exec_() != QtWidgets.QDialog.Accepted:
             return False
 
         dlg = daeAnimationParameters()
-        if dlg.exec_() != QtGui.QDialog.Accepted:
+        if dlg.exec_() != QtWidgets.QDialog.Accepted:
             return
 
         self.updateInterval = int(dlg.ui.spinUpdateInterval.value())

@@ -2,27 +2,26 @@
 
 # Form implementation generated from reading ui file 'table_widget.ui'
 #
-# Created: Wed May  5 03:55:28 2010
-#      by: PyQt4 UI code generator 4.7.2
+# Created by: PyQt5 UI code generator 5.7
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_tableWidgetDialog(object):
     def setupUi(self, tableWidgetDialog):
         tableWidgetDialog.setObjectName("tableWidgetDialog")
         tableWidgetDialog.resize(640, 480)
-        self.verticalLayout_2 = QtGui.QVBoxLayout(tableWidgetDialog)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout(tableWidgetDialog)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.verticalLayout = QtGui.QVBoxLayout()
+        self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.tableWidget = QtGui.QTableWidget(tableWidgetDialog)
-        self.tableWidget.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.tableWidget.setFrameShadow(QtGui.QFrame.Sunken)
-        self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.tableWidget = QtWidgets.QTableWidget(tableWidgetDialog)
+        self.tableWidget.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.tableWidget.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setAlternatingRowColors(True)
-        self.tableWidget.setSelectionMode(QtGui.QAbstractItemView.ContiguousSelection)
+        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
@@ -33,5 +32,6 @@ class Ui_tableWidgetDialog(object):
         QtCore.QMetaObject.connectSlotsByName(tableWidgetDialog)
 
     def retranslateUi(self, tableWidgetDialog):
-        tableWidgetDialog.setWindowTitle(QtGui.QApplication.translate("tableWidgetDialog", "Data dialog", None, QtGui.QApplication.UnicodeUTF8))
+        _translate = QtCore.QCoreApplication.translate
+        tableWidgetDialog.setWindowTitle(_translate("tableWidgetDialog", "Data dialog"))
 

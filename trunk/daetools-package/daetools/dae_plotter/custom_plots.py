@@ -13,15 +13,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, numpy, pickle
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 from .custom_plots_ui import Ui_CustomPlots
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeCustomPlots(QtGui.QDialog):
+class daeCustomPlots(QtWidgets.QDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_CustomPlots()
         self.ui.setupUi(self)
 
@@ -29,12 +29,12 @@ class daeCustomPlots(QtGui.QDialog):
 
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
 
-        self.connect(self.ui.buttonAddPlot,    QtCore.SIGNAL("clicked()"), self.slotAddPlot)
-        self.connect(self.ui.buttonRemovePlot, QtCore.SIGNAL("clicked()"), self.slotRemovePlot)
-        self.connect(self.ui.buttonMakePlot,   QtCore.SIGNAL("clicked()"), self.slotMakePlot)
-        self.connect(self.ui.buttonSave,       QtCore.SIGNAL("clicked()"), self.slotSaveSource)
-        self.connect(self.ui.listPlots,        QtCore.SIGNAL("itemSelectionChanged()"), self.itemSelectionChanged)
-        self.connect(self.ui.listPlots,        QtCore.SIGNAL("itemDoubleClicked(QListWidgetItem*)"), self.itemDoubleClicked)
+        self.ui.buttonAddPlot.clicked.connect(self.slotAddPlot)
+        self.ui.buttonRemovePlot.clicked.connect(self.slotRemovePlot)
+        self.ui.buttonMakePlot.clicked.connect(self.slotMakePlot)
+        self.ui.buttonSave.clicked.connect(self.slotSaveSource)
+        self.ui.listPlots.itemSelectionChanged.connect(self.itemSelectionChanged)
+        self.ui.listPlots.itemDoubleClicked.connect(self.itemDoubleClicked)
 
         self.currentItem = None
 
@@ -48,11 +48,11 @@ class daeCustomPlots(QtGui.QDialog):
                 cp = open(self.custom_plots_path, 'rb')
                 plots = pickle.load(cp)
                 for i, (name, source) in enumerate(plots):
-                    item = QtGui.QListWidgetItem(name, self.ui.listPlots)
+                    item = QtWidgets.QListWidgetItem(name, self.ui.listPlots)
                     item.setData(QtCore.Qt.UserRole, source)
                     self.ui.listPlots.addItem(item)
                     if i == 0:
-                        self.ui.listPlots.setItemSelected(item, True)
+                        item.setSelected(True)
             else:
                 name = 'Simple 2D plot'
                 source = '''import matplotlib.pyplot
@@ -63,29 +63,29 @@ def make_custom_plot(processes):
     cv_dlg = daeChooseVariable(daeChooseVariable.plot2D)
     cv_dlg.updateProcessesList(processes)
     cv_dlg.setWindowTitle('Choose variable for a user-defined 2D plot')
-    if cv_dlg.exec_() != QtGui.QDialog.Accepted:
+    if cv_dlg.exec_() != QtWidgets.QDialog.Accepted:
         return
     variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime = cv_dlg.getPlot2DData()
 
     # User-defined part
     matplotlib.pyplot.plot(xPoints, yPoints)
     matplotlib.pyplot.show()'''
-                item = QtGui.QListWidgetItem(name, self.ui.listPlots)
+                item = QtWidgets.QListWidgetItem(name, self.ui.listPlots)
                 item.setData(QtCore.Qt.UserRole, source)
+                item.setSelected(True)
                 self.ui.listPlots.addItem(item)
-                self.ui.listPlots.setItemSelected(item, True)
 
     def reject(self):
         self.slotSaveSource()
-        QtGui.QDialog.reject(self)
+        QtWidgets.QDialog.reject(self)
 
     def slotAddPlot(self):
-        name, ok = QtGui.QInputDialog.getText(self, 'Insert the name of the plot', 'Plot name:', QtGui.QLineEdit.Normal, '')
+        name, ok = QtWidgets.QInputDialog.getText(self, 'Insert the name of the plot', 'Plot name:', QtWidgets.QLineEdit.Normal, '')
         if ok:
-            item = QtGui.QListWidgetItem(name, self.ui.listPlots)
+            item = QtWidgets.QListWidgetItem(name, self.ui.listPlots)
             item.setData(QtCore.Qt.UserRole, 'def plot(processes):')
+            item.setSelected(True)
             self.ui.listPlots.addItem(item)
-            self.ui.listPlots.setItemSelected(item, True)
 
     def slotRemovePlot(self):
         items = self.ui.listPlots.selectedItems()
@@ -144,6 +144,6 @@ def make_custom_plot(processes):
 
     def itemDoubleClicked(self, item):
         name   = str(item.text())
-        name, ok = QtGui.QInputDialog.getText(self, 'Set the name of the plot', 'Plot name:', QtGui.QLineEdit.Normal, name)
+        name, ok = QtWidgets.QInputDialog.getText(self, 'Set the name of the plot', 'Plot name:', QtWidgets.QLineEdit.Normal, name)
         if ok:
             item.setText(name)

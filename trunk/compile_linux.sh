@@ -131,7 +131,7 @@ PYTHON=`python -c "import sys; print(sys.executable)"`
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
-QMAKE="qmake-qt4"
+QMAKE="qmake"
 QMAKE_SPEC="linux-g++"
 DAE_IF_CROSS_COMPILING=0
 
@@ -181,7 +181,7 @@ for i; do
                                 ;;
 
        --host) DAE_IF_CROSS_COMPILING=1
-               QMAKE="qmake-qt4"
+               QMAKE="qmake"
                if [ "$2" = "i686-w64-mingw32" ]; then
                   QMAKE_SPEC="win32-g++-i686-w64-mingw32"
                elif [ "$2" = "x86_64-w64-mingw32" ]; then

@@ -17,29 +17,29 @@ October 2012 by Caleb Huttingh:
 """
 import sys, numpy
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 from .choose_variable_ui import Ui_ChooseVariable
 from .table_widget import Ui_tableWidgetDialog
 
 python_major = sys.version_info[0]
 
-class daeTableDialog(QtGui.QDialog):
+class daeTableDialog(QtWidgets.QDialog):
     def __init__(self, parent):
-        QtGui.QDialog.__init__(self, parent)
+        QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_tableWidgetDialog()
         self.ui.setupUi(self)
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeChooseVariable(QtGui.QDialog):
+class daeChooseVariable(QtWidgets.QDialog):
 
     (plot2D, plot2DAutoUpdated, plot2DAnimated, plot3D) = list(range(0, 4))
     FREE_DOMAIN = -1
     LAST_TIME   = -2
 
     def __init__(self, plotType):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_ChooseVariable()
         self.ui.setupUi(self)
 
@@ -53,16 +53,16 @@ class daeChooseVariable(QtGui.QDialog):
 
         self.hideAndClearAll()
 
-        self.connect(self.ui.treeWidget,      QtCore.SIGNAL("itemSelectionChanged()"),   self.slotSelectionChanged)
-        self.connect(self.ui.timeComboBox,    QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain0ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain1ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain2ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain3ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain4ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain5ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain6ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
-        self.connect(self.ui.domain7ComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.slotCurrentIndexChanged)
+        self.ui.treeWidget.itemSelectionChanged.connect(self.slotSelectionChanged)
+        self.ui.timeComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain0ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain1ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain2ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain3ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain4ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain5ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain6ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
+        self.ui.domain7ComboBox.currentIndexChanged.connect(self.slotCurrentIndexChanged)
 
     def updateProcessesList(self, processes):
         for pnew in processes:
@@ -76,7 +76,7 @@ class daeChooseVariable(QtGui.QDialog):
         self.processes = processes
 
     def addProcess(self, process):
-        rootItem = QtGui.QTreeWidgetItem(self.ui.treeWidget)
+        rootItem = QtWidgets.QTreeWidgetItem(self.ui.treeWidget)
         rootItem.setText(0, process.Name)
 
         variables = process.Variables
@@ -107,11 +107,11 @@ class daeChooseVariable(QtGui.QDialog):
                         break
 
                 if found == False:
-                    currentItem = QtGui.QTreeWidgetItem(currentItem)
+                    currentItem = QtWidgets.QTreeWidgetItem(currentItem)
                     currentItem.setText(0, name)
 
             # Now we have the parrent in the currentItem, so add the new item to it with the variable data
-            varItem = QtGui.QTreeWidgetItem(currentItem)
+            varItem = QtWidgets.QTreeWidgetItem(currentItem)
             #varData = QtCore.QVariant(var)
             varItem.setText(0, var_name)
             varItem.setData(0, QtCore.Qt.UserRole, var) #varData)

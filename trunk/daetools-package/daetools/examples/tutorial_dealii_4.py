@@ -235,11 +235,7 @@ def guiRun(app):
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
-    try:
-        from PyQt4 import QtCore, QtGui
-        QtGui.QMessageBox.warning(None, "deal.II", "The simulation results will be located in: %s" % results_folder)
-    except Exception as e:
-        print(str(e))
+    daeQtMessage("deal.II", "The simulation results will be located in: %s" % results_folder)
 
     simulation.m.SetReportingOn(True)
     simulation.ReportingInterval = 60      # 1 minute
@@ -298,6 +294,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)

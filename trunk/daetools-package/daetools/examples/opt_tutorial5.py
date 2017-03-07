@@ -28,7 +28,7 @@ implementing Levenberg-Marquardt algorithm is used to estimate the parameters.
 import sys, numpy
 from time import localtime, strftime
 import matplotlib
-matplotlib.use('Qt4Agg')
+matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 from daetools.pyDAE import *

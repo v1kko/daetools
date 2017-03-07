@@ -13,15 +13,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import sys, numpy
 from os.path import join, realpath, dirname
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 from .save_video_ui import Ui_SaveVideo
 
 images_dir = join(dirname(__file__), 'images')
 
-class daeSavePlot2DVideo(QtGui.QDialog):
+class daeSavePlot2DVideo(QtWidgets.QDialog):
     def __init__(self):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_SaveVideo()
         self.ui.setupUi(self)
 
@@ -29,11 +29,11 @@ class daeSavePlot2DVideo(QtGui.QDialog):
 
         self.ui.buttonBox.accepted.connect(self.accept)
         self.ui.buttonBox.rejected.connect(self.reject)
-        self.connect(self.ui.buttonFilename, QtCore.SIGNAL("clicked()"), self.slotOpenFilename)
+        self.ui.buttonFilename.clicked.connect(self.slotOpenFilename)
 
     def slotOpenFilename(self):
-        filename = QtGui.QFileDialog.getSaveFileName(self, "Save video/sequence of images", self.ui.lineeditFilename.text(),
-                                                     "Videos (*.avi *.flv *.mp4 *.mpg *.ogv *.webm *.wmv);;Images (*.png *.jpeg *.tiff *.bmp);;All Files (*)")
-        if filename:
+        filename, ok = QtWidgets.QFileDialog.getSaveFileName(self, "Save video/sequence of images", self.ui.lineeditFilename.text(),
+                                                            "Videos (*.avi *.flv *.mp4 *.mpg *.ogv *.webm *.wmv);;Images (*.png *.jpeg *.tiff *.bmp);;All Files (*)")
+        if ok:
             self.ui.lineeditFilename.setText(filename)
 

@@ -17,7 +17,7 @@ import os, platform, sys, tempfile, traceback, webbrowser, math
 from os.path import join, realpath, dirname
 from daetools.pyDAE import *
 from time import ctime, time, localtime, strftime, struct_time
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .simulator_ui import Ui_SimulatorDialog
 from . import auxiliary
@@ -54,9 +54,9 @@ class daeTextEditLog(daeBaseLog):
             self.TextEdit.update()
         self.App.processEvents()
 
-class daeSimulator(QtGui.QDialog):
+class daeSimulator(QtWidgets.QDialog):
     def __init__(self, app, **kwargs):
-        QtGui.QDialog.__init__(self)
+        QtWidgets.QDialog.__init__(self)
         self.ui = Ui_SimulatorDialog()
         self.ui.setupUi(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -89,19 +89,19 @@ class daeSimulator(QtGui.QDialog):
             self.ui.MINLPSolverComboBox.addItem(nlp[0], userData = nlp[1])
             self.ui.MINLPSolverComboBox.setItemData(i, nlp[2], QtCore.Qt.ToolTipRole)
 
-        menuRun = QtGui.QMenu()
-        actionRun                = QtGui.QAction('Run', self)
-        actionShowExplorerAndRun = QtGui.QAction('Show simulation explorer and run', self)
+        menuRun = QtWidgets.QMenu()
+        actionRun                = QtWidgets.QAction('Run', self)
+        actionShowExplorerAndRun = QtWidgets.QAction('Show simulation explorer and run', self)
         menuRun.addAction(actionRun)
         menuRun.addAction(actionShowExplorerAndRun)
         self.ui.RunButton.setMenu(menuRun)
 
-        self.connect(self.ui.ResumeButton,      QtCore.SIGNAL('clicked()'),   self.slotResume)
-        self.connect(self.ui.PauseButton,       QtCore.SIGNAL('clicked()'),   self.slotPause)
-        self.connect(self.ui.MatrixButton,      QtCore.SIGNAL('clicked()'),   self.slotOpenSparseMatrixImage)
-        self.connect(self.ui.ExportButton,      QtCore.SIGNAL('clicked()'),   self.slotExportSparseMatrixAsMatrixMarketFormat)
-        self.connect(actionRun,                 QtCore.SIGNAL('triggered()'), self.slotRun)
-        self.connect(actionShowExplorerAndRun,  QtCore.SIGNAL('triggered()'), self.slotShowExplorerAndRun)
+        self.ui.ResumeButton.clicked.connect(self.slotResume)
+        self.ui.PauseButton.clicked.connect(self.slotPause)
+        self.ui.MatrixButton.clicked.connect(self.slotOpenSparseMatrixImage)
+        self.ui.ExportButton.clicked.connect(self.slotExportSparseMatrixAsMatrixMarketFormat)
+        actionRun.triggered.connect(self.slotRun)
+        actionShowExplorerAndRun.triggered.connect(self.slotShowExplorerAndRun)
 
         self.app                         = app
         self.simulation                  = kwargs.get('simulation',                 None)
@@ -118,7 +118,7 @@ class daeSimulator(QtGui.QDialog):
 
         if self.app == None:
             if not QtCore.QCoreApplication.instance():
-                self.app = QtGui.QApplication(sys.argv)
+                self.app = QtWidgets.QApplication(sys.argv)
         if self.simulation == None:
             raise RuntimeError('daeSimulator: simulation object must not be None')
 
@@ -163,7 +163,7 @@ class daeSimulator(QtGui.QDialog):
         elif self.optimization:
             pass
 
-        return QtGui.QDialog.done(self, status)
+        return QtWidgets.QDialog.done(self, status)
 
     """
     def __del__(self):
@@ -323,7 +323,7 @@ class daeSimulator(QtGui.QDialog):
                 self.optimization.Finalize()
 
     def showMessage(self, msg):
-        QtGui.QMessageBox.warning(self, "daeSimulator", str(msg))
+        QtWidgets.QMessageBox.warning(self, "daeSimulator", str(msg))
         
     #@QtCore.pyqtSlot()
     def slotOpenSparseMatrixImage(self):
@@ -344,7 +344,7 @@ class daeSimulator(QtGui.QDialog):
     #@QtCore.pyqtSlot()
     def slotExportSparseMatrixAsMatrixMarketFormat(self):
         if(self.lasolver != None):
-            fileName = QtGui.QFileDialog.getSaveFileName(self, "Save File", self.simulation.m.Name +".mtx", "Matrix Market Format Files (*.mtx)")
+            fileName = QtWidgets.QFileDialog.getSaveFileName(self, "Save File", self.simulation.m.Name +".mtx", "Matrix Market Format Files (*.mtx)")
             if(str(fileName) != ""):
                 self.lasolver.SaveAsMatrixMarketFile(str(fileName), self.simulation.m.Name + " matrix", self.simulation.m.Name + " description")
 

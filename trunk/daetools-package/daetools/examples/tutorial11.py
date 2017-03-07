@@ -358,8 +358,8 @@ def consoleRun():
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
-    lasolver.SaveAsXPM(str(fileName))
+    #fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
+    #lasolver.SaveAsXPM(str(fileName))
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
@@ -372,6 +372,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)

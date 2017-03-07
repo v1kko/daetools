@@ -40,3 +40,16 @@ try:
     from daetools.dae_simulator.simulation_inspector import daeSimulationInspector
 except ImportError as e:
     print('Cannot import daeSimulator module. Error: {0}'.format(str(e)))
+
+def daeCreateQtApplication(sys_argv):
+    from PyQt5 import QtWidgets
+    app = QtWidgets.QApplication(sys_argv)
+    return app
+
+def daeQtMessage(windowTitle, message):
+    try:
+        from PyQt5 import QtCore, QtWidgets
+        if QtCore.QCoreApplication.instance():
+            QtWidgets.QMessageBox.warning(None, windowTitle, message)
+    except Exception as e:
+        print(str(e))
