@@ -147,6 +147,7 @@ public:
     superlu_options_t	m_Options;
     mem_usage_t			m_memUsage;
     SuperLUStat_t		m_Stats;
+    GlobalLU_t          m_Glu;
 
     int*				m_etree;
     real_t*				m_R;

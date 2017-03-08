@@ -504,14 +504,14 @@ unix::NLOPT_LIBS           = -lnlopt -lm
 ######################################################################################
 #                                   SuperLU
 ######################################################################################
-SUPERLU_PATH    = ../superlu
+SUPERLU_PATH    = ../superlu/build
 SUPERLU_LIBPATH = $${SUPERLU_PATH}/lib
-SUPERLU_INCLUDE = $${SUPERLU_PATH}/SRC
+SUPERLU_INCLUDE = $${SUPERLU_PATH}/include
 
 win32-msvc2008::SUPERLU_LIBS = -L$${SUPERLU_LIBPATH} superlu.lib $${BLAS_LAPACK_LIBS}
-win32-g++-*::SUPERLU_LIBS    = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} $${PTHREADS_LIB}
-win64-g++-*::SUPERLU_LIBS    = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} $${PTHREADS_LIB}
-unix::SUPERLU_LIBS           = -L$${SUPERLU_LIBPATH} -lsuperlu_4.1 $${RT} $${PTHREADS_LIB}
+win32-g++-*::SUPERLU_LIBS    = -L$${SUPERLU_LIBPATH} -lsuperlu $${RT} $${PTHREADS_LIB}
+win64-g++-*::SUPERLU_LIBS    = -L$${SUPERLU_LIBPATH} -lsuperlu $${RT} $${PTHREADS_LIB}
+unix::SUPERLU_LIBS           = -L$${SUPERLU_LIBPATH} -lsuperlu $${RT} $${PTHREADS_LIB}
 
 
 ######################################################################################

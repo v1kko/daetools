@@ -131,6 +131,7 @@ daeSuperLUSolver::daeSuperLUSolver(void)
     memset(&m_Options,  0, sizeof(superlu_options_t));
     memset(&m_memUsage, 0, sizeof(mem_usage_t));
     memset(&m_Stats,    0, sizeof(SuperLUStat_t));
+    memset(&m_Glu,      0, sizeof(GlobalLU_t));
 
     set_default_options(&m_Options);
 //    printf(".. options:\n");
@@ -783,7 +784,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		if(m_lwork == 0)
 		{
 		// Get the memory requirements from SuperLU
-			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+            dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Glu, &m_Stats, &info);
 		
 		// Remove the ncol from info
 			memSize = info - m_nNoEquations; 
@@ -800,7 +801,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		}
 	}
 	
-	dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+    dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Glu, &m_Stats, &info);
 	if(info != 0)
 	{
 		std::cout << "SuperLU factorization failed; info = " << info << std::endl;
@@ -814,7 +815,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		if(m_lwork == 0)
 		{
 		// Get the memory requirements from SuperLU
-			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+            dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, NULL, -1, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Glu, &m_Stats, &info);
 		
 		// Remove the ncol from info
 			memSize = info - m_nNoEquations; 
@@ -834,7 +835,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 		while(info != 0)
 		{
 		// Try to do the factorization; if it fails inspect why and if the workspace size is too low try to increase it  
-			dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+            dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Glu, &m_Stats, &info);
 			
 			if(info != 0)
 			{
@@ -881,7 +882,7 @@ int daeSuperLUSolver::Setup(void*		ida,
 	}
 	else
 	{
-		dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Stats, &info);
+        dgstrf(&m_Options, &m_matAC, relax, panel_size, m_etree, m_work, m_lwork, m_perm_c, m_perm_r, &m_matL, &m_matU, &m_Glu, &m_Stats, &info);
 		if(info != 0)
 		{
 			std::cout << "SuperLU factorization failed; info = " << info << std::endl;

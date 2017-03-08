@@ -149,6 +149,13 @@ TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 
+MAKE="make"
+CMAKE_GENERATOR="Unix Makefiles"
+if [[ ${PLATFORM} == *"MSYS_"* ]]; then
+  MAKE="nmake"
+  CMAKE_GENERATOR="NMake Makefiles"
+fi
+
 if [ ${PLATFORM} = "Darwin" ]; then
   args=
 else
@@ -297,7 +304,7 @@ vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
 vDEALII=8.4.1
 # Old versions (require changes in makefiles)
-vSUPERLU=4.1
+vSUPERLU=5.2.1
 vSUPERLU_MT=2.0
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
@@ -308,8 +315,9 @@ LAPACK_HTTP=http://www.netlib.org/lapack
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
-SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
-#TRILINOS_HTTP=http://trilinos.csbsju.edu/download/files
+#Old: SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
+SUPERLU_HTTP=${DAETOOLS_HTTP}
+#Old: TRILINOS_HTTP=http://trilinos.csbsju.edu/download/files
 TRILINOS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
 NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
 METIS_HTTP=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
@@ -891,6 +899,7 @@ configure_idas()
   EXTRA_ARGS=
 
   cmake \
+    -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
@@ -915,7 +924,7 @@ compile_idas()
   echo ""
   echo "[*] Building idas..."
   echo ""
-  make install
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -928,7 +937,7 @@ clean_idas()
   echo "[*] Cleaning idas..."
   echo ""
   cd idas
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -949,13 +958,32 @@ configure_superlu()
   if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
     wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
   fi
-  if [ ! -e superlu_makefiles.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_makefiles.tar.gz
-  fi
   tar -xzf superlu_${vSUPERLU}.tar.gz
   mv SuperLU_${vSUPERLU} superlu
   cd superlu
-  tar -xzf ../superlu_makefiles.tar.gz
+
+  mkdir -p build
+  cd build
+
+  export SUPERLU_HOME="${TRUNK}/superlu"
+  echo ${SUPERLU_HOME}
+
+  cmake \
+    -G"${CMAKE_GENERATOR}" \
+    -DCMAKE_BUILD_TYPE:STRING=RELEASE \
+    -DBUILD_SHARED_LIBS:BOOL=OFF \
+    -DCMAKE_INSTALL_PREFIX:PATH=. \
+    -Denable_blaslib:BOOL=OFF \
+    -Denable_complex:BOOL=OFF \
+    -Denable_single:BOOL=OFF \
+    -Denable_tests:BOOL=OFF \
+    -Denable_complex16:BOOL=OFF \
+    -DCMAKE_Fortran_COMPILER:FILEPATH=""  \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    ${SUPERLU_HOME}
+
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -965,10 +993,11 @@ configure_superlu()
 compile_superlu() 
 {
   cd superlu
+  cd build
   echo ""
   echo "[*] Building superlu..."
   echo ""
-  make superlulib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS}"
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -981,7 +1010,8 @@ clean_superlu()
   echo "[*] Cleaning superlu..."
   echo ""
   cd superlu
-  make cleanlib
+  cd build
+  ${MAKE} cleanlib
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"

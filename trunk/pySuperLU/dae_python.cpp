@@ -84,6 +84,7 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 
 
 #ifdef daeSuperLU
+/*
     enum_<IterRefine_t>("IterRefine_t")
 		.value("NOREFINE",	NOREFINE)
 		.value("SINGLE",	SINGLE)
@@ -91,7 +92,7 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 		.value("EXTRA",		EXTRA)
 		.export_values()
 	;
-	
+*/
     enum_<rowperm_t>("rowperm_t")
 		.value("NOROWPERM",	NOROWPERM)
 		.value("LargeDiag",	LargeDiag)

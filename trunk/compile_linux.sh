@@ -34,7 +34,7 @@ OPTIONS:
                     Install the mingw-w64 package from the main Debian repository.
                     CMake uses cross-compile-i686-w64-mingw32.cmake file that targets a toolchain located in /usr/mingw32-i686 directory.
                     and cross-compile-x86_64-w64-mingw32.cmake file that targets a toolchain located in /usr/mingw32-x86_64 directory.
-                    Copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs
+                    Copy trunk/qt-mkspecs/win32-g++-i686-w64-mingw32 to /usr/share/qt/mkspecs (or i.e. /usr/lib/x86_64-linux-gnu/qt5/mkspecs)
                     
                     Modify dae.pri and set the python major and minor versions.
                     Python root directory must be in the trunk folder: Python[Major][Minor]-[arch] (i.e. Python35-win32).
