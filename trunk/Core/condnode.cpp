@@ -473,7 +473,7 @@ void condExpressionNode::BuildExpressionsArray(vector< adNodePtr > & ptrarrExpre
     if(dEventTolerance == 0)
     {
         daeConfig& cfg  = daeConfig::GetConfig();
-        dEventTolerance = cfg.Get<real_t>("daetools.core.eventTolerance", 1E-7);
+        dEventTolerance = cfg.GetFloat("daetools.core.eventTolerance", 1E-7);
     }
 
 /*

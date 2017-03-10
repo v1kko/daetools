@@ -656,7 +656,6 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Max",   &daepython::ad_max1);
     def("Max",   &daepython::ad_max2);
     def("Max",   &daepython::ad_max3);
-
     def("dt",	 &daepython::ad_dt, (arg("ad")), DOCSTR_dt);
     def("d",	 &daepython::ad_d,  (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d);
     def("d2",    &daepython::ad_d2, (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2);

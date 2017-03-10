@@ -108,13 +108,13 @@ void daeNLOPTSolver::Initialize(daeOptimization_t* pOptimization,
 	SetConstraints();
 	
 	daeConfig& cfg = daeConfig::GetConfig();
-	double xtol_rel   = cfg.Get<double>("daetools.NLOPT.xtol_rel",   1E-6);
-	double xtol_abs   = cfg.Get<double>("daetools.NLOPT.xtol_abs",   1E-6);
-	double ftol_rel   = cfg.Get<double>("daetools.NLOPT.ftol_rel",   1E-6);
-	double ftol_abs   = cfg.Get<double>("daetools.NLOPT.ftol_abs",   1E-6);
-	m_bPrintInfo      = cfg.Get<bool>  ("daetools.NLOPT.printInfo",  false);
-	int maxeval       = cfg.Get<int>   ("daetools.NLOPT.ftol_abs",  1000);
-	double maxtime    = cfg.Get<double>("daetools.NLOPT.maxtime",   0);
+	double xtol_rel   = cfg.GetFloat("daetools.NLOPT.xtol_rel",   1E-6);
+	double xtol_abs   = cfg.GetFloat("daetools.NLOPT.xtol_abs",   1E-6);
+	double ftol_rel   = cfg.GetFloat("daetools.NLOPT.ftol_rel",   1E-6);
+	double ftol_abs   = cfg.GetFloat("daetools.NLOPT.ftol_abs",   1E-6);
+	m_bPrintInfo      = cfg.GetBoolean  ("daetools.NLOPT.printInfo",  false);
+	int maxeval       = cfg.GetInteger   ("daetools.NLOPT.ftol_abs",  1000);
+	double maxtime    = cfg.GetFloat("daetools.NLOPT.maxtime",   0);
 	
 	nlopt_set_xtol_rel(m_nlopt, xtol_rel);	
 	nlopt_set_xtol_abs1(m_nlopt, xtol_abs);	
@@ -334,7 +334,7 @@ void daeNLOPTSolver::SetConstraints(void)
 		daeDeclareAndThrowException(exInvalidPointer);
 
 	daeConfig& cfg = daeConfig::GetConfig();
-	double tolerance = cfg.Get<double>("daetools.NLOPT.constr_tol", 1E-6);
+	double tolerance = cfg.GetFloat("daetools.NLOPT.constr_tol", 1E-6);
 
 	size_t Nc = m_ptrarrConstraints.size();
 	m_arrConstraintData.resize(Nc);

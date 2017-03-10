@@ -7,6 +7,8 @@ TEMPLATE = lib
 # Add "plugin" to avoid creation of symlinks
 CONFIG += shared plugin
 
+win32-msvc2015::QMAKE_CXXFLAGS += -DDAE_DLL_EXPORTS
+
 TARGET  = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 
 SOURCES += dllmain.cpp \
@@ -30,4 +32,4 @@ LIBS += $${BOOST_PYTHON_LIB} \
 
 QMAKE_POST_LINK = $${COPY_FILE} \
                   $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \
-                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}.$${SHARED_LIB_EXT}
+                  $${SOLIBS_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT}

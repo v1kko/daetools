@@ -14,6 +14,7 @@
 #include <boost/python.hpp>
 //#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
+#include <boost/python/tuple.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -208,12 +209,12 @@ std::string GetString(daeConfig& self, const std::string& strPropertyPath);
 bool        GetBoolean1(daeConfig& self, const std::string& strPropertyPath, const bool defValue);
 real_t      GetFloat1(daeConfig& self, const std::string& strPropertyPath, const real_t defValue);
 int         GetInteger1(daeConfig& self, const std::string& strPropertyPath, const int defValue);
-std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string defValue);
+std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string& defValue);
 
 void SetBoolean(daeConfig& self, const std::string& strPropertyPath, bool value);
 void SetFloat(daeConfig& self, const std::string& strPropertyPath, real_t value);
 void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value);
-void SetString(daeConfig& self, const std::string& strPropertyPath, std::string value);
+void SetString(daeConfig& self, const std::string& strPropertyPath, std::string& value);
 
 std::string daeConfig__str__(daeConfig& self);
 std::string daeConfig__repr__(daeConfig& self);
@@ -1290,6 +1291,7 @@ void daeModel_ON_EVENT(daeModel& self, daeEventPort* pTriggerEventPort,
                                        boost::python::list userDefinedActions = boost::python::list());
 
 boost::python::dict daeModel_GetOverallIndex_BlockIndex_VariableNameMap(daeModel& self);
+
 boost::python::list daeModel_GetDomains(daeModel& self);
 boost::python::list daeModel_GetParameters(daeModel& self);
 boost::python::list daeModel_GetVariables(daeModel& self);

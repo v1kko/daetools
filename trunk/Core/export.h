@@ -19,7 +19,7 @@ public:
 	{
 		std::string strIndent;
 		daeConfig& cfg = daeConfig::GetConfig();
-		std::string strPythonIndent = cfg.Get<std::string>("daetools.core.pythonIndent", "    ");
+        std::string strPythonIndent = cfg.GetString("daetools.core.pythonIndent", "    ");
 		
 		for(size_t i = 0; i < nPythonIndentLevel; i++)
 			strIndent += strPythonIndent;

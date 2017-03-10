@@ -105,6 +105,10 @@ compile()
     CONFIG_CROSS_COMPILING="CONFIG+=crossCompile"
   fi
   
+  if [ ${PLATFORM} = "Windows" ]; then
+    MAKEARG=
+  fi
+
   echo ""
   echo "[*] Configuring the project with ($2, $3)..."
   echo "${QMAKE} -makefile $1.pro -r CONFIG+=release CONFIG+=silent CONFIG+=shellCompile ${CONFIG_CROSS_COMPILING} customPython="${PYTHON}" -spec ${QMAKE_SPEC} ${CONFIG}"
@@ -114,12 +118,19 @@ compile()
   echo ""
   echo "[*] Cleaning the project..."
   echo ""
-  make clean -w
-
+  if [ ${PLATFORM} = "Windows" ]; then
+    ${MAKE} clean
+  else
+    ${MAKE} clean -w
+  fi
   echo ""
   echo "[*] Compiling the project..."
   echo ""
-  make ${MAKEARG} -w
+  if [ ${PLATFORM} = "Windows" ]; then
+    ${MAKE} ${MAKEARG}
+  else
+    ${MAKE} ${MAKEARG} -w
+  fi
 
   echo ""
   echo "[*] Done!"
@@ -135,6 +146,30 @@ QMAKE="qmake"
 QMAKE_SPEC="linux-g++"
 DAE_IF_CROSS_COMPILING=0
 
+if [[ ${PLATFORM} == *"MSYS_"* ]]; then
+  PLATFORM="Windows"
+  # Platform should be set by i.e. vcbuildtools.bat 
+  VC_PLAT=`cmd "/C echo %Platform% "`
+  echo $VC_PLAT
+  if [[ ${VC_PLAT} == *"X86"* ]]; then
+    HOST_ARCH="win32"
+  elif [[ ${VC_PLAT} == *"x86"* ]]; then
+    HOST_ARCH="win32"
+  elif [[ ${VC_PLAT} == *"x64"* ]]; then
+    HOST_ARCH="win64"
+  else
+    echo unknown HOST_ARCH: $HOST_ARCH
+    exit 1
+  fi
+fi
+
+MAKE="make"
+CMAKE_GENERATOR="Unix Makefiles"
+if [ ${PLATFORM} = "Windows" ]; then
+  MAKE="nmake -I -NOLOGO"
+  CMAKE_GENERATOR="NMake Makefiles"
+fi
+
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   # If there are problems with memory and speed of compilation set:
@@ -144,6 +179,9 @@ if [ ${PLATFORM} = "Darwin" ]; then
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
   QMAKE_SPEC=linux-g++
+elif [ ${PLATFORM} = "Windows" ]; then
+  Ncpu=4
+  QMAKE_SPEC=win32-msvc2015
 else
   Ncpu=4
   QMAKE_SPEC=win32-g++

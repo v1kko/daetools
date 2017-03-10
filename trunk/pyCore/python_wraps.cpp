@@ -168,62 +168,62 @@ std::string GetConfigFileName(daeConfig& self)
 
 bool GetBoolean(daeConfig& self, const std::string& strPropertyPath)
 {
-    return self.Get<bool>(strPropertyPath);
+    return self.GetBoolean(strPropertyPath);
 }
 
-real_t GetFloat(daeConfig& self, const std::string& strPropertyPath)
+double GetFloat(daeConfig& self, const std::string& strPropertyPath)
 {
-    return self.Get<real_t>(strPropertyPath);
+    return self.GetFloat(strPropertyPath);
 }
 
 int GetInteger(daeConfig& self, const std::string& strPropertyPath)
 {
-    return self.Get<int>(strPropertyPath);
+    return self.GetInteger(strPropertyPath);
 }
 
 std::string GetString(daeConfig& self, const std::string& strPropertyPath)
 {
-    return self.Get<std::string>(strPropertyPath);
+    return self.GetString(strPropertyPath);
 }
 
 bool GetBoolean1(daeConfig& self, const std::string& strPropertyPath, const bool defValue)
 {
-    return self.Get<bool>(strPropertyPath, defValue);
+    return self.GetBoolean(strPropertyPath, defValue);
 }
 
-real_t GetFloat1(daeConfig& self, const std::string& strPropertyPath, const real_t defValue)
+double GetFloat1(daeConfig& self, const std::string& strPropertyPath, const double defValue)
 {
-    return self.Get<real_t>(strPropertyPath, defValue);
+    return self.GetFloat(strPropertyPath, defValue);
 }
 
 int GetInteger1(daeConfig& self, const std::string& strPropertyPath, const int defValue)
 {
-    return self.Get<int>(strPropertyPath, defValue);
+    return self.GetInteger(strPropertyPath, defValue);
 }
 
-std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string defValue)
+std::string GetString1(daeConfig& self, const std::string& strPropertyPath, const std::string& defValue)
 {
-    return self.Get<std::string>(strPropertyPath, defValue);
+    return self.GetString(strPropertyPath, defValue);
 }
 
 void SetBoolean(daeConfig& self, const std::string& strPropertyPath, bool value)
 {
-    self.Set<bool>(strPropertyPath, value);
+    self.SetBoolean(strPropertyPath, value);
 }
 
-void SetFloat(daeConfig& self, const std::string& strPropertyPath, real_t value)
+void SetFloat(daeConfig& self, const std::string& strPropertyPath, double value)
 {
-    self.Set<real_t>(strPropertyPath, value);
+    self.SetFloat(strPropertyPath, value);
 }
 
 void SetInteger(daeConfig& self, const std::string& strPropertyPath, int value)
 {
-    self.Set<int>(strPropertyPath, value);
+    self.SetInteger(strPropertyPath, value);
 }
 
-void SetString(daeConfig& self, const std::string& strPropertyPath, std::string value)
+void SetString(daeConfig& self, const std::string& strPropertyPath, std::string& value)
 {
-    self.Set<std::string>(strPropertyPath, value);
+    self.SetString(strPropertyPath, value);
 }
 
 std::string daeConfig__str__(daeConfig& self)
@@ -279,7 +279,7 @@ boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::objec
 
     try
     {
-        return boost::python::object(self.Get<bool>(str_key()));
+        return boost::python::object(self.GetBoolean(str_key()));
     }
     catch(boost::property_tree::ptree_error& e)
     {
@@ -287,7 +287,7 @@ boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::objec
 
     try
     {
-        return boost::python::object(self.Get<int>(str_key()));
+        return boost::python::object(self.GetInteger(str_key()));
     }
     catch(boost::property_tree::ptree_error& e)
     {
@@ -295,7 +295,7 @@ boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::objec
 
     try
     {
-        return boost::python::object(self.Get<double>(str_key()));
+        return boost::python::object(self.GetFloat(str_key()));
     }
     catch(boost::property_tree::ptree_error& e)
     {
@@ -303,7 +303,7 @@ boost::python::object daeConfig__getitem__(daeConfig& self, boost::python::objec
 
     try
     {
-        return boost::python::object(self.Get<string>(str_key()));
+        return boost::python::object(self.GetString(str_key()));
     }
     catch(boost::property_tree::ptree_error& e)
     {
@@ -339,19 +339,19 @@ void daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::pyt
 
     if(bool_.check())
     {
-        self.Set<bool>(str_key(), bool_());
+        self.SetBoolean(str_key(), bool_());
     }
     else if(int_.check())
     {
-        self.Set<int>(str_key(), int_());
+        self.SetInteger(str_key(), int_());
     }
     else if(float_.check())
     {
-        self.Set<double>(str_key(), float_());
+        self.SetFloat(str_key(), float_());
     }
     else if(string_.check())
     {
-        self.Set<string>(str_key(), string_());
+        self.SetString(str_key(), string_());
     }
     else
     {
@@ -4315,7 +4315,10 @@ boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExec
 
     // dictionary {overall_index : tuple(block_index, derivative_node)}
     for(iter = mapJacobianExpressions.begin(); iter != mapJacobianExpressions.end(); iter++)
-        d[iter->first] = boost::python::make_tuple(iter->second.first, boost::cref(iter->second.second.get()));
+    {
+        const adNode* pn = iter->second.second.get();
+        d[iter->first] = boost::python::make_tuple(iter->second.first, boost::cref(*pn));
+    }
 
     return d;
 }

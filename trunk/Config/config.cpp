@@ -22,6 +22,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "../config.h"
 using namespace dae;
 
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+#include <Windows.h>
+#endif
+
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
 #include <dlfcn.h>
 #endif
@@ -101,47 +105,93 @@ bool daeConfig::HasKey(const std::string& strPropertyPath) const
     return false;
 }
 
-template<class T>
-T daeConfig::Get(const std::string& strPropertyPath)
+bool daeConfig::GetBoolean(const std::string& strPropertyPath)
 {
-    return g_pt.get<T>(strPropertyPath);
+    return g_pt.get<bool>(strPropertyPath);
 }
 
-template<class T>
-T daeConfig::Get(const std::string& strPropertyPath, const T defValue)
+double daeConfig::GetFloat(const std::string& strPropertyPath)
 {
-    return g_pt.get<T>(strPropertyPath, defValue);
+    return g_pt.get<double>(strPropertyPath);
 }
 
-template<class T>
-void daeConfig::Set(const std::string& strPropertyPath, const T value)
+int daeConfig::GetInteger(const std::string& strPropertyPath)
 {
-    boost::optional<T> v = g_pt.get_optional<T>(strPropertyPath);
+    return g_pt.get<int>(strPropertyPath);
+}
+
+std::string daeConfig::GetString(const std::string& strPropertyPath)
+{
+    return g_pt.get<std::string>(strPropertyPath);
+}
+
+bool daeConfig::GetBoolean(const std::string& strPropertyPath, const bool defValue)
+{
+    return g_pt.get<bool>(strPropertyPath, defValue);
+}
+
+double daeConfig::GetFloat(const std::string& strPropertyPath, const double defValue)
+{
+    return g_pt.get<double>(strPropertyPath, defValue);
+}
+
+int daeConfig::GetInteger(const std::string& strPropertyPath, const int defValue)
+{
+    return g_pt.get<int>(strPropertyPath, defValue);
+}
+
+std::string daeConfig::GetString(const std::string& strPropertyPath, const std::string& defValue)
+{
+    return g_pt.get<std::string>(strPropertyPath, defValue);
+}
+
+void daeConfig::SetBoolean(const std::string& strPropertyPath, const bool value)
+{
+    boost::optional<bool> v = g_pt.get_optional<bool>(strPropertyPath);
     if(!v.is_initialized())
     {
         daeDeclareException(exInvalidCall);
         e << "Failed to set the value of the key: " << strPropertyPath << " - the wrong data type";
         throw e;
     }
-
-    g_pt.put<T>(strPropertyPath, value);
+    g_pt.put<bool>(strPropertyPath, value);
 }
 
-// Explicit instantiations
-template bool        daeConfig::Get<bool>(const std::string& strPropertyPath);
-template real_t      daeConfig::Get<real_t>(const std::string& strPropertyPath);
-template int         daeConfig::Get<int>(const std::string& strPropertyPath);
-template std::string daeConfig::Get<std::string>(const std::string& strPropertyPath);
+void daeConfig::SetFloat(const std::string& strPropertyPath, const double value)
+{
+    boost::optional<double> v = g_pt.get_optional<double>(strPropertyPath);
+    if(!v.is_initialized())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Failed to set the value of the key: " << strPropertyPath << " - the wrong data type";
+        throw e;
+    }
+    g_pt.put<double>(strPropertyPath, value);
+}
 
-template bool        daeConfig::Get<bool>(const std::string& strPropertyPath,        const bool defValue);
-template real_t      daeConfig::Get<real_t>(const std::string& strPropertyPath,      const real_t defValue);
-template int         daeConfig::Get<int>(const std::string& strPropertyPath,         const int defValue);
-template std::string daeConfig::Get<std::string>(const std::string& strPropertyPath, const std::string defValue);
+void daeConfig::SetInteger(const std::string& strPropertyPath, const int value)
+{
+    boost::optional<int> v = g_pt.get_optional<int>(strPropertyPath);
+    if(!v.is_initialized())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Failed to set the value of the key: " << strPropertyPath << " - the wrong data type";
+        throw e;
+    }
+    g_pt.put<int>(strPropertyPath, value);
+}
 
-template void daeConfig::Set<bool>(const std::string& strPropertyPath, const bool value);
-template void daeConfig::Set<real_t>(const std::string& strPropertyPath, const real_t value);
-template void daeConfig::Set<int>(const std::string& strPropertyPath, const int value);
-template void daeConfig::Set<std::string>(const std::string& strPropertyPath, const std::string value);
+void daeConfig::SetString(const std::string& strPropertyPath, const std::string& value)
+{
+    boost::optional<std::string> v = g_pt.get_optional<std::string>(strPropertyPath);
+    if(!v.is_initialized())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Failed to set the value of the key: " << strPropertyPath << " - the wrong data type";
+        throw e;
+    }
+    g_pt.put<std::string>(strPropertyPath, value);
+}
 
 daeConfig& daeConfig::GetConfig(void)
 {
@@ -223,55 +273,6 @@ std::string daeConfig::GetConfigFolder()
         return std::string();
 }
 
-/*
-#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-        char* szUserProfile = getenv("USERPROFILE");
-        if(szUserProfile != NULL)
-        {
-            cfg_folder = std::string(szUserProfile);
-            cfg_folder /= std::string(".daetools");
-            cfg_file = cfg_folder / std::string("daetools.cfg");
-            if(boost::filesystem::exists(cfg_file))
-                return cfg_folder.string();
-        }
-
-        // If not found there, look in the module/exe folder
-        wchar_t szModuleFileName[MAX_PATH];
-        int returned = GetModuleFileName(NULL, szModuleFileName, MAX_PATH);
-        if(returned > 0)
-        {
-            cfg_folder = std::string(szModuleFileName); // i.e. daetools/pyDAE/Windows_win32_py27/pyCore.pyd
-            cfg_folder = cfg_folder.parent_path();      // i.e. daetools/pyDAE/Windows_win32_py27
-            cfg_folder = cfg_folder.parent_path();      // i.e. daetools/pyDAE
-            cfg_file = cfg_folder / std::string("daetools.cfg");
-            if(boost::filesystem::exists(cfg_file))
-                return cfg_folder.string();
-        }
-#else
-        char* szUserProfile = getenv("HOME");
-        if(szUserProfile != NULL)
-        {
-            cfg_folder = std::string(szUserProfile);
-            cfg_folder /= std::string(".daetools");
-            cfg_file = cfg_folder / std::string("daetools.cfg");
-            if(boost::filesystem::exists(cfg_file))
-                return cfg_folder.string();
-        }
-
-        Dl_info dl_info;
-        dladdr((void *)daeConfig::GetConfigFolder, &dl_info);
-        //printf("module %s loaded\n", dl_info.dli_fname);
-        if(dl_info.dli_fname != NULL)
-        {
-            cfg_folder = std::string(dl_info.dli_fname); // i.e. daetools/pyDAE/Linux_x86_64_py27/pyCore.so
-            cfg_folder = cfg_folder.parent_path();       // i.e. daetools/pyDAE/Linux_x86_64_py27
-            cfg_folder = cfg_folder.parent_path();       // i.e. daetools/pyDAE
-            cfg_file = cfg_folder / std::string("daetools.cfg");
-            if(boost::filesystem::exists(cfg_file))
-                return cfg_folder.string();
-        }
-#endif
-*/
 std::string daeConfig::toString(void) const
 {
     std::stringstream ss;
@@ -283,9 +284,3 @@ std::string daeConfig::GetConfigFileName(void) const
 {
     return configfile;
 }
-
-//const boost::property_tree::ptree& daeConfig::GetPropertyTree(void) const
-//{
-//    return g_pt;
-//}
-

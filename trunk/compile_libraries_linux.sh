@@ -33,7 +33,7 @@ OPTIONS:
    Python options (if not set use system's default python). One of the following:
     --with-python-binary          Path to python binary to use.
     --with-python-version         Version of the system's python in the format: major.minor (i.e 2.7).
-   
+
    Cross compiling options:
     --host                        Example: --host i686-w64-mingw32 (defines --host option for cross-compiling with the GNU gcc toolchain).    
     --cross-compile-python-root   An absolute path to the python root folder (for the native python cannot be run under the build OS).
@@ -148,10 +148,26 @@ PYTHON_LIB_DIR=
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
+if [[ ${PLATFORM} == *"MSYS_"* ]]; then
+  PLATFORM="Windows"
+  # Platform should be set by i.e. vcbuildtools.bat 
+  VC_PLAT=`cmd "/C echo %Platform% "`
+  echo $VC_PLAT
+  if [[ ${VC_PLAT} == *"X86"* ]]; then
+    HOST_ARCH="win32"
+  elif [[ ${VC_PLAT} == *"x86"* ]]; then
+    HOST_ARCH="win32"
+  elif [[ ${VC_PLAT} == *"x64"* ]]; then
+    HOST_ARCH="win64"
+  else
+    echo unknown HOST_ARCH: $HOST_ARCH
+    exit 1
+  fi
+fi
 
 MAKE="make"
 CMAKE_GENERATOR="Unix Makefiles"
-if [[ ${PLATFORM} == *"MSYS_"* ]]; then
+if [ ${PLATFORM} = "Windows" ]; then
   MAKE="nmake"
   CMAKE_GENERATOR="NMake Makefiles"
 fi
@@ -236,10 +252,10 @@ else
 fi
 
 if [ "${DAE_IF_CROSS_COMPILING}" = "0" ]; then
-    PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
-    PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
-    PYTHON_INCLUDE_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
-    PYTHON_LIB_DIR=`${PYTHON} -c "import sys; print(sys.prefix)"`/lib
+  PYTHON_MAJOR=`${PYTHON} -c "import sys; print(sys.version_info[0])"`
+  PYTHON_MINOR=`${PYTHON} -c "import sys; print(sys.version_info[1])"`
+  PYTHON_INCLUDE_DIR=`${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())"`
+  PYTHON_LIB_DIR=`${PYTHON} -c "import sys; print(sys.prefix)"`/lib
 fi
 PYTHON_VERSION=$PYTHON_MAJOR.$PYTHON_MINOR
 
@@ -286,8 +302,8 @@ export DAE_CROSS_COMPILER_PREFIX
 DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
 export DAE_UMFPACK_INSTALL_DIR
 
-vBOOST=1.52.0
-vBOOST_=1_52_0
+vBOOST=1.63.0
+vBOOST_=1_63_0
 vBONMIN=1.8.4
 vLAPACK=3.4.1
 vNLOPT=2.4.2
@@ -303,8 +319,8 @@ vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
 vDEALII=8.4.1
-# Old versions (require changes in makefiles)
 vSUPERLU=5.2.1
+# Old versions (require changes in makefiles)
 vSUPERLU_MT=2.0
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
@@ -319,7 +335,8 @@ BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
 SUPERLU_HTTP=${DAETOOLS_HTTP}
 #Old: TRILINOS_HTTP=http://trilinos.csbsju.edu/download/files
 TRILINOS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
-NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
+#Old: NLOPT_HTTP=http://ab-initio.mit.edu/nlopt
+NLOPT_HTTP=${DAETOOLS_HTTP}
 METIS_HTTP=http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis
 UMFPACK_HTTP=http://www.cise.ufl.edu/research/sparse/umfpack
 AMD_HTTP=http://www.cise.ufl.edu/research/sparse/amd
@@ -393,19 +410,29 @@ cd "${TRUNK}"
 #######################################################
 configure_boost() 
 {
-  if [ -e boost${PYTHON_VERSION} ]; then
-    rm -r boost${PYTHON_VERSION}
-  fi
+  #if [ -e boost${PYTHON_VERSION} ]; then
+  #  rm -r boost${PYTHON_VERSION}
+  #fi
   echo ""
   echo "[*] Setting-up boost"
   echo ""
-  if [ ! -e boost_${vBOOST_}.tar.gz ]; then
-    wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
+  if [ ${PLATFORM} = "Windows" ]; then
+    if [ ! -e boost_${vBOOST_}.zip ]; then
+      wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
+    fi
+  #  unzip boost_${vBOOST_}.zip
+  #  mv boost_${vBOOST_} boost${PYTHON_VERSION}
+  #  cd boost${PYTHON_VERSION}
+  #  cmd "/C bootstrap"
+  else
+    if [ ! -e boost_${vBOOST_}.tar.gz ]; then
+      wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
+    fi
+    tar -xzf boost_${vBOOST_}.tar.gz
+    mv boost_${vBOOST_} boost${PYTHON_VERSION}
+    cd boost${PYTHON_VERSION}
+    sh bootstrap.sh --with-python=${PYTHON}
   fi
-  tar -xzf boost_${vBOOST_}.tar.gz
-  mv boost_${vBOOST_} boost${PYTHON_VERSION}
-  cd boost${PYTHON_VERSION}
-  sh bootstrap.sh --with-python=${PYTHON}
   
   cd "${TRUNK}"
   echo ""
@@ -453,9 +480,9 @@ compile_boost()
            toolset=gcc target-os=windows threadapi=win32 \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*   ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*       ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_thread_win32-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}* ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*   ${SOLIBS_DIR}
 
     # Achtung, Achtung!
     # The following will fail at the linking phase!
@@ -476,7 +503,7 @@ compile_boost()
     if [ "${PYTHON_MAJOR}" = "2" ]; then
       LIBBOOST_PYTHON_SUF=""
     fi
-    cp -a stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
+    cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
   
   else # regular compiler (not a cross-compiler)
     
@@ -486,27 +513,52 @@ compile_boost()
     echo ""
     
     BOOST_USER_CONFIG=~/user-config.jam
-    echo "using python"                           >  ${BOOST_USER_CONFIG}
-    echo "    : ${PYTHON_MAJOR}.${PYTHON_MINOR}"  >> ${BOOST_USER_CONFIG}
-    echo "    : ${PYTHON}"                        >> ${BOOST_USER_CONFIG}
-    echo "    : ${PYTHON_INCLUDE_DIR}"            >> ${BOOST_USER_CONFIG}
-    echo "    : ${PYTHON_LIB_DIR}"                >> ${BOOST_USER_CONFIG}
-    echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
-    echo "    ;"                                  >> ${BOOST_USER_CONFIG}
-    
-    ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
-           --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
-           variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
+    if [ ${PLATFORM} = "Windows" ]; then
+      echo "using python"                           >  ${BOOST_USER_CONFIG}
+      echo "    : "                                 >> ${BOOST_USER_CONFIG}
+      echo "    : "                                 >> ${BOOST_USER_CONFIG}
+      echo "    : "                                 >> ${BOOST_USER_CONFIG}
+      echo "    : "                                 >> ${BOOST_USER_CONFIG}
+      echo "    : <toolset>msvc"                    >> ${BOOST_USER_CONFIG}
+      echo "    ;"                                  >> ${BOOST_USER_CONFIG}
 
-    LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
-    if [ "${PYTHON_MAJOR}" = "2" ]; then
-      LIBBOOST_PYTHON_SUF=""
-    fi
+      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
+             --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
+             variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
-    cp -a stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
-    cp -a stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                    ${SOLIBS_DIR}
+      LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
+      if [ "${PYTHON_MAJOR}" = "2" ]; then
+        LIBBOOST_PYTHON_SUF=""
+      fi
+
+      cp -fa stage/lib/boost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll  ${SOLIBS_DIR}
+      cp -fa stage/lib/boost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
+      cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
+      cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                    ${SOLIBS_DIR}
+
+    else
+      echo "using python"                           >  ${BOOST_USER_CONFIG}
+      echo "    : ${PYTHON_MAJOR}.${PYTHON_MINOR}"  >> ${BOOST_USER_CONFIG}
+      echo "    : ${PYTHON}"                        >> ${BOOST_USER_CONFIG}
+      echo "    : ${PYTHON_INCLUDE_DIR}"            >> ${BOOST_USER_CONFIG}
+      echo "    : ${PYTHON_LIB_DIR}"                >> ${BOOST_USER_CONFIG}
+      echo "    : <toolset>gcc"                     >> ${BOOST_USER_CONFIG}
+      echo "    ;"                                  >> ${BOOST_USER_CONFIG}
+
+      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
+             --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
+             variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
+
+      LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
+      if [ "${PYTHON_MAJOR}" = "2" ]; then
+        LIBBOOST_PYTHON_SUF=""
+      fi
+
+      cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
+      cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
+      cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
+      cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                    ${SOLIBS_DIR}
+    fi    
 
   fi
   
@@ -620,6 +672,7 @@ configure_ref_blas_lapack()
     -DCMAKE_INSTALL_PREFIX:STRING="${TRUNK}/lapack" \
     -DBUILD_DOUBLE:BOOL=ON \
     -DBUILD_STATIC_LIBS:BOOL=ON \
+    -DCMAKE_Fortran_COMPILER:FILEPATH="C:/g95/bin/g95.exe" \
     -DCMAKE_Fortran_FLAGS:STRING="${DAE_COMPILER_FLAGS}" \
     ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE}
   
@@ -966,14 +1019,13 @@ configure_superlu()
   cd build
 
   export SUPERLU_HOME="${TRUNK}/superlu"
-  echo ${SUPERLU_HOME}
 
   cmake \
     -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
-    -Denable_blaslib:BOOL=OFF \
+    -Denable_blaslib:BOOL=ON \
     -Denable_complex:BOOL=OFF \
     -Denable_single:BOOL=OFF \
     -Denable_tests:BOOL=OFF \
@@ -1153,12 +1205,33 @@ configure_nlopt()
   if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
     wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
   fi
+  if [ ! -e nlopt-config.cmake.h.in ]; then
+    wget ${NLOPT_HTTP}/nlopt-config.cmake.h.in
+  fi
+  if [ ! -e nlopt-CMakeLists.txt ]; then
+    wget ${NLOPT_HTTP}/nlopt-CMakeLists.txt
+  fi
+
   tar -xzf nlopt-${vNLOPT}.tar.gz
   mv nlopt-${vNLOPT} nlopt
+  cp nlopt-config.cmake.h.in nlopt/config.cmake.h.in 
+  cp nlopt-CMakeLists.txt    nlopt/CMakeLists.txt
   cd nlopt
   mkdir build
   cd build
-  ../configure ${DAE_CROSS_COMPILE_FLAGS} --disable-dependency-tracking -prefix=${TRUNK}/nlopt/build CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}"
+  
+  export NLOPT_HOME="${TRUNK}/nlopt"
+
+  cmake \
+    -G"${CMAKE_GENERATOR}" \
+    -DCMAKE_BUILD_TYPE:STRING=RELEASE \
+    -DBUILD_SHARED_LIBS:BOOL=OFF \
+    -DCMAKE_INSTALL_PREFIX:PATH=. \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
+    ${NLOPT_HOME}
+
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1169,8 +1242,8 @@ compile_nlopt()
 {
   cd nlopt/build
   echo "[*] Building nlopt..."
-  make
-  make install
+  ${MAKE}
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1183,7 +1256,7 @@ clean_nlopt()
   echo "[*] Cleaning nlopt..."
   echo ""
   cd nlopt/build
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1222,8 +1295,10 @@ configure_trilinos()
   fi
   
   cmake \
+    -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
+    -DTrilinos_ENABLE_CXX11=OFF \
     -DTrilinos_ENABLE_Amesos:BOOL=ON \
     -DTrilinos_ENABLE_Epetra:BOOL=ON \
     -DTrilinos_ENABLE_AztecOO:BOOL=ON \
@@ -1235,8 +1310,8 @@ configure_trilinos()
     -DIfpack_ENABLE_SuperLU:BOOL=ON \
     -DTeuchos_ENABLE_COMPLEX:BOOL=OFF \
     -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
-    -DTPL_SuperLU_LIBRARIES:STRING=superlu_4.1 \
-    -DTPL_ENABLE_UMFPACK:BOOL=ON \
+    -DTPL_SuperLU_LIBRARIES:STRING=superlu \
+    -DTPL_ENABLE_UMFPACK:BOOL=OFF \
     -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=${UMFPACK_INCLUDE_DIR} \
     -DTPL_UMFPACK_LIBRARIES:STRING=umfpack \
     -DTPL_BLAS_LIBRARIES:STRING="${TRUNK}/lapack/lib/libblas.a -lgfortran" \
@@ -1283,8 +1358,8 @@ compile_trilinos()
 
   cd trilinos/build
   echo "[*] Building trilinos..."
-  make -j${Ncpu}
-  make install
+  ${MAKE}
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1297,7 +1372,7 @@ clean_trilinos()
   echo "[*] Cleaning trilinos..."
   echo ""
   cd trilinos/build
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1341,6 +1416,7 @@ configure_dealii()
   cd deal.II
   mkdir build
   cmake \
+    -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=Release \
     -DDEAL_II_PACKAGE_NAME:STRING=deal.II-daetools \
     -DBUILD_SHARED_LIBS:BOOL=ON \
@@ -1386,8 +1462,8 @@ compile_dealii()
   echo "[*] Building deal.II..."
   echo ""
   
-  make expand_instantiations_exe
-  make -j${Ncpu} install
+  ${MAKE} expand_instantiations_exe
+  ${MAKE} install
   
   # Nota bene:
   #   No need to copy anything since we are producing a static lib (.a)
@@ -1408,7 +1484,7 @@ clean_dealii()
   echo "[*] Cleaning deal.II..."
   echo ""
   cd deal.II
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"

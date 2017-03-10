@@ -33,8 +33,8 @@ bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string&
 	if(strConnectString.empty())
 	{
 		daeConfig& cfg = daeConfig::GetConfig();
-		strIPAddress = cfg.Get<string>("daetools.datareporting.tcpipDataReceiverAddress", "127.0.0.1");
-		nPort        = cfg.Get<int>("daetools.datareporting.tcpipDataReceiverPort", 50000);
+		strIPAddress = cfg.GetString("daetools.datareporting.tcpipDataReceiverAddress", "127.0.0.1");
+		nPort        = cfg.GetInteger("daetools.datareporting.tcpipDataReceiverPort", 50000);
 	}
 	else
 	{

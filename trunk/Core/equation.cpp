@@ -902,7 +902,7 @@ daeEquation::daeEquation()
 {
     daeConfig& cfg = daeConfig::GetConfig();
     
-    m_bCheckUnitsConsistency    = cfg.Get<bool>("daetools.core.checkUnitsConsistency", true);
+    m_bCheckUnitsConsistency    = cfg.GetBoolean("daetools.core.checkUnitsConsistency", true);
     m_bBuildJacobianExpressions = false;
     m_dScaling                  = 1.0;
     m_pParentState              = NULL;

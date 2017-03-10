@@ -86,10 +86,10 @@ BOOST_PYTHON_MODULE(pySuperLU_CUDA)
 #ifdef daeSuperLU
 /*
     enum_<IterRefine_t>("IterRefine_t")
-		.value("NOREFINE",	NOREFINE)
-		.value("SINGLE",	SINGLE)
-		.value("DOUBLE",	DOUBLE)
-		.value("EXTRA",		EXTRA)
+        .value("NOREFINE",	NOREFINE)
+        //.value("SINGLE",	SINGLE)
+        //.value("DOUBLE",	DOUBLE)
+        //.value("EXTRA",	EXTRA)
 		.export_values()
 	;
 */

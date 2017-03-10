@@ -304,7 +304,7 @@ bool daeOnConditionActions::CheckObject(vector<string>& strarrErrors) const
 
 // Check unit-consistency of the condition
     daeConfig& cfg = daeConfig::GetConfig();
-    if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
+    if(cfg.GetBoolean("daetools.core.checkUnitsConsistency", false))
     {
         try
         {

@@ -135,8 +135,8 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     m_ProblemCreationStart = dae::GetTimeInSeconds();
 
     daeConfig& cfg = daeConfig::GetConfig();
-    bool bPrintHeader = cfg.Get<bool>("daetools.activity.printHeader", true);
-    bool bPrintInfo   = cfg.Get<bool>("daetools.core.printInfo", false);
+    bool bPrintHeader = cfg.GetBoolean("daetools.activity.printHeader", true);
+    bool bPrintInfo   = cfg.GetBoolean("daetools.core.printInfo", false);
 
     if(bPrintHeader)
     {
@@ -501,7 +501,7 @@ void daeSimulation::SolveInitial(void)
     m_IntegrationEnd      = dae::GetTimeInSeconds();
 
     daeConfig& cfg = daeConfig::GetConfig();
-    bool bPrintInfo = cfg.Get<bool>("daetools.core.printInfo", false);
+    bool bPrintInfo = cfg.GetBoolean("daetools.core.printInfo", false);
 
 // Register model if in simulation mode; otherwise it will be done later by the optimization/param.estimation
     if(!m_pDataReporter->IsConnected())
@@ -687,7 +687,7 @@ void daeSimulation::ReRun(void)
 daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(string strDescription)
 {
     daeConfig& cfg = daeConfig::GetConfig();
-    real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
+    real_t dAbsTolerance = cfg.GetFloat("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
     boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, true, dAbsTolerance, m_arrConstraints.size(), strDescription));
     m_arrConstraints.push_back(pConstraint);
@@ -697,7 +697,7 @@ daeOptimizationConstraint* daeSimulation::CreateInequalityConstraint(string strD
 daeOptimizationConstraint* daeSimulation::CreateEqualityConstraint(string strDescription)
 {
     daeConfig& cfg = daeConfig::GetConfig();
-    real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
+    real_t dAbsTolerance = cfg.GetFloat("daetools.activity.constraintsAbsoluteTolerance", 1E-8);
 
     boost::shared_ptr<daeOptimizationConstraint> pConstraint(new daeOptimizationConstraint(m_pModel, m_pDAESolver, false, dAbsTolerance, m_arrConstraints.size(), strDescription));
     m_arrConstraints.push_back(pConstraint);
@@ -714,7 +714,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(daeVariable& variable)
     }
 
     daeConfig& cfg = daeConfig::GetConfig();
-    real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
+    real_t dAbsTolerance = cfg.GetFloat("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
     size_t nIndex  = m_arrMeasuredVariables.size();
 
     boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
@@ -745,7 +745,7 @@ daeMeasuredVariable* daeSimulation::SetMeasuredVariable(adouble a)
     daeGetVariableAndIndexesFromNode(a, &variable, narrDomainIndexes);
 
     daeConfig& cfg = daeConfig::GetConfig();
-    real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
+    real_t dAbsTolerance = cfg.GetFloat("daetools.activity.measuredVariableAbsoluteTolerance", 1E-8);
     size_t nIndex  = m_arrMeasuredVariables.size();
 
     boost::shared_ptr<daeMeasuredVariable> measvar(new daeMeasuredVariable(m_pModel, m_pDAESolver, dAbsTolerance, nIndex, "Measured variable"));
@@ -955,7 +955,7 @@ daeObjectiveFunction* daeSimulation::GetObjectiveFunction(void) const
 boost::shared_ptr<daeObjectiveFunction> daeSimulation::AddObjectiveFunction(void)
 {
     daeConfig& cfg = daeConfig::GetConfig();
-    real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
+    real_t dAbsTolerance = cfg.GetFloat("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
     size_t nObjFunIndex  = m_arrObjectiveFunctions.size();
 
     boost::shared_ptr<daeObjectiveFunction> objfun(new daeObjectiveFunction(m_pModel, m_pDAESolver, dAbsTolerance, nObjFunIndex, "Objective function"));
@@ -972,7 +972,7 @@ void daeSimulation::SetNumberOfObjectiveFunctions(size_t n)
         daeDeclareAndThrowException(exInvalidCall);
 
     daeConfig& cfg = daeConfig::GetConfig();
-    real_t dAbsTolerance = cfg.Get<real_t>("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
+    real_t dAbsTolerance = cfg.GetFloat("daetools.activity.objFunctionAbsoluteTolerance", 1E-8);
 
 // Remove all equations from the model and delete all obj. functions
     for(i = 0; i < m_arrObjectiveFunctions.size(); i++)
@@ -1489,7 +1489,7 @@ void daeSimulation::SetUpParametersAndDomains_RuntimeSettings()
         daeDeclareAndThrowException(exInvalidPointer);
 
     daeConfig& cfg = daeConfig::GetConfig();
-    bool bPrintInfo = cfg.Get<bool>("daetools.core.printInfo", false);
+    bool bPrintInfo = cfg.GetBoolean("daetools.core.printInfo", false);
 
     if(bPrintInfo)
         std::cout << "      SetUpParametersAndDomains for RuntimeSettings" << std::endl;
@@ -1726,7 +1726,7 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
         daeDeclareAndThrowException(exInvalidPointer);
 
     daeConfig& cfg = daeConfig::GetConfig();
-    bool bPrintInfo = cfg.Get<bool>("daetools.core.printInfo", false);
+    bool bPrintInfo = cfg.GetBoolean("daetools.core.printInfo", false);
 
     if(bPrintInfo)
         std::cout << "      SetUpVariables for RuntimeSettings" << std::endl;

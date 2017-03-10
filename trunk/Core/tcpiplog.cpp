@@ -21,8 +21,8 @@ daeTCPIPLog::~daeTCPIPLog(void)
 bool daeTCPIPLog::Connect(const string& strIPAddress, int nPort)
 {
     daeConfig& cfg = daeConfig::GetConfig();
-	m_strIPAddress = strIPAddress.empty() ? cfg.Get<string>("daetools.logging.tcpipLogAddress", "127.0.0.1") : strIPAddress;
-    m_nPort	       = nPort <= 0 ? cfg.Get<int>("daetools.logging.tcpipLogPort", 51000) : nPort;
+	m_strIPAddress = strIPAddress.empty() ? cfg.GetString("daetools.logging.tcpipLogAddress", "127.0.0.1") : strIPAddress;
+    m_nPort	       = nPort <= 0 ? cfg.GetInteger("daetools.logging.tcpipLogPort", 51000) : nPort;
 
 	m_ptcpipSocket = boost::shared_ptr<tcp::socket>(new tcp::socket(m_ioService));
 	tcp::endpoint endpoint(boost::asio::ip::address::from_string(m_strIPAddress), m_nPort);

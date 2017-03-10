@@ -639,9 +639,9 @@ public:
         m_pLastSatisfiedCondition   = NULL;
 		
 		daeConfig& cfg = daeConfig::GetConfig();
-		m_bResetLAMatrixAfterDiscontinuity = cfg.Get<bool>("daetools.core.resetLAMatrixAfterDiscontinuity", true);
-		m_bPrintInfo                       = cfg.Get<bool>("daetools.core.printInfo", false);
-        m_bCheckForInfinite                = cfg.Get<bool>("daetools.core.checkForInfiniteNumbers", false);
+        m_bResetLAMatrixAfterDiscontinuity = cfg.GetBoolean("daetools.core.resetLAMatrixAfterDiscontinuity", true);
+        m_bPrintInfo                       = cfg.GetBoolean("daetools.core.printInfo", false);
+        m_bCheckForInfinite                = cfg.GetBoolean("daetools.core.checkForInfiniteNumbers", false);
 	}
 
 	

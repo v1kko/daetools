@@ -43,7 +43,7 @@ public:
 		m_dProgress      = 0;
 		
 		daeConfig& cfg  = daeConfig::GetConfig();
-		m_strIndentUnit = cfg.Get<std::string>("daetools.core.logIndent", "\t");
+        m_strIndentUnit = cfg.GetString("daetools.core.logIndent", "\t");
 	}
 
 	virtual ~daeBaseLog(void)

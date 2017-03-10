@@ -108,16 +108,16 @@ daeIDASolver::daeIDASolver(void)
 	m_pIDASolverData.reset(new daeIDASolverData);
 
 	daeConfig& cfg = daeConfig::GetConfig();
-	m_dRelTolerance                             = cfg.Get<real_t>("daetools.IDAS.relativeTolerance",                    1e-5);
-	m_dNextTimeAfterReinitialization            = cfg.Get<real_t>("daetools.IDAS.nextTimeAfterReinitialization",        1e-2);
-	m_strSensitivityMethod                      = cfg.Get<string>("daetools.IDAS.sensitivityMethod",                    "Simultaneous");
-	m_bErrorControl                             = cfg.Get<bool>  ("daetools.IDAS.SensErrCon",					        false);
-	m_bPrintInfo                                = cfg.Get<bool>  ("daetools.IDAS.printInfo",                            false);
-	m_bResetLAMatrixAfterDiscontinuity          = cfg.Get<bool>  ("daetools.core.resetLAMatrixAfterDiscontinuity",      true);
-    m_iNumberOfSTNRebuildsDuringInitialization  = cfg.Get<int>("daetools.IDAS.numberOfSTNRebuildsDuringInitialization", 1000);
+    m_dRelTolerance                             = cfg.GetFloat("daetools.IDAS.relativeTolerance",                         1e-5);
+    m_dNextTimeAfterReinitialization            = cfg.GetFloat("daetools.IDAS.nextTimeAfterReinitialization",             1e-2);
+    m_strSensitivityMethod                      = cfg.GetString("daetools.IDAS.sensitivityMethod",                        "Simultaneous");
+    m_bErrorControl                             = cfg.GetBoolean("daetools.IDAS.SensErrCon",					          false);
+    m_bPrintInfo                                = cfg.GetBoolean("daetools.IDAS.printInfo",                               false);
+    m_bResetLAMatrixAfterDiscontinuity          = cfg.GetBoolean("daetools.core.resetLAMatrixAfterDiscontinuity",         true);
+    m_iNumberOfSTNRebuildsDuringInitialization  = cfg.GetInteger("daetools.IDAS.numberOfSTNRebuildsDuringInitialization", 1000);
 
-    m_dSensRelTolerance                         = cfg.Get<real_t>("daetools.IDAS.sensRelativeTolerance",                1e-5);
-    m_dSensAbsTolerance                         = cfg.Get<real_t>("daetools.IDAS.sensAbsoluteTolerance",                1e-5);
+    m_dSensRelTolerance                         = cfg.GetFloat("daetools.IDAS.sensRelativeTolerance",                1e-5);
+    m_dSensAbsTolerance                         = cfg.GetFloat("daetools.IDAS.sensAbsoluteTolerance",                1e-5);
 }
 
 daeIDASolver::~daeIDASolver(void)
@@ -344,23 +344,23 @@ void daeIDASolver::CreateIDA(void)
     bool bval;
     daeConfig& cfg = daeConfig::GetConfig();
     
-    IDASetMaxOrd(m_pIDA,      cfg.Get<int>("daetools.IDAS.MaxOrd",      5));
-    IDASetMaxNumSteps(m_pIDA, cfg.Get<int>("daetools.IDAS.MaxNumSteps", 500));
+    IDASetMaxOrd(m_pIDA,      cfg.GetInteger("daetools.IDAS.MaxOrd",      5));
+    IDASetMaxNumSteps(m_pIDA, cfg.GetInteger("daetools.IDAS.MaxNumSteps", 500));
     
-    fval = cfg.Get<real_t>("daetools.IDAS.InitStep", 0.0);
+    fval = cfg.GetFloat("daetools.IDAS.InitStep", 0.0);
     if(fval > 0.0)
         IDASetInitStep(m_pIDA, fval);
     
-    fval = cfg.Get<real_t>("daetools.IDAS.MaxStep", 0.0);
+    fval = cfg.GetFloat("daetools.IDAS.MaxStep", 0.0);
     if(fval > 0.0)
         IDASetMaxStep(m_pIDA, fval);
     
-    IDASetMaxErrTestFails(m_pIDA,   cfg.Get<int>   ("daetools.IDAS.MaxErrTestFails", 10));
-    IDASetMaxNonlinIters(m_pIDA,    cfg.Get<int>   ("daetools.IDAS.MaxNonlinIters",  4));
-    IDASetMaxConvFails(m_pIDA,      cfg.Get<int>   ("daetools.IDAS.MaxConvFails",    10));
-    IDASetNonlinConvCoef(m_pIDA,    cfg.Get<real_t>("daetools.IDAS.NonlinConvCoef",  0.33));
-    IDASetSuppressAlg(m_pIDA,       cfg.Get<bool>  ("daetools.IDAS.SuppressAlg",     false));
-    bval = cfg.Get<bool>("daetools.IDAS.NoInactiveRootWarn", false);
+    IDASetMaxErrTestFails(m_pIDA,   cfg.GetInteger   ("daetools.IDAS.MaxErrTestFails", 10));
+    IDASetMaxNonlinIters(m_pIDA,    cfg.GetInteger   ("daetools.IDAS.MaxNonlinIters",  4));
+    IDASetMaxConvFails(m_pIDA,      cfg.GetInteger   ("daetools.IDAS.MaxConvFails",    10));
+    IDASetNonlinConvCoef(m_pIDA,    cfg.GetFloat("daetools.IDAS.NonlinConvCoef",  0.33));
+    IDASetSuppressAlg(m_pIDA,       cfg.GetBoolean  ("daetools.IDAS.SuppressAlg",     false));
+    bval = cfg.GetBoolean("daetools.IDAS.NoInactiveRootWarn", false);
     if(bval)
         IDASetNoInactiveRootWarn(m_pIDA);
 	
@@ -433,7 +433,7 @@ void daeIDASolver::SetupSensitivityCalculation(void)
 	}
 
     daeConfig& cfg = daeConfig::GetConfig();
-    int nNonlinIters = cfg.Get<int>("daetools.IDAS.maxNonlinIters", 3);
+    int nNonlinIters = cfg.GetInteger("daetools.IDAS.maxNonlinIters", 3);
     retval = IDASetSensMaxNonlinIters(m_pIDA, nNonlinIters);
     if(!CheckFlag(retval))
     {
@@ -609,11 +609,11 @@ void daeIDASolver::SolveInitial(void)
 	
     daeConfig& cfg = daeConfig::GetConfig();
     
-    IDASetNonlinConvCoefIC(m_pIDA,  cfg.Get<real_t>("daetools.IDAS.NonlinConvCoefIC", 0.0033));
-    IDASetMaxNumStepsIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumStepsIC",    5));
-    IDASetMaxNumJacsIC(m_pIDA,      cfg.Get<int>   ("daetools.IDAS.MaxNumJacsIC",     4));
-    IDASetMaxNumItersIC(m_pIDA,     cfg.Get<int>   ("daetools.IDAS.MaxNumItersIC",    10));
-    IDASetLineSearchOffIC(m_pIDA,   cfg.Get<bool>  ("daetools.IDAS.LineSearchOffIC",  false));
+    IDASetNonlinConvCoefIC(m_pIDA,  cfg.GetFloat("daetools.IDAS.NonlinConvCoefIC", 0.0033));
+    IDASetMaxNumStepsIC(m_pIDA,     cfg.GetInteger   ("daetools.IDAS.MaxNumStepsIC",    5));
+    IDASetMaxNumJacsIC(m_pIDA,      cfg.GetInteger   ("daetools.IDAS.MaxNumJacsIC",     4));
+    IDASetMaxNumItersIC(m_pIDA,     cfg.GetInteger   ("daetools.IDAS.MaxNumItersIC",    10));
+    IDASetLineSearchOffIC(m_pIDA,   cfg.GetBoolean  ("daetools.IDAS.LineSearchOffIC",  false));
 
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
     {

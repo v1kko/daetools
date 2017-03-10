@@ -326,7 +326,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 		}
 		
 		daeConfig& cfg = daeConfig::GetConfig();
-		if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
+		if(cfg.GetBoolean("daetools.core.checkUnitsConsistency", false))
 		{
 			try
 			{
@@ -373,7 +373,7 @@ bool daeAction::CheckObject(std::vector<string>& strarrErrors) const
 		//}
 		
 		daeConfig& cfg = daeConfig::GetConfig();
-		if(cfg.Get<bool>("daetools.core.checkUnitsConsistency", false))
+		if(cfg.GetBoolean("daetools.core.checkUnitsConsistency", false))
 		{
 		// Check the expression unit-consistency
 			try
