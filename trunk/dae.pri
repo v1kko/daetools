@@ -608,9 +608,9 @@ win64-g++-*::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
 # -lteuchosparameterlist -lteuchoscomm -lteuchosnumerics -lteuchoscore
 linux-g++::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                            -laztecoo -lml -lifpack \
-                           -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
-                           -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
-                           -lteuchosparameterlist -lteuchoscore -lkokkoscore \
+                           -lamesos -lepetraext -ltriutils -lepetra \
+                           -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                           -lteuchosparameterlist -lteuchoscore \
                             $${UMFPACK_LIBS} \
                             $${SUPERLU_LIBS}
 

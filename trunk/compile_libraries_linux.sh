@@ -148,28 +148,21 @@ PYTHON_LIB_DIR=
 TRUNK="$( cd "$( dirname "$0" )" && pwd )"
 HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
-if [[ ${PLATFORM} == *"MSYS_"* ]]; then
+if [[ "${PLATFORM}" == *"MSYS_"* ]]; then
   PLATFORM="Windows"
   # Platform should be set by i.e. vcbuildtools.bat 
   VC_PLAT=`cmd "/C echo %Platform% "`
   echo $VC_PLAT
-  if [[ ${VC_PLAT} == *"X86"* ]]; then
+  if [[ "${VC_PLAT}" == *"X86"* ]]; then
     HOST_ARCH="win32"
-  elif [[ ${VC_PLAT} == *"x86"* ]]; then
+  elif [[ "${VC_PLAT}" == *"x86"* ]]; then
     HOST_ARCH="win32"
-  elif [[ ${VC_PLAT} == *"x64"* ]]; then
+  elif [[ "${VC_PLAT}" == *"x64"* ]]; then
     HOST_ARCH="win64"
   else
     echo unknown HOST_ARCH: $HOST_ARCH
     exit 1
   fi
-fi
-
-MAKE="make"
-CMAKE_GENERATOR="Unix Makefiles"
-if [ ${PLATFORM} = "Windows" ]; then
-  MAKE="nmake"
-  CMAKE_GENERATOR="NMake Makefiles"
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
@@ -249,6 +242,15 @@ elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 else
   Ncpu=4
+fi
+
+MAKE="make"
+MAKE_Ncpu="make -j${Ncpu}"
+CMAKE_GENERATOR="Unix Makefiles"
+if [ ${PLATFORM} = "Windows" ]; then
+  MAKE="nmake"
+  MAKE_Ncpu="nmake"
+  CMAKE_GENERATOR="NMake Makefiles"
 fi
 
 if [ "${DAE_IF_CROSS_COMPILING}" = "0" ]; then
@@ -621,9 +623,9 @@ compile_openblas()
   echo ""
   echo "[*] Building openblas..."
   echo ""
-  make -j${Ncpu} libs
-  make 
-  make prefix=build install
+  ${MAKE_Ncpu} libs
+  ${MAKE_Ncpu} 
+  ${MAKE} prefix=build install
   cp -a libopenblas_daetools* ${SOLIBS_DIR}
   echo ""
   echo "[*] Done!"
@@ -668,11 +670,11 @@ configure_ref_blas_lapack()
   cd lapack
   
   cmake \
+    -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=Release \
     -DCMAKE_INSTALL_PREFIX:STRING="${TRUNK}/lapack" \
     -DBUILD_DOUBLE:BOOL=ON \
     -DBUILD_STATIC_LIBS:BOOL=ON \
-    -DCMAKE_Fortran_COMPILER:FILEPATH="C:/g95/bin/g95.exe" \
     -DCMAKE_Fortran_FLAGS:STRING="${DAE_COMPILER_FLAGS}" \
     ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE}
   
@@ -689,8 +691,8 @@ compile_ref_blas_lapack()
   echo ""
   echo "[*] Building reference blas & lapack..."
   echo ""
-  make -j${Ncpu} lapack
-  make -j${Ncpu} blas
+  ${MAKE_Ncpu} lapack
+  ${MAKE_Ncpu} blas
   echo ""
   echo "[*] Done!"
   echo ""
@@ -703,7 +705,7 @@ clean_ref_blas_lapack()
   echo "[*] Cleaning reference blas & lapack..."
   echo ""
   cd lapack
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -798,10 +800,10 @@ compile_umfpack()
   echo ""
   echo "[*] Building suitesparseconfig..."
   echo ""
-  echo "make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
-  make clean
+  echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
+  ${MAKE} clean
   echo ""
   echo "[*] Done!"
   echo ""
@@ -811,9 +813,9 @@ compile_umfpack()
   echo ""
   echo "[*] Building amd..."
   echo ""
-  #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
+  #echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -823,9 +825,9 @@ compile_umfpack()
   echo ""
   echo "[*] Building camd..."
   echo ""
-  #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
+  #echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
   echo "[*] Done!"
   cd "${TRUNK}"
 
@@ -833,9 +835,9 @@ compile_umfpack()
   echo ""
   echo "[*] Building colamd..."
   echo ""
-  #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
+  #echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -845,9 +847,9 @@ compile_umfpack()
   echo ""
   echo "[*] Building ccolamd..."
   echo ""
-  #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
+  #echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -857,9 +859,9 @@ compile_umfpack()
   echo ""
   echo "[*] Building cholmod..."
   echo ""
-  #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
+  #echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -869,9 +871,9 @@ compile_umfpack()
   echo ""
   echo "[*] Building umfpack..."
   echo ""
-  #echo "make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
-  make -j${Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
-  make install
+  #echo "${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library"
+  ${MAKE_Ncpu} CC=${DAE_CROSS_COMPILER_PREFIX}gcc CXX=${DAE_CROSS_COMPILER_PREFIX}g++ AR=${DAE_CROSS_COMPILER_PREFIX}ar RANLIB=${DAE_CROSS_COMPILER_PREFIX}ranlib CFLAGS="${DAE_COMPILER_FLAGS} -O3" CPPFLAGS="${DAE_COMPILER_FLAGS} -O3" FFLAGS="${DAE_COMPILER_FLAGS}" library
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -888,31 +890,31 @@ clean_umfpack()
   #cd "${TRUNK}"
   
   cd umfpack/SuiteSparse_config
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   cd umfpack/AMD
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   cd umfpack/CAMD
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   cd umfpack/COLAMD
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   cd umfpack/CCOLAMD
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   cd umfpack/CHOLMOD
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   cd umfpack/UMFPACK
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   
   echo ""
@@ -977,7 +979,7 @@ compile_idas()
   echo ""
   echo "[*] Building idas..."
   echo ""
-  ${MAKE} install
+  ${MAKE_Ncpu} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1049,7 +1051,7 @@ compile_superlu()
   echo ""
   echo "[*] Building superlu..."
   echo ""
-  ${MAKE} install
+  ${MAKE_Ncpu} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1104,7 +1106,7 @@ compile_superlu_mt()
   echo "[*] Building superlu_mt..."
   echo ""
   
-  make lib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS}"
+  ${MAKE_Ncpu} lib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS}"
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1117,7 +1119,7 @@ clean_superlu_mt()
   echo "[*] Cleaning superlu_mt..."
   echo ""
   cd superlu_mt
-  make cleanlib
+  ${MAKE} cleanlib
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1169,9 +1171,9 @@ compile_bonmin()
 {
   cd bonmin/build
   echo "[*] Building bonmin..."
-  make -j${Ncpu}
-  #make test
-  make install
+  ${MAKE_Ncpu}
+  #${MAKE_Ncpu} test
+  ${MAKE} install
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1184,7 +1186,7 @@ clean_bonmin()
   echo "[*] Cleaning bonmin..."
   echo ""
   cd bonmin/build
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1242,7 +1244,7 @@ compile_nlopt()
 {
   cd nlopt/build
   echo "[*] Building nlopt..."
-  ${MAKE}
+  ${MAKE_Ncpu}
   ${MAKE} install
   echo ""
   echo "[*] Done!"
@@ -1293,6 +1295,11 @@ configure_trilinos()
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 "
   fi
+
+  UMFPACK_ENABLED=ON
+  if [ ${PLATFORM} = "Windows" ]; then
+    UMFPACK_ENABLED=OFF
+  fi
   
   cmake \
     -G"${CMAKE_GENERATOR}" \
@@ -1306,12 +1313,10 @@ configure_trilinos()
     -DTrilinos_ENABLE_Ifpack:BOOL=ON \
     -DTrilinos_ENABLE_Teuchos:BOOL=ON \
     -DTrilinos_ENABLE_Zoltan:BOOL=OFF \
-    -DAmesos_ENABLE_SuperLU:BOOL=ON \
-    -DIfpack_ENABLE_SuperLU:BOOL=ON \
+    -DAmesos_ENABLE_SuperLU:BOOL=OFF \
+    -DIfpack_ENABLE_SuperLU:BOOL=OFF \
     -DTeuchos_ENABLE_COMPLEX:BOOL=OFF \
-    -DTPL_SuperLU_INCLUDE_DIRS:FILEPATH=${TRUNK}/superlu/SRC \
-    -DTPL_SuperLU_LIBRARIES:STRING=superlu \
-    -DTPL_ENABLE_UMFPACK:BOOL=OFF \
+    -DTPL_ENABLE_UMFPACK:BOOL=${UMFPACK_ENABLED} \
     -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=${UMFPACK_INCLUDE_DIR} \
     -DTPL_UMFPACK_LIBRARIES:STRING=umfpack \
     -DTPL_BLAS_LIBRARIES:STRING="${TRUNK}/lapack/lib/libblas.a -lgfortran" \
@@ -1358,7 +1363,7 @@ compile_trilinos()
 
   cd trilinos/build
   echo "[*] Building trilinos..."
-  ${MAKE}
+  ${MAKE_Ncpu}
   ${MAKE} install
   echo ""
   echo "[*] Done!"
@@ -1424,7 +1429,7 @@ configure_dealii()
     -DDEAL_II_PREFER_STATIC_LIBS:BOOL=ON \
     -DDEAL_II_COMPONENT_EXAMPLES:BOOL=ON \
     -DDEAL_II_WITH_CXX14:BOOL=OFF \
-    -DDEAL_II_WITH_CXX11:BOOL=OFF \
+    -DDEAL_II_WITH_CXX11:BOOL=ON \
     -DDEAL_II_WITH_LAPACK:BOOL=OFF \
     -DDEAL_II_WITH_THREADS:BOOL=OFF \
     -DDEAL_II_WITH_MPI:BOOL=OFF \
@@ -1463,7 +1468,7 @@ compile_dealii()
   echo ""
   
   ${MAKE} expand_instantiations_exe
-  ${MAKE} install
+  ${MAKE_Ncpu} install
   
   # Nota bene:
   #   No need to copy anything since we are producing a static lib (.a)
@@ -1472,6 +1477,9 @@ compile_dealii()
     cp -a build/lib/libdeal_II-daetools.dylib.${vDEALII} ${SOLIBS_DIR}
   elif [ ${PLATFORM} = "Linux" ]; then
     cp -a build/lib/libdeal_II-daetools.so.${vDEALII} ${SOLIBS_DIR}/libdeal_II-daetools.so.${vDEALII}
+  elif [ ${PLATFORM} = "Linux" ]; then
+    echo "Cannot copy libdeal.II to solibs"
+    exit 1
   else
     echo "..."
   fi

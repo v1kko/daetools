@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 
 set -e
 
@@ -69,7 +69,7 @@ PROJECT:
 EOF
 }
 
-compile() 
+compile()
 {
   DIR=$1
   MAKEARG=$2
@@ -163,13 +163,6 @@ if [[ ${PLATFORM} == *"MSYS_"* ]]; then
   fi
 fi
 
-MAKE="make"
-CMAKE_GENERATOR="Unix Makefiles"
-if [ ${PLATFORM} = "Windows" ]; then
-  MAKE="nmake -I -NOLOGO"
-  CMAKE_GENERATOR="NMake Makefiles"
-fi
-
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   # If there are problems with memory and speed of compilation set:
@@ -189,6 +182,11 @@ fi
 
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
+fi
+
+MAKE="make"
+if [ ${PLATFORM} = "Windows" ]; then
+  MAKE="nmake"
 fi
 
 cd "${TRUNK}"

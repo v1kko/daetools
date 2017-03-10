@@ -18,11 +18,10 @@ QMAKE_CXXFLAGS += -fpermissive -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsyn
                   -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused \
                   -DBOOST_NO_HASH -DBOOST_NO_SLIST
                   
-#unix::QMAKE_CXXFLAGS += -std=c++11
-#unix::QMAKE_LFLAGS += -std=c++11
-
-QMAKE_CXXFLAGS_DEBUG += -DDEBUG
-QMAKE_CFLAGS_DEBUG   += -DDEBUG
+unix::QMAKE_CXXFLAGS  += -std=c++11
+unix::QMAKE_LFLAGS    += -std=c++11
+win32::QMAKE_CXXFLAGS += /std:c++11
+win32::QMAKE_LFLAGS   += /std:c++11
 
 QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                   -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
