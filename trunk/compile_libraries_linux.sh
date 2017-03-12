@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 set -e
+#set -x
+
 usage()
 {
 cat << EOF
@@ -41,11 +43,14 @@ OPTIONS:
                    
 LIBRARY:
     all    All libraries and solvers.
-           Equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt bonmin nlopt trilinos deal.ii
-    
+           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt trilinos deal.ii
+           On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt trilinos deal.ii
+
     Individual libraries/solvers:
     boost            Boost libraries (system, filesystem, thread, python)
     ref_blas_lapack  reference BLAS and Lapack libraries
+    cblas_clapack    CBLAS and CLapack libraries
+    mumps            Mumpslinear solver
     umfpack          Umfpack solver
     idas             IDAS solver
     superlu          SuperLU solver
@@ -248,6 +253,7 @@ MAKE="make"
 MAKE_Ncpu="make -j${Ncpu}"
 CMAKE_GENERATOR="Unix Makefiles"
 if [ ${PLATFORM} = "Windows" ]; then
+  DAE_COMPILER_FLAGS=""
   MAKE="nmake"
   MAKE_Ncpu="nmake"
   CMAKE_GENERATOR="NMake Makefiles"
@@ -304,10 +310,12 @@ export DAE_CROSS_COMPILER_PREFIX
 DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
 export DAE_UMFPACK_INSTALL_DIR
 
-vBOOST=1.63.0
-vBOOST_=1_63_0
+vBOOST=1.62.0
+vBOOST_=1_62_0
 vBONMIN=1.8.4
 vLAPACK=3.4.1
+vCLAPACK=3.2.1
+vMUMPS=4.9.2
 vNLOPT=2.4.2
 vIDAS=1.3.0
 vTRILINOS=12.10.1
@@ -323,14 +331,16 @@ vOPENBLAS=0.2.8
 vDEALII=8.4.1
 vSUPERLU=5.2.1
 # Old versions (require changes in makefiles)
-vSUPERLU_MT=2.0
+vSUPERLU_MT=3.1
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
 
 BOOST_HTTP=http://sourceforge.net/projects/boost/files/boost
-LAPACK_HTTP=http://www.netlib.org/lapack
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
+LAPACK_HTTP=http://www.netlib.org/lapack
+CLAPACK_HTTP=${DAETOOLS_HTTP}
+MUMPS_HTTP=${DAETOOLS_HTTP}
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
 #Old: SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
@@ -369,6 +379,8 @@ else
         all)              ;;
         boost)            ;;
         ref_blas_lapack)  ;;
+        cblas_clapack)    ;;
+        mumps)            ;;
         openblas)         ;;
         umfpack)          ;;
         idas)             ;;
@@ -412,9 +424,9 @@ cd "${TRUNK}"
 #######################################################
 configure_boost() 
 {
-  #if [ -e boost${PYTHON_VERSION} ]; then
-  #  rm -r boost${PYTHON_VERSION}
-  #fi
+  if [ -e boost${PYTHON_VERSION} ]; then
+    rm -r boost${PYTHON_VERSION}
+  fi
   echo ""
   echo "[*] Setting-up boost"
   echo ""
@@ -422,10 +434,10 @@ configure_boost()
     if [ ! -e boost_${vBOOST_}.zip ]; then
       wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
     fi
-  #  unzip boost_${vBOOST_}.zip
-  #  mv boost_${vBOOST_} boost${PYTHON_VERSION}
-  #  cd boost${PYTHON_VERSION}
-  #  cmd "/C bootstrap"
+    unzip boost_${vBOOST_}.zip
+    mv boost_${vBOOST_} boost${PYTHON_VERSION}
+    cd boost${PYTHON_VERSION}
+    cmd "/C bootstrap"
   else
     if [ ! -e boost_${vBOOST_}.tar.gz ]; then
       wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
@@ -435,7 +447,7 @@ configure_boost()
     cd boost${PYTHON_VERSION}
     sh bootstrap.sh --with-python=${PYTHON}
   fi
-  
+
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -537,6 +549,7 @@ compile_boost()
       cp -fa stage/lib/boost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
       cp -fa stage/lib/boost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
       cp -fa stage/lib/boost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                    ${SOLIBS_DIR}
+      cp -fa stage/lib/boost_chrono-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*.dll                        ${SOLIBS_DIR}
 
     else
       echo "using python"                           >  ${BOOST_USER_CONFIG}
@@ -639,7 +652,7 @@ clean_openblas()
   echo "[*] Cleaning openblas..."
   echo ""
   cd openblas
-  make clean
+  ${MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -705,6 +718,125 @@ clean_ref_blas_lapack()
   echo "[*] Cleaning reference blas & lapack..."
   echo ""
   cd lapack
+  ${MAKE} clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+#######################################################
+#                 CBLAS and CLAPACK                   #
+#######################################################
+configure_cblas_clapack()
+{
+  if [ -e clapack ]; then
+    rm -r clapack
+  fi
+
+  echo ""
+  echo "[*] Setting-up cblas & clapack..."
+  echo ""
+  if [ ! -e clapack-${vCLAPACK}-CMAKE.tgz ]; then
+    wget ${CLAPACK_HTTP}/clapack-${vCLAPACK}-CMAKE.tgz
+  fi
+  tar -xzf clapack-${vCLAPACK}-CMAKE.tgz
+  mv clapack-${vCLAPACK}-CMAKE clapack
+
+  cd clapack
+  mkdir -p build
+
+  # Might need configure from the cmake-gui
+  cmake \
+    -G"${CMAKE_GENERATOR}" \
+    -DBUILD_TESTING:BOOL=OFF \
+    -DUSE_BLAS_WRAP:BOOL=OFF \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCMAKE_INSTALL_PREFIX:PATH="${TRUNK}/clapack/build" \
+    -DBUILD_STATIC_LIBS:BOOL=ON
+
+  cmake-gui .
+  cd "${TRUNK}"
+
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_cblas_clapack()
+{
+  cd clapack
+  echo ""
+  echo "[*] Building cblas & clapack..."
+  echo ""
+  ${MAKE_Ncpu} install
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_cblas_clapack()
+{
+  echo ""
+  echo "[*] Cleaning cblas & clapack..."
+  echo ""
+  cd clapack
+  cd build
+  ${MAKE} clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+#######################################################
+#                      Mumps                          #
+#######################################################
+configure_mumps()
+{
+  if [ -e mumps ]; then
+    rm -r mumps
+  fi
+
+  echo ""
+  echo "Setting-up mumps..."
+  echo ""
+  if [ ! -e mumps-${vMUMPS}.zip ]; then
+    wget ${DAETOOLS_HTTP}/mumps-${vMUMPS}.zip
+  fi
+  unzip mumps-${vMUMPS}.zip
+  cd "${TRUNK}"
+
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_mumps()
+{
+  cd mumps
+  echo ""
+  echo "[*] Building mumps..."
+  echo ""
+  cd blas
+  ${MAKE_Ncpu}
+  cd ..
+  ${MAKE_Ncpu} d
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_mumps()
+{
+  echo ""
+  echo "[*] Cleaning mumps..."
+  echo ""
+  cd mumps
+  ${MAKE} clean
+  cd blas
   ${MAKE} clean
   cd "${TRUNK}"
   echo ""
@@ -1160,7 +1292,9 @@ configure_bonmin()
   
   mkdir -p build
   cd build
-  ../configure ${DAE_CROSS_COMPILE_FLAGS} --disable-dependency-tracking --enable-shared=no --enable-static=yes ARCHFLAGS="${DAE_COMPILER_FLAGS}" CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" FFLAGS="${DAE_COMPILER_FLAGS}" LDFLAGS="${DAE_COMPILER_FLAGS}"
+  ../configure ${DAE_CROSS_COMPILE_FLAGS} --disable-dependency-tracking --enable-shared=no --enable-static=yes \
+               ARCHFLAGS="${DAE_COMPILER_FLAGS}" CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" \
+               FFLAGS="${DAE_COMPILER_FLAGS}" LDFLAGS=""
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1224,13 +1358,19 @@ configure_nlopt()
   
   export NLOPT_HOME="${TRUNK}/nlopt"
 
+  NLOPT_CXX_FLAGS=
+  if [ ${PLATFORM} = "Windows" ]; then
+    NLOPT_CXX_FLAGS="/MD /EHsc"
+  fi
+
+  # Might need configure from the cmake-gui to compile nlopt.lib (not nlopt.dll)
   cmake \
     -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
-    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
-    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} ${NLOPT_CXX_FLAGS}" \
+    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} ${NLOPT_CXX_FLAGS}" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     ${NLOPT_HOME}
 
@@ -1288,8 +1428,6 @@ configure_trilinos()
   export TRILINOS_HOME="${TRUNK}/trilinos"
   EXTRA_ARGS=
 
-  echo $TRILINOS_HOME
-
   UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
   
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
@@ -1297,8 +1435,12 @@ configure_trilinos()
   fi
 
   UMFPACK_ENABLED=ON
+  BLAS_LIBRARIES="${TRUNK}/lapack/lib/libblas.a -lgfortran"
+  LAPACK_LIBRARIES="${TRUNK}/lapack/lib/liblapack.a -lgfortran"
   if [ ${PLATFORM} = "Windows" ]; then
     UMFPACK_ENABLED=OFF
+    BLAS_LIBRARIES="${TRUNK}/clapack/build/lib/blas.lib ${TRUNK}/clapack/build/lib/libf2c.lib"
+    LAPACK_LIBRARIES="${TRUNK}/clapack/build/lib/lapack.lib ${TRUNK}/clapack/build/lib/libf2c.lib"
   fi
   
   cmake \
@@ -1313,18 +1455,21 @@ configure_trilinos()
     -DTrilinos_ENABLE_Ifpack:BOOL=ON \
     -DTrilinos_ENABLE_Teuchos:BOOL=ON \
     -DTrilinos_ENABLE_Zoltan:BOOL=OFF \
+    -DAmesos_ENABLE_LAPACK:BOOL=ON \
     -DAmesos_ENABLE_SuperLU:BOOL=OFF \
     -DIfpack_ENABLE_SuperLU:BOOL=OFF \
     -DTeuchos_ENABLE_COMPLEX:BOOL=OFF \
+    -DTeuchos_ENABLE_LAPACK:BOOL=ON \
+    -DEpetra_ENABLE_BLAS:BOOL=ON \
     -DTPL_ENABLE_UMFPACK:BOOL=${UMFPACK_ENABLED} \
     -DTPL_UMFPACK_INCLUDE_DIRS:FILEPATH=${UMFPACK_INCLUDE_DIR} \
     -DTPL_UMFPACK_LIBRARIES:STRING=umfpack \
-    -DTPL_BLAS_LIBRARIES:STRING="${TRUNK}/lapack/lib/libblas.a -lgfortran" \
-    -DTPL_LAPACK_LIBRARIES:STRING="${TRUNK}/lapack/lib/liblapack.a ${TRUNK}/lapack/lib/libblas.a -lgfortran" \
+    -DTPL_BLAS_LIBRARIES:STRING="${BLAS_LIBRARIES}" \
+    -DTPL_LAPACK_LIBRARIES:STRING="${LAPACK_LIBRARIES}" \
     -DTPL_ENABLE_MPI:BOOL=OFF \
     -DDART_TESTING_TIMEOUT:STRING=600 \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
-    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG -fpermissive ${DAE_COMPILER_FLAGS}" \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     $EXTRA_ARGS \
@@ -1418,18 +1563,27 @@ configure_dealii()
   # The line below should be enabled for newer versions of deal.ii
   mv dealii-${vDEALII} deal.II
 
+  WITH_CXX11=ON
+  WITH_CXX14=OFF
+  DEALII_CXX_FLAGS=
+  if [ ${PLATFORM} = "Windows" ]; then
+    WITH_CXX11=OFF
+    WITH_CXX14=OFF
+    DEALII_CXX_FLAGS="/MD /EHsc"
+  fi
+
   cd deal.II
-  mkdir build
+  mkdir -p build
   cmake \
     -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=Release \
     -DDEAL_II_PACKAGE_NAME:STRING=deal.II-daetools \
     -DBUILD_SHARED_LIBS:BOOL=ON \
     -DDEAL_II_ALLOW_AUTODETECTION=ON \
-    -DDEAL_II_PREFER_STATIC_LIBS:BOOL=ON \
+    -DDEAL_II_PREFER_STATIC_LIBS:BOOL=OFF \
     -DDEAL_II_COMPONENT_EXAMPLES:BOOL=ON \
-    -DDEAL_II_WITH_CXX14:BOOL=OFF \
-    -DDEAL_II_WITH_CXX11:BOOL=ON \
+    -DDEAL_II_WITH_CXX14:BOOL=${WITH_CXX14} \
+    -DDEAL_II_WITH_CXX11:BOOL=${WITH_CXX11} \
     -DDEAL_II_WITH_LAPACK:BOOL=OFF \
     -DDEAL_II_WITH_THREADS:BOOL=OFF \
     -DDEAL_II_WITH_MPI:BOOL=OFF \
@@ -1450,8 +1604,8 @@ configure_dealii()
     -DDEAL_II_COMPONENT_PARAMETER_GUI:BOOL=OFF \
     -DDEAL_II_COMPONENT_MESH_CONVERTER:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:STRING="${TRUNK}/deal.II/build" \
-    -DDEAL_II_CMAKE_CXX_FLAGS:STRING="${DAE_COMPILER_FLAGS} " \
-    -DDEAL_II_CMAKE_C_FLAGS:STRING="${DAE_COMPILER_FLAGS} " \
+    -DDEAL_II_CXX_FLAGS:STRING="${DAE_COMPILER_FLAGS} ${DEALII_CXX_FLAGS} " \
+    -DDEAL_II_C_FLAGS:STRING="${DAE_COMPILER_FLAGS} ${DEALII_CXX_FLAGS} " \
     ${DEALII_CROSS_COMPILE_OPTIONS}
 
   cd "${TRUNK}"
@@ -1507,42 +1661,75 @@ for solver in "$@"
 do
   case "$solver" in
     all)              if [ "${DO_CONFIGURE}" = "yes" ]; then
-                        configure_boost
-                        configure_ref_blas_lapack
-                        configure_umfpack
-                        configure_idas
-                        configure_superlu
-                        configure_superlu_mt
-                        configure_trilinos
-                        configure_bonmin
-                        configure_nlopt
-                        configure_dealii
+                        if [ ${PLATFORM} = "Windows" ]; then
+                          configure_boost
+                          configure_cblas_clapack
+                          configure_mumps
+                          configure_idas
+                          configure_superlu
+                          configure_trilinos
+                          configure_nlopt
+                          configure_dealii
+                        else
+                          configure_boost
+                          configure_ref_blas_lapack
+                          configure_umfpack
+                          configure_idas
+                          configure_superlu
+                          configure_superlu_mt
+                          configure_trilinos
+                          configure_bonmin
+                          configure_nlopt
+                          configure_dealii
+                        fi
                       fi
                       
                       if [ "${DO_BUILD}" = "yes" ]; then 
-                        compile_boost
-                        compile_ref_blas_lapack
-                        compile_umfpack
-                        compile_idas
-                        compile_superlu
-                        compile_superlu_mt
-                        compile_trilinos
-                        compile_bonmin
-                        compile_nlopt
-                        compile_dealii
+                        if [ ${PLATFORM} = "Windows" ]; then
+                          compile_boost
+                          compile_cblas_clapack
+                          compile_mumps
+                          compile_idas
+                          compile_superlu
+                          compile_trilinos
+                          compile_nlopt
+                          compile_dealii
+                        else
+                          compile_boost
+                          compile_ref_blas_lapack
+                          compile_umfpack
+                          compile_idas
+                          compile_superlu
+                          compile_superlu_mt
+                          compile_trilinos
+                          compile_bonmin
+                          compile_nlopt
+                          compile_dealii
+                        fi
                       fi
                       
                       if [ "${DO_CLEAN}" = "yes" ]; then 
-                        clean_boost
-                        clean_ref_blas_lapack
-                        clean_umfpack
-                        clean_idas
-                        clean_superlu
-                        clean_superlu_mt
-                        clean_trilinos
-                        clean_bonmin
-                        clean_nlopt
-                        clean_dealii
+                        if [ ${PLATFORM} = "Windows" ]; then
+                          clean_boost
+                          clean_cblas_clapack
+                          clean_mumps
+                          clean_idas
+                          clean_superlu
+                          clean_trilinos
+                          clean_nlopt
+                          clean_dealii
+                        else
+                          clean_boost
+                          clean_ref_blas_lapack
+                          clean_umfpack
+                          clean_idas
+                          clean_superlu
+                          clean_superlu_mt
+                          clean_trilinos
+                          clean_bonmin
+                          clean_nlopt
+                          clean_dealii
+                        fi
                       fi
                       ;;
     
@@ -1572,6 +1759,32 @@ do
                       fi
                       ;;
                       
+    cblas_clapack)  if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_cblas_clapack
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_cblas_clapack
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_cblas_clapack
+                      fi
+                      ;;
+
+    mumps)            if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_mumps
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_mumps
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_mumps
+                      fi
+                      ;;
+
     openblas)         if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_openblas
                       fi

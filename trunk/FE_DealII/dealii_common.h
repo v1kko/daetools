@@ -1177,7 +1177,7 @@ feRuntimeNumber<dim> operator ^(const feRuntimeNumber<dim>& l, const feRuntimeNu
     if(l.m_eType == eFEScalar && r.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = pow(l.m_value, r.m_value);
+        tmp.m_value = ::pow(l.m_value, r.m_value);
     }
     else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFEScalar)
     {
@@ -1211,7 +1211,7 @@ feRuntimeNumber<dim> sin_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = sin(fe.m_value);
+        tmp.m_value = ::sin(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1234,7 +1234,7 @@ feRuntimeNumber<dim> cos_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = cos(fe.m_value);
+        tmp.m_value = ::cos(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1257,7 +1257,7 @@ feRuntimeNumber<dim> tan_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = tan(fe.m_value);
+        tmp.m_value = ::tan(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1280,7 +1280,7 @@ feRuntimeNumber<dim> asin_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = asin(fe.m_value);
+        tmp.m_value = ::asin(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1303,7 +1303,7 @@ feRuntimeNumber<dim> acos_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = acos(fe.m_value);
+        tmp.m_value = ::acos(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1326,7 +1326,7 @@ feRuntimeNumber<dim> atan_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = atan(fe.m_value);
+        tmp.m_value = ::atan(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1349,7 +1349,7 @@ feRuntimeNumber<dim> sqrt_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = sqrt(fe.m_value);
+        tmp.m_value = ::sqrt(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1372,7 +1372,7 @@ feRuntimeNumber<dim> log_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = log(fe.m_value);
+        tmp.m_value = ::log(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1395,7 +1395,7 @@ feRuntimeNumber<dim> log10_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = log10(fe.m_value);
+        tmp.m_value = ::log10(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1418,7 +1418,7 @@ feRuntimeNumber<dim> exp_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = exp(fe.m_value);
+        tmp.m_value = ::exp(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1441,7 +1441,7 @@ feRuntimeNumber<dim> abs_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = abs(fe.m_value);
+        tmp.m_value = ::abs(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1464,7 +1464,7 @@ feRuntimeNumber<dim> sinh_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = sinh(fe.m_value);
+        tmp.m_value = ::sinh(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1483,7 +1483,7 @@ feRuntimeNumber<dim> cosh_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = cosh(fe.m_value);
+        tmp.m_value = ::cosh(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1502,7 +1502,7 @@ feRuntimeNumber<dim> tanh_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = tanh(fe.m_value);
+        tmp.m_value = ::tanh(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1521,7 +1521,7 @@ feRuntimeNumber<dim> asinh_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = asinh(fe.m_value);
+        tmp.m_value = ::asinh(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1540,7 +1540,7 @@ feRuntimeNumber<dim> acosh_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = acosh(fe.m_value);
+        tmp.m_value = ::acosh(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1559,7 +1559,7 @@ feRuntimeNumber<dim> atanh_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = atanh(fe.m_value);
+        tmp.m_value = ::atanh(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {
@@ -1578,7 +1578,7 @@ feRuntimeNumber<dim> erf_(const feRuntimeNumber<dim>& fe)
     if(fe.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = erf(fe.m_value);
+        tmp.m_value = ::erf(fe.m_value);
     }
     else if(fe.m_eType == eFEScalar_adouble)
     {

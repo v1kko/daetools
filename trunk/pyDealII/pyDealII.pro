@@ -14,17 +14,21 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${BLAS_LAPACK_LIBDIR} \
                 $${DEALII_LIB_DIR}
 
-QMAKE_CXXFLAGS += -fpermissive -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
-                  -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused \
-                  -DBOOST_NO_HASH -DBOOST_NO_SLIST
-                  
+unix::QMAKE_CXXFLAGS += -fpermissive -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
+                        -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused \
+                        -DBOOST_NO_HASH -DBOOST_NO_SLIST
+unix::QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
+                        -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
+
+win32-msvc2015::QMAKE_CXXFLAGS += -W2 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors \
+                                  -DBOOST_NO_HASH -DBOOST_NO_SLIST
+win32-msvc2015::QMAKE_LFLAGS   += /FORCE:MULTIPLE
+
 unix::QMAKE_CXXFLAGS  += -std=c++11
 unix::QMAKE_LFLAGS    += -std=c++11
-win32::QMAKE_CXXFLAGS += /std:c++11
-win32::QMAKE_LFLAGS   += /std:c++11
-
-QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
-                  -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
+# deal.ii with msvc++ 2017 cannot use cxx11 (for some reasons)
+win32-msvc2015::QMAKE_CXXFLAGS  +=
+win32-msvc2015::QMAKE_LFLAGS    +=
 
 LIBS += $${SOLIBS_RPATH}
 

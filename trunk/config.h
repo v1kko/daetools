@@ -17,7 +17,7 @@ class DAE_API daeConfig
 {
 public:
     daeConfig();
-    virtual ~daeConfig(void);
+    ~daeConfig(void);
 
 public:
     void Reload(void);

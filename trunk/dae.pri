@@ -379,7 +379,8 @@ unix::BOOST_LIBS                 = -L$${BOOSTLIBPATH} -l$${BOOST_SYSTEM_LIB_NAME
 #####################################################################################
 #                                 BLAS/LAPACK
 #####################################################################################
-win32-msvc2015::BLAS_LAPACK_LIBDIR = ../clapack/LIB/Win32
+# No fortran compiler in windows - use cblas and clapack reference implementation
+win32-msvc2015::BLAS_LAPACK_LIBDIR = ../clapack/build/lib
 win32-g++-*::BLAS_LAPACK_LIBDIR    = ../lapack/lib
 win64-g++-*::BLAS_LAPACK_LIBDIR    = ../lapack/lib
 linux-g++::BLAS_LAPACK_LIBDIR      = ../lapack/lib
@@ -392,11 +393,9 @@ win64-g++-*::QMAKE_CXXFLAGS     +=
 linux-g++::QMAKE_CXXFLAGS       += #-DDAE_USE_OPEN_BLAS
 macx-g++::QMAKE_CXXFLAGS        +=
 
-win32-msvc2015::BLAS_LAPACK_LIBS =
-                                   # $${BLAS_LAPACK_LIBDIR}/BLAS_nowrap.lib \
-                                   # $${BLAS_LAPACK_LIBDIR}/clapack_nowrap.lib \
-                                   # $${BLAS_LAPACK_LIBDIR}/libf2c.lib
-
+win32-msvc2015::BLAS_LAPACK_LIBS = $${BLAS_LAPACK_LIBDIR}/blas.lib \
+                                   $${BLAS_LAPACK_LIBDIR}/lapack.lib \
+                                   $${BLAS_LAPACK_LIBDIR}/libf2c.lib
 win32-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 win64-g++-*::BLAS_LAPACK_LIBS    =  $${BLAS_LAPACK_LIBDIR}/liblapack.a $${BLAS_LAPACK_LIBDIR}/libblas.a -lgfortran -lm
 
@@ -460,7 +459,7 @@ IPOPT_DIR = ../bonmin/build
 IPOPT_INCLUDE = $${IPOPT_DIR}/include/coin
 IPOPT_LIBDIR  = $${IPOPT_DIR}/lib
 
-win32-msvc2015::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib libIpopt.lib
+win32-msvc2015::IPOPT_LIBS = libCoinBlas.lib libCoinLapack.lib libIpopt.lib
 win32-g++-*::IPOPT_LIBS    = -lipopt -lcoinlapack -lcoinblas $${GFORTRAN}
 win64-g++-*::IPOPT_LIBS    = -lipopt -lcoinlapack -lcoinblas $${GFORTRAN}
 unix::IPOPT_LIBS           = -lipopt -ldl
@@ -474,7 +473,7 @@ BONMIN_DIR = ../bonmin/build
 BONMIN_INCLUDE = $${BONMIN_DIR}/include/coin
 BONMIN_LIBDIR  = $${BONMIN_DIR}/lib
 
-win32-msvc2015::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib libf2c.lib \
+win32-msvc2015::BONMIN_LIBS = libCoinBlas.lib libCoinLapack.lib \
                               libBonmin.lib libIpopt.lib libCbc.lib \
                               libCgl.lib libClp.lib libCoinUtils.lib \
                               libOsiCbc.lib libOsiClp.lib libOsi.lib
@@ -503,7 +502,7 @@ NLOPT_DIR     = ../nlopt/build
 NLOPT_INCLUDE = $${NLOPT_DIR}/include
 NLOPT_LIBDIR  = $${NLOPT_DIR}/lib
 
-win32-msvc2015::NLOPT_LIBS = -L$${NLOPT_LIBDIR}/nlopt-0.lib
+win32-msvc2015::NLOPT_LIBS = $${NLOPT_LIBDIR}/nlopt.lib
 win32-g++-*::NLOPT_LIBS    = -lnlopt -lm
 win64-g++-*::NLOPT_LIBS    = -lnlopt -lm
 unix::NLOPT_LIBS           = -lnlopt -lm
@@ -582,26 +581,26 @@ win32-g++-*::TRILINOS_INCLUDE    = $${TRILINOS_DIR}/include
 win64-g++-*::TRILINOS_INCLUDE    = $${TRILINOS_DIR}/include
 unix::TRILINOS_INCLUDE           = $${TRILINOS_DIR}/include
 
-win32-msvc2015::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
-                                $${SUPERLU_LIBS} \
+win32-msvc2015::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib \
                                 aztecoo.lib ml.lib ifpack.lib \
-                                amesos.lib epetraext.lib triutils.lib epetra.lib teuchoskokkoscomm.lib \
-                                teuchoskokkoscompat.lib teuchosremainder.lib teuchosnumerics.lib teuchoscomm.lib \
-                                teuchosparameterlist.lib teuchoscore.lib kokkoscore.lib
+                                amesos.lib epetraext.lib triutils.lib epetra.lib \
+                                teuchosremainder.lib teuchosnumerics.lib teuchoscomm.lib \
+                                teuchosparameterlist.lib teuchoscore.lib \
+                                $${BLAS_LAPACK_LIBS}
 
 win32-g++-*::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                               -laztecoo -lml -lifpack \
-                              -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
-                              -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
-                              -lteuchosparameterlist -lteuchoscore -lkokkoscore \
+                              -lamesos -lepetraext -ltriutils -lepetra \
+                              -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                              -lteuchosparameterlist -lteuchoscore \
                                $${UMFPACK_LIBS} \
                                $${SUPERLU_LIBS}
 
 win64-g++-*::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                               -laztecoo -lml -lifpack \
-                              -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
-                              -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
-                              -lteuchosparameterlist -lteuchoscore -lkokkoscore \
+                              -lamesos -lepetraext -ltriutils -lepetra \
+                              -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                              -lteuchosparameterlist -lteuchoscore \
                                $${UMFPACK_LIBS} \
                                $${SUPERLU_LIBS}
 
@@ -696,9 +695,10 @@ DEALII_DIR               = ../deal.II/build
 DEALII_INCLUDE           = $${DEALII_DIR}/include
 DEALII_LIB_DIR           = $${DEALII_DIR}/lib
 
-unix::DEALII_LIBS        = -ldeal_II-daetools -lz -lblas -lgfortran -lm
-win32-g++-*::DEALII_LIBS = -ldeal_II-daetools -lblas -lgfortran -lm
-win64-g++-*::DEALII_LIBS = -ldeal_II-daetools -lblas -lgfortran -lm
+win32-msvc2015::DEALII_LIBS = $${DEALII_LIB_DIR}/deal_II-daetools.lib
+unix::DEALII_LIBS           = -ldeal_II-daetools -lz -lblas -lgfortran -lm
+win32-g++-*::DEALII_LIBS    = -ldeal_II-daetools -lblas -lgfortran -lm
+win64-g++-*::DEALII_LIBS    = -ldeal_II-daetools -lblas -lgfortran -lm
 
 #####################################################################################
 #                                 MPI SUPPORT
