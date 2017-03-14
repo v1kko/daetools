@@ -112,7 +112,7 @@ elif platform.system() == 'Windows':
     boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_thread2    = 'boost_thread_-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_thread2    = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
     dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
