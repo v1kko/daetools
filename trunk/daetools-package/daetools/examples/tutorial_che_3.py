@@ -17,7 +17,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Batch reactor seeded crystallization using the method of moments.
+Batch reactor seeded crystallisation using the method of moments.
 
 References (model equations and input parameters):
 
@@ -32,7 +32,7 @@ References (model equations and input parameters):
 
 The main assumptions:
 
-- Seeded crystallization
+- Seeded crystallisation
 - Ideal mixing
 - Fixed cooling rate
 - Size independent growth

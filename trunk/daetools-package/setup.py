@@ -114,6 +114,7 @@ elif platform.system() == 'Windows':
     boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
+    dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
     #deal_II          = 'deal_II-daetools'
     #sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
     #fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
@@ -127,6 +128,9 @@ elif platform.system() == 'Windows':
 
         for f in shared_libs_files:
             if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (boost_chrono in f):
+                shared_libs.append(os.path.join(shared_libs_dir, f))
+
+            if dae_config in f:
                 shared_libs.append(os.path.join(shared_libs_dir, f))
 
             #if (sim_loader in f) or (fmu_so in f):

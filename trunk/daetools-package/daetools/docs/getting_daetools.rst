@@ -59,21 +59,25 @@ Getting the packages
 The installation files can be downloaded from the `downloads <http://daetools.com/downloads.html>`_ section
 or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ website.
 
-.. note:: From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
+.. topic:: Note
 
-.. note:: From the version 1.6.0 Windows installer is not provided anymore.
+    From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
+
+.. topic:: Note
+
+    From the version 1.6.0 Windows installer is not provided anymore.
 
 The naming convention for the installation files: ``daetools-major.minor.platform-architecture.tar.gz``
 where ``major.minor.build`` represents the version (``1.5.0`` for instance),
 ``platform`` can be ``gnu_linux``, ``win32`` and ``macosx``, and
 ``architecture`` can be ``i686``, ``x86_64`` or ``universal``.
 
-An example: ``daetools-1.5.0-gnu_linux-x86_64.tar.gz`` is the version 1.5.0 for 64 bit GNU/Linux.
+An example: ``daetools-1.6.0-gnu_linux-x86_64.tar.gz`` is the version 1.6.0 for 64 bit GNU/Linux.
 
 For other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the download section
-(``daetools-1.5.0-source.tar.gz`` for instance).
+(``daetools-1.6.0-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -220,8 +224,10 @@ The easiest way is to install one of available scientific python distributions:
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 * `Python(x,y) <https://python-xy.github.io/>`_
 
-.. note:: Only 32-bit version of **DAE Tools** is available for Windows. However, **DAE Tools** can be used on 64-bit
-          versions of Windows by installing the 32-bit python.
+.. topic:: Note
+
+    Only 32-bit version of **DAE Tools** is available for Windows. However, **DAE Tools** can be used on 64-bit
+    versions of Windows by installing the 32-bit python.
 
 To be able to create 3D plots you need to install Mayavi2 package. It can be installed using the following shell command:
 

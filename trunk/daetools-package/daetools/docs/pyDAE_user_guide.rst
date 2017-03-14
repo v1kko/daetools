@@ -1000,7 +1000,7 @@ the following can be used:
 
     # Notation:
     #  - V1, V3, V14 are ordinary variables
-    eq.Residal = V14.dt() + V1() / (V14() + 2.5) + sin(3.14 * V3())
+    eq.Residal = dt(V14()) + V1() / (V14() + 2.5) + sin(3.14 * V3())
 
 To define a residual expression of a distributed equation:
 
@@ -1035,7 +1035,7 @@ current index in the domain which is being iterated. Hence, the equation above i
     for dx in range(0, x.NumberOfPoints): # x: [x0, xn]
         for dy in range(1, y.NumberOfPoints-1): # y: (y0, yn)
             eq = model.CreateEquation("MyEquation_%d_%d" % (dx, dy) )
-            eq.Residal = V14.dt(dx,dy) + V1() / ( V14(dx,dy) + 2.5) + sin(3.14 * V3(dx,dy) )
+            eq.Residal = dt(V14(dx,dy)) + V1() / ( V14(dx,dy) + 2.5) + sin(3.14 * V3(dx,dy) )
     
 The second way can be used for writing equations that are different
 for different points within domains.
@@ -1059,29 +1059,10 @@ the following can be used:
     eq.Residal = V1(dx) - ( V2(dx) + V2(dx+1) )
 
 Supported mathematical operations and functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **DAE Tools** support five basic mathematical operations (``+, -, *, /, **``) and the following
 standard mathematical functions: ``sqrt, pow, log, log10, exp, min, max, floor, ceil, abs,
 sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2, erf``).
-The basic mathematical operations and functions are re-defined to operate on the :py:class:`~pyCore.adouble`
-class and with NumPy library in mind. Therefore it is equivalent to use NumPy functions on
-:py:class:`~pyCore.adouble` arguments. For instance, to define the equation below:
-
-.. math::
-    V_1 = exp(V_2)
-
-the following can be used:
-
-.. code-block:: python
-
-    # Notation:
-    #  - V1 and V2 are ordinary variables
-    eq.Residal = V1() - Exp(V2())
-    # or:
-    eq.Residal = V1() - numpy.exp(V2())
-
-since the numpy function ``exp`` is redefined for :py:class:`~pyCore.adouble` arguments
-and calls the **DAE Tools** :py:meth:`~pyCore.Exp` function. The same stands for all other mathematical functions.
 
 To define conditions the following comparison operators:
 ``<`` (less than),
@@ -1098,12 +1079,103 @@ can be used.
 
 .. topic:: Nota bene
 
-          Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
-          cannot be used to define logical conditions; therefore, the custom operators ``&``, ``|`` and ``~`` are defined
-          and should be used instead.
+    Since it is not allowed to overload Python's operators ``and``, ``or`` and ``not`` they
+    cannot be used to define logical conditions; therefore, the custom operators ``&``, ``|`` and ``~`` are defined
+    and should be used instead.
+
+Interoperability with NumPy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+..  The basic mathematical operations and functions are re-defined to operate on the :py:class:`~pyCore.adouble`
+    class and with NumPy library in mind. Therefore it is equivalent to use NumPy functions on
+    :py:class:`~pyCore.adouble` arguments. For instance, to define the equation below:
+
+    .. math::
+        V_1 = exp(V_2)
+
+    the following can be used:
+
+    .. code-block:: python
+
+        # Notation:
+        #  - V1 and V2 are ordinary variables
+        eq.Residal = V1() - Exp(V2())
+        # or:
+        eq.Residal = V1() - numpy.exp(V2())
+
+    since the numpy function ``exp`` is redefined for :py:class:`~pyCore.adouble` arguments
+    and calls the **DAE Tools** :py:meth:`~pyCore.Exp` function. The same stands for all other mathematical functions.
+
+The :py:class:`~pyCore.adouble` class is designed with ``numpy`` library in mind.
+It redefines all standard mathematical functions available in ``numpy``
+(i.e. ``sqrt``, ``exp``, ``log``, ``log10``, ``sin``, ``cos`` etc.) so that the ``numpy`` functions also operate on the
+:py:class:`~pyCore.adouble` objects. Therefore, the :py:class:`~pyCore.adouble` class can be used as an ordinary
+data type in ``numpy``.
+In addition, ``numpy`` and **DAE Tools** mathematical functions are interchangeable.
+In the example given below, the :py:meth:`~pyCore.Exp` and :py:meth:`numpy.exp` function calls produce identical results:
+
+.. code-block:: python
+
+    # Notation:
+    #  - Var is an ordinary variable
+    #  - result is an ordinary variable
+    eq = self.CreateEquation("...")
+    eq.Residual = result() - numpy.exp( Var() )
+
+    # The above is identical to:
+    eq.Residual = result() - Exp( Var() )
+
+Often, it is desired to apply ``numpy``/``scipy`` numerical functions on arrays of :py:class:`~pyCore.adouble` objects.
+In those cases the functions such as :py:meth:`~daeVariable.pyCore.array`, :py:meth:`~pyCore.d_array`,
+:py:meth:`~pyCore.dt_array`, :py:meth:`~pyCore.Array` etc.
+are NOT applicable since they return :py:class:`~pyCore.adouble_array` objects.
+However, ``numpy`` arrays can be created and populated with :py:class:`~pyCore.adouble` objects and ``numpy`` functions
+applied on them. In addition, an :py:class:`~pyCore.adouble_array` object can be created from resulting ``numpy`` arrays
+of :py:class:`~pyCore.adouble` objects, if necessary.
+
+For instance, to define the equation below:
+
+.. math::
+    sum = \sum\limits_{i=0}^{N_x-1} \left( V_1(i) + 2 \cdot V_2(i)^2 \right)
+
+the following code can be used:
+
+.. code-block:: python
+
+    # Notation:
+    #  - x is a continuous domain
+    #  - V1 is a variable distributed on the x domain
+    #  - V2 is a variable distributed on the x domain
+    #  - sum is an ordinary variable
+    #  - ndarr_V1 is one dimensional numpy array with dtype=object
+    #  - ndarr_V2 is one dimensional numpy array with dtype=object
+    #  - adarr_V1 is adouble_array object
+    #  - Nx is the number of points in the domain x
+
+    # 1.Create empty numpy arrays as a container for daetools adouble objects
+    ndarr_V1 = numpy.empty(Nx, dtype=object)
+    ndarr_V2 = numpy.empty(Nx, dtype=object)
+
+    # 2. Fill the created numpy arrays with adouble objects
+    ndarr_V1[:] = [V1(x) for x in range(Nx)]
+    ndarr_V2[:] = [V2(x) for x in range(Nx)]
+
+    # Now, ndarr_V1 and ndarr_V2 represent arrays of Nx adouble objects each:
+    #  ndarr_V1 := [V1(0), V1(1), V1(2), ..., V1(Nx-1)]
+    #  ndarr_V2 := [V2(0), V2(1), V2(2), ..., V2(Nx-1)]
+
+    # 3. Create an equation using the common numpy/scipy functions/operators
+    eq = self.CreateEquation("sum")
+    eq.Residual = sum() - numpy.sum(ndarr_V1 + 2*ndarr_V2**2)
+
+    # If adouble_aray is needed after operations on a numpy array, the following two functions can be used:
+    #   a) static function adouble_array.FromList(python_list)
+    #   b) static function adouble_array.FromNumpyArray(numpy_array)
+    # Both return an adouble_array object.
+    adarr_V1 = adouble_array.FromNumpyArray(ndarr_V1)
+    print(adarr_V1)
 
 Details on autodifferentiation support
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To calculate a residual and its gradients (which represent a single row in the Jacobian matrix)
 **DAE Tools** combine the 
 `operator overloading <http://en.wikipedia.org/wiki/Automatic_differentiation#Operator_overloading>`_
@@ -1477,8 +1549,9 @@ is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look
 on :ref:`tutorial_13`.
 
-Configuration file
-==================
+
+Configuration files
+===================
 Various options used by **DAE Tools** objects are located in the ``daetools/daetools.cfg`` config file (in JSON format).
 The configuration file can be obtained using the global function :py:meth:`~pyCore.daeGetConfig`:
 

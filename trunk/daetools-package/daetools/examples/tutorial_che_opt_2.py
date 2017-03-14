@@ -19,6 +19,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 COPS test 5: Isomerization of α-pinene (parameter estimation of a dynamic system).
 
+Very slow convergence.
+
 Determine the reaction coefficients in the thermal isometrization of α-pinene (y1) to
 dipentene (y2) and allo-ocimen (y3) which in turn produces α- and β-pyronene (y4)
 and a dimer (y5).

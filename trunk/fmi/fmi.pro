@@ -25,7 +25,8 @@ LIBS += $${DAE_CONFIG_LIB} \
 LIBS += $${BOOST_LIBS}
 
 # Achtung, Achtung!!
-# It uses daetools/solibs for linking
+# It uses daetools/solibs for linking the config, simulation_loader libraries
+# since the lib names contain major number at the end of the filename and can't be found
 QMAKE_LIBDIR += $${SOLIBS_DIR}
 
 QMAKE_POST_LINK = $${COPY_FILE} \

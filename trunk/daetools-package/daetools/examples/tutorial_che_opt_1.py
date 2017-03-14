@@ -19,11 +19,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 Optimisation of the CSTR model and Van de Vusse reactions given in tutorial_che_1:
 
+Not fully implemented yet.
+
 Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics
 Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.
 `doi:10.1021/i160048a700 <https://doi.org/10.1021/i160048a700>`_
-
-No fully implemented yet.
 """
 
 import sys
