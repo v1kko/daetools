@@ -11,7 +11,7 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 7
+DAE_TOOLS_MINOR = 6
 DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)
@@ -302,7 +302,7 @@ macx-g++::GFORTRAN          = -lgfortran
 #####################################################################################
 #                                  pthreads
 #####################################################################################
-win32-msvc2015::PTHREADS_LIB = -lpthread
+win32-msvc2015::PTHREADS_LIB =
 unix::PTHREADS_LIB           = -lpthread
 win32-g++-*::PTHREADS_LIB    = -lwinpthread
 win64-g++-*::PTHREADS_LIB    = -lwinpthread

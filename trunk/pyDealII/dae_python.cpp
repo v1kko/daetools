@@ -7,6 +7,55 @@
 #include <boost/python/return_value_policy.hpp>
 using namespace boost::python;
 
+// Temporary workaround for Visual Studio 2015 update 3
+//  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
+#if _MSC_FULL_VER  == 190024210
+#if (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+namespace boost
+{
+#define POINTER_CONVERSION(CLASS_NAME)   template <> CLASS_NAME const volatile * get_pointer(class CLASS_NAME const volatile *c) {return c;}
+
+POINTER_CONVERSION(FE_Q<1>)
+POINTER_CONVERSION(FE_Q<2>)
+POINTER_CONVERSION(FE_Q<3>)
+POINTER_CONVERSION(FE_Bernstein<1>)
+POINTER_CONVERSION(FE_Bernstein<2>)
+POINTER_CONVERSION(FE_Bernstein<3>)
+
+POINTER_CONVERSION(FE_RaviartThomas<1>)
+POINTER_CONVERSION(FE_RaviartThomas<2>)
+POINTER_CONVERSION(FE_RaviartThomas<3>)
+POINTER_CONVERSION(FE_DGRaviartThomas<1>)
+POINTER_CONVERSION(FE_DGRaviartThomas<2>)
+POINTER_CONVERSION(FE_DGRaviartThomas<3>)
+POINTER_CONVERSION(FE_Nedelec<1>)
+POINTER_CONVERSION(FE_Nedelec<2>)
+POINTER_CONVERSION(FE_Nedelec<3>)
+POINTER_CONVERSION(FE_DGNedelec<1>)
+POINTER_CONVERSION(FE_DGNedelec<2>)
+POINTER_CONVERSION(FE_DGNedelec<3>)
+POINTER_CONVERSION(FE_BDM<1>)
+POINTER_CONVERSION(FE_BDM<2>)
+POINTER_CONVERSION(FE_BDM<3>)
+POINTER_CONVERSION(FE_DGBDM<1>)
+POINTER_CONVERSION(FE_DGBDM<2>)
+POINTER_CONVERSION(FE_DGBDM<3>)
+POINTER_CONVERSION(FE_ABF<1>)
+POINTER_CONVERSION(FE_ABF<2>)
+POINTER_CONVERSION(FE_ABF<3>)
+POINTER_CONVERSION(FE_DGQ<1>)
+POINTER_CONVERSION(FE_DGQ<2>)
+POINTER_CONVERSION(FE_DGQ<3>)
+POINTER_CONVERSION(FE_DGP<1>)
+POINTER_CONVERSION(FE_DGP<2>)
+POINTER_CONVERSION(FE_DGP<3>)
+POINTER_CONVERSION(dealIIDataReporter)
+POINTER_CONVERSION(adouble)
+}
+#endif
+#endif
+
+
 BOOST_PYTHON_MODULE(pyDealII)
 {
 	//import_array();

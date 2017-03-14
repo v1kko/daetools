@@ -20,8 +20,9 @@ unix::QMAKE_CXXFLAGS += -fpermissive -fpic -Wall -Wpointer-arith -Wwrite-strings
 unix::QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
                         -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
 
-win32-msvc2015::QMAKE_CXXFLAGS += -W2 -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors \
-                                  -DBOOST_NO_HASH -DBOOST_NO_SLIST
+win32-msvc2015::QMAKE_CXXFLAGS += -W2 -O2 -DBOOST_NO_HASH -DBOOST_NO_SLIST
+# There are some multiply defined template functions (dealii::Vector<int>::lp_norm, dealii::Vector<class std::complex<float>>::operator=),
+# use /FORCE:MULTIPLE to get around them.
 win32-msvc2015::QMAKE_LFLAGS   += /FORCE:MULTIPLE
 
 unix::QMAKE_CXXFLAGS  += -std=c++11

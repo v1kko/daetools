@@ -112,6 +112,7 @@ elif platform.system() == 'Windows':
     boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, python_minor)
+    boost_thread2    = 'boost_thread_-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
     dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
@@ -127,7 +128,7 @@ elif platform.system() == 'Windows':
         shared_libs_files = os.listdir(shared_libs_dir)
 
         for f in shared_libs_files:
-            if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_filesystem in f) or (boost_chrono in f):
+            if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_thread2 in f) or (boost_filesystem in f) or (boost_chrono in f):
                 shared_libs.append(os.path.join(shared_libs_dir, f))
 
             if dae_config in f:

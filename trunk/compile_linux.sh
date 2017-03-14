@@ -46,7 +46,8 @@ PROJECT:
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
                     Equivalent to: units data_reporting idas core activity simulation_loader fmi
     solvers         Build all solvers and their python extension modules.
-                    Equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On Windows equivalent to: superlu trilinos ipopt bonmin nlopt deal.ii
     pydae           Build daetools core python extension modules only.
     
     Individual projects:
@@ -369,8 +370,10 @@ do
         solvers)    compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"
                     compile pySuperLU          "-j1" "CONFIG+=shellSuperLU"
 
-                    compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
-                    compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
+                    if [ ${PLATFORM} != "Windows" ]; then
+                      compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU_MT"
+                      compile pySuperLU          "-j1" "CONFIG+=shellSuperLU_MT"
+                    fi
 
                     compile LA_Trilinos_Amesos "-j1"
                     compile pyTrilinos         "-j1"
@@ -405,13 +408,6 @@ do
                     compile pySuperLU  "-j1" "CONFIG+=shellSuperLU_MT"
                     ;;
   
-        superlu_cuda) compile LA_SUPERLU "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
-                      compile pySuperLU  "-j1 --file=gpuMakefile" "CONFIG+=shellSuperLU_CUDA"
-                      ;;
-
-        cusp) compile LA_CUSP "-j1 --file=cudaMakefile"
-              ;;
-
         trilinos) compile LA_Trilinos_Amesos "-j1"
                   compile pyTrilinos         "-j1"
                   ;;

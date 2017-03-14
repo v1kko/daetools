@@ -5,6 +5,51 @@
 //#include <noprefix.h>
 using namespace boost::python;
 
+// Temporary workaround for Visual Studio 2015 update 3
+//  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
+#if _MSC_FULL_VER  == 190024210
+#if (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+namespace boost
+{
+#define POINTER_CONVERSION(CLASS_NAME)   template <> CLASS_NAME const volatile * get_pointer(class CLASS_NAME const volatile *c) {return c;}
+
+POINTER_CONVERSION(adNode)
+POINTER_CONVERSION(adNodeArray)
+POINTER_CONVERSION(condNode)
+POINTER_CONVERSION(adouble)
+POINTER_CONVERSION(adouble_array)
+POINTER_CONVERSION(daeEquation)
+POINTER_CONVERSION(daeObject)
+POINTER_CONVERSION(daeCondition)
+POINTER_CONVERSION(daeEventPort)
+POINTER_CONVERSION(daeVariableWrapper)
+POINTER_CONVERSION(daeState)
+POINTER_CONVERSION(daeSTN)
+POINTER_CONVERSION(daeVariableType)
+POINTER_CONVERSION(daeDomain)
+POINTER_CONVERSION(daeVariable)
+POINTER_CONVERSION(daeParameter)
+POINTER_CONVERSION(daeScalarExternalFunction)
+POINTER_CONVERSION(daeVectorExternalFunction)
+POINTER_CONVERSION(daeDistributedEquationDomainInfo)
+POINTER_CONVERSION(daeLog_t)
+POINTER_CONVERSION(daeMatrix<adouble>)
+POINTER_CONVERSION(daeArray<adouble>)
+POINTER_CONVERSION(daeConfig)
+POINTER_CONVERSION(daeAction)
+POINTER_CONVERSION(daeEquationExecutionInfo)
+POINTER_CONVERSION(daeOnEventActions)
+POINTER_CONVERSION(daeOnConditionActions)
+POINTER_CONVERSION(daePort)
+POINTER_CONVERSION(daeModel)
+POINTER_CONVERSION(daePortConnection)
+POINTER_CONVERSION(daeEventPortConnection)
+POINTER_CONVERSION(daePortArray)
+POINTER_CONVERSION(daeModelArray)
+}
+#endif
+#endif
+
 BOOST_PYTHON_MODULE(pyCore)
 {
     //import_array();

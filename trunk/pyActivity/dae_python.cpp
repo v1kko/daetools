@@ -5,6 +5,31 @@
 #include "docstrings.h"
 using namespace boost::python;
 
+// Temporary workaround for Visual Studio 2015 update 3
+//  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
+#if _MSC_FULL_VER  == 190024210
+#if (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+namespace boost
+{
+#define POINTER_CONVERSION(CLASS_NAME)   template <> CLASS_NAME const volatile * get_pointer(class CLASS_NAME const volatile *c) {return c;}
+
+POINTER_CONVERSION(daeSimulation)
+POINTER_CONVERSION(daeSimulation_t)
+POINTER_CONVERSION(daeCondition)
+POINTER_CONVERSION(daeDAESolver_t)
+POINTER_CONVERSION(daeDataReporter_t)
+POINTER_CONVERSION(daeLog_t)
+POINTER_CONVERSION(daeObjectiveFunction)
+POINTER_CONVERSION(daeMeasuredVariable)
+POINTER_CONVERSION(daeOptimizationVariable)
+POINTER_CONVERSION(daeOptimizationConstraint)
+POINTER_CONVERSION(daeVariableWrapper)
+POINTER_CONVERSION(daeModel_t)
+POINTER_CONVERSION(daeEquationExecutionInfo)
+}
+#endif
+#endif
+
 BOOST_PYTHON_MODULE(pyActivity)
 {
     //import_array();

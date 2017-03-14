@@ -6,6 +6,20 @@
 using namespace boost::python;
 using namespace dae::solver;
 
+// Temporary workaround for Visual Studio 2015 update 3
+//  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
+#if _MSC_FULL_VER  == 190024210
+#if (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+namespace boost
+{
+#define POINTER_CONVERSION(CLASS_NAME)   template <> CLASS_NAME const volatile * get_pointer(class CLASS_NAME const volatile *c) {return c;}
+
+POINTER_CONVERSION(daeIDALASolver_t)
+POINTER_CONVERSION(Teuchos::ParameterList)
+}
+#endif
+#endif
+
 boost::python::list pydaeTrilinosSupportedSolvers(void);
 
 boost::python::list pydaeTrilinosSupportedSolvers(void)

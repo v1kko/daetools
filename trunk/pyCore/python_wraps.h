@@ -1617,7 +1617,7 @@ public:
             else if(get_adouble_array.check())
                 mapArguments[name] = get_adouble_array();
         }
-        SetArguments(mapArguments);
+        this->daeExternalFunction_t::SetArguments(mapArguments);
     }
 
     boost::python::object Calculate_(boost::python::dict values)
