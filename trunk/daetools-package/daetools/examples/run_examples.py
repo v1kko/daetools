@@ -99,6 +99,30 @@ class RunExamples(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.app = app
 
+        sg = app.desktop().screenGeometry()
+        screenHeight = sg.height()
+        screenWidth  = sg.width()
+        #print("The screen resolution is %d x %d" % (screenWidth, screenHeight))
+        if screenWidth <= 800:
+            self.formWidth = 750
+        elif screenWidth <= 960:
+            self.formWidth = 850
+        elif screenWidth <= 1024:
+            self.formWidth = 900
+        else:
+            self.formWidth = 1000
+        if screenHeight <= 600:
+            self.formHeight = 550
+        elif screenHeight <= 800:
+            self.formHeight = 750
+        elif screenHeight <= 1000:
+            self.formHeight = 900
+        elif screenHeight <= 1100:
+            self.formHeight = 900
+        else:
+            self.formHeight = 1000
+        self.resize(self.formWidth, self.formHeight)
+        
         settings = QtWebKit.QWebSettings.globalSettings()
         font = QtGui.QFont()
         if platform.system() == 'Linux':
@@ -134,12 +158,17 @@ class RunExamples(QtWidgets.QDialog):
                 if module:
                     self.ui.comboBoxExample.addItem(m_name, (module, doc))
         
+        self.setTutorialLink("all-tutorials")
+        
     def setTutorialLink(self, module_name):
         address = join(_examples_dir, "..", "docs", "html", "tutorials-all.html#%s" % module_name)
-        address = "file://" + os.path.normpath(address)
-        print(address)
+        address = "file:///" + os.path.normpath(address)
+        address = address.replace('\\', '/')
+        # The url contains bookmarks (i.e. tutorials-all.html#tutorial1.html) - can't use QUrl.fromLocalFile()
         url = QtCore.QUrl(address)
-        self.ui.docstringWeb.setUrl(url)
+        #print(url)
+        self.ui.docstringWeb.load(url)
+        self.ui.docstringWeb.show()
         
     #@QtCore.pyqtSlot()
     def slotTutorialChanged(self, index):
@@ -151,19 +180,24 @@ class RunExamples(QtWidgets.QDialog):
         module_name = module.__name__.split('.')[-1]
         module_name = module_name.replace(' ', '-')
         module_name = module_name.replace('_', '-')
-        self.setTutorialLink(module_name)
+        try:
+            self.setTutorialLink(module_name)
+        except:
+            self.ui.docstringWeb.setHtml("<code><pre>%s</pre></code>" % str(doc))
+            self.ui.docstringWeb.show()
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
         address = join(_examples_dir, simName + ".html")
-        address = "file://" + os.path.normpath(address)
+        address = os.path.normpath(address)
         try:
             from daetools.pyDAE.web_view_dialog import daeWebView
-            url   = QtCore.QUrl(address)
+            url   = QtCore.QUrl.fromLocalFile(address)
             title = simName + ".py"
             wv = daeWebView(url)
             wv.setWindowTitle(title)
+            wv.resize(self.formWidth, self.formHeight)
             wv.exec_()
         except Exception as e:
             print(str(e))

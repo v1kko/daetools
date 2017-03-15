@@ -11,7 +11,6 @@ Chemical Engineering Optimisation Examples
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. begin-command
 
 ==========================   =================================================================
 :ref:`tutorial_che_opt_1`    |tceo_1|
@@ -26,6 +25,8 @@ Chemical Engineering Optimisation Examples
 --------------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_opt_6`    |tceo_6|
 ==========================   =================================================================
+
+.. begin-command
 
 The implementations of the `COPS <http://www.mcs.anl.gov/~more/cops>`_ tests differ from the
 original ones in following:

@@ -11,7 +11,6 @@ Finite Element Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. begin-command
 
 =========================   =================================================================
 :ref:`tutorial_dealii_1`    |tdealii_1|
@@ -27,7 +26,7 @@ Finite Element Tutorials
 :ref:`tutorial_dealii_6`    |tdealii_6|
 =========================   =================================================================
 
-
+ 
 .. |tdealii_1| replace:: Introductory example to illustrate the support for the finite elements method
                          in **DAE Tools** (solution of a simple heat conduction equation).
 
@@ -42,6 +41,8 @@ Finite Element Tutorials
 
 .. |tdealii_6| replace:: A simple steady-state diffusion and first-order reaction in an irregular catalyst shape.
 
+
+.. begin-command
 
 .. _tutorial_dealii_1:
 

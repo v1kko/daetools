@@ -11,7 +11,6 @@ Optimisation Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. begin-command
 
 =========================  =================================================================
 :ref:`opt_tutorial1`       |topt_1|
@@ -46,6 +45,8 @@ Optimisation Tutorials
 
 .. |topt_7| replace:: Monitoring the optimisation progress (pyQt GUI).
 
+
+.. begin-command
 
 .. _opt_tutorial1:
 
@@ -172,3 +173,4 @@ Runtime model report    `opt_tutorial7-rt.xml <../examples/opt_tutorial7-rt.xml>
 Source code             `opt_tutorial7.py <../examples/opt_tutorial7.html>`_
 =====================   =================================================================
 
+.. end-command

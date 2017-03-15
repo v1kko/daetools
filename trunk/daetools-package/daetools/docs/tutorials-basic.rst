@@ -11,7 +11,6 @@ Basic Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. begin-command
 
 .. rubric:: The key modelling concepts in **DAE Tools**:
 
@@ -129,6 +128,8 @@ Basic Tutorials
 
 .. |t_18| replace:: Using DAE Tools variables and NumPy functions to generate and solve a simple ODE system.
 
+
+.. begin-command
 
 .. _whats_the_time:
 

@@ -70,7 +70,7 @@ parameter estimation and optimal control tests.
    tutorials-fe
    tutorials-optimisation
    tutorials-chemeng
-   tutorials-chemeng-optimisation
-   tutorials-all
+   tutorials-chemeng-optimisation 
+   #tutorials-all
 
 

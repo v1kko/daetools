@@ -11,7 +11,6 @@ Advanced Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. begin-command
 
 =======================   =================================================================
 :ref:`tutorial_adv_1`     |tadv_1|
@@ -34,6 +33,8 @@ Advanced Tutorials
 
 .. |tadv_4| replace:: C++ MPI code generator.
 
+
+.. begin-command
 
 .. _tutorial_adv_1:
 

@@ -11,7 +11,6 @@ Chemical Engineering Examples
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
-.. begin-command
 
 =======================   =================================================================
 :ref:`tutorial_che_1`     |tce_1|
@@ -52,6 +51,7 @@ Chemical Engineering Examples
                      The model applies generalised Maxwell-Stefan equations to predict the fluxes and the selectivities.
                      The problem modelled is separation of CH4+C2H6 mixture on a zeolite (silicalite-1) membrane.
 
+.. begin-command
 
 .. _tutorial_che_1:
 
