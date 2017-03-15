@@ -67,7 +67,7 @@ PROJECT:
         bonmin              Build BONMIN minlp solver and its python extension module (pyBONMIN).
         ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
         nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
-        deal.ii             Build deal.II FEM solvers and its python extension module (pyDealII).
+        deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
 EOF
 }
 

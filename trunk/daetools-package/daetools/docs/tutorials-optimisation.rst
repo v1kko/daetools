@@ -11,21 +11,22 @@ Optimisation Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+.. begin-command
 
 =========================  =================================================================
-:ref:`opt_tutorial_1`      |topt_1|
+:ref:`opt_tutorial1`       |topt_1|
 -------------------------  -----------------------------------------------------------------
-:ref:`opt_tutorial_2`      |topt_2|
+:ref:`opt_tutorial2`       |topt_2|
 -------------------------  -----------------------------------------------------------------
-:ref:`opt_tutorial_3`      |topt_3|
+:ref:`opt_tutorial3`       |topt_3|
 -------------------------  -----------------------------------------------------------------
-:ref:`opt_tutorial_4`      |topt_4|
+:ref:`opt_tutorial4`       |topt_4|
 -------------------------  -----------------------------------------------------------------
-:ref:`opt_tutorial_5`      |topt_5|
+:ref:`opt_tutorial5`       |topt_5|
 -------------------------  -----------------------------------------------------------------
-:ref:`opt_tutorial_6`      |topt_6|
+:ref:`opt_tutorial6`       |topt_6|
 -------------------------  -----------------------------------------------------------------
-:ref:`opt_tutorial_7`      |topt_7|
+:ref:`opt_tutorial7`       |topt_7|
 =========================  =================================================================
 
 
@@ -46,11 +47,10 @@ Optimisation Tutorials
 .. |topt_7| replace:: Monitoring the optimisation progress (pyQt GUI).
 
 
-.. _opt_tutorial_1:
+.. _opt_tutorial1:
 
 Optimisation tutorial 1
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial1
    :no-members:
@@ -65,11 +65,10 @@ Source code             `opt_tutorial1.py <../examples/opt_tutorial1.html>`_
 =====================   =================================================================
 
 
-.. _opt_tutorial_2:
+.. _opt_tutorial2:
 
 Optimisation tutorial 2
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial2
    :no-members:
@@ -84,11 +83,10 @@ Source code             `opt_tutorial2.py <../examples/opt_tutorial2.html>`_
 =====================   =================================================================
 
 
-.. _opt_tutorial_3:
+.. _opt_tutorial3:
 
 Optimisation tutorial 3
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial3
    :no-members:
@@ -103,11 +101,10 @@ Source code             `opt_tutorial3.py <../examples/opt_tutorial3.html>`_
 =====================   =================================================================
 
 
-.. _opt_tutorial_4:
+.. _opt_tutorial4:
 
 Optimisation tutorial 4
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial4
    :no-members:
@@ -122,11 +119,10 @@ Source code             `opt_tutorial4.py <../examples/opt_tutorial4.html>`_
 =====================   =================================================================
 
 
-.. _opt_tutorial_5:
+.. _opt_tutorial5:
 
 Optimisation tutorial 5
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial5
    :no-members:
@@ -141,11 +137,10 @@ Source code             `opt_tutorial5.py <../examples/opt_tutorial5.html>`_
 =====================   =================================================================
 
 
-.. _opt_tutorial_6:
+.. _opt_tutorial6:
 
 Optimisation tutorial 6
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial6
    :no-members:
@@ -160,11 +155,10 @@ Source code             `opt_tutorial6.py <../examples/opt_tutorial6.html>`_
 =====================   =================================================================
 
 
-.. _opt_tutorial_7:
+.. _opt_tutorial7:
 
 Optimisation tutorial 7
 =======================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.opt_tutorial7
    :no-members:

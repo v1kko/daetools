@@ -19,7 +19,7 @@ import os, platform, sys, subprocess, webbrowser, traceback, numpy
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtWebKit
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -99,17 +99,24 @@ class RunExamples(QtWidgets.QDialog):
         self.ui.setupUi(self)
         self.app = app
 
+        settings = QtWebKit.QWebSettings.globalSettings()
         font = QtGui.QFont()
         if platform.system() == 'Linux':
             font.setFamily("Monospace")
             font.setPointSize(9)
+            settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Monospace')
+            settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 9)
         elif platform.system() == 'Darwin':
             font.setFamily("Monaco")
             font.setPointSize(10)
+            settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Monaco')
+            settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 10)
         else:
             font.setFamily("Courier New")
             font.setPointSize(9)
-        self.ui.docstringEdit.setFont(font)
+            settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Courier New')
+            settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 10)
+        #self.ui.docstringWeb.setFont(font)
         
         self.setWindowTitle("DAE Tools Examples v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))
@@ -127,18 +134,30 @@ class RunExamples(QtWidgets.QDialog):
                 if module:
                     self.ui.comboBoxExample.addItem(m_name, (module, doc))
         
+    def setTutorialLink(self, module_name):
+        address = join(_examples_dir, "..", "docs", "html", "tutorials-all.html#%s" % module_name)
+        address = "file://" + os.path.normpath(address)
+        print(address)
+        url = QtCore.QUrl(address)
+        self.ui.docstringWeb.setUrl(url)
+        
+    #@QtCore.pyqtSlot()
     def slotTutorialChanged(self, index):
         data = self.ui.comboBoxExample.itemData(index)
         if isinstance(data, QtCore.QVariant):
             module, doc = data.toPyObject()
         else:
             module, doc = data
-        self.ui.docstringEdit.setText(str(doc))
+        module_name = module.__name__.split('.')[-1]
+        module_name = module_name.replace(' ', '-')
+        module_name = module_name.replace('_', '-')
+        self.setTutorialLink(module_name)
 
     #@QtCore.pyqtSlot()
     def slotShowCode(self):
         simName = str(self.ui.comboBoxExample.currentText())
         address = join(_examples_dir, simName + ".html")
+        address = "file://" + os.path.normpath(address)
         try:
             from daetools.pyDAE.web_view_dialog import daeWebView
             url   = QtCore.QUrl(address)

@@ -11,6 +11,7 @@ Chemical Engineering Examples
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+.. begin-command
 
 =======================   =================================================================
 :ref:`tutorial_che_1`     |tce_1|
@@ -56,7 +57,6 @@ Chemical Engineering Examples
 
 Chem. Eng. Example 1
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_1
    :no-members:
@@ -75,7 +75,6 @@ Source code             `tutorial_che_1.py <../examples/tutorial_che_1.html>`_
 
 Chem. Eng. Example 2
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_2
    :no-members:
@@ -94,7 +93,6 @@ Source code             `tutorial_che_2.py <../examples/tutorial_che_2.html>`_
 
 Chem. Eng. Example 3
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_3
    :no-members:
@@ -113,7 +111,6 @@ Source code             `tutorial_che_3.py <../examples/tutorial_che_3.html>`_
 
 Chem. Eng. Example 4
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_4
    :no-members:
@@ -132,7 +129,6 @@ Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
 
 Chem. Eng. Example 5
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_5
    :no-members:
@@ -151,7 +147,6 @@ Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
 
 Chem. Eng. Example 6
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_6
    :no-members:
@@ -184,7 +179,6 @@ Source code             `tutorial_che_6.py <../examples/tutorial_che_6.html>`_
 
 Chem. Eng. Example 7
 =====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_7
    :no-members:
@@ -203,7 +197,6 @@ Source code             `tutorial_che_7.py <../examples/tutorial_che_7.html>`_
 
 Chem. Eng. Example 8
 ====================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_8
    :no-members:
@@ -223,3 +216,4 @@ In/out compartment      `compartment.py <../examples/compartment.html>`_
 =====================   =================================================================
 
 
+.. end-command

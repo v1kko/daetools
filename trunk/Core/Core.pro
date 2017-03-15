@@ -20,7 +20,6 @@ SOURCES += xmlreadstream.cpp \
     stn.cpp \
     if.cpp \
     state.cpp \
-    stdafx.cpp \
     ports.cpp \
     event_port.cpp \
     action.cpp \
@@ -34,7 +33,6 @@ SOURCES += xmlreadstream.cpp \
     finite_element_model.cpp \
     equation.cpp \
     domain.cpp \
-    dllmain.cpp \
     distributed_variable_array.cpp \
     condnode.cpp \
     condition.cpp \

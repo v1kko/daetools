@@ -575,8 +575,8 @@ class SimBattery(daeSimulation):
 def guiRun(app):
     sim = SimBattery()
     sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 1000
+    sim.ReportingInterval = sim.process_info["tend"].value / 100
+    sim.TimeHorizon       = sim.process_info["tend"].value
     simulator  = daeSimulator(app, simulation=sim)
     simulator.exec_()
 

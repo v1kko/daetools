@@ -21,7 +21,7 @@ Supported platforms:
 * Windows (32 bit and 32 bit version of DAE Tools on 64 bit)
 * MacOS (x86, x86_64)
 
-The software works on both python 2 and 3. The binaries are provided for 2.7, 3.4 and 3.5 (except on Windows).
+The software works on both python 2 and 3. The binaries are provided for 2.7, 3.4, 3.5 and 3.6.
 
 Mandatory packages:
 
@@ -29,7 +29,7 @@ Mandatory packages:
 * Numpy (1.8\ :sup:`+`): `<http://www.numpy.org>`_
 * Scipy (0.14\ :sup:`+`): `<http://www.scipy.org>`_
 * Matplotlib (1.4\ :sup:`+`): `<http://matplotlib.sourceforge.net>`_
-* pyQt4: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
+* pyQt5: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
 * mayavi2
 * python-lxml
 
@@ -59,16 +59,16 @@ Getting the packages
 The installation files can be downloaded from the `downloads <http://daetools.com/downloads.html>`_ section
 or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ website.
 
-.. topic:: Note
+.. topic:: Nota bene
 
     From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
 
-.. topic:: Note
+.. topic:: Nota bene
 
     From the version 1.6.0 Windows installer is not provided anymore.
 
 The naming convention for the installation files: ``daetools-major.minor.platform-architecture.tar.gz``
-where ``major.minor.build`` represents the version (``1.5.0`` for instance),
+where ``major.minor.build`` represents the version (``1.6.0`` for instance),
 ``platform`` can be ``gnu_linux``, ``win32`` and ``macosx``, and
 ``architecture`` can be ``i686``, ``x86_64`` or ``universal``.
 
@@ -94,7 +94,7 @@ Use the system's Python
 
   .. code-block:: bash
 
-     sudo apt-get install python-numpy python-scipy python-matplotlib python-qt4 mayavi2 python-lxml
+     sudo apt-get install python-numpy python-scipy python-matplotlib python-qt5 mayavi2 python-lxml
      # Optional packages:
      sudo apt-get install python-xlwt python-h5py python-pandas
 
@@ -102,7 +102,7 @@ Use the system's Python
 
   .. code-block:: bash
 
-     sudo yum install numpy scipy python-matplotlib PyQt4 Mayavi python-lxml
+     sudo yum install numpy scipy python-matplotlib PyQt5 Mayavi python-lxml
      # Optional packages:
      sudo yum install python-xlwt h5py python-pandas
 
@@ -110,7 +110,7 @@ Use the system's Python
 
   .. code-block:: bash
 
-     sudo zypper in python-numpy python-scipy python-matplotlib python-qt4 python-lxml
+     sudo zypper in python-numpy python-scipy python-matplotlib python-qt5 python-lxml
      # Optional packages:
      sudo zypper in python-xlwt h5py python-pandas
 
@@ -119,12 +119,12 @@ Use the system's Python
   .. code-block:: bash
 
      # Python 2:
-     sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt4 mayavi python-lxml
+     sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt5 mayavi python-lxml
      # Optional packages:
      sudo pacman -S python2-xlwt python-h5py python-pandas
 
      # Python 3:
-     sudo pacman -S python-numpy python-scipy python-matplotlib python-pyqt4 mayavi python-lxml
+     sudo pacman -S python-numpy python-scipy python-matplotlib python-pyqt5 mayavi python-lxml
      # Optional packages:
      sudo pacman -S python-xlwt python-h5py python-pandas
 
@@ -138,7 +138,7 @@ Install one of scientific python distributions
 
   .. code-block:: bash
 
-     conda install numpy scipy matplotlib pyqt=4.11 lxml pandas h5py xlwt
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
 
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -158,6 +158,11 @@ You can also install **DAE Tools** into a python virtual environment:
    source activate <environment_name>
    python setup.py install
 
+Virtual environments in ``conda`` can be created using the following command:
+
+.. code-block:: bash
+
+   conda create -n environment_name python=x.x
 
 MacOS
 -----
@@ -173,7 +178,7 @@ Install one of scientific python distributions
       
   .. code-block:: bash
 
-    conda install numpy scipy matplotlib pyqt=4.11 lxml pandas h5py xlwt
+    conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -219,7 +224,7 @@ The easiest way is to install one of available scientific python distributions:
 
   .. code-block:: bash
 
-     conda install numpy scipy matplotlib pyqt=4.11 lxml pandas h5py xlwt
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 * `Python(x,y) <https://python-xy.github.io/>`_
@@ -280,8 +285,8 @@ Compiling from source
 To compile the **DAE Tools** the following is needed:
     
 * Installed ``python`` and ``numpy`` modules
-* Compiled third party libraries and DAE/LA/NLP solvers: ``Sundials IDAS``, ``Trilinos``,
-  ``SuperLU``, ``SuperLU_MT``, ``Bonmin``, ``NLopt``, ``deal.II``
+* Compiled third party libraries and DAE/LA/NLP solvers: ``Boost``, ``Sundials IDAS``, ``Trilinos``,
+  ``SuperLU``, ``SuperLU_MT``, ``Bonmin``, ``NLopt``, ``deal.II``, ``blas``, ``lapack``
 
 All **DAE Tools** modules are developed using the QtCreator/QMake cross-platform integrated development environment.
 The source code can be downloaded from the SourceForge website or checked out from the
@@ -317,23 +322,27 @@ development.
     cd daetools/trunk
     sh install_dependencies_linux.sh
 
-
-Then, compile all the third party libraries by executing ``compile_libraries_linux.sh`` shell script located in the
+Then, compile all the third party libraries by executing ``compile_libraries.sh`` shell script located in the
 ``trunk`` directory. The script will download all necessary source archives from the **DAE Tools** SourceForge web-site,
 unpack them, apply changes and compile them. If all dependencies are installed there should not be problems compiling
 the libraries.
 
 .. code-block:: bash
 
-    sh compile_libraries_linux.sh all
+    sh compile_libraries.sh all
 
 It is also possible to compile individual libraries using one of the following options:
 
 .. code-block:: none
+    all    All libraries and solvers.
+           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt trilinos deal.ii
+           On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt trilinos deal.ii
 
     Individual libraries/solvers:
       boost            Boost libraries (system, filesystem, thread, python)
       ref_blas_lapack  reference BLAS and Lapack libraries
+      cblas_clapack    CBLAS and CLapack libraries
+      mumps            Mumps linear solver
       umfpack          Umfpack solver
       idas             IDAS solver
       superlu          SuperLU solver
@@ -345,25 +354,27 @@ It is also possible to compile individual libraries using one of the following o
 
 After compilation, the shared libraries will be located in ``trunk/daetools-package/daetools/solibs`` directory.
 
-Finally, compile all **DAE Tools** libraries and python modules by executing ``compile_linux.sh`` shell script located
+Finally, compile all **DAE Tools** libraries and python modules by executing ``compile.sh`` shell script located
 in the ``trunk`` directory.
 
 .. code-block:: bash
 
-    sh compile_linux.sh all
+    sh compile.sh all
 
 It is also possible to compile individual libraries using one of the following options:
 
 .. code-block:: none
 
     all             Build all daetools c++ libraries, solvers and python extension modules.
-                    Equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On Windows equivalent to: dae superlu trilinos ipopt bonmin nlopt deal.ii
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
-                    Equivalent to: units data_reporting idas core activity simulation_loader fmi
+                    Equivalent to: config units data_reporting idas core activity simulation_loader fmi
     solvers         Build all solvers and their python extension modules.
-                    Equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On Windows equivalent to: superlu trilinos ipopt bonmin nlopt deal.ii
     pydae           Build daetools core python extension modules only.
-
+    
     Individual projects:
         config              Build Config shared c++ library.
         core                Build Core c++ library and its python extension module (pyCore).
@@ -381,7 +392,7 @@ It is also possible to compile individual libraries using one of the following o
         bonmin              Build BONMIN minlp solver and its python extension module (pyBONMIN).
         ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
         nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
-        deal.ii             Build deal.II FEM solvers and its python extension module (pyDealII).
+        deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
 
 All python extensions are located in the platform-dependent locations in ``trunk/daetools-package/daetools/pyDAE`` and
 ``trunk/daetools-package/daetools/solvers`` folders.
@@ -433,9 +444,51 @@ DAE Tools can also be compiled from within QtCreator IDE. First install dependen
 
 Windows
 -------
-DAE Tools support cross-compilation since the version 1.3.0. For more information about the ``mingw-w64``
-toolchain and options read the help sections in ``compile_libraries_linux.sh`` and ``compile_linux.sh`` scripts.
+.. topic:: Nota bene
 
+    DAE Tools supported cross-compilation in the versions 1.3.0 to 1.6.0.
+    New versions support ``native MSVC++ compilers`` (v2015 required for python 3.5 and 3.6).
+    For more information about the ``mingw-w64`` toolchain and options read the help sections in 
+    ``compile_libraries.sh`` and ``compile.sh`` scripts.
+
+Microsoft VC++
+++++++++++++++
+First, download and install (a) `Visual Studio Community Edition 2015 <https://www.microsoft.com/en-us/download/details.aspx?id=48146>`_ 
+or (b) ``Visual Studio 2017`` and ``VC++ Build Tools 2015``. Python 3.5 and 3.6 are compiled using VC++ 2015 (``msvc++ v14.0``).
+Start ``x86`` (32 bit builds) or ``x64`` (64 bit builds) ``Visual C++ 2015 Command Prompt``. Install some software that provides
+``bash`` environment. `Git for Windows <https://git-scm.com/download/win>`_ has been successfuly tested. During installation,
+when asked select the following options:
+
+- Use Git and optional Unix tools from the Windows Command Prompt
+- Use Windows' default console window
+- Add all bash commands to the ``PATH`` (nota bene: it might 'hide' some Windows commands such as ``find``):
+  i.e. ``C:\Program Files\Git\cmd;C:\Program Files\Git\mingw32\bin;C:\Program Files\Git\usr\bin``
+
+Then, compile all the third party libraries except the ``bonmin`` by executing ``compile_libraries.sh`` shell script located in the
+``trunk`` directory. The script will download all necessary source archives from the **DAE Tools** SourceForge web-site,
+unpack them, apply changes and compile them. If all dependencies are installed there should not be problems compiling
+the libraries.
+
+.. code-block:: bash
+
+    sh compile_libraries.sh all
+
+Next, download `bonmin-1.4.1-msvc++-2015.zip <https://sourceforge.net/projects/daetools/files/windows-libs/bonmin-1.4.1-msvc++-2015.zip/download>`_ 
+from the ``DAE Tools`` SourceForge website and unzip it in the ``trunk``. Go to the ``bonmin`` folder and open ``Bonmin.sln`` solution.
+Select all projects, open their proprties and make sure the ``Platform Toolset`` is set to ``Visual Studio 2015 (v140)``,
+build type (must be Release) and the platform (32 or 64 bit).
+The newer compiler versions will also work but the corresponding msvc++ redistributable package must be installed. Build all projects. 
+The compiled static libraries will be located in the ``bonmin/build/lib`` directory.
+
+Finally, compile all **DAE Tools** libraries and python modules by executing ``compile.sh`` shell script located
+in the ``trunk`` directory.
+
+.. code-block:: bash
+
+    sh compile.sh all
+
+Cross-compilation (deprecated)
+++++++++++++++++++++++++++++++
 First, compile the third party libraries:
 
 .. code-block:: none

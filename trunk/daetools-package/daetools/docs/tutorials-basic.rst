@@ -11,72 +11,73 @@ Basic Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+.. begin-command
 
 .. rubric:: The key modelling concepts in **DAE Tools**:
 
 =======================   =================================================================
 :ref:`whats_the_time`     |witt|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_1`         |t_1|
+:ref:`tutorial1`          |t_1|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_2`         |t_2|
+:ref:`tutorial2`          |t_2|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_3`         |t_3|
+:ref:`tutorial3`          |t_3|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_6`         |t_6|
+:ref:`tutorial6`          |t_6|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_10`        |t_10|
+:ref:`tutorial10`         |t_10|
 =======================   =================================================================
 
 .. rubric:: Support for discrete systems:
 
 =======================   =================================================================
-:ref:`tutorial_4`         |t_4|
+:ref:`tutorial4`          |t_4|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_5`         |t_5|
+:ref:`tutorial5`          |t_5|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_13`        |t_13|
+:ref:`tutorial13`         |t_13|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_15`        |t_15|
+:ref:`tutorial15`         |t_15|
 =======================   =================================================================
 
 .. rubric:: The simulation options:
 
 =======================   =================================================================
-:ref:`tutorial_7`         |t_7|
+:ref:`tutorial7`          |t_7|
 =======================   =================================================================
 
 .. rubric:: Data reporting:
 =======================   =================================================================
-:ref:`tutorial_8`         |t_8|
+:ref:`tutorial8`          |t_8|
 =======================   =================================================================
 
 .. rubric:: DAE and LA solvers:
 =======================   =================================================================
-:ref:`tutorial_9`         |t_9|
+:ref:`tutorial9`          |t_9|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_11`        |t_11|
+:ref:`tutorial11`         |t_11|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_12`        |t_12|
+:ref:`tutorial12`         |t_12|
 =======================   =================================================================
 
 .. rubric:: External functions:
 
 =======================   =================================================================
-:ref:`tutorial_14`        |t_14|
+:ref:`tutorial14`         |t_14|
 =======================   =================================================================
 
 .. rubric:: Logging:
 =======================   =================================================================
-:ref:`tutorial_17`        |t_17|
+:ref:`tutorial17`         |t_17|
 =======================   =================================================================
 
 .. rubric:: Interoperability with NumPy:
 
 =======================   =================================================================
-:ref:`tutorial_16`        |t_16|
+:ref:`tutorial16`        |t_16|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial_18`        |t_18|
+:ref:`tutorial18`        |t_18|
 =======================   =================================================================
 
 
@@ -133,7 +134,6 @@ Basic Tutorials
 
 What's the time? (AKA: Hello world!)
 ====================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.whats_the_time
    :no-members:
@@ -147,11 +147,10 @@ Runtime model report    `whats_the_time-rt.xml <../examples/whats_the_time-rt.xm
 Source code             `whats_the_time.py <../examples/whats_the_time.html>`_
 =====================   =================================================================
 
-.. _tutorial_1:
+.. _tutorial1:
     
 Tutorial 1
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial1
    :no-members:
@@ -166,11 +165,10 @@ Source code             `tutorial1.py <../examples/tutorial1.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_2:
+.. _tutorial2:
 
 Tutorial 2
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial2
    :no-members:
@@ -185,11 +183,10 @@ Source code             `tutorial2.py <../examples/tutorial2.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_3:
+.. _tutorial3:
 
 Tutorial 3
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial3
    :no-members:
@@ -204,11 +201,10 @@ Source code             `tutorial3.py <../examples/tutorial3.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_4:
+.. _tutorial4:
 
 Tutorial 4
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial4
    :no-members:
@@ -223,11 +219,10 @@ Source code             `tutorial4.py <../examples/tutorial4.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_5:
+.. _tutorial5:
 
 Tutorial 5
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial5
    :no-members:
@@ -242,11 +237,10 @@ Source code             `tutorial5.py <../examples/tutorial5.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_6:
+.. _tutorial6:
 
 Tutorial 6
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial6
    :no-members:
@@ -261,11 +255,10 @@ Source code             `tutorial6.py <../examples/tutorial6.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_7:
+.. _tutorial7:
 
 Tutorial 7
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial7
    :no-members:
@@ -280,11 +273,10 @@ Source code             `tutorial7.py <../examples/tutorial7.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_8:
+.. _tutorial8:
 
 Tutorial 8
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial8
    :no-members:
@@ -299,11 +291,10 @@ Source code             `tutorial8.py <../examples/tutorial8.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_9:
+.. _tutorial9:
 
 Tutorial 9
 ==========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial9
    :no-members:
@@ -318,11 +309,10 @@ Source code             `tutorial9.py <../examples/tutorial9.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_10:
+.. _tutorial10:
 
 Tutorial 10
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial10
    :no-members:
@@ -337,11 +327,10 @@ Source code             `tutorial10.py <../examples/tutorial10.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_11:
+.. _tutorial11:
 
 Tutorial 11
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial11
    :no-members:
@@ -356,11 +345,10 @@ Source code             `tutorial11.py <../examples/tutorial11.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_12:
+.. _tutorial12:
 
 Tutorial 12
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial12
    :no-members:
@@ -375,11 +363,10 @@ Source code             `tutorial12.py <../examples/tutorial12.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_13:
+.. _tutorial13:
 
 Tutorial 13
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial13
    :no-members:
@@ -394,11 +381,10 @@ Source code             `tutorial13.py <../examples/tutorial13.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_14:
+.. _tutorial14:
 
 Tutorial 14
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial14
    :no-members:
@@ -413,11 +399,10 @@ Source code             `tutorial14.py <../examples/tutorial14.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_15:
+.. _tutorial15:
 
 Tutorial 15
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial15
    :no-members:
@@ -432,11 +417,10 @@ Source code             `tutorial15.py <../examples/tutorial15.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_16:
+.. _tutorial16:
 
 Tutorial 16
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial16
    :no-members:
@@ -451,11 +435,10 @@ Source code             `tutorial16.py <../examples/tutorial16.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_17:
+.. _tutorial17:
 
 Tutorial 17
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial17
    :no-members:
@@ -470,11 +453,10 @@ Source code             `tutorial17.py <../examples/tutorial17.html>`_
 =====================   =================================================================
 
 
-.. _tutorial_18:
+.. _tutorial18:
 
 Tutorial 18
 ===========
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial18
    :no-members:
@@ -488,3 +470,4 @@ Runtime model report    `tutorial18-rt.xml <../examples/tutorial18-rt.xml>`_
 Source code             `tutorial18.py <../examples/tutorial18.html>`_
 =====================   =================================================================
 
+.. end-command

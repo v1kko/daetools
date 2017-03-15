@@ -11,6 +11,7 @@ Finite Element Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+.. begin-command
 
 =========================   =================================================================
 :ref:`tutorial_dealii_1`    |tdealii_1|
@@ -46,7 +47,6 @@ Finite Element Tutorials
 
 Tutorial deal.II 1
 ==================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_dealii_1
     :no-members:
@@ -64,7 +64,6 @@ Source code             `tutorial_dealii_1.py <../examples/tutorial_dealii_1.htm
 
 Tutorial deal.II 2
 ==================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_dealii_2
     :no-members:
@@ -82,7 +81,6 @@ Source code             `tutorial_dealii_2.py <../examples/tutorial_dealii_2.htm
 
 Tutorial deal.II 3
 ==================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_dealii_3
     :no-members:
@@ -100,7 +98,6 @@ Source code             `tutorial_dealii_3.py <../examples/tutorial_dealii_3.htm
 
 Tutorial deal.II 4
 ==================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_dealii_4
     :no-members:
@@ -118,7 +115,6 @@ Source code             `tutorial_dealii_4.py <../examples/tutorial_dealii_4.htm
 
 Tutorial deal.II 5
 ==================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_dealii_5
     :no-members:
@@ -136,7 +132,6 @@ Source code             `tutorial_dealii_5.py <../examples/tutorial_dealii_5.htm
 
 Tutorial deal.II 6
 ==================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_dealii_6
     :no-members:
@@ -149,3 +144,5 @@ Model report            `tutorial_dealii_6.xml <../examples/tutorial_dealii_6.xm
 Runtime model report    `tutorial_dealii_6-rt.xml <../examples/tutorial_dealii_6-rt.xml>`_
 Source code             `tutorial_dealii_6.py <../examples/tutorial_dealii_6.html>`_
 =====================   =================================================================
+
+.. end-command

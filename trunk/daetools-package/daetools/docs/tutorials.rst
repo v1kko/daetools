@@ -71,5 +71,6 @@ parameter estimation and optimal control tests.
    tutorials-optimisation
    tutorials-chemeng
    tutorials-chemeng-optimisation
+   tutorials-all
 
 

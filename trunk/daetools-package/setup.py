@@ -30,7 +30,7 @@ import os, sys, platform, shutil
 from distutils.core import setup
 from distutils import dir_util
 
-daetools_version = '1.6.0'
+daetools_version = '1.7.0b1'
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -47,7 +47,7 @@ if platform.system() == 'Darwin':
     daetools_machine = 'universal'
 elif platform.system() == 'Windows':
     daetools_machine = 'win32'
-    # So far there is no win63 port
+    # So far there is no win64 port
     #if 'AMD64' in platform.machine():
     #    daetools_machine = 'win64'
     #else:

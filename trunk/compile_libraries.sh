@@ -50,7 +50,7 @@ LIBRARY:
     boost            Boost libraries (system, filesystem, thread, python)
     ref_blas_lapack  reference BLAS and Lapack libraries
     cblas_clapack    CBLAS and CLapack libraries
-    mumps            Mumpslinear solver
+    mumps            Mumps linear solver
     umfpack          Umfpack solver
     idas             IDAS solver
     superlu          SuperLU solver

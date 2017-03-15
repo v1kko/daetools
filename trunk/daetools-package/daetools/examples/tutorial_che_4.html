@@ -6,264 +6,272 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial_che_4.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                           tutorial_che_4.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This example shows a comparison between the analytical results and the discretised</span>
-<span style='color:#c00000;'>population balance equations results solved using the cell centered finite volume method</span>
-<span style='color:#c00000;'>employing the high resolution upwind scheme (Van Leer k-interpolation with k = 1/3) and</span>
-<span style='color:#c00000;'>a range of flux limiters.</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                           tutorial_che_4.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>This example shows a comparison between the analytical results and the discretised</span>
+<span style='color:#bf0303;'>population balance equations results solved using the cell centered finite volume method</span>
+<span style='color:#bf0303;'>employing the high resolution upwind scheme (Van Leer k-interpolation with k = 1/3) and</span>
+<span style='color:#bf0303;'>a range of flux limiters.</span>
 
-<span style='color:#c00000;'>The problem is from the section 4.1.1 Size-independent growth I of the following article:</span>
+<span style='color:#bf0303;'>This tutorial can be run from the console only.</span>
 
-<span style='color:#c00000;'>- Nikolic D.D., Frawley P.J. Application of the Lagrangian Meshfree Approach to</span>
-<span style='color:#c00000;'>  Modelling of Batch Crystallisation: Part II – An Efficient Solution of Integrated CFD</span>
-<span style='color:#c00000;'>  and Population Balance Equations. Preprints 2016, 20161100128.</span>
-<span style='color:#c00000;'>  `doi:10.20944/preprints201611.0012.v1 &lt;http://dx.doi.org/10.20944/preprints201611.0012.v1&gt;`_</span>
+<span style='color:#bf0303;'>The problem is from the section 4.1.1 Size-independent growth I of the following article:</span>
 
-<span style='color:#c00000;'>and also from the section 3.1 Size-independent growth of the following article:</span>
+<span style='color:#bf0303;'>- Nikolic D.D., Frawley P.J. Application of the Lagrangian Meshfree Approach to</span>
+<span style='color:#bf0303;'>  Modelling of Batch Crystallisation: Part II – An Efficient Solution of Integrated CFD</span>
+<span style='color:#bf0303;'>  and Population Balance Equations. Preprints 2016, 20161100128.</span>
+<span style='color:#bf0303;'>  `doi:10.20944/preprints201611.0012.v1 &lt;http://dx.doi.org/10.20944/preprints201611.0012.v1&gt;`_</span>
 
-<span style='color:#c00000;'>- Qamar S., Elsner M.P., Angelov I.A., Warnecke G., Seidel-Morgenstern A. (2006)</span>
-<span style='color:#c00000;'>  A comparative study of high resolution schemes for solving population balances in crystallization.</span>
-<span style='color:#c00000;'>  Computers and Chemical Engineering 30(6-7):1119-1131.</span>
-<span style='color:#c00000;'>  `doi:10.1016/j.compchemeng.2006.02.012 &lt;http://dx.doi.org/10.1016/j.compchemeng.2006.02.012&gt;`_</span>
+<span style='color:#bf0303;'>and also from the section 3.1 Size-independent growth of the following article:</span>
 
-<span style='color:#c00000;'>The growth-only crystallisation process was considered with the constant growth rate</span>
-<span style='color:#c00000;'>of 1μm/s and the following initial number density function:</span>
+<span style='color:#bf0303;'>- Qamar S., Elsner M.P., Angelov I.A., Warnecke G., Seidel-Morgenstern A. (2006)</span>
+<span style='color:#bf0303;'>  A comparative study of high resolution schemes for solving population balances in crystallization.</span>
+<span style='color:#bf0303;'>  Computers and Chemical Engineering 30(6-7):1119-1131.</span>
+<span style='color:#bf0303;'>  `doi:10.1016/j.compchemeng.2006.02.012 &lt;http://dx.doi.org/10.1016/j.compchemeng.2006.02.012&gt;`_</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>The growth-only crystallisation process was considered with the constant growth rate</span>
+<span style='color:#bf0303;'>of 1μm/s and the following initial number density function:</span>
 
-<span style='color:#c00000;'>   n(L,0): 1E10, if 10μm &lt; L &lt; 20μm</span>
-<span style='color:#c00000;'>              0, otherwise</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>The crystal size in the range of [0, 100]μm was discretised into 100 elements.</span>
-<span style='color:#c00000;'>The analytical solution in this case is equal to the initial profile translated right</span>
-<span style='color:#c00000;'>in time by a distance Gt (the growth rate multiplied by the time elapsed in the process).</span>
+<span style='color:#bf0303;'>   n(L,0): 1E10, if 10μm &lt; L &lt; 20μm</span>
+<span style='color:#bf0303;'>              0, otherwise</span>
 
-<span style='color:#c00000;'>The flux limiters used in the model are:</span>
+<span style='color:#bf0303;'>The crystal size in the range of [0, 100]μm was discretised into 100 elements.</span>
+<span style='color:#bf0303;'>The analytical solution in this case is equal to the initial profile translated right</span>
+<span style='color:#bf0303;'>in time by a distance Gt (the growth rate multiplied by the time elapsed in the process).</span>
 
-<span style='color:#c00000;'>- HCUS</span>
-<span style='color:#c00000;'>- HQUICK</span>
-<span style='color:#c00000;'>- Koren</span>
-<span style='color:#c00000;'>- monotinized_central</span>
-<span style='color:#c00000;'>- minmod</span>
-<span style='color:#c00000;'>- Osher</span>
-<span style='color:#c00000;'>- ospre</span>
-<span style='color:#c00000;'>- smart</span>
-<span style='color:#c00000;'>- superbee</span>
-<span style='color:#c00000;'>- Sweby</span>
-<span style='color:#c00000;'>- UMIST</span>
-<span style='color:#c00000;'>- vanAlbada1</span>
-<span style='color:#c00000;'>- vanAlbada2</span>
-<span style='color:#c00000;'>- vanLeer</span>
-<span style='color:#c00000;'>- vanLeer_minmod</span>
+<span style='color:#bf0303;'>The flux limiters used in the model are:</span>
 
-<span style='color:#c00000;'>Comparison of L1- and L2-norms (ni_HR - ni_analytical):</span>
+<span style='color:#bf0303;'>- HCUS</span>
+<span style='color:#bf0303;'>- HQUICK</span>
+<span style='color:#bf0303;'>- Koren</span>
+<span style='color:#bf0303;'>- monotinized_central</span>
+<span style='color:#bf0303;'>- minmod</span>
+<span style='color:#bf0303;'>- Osher</span>
+<span style='color:#bf0303;'>- ospre</span>
+<span style='color:#bf0303;'>- smart</span>
+<span style='color:#bf0303;'>- superbee</span>
+<span style='color:#bf0303;'>- Sweby</span>
+<span style='color:#bf0303;'>- UMIST</span>
+<span style='color:#bf0303;'>- vanAlbada1</span>
+<span style='color:#bf0303;'>- vanAlbada2</span>
+<span style='color:#bf0303;'>- vanLeer</span>
+<span style='color:#bf0303;'>- vanLeer_minmod</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>Comparison of L1- and L2-norms (ni_HR - ni_analytical):</span>
 
-<span style='color:#c00000;'>  --------------------------------------</span>
-<span style='color:#c00000;'>           Scheme  L1         L2</span>
-<span style='color:#c00000;'>  --------------------------------------</span>
-<span style='color:#c00000;'>         superbee  1.786e+10  7.016e+09</span>
-<span style='color:#c00000;'>            Sweby  2.817e+10  8.614e+09</span>
-<span style='color:#c00000;'>            Koren  3.015e+10  9.293e+09</span>
-<span style='color:#c00000;'>            smart  2.961e+10  9.326e+09</span>
-<span style='color:#c00000;'>               MC  3.258e+10  9.807e+09</span>
-<span style='color:#c00000;'>             HCUS  3.638e+10  1.001e+10</span>
-<span style='color:#c00000;'>           HQUICK  3.622e+10  1.005e+10</span>
-<span style='color:#c00000;'>    vanLeerMinmod  3.581e+10  1.011e+10</span>
-<span style='color:#c00000;'>          vanLeer  3.874e+10  1.059e+10</span>
-<span style='color:#c00000;'>            ospre  4.139e+10  1.094e+10</span>
-<span style='color:#c00000;'>            UMIST  4.363e+10  1.136e+10</span>
-<span style='color:#c00000;'>            Osher  4.579e+10  1.156e+10</span>
-<span style='color:#c00000;'>       vanAlbada1  4.574e+10  1.157e+10</span>
-<span style='color:#c00000;'>           minmod  5.653e+10  1.325e+10</span>
-<span style='color:#c00000;'>       vanAlbada2  5.456e+10  1.331e+10</span>
-<span style='color:#c00000;'>   -------------------------------------</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>The comparison of number density functions between the analytical solution and the</span>
-<span style='color:#c00000;'>solution obtained using high-resolution scheme with the Superbee flux limiter at t=60s:</span>
+<span style='color:#bf0303;'>  --------------------------------------</span>
+<span style='color:#bf0303;'>           Scheme  L1         L2</span>
+<span style='color:#bf0303;'>  --------------------------------------</span>
+<span style='color:#bf0303;'>         superbee  1.786e+10  7.016e+09</span>
+<span style='color:#bf0303;'>            Sweby  2.817e+10  8.614e+09</span>
+<span style='color:#bf0303;'>            Koren  3.015e+10  9.293e+09</span>
+<span style='color:#bf0303;'>            smart  2.961e+10  9.326e+09</span>
+<span style='color:#bf0303;'>               MC  3.258e+10  9.807e+09</span>
+<span style='color:#bf0303;'>             HCUS  3.638e+10  1.001e+10</span>
+<span style='color:#bf0303;'>           HQUICK  3.622e+10  1.005e+10</span>
+<span style='color:#bf0303;'>    vanLeerMinmod  3.581e+10  1.011e+10</span>
+<span style='color:#bf0303;'>          vanLeer  3.874e+10  1.059e+10</span>
+<span style='color:#bf0303;'>            ospre  4.139e+10  1.094e+10</span>
+<span style='color:#bf0303;'>            UMIST  4.363e+10  1.136e+10</span>
+<span style='color:#bf0303;'>            Osher  4.579e+10  1.156e+10</span>
+<span style='color:#bf0303;'>       vanAlbada1  4.574e+10  1.157e+10</span>
+<span style='color:#bf0303;'>           minmod  5.653e+10  1.325e+10</span>
+<span style='color:#bf0303;'>       vanAlbada2  5.456e+10  1.331e+10</span>
+<span style='color:#bf0303;'>   -------------------------------------</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_che_4-results.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
+<span style='color:#bf0303;'>The comparison of number density functions between the analytical solution and the</span>
+<span style='color:#bf0303;'>solution obtained using high-resolution scheme with the Superbee flux limiter at t=60s:</span>
 
-<span style='color:#c00000;'>The comparison of number density functions between the analytical solution and the</span>
-<span style='color:#c00000;'>solution obtained using high-resolution scheme with the Koren flux limiter at t=60s:</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial_che_4-results.png</span>
+<span style='color:#bf0303;'>   :width: 500px</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_che_4-results2.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>The comparison of number density functions between the analytical solution and the</span>
+<span style='color:#bf0303;'>solution obtained using high-resolution scheme with the Koren flux limiter at t=60s:</span>
 
-<span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> daetools.pyDAE.data_reporters <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
+<span style='color:#bf0303;'>.. image:: _static/tutorial_che_4-results2.png</span>
+<span style='color:#bf0303;'>   :width: 500px</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+
+<span style='color:#ff5500;'>import</span> sys, numpy
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
+<span style='color:#ff5500;'>from</span> daetools.pyDAE.data_reporters <span style='color:#ff5500;'>import</span> *
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
 <b>try</b>:
-    <span style='color:#0000ff;'>from</span> .fl_analytical <span style='color:#0000ff;'>import</span> run_analytical
-    <span style='color:#0000ff;'>from</span> .flux_limiters <span style='color:#0000ff;'>import</span> HRFluxLimiter, supported_schemes
+    <span style='color:#ff5500;'>from</span> .fl_analytical <span style='color:#ff5500;'>import</span> run_analytical
+    <span style='color:#ff5500;'>from</span> .flux_limiters <span style='color:#ff5500;'>import</span> HRFluxLimiter, supported_schemes
 <b>except</b>:
-    <span style='color:#0000ff;'>from</span> fl_analytical <span style='color:#0000ff;'>import</span> run_analytical
-    <span style='color:#0000ff;'>from</span> flux_limiters <span style='color:#0000ff;'>import</span> HRFluxLimiter, supported_schemes
+    <span style='color:#ff5500;'>from</span> fl_analytical <span style='color:#ff5500;'>import</span> run_analytical
+    <span style='color:#ff5500;'>from</span> flux_limiters <span style='color:#ff5500;'>import</span> HRFluxLimiter, supported_schemes
 
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, g, kg, s, K, mol, kmol, J, um
+<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, g, kg, s, K, mol, kmol, J, um
 
-pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;pbm_number_density_t&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0e+40</span>,  <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1e-0</span>)
+pbm_number_density_t = daeVariableType(<span style='color:#bf0303;'>&quot;pbm_number_density_t&quot;</span>, m**(-<span style='color:#b08000;'>1</span>), <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0e+40</span>,  <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1e-0</span>)
 
 <b>class</b> modelMoC(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, G, Phi_callable, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, G, Phi_callable, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.G  <b><span style='color:#0000ff;'>=</span></b> G
-        <span style='color:#0000ff;'>self</span>.fl <b><span style='color:#0000ff;'>=</span></b> HRFluxLimiter(Phi_callable, Constant(<span style='color:#c000c0;'>1e-10</span> <b><span style='color:#0000ff;'>*</span></b> pbm_number_density_t.Units))
+        <span style='color:#0057ae;'>self</span>.G  = G
+        <span style='color:#0057ae;'>self</span>.fl = HRFluxLimiter(Phi_callable, Constant(<span style='color:#b08000;'>1e-10</span> * pbm_number_density_t.Units))
 
-        <span style='color:#0000ff;'>self</span>.L  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;L&quot;</span>,  <span style='color:#0000ff;'>self</span>, um, <span style='color:#c00000;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.L  = daeDomain(<span style='color:#bf0303;'>&quot;L&quot;</span>,  <span style='color:#0057ae;'>self</span>, um, <span style='color:#bf0303;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.ni <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;ni&quot;</span>, pbm_number_density_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#0000ff;'>self</span>.L])
+        <span style='color:#0057ae;'>self</span>.ni = daeVariable(<span style='color:#bf0303;'>&quot;ni&quot;</span>, pbm_number_density_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#0057ae;'>self</span>.L])
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        L  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L.Points
-        nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L.NumberOfPoints
+        L  = <span style='color:#0057ae;'>self</span>.L.Points
+        nL = <span style='color:#0057ae;'>self</span>.L.NumberOfPoints
 
-        <span style='color:#008000;'># k-interpolation (van Leer 1985)</span>
-        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, nL):
-            <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c000c0;'>0</span>:
-                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;ni(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#c00000;'>&quot;&quot;</span>)
-                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ni(<span style='color:#c000c0;'>0</span>) <span style='color:#008000;'># Boundary condition: here G*ni = 0</span>
+        <span style='color:#898887;'># k-interpolation (van Leer 1985)</span>
+        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, nL):
+            <b>if</b> i == <span style='color:#b08000;'>0</span>:
+                eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
+                eq.Residual = <span style='color:#0057ae;'>self</span>.ni(<span style='color:#b08000;'>0</span>) <span style='color:#898887;'># Boundary condition: here G*ni = 0</span>
 
             <b>else</b>:
-                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;ni(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#c00000;'>&quot;&quot;</span>)
-                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.ni.dt(i) <b><span style='color:#0000ff;'>+</span></b> Constant(G) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.fl.ni_edge_plus(i,<span style='color:#0000ff;'>self</span>.ni,nL) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.fl.ni_edge_plus(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>,<span style='color:#0000ff;'>self</span>.ni,nL)) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#0000ff;'>self</span>.L(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.L(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>))
+                eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
+                eq.Residual = <span style='color:#0057ae;'>self</span>.ni.dt(i) + Constant(G) * (<span style='color:#0057ae;'>self</span>.fl.ni_edge_plus(i,<span style='color:#0057ae;'>self</span>.ni,nL) - <span style='color:#0057ae;'>self</span>.fl.ni_edge_plus(i-<span style='color:#b08000;'>1</span>,<span style='color:#0057ae;'>self</span>.ni,nL)) / (<span style='color:#0057ae;'>self</span>.L(i) - <span style='color:#0057ae;'>self</span>.L(i-<span style='color:#b08000;'>1</span>))
 
 
 <b>class</b> simBatchReactor(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, modelName, N, L, G, ni_0, Phi):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modelMoC(modelName, G, Phi)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, modelName, N, L, G, ni_0, Phi):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modelMoC(modelName, G, Phi)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
 
-        <span style='color:#0000ff;'>self</span>.N    <b><span style='color:#0000ff;'>=</span></b> N
-        <span style='color:#0000ff;'>self</span>.L    <b><span style='color:#0000ff;'>=</span></b> L
-        <span style='color:#0000ff;'>self</span>.ni_0 <b><span style='color:#0000ff;'>=</span></b> ni_0
+        <span style='color:#0057ae;'>self</span>.N    = N
+        <span style='color:#0057ae;'>self</span>.L    = L
+        <span style='color:#0057ae;'>self</span>.ni_0 = ni_0
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.L.CreateStructuredGrid(<span style='color:#0000ff;'>self</span>.N, <span style='color:#0000ff;'>min</span>(<span style='color:#0000ff;'>self</span>.L), <span style='color:#0000ff;'>max</span>(<span style='color:#0000ff;'>self</span>.L))
-        <span style='color:#0000ff;'>self</span>.m.L.Points <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.L.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.N, <b><span style='color:#644a9b;'>min</span></b>(<span style='color:#0057ae;'>self</span>.L), <b><span style='color:#644a9b;'>max</span></b>(<span style='color:#0057ae;'>self</span>.L))
+        <span style='color:#0057ae;'>self</span>.m.L.Points = <span style='color:#0057ae;'>self</span>.L
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># Initial conditions</span>
-        L <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L.Points
-        nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.L.NumberOfPoints
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#898887;'># Initial conditions</span>
+        L = <span style='color:#0057ae;'>self</span>.m.L.Points
+        nL = <span style='color:#0057ae;'>self</span>.m.L.NumberOfPoints
 
-        <span style='color:#008000;'># Initial conditions (the first item is not differential)</span>
-        <span style='color:#0000ff;'>self</span>.ni_0[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>
+        <span style='color:#898887;'># Initial conditions (the first item is not differential)</span>
+        <span style='color:#0057ae;'>self</span>.ni_0[<span style='color:#b08000;'>0</span>] = <span style='color:#0057ae;'>None</span>
 
-        <span style='color:#0000ff;'>self</span>.m.ni.SetInitialConditions(<span style='color:#0000ff;'>self</span>.ni_0)
+        <span style='color:#0057ae;'>self</span>.m.ni.SetInitialConditions(<span style='color:#0057ae;'>self</span>.ni_0)
 
 <b>def</b> run_simulation(simPrefix, modelName, N, L, G, ni_0, reportingInterval, timeHorizon, Phi):
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeDelegateDataReporter()
+    dr_tcpip     = daeTCPIPDataReporter()
+    dr_data      = daeNoOpDataReporter()
     datareporter.AddDataReporter(dr_tcpip)
     datareporter.AddDataReporter(dr_data)
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simBatchReactor(modelName, N, L, G, ni_0, Phi)
+    simulation   = simBatchReactor(modelName, N, L, G, ni_0, Phi)
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> reportingInterval
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> timeHorizon
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = reportingInterval
+    simulation.TimeHorizon       = timeHorizon
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simPrefix <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(dr_tcpip.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simPrefix + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(dr_tcpip.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    <span style='color:#008000;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
-    <span style='color:#008000;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    <span style='color:#898887;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
+    <span style='color:#898887;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
     <b>return</b> dr_data.Process
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <span style='color:#008000;'># Create an initial CSD array and growth rate</span>
-    N    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
-    L_lb <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.0</span>
-    L_ub <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100.0</span>
-    G    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>*</span></b> um<b><span style='color:#0000ff;'>/</span></b>s
-    ni_0 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>)
-    L    <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(L_lb, L_ub, N<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>)
-    <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, N<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>):
-        <b>if</b> L[i] <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>10</span> <b><span style='color:#0000ff;'>and</span></b> L[i] <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#c000c0;'>20</span>:
-            ni_0[i] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e10</span>
+<span style='color:#898887;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    msg = <span style='color:#bf0303;'>&quot;This tutorial can be run from the command line only: python tutorial_che_4.py console&quot;</span>
+    daeQtMessage(<span style='color:#bf0303;'>&quot;tutorial_che_4&quot;</span>, msg)
 
-    reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
-    timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>60</span>
-    timeIndex         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>12</span>
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <span style='color:#898887;'># Create an initial CSD array and growth rate</span>
+    N    = <span style='color:#b08000;'>100</span>
+    L_lb = <span style='color:#b08000;'>0.0</span>
+    L_ub = <span style='color:#b08000;'>100.0</span>
+    G    = <span style='color:#b08000;'>1</span> * um/s
+    ni_0 = numpy.zeros(N+<span style='color:#b08000;'>1</span>)
+    L    = numpy.linspace(L_lb, L_ub, N+<span style='color:#b08000;'>1</span>)
+    <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, N+<span style='color:#b08000;'>1</span>):
+        <b>if</b> L[i] &gt; <span style='color:#b08000;'>10</span> <b>and</b> L[i] &lt; <span style='color:#b08000;'>20</span>:
+            ni_0[i] = <span style='color:#b08000;'>1e10</span>
 
-    <span style='color:#008000;'># First find analytical solution</span>
-    process_analytical <b><span style='color:#0000ff;'>=</span></b> run_analytical(<span style='color:#c00000;'>'Analytical'</span>, <span style='color:#c00000;'>'Analytical'</span>, N, L, G, ni_0, reportingInterval, timeHorizon)
-    ni_analytical <b><span style='color:#0000ff;'>=</span></b> process_analytical.dictVariables[<span style='color:#c00000;'>'Analytical.ni'</span>]
+    reportingInterval = <span style='color:#b08000;'>5</span>
+    timeHorizon       = <span style='color:#b08000;'>60</span>
+    timeIndex         = <span style='color:#b08000;'>12</span>
 
-    L_report <b><span style='color:#0000ff;'>=</span></b> []
+    <span style='color:#898887;'># First find analytical solution</span>
+    process_analytical = run_analytical(<span style='color:#bf0303;'>'Analytical'</span>, <span style='color:#bf0303;'>'Analytical'</span>, N, L, G, ni_0, reportingInterval, timeHorizon)
+    ni_analytical = process_analytical.dictVariables[<span style='color:#bf0303;'>'Analytical.ni'</span>]
+
+    L_report = []
     <b>try</b>:
-        <b>for</b> scheme <b><span style='color:#0000ff;'>in</span></b> supported_schemes:
-            scheme_name <b><span style='color:#0000ff;'>=</span></b> scheme.__doc__
-            process_dpb <b><span style='color:#0000ff;'>=</span></b> run_simulation(scheme_name, scheme_name, N, L, G, ni_0, reportingInterval, timeHorizon, scheme)
-            ni_dpb      <b><span style='color:#0000ff;'>=</span></b> process_dpb.dictVariables[<span style='color:#c00000;'>'</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>.ni'</span> <b><span style='color:#0000ff;'>%</span></b> scheme_name]
+        <b>for</b> scheme <b>in</b> supported_schemes:
+            scheme_name = scheme.__doc__
+            process_dpb = run_simulation(scheme_name, scheme_name, N, L, G, ni_0, reportingInterval, timeHorizon, scheme)
+            ni_dpb      = process_dpb.dictVariables[<span style='color:#bf0303;'>'</span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>.ni'</span> % scheme_name]
 
-            ni_anal <b><span style='color:#0000ff;'>=</span></b> ni_analytical.Values[timeIndex]
-            ni_dpb  <b><span style='color:#0000ff;'>=</span></b> ni_dpb.Values[timeIndex]
+            ni_anal = ni_analytical.Values[timeIndex]
+            ni_dpb  = ni_dpb.Values[timeIndex]
 
-            L1 <b><span style='color:#0000ff;'>=</span></b> numpy.linalg.norm(ni_dpb<b><span style='color:#0000ff;'>-</span></b>ni_anal, <span style='color:#0000ff;'>ord</span> <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>)
-            L2 <b><span style='color:#0000ff;'>=</span></b> numpy.linalg.norm(ni_dpb<b><span style='color:#0000ff;'>-</span></b>ni_anal, <span style='color:#0000ff;'>ord</span> <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>)
-            <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'L1 = </span><span style='color:#0057ae;'>%e</span><span style='color:#c00000;'>, L2 = </span><span style='color:#0057ae;'>%e</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (L1, L2))
+            L1 = numpy.linalg.norm(ni_dpb-ni_anal, <b><span style='color:#644a9b;'>ord</span></b> = <span style='color:#b08000;'>1</span>)
+            L2 = numpy.linalg.norm(ni_dpb-ni_anal, <b><span style='color:#644a9b;'>ord</span></b> = <span style='color:#b08000;'>2</span>)
+            <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'L1 = </span><span style='color:#3daee9;'>%e</span><span style='color:#bf0303;'>, L2 = </span><span style='color:#3daee9;'>%e</span><span style='color:#bf0303;'>'</span> % (L1, L2))
 
             L_report.append((scheme_name, L1, L2))
 
     <b>finally</b>:
-        <span style='color:#008000;'># Sort by L2</span>
-        L_report.sort(key <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> t: t[<span style='color:#c000c0;'>2</span>])
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'   ---------------------------------------'</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'           Scheme  L1         L2          '</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'   ---------------------------------------'</span>)
-        <b>for</b> scheme, L1, L2 <b><span style='color:#0000ff;'>in</span></b> L_report:
-            <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  </span><span style='color:#0057ae;'>%15s</span><span style='color:#c00000;'>  </span><span style='color:#0057ae;'>%.3e</span><span style='color:#c00000;'>  </span><span style='color:#0057ae;'>%.3e</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (scheme, L1, L2))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'   --------------------------------------'</span>)
+        <span style='color:#898887;'># Sort by L2</span>
+        L_report.sort(key = <b>lambda</b> t: t[<span style='color:#b08000;'>2</span>])
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'   ---------------------------------------'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'           Scheme  L1         L2          '</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'   ---------------------------------------'</span>)
+        <b>for</b> scheme, L1, L2 <b>in</b> L_report:
+            <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'  </span><span style='color:#3daee9;'>%15s</span><span style='color:#bf0303;'>  </span><span style='color:#3daee9;'>%.3e</span><span style='color:#bf0303;'>  </span><span style='color:#3daee9;'>%.3e</span><span style='color:#bf0303;'>'</span> % (scheme, L1, L2))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'   --------------------------------------'</span>)
 </pre>
 </body>
 </html>

@@ -11,6 +11,7 @@ Advanced Tutorials
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+.. begin-command
 
 =======================   =================================================================
 :ref:`tutorial_adv_1`     |tadv_1|
@@ -38,7 +39,6 @@ Advanced Tutorials
 
 Advanced Tutorial 1
 ===================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_adv_1
    :no-members:
@@ -57,7 +57,6 @@ Source code             `tutorial_adv_1.py <../examples/tutorial_adv_1.html>`_
 
 Advanced Tutorial 2
 ===================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_adv_2
    :no-members:
@@ -76,7 +75,6 @@ Source code             `tutorial_adv_2.py <../examples/tutorial_adv_2.html>`_
 
 Advanced Tutorial 3
 ===================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_adv_3
    :no-members:
@@ -95,7 +93,6 @@ Source code             `tutorial_adv_3.py <../examples/tutorial_adv_3.html>`_
 
 Advanced Tutorial 4
 ===================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_adv_4
     :no-members:
@@ -110,3 +107,4 @@ Source code             `tutorial_adv_4.py <../examples/tutorial_adv_4.html>`_
 =====================   =================================================================
 
 
+.. end-command

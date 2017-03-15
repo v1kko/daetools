@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'RunExamples.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_RunExamplesDialog(object):
     def setupUi(self, RunExamplesDialog):
         RunExamplesDialog.setObjectName("RunExamplesDialog")
-        RunExamplesDialog.resize(700, 400)
+        RunExamplesDialog.resize(750, 550)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -20,10 +20,7 @@ class Ui_RunExamplesDialog(object):
         RunExamplesDialog.setMinimumSize(QtCore.QSize(500, 200))
         RunExamplesDialog.setMaximumSize(QtCore.QSize(10000, 100000))
         RunExamplesDialog.setSizeGripEnabled(False)
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(RunExamplesDialog)
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_3.setSpacing(2)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout(RunExamplesDialog)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
@@ -97,27 +94,10 @@ class Ui_RunExamplesDialog(object):
         self.verticalLayout.addWidget(self.toolButtonRuntimeModelReport)
         self.horizontalLayout_2.addLayout(self.verticalLayout)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
-        self.docstringEdit = QtWidgets.QTextEdit(RunExamplesDialog)
-        self.docstringEdit.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.docstringEdit.sizePolicy().hasHeightForWidth())
-        self.docstringEdit.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Monospace")
-        font.setPointSize(8)
-        self.docstringEdit.setFont(font)
-        self.docstringEdit.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.docstringEdit.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.docstringEdit.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.docstringEdit.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.docstringEdit.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
-        self.docstringEdit.setReadOnly(True)
-        self.docstringEdit.setObjectName("docstringEdit")
-        self.verticalLayout_3.addWidget(self.docstringEdit)
-        self.verticalLayout_3.setStretch(1, 2)
-        self.horizontalLayout_3.addLayout(self.verticalLayout_3)
+        self.docstringWeb = QtWebKitWidgets.QWebView(RunExamplesDialog)
+        self.docstringWeb.setUrl(QtCore.QUrl("about:blank"))
+        self.docstringWeb.setObjectName("docstringWeb")
+        self.verticalLayout_3.addWidget(self.docstringWeb)
 
         self.retranslateUi(RunExamplesDialog)
         QtCore.QMetaObject.connectSlotsByName(RunExamplesDialog)
@@ -132,3 +112,4 @@ class Ui_RunExamplesDialog(object):
         self.toolButtonModelReport.setText(_translate("RunExamplesDialog", "Show model report ... *"))
         self.toolButtonRuntimeModelReport.setText(_translate("RunExamplesDialog", "Show runtime model report ... *"))
 
+from PyQt5 import QtWebKitWidgets

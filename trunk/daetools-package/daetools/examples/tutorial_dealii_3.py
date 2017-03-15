@@ -185,7 +185,7 @@ def guiRun(app):
     daeQtMessage("deal.II", "The simulation results will be located in: %s" % results_folder)
 
     simulation.m.SetReportingOn(True)
-    simulation.TimeHorizon       = 1.0
+    simulation.TimeHorizon       = 500.0
     simulation.ReportingInterval = simulation.TimeHorizon/100
     simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()

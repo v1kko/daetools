@@ -25,8 +25,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QWebView" name="webView" native="true">
-     <property name="url" stdset="0">
+    <widget class="QWebView" name="webView">
+     <property name="styleSheet">
+      <string notr="true">body{font-family:&quot;Courier New&quot;, &quot;Monospace&quot;; font-size: 1.6em}</string>
+     </property>
+     <property name="url">
       <url>
        <string>about:blank</string>
       </url>
@@ -39,7 +42,7 @@
   <customwidget>
    <class>QWebView</class>
    <extends>QWidget</extends>
-   <header>QtWebKit/QWebView</header>
+   <header>QtWebKitWidgets/QWebView</header>
   </customwidget>
  </customwidgets>
  <resources/>

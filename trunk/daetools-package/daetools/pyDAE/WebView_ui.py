@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'WebView.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -21,7 +21,8 @@ class Ui_WebViewDialog(object):
         self.verticalLayout = QtWidgets.QVBoxLayout(WebViewDialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.webView = QtWebKitWidgets.QWebView(WebViewDialog)
-        self.webView.setProperty("url", QtCore.QUrl("about:blank"))
+        self.webView.setStyleSheet("body{font-family:\"Courier New\", \"Monospace\"; font-size: 1.6em}")
+        self.webView.setUrl(QtCore.QUrl("about:blank"))
         self.webView.setObjectName("webView")
         self.verticalLayout.addWidget(self.webView)
 

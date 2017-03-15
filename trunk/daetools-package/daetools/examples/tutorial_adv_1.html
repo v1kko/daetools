@@ -6,270 +6,271 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial_adv_1.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            tutorial_adv_1.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial presents a user-defined simulation which instead of simply integrating</span>
-<span style='color:#c00000;'>the system shows the pyQt graphical user interface (GUI) where the simulation can be</span>
-<span style='color:#c00000;'>manipulated (a sort of interactive operating procedure).</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                            tutorial_adv_1.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>This tutorial presents a user-defined simulation which instead of simply integrating</span>
+<span style='color:#bf0303;'>the system shows the pyQt graphical user interface (GUI) where the simulation can be</span>
+<span style='color:#bf0303;'>manipulated (a sort of interactive operating procedure).</span>
 
-<span style='color:#c00000;'>The model in this example is the same as in the tutorial 4.</span>
+<span style='color:#bf0303;'>The model in this example is the same as in the tutorial 4.</span>
 
-<span style='color:#c00000;'>The simulation.Run() function is modifed to show the graphical user interface (GUI)</span>
-<span style='color:#c00000;'>that allows to specify the input power of the heater (degree of freedom), a time period</span>
-<span style='color:#c00000;'>for integration, and a reporting interval. The GUI also contains the temperature plot</span>
-<span style='color:#c00000;'>updated in real time, as the simulation progresses.</span>
+<span style='color:#bf0303;'>The simulation.Run() function is modifed to show the graphical user interface (GUI)</span>
+<span style='color:#bf0303;'>that allows to specify the input power of the heater (degree of freedom), a time period</span>
+<span style='color:#bf0303;'>for integration, and a reporting interval. The GUI also contains the temperature plot</span>
+<span style='color:#bf0303;'>updated in real time, as the simulation progresses.</span>
 
-<span style='color:#c00000;'>The screenshot of the pyQt GUI:</span>
+<span style='color:#bf0303;'>The screenshot of the pyQt GUI:</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_adv_1-screenshot.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial_adv_1-screenshot.png</span>
+<span style='color:#bf0303;'>   :width: 500px</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime, sleep
-<span style='color:#0000ff;'>from</span> os.path <span style='color:#0000ff;'>import</span> join, realpath, dirname
-<span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-<span style='color:#0000ff;'>import</span> matplotlib
-matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
-<span style='color:#0000ff;'>from</span> matplotlib.figure <span style='color:#0000ff;'>import</span> Figure
-<span style='color:#0000ff;'>from</span> matplotlib.backends.backend_qt4agg <span style='color:#0000ff;'>import</span> FigureCanvasQTAgg <span style='color:#0000ff;'>as</span> FigureCanvas
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#ff5500;'>import</span> sys
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime, sleep
+<span style='color:#ff5500;'>from</span> os.path <span style='color:#ff5500;'>import</span> join, realpath, dirname
+<span style='color:#ff5500;'>from</span> PyQt5 <span style='color:#ff5500;'>import</span> QtCore, QtGui, QtWidgets
+<span style='color:#ff5500;'>import</span> matplotlib
+matplotlib.use(<span style='color:#bf0303;'>'Qt5Agg'</span>)
+<span style='color:#ff5500;'>from</span> matplotlib.figure <span style='color:#ff5500;'>import</span> Figure
+<span style='color:#ff5500;'>from</span> matplotlib.backends.backend_qt5agg <span style='color:#ff5500;'>import</span> FigureCanvasQTAgg <span style='color:#ff5500;'>as</span> FigureCanvas
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
 <b>try</b>:
-    <span style='color:#0000ff;'>from</span> .tutorial_adv_1_ui <span style='color:#0000ff;'>import</span> Ui_InteractiveRunDialog
-<b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-    <span style='color:#0000ff;'>from</span> tutorial_adv_1_ui <span style='color:#0000ff;'>import</span> Ui_InteractiveRunDialog
+    <span style='color:#ff5500;'>from</span> .tutorial_adv_1_ui <span style='color:#ff5500;'>import</span> Ui_InteractiveRunDialog
+<b>except</b> <span style='color:#006e28;'>Exception</span> <span style='color:#ff5500;'>as</span> e:
+    <span style='color:#ff5500;'>from</span> tutorial_adv_1_ui <span style='color:#ff5500;'>import</span> Ui_InteractiveRunDialog
 
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kW
+<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W, kW
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;m&quot;</span>,       kg,           <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Mass of the copper plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat transfer coefficient&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>,         <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Area of the plate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature of the surroundings&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m     = daeParameter(<span style='color:#bf0303;'>&quot;m&quot;</span>,       kg,           <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.cp    = daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,     J/(kg*K),     <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.alpha = daeParameter(<span style='color:#bf0303;'>&quot;&amp;alpha;&quot;</span>, W/((m**<span style='color:#b08000;'>2</span>)*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.A     = daeParameter(<span style='color:#bf0303;'>&quot;A&quot;</span>,       m**<span style='color:#b08000;'>2</span>,         <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.Tsurr = daeParameter(<span style='color:#bf0303;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the surroundings&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Qin  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Power of the heater&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.T    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature of the plate&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.Qin  = daeVariable(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.T    = daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;HeatBalance&quot;</span>, <span style='color:#c00000;'>&quot;Integral heat balance equation&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#0000ff;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#0000ff;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.Tsurr())
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Integral heat balance equation&quot;</span>)
+        eq.Residual = <span style='color:#0057ae;'>self</span>.m() * <span style='color:#0057ae;'>self</span>.cp() * dt(<span style='color:#0057ae;'>self</span>.T()) - <span style='color:#0057ae;'>self</span>.Qin() + <span style='color:#0057ae;'>self</span>.alpha() * <span style='color:#0057ae;'>self</span>.A() * (<span style='color:#0057ae;'>self</span>.T() - <span style='color:#0057ae;'>self</span>.Tsurr())
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_adv_1&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial_adv_1&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.m.SetValue(<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>*</span></b> kg)
-        <span style='color:#0000ff;'>self</span>.m.alpha.SetValue(<span style='color:#c000c0;'>200</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.A.SetValue(<span style='color:#c000c0;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)
-        <span style='color:#0000ff;'>self</span>.m.Tsurr.SetValue(<span style='color:#c000c0;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span> * J/(kg*K))
+        <span style='color:#0057ae;'>self</span>.m.m.SetValue(<span style='color:#b08000;'>1</span> * kg)
+        <span style='color:#0057ae;'>self</span>.m.alpha.SetValue(<span style='color:#b08000;'>200</span> * W/((m**<span style='color:#b08000;'>2</span>)*K))
+        <span style='color:#0057ae;'>self</span>.m.A.SetValue(<span style='color:#b08000;'>0.1</span> * m**<span style='color:#b08000;'>2</span>)
+        <span style='color:#0057ae;'>self</span>.m.Tsurr.SetValue(<span style='color:#b08000;'>283</span> * K)
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.Qin.AssignValue(<span style='color:#c000c0;'>1500</span> <b><span style='color:#0000ff;'>*</span></b> W)
-        <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition(<span style='color:#c000c0;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.Qin.AssignValue(<span style='color:#b08000;'>1500</span> * W)
+        <span style='color:#0057ae;'>self</span>.m.T.SetInitialCondition(<span style='color:#b08000;'>283</span> * K)
 
-    <b>def</b> Run(<span style='color:#0000ff;'>self</span>):
-        opDlg <b><span style='color:#0000ff;'>=</span></b> InteractiveOP(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> Run(<span style='color:#0057ae;'>self</span>):
+        opDlg = InteractiveOP(<span style='color:#0057ae;'>self</span>)
         opDlg.exec_()
         
-<b>class</b> InteractiveOP(QtGui.QDialog):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, simulation):
-        QtGui.QDialog.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+<b>class</b> InteractiveOP(QtWidgets.QDialog):
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, simulation):
+        QtWidgets.QDialog.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
 
-        <span style='color:#0000ff;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> Ui_InteractiveRunDialog()
-        <span style='color:#0000ff;'>self</span>.ui.setupUi(<span style='color:#0000ff;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.ui = Ui_InteractiveRunDialog()
+        <span style='color:#0057ae;'>self</span>.ui.setupUi(<span style='color:#0057ae;'>self</span>)
 
-        <span style='color:#0000ff;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#0000ff;'>__file__</span>), <span style='color:#c00000;'>'daetools-48x48.png'</span>)))
-        <span style='color:#0000ff;'>self</span>.setWindowTitle(<span style='color:#c00000;'>&quot;Advanced Tutorial 1 - An Interactive Operating Procedure&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#0057ae;'>__file__</span>), <span style='color:#bf0303;'>'daetools-48x48.png'</span>)))
+        <span style='color:#0057ae;'>self</span>.setWindowTitle(<span style='color:#bf0303;'>&quot;Advanced Tutorial 1 - An Interactive Operating Procedure&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.simulation <b><span style='color:#0000ff;'>=</span></b> simulation
-        <span style='color:#0000ff;'>self</span>.ui.powerSpinBox.setValue(<span style='color:#0000ff;'>self</span>.simulation.m.Qin.GetValue())
-        <span style='color:#0000ff;'>self</span>.ui.reportingIntervalSpinBox.setValue(<span style='color:#0000ff;'>self</span>.simulation.ReportingInterval)
+        <span style='color:#0057ae;'>self</span>.simulation = simulation
+        <span style='color:#0057ae;'>self</span>.ui.powerSpinBox.setValue(<span style='color:#0057ae;'>self</span>.simulation.m.Qin.GetValue())
+        <span style='color:#0057ae;'>self</span>.ui.reportingIntervalSpinBox.setValue(<span style='color:#0057ae;'>self</span>.simulation.ReportingInterval)
 
-        <span style='color:#0000ff;'>self</span>.figure <b><span style='color:#0000ff;'>=</span></b> Figure((<span style='color:#c000c0;'>5.0</span>, <span style='color:#c000c0;'>4.0</span>), dpi<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>100</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'white'</span>)
-        <span style='color:#0000ff;'>self</span>.canvas <b><span style='color:#0000ff;'>=</span></b> FigureCanvas(<span style='color:#0000ff;'>self</span>.figure)
-        <span style='color:#0000ff;'>self</span>.canvas.setParent(<span style='color:#0000ff;'>self</span>.ui.frame)
-        <span style='color:#0000ff;'>self</span>.canvas.axes <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.figure.add_subplot(<span style='color:#c000c0;'>111</span>)
+        <span style='color:#0057ae;'>self</span>.figure = Figure((<span style='color:#b08000;'>5.0</span>, <span style='color:#b08000;'>4.0</span>), dpi=<span style='color:#b08000;'>100</span>, facecolor=<span style='color:#bf0303;'>'white'</span>)
+        <span style='color:#0057ae;'>self</span>.canvas = FigureCanvas(<span style='color:#0057ae;'>self</span>.figure)
+        <span style='color:#0057ae;'>self</span>.canvas.setParent(<span style='color:#0057ae;'>self</span>.ui.frame)
+        <span style='color:#0057ae;'>self</span>.canvas.axes = <span style='color:#0057ae;'>self</span>.figure.add_subplot(<span style='color:#b08000;'>111</span>)
 
-        <span style='color:#008000;'># Add an empty curve</span>
-        <span style='color:#0000ff;'>self</span>.line, <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.canvas.axes.plot([], [])
+        <span style='color:#898887;'># Add an empty curve</span>
+        <span style='color:#0057ae;'>self</span>.line, = <span style='color:#0057ae;'>self</span>.canvas.axes.plot([], [])
 
-        <span style='color:#0000ff;'>self</span>.fp9  <b><span style='color:#0000ff;'>=</span></b> matplotlib.font_manager.FontProperties(family<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'sans-serif'</span>, style<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, variant<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, weight<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, size<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>9</span>)
-        <span style='color:#0000ff;'>self</span>.fp10 <b><span style='color:#0000ff;'>=</span></b> matplotlib.font_manager.FontProperties(family<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'sans-serif'</span>, style<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, variant<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, weight<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'bold'</span>, size<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>10</span>)
+        <span style='color:#0057ae;'>self</span>.fp9  = matplotlib.font_manager.FontProperties(family=<span style='color:#bf0303;'>'sans-serif'</span>, style=<span style='color:#bf0303;'>'normal'</span>, variant=<span style='color:#bf0303;'>'normal'</span>, weight=<span style='color:#bf0303;'>'normal'</span>, size=<span style='color:#b08000;'>9</span>)
+        <span style='color:#0057ae;'>self</span>.fp10 = matplotlib.font_manager.FontProperties(family=<span style='color:#bf0303;'>'sans-serif'</span>, style=<span style='color:#bf0303;'>'normal'</span>, variant=<span style='color:#bf0303;'>'normal'</span>, weight=<span style='color:#bf0303;'>'bold'</span>, size=<span style='color:#b08000;'>10</span>)
 
-        <span style='color:#0000ff;'>self</span>.canvas.axes.set_xlabel(<span style='color:#c00000;'>'Time, s'</span>,        fontproperties<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>self</span>.fp10)
-        <span style='color:#0000ff;'>self</span>.canvas.axes.set_ylabel(<span style='color:#c00000;'>'Temperature, K'</span>, fontproperties<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>self</span>.fp10)
+        <span style='color:#0057ae;'>self</span>.canvas.axes.set_xlabel(<span style='color:#bf0303;'>'Time, s'</span>,        fontproperties=<span style='color:#0057ae;'>self</span>.fp10)
+        <span style='color:#0057ae;'>self</span>.canvas.axes.set_ylabel(<span style='color:#bf0303;'>'Temperature, K'</span>, fontproperties=<span style='color:#0057ae;'>self</span>.fp10)
 
-        <b>for</b> xlabel <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>self</span>.canvas.axes.get_xticklabels():
-            xlabel.set_fontproperties(<span style='color:#0000ff;'>self</span>.fp9)
-        <b>for</b> ylabel <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>self</span>.canvas.axes.get_yticklabels():
-            ylabel.set_fontproperties(<span style='color:#0000ff;'>self</span>.fp9)
+        <b>for</b> xlabel <b>in</b> <span style='color:#0057ae;'>self</span>.canvas.axes.get_xticklabels():
+            xlabel.set_fontproperties(<span style='color:#0057ae;'>self</span>.fp9)
+        <b>for</b> ylabel <b>in</b> <span style='color:#0057ae;'>self</span>.canvas.axes.get_yticklabels():
+            ylabel.set_fontproperties(<span style='color:#0057ae;'>self</span>.fp9)
 
-        <span style='color:#0000ff;'>self</span>.canvas.axes.grid(<span style='color:#0000ff;'>True</span>)
+        <span style='color:#0057ae;'>self</span>.canvas.axes.grid(<span style='color:#0057ae;'>True</span>)
 
-        <span style='color:#0000ff;'>self</span>.<b><span style='color:#0095ff;'>connect</span></b>(<span style='color:#0000ff;'>self</span>.ui.runButton, QtCore.<b><span style='color:#0095ff;'>SIGNAL</span></b>(<span style='color:#c00000;'>'clicked()'</span>), <span style='color:#0000ff;'>self</span>.integrate)
+        <span style='color:#0057ae;'>self</span>.ui.runButton.clicked.<span style='color:#0095ff;'>connect</span>(<span style='color:#0057ae;'>self</span>.integrate)
 
-    <b>def</b> integrate(<span style='color:#0000ff;'>self</span>):
+    <b>def</b> integrate(<span style='color:#0057ae;'>self</span>):
         <b>try</b>:
-            <span style='color:#008000;'># Get the data from the GUI</span>
-            Qin      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>float</span>(<span style='color:#0000ff;'>self</span>.ui.powerSpinBox.value())
-            interval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>float</span>(<span style='color:#0000ff;'>self</span>.ui.intervalSpinBox.value())
-            <span style='color:#0000ff;'>self</span>.simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>float</span>(<span style='color:#0000ff;'>self</span>.ui.reportingIntervalSpinBox.value())
-            <span style='color:#0000ff;'>self</span>.simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.CurrentTime <b><span style='color:#0000ff;'>+</span></b> interval
+            <span style='color:#898887;'># Get the data from the GUI</span>
+            Qin      = <b><span style='color:#644a9b;'>float</span></b>(<span style='color:#0057ae;'>self</span>.ui.powerSpinBox.value())
+            interval = <b><span style='color:#644a9b;'>float</span></b>(<span style='color:#0057ae;'>self</span>.ui.intervalSpinBox.value())
+            <span style='color:#0057ae;'>self</span>.simulation.ReportingInterval = <b><span style='color:#644a9b;'>float</span></b>(<span style='color:#0057ae;'>self</span>.ui.reportingIntervalSpinBox.value())
+            <span style='color:#0057ae;'>self</span>.simulation.TimeHorizon       = <span style='color:#0057ae;'>self</span>.simulation.CurrentTime + interval
 
-            <b>if</b> <span style='color:#0000ff;'>self</span>.simulation.ReportingInterval <b><span style='color:#0000ff;'>&gt;</span></b> interval:
-                QtGui.QMessageBox.warning(<span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;tutorial_adv_1&quot;</span>, <span style='color:#c00000;'>'Reporting interval must be lower than the integration interval'</span>)
+            <b>if</b> <span style='color:#0057ae;'>self</span>.simulation.ReportingInterval &gt; interval:
+                QtWidgets.QMessageBox.warning(<span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;tutorial_adv_1&quot;</span>, <span style='color:#bf0303;'>'Reporting interval must be lower than the integration interval'</span>)
                 <b>return</b>
 
-            <span style='color:#008000;'># Disable the input boxes and buttons</span>
-            <span style='color:#0000ff;'>self</span>.ui.powerSpinBox.setEnabled(<span style='color:#0000ff;'>False</span>)
-            <span style='color:#0000ff;'>self</span>.ui.intervalSpinBox.setEnabled(<span style='color:#0000ff;'>False</span>)
-            <span style='color:#0000ff;'>self</span>.ui.reportingIntervalSpinBox.setEnabled(<span style='color:#0000ff;'>False</span>)
-            <span style='color:#0000ff;'>self</span>.ui.runButton.setEnabled(<span style='color:#0000ff;'>False</span>)
+            <span style='color:#898887;'># Disable the input boxes and buttons</span>
+            <span style='color:#0057ae;'>self</span>.ui.powerSpinBox.setEnabled(<span style='color:#0057ae;'>False</span>)
+            <span style='color:#0057ae;'>self</span>.ui.intervalSpinBox.setEnabled(<span style='color:#0057ae;'>False</span>)
+            <span style='color:#0057ae;'>self</span>.ui.reportingIntervalSpinBox.setEnabled(<span style='color:#0057ae;'>False</span>)
+            <span style='color:#0057ae;'>self</span>.ui.runButton.setEnabled(<span style='color:#0057ae;'>False</span>)
 
-            <span style='color:#008000;'># Reassign the new Qin value, reinitialize the simulation and report the data</span>
-            <span style='color:#0000ff;'>self</span>.simulation.m.Qin.ReAssignValue(Qin)
-            <span style='color:#0000ff;'>self</span>.simulation.Reinitialize()
-            <span style='color:#0000ff;'>self</span>.simulation.ReportData(<span style='color:#0000ff;'>self</span>.simulation.CurrentTime)
+            <span style='color:#898887;'># Reassign the new Qin value, reinitialize the simulation and report the data</span>
+            <span style='color:#0057ae;'>self</span>.simulation.m.Qin.ReAssignValue(Qin)
+            <span style='color:#0057ae;'>self</span>.simulation.Reinitialize()
+            <span style='color:#0057ae;'>self</span>.simulation.ReportData(<span style='color:#0057ae;'>self</span>.simulation.CurrentTime)
 
-            <span style='color:#008000;'># Integrate for ReportingInterval until the TimeHorizon is reached</span>
-            <span style='color:#008000;'># After each integration call update the plot with the new data</span>
-            <span style='color:#008000;'># Sleep for 0.1 seconds after each integration to give some real-time impression</span>
-            time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.IntegrateForTimeInterval(<span style='color:#0000ff;'>self</span>.simulation.ReportingInterval, eDoNotStopAtDiscontinuity)
-            <span style='color:#0000ff;'>self</span>.simulation.ReportData(<span style='color:#0000ff;'>self</span>.simulation.CurrentTime)
-            <span style='color:#0000ff;'>self</span>._updatePlot()
-            sleep(<span style='color:#c000c0;'>0.1</span>)
+            <span style='color:#898887;'># Integrate for ReportingInterval until the TimeHorizon is reached</span>
+            <span style='color:#898887;'># After each integration call update the plot with the new data</span>
+            <span style='color:#898887;'># Sleep for 0.1 seconds after each integration to give some real-time impression</span>
+            time = <span style='color:#0057ae;'>self</span>.simulation.IntegrateForTimeInterval(<span style='color:#0057ae;'>self</span>.simulation.ReportingInterval, eDoNotStopAtDiscontinuity)
+            <span style='color:#0057ae;'>self</span>.simulation.ReportData(<span style='color:#0057ae;'>self</span>.simulation.CurrentTime)
+            <span style='color:#0057ae;'>self</span>._updatePlot()
+            sleep(<span style='color:#b08000;'>0.1</span>)
             
-            <b>while</b> time <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#0000ff;'>self</span>.simulation.TimeHorizon:
-                <b>if</b> time <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.simulation.ReportingInterval <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#0000ff;'>self</span>.simulation.TimeHorizon:
-                    interval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.TimeHorizon <b><span style='color:#0000ff;'>-</span></b> time
+            <b>while</b> time &lt; <span style='color:#0057ae;'>self</span>.simulation.TimeHorizon:
+                <b>if</b> time + <span style='color:#0057ae;'>self</span>.simulation.ReportingInterval &gt; <span style='color:#0057ae;'>self</span>.simulation.TimeHorizon:
+                    interval = <span style='color:#0057ae;'>self</span>.simulation.TimeHorizon - time
                 <b>else</b>:
-                    interval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.ReportingInterval
+                    interval = <span style='color:#0057ae;'>self</span>.simulation.ReportingInterval
 
-                time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.IntegrateForTimeInterval(interval, eDoNotStopAtDiscontinuity)
-                <span style='color:#0000ff;'>self</span>.simulation.ReportData(<span style='color:#0000ff;'>self</span>.simulation.CurrentTime)
-                <span style='color:#0000ff;'>self</span>._updatePlot()
-                sleep(<span style='color:#c000c0;'>0.1</span>)
+                time = <span style='color:#0057ae;'>self</span>.simulation.IntegrateForTimeInterval(interval, eDoNotStopAtDiscontinuity)
+                <span style='color:#0057ae;'>self</span>.simulation.ReportData(<span style='color:#0057ae;'>self</span>.simulation.CurrentTime)
+                <span style='color:#0057ae;'>self</span>._updatePlot()
+                sleep(<span style='color:#b08000;'>0.1</span>)
 
-        <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-            QtGui.QMessageBox.warning(<span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;tutorial_adv_1&quot;</span>, <span style='color:#c00000;'>'Error: </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(e))
+        <b>except</b> <span style='color:#006e28;'>Exception</span> <span style='color:#ff5500;'>as</span> e:
+            QtWidgets.QMessageBox.warning(<span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;tutorial_adv_1&quot;</span>, <span style='color:#bf0303;'>'Error: </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>(e))
             
         <b>finally</b>:
-            <span style='color:#008000;'># Enable the input boxes and buttons again</span>
-            <span style='color:#0000ff;'>self</span>.ui.powerSpinBox.setEnabled(<span style='color:#0000ff;'>True</span>)
-            <span style='color:#0000ff;'>self</span>.ui.intervalSpinBox.setEnabled(<span style='color:#0000ff;'>True</span>)
-            <span style='color:#0000ff;'>self</span>.ui.reportingIntervalSpinBox.setEnabled(<span style='color:#0000ff;'>True</span>)
-            <span style='color:#0000ff;'>self</span>.ui.runButton.setEnabled(<span style='color:#0000ff;'>True</span>)
+            <span style='color:#898887;'># Enable the input boxes and buttons again</span>
+            <span style='color:#0057ae;'>self</span>.ui.powerSpinBox.setEnabled(<span style='color:#0057ae;'>True</span>)
+            <span style='color:#0057ae;'>self</span>.ui.intervalSpinBox.setEnabled(<span style='color:#0057ae;'>True</span>)
+            <span style='color:#0057ae;'>self</span>.ui.reportingIntervalSpinBox.setEnabled(<span style='color:#0057ae;'>True</span>)
+            <span style='color:#0057ae;'>self</span>.ui.runButton.setEnabled(<span style='color:#0057ae;'>True</span>)
 
-    <b>def</b> _updatePlot(<span style='color:#0000ff;'>self</span>):
-        temperature <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.simulation.DataReporter.dictVariables[<span style='color:#c00000;'>'tutorial_adv_1.T'</span>]
-        x <b><span style='color:#0000ff;'>=</span></b> temperature.TimeValues
-        y <b><span style='color:#0000ff;'>=</span></b> temperature.Values
-        <span style='color:#0000ff;'>self</span>.line.set_xdata(x)
-        <span style='color:#0000ff;'>self</span>.line.set_ydata(y)
-        <span style='color:#0000ff;'>self</span>.canvas.axes.relim()
-        <span style='color:#0000ff;'>self</span>.canvas.axes.autoscale_view()
-        <span style='color:#0000ff;'>self</span>.canvas.draw()
-        <span style='color:#0000ff;'>self</span>.ui.currentTimeEdit.setText(<span style='color:#0000ff;'>str</span>(<span style='color:#0000ff;'>self</span>.simulation.CurrentTime) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>' s'</span>)
-        QtGui.QApplication.processEvents()
+    <b>def</b> _updatePlot(<span style='color:#0057ae;'>self</span>):
+        temperature = <span style='color:#0057ae;'>self</span>.simulation.DataReporter.dictVariables[<span style='color:#bf0303;'>'tutorial_adv_1.T'</span>]
+        x = temperature.TimeValues
+        y = temperature.Values
+        <span style='color:#0057ae;'>self</span>.line.set_xdata(x)
+        <span style='color:#0057ae;'>self</span>.line.set_ydata(y)
+        <span style='color:#0057ae;'>self</span>.canvas.axes.relim()
+        <span style='color:#0057ae;'>self</span>.canvas.axes.autoscale_view()
+        <span style='color:#0057ae;'>self</span>.canvas.draw()
+        <span style='color:#0057ae;'>self</span>.ui.currentTimeEdit.setText(<b><span style='color:#644a9b;'>str</span></b>(<span style='color:#0057ae;'>self</span>.simulation.CurrentTime) + <span style='color:#bf0303;'>' s'</span>)
+        QtWidgets.QApplication.processEvents()
 
 <b>def</b> guiRun(app):
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDataReporterLocal()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeDataReporterLocal()
+    simulation   = simTutorial()
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10000</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>1</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>10000</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
 <b>def</b> consoleRun():
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDataReporterLocal()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeDataReporterLocal()
+    simulation   = simTutorial()
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10000</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>1</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>10000</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
     
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+        app = QtWidgets.QApplication(sys.argv)
         consoleRun()
     <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

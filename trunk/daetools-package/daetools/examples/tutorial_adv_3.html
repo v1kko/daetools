@@ -6,360 +6,357 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial_adv_3.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            tutorial_adv_3.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial introduces the following concepts:</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                            tutorial_adv_3.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>This tutorial introduces the following concepts:</span>
 
-<span style='color:#c00000;'>- DAE Tools code-generators</span>
+<span style='color:#bf0303;'>- DAE Tools code-generators</span>
 
-<span style='color:#c00000;'>  - Modelica code-generator</span>
-<span style='color:#c00000;'>  - gPROMS code-generator</span>
-<span style='color:#c00000;'>  - FMI code-generator (for Co-Simulation)</span>
+<span style='color:#bf0303;'>  - Modelica code-generator</span>
+<span style='color:#bf0303;'>  - gPROMS code-generator</span>
+<span style='color:#bf0303;'>  - FMI code-generator (for Co-Simulation)</span>
 
-<span style='color:#c00000;'>- DAE Tools model-exchange capabilities:</span>
+<span style='color:#bf0303;'>- DAE Tools model-exchange capabilities:</span>
 
-<span style='color:#c00000;'>  - Scilab/GNU_Octave/Matlab MEX functions</span>
-<span style='color:#c00000;'>  - Simulink S-functions</span>
+<span style='color:#bf0303;'>  - Scilab/GNU_Octave/Matlab MEX functions</span>
+<span style='color:#bf0303;'>  - Simulink S-functions</span>
 
-<span style='color:#c00000;'>The model represent a simple multiplier block. It contains two inlet and two outlet ports.</span>
-<span style='color:#c00000;'>The outlets values are equal to inputs values multiplied by a multiplier &quot;m&quot;:</span>
+<span style='color:#bf0303;'>The model represent a simple multiplier block. It contains two inlet and two outlet ports.</span>
+<span style='color:#bf0303;'>The outlets values are equal to inputs values multiplied by a multiplier &quot;m&quot;:</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>    out1.y   = m1   x in1.y</span>
-<span style='color:#c00000;'>    out2.y[] = m2[] x in2.y[]</span>
+<span style='color:#bf0303;'>    out1.y   = m1   x in1.y</span>
+<span style='color:#bf0303;'>    out2.y[] = m2[] x in2.y[]</span>
 
-<span style='color:#c00000;'>where multipliers m1 and m2[] are:</span>
+<span style='color:#bf0303;'>where multipliers m1 and m2[] are:</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>   STN Multipliers</span>
-<span style='color:#c00000;'>      case variableMultipliers:</span>
-<span style='color:#c00000;'>         dm1/dt   = p1</span>
-<span style='color:#c00000;'>         dm2[]/dt = p2</span>
-<span style='color:#c00000;'>      case constantMultipliers:</span>
-<span style='color:#c00000;'>         dm1/dt   = 0</span>
-<span style='color:#c00000;'>         dm2[]/dt = 0</span>
-<span style='color:#c00000;'>        </span>
-<span style='color:#c00000;'>(that is the multipliers can be constant or variable).</span>
+<span style='color:#bf0303;'>   STN Multipliers</span>
+<span style='color:#bf0303;'>      case variableMultipliers:</span>
+<span style='color:#bf0303;'>         dm1/dt   = p1</span>
+<span style='color:#bf0303;'>         dm2[]/dt = p2</span>
+<span style='color:#bf0303;'>      case constantMultipliers:</span>
+<span style='color:#bf0303;'>         dm1/dt   = 0</span>
+<span style='color:#bf0303;'>         dm2[]/dt = 0</span>
+<span style='color:#bf0303;'>        </span>
+<span style='color:#bf0303;'>(that is the multipliers can be constant or variable).</span>
 
-<span style='color:#c00000;'>The ports in1 and out1 are scalar (width = 1).</span>
-<span style='color:#c00000;'>The ports in2 and out2 are vectors (width = 1).</span>
+<span style='color:#bf0303;'>The ports in1 and out1 are scalar (width = 1).</span>
+<span style='color:#bf0303;'>The ports in2 and out2 are vectors (width = 1).</span>
 
-<span style='color:#c00000;'>Achtung, Achtung!!</span>
-<span style='color:#c00000;'>Notate bene:</span>
+<span style='color:#bf0303;'>Achtung, Achtung!!</span>
+<span style='color:#bf0303;'>Notate bene:</span>
 
-<span style='color:#c00000;'>1. Inlet ports must be DOFs (that is to have their values asssigned),</span>
-<span style='color:#c00000;'>   for they can't be connected when the model is simulated outside of daetools context.</span>
-<span style='color:#c00000;'>2. Only scalar output ports are supported at the moment!! (Simulink issue)</span>
+<span style='color:#bf0303;'>1. Inlet ports must be DOFs (that is to have their values asssigned),</span>
+<span style='color:#bf0303;'>   for they can't be connected when the model is simulated outside of daetools context.</span>
+<span style='color:#bf0303;'>2. Only scalar output ports are supported at the moment!! (Simulink issue)</span>
 
-<span style='color:#c00000;'>The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for</span>
-<span style='color:#c00000;'>the constant multipliers (m1 = 2):</span>
+<span style='color:#bf0303;'>The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for</span>
+<span style='color:#bf0303;'>the constant multipliers (m1 = 2):</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_adv_3-results.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial_adv_3-results.png</span>
+<span style='color:#bf0303;'>   :width: 500px</span>
 
-<span style='color:#c00000;'>The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for</span>
-<span style='color:#c00000;'>the variable multipliers (dm1/dt = 10, m1(t=0) = 2):</span>
+<span style='color:#bf0303;'>The plot of the inlet 'y' variable and the multiplied outlet 'y' variable for</span>
+<span style='color:#bf0303;'>the variable multipliers (dm1/dt = 10, m1(t=0) = 2):</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_adv_3-results2.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial_adv_3-results2.png</span>
+<span style='color:#bf0303;'>   :width: 500px</span>
 
-<span style='color:#c00000;'>FMI Cross-Check results:</span>
+<span style='color:#bf0303;'>FMI Cross-Check results:</span>
 
-<span style='color:#c00000;'>1. Start the DAEPlotter (or change the data reporter below).</span>
+<span style='color:#bf0303;'>1. Start the DAEPlotter (or change the data reporter below).</span>
 
-<span style='color:#c00000;'>2. Execute:</span>
+<span style='color:#bf0303;'>2. Execute:</span>
 
-<span style='color:#c00000;'>   .. code-block:: none</span>
+<span style='color:#bf0303;'>   .. code-block:: none</span>
 
-<span style='color:#c00000;'>      ./fmuCheck.linux64 -n 10 tutorial_adv_3.fmu</span>
+<span style='color:#bf0303;'>      ./fmuCheck.linux64 -n 10 tutorial_adv_3.fmu</span>
 
-<span style='color:#c00000;'>3. Results:</span>
+<span style='color:#bf0303;'>3. Results:</span>
 
-<span style='color:#c00000;'>   .. code-block:: none</span>
+<span style='color:#bf0303;'>   .. code-block:: none</span>
 
-<span style='color:#c00000;'>    [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Will process FMU tutorial_adv_3.fmu</span>
-<span style='color:#c00000;'>    [INFO][FMILIB] XML specifies FMI standard version 2.0</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Model name: tutorial_adv_3</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Model GUID: e9654532-0998-11e6-957b-9cb70d5dfdfc</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Model version:</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] FMU kind: CoSimulation</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] The FMU contains:</span>
-<span style='color:#c00000;'>    0 constants</span>
-<span style='color:#c00000;'>    3 parameters</span>
-<span style='color:#c00000;'>    0 discrete variables</span>
-<span style='color:#c00000;'>    4 continuous variables</span>
-<span style='color:#c00000;'>    2 inputs</span>
-<span style='color:#c00000;'>    2 outputs</span>
-<span style='color:#c00000;'>    0 local variables</span>
-<span style='color:#c00000;'>    0 independent variables</span>
-<span style='color:#c00000;'>    0 calculated parameters</span>
-<span style='color:#c00000;'>    6 real variables</span>
-<span style='color:#c00000;'>    0 integer variables</span>
-<span style='color:#c00000;'>    0 enumeration variables</span>
-<span style='color:#c00000;'>    0 boolean variables</span>
-<span style='color:#c00000;'>    1 string variables</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Will process FMU tutorial_adv_3.fmu</span>
+<span style='color:#bf0303;'>    [INFO][FMILIB] XML specifies FMI standard version 2.0</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Model name: tutorial_adv_3</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Model GUID: e9654532-0998-11e6-957b-9cb70d5dfdfc</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Model version:</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] FMU kind: CoSimulation</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] The FMU contains:</span>
+<span style='color:#bf0303;'>    0 constants</span>
+<span style='color:#bf0303;'>    3 parameters</span>
+<span style='color:#bf0303;'>    0 discrete variables</span>
+<span style='color:#bf0303;'>    4 continuous variables</span>
+<span style='color:#bf0303;'>    2 inputs</span>
+<span style='color:#bf0303;'>    2 outputs</span>
+<span style='color:#bf0303;'>    0 local variables</span>
+<span style='color:#bf0303;'>    0 independent variables</span>
+<span style='color:#bf0303;'>    0 calculated parameters</span>
+<span style='color:#bf0303;'>    6 real variables</span>
+<span style='color:#bf0303;'>    0 integer variables</span>
+<span style='color:#bf0303;'>    0 enumeration variables</span>
+<span style='color:#bf0303;'>    0 boolean variables</span>
+<span style='color:#bf0303;'>    1 string variables</span>
 
-<span style='color:#c00000;'>    [INFO][FMUCHK] Printing output file header</span>
-<span style='color:#c00000;'>    time,out_1.y,out_2.y</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial_adv_3</span>
-<span style='color:#c00000;'>    [INFO][FMILIB] Loading 'linux64' binary with 'default' platform types</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Version returned from CS FMU:   2.0</span>
-<span style='color:#c00000;'>    ***********************************************************************</span>
-<span style='color:#c00000;'>                                     Version:   1.5.0</span>
-<span style='color:#c00000;'>                                     Copyright: Dragan Nikolic</span>
-<span style='color:#c00000;'>                                     Homepage:  http://www.daetools.com</span>
-<span style='color:#c00000;'>           @                       @</span>
-<span style='color:#c00000;'>           @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@</span>
-<span style='color:#c00000;'>      @@@@@@        @   @     @    @     @     @  @     @  @     @</span>
-<span style='color:#c00000;'>     @     @   @@@@@@   @@@@@@     @     @     @  @     @  @      @@@@@</span>
-<span style='color:#c00000;'>     @     @  @     @   @          @     @     @  @     @  @           @</span>
-<span style='color:#c00000;'>      @@@@@@   @@@@@@    @@@@@      @@@   @@@@@    @@@@@    @@@@  @@@@@</span>
-<span style='color:#c00000;'>    ***********************************************************************</span>
-<span style='color:#c00000;'>    DAE Tools is free software: you can redistribute it and/or modify</span>
-<span style='color:#c00000;'>    it under the terms of the GNU General Public License version 3</span>
-<span style='color:#c00000;'>    as published by the Free Software Foundation.</span>
-<span style='color:#c00000;'>    DAE Tools is distributed in the hope that it will be useful,</span>
-<span style='color:#c00000;'>    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
-<span style='color:#c00000;'>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
-<span style='color:#c00000;'>    General Public License for more details.</span>
-<span style='color:#c00000;'>    You should have received a copy of the GNU General Public License</span>
-<span style='color:#c00000;'>    along with this program. If not, see &lt;http://www.gnu.org/licenses&gt;.</span>
-<span style='color:#c00000;'>    ***********************************************************************</span>
-<span style='color:#c00000;'>    Creating the system...</span>
-<span style='color:#c00000;'>    The system created successfully in: 0.002 s</span>
-<span style='color:#c00000;'>    Starting the initialization of the system... Done.</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Initialized FMU for simulation starting at time 0</span>
-<span style='color:#c00000;'>    0,1.0000000010000001E+00,2.0000000039999999E+00</span>
-<span style='color:#c00000;'>    10,1.0100000000000001E+02,4.0200000000000006E+02</span>
-<span style='color:#c00000;'>    20,2.0099999999999994E+02,8.0199999999999977E+02</span>
-<span style='color:#c00000;'>    30,3.0100000000000000E+02,1.2020000000000000E+03</span>
-<span style='color:#c00000;'>    40,4.0100000000000000E+02,1.6020000000000000E+03</span>
-<span style='color:#c00000;'>    50,5.0099999999999989E+02,2.0019999999999995E+03</span>
-<span style='color:#c00000;'>    60,6.0100000000000000E+02,2.4020000000000000E+03</span>
-<span style='color:#c00000;'>    70,7.0100000000000000E+02,2.8020000000000000E+03</span>
-<span style='color:#c00000;'>    80,8.0100000000000000E+02,3.2020000000000000E+03</span>
-<span style='color:#c00000;'>    90,9.0099999999999977E+02,3.6019999999999991E+03</span>
-<span style='color:#c00000;'>    100,1.0009999999999998E+03,4.0019999999999991E+03</span>
-<span style='color:#c00000;'>    [INFO][FMUCHK] Simulation finished successfully at time 100</span>
-<span style='color:#c00000;'>    FMU check summary:</span>
-<span style='color:#c00000;'>    FMU reported:</span>
-<span style='color:#c00000;'>            0 warning(s) and error(s)</span>
-<span style='color:#c00000;'>    Checker reported:</span>
-<span style='color:#c00000;'>            0 Warning(s)</span>
-<span style='color:#c00000;'>            0 Error(s)</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Printing output file header</span>
+<span style='color:#bf0303;'>    time,out_1.y,out_2.y</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial_adv_3</span>
+<span style='color:#bf0303;'>    [INFO][FMILIB] Loading 'linux64' binary with 'default' platform types</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Version returned from CS FMU:   2.0</span>
+<span style='color:#bf0303;'>    ***********************************************************************</span>
+<span style='color:#bf0303;'>                                     Version:   1.5.0</span>
+<span style='color:#bf0303;'>                                     Copyright: Dragan Nikolic</span>
+<span style='color:#bf0303;'>                                     Homepage:  http://www.daetools.com</span>
+<span style='color:#bf0303;'>           @                       @</span>
+<span style='color:#bf0303;'>           @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@</span>
+<span style='color:#bf0303;'>      @@@@@@        @   @     @    @     @     @  @     @  @     @</span>
+<span style='color:#bf0303;'>     @     @   @@@@@@   @@@@@@     @     @     @  @     @  @      @@@@@</span>
+<span style='color:#bf0303;'>     @     @  @     @   @          @     @     @  @     @  @           @</span>
+<span style='color:#bf0303;'>      @@@@@@   @@@@@@    @@@@@      @@@   @@@@@    @@@@@    @@@@  @@@@@</span>
+<span style='color:#bf0303;'>    ***********************************************************************</span>
+<span style='color:#bf0303;'>    DAE Tools is free software: you can redistribute it and/or modify</span>
+<span style='color:#bf0303;'>    it under the terms of the GNU General Public License version 3</span>
+<span style='color:#bf0303;'>    as published by the Free Software Foundation.</span>
+<span style='color:#bf0303;'>    DAE Tools is distributed in the hope that it will be useful,</span>
+<span style='color:#bf0303;'>    but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span style='color:#bf0303;'>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span style='color:#bf0303;'>    General Public License for more details.</span>
+<span style='color:#bf0303;'>    You should have received a copy of the GNU General Public License</span>
+<span style='color:#bf0303;'>    along with this program. If not, see &lt;http://www.gnu.org/licenses&gt;.</span>
+<span style='color:#bf0303;'>    ***********************************************************************</span>
+<span style='color:#bf0303;'>    Creating the system...</span>
+<span style='color:#bf0303;'>    The system created successfully in: 0.002 s</span>
+<span style='color:#bf0303;'>    Starting the initialization of the system... Done.</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Initialized FMU for simulation starting at time 0</span>
+<span style='color:#bf0303;'>    0,1.0000000010000001E+00,2.0000000039999999E+00</span>
+<span style='color:#bf0303;'>    10,1.0100000000000001E+02,4.0200000000000006E+02</span>
+<span style='color:#bf0303;'>    20,2.0099999999999994E+02,8.0199999999999977E+02</span>
+<span style='color:#bf0303;'>    30,3.0100000000000000E+02,1.2020000000000000E+03</span>
+<span style='color:#bf0303;'>    40,4.0100000000000000E+02,1.6020000000000000E+03</span>
+<span style='color:#bf0303;'>    50,5.0099999999999989E+02,2.0019999999999995E+03</span>
+<span style='color:#bf0303;'>    60,6.0100000000000000E+02,2.4020000000000000E+03</span>
+<span style='color:#bf0303;'>    70,7.0100000000000000E+02,2.8020000000000000E+03</span>
+<span style='color:#bf0303;'>    80,8.0100000000000000E+02,3.2020000000000000E+03</span>
+<span style='color:#bf0303;'>    90,9.0099999999999977E+02,3.6019999999999991E+03</span>
+<span style='color:#bf0303;'>    100,1.0009999999999998E+03,4.0019999999999991E+03</span>
+<span style='color:#bf0303;'>    [INFO][FMUCHK] Simulation finished successfully at time 100</span>
+<span style='color:#bf0303;'>    FMU check summary:</span>
+<span style='color:#bf0303;'>    FMU reported:</span>
+<span style='color:#bf0303;'>            0 warning(s) and error(s)</span>
+<span style='color:#bf0303;'>    Checker reported:</span>
+<span style='color:#bf0303;'>            0 Warning(s)</span>
+<span style='color:#bf0303;'>            0 Error(s)</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#ff5500;'>import</span> sys, numpy
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
 
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W
 
 <b>class</b> portScalar(daePort):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daePort.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, PortType, Model, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daePort.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, PortType, Model, Description)
 
-        <span style='color:#0000ff;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.y = daeVariable(<span style='color:#bf0303;'>&quot;y&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
 
 <b>class</b> portVector(daePort):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description, width):
-        daePort.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, PortType, Model, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, PortType, Model, Description, width):
+        daePort.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, PortType, Model, Description)
 
-        <span style='color:#0000ff;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;&quot;</span>, [width])
+        <span style='color:#0057ae;'>self</span>.y = daeVariable(<span style='color:#bf0303;'>&quot;y&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;&quot;</span>, [width])
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.w <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;w&quot;</span>, <span style='color:#0000ff;'>self</span>, unit(), <span style='color:#c00000;'>&quot;Ports width&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.w = daeDomain(<span style='color:#bf0303;'>&quot;w&quot;</span>, <span style='color:#0057ae;'>self</span>, unit(), <span style='color:#bf0303;'>&quot;Ports width&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.p1 <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;p1&quot;</span>, s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Parameter multiplier 1 (fixed)&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.p2 <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;p2&quot;</span>, s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Parameter multiplier 2 (fixed)&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.p1 = daeParameter(<span style='color:#bf0303;'>&quot;p1&quot;</span>, s**(-<span style='color:#b08000;'>1</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Parameter multiplier 1 (fixed)&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.p2 = daeParameter(<span style='color:#bf0303;'>&quot;p2&quot;</span>, s**(-<span style='color:#b08000;'>1</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Parameter multiplier 2 (fixed)&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.m1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;m1&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Multiplier 1&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;m2&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Multiplier 2&quot;</span>, [<span style='color:#0000ff;'>self</span>.w])
+        <span style='color:#0057ae;'>self</span>.m1 = daeVariable(<span style='color:#bf0303;'>&quot;m1&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Multiplier 1&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m2 = daeVariable(<span style='color:#bf0303;'>&quot;m2&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Multiplier 2&quot;</span>, [<span style='color:#0057ae;'>self</span>.w])
 
-        <span style='color:#0000ff;'>self</span>.in1  <b><span style='color:#0000ff;'>=</span></b> portScalar(<span style='color:#c00000;'>&quot;in_1&quot;</span>,  eInletPort,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Input 1&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.out1 <b><span style='color:#0000ff;'>=</span></b> portScalar(<span style='color:#c00000;'>&quot;out_1&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Output 1 = p1 x m1&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.in1  = portScalar(<span style='color:#bf0303;'>&quot;in_1&quot;</span>,  eInletPort,  <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Input 1&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.out1 = portScalar(<span style='color:#bf0303;'>&quot;out_1&quot;</span>, eOutletPort, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Output 1 = p1 x m1&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.in2  <b><span style='color:#0000ff;'>=</span></b> portVector(<span style='color:#c00000;'>&quot;in_2&quot;</span>,  eInletPort,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Input 2&quot;</span>,              <span style='color:#0000ff;'>self</span>.w)
-        <span style='color:#0000ff;'>self</span>.out2 <b><span style='color:#0000ff;'>=</span></b> portVector(<span style='color:#c00000;'>&quot;out_2&quot;</span>, eOutletPort, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Output 2 = p2 x m2[]&quot;</span>, <span style='color:#0000ff;'>self</span>.w)
+        <span style='color:#0057ae;'>self</span>.in2  = portVector(<span style='color:#bf0303;'>&quot;in_2&quot;</span>,  eInletPort,  <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Input 2&quot;</span>,              <span style='color:#0057ae;'>self</span>.w)
+        <span style='color:#0057ae;'>self</span>.out2 = portVector(<span style='color:#bf0303;'>&quot;out_2&quot;</span>, eOutletPort, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Output 2 = p2 x m2[]&quot;</span>, <span style='color:#0057ae;'>self</span>.w)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        nw <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.w.NumberOfPoints
+        nw = <span style='color:#0057ae;'>self</span>.w.NumberOfPoints
 
-        <span style='color:#008000;'># Set the outlet port values</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;out_1&quot;</span>, <span style='color:#c00000;'>&quot;out_1.y = m1 x in1.y&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.out1.y() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m1() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.in1.y()
+        <span style='color:#898887;'># Set the outlet port values</span>
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;out_1&quot;</span>, <span style='color:#bf0303;'>&quot;out_1.y = m1 x in1.y&quot;</span>)
+        eq.Residual = <span style='color:#0057ae;'>self</span>.out1.y() - <span style='color:#0057ae;'>self</span>.m1() * <span style='color:#0057ae;'>self</span>.in1.y()
 
-        <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
-            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;out_2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;out_2.y[</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>] = m2[</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>] * in2.y[</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>]&quot;</span> <b><span style='color:#0000ff;'>%</span></b> (w, w, w))
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.out2.y(w) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m2(w) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.in2.y(w)
+        <b>for</b> w <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(nw):
+            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;out_2(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % w, <span style='color:#bf0303;'>&quot;out_2.y[</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>] = m2[</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>] * in2.y[</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>]&quot;</span> % (w, w, w))
+            eq.Residual = <span style='color:#0057ae;'>self</span>.out2.y(w) - <span style='color:#0057ae;'>self</span>.m2(w) * <span style='color:#0057ae;'>self</span>.in2.y(w)
 
-        <span style='color:#008000;'># STN Multipliers</span>
-        <span style='color:#0000ff;'>self</span>.stnMultipliers <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.STN(<span style='color:#c00000;'>&quot;Multipliers&quot;</span>)
+        <span style='color:#898887;'># STN Multipliers</span>
+        <span style='color:#0057ae;'>self</span>.stnMultipliers = <span style='color:#0057ae;'>self</span>.STN(<span style='color:#bf0303;'>&quot;Multipliers&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;variableMultipliers&quot;</span>) <span style='color:#008000;'># Variable multipliers</span>
+        <span style='color:#0057ae;'>self</span>.STATE(<span style='color:#bf0303;'>&quot;variableMultipliers&quot;</span>) <span style='color:#898887;'># Variable multipliers</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m1&quot;</span>, <span style='color:#c00000;'>&quot;Multiplier 1 (Variable)&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m1()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p1()
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;m1&quot;</span>, <span style='color:#bf0303;'>&quot;Multiplier 1 (Variable)&quot;</span>)
+        eq.Residual = dt(<span style='color:#0057ae;'>self</span>.m1()) - <span style='color:#0057ae;'>self</span>.p1()
 
-        <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
-            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;Multiplier 2 (Variable)&quot;</span>)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m2(w)) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.p2()
+        <b>for</b> w <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(nw):
+            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;m2(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % w, <span style='color:#bf0303;'>&quot;Multiplier 2 (Variable)&quot;</span>)
+            eq.Residual = dt(<span style='color:#0057ae;'>self</span>.m2(w)) - <span style='color:#0057ae;'>self</span>.p2()
 
-        <span style='color:#0000ff;'>self</span>.STATE(<span style='color:#c00000;'>&quot;constantMultipliers&quot;</span>) <span style='color:#008000;'># Constant multipliers</span>
+        <span style='color:#0057ae;'>self</span>.STATE(<span style='color:#bf0303;'>&quot;constantMultipliers&quot;</span>) <span style='color:#898887;'># Constant multipliers</span>
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m1&quot;</span>, <span style='color:#c00000;'>&quot;Multiplier 1 (Constant)&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m1())
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;m1&quot;</span>, <span style='color:#bf0303;'>&quot;Multiplier 1 (Constant)&quot;</span>)
+        eq.Residual = dt(<span style='color:#0057ae;'>self</span>.m1())
 
-        <b>for</b> w <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(nw):
-            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;m2(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> w, <span style='color:#c00000;'>&quot;Multiplier 2 (Constant)&quot;</span>)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.m2(w))
+        <b>for</b> w <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(nw):
+            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;m2(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % w, <span style='color:#bf0303;'>&quot;Multiplier 2 (Constant)&quot;</span>)
+            eq.Residual = dt(<span style='color:#0057ae;'>self</span>.m2(w))
 
-        <span style='color:#0000ff;'>self</span>.END_STN()
+        <span style='color:#0057ae;'>self</span>.END_STN()
    
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_adv_3&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial_adv_3&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.w.CreateArray(<span style='color:#c000c0;'>1</span>)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.w.CreateArray(<span style='color:#b08000;'>1</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.p1.SetValue(<span style='color:#c000c0;'>10</span>)
-        <span style='color:#0000ff;'>self</span>.m.p2.SetValues(<span style='color:#c000c0;'>20</span>)
+        <span style='color:#0057ae;'>self</span>.m.p1.SetValue(<span style='color:#b08000;'>10</span>)
+        <span style='color:#0057ae;'>self</span>.m.p2.SetValues(<span style='color:#b08000;'>20</span>)
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        nw <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.w.NumberOfPoints
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        nw = <span style='color:#0057ae;'>self</span>.m.w.NumberOfPoints
 
-        <span style='color:#0000ff;'>self</span>.m.stnMultipliers.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;constantMultipliers&quot;</span>
+        <span style='color:#0057ae;'>self</span>.m.stnMultipliers.ActiveState = <span style='color:#bf0303;'>&quot;constantMultipliers&quot;</span>
 
-        <span style='color:#0000ff;'>self</span>.m.in1.y.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.in2.y.AssignValues(numpy.ones(nw) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>2</span>)
+        <span style='color:#0057ae;'>self</span>.m.in1.y.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.in2.y.AssignValues(numpy.ones(nw) * <span style='color:#b08000;'>2</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.m1.SetInitialCondition(<span style='color:#c000c0;'>2</span>)
-        <span style='color:#0000ff;'>self</span>.m.m2.SetInitialConditions(<span style='color:#c000c0;'>3</span><b><span style='color:#0000ff;'>*</span></b>numpy.ones(nw))
+        <span style='color:#0057ae;'>self</span>.m.m1.SetInitialCondition(<span style='color:#b08000;'>2</span>)
+        <span style='color:#0057ae;'>self</span>.m.m2.SetInitialConditions(<span style='color:#b08000;'>3</span>*numpy.ones(nw))
 
 <b>def</b> run_code_generators(simulation, log):
-    <span style='color:#008000;'># Demonstration of daetools code-generators:</span>
-    <span style='color:#0000ff;'>import</span> tempfile
-    tmp_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'daetools-code_generator-fmi-'</span>)
-    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'Generated code (Modelica, gPROMS and FMU) </span><span style='color:#c00000;'>\n</span><span style='color:#c00000;'>will be located in: </span><span style='color:#c00000;'>\n</span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> tmp_folder
-    log.Message(msg, <span style='color:#c000c0;'>0</span>)
+    <span style='color:#898887;'># Demonstration of daetools code-generators:</span>
+    <span style='color:#ff5500;'>import</span> tempfile
+    tmp_folder = tempfile.mkdtemp(prefix = <span style='color:#bf0303;'>'daetools-code_generator-fmi-'</span>)
+    msg = <span style='color:#bf0303;'>'Generated code (Modelica, gPROMS and FMU) </span><span style='color:#924c9d;'>\n</span><span style='color:#bf0303;'>will be located in: </span><span style='color:#924c9d;'>\n</span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % tmp_folder
+    log.Message(msg, <span style='color:#b08000;'>0</span>)
     
     <b>try</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        <b>if</b> <b><span style='color:#0000ff;'>not</span></b> QtGui.QApplication.instance():
-            app_ <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
-        QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;tutorial_adv_3&quot;</span>, msg)
-    <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-        log.Message(<span style='color:#0000ff;'>str</span>(e), <span style='color:#c000c0;'>0</span>)
+        daeQtMessage(<span style='color:#bf0303;'>&quot;tutorial_adv_3&quot;</span>, msg)
+    <b>except</b> <span style='color:#006e28;'>Exception</span> <span style='color:#ff5500;'>as</span> e:
+        log.Message(<b><span style='color:#644a9b;'>str</span></b>(e), <span style='color:#b08000;'>0</span>)
 
-    <span style='color:#008000;'># Modelica:</span>
-    <span style='color:#0000ff;'>from</span> daetools.code_generators.modelica <span style='color:#0000ff;'>import</span> daeCodeGenerator_Modelica
-    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_Modelica()
+    <span style='color:#898887;'># Modelica:</span>
+    <span style='color:#ff5500;'>from</span> daetools.code_generators.modelica <span style='color:#ff5500;'>import</span> daeCodeGenerator_Modelica
+    cg = daeCodeGenerator_Modelica()
     cg.generateSimulation(simulation, tmp_folder)
 
-    <span style='color:#008000;'># gPROMS:</span>
-    <span style='color:#0000ff;'>from</span> daetools.code_generators.gproms <span style='color:#0000ff;'>import</span> daeCodeGenerator_gPROMS
-    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_gPROMS()
+    <span style='color:#898887;'># gPROMS:</span>
+    <span style='color:#ff5500;'>from</span> daetools.code_generators.gproms <span style='color:#ff5500;'>import</span> daeCodeGenerator_gPROMS
+    cg = daeCodeGenerator_gPROMS()
     cg.generateSimulation(simulation, tmp_folder)
 
-    <span style='color:#008000;'># Functional Mock-up Interface for co-simulation</span>
-    <span style='color:#0000ff;'>from</span> daetools.code_generators.fmi <span style='color:#0000ff;'>import</span> daeCodeGenerator_FMI
-    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, <span style='color:#0000ff;'>__file__</span>, <span style='color:#c00000;'>'create_simulation'</span>, <span style='color:#c00000;'>''</span>, [])
+    <span style='color:#898887;'># Functional Mock-up Interface for co-simulation</span>
+    <span style='color:#ff5500;'>from</span> daetools.code_generators.fmi <span style='color:#ff5500;'>import</span> daeCodeGenerator_FMI
+    cg = daeCodeGenerator_FMI()
+    cg.generateSimulation(simulation, tmp_folder, <span style='color:#0057ae;'>__file__</span>, <span style='color:#bf0303;'>'create_simulation'</span>, <span style='color:#bf0303;'>''</span>, [])
 
-<span style='color:#008000;'># Use daeSimulator class</span>
+<span style='color:#898887;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, run_before_simulation_begin_fn <b><span style='color:#0000ff;'>=</span></b> run_code_generators)
+    sim = simTutorial()
+    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    sim.ReportingInterval = <span style='color:#b08000;'>10</span>
+    sim.TimeHorizon       = <span style='color:#b08000;'>100</span>
+    simulator  = daeSimulator(app, simulation=sim, run_before_simulation_begin_fn = run_code_generators)
     simulator.exec_()
 
-<span style='color:#008000;'># This function is used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.</span>
-<span style='color:#008000;'># It can have any number of arguments, but must return an initialized daeSimulation object.</span>
+<span style='color:#898887;'># This function is used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.</span>
+<span style='color:#898887;'># It can have any number of arguments, but must return an initialized daeSimulation object.</span>
 <b>def</b> create_simulation():
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>100</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Nota bene: store the objects since they will be destroyed when they go out of scope</span>
-    simulation.__rt_objects__ <b><span style='color:#0000ff;'>=</span></b> [daesolver, datareporter, log]
+    <span style='color:#898887;'># Nota bene: store the objects since they will be destroyed when they go out of scope</span>
+    simulation.__rt_objects__ = [daesolver, datareporter, log]
 
     <b>return</b> simulation
     
-<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<span style='color:#898887;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#008000;'># Create simulation</span>
-    simulation <b><span style='color:#0000ff;'>=</span></b> create_simulation()
+    <span style='color:#898887;'># Create simulation</span>
+    simulation = create_simulation()
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Run code-generators</span>
+    <span style='color:#898887;'># Run code-generators</span>
     run_code_generators(simulation, simulation.Log)
     
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

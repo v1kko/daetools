@@ -11,6 +11,7 @@ Chemical Engineering Optimisation Examples
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+.. begin-command
 
 ==========================   =================================================================
 :ref:`tutorial_che_opt_1`    |tceo_1|
@@ -60,7 +61,6 @@ In addition, the solver options should be tuned to achieve faster convergence.
 
 Chem. Eng. Optimisation Example 1
 =================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_opt_1
    :no-members:
@@ -79,7 +79,6 @@ Source code             `tutorial_che_opt_1.py <../examples/tutorial_che_opt_1.h
 
 Chem. Eng. Optimisation Example 2
 =================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_opt_2
    :no-members:
@@ -98,7 +97,6 @@ Source code             `tutorial_che_opt_2.py <../examples/tutorial_che_opt_2.h
 
 Chem. Eng. Optimisation Example 3
 =================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_opt_3
    :no-members:
@@ -117,7 +115,6 @@ Source code             `tutorial_che_opt_3.py <../examples/tutorial_che_opt_3.h
 
 Chem. Eng. Optimisation Example 4
 =================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_opt_4
    :no-members:
@@ -136,7 +133,6 @@ Source code             `tutorial_che_opt_4.py <../examples/tutorial_che_opt_4.h
 
 Chem. Eng. Optimisation Example 5
 =================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_opt_5
    :no-members:
@@ -155,7 +151,6 @@ Source code             `tutorial_che_opt_5.py <../examples/tutorial_che_opt_5.h
 
 Chem. Eng. Optimisation Example 6
 =================================
-.. rubric:: Description
 
 .. automodule:: daetools.examples.tutorial_che_opt_6
    :no-members:
@@ -171,5 +166,4 @@ Source code             `tutorial_che_opt_6.py <../examples/tutorial_che_opt_6.h
 
 
 
-
-
+.. end-command

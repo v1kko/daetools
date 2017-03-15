@@ -707,7 +707,9 @@ public:
 	{
 		double dValue;
         boost::uint32_t nTotalNumberOfVariables;
-		size_t counter, nFileSize, nRequiredFileSize;
+        size_t counter;
+        long lRequiredFileSize;
+        std::streamoff lFileSize;
 		std::ifstream file;
 		
         if(m_nTotalNumberOfVariables == 0 || m_pdarrValuesReferences.empty())
@@ -727,7 +729,7 @@ public:
         {
             file.open(strFileName.c_str(), std::ios_base::in | std::ios_base::binary);
             file.seekg(0, std::ifstream::end);
-            nFileSize = file.tellg();
+            lFileSize = file.tellg();
             file.seekg(0);
             file.read((char*)(&nTotalNumberOfVariables), sizeof(boost::uint32_t));
         }
@@ -739,14 +741,14 @@ public:
             throw e;
         }
 
-        nRequiredFileSize = sizeof(boost::uint32_t) + m_nTotalNumberOfVariables * sizeof(double);
-        if(nFileSize != nRequiredFileSize)
+        lRequiredFileSize = sizeof(boost::uint32_t) + m_nTotalNumberOfVariables * sizeof(double);
+        if(lFileSize != lRequiredFileSize)
         {
             daeDeclareException(exInvalidCall);
             e << string("The file size of the initialization file ") <<
                  strFileName + string(" does not match; required: ") <<
-                 toString<size_t>(nRequiredFileSize) + string(", but available: ") <<
-                 toString<size_t>(nFileSize);
+                 toString<long>(lRequiredFileSize) + string(", but available: ") <<
+                 toString<long>(lFileSize);
             throw e;
         }
 

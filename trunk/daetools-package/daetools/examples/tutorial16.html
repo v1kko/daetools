@@ -6,287 +6,287 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial16.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            tutorial16.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial shows how to use DAE Tools objects with NumPy arrays to solve a simple</span>
-<span style='color:#c00000;'>stationary heat conduction in one dimension using the Finite Elements method</span>
-<span style='color:#c00000;'>with linear elements and two ways of manually assembling a stiffness matrix/load vector:</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                            tutorial16.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>This tutorial shows how to use DAE Tools objects with NumPy arrays to solve a simple</span>
+<span style='color:#bf0303;'>stationary heat conduction in one dimension using the Finite Elements method</span>
+<span style='color:#bf0303;'>with linear elements and two ways of manually assembling a stiffness matrix/load vector:</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>   d2T(x)/dx2 = F(x);  x in (0, Lx)</span>
+<span style='color:#bf0303;'>   d2T(x)/dx2 = F(x);  x in (0, Lx)</span>
 
-<span style='color:#c00000;'>Linear finite elements discretisation and simple FE matrix assembly:</span>
+<span style='color:#bf0303;'>Linear finite elements discretisation and simple FE matrix assembly:</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>                   phi                 phi</span>
-<span style='color:#c00000;'>                      (k-1)               (k)</span>
-<span style='color:#c00000;'>                      </span>
-<span style='color:#c00000;'>                     *                   *             </span>
-<span style='color:#c00000;'>                   * | *               * | *            </span>
-<span style='color:#c00000;'>                 *   |   *           *   |   *          </span>
-<span style='color:#c00000;'>               *     |     *       *     |     *        </span>
-<span style='color:#c00000;'>             *       |       *   *       |       *      </span>
-<span style='color:#c00000;'>           *         |         *         |         *        </span>
-<span style='color:#c00000;'>         *           |       *   *       |           *      </span>
-<span style='color:#c00000;'>       *             |     *       *     |             *    </span>
-<span style='color:#c00000;'>     *               |   *           *   |               *  </span>
-<span style='color:#c00000;'>   *                 | *  element (k)  * |                 *</span>
-<span style='color:#c00000;'> *-------------------*+++++++++++++++++++*-------------------*-</span>
-<span style='color:#c00000;'>                     x                   x</span>
-<span style='color:#c00000;'>                      (k-i                (k)</span>
-<span style='color:#c00000;'>                    </span>
-<span style='color:#c00000;'>                     \_________ _________/</span>
-<span style='color:#c00000;'>                               |</span>
-<span style='color:#c00000;'>                               dx</span>
+<span style='color:#bf0303;'>                   phi                 phi</span>
+<span style='color:#bf0303;'>                      (k-1)               (k)</span>
+<span style='color:#bf0303;'>                      </span>
+<span style='color:#bf0303;'>                     *                   *             </span>
+<span style='color:#bf0303;'>                   * | *               * | *            </span>
+<span style='color:#bf0303;'>                 *   |   *           *   |   *          </span>
+<span style='color:#bf0303;'>               *     |     *       *     |     *        </span>
+<span style='color:#bf0303;'>             *       |       *   *       |       *      </span>
+<span style='color:#bf0303;'>           *         |         *         |         *        </span>
+<span style='color:#bf0303;'>         *           |       *   *       |           *      </span>
+<span style='color:#bf0303;'>       *             |     *       *     |             *    </span>
+<span style='color:#bf0303;'>     *               |   *           *   |               *  </span>
+<span style='color:#bf0303;'>   *                 | *  element (k)  * |                 *</span>
+<span style='color:#bf0303;'> *-------------------*+++++++++++++++++++*-------------------*-</span>
+<span style='color:#bf0303;'>                     x                   x</span>
+<span style='color:#bf0303;'>                      (k-i                (k)</span>
+<span style='color:#bf0303;'>                    </span>
+<span style='color:#bf0303;'>                     \_________ _________/</span>
+<span style='color:#bf0303;'>                               |</span>
+<span style='color:#bf0303;'>                               dx</span>
 
-<span style='color:#c00000;'>The comparison of the analytical solution and two ways of assembling the system is given</span>
-<span style='color:#c00000;'>in the following plot:</span>
+<span style='color:#bf0303;'>The comparison of the analytical solution and two ways of assembling the system is given</span>
+<span style='color:#bf0303;'>in the following plot:</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial16-results.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial16-results.png</span>
+<span style='color:#bf0303;'>   :width: 500px</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#ff5500;'>import</span> sys, numpy
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
 
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#c00000;'>&quot;x&quot;</span>, <span style='color:#0000ff;'>self</span>, unit(), <span style='color:#c00000;'>&quot;x axis domain&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.x  = daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0057ae;'>self</span>, unit(), <span style='color:#bf0303;'>&quot;x axis domain&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.L  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;L&quot;</span>, unit(), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Length&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.L  = daeParameter(<span style='color:#bf0303;'>&quot;L&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Length&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Ta <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Ta&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - analytical solution&quot;</span>, [<span style='color:#0000ff;'>self</span>.x])
-        <span style='color:#0000ff;'>self</span>.T1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T1&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - first way&quot;</span>,           [<span style='color:#0000ff;'>self</span>.x])
-        <span style='color:#0000ff;'>self</span>.T2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T2&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature - second way&quot;</span>,          [<span style='color:#0000ff;'>self</span>.x])
+        <span style='color:#0057ae;'>self</span>.Ta = daeVariable(<span style='color:#bf0303;'>&quot;Ta&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature - analytical solution&quot;</span>, [<span style='color:#0057ae;'>self</span>.x])
+        <span style='color:#0057ae;'>self</span>.T1 = daeVariable(<span style='color:#bf0303;'>&quot;T1&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature - first way&quot;</span>,           [<span style='color:#0057ae;'>self</span>.x])
+        <span style='color:#0057ae;'>self</span>.T2 = daeVariable(<span style='color:#bf0303;'>&quot;T2&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature - second way&quot;</span>,          [<span style='color:#0057ae;'>self</span>.x])
 
-    <b>def</b> local_dof(<span style='color:#0000ff;'>self</span>, i):
-        <b>return</b> <span style='color:#0000ff;'>self</span>.mapLocalToGlobalIndices
+    <b>def</b> local_dof(<span style='color:#0057ae;'>self</span>, i):
+        <b>return</b> <span style='color:#0057ae;'>self</span>.mapLocalToGlobalIndices
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        N <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.x.NumberOfPoints
-        Nelem <b><span style='color:#0000ff;'>=</span></b> N <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1</span>
-        Ndofs_per_elem <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span> <span style='color:#008000;'># since we use linear elements</span>
+        N = <span style='color:#0057ae;'>self</span>.x.NumberOfPoints
+        Nelem = N - <span style='color:#b08000;'>1</span>
+        Ndofs_per_elem = <span style='color:#b08000;'>2</span> <span style='color:#898887;'># since we use linear elements</span>
         
-        numpy.set_printoptions(linewidth<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1e10</span>)
-        <span style='color:#008000;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-        <span style='color:#008000;'># Analytical solution</span>
-        <span style='color:#008000;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L.GetValue() <b><span style='color:#0000ff;'>/</span></b> Nelem
-        m <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#c000c0;'>0.</span>, <span style='color:#c000c0;'>5.</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>4.</span>, <span style='color:#c000c0;'>9.</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>2</span>]
-        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(N):
-            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Poisson_Analytical(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Ta(i) <b><span style='color:#0000ff;'>-</span></b> m[i] <b><span style='color:#0000ff;'>*</span></b> dx<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>
+        numpy.set_printoptions(linewidth=<span style='color:#b08000;'>1e10</span>)
+        <span style='color:#898887;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+        <span style='color:#898887;'># Analytical solution</span>
+        <span style='color:#898887;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+        dx = <span style='color:#0057ae;'>self</span>.L.GetValue() / Nelem
+        m = [<span style='color:#b08000;'>0.</span>, <span style='color:#b08000;'>5.</span>/<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>4.</span>, <span style='color:#b08000;'>9.</span>/<span style='color:#b08000;'>2</span>]
+        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N):
+            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Poisson_Analytical(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i)
+            eq.Residual = <span style='color:#0057ae;'>self</span>.Ta(i) - m[i] * dx**<span style='color:#b08000;'>2</span>
 
-        <span style='color:#008000;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-        <span style='color:#008000;'># First way: use constant global stiffness matrix and load array</span>
-        <span style='color:#008000;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'***************************************************************************'</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    First way'</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'***************************************************************************'</span>)
-        <span style='color:#008000;'># Create global stiffness matrix and load vector (dtype = float):</span>
-        A <b><span style='color:#0000ff;'>=</span></b> numpy.zeros((N,N))        
-        F <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N)
+        <span style='color:#898887;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+        <span style='color:#898887;'># First way: use constant global stiffness matrix and load array</span>
+        <span style='color:#898887;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'***************************************************************************'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    First way'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'***************************************************************************'</span>)
+        <span style='color:#898887;'># Create global stiffness matrix and load vector (dtype = float):</span>
+        A = numpy.zeros((N,N))        
+        F = numpy.zeros(N)
 
-        <span style='color:#008000;'># Maps local indices within an element to the indices in the system's matrix</span>
-        mapLocalToGlobalIndices <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>), (<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>), (<span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>3</span>)]   
-        <span style='color:#008000;'># ∆x is equidistant and constant</span>
-        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L.GetValue() <b><span style='color:#0000ff;'>/</span></b> Nelem
-        <b>for</b> el <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nelem):
-            <span style='color:#008000;'># Get global indices for the current element</span>
-            dof_indices <b><span style='color:#0000ff;'>=</span></b> mapLocalToGlobalIndices[el]
+        <span style='color:#898887;'># Maps local indices within an element to the indices in the system's matrix</span>
+        mapLocalToGlobalIndices = [(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>), (<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>2</span>), (<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>3</span>)]   
+        <span style='color:#898887;'># ∆x is equidistant and constant</span>
+        dx = <span style='color:#0057ae;'>self</span>.L.GetValue() / Nelem
+        <b>for</b> el <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Nelem):
+            <span style='color:#898887;'># Get global indices for the current element</span>
+            dof_indices = mapLocalToGlobalIndices[el]
             
-            <span style='color:#008000;'># Element stiffness matrix and load vector:</span>
-            <span style='color:#008000;'>#       | 1 -1 |          | 1 |</span>
-            <span style='color:#008000;'># Ael = |-1  1 |    Fel = | 1 |</span>
-            <span style='color:#008000;'>#       </span>
-            Ael <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>dx) <b><span style='color:#0000ff;'>*</span></b> numpy.array( [[<span style='color:#c000c0;'>1</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>], [<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>]] )
-            Fel <b><span style='color:#0000ff;'>=</span></b> (dx<b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>2</span>) <b><span style='color:#0000ff;'>*</span></b> numpy.array( [<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>] )
+            <span style='color:#898887;'># Element stiffness matrix and load vector:</span>
+            <span style='color:#898887;'>#       | 1 -1 |          | 1 |</span>
+            <span style='color:#898887;'># Ael = |-1  1 |    Fel = | 1 |</span>
+            <span style='color:#898887;'>#       </span>
+            Ael = (<span style='color:#b08000;'>1</span>/dx) * numpy.array( [[<span style='color:#b08000;'>1</span>, -<span style='color:#b08000;'>1</span>], [-<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>]] )
+            Fel = (dx/<span style='color:#b08000;'>2</span>) * numpy.array( [<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>] )
             
-            <span style='color:#008000;'># Loop over element DOFs and update the global matrix and vector </span>
-            <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Ndofs_per_elem):
-                <b>for</b> j <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Ndofs_per_elem):
-                    A[dof_indices[i], dof_indices[j]] <b><span style='color:#0000ff;'>+=</span></b> Ael[i,j]
-                F[dof_indices[i]] <b><span style='color:#0000ff;'>+=</span></b> Fel[i]
+            <span style='color:#898887;'># Loop over element DOFs and update the global matrix and vector </span>
+            <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Ndofs_per_elem):
+                <b>for</b> j <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Ndofs_per_elem):
+                    A[dof_indices[i], dof_indices[j]] += Ael[i,j]
+                F[dof_indices[i]] += Fel[i]
         
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global stiffness matrix (A) before applying boundary conditions:'</span>)
-        <span style='color:#0000ff;'>print</span>(A)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global load vector (F):'</span>)
-        <span style='color:#0000ff;'>print</span>(F)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global stiffness matrix (A) before applying boundary conditions:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(A)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global load vector (F):'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(F)
         
-        <span style='color:#008000;'># Boundary conditions:</span>
-        <span style='color:#008000;'># at x = 0: T(0) = 0     (Dirichlet BC)</span>
-        <span style='color:#008000;'># at x = 1: dT(1)/dx = 0 (Neumann BC)</span>
-        A[<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>:<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
-        F[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global stiffness matrix (A) after applying boundary conditions:'</span>)
-        <span style='color:#0000ff;'>print</span>(A)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global load vector (F) after applying boundary conditions:'</span>)
-        <span style='color:#0000ff;'>print</span>(F)
+        <span style='color:#898887;'># Boundary conditions:</span>
+        <span style='color:#898887;'># at x = 0: T(0) = 0     (Dirichlet BC)</span>
+        <span style='color:#898887;'># at x = 1: dT(1)/dx = 0 (Neumann BC)</span>
+        A[<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>:-<span style='color:#b08000;'>1</span>] = <span style='color:#b08000;'>0</span>
+        F[<span style='color:#b08000;'>0</span>] = <span style='color:#b08000;'>0</span>
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global stiffness matrix (A) after applying boundary conditions:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(A)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global load vector (F) after applying boundary conditions:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(F)
         
-        <span style='color:#008000;'># Create a vector of temperatures:</span>
-        T <b><span style='color:#0000ff;'>=</span></b> numpy.empty(N, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
-        T[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.T1(i) <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(N)]
+        <span style='color:#898887;'># Create a vector of temperatures:</span>
+        T = numpy.empty(N, dtype=<b><span style='color:#644a9b;'>object</span></b>)
+        T[:] = [<span style='color:#0057ae;'>self</span>.T1(i) <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N)]
         
-        <span style='color:#008000;'># Generate the system equations</span>
-        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(N):
-            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Poisson_ConstantStiffnessMatrix(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> numpy.<span style='color:#0000ff;'>sum</span>(A[i, :] <b><span style='color:#0000ff;'>*</span></b> T[:]) <b><span style='color:#0000ff;'>-</span></b> F[i]
+        <span style='color:#898887;'># Generate the system equations</span>
+        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N):
+            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Poisson_ConstantStiffnessMatrix(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i)
+            eq.Residual = numpy.<b><span style='color:#644a9b;'>sum</span></b>(A[i, :] * T[:]) - F[i]
 
-        <span style='color:#008000;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-        <span style='color:#008000;'># Second way: use global stiffness matrix and load array that depend on DAE Tools</span>
-        <span style='color:#008000;'>#             model parameters/variables (not constant in a general case).</span>
-        <span style='color:#008000;'>#             Obviously, they are constant here - this is only to show the concept</span>
-        <span style='color:#008000;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'***************************************************************************'</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Second way'</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'***************************************************************************'</span>)
-        <span style='color:#008000;'># Create global stiffness matrix and load vector (dtype = object). This matrix and</span>
-        <span style='color:#008000;'># load vector will be functions of model parameters/variables.  </span>
-        <span style='color:#008000;'># In this simple example that is not a case; however, the procedure is analogous.</span>
-        A <b><span style='color:#0000ff;'>=</span></b> numpy.zeros((N,N), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
-        <span style='color:#008000;'>#A[:] = adouble(0, 0, True)</span>
-        <span style='color:#008000;'>#print A</span>
+        <span style='color:#898887;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+        <span style='color:#898887;'># Second way: use global stiffness matrix and load array that depend on DAE Tools</span>
+        <span style='color:#898887;'>#             model parameters/variables (not constant in a general case).</span>
+        <span style='color:#898887;'>#             Obviously, they are constant here - this is only to show the concept</span>
+        <span style='color:#898887;'>###############################################################################</span><b><span style='color:#81ca2d;background:#f7e6e6;'>###</span></b>
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'***************************************************************************'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    Second way'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'***************************************************************************'</span>)
+        <span style='color:#898887;'># Create global stiffness matrix and load vector (dtype = object). This matrix and</span>
+        <span style='color:#898887;'># load vector will be functions of model parameters/variables.  </span>
+        <span style='color:#898887;'># In this simple example that is not a case; however, the procedure is analogous.</span>
+        A = numpy.zeros((N,N), dtype=<b><span style='color:#644a9b;'>object</span></b>)
+        <span style='color:#898887;'>#A[:] = adouble(0, 0, True)</span>
+        <span style='color:#898887;'>#print A</span>
         
-        F <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
-        <span style='color:#008000;'>#F[:] = adouble(0, 0, True)</span>
-        <span style='color:#008000;'>#print F</span>
+        F = numpy.zeros(N, dtype=<b><span style='color:#644a9b;'>object</span></b>)
+        <span style='color:#898887;'>#F[:] = adouble(0, 0, True)</span>
+        <span style='color:#898887;'>#print F</span>
         
-        <span style='color:#008000;'># Maps local indices within an element to the indices in the system's matrix</span>
-        mapLocalToGlobalIndices <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>), (<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>), (<span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>3</span>)]
-        <span style='color:#008000;'># ∆x is equidistant but not constant (it depends on the parameter 'L')</span>
-        dx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.L() <b><span style='color:#0000ff;'>/</span></b> Nelem
-        <b>for</b> el <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Nelem):
-            <span style='color:#008000;'># Get global indices for the current element</span>
-            dof_indices <b><span style='color:#0000ff;'>=</span></b> mapLocalToGlobalIndices[el]
+        <span style='color:#898887;'># Maps local indices within an element to the indices in the system's matrix</span>
+        mapLocalToGlobalIndices = [(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>), (<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>2</span>), (<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>3</span>)]
+        <span style='color:#898887;'># ∆x is equidistant but not constant (it depends on the parameter 'L')</span>
+        dx = <span style='color:#0057ae;'>self</span>.L() / Nelem
+        <b>for</b> el <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Nelem):
+            <span style='color:#898887;'># Get global indices for the current element</span>
+            dof_indices = mapLocalToGlobalIndices[el]
             
-            <span style='color:#008000;'># Element stiffness matrix and load vector are the same:</span>
-            <span style='color:#008000;'>#       | 1 -1 |          | 1 |</span>
-            <span style='color:#008000;'># Ael = |-1  1 |    Fel = | 1 |</span>
-            <span style='color:#008000;'>#</span>
-            Ael <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>/</span></b> dx) <b><span style='color:#0000ff;'>*</span></b> numpy.array( [[<span style='color:#c000c0;'>1</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>], [<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>]] )
-            Fel <b><span style='color:#0000ff;'>=</span></b> (dx <b><span style='color:#0000ff;'>/</span></b> <span style='color:#c000c0;'>2</span>) <b><span style='color:#0000ff;'>*</span></b> numpy.array([<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>])
+            <span style='color:#898887;'># Element stiffness matrix and load vector are the same:</span>
+            <span style='color:#898887;'>#       | 1 -1 |          | 1 |</span>
+            <span style='color:#898887;'># Ael = |-1  1 |    Fel = | 1 |</span>
+            <span style='color:#898887;'>#</span>
+            Ael = (<span style='color:#b08000;'>1</span> / dx) * numpy.array( [[<span style='color:#b08000;'>1</span>, -<span style='color:#b08000;'>1</span>], [-<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>]] )
+            Fel = (dx / <span style='color:#b08000;'>2</span>) * numpy.array([<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>])
             
-            <span style='color:#008000;'># Loop over element DOFs and update the global matrix and vector </span>
-            <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Ndofs_per_elem):
-                <b>for</b> j <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(Ndofs_per_elem):
-                    A[dof_indices[i], dof_indices[j]] <b><span style='color:#0000ff;'>+=</span></b> Ael[i,j]
-                F[dof_indices[i]] <b><span style='color:#0000ff;'>+=</span></b> Fel[i]
+            <span style='color:#898887;'># Loop over element DOFs and update the global matrix and vector </span>
+            <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Ndofs_per_elem):
+                <b>for</b> j <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Ndofs_per_elem):
+                    A[dof_indices[i], dof_indices[j]] += Ael[i,j]
+                F[dof_indices[i]] += Fel[i]
         
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global stiffness matrix (A) before applying boundary conditions:'</span>)
-        <span style='color:#0000ff;'>print</span>(A)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global load vector (F):'</span>)
-        <span style='color:#0000ff;'>print</span>(F)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global stiffness matrix (A) before applying boundary conditions:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(A)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global load vector (F):'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(F)
         
-        <span style='color:#008000;'># Boundary conditions:</span>
-        <span style='color:#008000;'># at x = 0: T(0) = 0     (Dirichlet BC)</span>
-        <span style='color:#008000;'># at x = 1: dT(1)/dx = 0 (Neumann BC)</span>
-        A[<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>:<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
-        F[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span>
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global stiffness matrix (A) after applying boundary conditions:'</span>)
-        <span style='color:#0000ff;'>print</span>(A)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The global load vector (F) after applying boundary conditions:'</span>)
-        <span style='color:#0000ff;'>print</span>(F)
+        <span style='color:#898887;'># Boundary conditions:</span>
+        <span style='color:#898887;'># at x = 0: T(0) = 0     (Dirichlet BC)</span>
+        <span style='color:#898887;'># at x = 1: dT(1)/dx = 0 (Neumann BC)</span>
+        A[<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>:-<span style='color:#b08000;'>1</span>] = <span style='color:#b08000;'>0</span>
+        F[<span style='color:#b08000;'>0</span>] = <span style='color:#b08000;'>0</span>
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global stiffness matrix (A) after applying boundary conditions:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(A)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The global load vector (F) after applying boundary conditions:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(F)
         
-        <span style='color:#008000;'># Create a vector of temperatures:</span>
-        T <b><span style='color:#0000ff;'>=</span></b> numpy.empty(N, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>object</span>)
-        T[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>self</span>.T2(i) <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(N)]
+        <span style='color:#898887;'># Create a vector of temperatures:</span>
+        T = numpy.empty(N, dtype=<b><span style='color:#644a9b;'>object</span></b>)
+        T[:] = [<span style='color:#0057ae;'>self</span>.T2(i) <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N)]
         
-        <span style='color:#008000;'># Generate the system equations</span>
-        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(N):
-            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Poisson_NonConstantStiffnexMatrix(</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> numpy.<span style='color:#0000ff;'>sum</span>(A[i, :] <b><span style='color:#0000ff;'>*</span></b> T[:]) <b><span style='color:#0000ff;'>-</span></b> F[i]
+        <span style='color:#898887;'># Generate the system equations</span>
+        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N):
+            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Poisson_NonConstantStiffnexMatrix(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i)
+            eq.Residual = numpy.<b><span style='color:#644a9b;'>sum</span></b>(A[i, :] * T[:]) - F[i]
             
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial16&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial16&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
         
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.x.CreateArray(<span style='color:#c000c0;'>4</span>)
-        <span style='color:#0000ff;'>self</span>.m.L.SetValue(<span style='color:#c000c0;'>1</span>)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.x.CreateArray(<span style='color:#b08000;'>4</span>)
+        <span style='color:#0057ae;'>self</span>.m.L.SetValue(<span style='color:#b08000;'>1</span>)
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
         <b>pass</b>
     
-<span style='color:#008000;'># Use daeSimulator class</span>
+<span style='color:#898887;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1000</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
+    sim = simTutorial()
+    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    sim.ReportingInterval = <span style='color:#b08000;'>10</span>
+    sim.TimeHorizon       = <span style='color:#b08000;'>1000</span>
+    simulator  = daeSimulator(app, simulation=sim)
     simulator.exec_()
 
-<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<span style='color:#898887;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1000</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>1000</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

@@ -6,225 +6,226 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>opt_tutorial5.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            opt_tutorial5.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>This tutorial shows the interoperability between DAE Tools and 3rd party optimization </span>
-<span style='color:#c00000;'>software (scipy.optimize) used to fit the simple function with experimental data.</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                            opt_tutorial5.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>This tutorial shows the interoperability between DAE Tools and 3rd party optimization </span>
+<span style='color:#bf0303;'>software (scipy.optimize) used to fit the simple function with experimental data.</span>
 
-<span style='color:#c00000;'>DAE Tools simulation object is used to calculate the objective function and its gradients,</span>
-<span style='color:#c00000;'>while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder)</span>
-<span style='color:#c00000;'>implementing Levenberg-Marquardt algorithm is used to estimate the parameters.</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>DAE Tools simulation object is used to calculate the objective function and its gradients,</span>
+<span style='color:#bf0303;'>while scipy.optimize.leastsq function (a wrapper around MINPACK’s lmdif and lmder)</span>
+<span style='color:#bf0303;'>implementing Levenberg-Marquardt algorithm is used to estimate the parameters.</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>import</span> matplotlib
-matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
-<span style='color:#0000ff;'>import</span> matplotlib.pyplot <span style='color:#0000ff;'>as</span> plt
-<span style='color:#0000ff;'>from</span> scipy.optimize <span style='color:#0000ff;'>import</span> leastsq
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#ff5500;'>import</span> sys, numpy
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
+<span style='color:#ff5500;'>import</span> matplotlib
+matplotlib.use(<span style='color:#bf0303;'>'Qt5Agg'</span>)
+<span style='color:#ff5500;'>import</span> matplotlib.pyplot <span style='color:#ff5500;'>as</span> plt
+<span style='color:#ff5500;'>from</span> scipy.optimize <span style='color:#ff5500;'>import</span> leastsq
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0000ff;'>self</span>.x     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;x&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;A&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.k     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;k&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.theta <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;&amp;theta;&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.y     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.x     = daeVariable(<span style='color:#bf0303;'>&quot;x&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.A     = daeVariable(<span style='color:#bf0303;'>&quot;A&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.k     = daeVariable(<span style='color:#bf0303;'>&quot;k&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.theta = daeVariable(<span style='color:#bf0303;'>&quot;&amp;theta;&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.y     = daeVariable(<span style='color:#bf0303;'>&quot;y&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> Sin(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> numpy.pi <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.x() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.theta())
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;y&quot;</span>)
+        eq.Residual = <span style='color:#0057ae;'>self</span>.y() - <span style='color:#0057ae;'>self</span>.A() * Sin(<span style='color:#b08000;'>2</span> * numpy.pi * <span style='color:#0057ae;'>self</span>.k() * <span style='color:#0057ae;'>self</span>.x() + <span style='color:#0057ae;'>self</span>.theta())
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;opt_tutorial5&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;opt_tutorial5&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
         <b>pass</b>
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.x.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.A.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.k.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.theta.AssignValue(<span style='color:#c000c0;'>1</span>)
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.x.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.A.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.k.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.theta.AssignValue(<span style='color:#b08000;'>1</span>)
 
-    <b>def</b> SetUpSensitivityAnalysis(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.y()
+    <b>def</b> SetUpSensitivityAnalysis(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.ObjectiveFunction.Residual = <span style='color:#0057ae;'>self</span>.m.y()
         
-        <span style='color:#0000ff;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.A,     <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>0.7</span>)<b><span style='color:#0000ff;'>;</span></b>
-        <span style='color:#0000ff;'>self</span>.k     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.k,     <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>0.8</span>)<b><span style='color:#0000ff;'>;</span></b>
-        <span style='color:#0000ff;'>self</span>.theta <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.theta, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>1.9</span>)<b><span style='color:#0000ff;'>;</span></b>
+        <span style='color:#0057ae;'>self</span>.A     = <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.A,     -<span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>0.7</span>);
+        <span style='color:#0057ae;'>self</span>.k     = <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.k,     -<span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>0.8</span>);
+        <span style='color:#0057ae;'>self</span>.theta = <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.theta, -<span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>1.9</span>);
 
-<span style='color:#008000;'># Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values</span>
+<span style='color:#898887;'># Function to calculate either Residuals or Jacobian matrix, subject to the argument calc_values</span>
 <b>def</b> Function(p, simulation, xin, ymeas, calc_values):
-    Nparams <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(p)
-    Nexp    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(xin)
+    Nparams = <b><span style='color:#644a9b;'>len</span></b>(p)
+    Nexp    = <b><span style='color:#644a9b;'>len</span></b>(xin)
     
-    <b>if</b>(<span style='color:#0000ff;'>len</span>(xin) <b><span style='color:#0000ff;'>!=</span></b> <span style='color:#0000ff;'>len</span>(ymeas)):
-        <b>raise</b> <b><span style='color:#054d00;'>RuntimeError</span></b>(<span style='color:#c00000;'>'The number of input data and the number of measurements must be equal'</span>) 
+    <b>if</b>(<b><span style='color:#644a9b;'>len</span></b>(xin) != <b><span style='color:#644a9b;'>len</span></b>(ymeas)):
+        <b>raise</b> <span style='color:#006e28;'>RuntimeError</span>(<span style='color:#bf0303;'>'The number of input data and the number of measurements must be equal'</span>) 
     
-    values <b><span style='color:#0000ff;'>=</span></b> numpy.zeros((Nexp))
-    derivs <b><span style='color:#0000ff;'>=</span></b> numpy.zeros((Nexp, Nparams))
+    values = numpy.zeros((Nexp))
+    derivs = numpy.zeros((Nexp, Nparams))
     
-    <b>for</b> e <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, Nexp):
-        <span style='color:#008000;'># Set initial conditions, initial guesses, initially active states etc</span>
-        <span style='color:#008000;'># In this case it can be omitted; however, in general case it should be called</span>
+    <b>for</b> e <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, Nexp):
+        <span style='color:#898887;'># Set initial conditions, initial guesses, initially active states etc</span>
+        <span style='color:#898887;'># In this case it can be omitted; however, in general case it should be called</span>
         simulation.SetUpVariables()
     
-        <span style='color:#008000;'># Assign the input data for the simulation</span>
+        <span style='color:#898887;'># Assign the input data for the simulation</span>
         simulation.m.x.ReAssignValue(xin[e])
         
-        <span style='color:#008000;'># Set the parameters values</span>
-        simulation.A.Value     <b><span style='color:#0000ff;'>=</span></b> p[<span style='color:#c000c0;'>0</span>]
-        simulation.k.Value     <b><span style='color:#0000ff;'>=</span></b> p[<span style='color:#c000c0;'>1</span>]
-        simulation.theta.Value <b><span style='color:#0000ff;'>=</span></b> p[<span style='color:#c000c0;'>2</span>]
+        <span style='color:#898887;'># Set the parameters values</span>
+        simulation.A.Value     = p[<span style='color:#b08000;'>0</span>]
+        simulation.k.Value     = p[<span style='color:#b08000;'>1</span>]
+        simulation.theta.Value = p[<span style='color:#b08000;'>2</span>]
         
-        <span style='color:#008000;'># Run the simulation</span>
+        <span style='color:#898887;'># Run the simulation</span>
         simulation.Reset()
         simulation.Reinitialize()
         simulation.Run()
         
-        <span style='color:#008000;'># Get the results</span>
-        values[e]    <b><span style='color:#0000ff;'>=</span></b> simulation.ObjectiveFunction.Value <b><span style='color:#0000ff;'>-</span></b> ymeas[e]
-        derivs[e][:] <b><span style='color:#0000ff;'>=</span></b> simulation.ObjectiveFunction.Gradients
+        <span style='color:#898887;'># Get the results</span>
+        values[e]    = simulation.ObjectiveFunction.Value - ymeas[e]
+        derivs[e][:] = simulation.ObjectiveFunction.Gradients
         
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'A ='</span>, simulation.A.Value, <span style='color:#c00000;'>', k ='</span>, simulation.k.Value, <span style='color:#c00000;'>', theta ='</span>, simulation.theta.Value)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'A ='</span>, simulation.A.Value, <span style='color:#bf0303;'>', k ='</span>, simulation.k.Value, <span style='color:#bf0303;'>', theta ='</span>, simulation.theta.Value)
     <b>if</b> calc_values:
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  Residuals:'</span>)
-        <span style='color:#0000ff;'>print</span>(values)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'  Residuals:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(values)
     <b>else</b>:
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'  Derivatives:'</span>)
-        <span style='color:#0000ff;'>print</span>(derivs)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'  Derivatives:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(derivs)
     
     <b>if</b> calc_values:
         <b>return</b> values
     <b>else</b>:
         <b>return</b> derivs
 
-<span style='color:#008000;'># Function to calculate residuals R = ydata - f(xdata, params):</span>
-<span style='color:#008000;'>#   R[0], R[1], ..., R[n] </span>
+<span style='color:#898887;'># Function to calculate residuals R = ydata - f(xdata, params):</span>
+<span style='color:#898887;'>#   R[0], R[1], ..., R[n] </span>
 <b>def</b> Residuals(p, simulation, xin, ymeas):
-    <b>return</b> Function(p, simulation, xin, ymeas, <span style='color:#0000ff;'>True</span>)
+    <b>return</b> Function(p, simulation, xin, ymeas, <span style='color:#0057ae;'>True</span>)
     
-<span style='color:#008000;'># Function to calculate a Jacobian for residuals: </span>
-<span style='color:#008000;'>#   dR[0]/dp[0], dR[0]/dp[1], ..., dR[0]/dp[n] </span>
-<span style='color:#008000;'>#   dR[1]/dp[0], dR[1]/dp[1], ..., dR[1]/dp[n] </span>
-<span style='color:#008000;'>#   ...</span>
-<span style='color:#008000;'>#   dR[n]/dp[0], dR[n]/dp[1], ..., dR[n]/dp[n] </span>
+<span style='color:#898887;'># Function to calculate a Jacobian for residuals: </span>
+<span style='color:#898887;'>#   dR[0]/dp[0], dR[0]/dp[1], ..., dR[0]/dp[n] </span>
+<span style='color:#898887;'>#   dR[1]/dp[0], dR[1]/dp[1], ..., dR[1]/dp[n] </span>
+<span style='color:#898887;'>#   ...</span>
+<span style='color:#898887;'>#   dR[n]/dp[0], dR[n]/dp[1], ..., dR[n]/dp[n] </span>
 <b>def</b> Derivatives(p, simulation, xin, ymeas):
-    <b>return</b> Function(p, simulation, xin, ymeas, <span style='color:#0000ff;'>False</span>)
+    <b>return</b> Function(p, simulation, xin, ymeas, <span style='color:#0057ae;'>False</span>)
 
-<span style='color:#008000;'># Function to calculate y  values for the estimated parameters</span>
+<span style='color:#898887;'># Function to calculate y  values for the estimated parameters</span>
 <b>def</b> peval(x, p):
-    <b>return</b> p[<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>*</span></b> numpy.sin(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> numpy.pi <b><span style='color:#0000ff;'>*</span></b> p[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>*</span></b> x <b><span style='color:#0000ff;'>+</span></b> p[<span style='color:#c000c0;'>2</span>])
+    <b>return</b> p[<span style='color:#b08000;'>0</span>] * numpy.sin(<span style='color:#b08000;'>2</span> * numpy.pi * p[<span style='color:#b08000;'>1</span>] * x + p[<span style='color:#b08000;'>2</span>])
 
 <b>def</b> run():
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
 
-    <span style='color:#008000;'># Do no print progress</span>
-    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
+    <span style='color:#898887;'># Do no print progress</span>
+    log.PrintProgress = <span style='color:#0057ae;'>False</span>
     
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>1</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>5</span>
 
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>True</span>)
+    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = <span style='color:#0057ae;'>True</span>)
     simulation.SolveInitial()
 
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Exact values of the parameters</span>
-    A, k, theta <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#c000c0;'>10</span>, <span style='color:#c000c0;'>33.33333333</span>, <span style='color:#c000c0;'>0.523598333</span>]
+    <span style='color:#898887;'># Exact values of the parameters</span>
+    A, k, theta = [<span style='color:#b08000;'>10</span>, <span style='color:#b08000;'>33.33333333</span>, <span style='color:#b08000;'>0.523598333</span>]
 
-    <span style='color:#008000;'># Starting point for parameters</span>
-    p0 <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#c000c0;'>9.0</span>, <span style='color:#c000c0;'>43.0</span>, <span style='color:#c000c0;'>0.3</span>]
+    <span style='color:#898887;'># Starting point for parameters</span>
+    p0 = [<span style='color:#b08000;'>9.0</span>, <span style='color:#b08000;'>43.0</span>, <span style='color:#b08000;'>0.3</span>]
 
-    <span style='color:#008000;'># Input data for the model</span>
-    x <b><span style='color:#0000ff;'>=</span></b> numpy.arange(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.06</span>, <span style='color:#c000c0;'>0.002</span>)
+    <span style='color:#898887;'># Input data for the model</span>
+    x = numpy.arange(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.06</span>, <span style='color:#b08000;'>0.002</span>)
 
-    <span style='color:#008000;'># The values of y for given x and exact values of A, k, and theta</span>
-    y_true <b><span style='color:#0000ff;'>=</span></b> A <b><span style='color:#0000ff;'>*</span></b> numpy.sin(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> numpy.pi <b><span style='color:#0000ff;'>*</span></b> k <b><span style='color:#0000ff;'>*</span></b> x <b><span style='color:#0000ff;'>+</span></b> theta)
+    <span style='color:#898887;'># The values of y for given x and exact values of A, k, and theta</span>
+    y_true = A * numpy.sin(<span style='color:#b08000;'>2</span> * numpy.pi * k * x + theta)
 
-    <span style='color:#008000;'># Measured values for y</span>
-    y_meas <b><span style='color:#0000ff;'>=</span></b> numpy.zeros_like(x)
-    y_meas <b><span style='color:#0000ff;'>=</span></b> [ <span style='color:#c000c0;'>5.95674236</span>,  <span style='color:#c000c0;'>10.03610565</span>,  <span style='color:#c000c0;'>10.14475642</span>,   <span style='color:#c000c0;'>9.16722521</span>,   <span style='color:#c000c0;'>8.52093929</span>,
-               <span style='color:#c000c0;'>4.78842863</span>,   <span style='color:#c000c0;'>2.87467755</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>3.93427325</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>6.13071010</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>9.26168083</span>,
-              <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>9.25272475</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>10.42850414</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>4.71175587</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>3.60403013</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>0.11039750</span>,
-               <span style='color:#c000c0;'>3.80372890</span>,   <span style='color:#c000c0;'>8.51512082</span>,   <span style='color:#c000c0;'>9.78232718</span>,   <span style='color:#c000c0;'>9.91931747</span>,   <span style='color:#c000c0;'>5.17108061</span>,
-               <span style='color:#c000c0;'>6.47468360</span>,   <span style='color:#c000c0;'>0.66528089</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>5.10344027</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>7.12668123</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>9.42080566</span>,
-              <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>8.23170543</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>6.56081590</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>6.28524014</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>2.30246340</span>,  <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>0.79571452</span>]
+    <span style='color:#898887;'># Measured values for y</span>
+    y_meas = numpy.zeros_like(x)
+    y_meas = [ <span style='color:#b08000;'>5.95674236</span>,  <span style='color:#b08000;'>10.03610565</span>,  <span style='color:#b08000;'>10.14475642</span>,   <span style='color:#b08000;'>9.16722521</span>,   <span style='color:#b08000;'>8.52093929</span>,
+               <span style='color:#b08000;'>4.78842863</span>,   <span style='color:#b08000;'>2.87467755</span>,  -<span style='color:#b08000;'>3.93427325</span>,  -<span style='color:#b08000;'>6.13071010</span>,  -<span style='color:#b08000;'>9.26168083</span>,
+              -<span style='color:#b08000;'>9.25272475</span>, -<span style='color:#b08000;'>10.42850414</span>,  -<span style='color:#b08000;'>4.71175587</span>,  -<span style='color:#b08000;'>3.60403013</span>,  -<span style='color:#b08000;'>0.11039750</span>,
+               <span style='color:#b08000;'>3.80372890</span>,   <span style='color:#b08000;'>8.51512082</span>,   <span style='color:#b08000;'>9.78232718</span>,   <span style='color:#b08000;'>9.91931747</span>,   <span style='color:#b08000;'>5.17108061</span>,
+               <span style='color:#b08000;'>6.47468360</span>,   <span style='color:#b08000;'>0.66528089</span>,  -<span style='color:#b08000;'>5.10344027</span>,  -<span style='color:#b08000;'>7.12668123</span>,  -<span style='color:#b08000;'>9.42080566</span>,
+              -<span style='color:#b08000;'>8.23170543</span>,  -<span style='color:#b08000;'>6.56081590</span>,  -<span style='color:#b08000;'>6.28524014</span>,  -<span style='color:#b08000;'>2.30246340</span>,  -<span style='color:#b08000;'>0.79571452</span>]
 
-    <span style='color:#008000;'># Call leastsq</span>
-    p, cov_x, infodict, msg, ier <b><span style='color:#0000ff;'>=</span></b> leastsq(Residuals, 
+    <span style='color:#898887;'># Call leastsq</span>
+    p, cov_x, infodict, msg, ier = leastsq(Residuals, 
                                            p0,
-                                           Dfun<b><span style='color:#0000ff;'>=</span></b>Derivatives,
-                                           args<b><span style='color:#0000ff;'>=</span></b>(simulation, x, y_meas),
-                                           full_output<b><span style='color:#0000ff;'>=</span></b><span style='color:#0000ff;'>True</span>)
+                                           Dfun=Derivatives,
+                                           args=(simulation, x, y_meas),
+                                           full_output=<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Print the results</span>
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'------------------------------------------------------'</span>)
-    <b>if</b> ier <b><span style='color:#0000ff;'>in</span></b> [<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>3</span>, <span style='color:#c000c0;'>4</span>]:
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Solution found!'</span>)
+    <span style='color:#898887;'># Print the results</span>
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'------------------------------------------------------'</span>)
+    <b>if</b> ier <b>in</b> [<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>3</span>, <span style='color:#b08000;'>4</span>]:
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Solution found!'</span>)
     <b>else</b>:
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Least square method failed!'</span>)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Status:'</span>, msg)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Least square method failed!'</span>)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Status:'</span>, msg)
 
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Number of function evaluations ='</span>, infodict[<span style='color:#c00000;'>'nfev'</span>])
-    chisq <b><span style='color:#0000ff;'>=</span></b> (infodict[<span style='color:#c00000;'>'fvec'</span>]<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>).<span style='color:#0000ff;'>sum</span>()
-    dof <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>len</span>(x) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>len</span>(p0)
-    rmse <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt(chisq <b><span style='color:#0000ff;'>/</span></b> dof)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Root mean square deviation ='</span>, rmse)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Number of function evaluations ='</span>, infodict[<span style='color:#bf0303;'>'nfev'</span>])
+    chisq = (infodict[<span style='color:#bf0303;'>'fvec'</span>]**<span style='color:#b08000;'>2</span>).<b><span style='color:#644a9b;'>sum</span></b>()
+    dof = <b><span style='color:#644a9b;'>len</span></b>(x) - <b><span style='color:#644a9b;'>len</span></b>(p0)
+    rmse = numpy.sqrt(chisq / dof)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Root mean square deviation ='</span>, rmse)
 
-    A, k, theta <b><span style='color:#0000ff;'>=</span></b> p
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Estimated parameters values:'</span>)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    A     ='</span>, A)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    k     ='</span>, k)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    theta ='</span>, theta)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'------------------------------------------------------'</span>)
+    A, k, theta = p
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Estimated parameters values:'</span>)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    A     ='</span>, A)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    k     ='</span>, k)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    theta ='</span>, theta)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'------------------------------------------------------'</span>)
 
-    <span style='color:#008000;'># Plot the comparison between the exact values, measured and fitted data</span>
-    plt.plot(x, peval(x, p), x, y_meas, <span style='color:#c00000;'>'o'</span>, x, y_true)
-    plt.title(<span style='color:#c00000;'>'Least-squares fit to experimental data'</span>)
-    plt.legend([<span style='color:#c00000;'>'Fit'</span>, <span style='color:#c00000;'>'Experimental'</span>, <span style='color:#c00000;'>'Exact'</span>])
+    <span style='color:#898887;'># Plot the comparison between the exact values, measured and fitted data</span>
+    plt.plot(x, peval(x, p), x, y_meas, <span style='color:#bf0303;'>'o'</span>, x, y_true)
+    plt.title(<span style='color:#bf0303;'>'Least-squares fit to experimental data'</span>)
+    plt.legend([<span style='color:#bf0303;'>'Fit'</span>, <span style='color:#bf0303;'>'Experimental'</span>, <span style='color:#bf0303;'>'Exact'</span>])
     plt.show()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
     run()
 </pre>
 </body>

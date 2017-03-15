@@ -6,478 +6,474 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial_dealii_1.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                        tutorial_dealii_1.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span><span style='color:#c00000;'>An introductory example of the support for Finite Elements in daetools.</span>
-<span style='color:#c00000;'>The basic idea is to use an external library to perform all low-level tasks such as</span>
-<span style='color:#c00000;'>management of mesh elements, degrees of freedom, matrix assembly, management of</span>
-<span style='color:#c00000;'>boundary conditions etc. deal.II library (www.dealii.org) is employed for these tasks.</span>
-<span style='color:#c00000;'>The mass and stiffness matrices and the load vector assembled in deal.II library are</span>
-<span style='color:#c00000;'>used to generate a set of algebraic/differential equations in the following form:</span>
-<span style='color:#c00000;'>[Mij]{dx/dt} + [Aij]</span><span style='color:#0057ae;'>{x}</span><span style='color:#c00000;'> = </span><span style='color:#0057ae;'>{Fi}</span><span style='color:#c00000;'>.</span>
-<span style='color:#c00000;'>Specification of additional equations such as surface/volume integrals are also available.</span>
-<span style='color:#c00000;'>The numerical solution of the resulting ODA/DAE system is performed in daetools</span>
-<span style='color:#c00000;'>together with the rest of the model equations.</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                        tutorial_dealii_1.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span><span style='color:#bf0303;'>An introductory example of the support for Finite Elements in daetools.</span>
+<span style='color:#bf0303;'>The basic idea is to use an external library to perform all low-level tasks such as</span>
+<span style='color:#bf0303;'>management of mesh elements, degrees of freedom, matrix assembly, management of</span>
+<span style='color:#bf0303;'>boundary conditions etc. deal.II library (www.dealii.org) is employed for these tasks.</span>
+<span style='color:#bf0303;'>The mass and stiffness matrices and the load vector assembled in deal.II library are</span>
+<span style='color:#bf0303;'>used to generate a set of algebraic/differential equations in the following form:</span>
+<span style='color:#bf0303;'>[Mij]{dx/dt} + [Aij]</span><span style='color:#3daee9;'>{x}</span><span style='color:#bf0303;'> = </span><span style='color:#3daee9;'>{Fi}</span><span style='color:#bf0303;'>.</span>
+<span style='color:#bf0303;'>Specification of additional equations such as surface/volume integrals are also available.</span>
+<span style='color:#bf0303;'>The numerical solution of the resulting ODA/DAE system is performed in daetools</span>
+<span style='color:#bf0303;'>together with the rest of the model equations.</span>
 
-<span style='color:#c00000;'>The unique feature of this approach is a capability to use daetools variables</span>
-<span style='color:#c00000;'>to specify boundary conditions, time varying coefficients and non-linear terms,</span>
-<span style='color:#c00000;'>and evaluate quantities such as surface/volume integrals.</span>
-<span style='color:#c00000;'>This way, the finite element model is fully integrated with the rest of the model</span>
-<span style='color:#c00000;'>and multiple FE systems can be created and coupled together.</span>
-<span style='color:#c00000;'>In addition, non-linear and DAE finite element systems are automatically supported.</span>
+<span style='color:#bf0303;'>The unique feature of this approach is a capability to use daetools variables</span>
+<span style='color:#bf0303;'>to specify boundary conditions, time varying coefficients and non-linear terms,</span>
+<span style='color:#bf0303;'>and evaluate quantities such as surface/volume integrals.</span>
+<span style='color:#bf0303;'>This way, the finite element model is fully integrated with the rest of the model</span>
+<span style='color:#bf0303;'>and multiple FE systems can be created and coupled together.</span>
+<span style='color:#bf0303;'>In addition, non-linear and DAE finite element systems are automatically supported.</span>
 
-<span style='color:#c00000;'>In this tutorial the simple transient heat conduction problem is solved using</span>
-<span style='color:#c00000;'>the finite element method:</span>
+<span style='color:#bf0303;'>In this tutorial the simple transient heat conduction problem is solved using</span>
+<span style='color:#bf0303;'>the finite element method:</span>
 
-<span style='color:#c00000;'>.. code-block:: none</span>
+<span style='color:#bf0303;'>.. code-block:: none</span>
 
-<span style='color:#c00000;'>   dT/dt - kappa/(rho*cp)*nabla^2(T) = g(T) in Omega</span>
+<span style='color:#bf0303;'>   dT/dt - kappa/(rho*cp)*nabla^2(T) = g(T) in Omega</span>
 
-<span style='color:#c00000;'>The mesh is rectangular with two holes, similar to the mesh in step-49 deal.II example:</span>
+<span style='color:#bf0303;'>The mesh is rectangular with two holes, similar to the mesh in step-49 deal.II example:</span>
 
-<span style='color:#c00000;'>.. image:: _static/step-49.png</span>
-<span style='color:#c00000;'>   :alt:</span>
-<span style='color:#c00000;'>   :width: 400 px</span>
+<span style='color:#bf0303;'>.. image:: _static/step-49.png</span>
+<span style='color:#bf0303;'>   :alt:</span>
+<span style='color:#bf0303;'>   :width: 400 px</span>
 
-<span style='color:#c00000;'>Dirichlet boundary conditions are set to 300 K on the outer rectangle,</span>
-<span style='color:#c00000;'>350 K on the inner ellipse and 250 K on the inner diamond.</span>
+<span style='color:#bf0303;'>Dirichlet boundary conditions are set to 300 K on the outer rectangle,</span>
+<span style='color:#bf0303;'>350 K on the inner ellipse and 250 K on the inner diamond.</span>
 
-<span style='color:#c00000;'>The temperature plot at t = 500s (generated in VisIt):</span>
+<span style='color:#bf0303;'>The temperature plot at t = 500s (generated in VisIt):</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_dealii_1-results.png</span>
-<span style='color:#c00000;'>   :width: 600 px</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial_dealii_1-results.png</span>
+<span style='color:#bf0303;'>   :width: 600 px</span>
 
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> os, sys, numpy, json, tempfile
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> daetools.solvers.deal_II <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> daetools.solvers.superlu <span style='color:#0000ff;'>import</span> pySuperLU
+<span style='color:#ff5500;'>import</span> os, sys, numpy, json, tempfile
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
+<span style='color:#ff5500;'>from</span> daetools.solvers.deal_II <span style='color:#ff5500;'>import</span> *
+<span style='color:#ff5500;'>from</span> daetools.solvers.superlu <span style='color:#ff5500;'>import</span> pySuperLU
 
-<span style='color:#008000;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>daetools provide four main classes to support the deal.II library:</span>
-<span style='color:#008000;'>  1) dealiiFiniteElementDOF</span>
-<span style='color:#008000;'>     In deal.II represents a degree of freedom distributed on a finite element domain.</span>
-<span style='color:#008000;'>     In daetools represents a variable distributed on a finite element domain.</span>
-<span style='color:#008000;'>  2) dealiiFiniteElementSystem (implements daeFiniteElementObject)</span>
-<span style='color:#008000;'>     It is a wrapper around deal.II FESystem&lt;dim&gt; class and handles all finite element related details.</span>
-<span style='color:#008000;'>     It uses information about the mesh, quadrature and face quadrature formulas, degrees of freedom</span>
-<span style='color:#008000;'>     and the FE weak formulation to assemble the system's mass matrix (Mij), stiffness matrix (Aij)</span>
-<span style='color:#008000;'>     and the load vector (Fi).</span>
-<span style='color:#008000;'>  3) dealiiFiniteElementWeakForm</span>
-<span style='color:#008000;'>     Contains weak form expressions for the contribution of FE cells to the system/stiffness matrices,</span>
-<span style='color:#008000;'>     the load vector, boundary conditions and (optionally) surface/volume integrals (as an output).</span>
-<span style='color:#008000;'>  4) daeFiniteElementModel</span>
-<span style='color:#008000;'>     daeModel-derived class that use system matrices/vectors from the dealiiFiniteElementSystem object</span>
-<span style='color:#008000;'>     to generate a system of equations: [Mij]{dx/dt} + [Aij]{x} = {Fi}.</span>
-<span style='color:#008000;'>     This system is in a general case DAE system, although it can also be a system of linear/non-linear</span>
-<span style='color:#008000;'>     equations (if the mass matrix is zero).</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>daetools provide four main classes to support the deal.II library:</span>
+<span style='color:#898887;'>  1) dealiiFiniteElementDOF</span>
+<span style='color:#898887;'>     In deal.II represents a degree of freedom distributed on a finite element domain.</span>
+<span style='color:#898887;'>     In daetools represents a variable distributed on a finite element domain.</span>
+<span style='color:#898887;'>  2) dealiiFiniteElementSystem (implements daeFiniteElementObject)</span>
+<span style='color:#898887;'>     It is a wrapper around deal.II FESystem&lt;dim&gt; class and handles all finite element related details.</span>
+<span style='color:#898887;'>     It uses information about the mesh, quadrature and face quadrature formulas, degrees of freedom</span>
+<span style='color:#898887;'>     and the FE weak formulation to assemble the system's mass matrix (Mij), stiffness matrix (Aij)</span>
+<span style='color:#898887;'>     and the load vector (Fi).</span>
+<span style='color:#898887;'>  3) dealiiFiniteElementWeakForm</span>
+<span style='color:#898887;'>     Contains weak form expressions for the contribution of FE cells to the system/stiffness matrices,</span>
+<span style='color:#898887;'>     the load vector, boundary conditions and (optionally) surface/volume integrals (as an output).</span>
+<span style='color:#898887;'>  4) daeFiniteElementModel</span>
+<span style='color:#898887;'>     daeModel-derived class that use system matrices/vectors from the dealiiFiniteElementSystem object</span>
+<span style='color:#898887;'>     to generate a system of equations: [Mij]{dx/dt} + [Aij]{x} = {Fi}.</span>
+<span style='color:#898887;'>     This system is in a general case DAE system, although it can also be a system of linear/non-linear</span>
+<span style='color:#898887;'>     equations (if the mass matrix is zero).</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
         
-        <span style='color:#0000ff;'>self</span>.T_outer <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T_outer&quot;</span>, temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature of the outer boundary with id=0 (Dirichlet BC)&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.T_outer = daeVariable(<span style='color:#bf0303;'>&quot;T_outer&quot;</span>, temperature_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the outer boundary with id=0 (Dirichlet BC)&quot;</span>)
 
-        <span style='color:#008000;'># Some variables to store results of the FE surface/volume inegrals</span>
-        <span style='color:#0000ff;'>self</span>.MeshSurface <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;MeshSurface&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Mesh outer surface area in 3d, circumference in 2D)&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.MeshVolume  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;MeshVolume&quot;</span>,  no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Mesh volume in 3d, surface in 2D&quot;</span>)
+        <span style='color:#898887;'># Some variables to store results of the FE surface/volume inegrals</span>
+        <span style='color:#0057ae;'>self</span>.MeshSurface = daeVariable(<span style='color:#bf0303;'>&quot;MeshSurface&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Mesh outer surface area in 3d, circumference in 2D)&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.MeshVolume  = daeVariable(<span style='color:#bf0303;'>&quot;MeshVolume&quot;</span>,  no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Mesh volume in 3d, surface in 2D&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.Q0_total <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Q0_total&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Total heat passing through the boundary with id=0&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Q1_total <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Q1_total&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Total heat passing through the boundary with id=1&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Q2_total <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Q2_total&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Total heat passing through the boundary with id=2&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.Q0_total = daeVariable(<span style='color:#bf0303;'>&quot;Q0_total&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total heat passing through the boundary with id=0&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.Q1_total = daeVariable(<span style='color:#bf0303;'>&quot;Q1_total&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total heat passing through the boundary with id=1&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.Q2_total = daeVariable(<span style='color:#bf0303;'>&quot;Q2_total&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total heat passing through the boundary with id=2&quot;</span>)
 
-        <span style='color:#008000;'># 1. The starting point is a definition of the daeFiniteElementObject class (1D, 2D or 2D problem).</span>
+        <span style='color:#898887;'># 1. The starting point is a definition of the daeFiniteElementObject class (1D, 2D or 2D problem).</span>
 
-        <span style='color:#008000;'>#    1.1 Specification of the mesh file in one of the formats supported by deal.II:</span>
-        <span style='color:#008000;'>#         - UCD (unstructured cell data)</span>
-        <span style='color:#008000;'>#         - DB Mesh</span>
-        <span style='color:#008000;'>#         - XDA</span>
-        <span style='color:#008000;'>#         - Gmsh</span>
-        <span style='color:#008000;'>#         - Tecplot</span>
-        <span style='color:#008000;'>#         - NetCDF</span>
-        <span style='color:#008000;'>#         - UNV</span>
-        <span style='color:#008000;'>#         - VTK</span>
-        <span style='color:#008000;'>#         - Cubit</span>
-        <span style='color:#008000;'>#        Here the .msh format from Gmsh is used (generated from the step-49.geo file)</span>
-        meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#c00000;'>'step-49.msh'</span>)
+        <span style='color:#898887;'>#    1.1 Specification of the mesh file in one of the formats supported by deal.II:</span>
+        <span style='color:#898887;'>#         - UCD (unstructured cell data)</span>
+        <span style='color:#898887;'>#         - DB Mesh</span>
+        <span style='color:#898887;'>#         - XDA</span>
+        <span style='color:#898887;'>#         - Gmsh</span>
+        <span style='color:#898887;'>#         - Tecplot</span>
+        <span style='color:#898887;'>#         - NetCDF</span>
+        <span style='color:#898887;'>#         - UNV</span>
+        <span style='color:#898887;'>#         - VTK</span>
+        <span style='color:#898887;'>#         - Cubit</span>
+        <span style='color:#898887;'>#        Here the .msh format from Gmsh is used (generated from the step-49.geo file)</span>
+        meshes_dir = os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0057ae;'>__file__</span>)), <span style='color:#bf0303;'>'meshes'</span>)
+        mesh_file  = os.path.join(meshes_dir, <span style='color:#bf0303;'>'step-49.msh'</span>)
 
-        <span style='color:#008000;'>#    1.2 Specification of the degrees of freedom (as a python list of dealiiFiniteElementDOF objects)</span>
-        <span style='color:#008000;'>#        Every dof has a name which will be also used to declare daetools variable ith the same name,</span>
-        <span style='color:#008000;'>#        description, finite element object (deal.II FiniteElement&lt;dim&gt; instance) and the multiplicity.</span>
-        <span style='color:#008000;'>#        The following finite elements are available:</span>
-        <span style='color:#008000;'>#          - Scalar finite elements: FE_Q, FE_Bernstein</span>
-        <span style='color:#008000;'>#          - Vector finite elements: FE_ABF, FE_BDM, FE_Nedelec, FE_RaviartThomas</span>
-        <span style='color:#008000;'>#          - Discontinuous Galerkin finite elements</span>
-        <span style='color:#008000;'>#            - scalar: FE_DGP, FE_DGQ</span>
-        <span style='color:#008000;'>#            - scalar, different shape functions: FE_DGPMonomial, FE_DGPNonparametric, FE_DGQArbitraryNodes</span>
-        <span style='color:#008000;'>#            - vector-valued: FE_DGBDM, FE_DGNedelec, FE_DGRaviartThomas</span>
-        <span style='color:#008000;'>#        For more information see the deal.II documentation</span>
-        <span style='color:#008000;'>#        Multiplicity &gt; 1 defines vector DOFs (such as velocity).</span>
-        dofs <b><span style='color:#0000ff;'>=</span></b> [dealiiFiniteElementDOF_2D(name<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'T'</span>,
-                                          description<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'Temperature'</span>,
-                                          fe <b><span style='color:#0000ff;'>=</span></b> FE_Q_2D(<span style='color:#c000c0;'>1</span>),
-                                          multiplicity<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>1</span>)]
+        <span style='color:#898887;'>#    1.2 Specification of the degrees of freedom (as a python list of dealiiFiniteElementDOF objects)</span>
+        <span style='color:#898887;'>#        Every dof has a name which will be also used to declare daetools variable ith the same name,</span>
+        <span style='color:#898887;'>#        description, finite element object (deal.II FiniteElement&lt;dim&gt; instance) and the multiplicity.</span>
+        <span style='color:#898887;'>#        The following finite elements are available:</span>
+        <span style='color:#898887;'>#          - Scalar finite elements: FE_Q, FE_Bernstein</span>
+        <span style='color:#898887;'>#          - Vector finite elements: FE_ABF, FE_BDM, FE_Nedelec, FE_RaviartThomas</span>
+        <span style='color:#898887;'>#          - Discontinuous Galerkin finite elements</span>
+        <span style='color:#898887;'>#            - scalar: FE_DGP, FE_DGQ</span>
+        <span style='color:#898887;'>#            - scalar, different shape functions: FE_DGPMonomial, FE_DGPNonparametric, FE_DGQArbitraryNodes</span>
+        <span style='color:#898887;'>#            - vector-valued: FE_DGBDM, FE_DGNedelec, FE_DGRaviartThomas</span>
+        <span style='color:#898887;'>#        For more information see the deal.II documentation</span>
+        <span style='color:#898887;'>#        Multiplicity &gt; 1 defines vector DOFs (such as velocity).</span>
+        dofs = [dealiiFiniteElementDOF_2D(name=<span style='color:#bf0303;'>'T'</span>,
+                                          description=<span style='color:#bf0303;'>'Temperature'</span>,
+                                          fe = FE_Q_2D(<span style='color:#b08000;'>1</span>),
+                                          multiplicity=<span style='color:#b08000;'>1</span>)]
 
-        <span style='color:#008000;'>#    1.3 Specify quadrature formulas for elements and their faces.</span>
-        <span style='color:#008000;'>#        A large number of formulas is available in deal.II:</span>
-        <span style='color:#008000;'>#        QGaussLobatto, QGauss, QMidpoint, QSimpson, QTrapez, QMilne, QWeddle,</span>
-        <span style='color:#008000;'>#        QGaussLog, QGaussLogR, QGaussOneOverR, QGaussChebyshev, QGaussLobattoChebyshev</span>
-        <span style='color:#008000;'>#        each in 1D, 2D and 3D versions. Our example is 2D so we always use 2D versions.</span>
-        quadrature      <b><span style='color:#0000ff;'>=</span></b> QGauss_2D(<span style='color:#c000c0;'>3</span>) <span style='color:#008000;'># quadrature formula</span>
-        faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(<span style='color:#c000c0;'>3</span>) <span style='color:#008000;'># face quadrature formula</span>
+        <span style='color:#898887;'>#    1.3 Specify quadrature formulas for elements and their faces.</span>
+        <span style='color:#898887;'>#        A large number of formulas is available in deal.II:</span>
+        <span style='color:#898887;'>#        QGaussLobatto, QGauss, QMidpoint, QSimpson, QTrapez, QMilne, QWeddle,</span>
+        <span style='color:#898887;'>#        QGaussLog, QGaussLogR, QGaussOneOverR, QGaussChebyshev, QGaussLobattoChebyshev</span>
+        <span style='color:#898887;'>#        each in 1D, 2D and 3D versions. Our example is 2D so we always use 2D versions.</span>
+        quadrature      = QGauss_2D(<span style='color:#b08000;'>3</span>) <span style='color:#898887;'># quadrature formula</span>
+        faceQuadrature  = QGauss_1D(<span style='color:#b08000;'>3</span>) <span style='color:#898887;'># face quadrature formula</span>
 
-        <span style='color:#008000;'>#    1.4 Create dealiiFiniteElementSystem object using the above information</span>
-        <span style='color:#008000;'>#        Nota bene:</span>
-        <span style='color:#008000;'>#        Store the object in python variable so it does not go out of scope while still in use by deal.II/daetools</span>
-        <span style='color:#0000ff;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,      <span style='color:#008000;'># path to mesh</span>
-                                                      quadrature      <b><span style='color:#0000ff;'>=</span></b> quadrature,     <span style='color:#008000;'># quadrature formula</span>
-                                                      faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> faceQuadrature, <span style='color:#008000;'># face quadrature formula</span>
-                                                      dofs            <b><span style='color:#0000ff;'>=</span></b> dofs)           <span style='color:#008000;'># degrees of freedom</span>
+        <span style='color:#898887;'>#    1.4 Create dealiiFiniteElementSystem object using the above information</span>
+        <span style='color:#898887;'>#        Nota bene:</span>
+        <span style='color:#898887;'>#        Store the object in python variable so it does not go out of scope while still in use by deal.II/daetools</span>
+        <span style='color:#0057ae;'>self</span>.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,      <span style='color:#898887;'># path to mesh</span>
+                                                      quadrature      = quadrature,     <span style='color:#898887;'># quadrature formula</span>
+                                                      faceQuadrature  = faceQuadrature, <span style='color:#898887;'># face quadrature formula</span>
+                                                      dofs            = dofs)           <span style='color:#898887;'># degrees of freedom</span>
 
-        <span style='color:#008000;'># 2. Create daeFiniteElementModel object (similarly to the ordinary daetools model)</span>
-        <span style='color:#008000;'>#    with the finite element system object as the last argument.</span>
-        <span style='color:#0000ff;'>self</span>.fe_model <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#c00000;'>'HeatConduction'</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>'Transient heat conduction FE problem'</span>, <span style='color:#0000ff;'>self</span>.fe_system)
+        <span style='color:#898887;'># 2. Create daeFiniteElementModel object (similarly to the ordinary daetools model)</span>
+        <span style='color:#898887;'>#    with the finite element system object as the last argument.</span>
+        <span style='color:#0057ae;'>self</span>.fe_model = daeFiniteElementModel(<span style='color:#bf0303;'>'HeatConduction'</span>, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>'Transient heat conduction FE problem'</span>, <span style='color:#0057ae;'>self</span>.fe_system)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        <span style='color:#008000;'># 3. Define the weak form of the problem.</span>
+        <span style='color:#898887;'># 3. Define the weak form of the problem.</span>
 
-        <span style='color:#008000;'>#    3.1 First define some auxiliary variables (i.e thermo-physical properties)</span>
-        <span style='color:#008000;'>#        In this example copper is used.</span>
-        rho   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>8960.0</span>  <span style='color:#008000;'># kg/m**3</span>
-        cp    <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>385.0</span>  <span style='color:#008000;'># J/(kg*K)</span>
-        kappa <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#c000c0;'>401.0</span>  <span style='color:#008000;'># W/(m*K)</span>
-        alpha <b><span style='color:#0000ff;'>=</span></b> kappa <b><span style='color:#0000ff;'>/</span></b> (rho <b><span style='color:#0000ff;'>*</span></b> cp) <span style='color:#008000;'># Thermal diffusivity (m**2/s)</span>
+        <span style='color:#898887;'>#    3.1 First define some auxiliary variables (i.e thermo-physical properties)</span>
+        <span style='color:#898887;'>#        In this example copper is used.</span>
+        rho   = <span style='color:#b08000;'>8960.0</span>  <span style='color:#898887;'># kg/m**3</span>
+        cp    =  <span style='color:#b08000;'>385.0</span>  <span style='color:#898887;'># J/(kg*K)</span>
+        kappa =  <span style='color:#b08000;'>401.0</span>  <span style='color:#898887;'># W/(m*K)</span>
+        alpha = kappa / (rho * cp) <span style='color:#898887;'># Thermal diffusivity (m**2/s)</span>
 
-        <span style='color:#008000;'>#    3.2 Diffusivity and the generation in the heat conduction equation can be:</span>
-        <span style='color:#008000;'>#         - constants</span>
-        <span style='color:#008000;'>#         - daetools expressions</span>
-        <span style='color:#008000;'>#         - deal.II Function&lt;dim,Number&gt; wrapper objects.</span>
-        <span style='color:#008000;'>#        In this example we use deal.II ConstantFunction&lt;dim&gt; class to specify a constant value.</span>
-        <span style='color:#008000;'>#        Since we have only one DOF we do not need to specify n_components in the constructor</span>
-        <span style='color:#008000;'>#        (the default value is 1) and we do not need to handle values of multiple components.</span>
-        <span style='color:#008000;'>#        Nota bene:</span>
-        <span style='color:#008000;'>#          Again, the function objects have to be stored in the python model</span>
-        <span style='color:#008000;'>#          since the weak form holds only the weak references to them.</span>
-        <span style='color:#0000ff;'>self</span>.fun_Diffusivity <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(alpha)
-        <span style='color:#0000ff;'>self</span>.fun_Generation  <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(<span style='color:#c000c0;'>0.0</span>)
+        <span style='color:#898887;'>#    3.2 Diffusivity and the generation in the heat conduction equation can be:</span>
+        <span style='color:#898887;'>#         - constants</span>
+        <span style='color:#898887;'>#         - daetools expressions</span>
+        <span style='color:#898887;'>#         - deal.II Function&lt;dim,Number&gt; wrapper objects.</span>
+        <span style='color:#898887;'>#        In this example we use deal.II ConstantFunction&lt;dim&gt; class to specify a constant value.</span>
+        <span style='color:#898887;'>#        Since we have only one DOF we do not need to specify n_components in the constructor</span>
+        <span style='color:#898887;'>#        (the default value is 1) and we do not need to handle values of multiple components.</span>
+        <span style='color:#898887;'>#        Nota bene:</span>
+        <span style='color:#898887;'>#          Again, the function objects have to be stored in the python model</span>
+        <span style='color:#898887;'>#          since the weak form holds only the weak references to them.</span>
+        <span style='color:#0057ae;'>self</span>.fun_Diffusivity = ConstantFunction_2D(alpha)
+        <span style='color:#0057ae;'>self</span>.fun_Generation  = ConstantFunction_2D(<span style='color:#b08000;'>0.0</span>)
 
-        <span style='color:#008000;'># The physical boundaries in the mesh file are specified using integers.</span>
-        <span style='color:#008000;'># In our example they are the following:</span>
-        outerRectangle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0</span> <span style='color:#008000;'># outer boundary</span>
-        innerEllipse   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span> <span style='color:#008000;'># inner ellipse at the left side</span>
-        innerDiamond   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span> <span style='color:#008000;'># inner diamond at the right side</span>
+        <span style='color:#898887;'># The physical boundaries in the mesh file are specified using integers.</span>
+        <span style='color:#898887;'># In our example they are the following:</span>
+        outerRectangle = <span style='color:#b08000;'>0</span> <span style='color:#898887;'># outer boundary</span>
+        innerEllipse   = <span style='color:#b08000;'>1</span> <span style='color:#898887;'># inner ellipse at the left side</span>
+        innerDiamond   = <span style='color:#b08000;'>2</span> <span style='color:#898887;'># inner diamond at the right side</span>
 
-        <span style='color:#008000;'>#    3.3 Specify Dirichlet-type boundary conditions using deal.II Function&lt;dim,Number&gt; wrapper objects</span>
-        <span style='color:#008000;'>#        In this case, only the adouble versions of Function&lt;dim,adouble&gt; class can be used.</span>
-        <span style='color:#008000;'>#        The allowed values include constants and expressions on daetools variables/parameters.</span>
-        <span style='color:#008000;'>#        Here we use a time varying quantity for the outer boundary and constant values for the rest.</span>
-        <span style='color:#008000;'>#        The boundary conditions are given as a dictionary where the keys are boundary IDs (integers)</span>
-        <span style='color:#008000;'>#        and values are a list of tuples ('DOF name', Function&lt;dim&gt; object).</span>
-        dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
-        dirichletBC[outerRectangle] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#c00000;'>'T'</span>, adoubleConstantFunction_2D( <span style='color:#0000ff;'>self</span>.T_outer() ))]
-        dirichletBC[innerEllipse]   <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#c00000;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#c000c0;'>350</span>) ))]
-        dirichletBC[innerDiamond]   <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#c00000;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#c000c0;'>250</span>) ))]
+        <span style='color:#898887;'>#    3.3 Specify Dirichlet-type boundary conditions using deal.II Function&lt;dim,Number&gt; wrapper objects</span>
+        <span style='color:#898887;'>#        In this case, only the adouble versions of Function&lt;dim,adouble&gt; class can be used.</span>
+        <span style='color:#898887;'>#        The allowed values include constants and expressions on daetools variables/parameters.</span>
+        <span style='color:#898887;'>#        Here we use a time varying quantity for the outer boundary and constant values for the rest.</span>
+        <span style='color:#898887;'>#        The boundary conditions are given as a dictionary where the keys are boundary IDs (integers)</span>
+        <span style='color:#898887;'>#        and values are a list of tuples ('DOF name', Function&lt;dim&gt; object).</span>
+        dirichletBC = {}
+        dirichletBC[outerRectangle] = [(<span style='color:#bf0303;'>'T'</span>, adoubleConstantFunction_2D( <span style='color:#0057ae;'>self</span>.T_outer() ))]
+        dirichletBC[innerEllipse]   = [(<span style='color:#bf0303;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#b08000;'>350</span>) ))]
+        dirichletBC[innerDiamond]   = [(<span style='color:#bf0303;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#b08000;'>250</span>) ))]
 
-        <span style='color:#008000;'>#    3.4 Often, it is required to calculate surface or volume integrals.</span>
-        <span style='color:#008000;'>#        For instance, this is useful to obtain the total quantity flowing through a boundary</span>
-        <span style='color:#008000;'>#        in this example the total heat.</span>
-        <span style='color:#008000;'>#        Surface integrals are given as dictionaries</span>
-        <span style='color:#008000;'>#        {boundary ID : list of tuples (daetools variable, integral weak form)}</span>
-        <span style='color:#008000;'>#        This way, several surface integrals for a single boundary can be integrated.</span>
-        <span style='color:#008000;'>#        The variables are used to create equations in the following form:</span>
-        <span style='color:#008000;'>#          eq.Residual = variable() - integral_expression</span>
-        <span style='color:#008000;'>#        This way the results of integration are stored in the specified variable.</span>
-        <span style='color:#008000;'>#        More details about specification of the weak form is given below in section 3.6.</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#        In this example we specify four boundary integrals:</span>
-        <span style='color:#008000;'>#          a) The simplest case is to use a surface integral to calculate the mesh surface</span>
-        <span style='color:#008000;'>#             at the given boundary (in 2D case it is equal to circumference).</span>
-        <span style='color:#008000;'>#             This is also useful for testing the validity of the results.</span>
-        <span style='color:#008000;'>#          b-d) The total heat passing through the outer rectangle, inner ellipse and inner diamond boundary.</span>
-        surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
-        surfaceIntegrals[outerRectangle] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>None</span>, <span style='color:#0000ff;'>None</span>]
-        <span style='color:#008000;'>#        a) Area of the mesh outer surface (a test, just to check the integration validity).</span>
-        <span style='color:#008000;'>#           In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.</span>
-        surfaceIntegrals[outerRectangle][<span style='color:#c000c0;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.MeshSurface(), (phi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)))
-        <span style='color:#008000;'>#        b) Total heat transferred through the outer rectangle boundary</span>
-        surfaceIntegrals[outerRectangle][<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#0000ff;'>self</span>.Q0_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#c00000;'>'T'</span>, fe_i))
-        <span style='color:#008000;'>#        c) Total heat transferred through the inner ellipse boundary</span>
-        surfaceIntegrals[innerEllipse] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#0000ff;'>self</span>.Q1_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#c00000;'>'T'</span>, fe_i))]
-        <span style='color:#008000;'>#        d) Total heat transferred through the inner diamond boundary</span>
-        surfaceIntegrals[innerDiamond] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#0000ff;'>self</span>.Q2_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#c00000;'>'T'</span>, fe_i))]
+        <span style='color:#898887;'>#    3.4 Often, it is required to calculate surface or volume integrals.</span>
+        <span style='color:#898887;'>#        For instance, this is useful to obtain the total quantity flowing through a boundary</span>
+        <span style='color:#898887;'>#        in this example the total heat.</span>
+        <span style='color:#898887;'>#        Surface integrals are given as dictionaries</span>
+        <span style='color:#898887;'>#        {boundary ID : list of tuples (daetools variable, integral weak form)}</span>
+        <span style='color:#898887;'>#        This way, several surface integrals for a single boundary can be integrated.</span>
+        <span style='color:#898887;'>#        The variables are used to create equations in the following form:</span>
+        <span style='color:#898887;'>#          eq.Residual = variable() - integral_expression</span>
+        <span style='color:#898887;'>#        This way the results of integration are stored in the specified variable.</span>
+        <span style='color:#898887;'>#        More details about specification of the weak form is given below in section 3.6.</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#        In this example we specify four boundary integrals:</span>
+        <span style='color:#898887;'>#          a) The simplest case is to use a surface integral to calculate the mesh surface</span>
+        <span style='color:#898887;'>#             at the given boundary (in 2D case it is equal to circumference).</span>
+        <span style='color:#898887;'>#             This is also useful for testing the validity of the results.</span>
+        <span style='color:#898887;'>#          b-d) The total heat passing through the outer rectangle, inner ellipse and inner diamond boundary.</span>
+        surfaceIntegrals = {}
+        surfaceIntegrals[outerRectangle] = [<span style='color:#0057ae;'>None</span>, <span style='color:#0057ae;'>None</span>]
+        <span style='color:#898887;'>#        a) Area of the mesh outer surface (a test, just to check the integration validity).</span>
+        <span style='color:#898887;'>#           In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.</span>
+        surfaceIntegrals[outerRectangle][<span style='color:#b08000;'>0</span>] = (<span style='color:#0057ae;'>self</span>.MeshSurface(), (phi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * JxW_2D(fe_q)))
+        <span style='color:#898887;'>#        b) Total heat transferred through the outer rectangle boundary</span>
+        surfaceIntegrals[outerRectangle][<span style='color:#b08000;'>1</span>] = (<span style='color:#0057ae;'>self</span>.Q0_total(), (-alpha * (dphi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D(<span style='color:#bf0303;'>'T'</span>, fe_i))
+        <span style='color:#898887;'>#        c) Total heat transferred through the inner ellipse boundary</span>
+        surfaceIntegrals[innerEllipse] = [(<span style='color:#0057ae;'>self</span>.Q1_total(), (-alpha * (dphi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D(<span style='color:#bf0303;'>'T'</span>, fe_i))]
+        <span style='color:#898887;'>#        d) Total heat transferred through the inner diamond boundary</span>
+        surfaceIntegrals[innerDiamond] = [(<span style='color:#0057ae;'>self</span>.Q2_total(), (-alpha * (dphi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D(<span style='color:#bf0303;'>'T'</span>, fe_i))]
 
-        <span style='color:#008000;'>#    3.5 Volume integrals are specified similarly. The only difference is that they do not require boundary IDs.</span>
-        <span style='color:#008000;'>#        Nota bene:</span>
-        <span style='color:#008000;'>#          Care should be taken with the volume integrals since they include values at ALL cells</span>
-        <span style='color:#008000;'>#          and the resulting equations can be enormously long!!</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#        In this example we specify only one volume integral: the simplest case used to calculate</span>
-        <span style='color:#008000;'>#        the mesh surface area (in 2D it is area; in 3D it is the volume).</span>
-        <span style='color:#008000;'>#        This is another test to check the integration validity.</span>
-        <span style='color:#008000;'>#        Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732...</span>
-        <span style='color:#008000;'>#        (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).</span>
-        volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#0000ff;'>self</span>.MeshVolume(), (phi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#c00000;'>'T'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q))) ]
+        <span style='color:#898887;'>#    3.5 Volume integrals are specified similarly. The only difference is that they do not require boundary IDs.</span>
+        <span style='color:#898887;'>#        Nota bene:</span>
+        <span style='color:#898887;'>#          Care should be taken with the volume integrals since they include values at ALL cells</span>
+        <span style='color:#898887;'>#          and the resulting equations can be enormously long!!</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#        In this example we specify only one volume integral: the simplest case used to calculate</span>
+        <span style='color:#898887;'>#        the mesh surface area (in 2D it is area; in 3D it is the volume).</span>
+        <span style='color:#898887;'>#        This is another test to check the integration validity.</span>
+        <span style='color:#898887;'>#        Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732...</span>
+        <span style='color:#898887;'>#        (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).</span>
+        volumeIntegrals = [ (<span style='color:#0057ae;'>self</span>.MeshVolume(), (phi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * phi_2D(<span style='color:#bf0303;'>'T'</span>, fe_j, fe_q) * JxW_2D(fe_q))) ]
 
-        <span style='color:#008000;'>#    3.6 Derive and specify the weak form of the problem.</span>
-        <span style='color:#008000;'>#        The weak form consists of the following contributions:</span>
-        <span style='color:#008000;'>#         a) Aij - cell contribution to the system stiffness matrix.</span>
-        <span style='color:#008000;'>#         b) Mij - cell contribution to the mass stiffness matrix.</span>
-        <span style='color:#008000;'>#         c) Fi  - cell contribution to the load vector.</span>
-        <span style='color:#008000;'>#         d) boundaryFaceAij  - boundary face contribution to the system stiffness matrix.</span>
-        <span style='color:#008000;'>#         e) boundaryFaceFi   - boundary face contribution to the load vector</span>
-        <span style='color:#008000;'>#         f) innerCellFaceAij - inner cell face contribution to the system stiffness matrix.</span>
-        <span style='color:#008000;'>#         g) innerCellFaceFi  - inner cell face contribution to the load vector</span>
-        <span style='color:#008000;'>#         h) functionsDirichletBC - Dirichlet boundary conditions (section 3.3)</span>
-        <span style='color:#008000;'>#         i) surfaceIntegrals - surface integrals (section 3.4)</span>
-        <span style='color:#008000;'>#         j) volumeIntegrals  - volume  integrals (section 3.5)</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#         The weak form expressions are specified using the functions that wrap deal.II</span>
-        <span style='color:#008000;'>#         concepts used to assembly the matrices/vectors. The weak forms in daetools</span>
-        <span style='color:#008000;'>#         represent expressions as they would appear in typical nested for loops.</span>
-        <span style='color:#008000;'>#         In deal.II a typical cell assembly loop (in C++) would look like</span>
-        <span style='color:#008000;'>#         (i.e. a very simple example given in step-7):</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#         typename DoFHandler&lt;dim&gt;::active_cell_iterator cell = dof_handler.begin_active(),</span>
-        <span style='color:#008000;'>#                                                        endc = dof_handler.end();</span>
-        <span style='color:#008000;'>#         for(; cell != endc; ++cell)</span>
-        <span style='color:#008000;'>#         {</span>
-        <span style='color:#008000;'>#             for(unsigned int q_point = 0; q_point &lt; n_q_points; ++q_point)</span>
-        <span style='color:#008000;'>#             {</span>
-        <span style='color:#008000;'>#                 for(unsigned int i = 0; i &lt; dofs_per_cell; ++i)</span>
-        <span style='color:#008000;'>#                 {</span>
-        <span style='color:#008000;'>#                     for(unsigned int j = 0; j &lt; dofs_per_cell; ++j)</span>
-        <span style='color:#008000;'>#                     {</span>
-        <span style='color:#008000;'>#                         cell_matrix(i,j) += ((fe_values.shape_grad(i,q_point) *</span>
-        <span style='color:#008000;'>#                                               fe_values.shape_grad(j,q_point)</span>
-        <span style='color:#008000;'>#                                               +</span>
-        <span style='color:#008000;'>#                                               fe_values.shape_value(i,q_point) *</span>
-        <span style='color:#008000;'>#                                               fe_values.shape_value(j,q_point)) *</span>
-        <span style='color:#008000;'>#                                               fe_values.JxW(q_point));</span>
-        <span style='color:#008000;'>#                     }</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#                     cell_rhs(i) += (fe_values.shape_value(i,q_point) *</span>
-        <span style='color:#008000;'>#                                     rhs_values [q_point] * fe_values.JxW(q_point));</span>
-        <span style='color:#008000;'>#                 }</span>
-        <span style='color:#008000;'>#             }</span>
-        <span style='color:#008000;'>#         }</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#         In daetools, the dealiiFiniteElementSystem class creates a context where these loops are executed</span>
-        <span style='color:#008000;'>#         and only weak form expressions are required - all other data are managed automatically, in a generic way.</span>
-        <span style='color:#008000;'>#         Obviously, the generic loops can be used to solve many FE problems but not all.</span>
-        <span style='color:#008000;'>#         However, they can support a large number of problems at the moment.</span>
-        <span style='color:#008000;'>#         In the future they will be expanded to support a broader class of problems.</span>
-        <span style='color:#008000;'>#</span>
-        <span style='color:#008000;'>#         Functions are developed for the most of the functionality provided by deal.II FEValues&lt;dim&gt; and</span>
-        <span style='color:#008000;'>#         FEFaceValues&lt;dim&gt; classes used for matrix assembly. The current list include (for 1D, 2D and 3D):</span>
-        <span style='color:#008000;'>#          - phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II</span>
-        <span style='color:#008000;'>#          - dphi (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II</span>
-        <span style='color:#008000;'>#          - d2phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian in deal.II</span>
-        <span style='color:#008000;'>#          - phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_value of vector dofs in deal.II</span>
-        <span style='color:#008000;'>#          - dphi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad of vector dofs in deal.II</span>
-        <span style='color:#008000;'>#          - d2phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian of vector dofs in deal.II</span>
-        <span style='color:#008000;'>#          - div_phi (variableName, shapeFunction, quadraturePoint): corresponds to divergence in deal.II</span>
-        <span style='color:#008000;'>#          - JxW (quadraturePoint): corresponds to the mapped quadrature weight in deal.II</span>
-        <span style='color:#008000;'>#          - xyz (quadraturePoint): returns the point for the specified quadrature point in deal.II</span>
-        <span style='color:#008000;'>#          - normal (quadraturePoint): corresponds to the normal_vector in deal.II</span>
-        <span style='color:#008000;'>#          - function_value (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a value</span>
-        <span style='color:#008000;'>#          - function_gradient (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a gradient</span>
-        <span style='color:#008000;'>#          - function_adouble_value (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns adouble value</span>
-        <span style='color:#008000;'>#          - function_adouble_gradient (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns adouble gradient</span>
-        <span style='color:#008000;'>#          - dof (variableName, shapeFunction): returns daetools variable at the given index (adouble object)</span>
-        <span style='color:#008000;'>#          - dof_approximation (variableName, shapeFunction): returns FE approximation of a quantity as a daetools variable (adouble object)</span>
-        <span style='color:#008000;'>#          - dof_gradient_approximation (variableName, shapeFunction): returns FE gradient approximation of a quantity as a daetools variable (adouble object)</span>
-        <span style='color:#008000;'>#          - dof_hessian_approximation (variableName, shapeFunction): returns FE hessian approximation of a quantity as a daetools variable (adouble object)</span>
-        <span style='color:#008000;'>#          - vector_dof_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
-        <span style='color:#008000;'>#          - vector_dof_gradient_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
-        <span style='color:#008000;'>#          - adouble (ad): wraps any daetools expression to be used in matrix assembly</span>
-        <span style='color:#008000;'>#          - tensor1 (t): wraps deal.II Tensor&lt;rank=1,double&gt;</span>
-        <span style='color:#008000;'>#          - tensor2 (t): wraps deal.II Tensor&lt;rank=2,double&gt;</span>
-        <span style='color:#008000;'>#          - tensor3 (t): wraps deal.II Tensor&lt;rank=3,double&gt;</span>
-        <span style='color:#008000;'>#          - adouble_tensor1 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
-        <span style='color:#008000;'>#          - adouble_tensor2 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
-        <span style='color:#008000;'>#          - adouble_tensor3 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#898887;'>#    3.6 Derive and specify the weak form of the problem.</span>
+        <span style='color:#898887;'>#        The weak form consists of the following contributions:</span>
+        <span style='color:#898887;'>#         a) Aij - cell contribution to the system stiffness matrix.</span>
+        <span style='color:#898887;'>#         b) Mij - cell contribution to the mass stiffness matrix.</span>
+        <span style='color:#898887;'>#         c) Fi  - cell contribution to the load vector.</span>
+        <span style='color:#898887;'>#         d) boundaryFaceAij  - boundary face contribution to the system stiffness matrix.</span>
+        <span style='color:#898887;'>#         e) boundaryFaceFi   - boundary face contribution to the load vector</span>
+        <span style='color:#898887;'>#         f) innerCellFaceAij - inner cell face contribution to the system stiffness matrix.</span>
+        <span style='color:#898887;'>#         g) innerCellFaceFi  - inner cell face contribution to the load vector</span>
+        <span style='color:#898887;'>#         h) functionsDirichletBC - Dirichlet boundary conditions (section 3.3)</span>
+        <span style='color:#898887;'>#         i) surfaceIntegrals - surface integrals (section 3.4)</span>
+        <span style='color:#898887;'>#         j) volumeIntegrals  - volume  integrals (section 3.5)</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#         The weak form expressions are specified using the functions that wrap deal.II</span>
+        <span style='color:#898887;'>#         concepts used to assembly the matrices/vectors. The weak forms in daetools</span>
+        <span style='color:#898887;'>#         represent expressions as they would appear in typical nested for loops.</span>
+        <span style='color:#898887;'>#         In deal.II a typical cell assembly loop (in C++) would look like</span>
+        <span style='color:#898887;'>#         (i.e. a very simple example given in step-7):</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#         typename DoFHandler&lt;dim&gt;::active_cell_iterator cell = dof_handler.begin_active(),</span>
+        <span style='color:#898887;'>#                                                        endc = dof_handler.end();</span>
+        <span style='color:#898887;'>#         for(; cell != endc; ++cell)</span>
+        <span style='color:#898887;'>#         {</span>
+        <span style='color:#898887;'>#             for(unsigned int q_point = 0; q_point &lt; n_q_points; ++q_point)</span>
+        <span style='color:#898887;'>#             {</span>
+        <span style='color:#898887;'>#                 for(unsigned int i = 0; i &lt; dofs_per_cell; ++i)</span>
+        <span style='color:#898887;'>#                 {</span>
+        <span style='color:#898887;'>#                     for(unsigned int j = 0; j &lt; dofs_per_cell; ++j)</span>
+        <span style='color:#898887;'>#                     {</span>
+        <span style='color:#898887;'>#                         cell_matrix(i,j) += ((fe_values.shape_grad(i,q_point) *</span>
+        <span style='color:#898887;'>#                                               fe_values.shape_grad(j,q_point)</span>
+        <span style='color:#898887;'>#                                               +</span>
+        <span style='color:#898887;'>#                                               fe_values.shape_value(i,q_point) *</span>
+        <span style='color:#898887;'>#                                               fe_values.shape_value(j,q_point)) *</span>
+        <span style='color:#898887;'>#                                               fe_values.JxW(q_point));</span>
+        <span style='color:#898887;'>#                     }</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#                     cell_rhs(i) += (fe_values.shape_value(i,q_point) *</span>
+        <span style='color:#898887;'>#                                     rhs_values [q_point] * fe_values.JxW(q_point));</span>
+        <span style='color:#898887;'>#                 }</span>
+        <span style='color:#898887;'>#             }</span>
+        <span style='color:#898887;'>#         }</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#         In daetools, the dealiiFiniteElementSystem class creates a context where these loops are executed</span>
+        <span style='color:#898887;'>#         and only weak form expressions are required - all other data are managed automatically, in a generic way.</span>
+        <span style='color:#898887;'>#         Obviously, the generic loops can be used to solve many FE problems but not all.</span>
+        <span style='color:#898887;'>#         However, they can support a large number of problems at the moment.</span>
+        <span style='color:#898887;'>#         In the future they will be expanded to support a broader class of problems.</span>
+        <span style='color:#898887;'>#</span>
+        <span style='color:#898887;'>#         Functions are developed for the most of the functionality provided by deal.II FEValues&lt;dim&gt; and</span>
+        <span style='color:#898887;'>#         FEFaceValues&lt;dim&gt; classes used for matrix assembly. The current list include (for 1D, 2D and 3D):</span>
+        <span style='color:#898887;'>#          - phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II</span>
+        <span style='color:#898887;'>#          - dphi (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II</span>
+        <span style='color:#898887;'>#          - d2phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian in deal.II</span>
+        <span style='color:#898887;'>#          - phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_value of vector dofs in deal.II</span>
+        <span style='color:#898887;'>#          - dphi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad of vector dofs in deal.II</span>
+        <span style='color:#898887;'>#          - d2phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian of vector dofs in deal.II</span>
+        <span style='color:#898887;'>#          - div_phi (variableName, shapeFunction, quadraturePoint): corresponds to divergence in deal.II</span>
+        <span style='color:#898887;'>#          - JxW (quadraturePoint): corresponds to the mapped quadrature weight in deal.II</span>
+        <span style='color:#898887;'>#          - xyz (quadraturePoint): returns the point for the specified quadrature point in deal.II</span>
+        <span style='color:#898887;'>#          - normal (quadraturePoint): corresponds to the normal_vector in deal.II</span>
+        <span style='color:#898887;'>#          - function_value (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a value</span>
+        <span style='color:#898887;'>#          - function_gradient (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a gradient</span>
+        <span style='color:#898887;'>#          - function_adouble_value (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns adouble value</span>
+        <span style='color:#898887;'>#          - function_adouble_gradient (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns adouble gradient</span>
+        <span style='color:#898887;'>#          - dof (variableName, shapeFunction): returns daetools variable at the given index (adouble object)</span>
+        <span style='color:#898887;'>#          - dof_approximation (variableName, shapeFunction): returns FE approximation of a quantity as a daetools variable (adouble object)</span>
+        <span style='color:#898887;'>#          - dof_gradient_approximation (variableName, shapeFunction): returns FE gradient approximation of a quantity as a daetools variable (adouble object)</span>
+        <span style='color:#898887;'>#          - dof_hessian_approximation (variableName, shapeFunction): returns FE hessian approximation of a quantity as a daetools variable (adouble object)</span>
+        <span style='color:#898887;'>#          - vector_dof_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
+        <span style='color:#898887;'>#          - vector_dof_gradient_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
+        <span style='color:#898887;'>#          - adouble (ad): wraps any daetools expression to be used in matrix assembly</span>
+        <span style='color:#898887;'>#          - tensor1 (t): wraps deal.II Tensor&lt;rank=1,double&gt;</span>
+        <span style='color:#898887;'>#          - tensor2 (t): wraps deal.II Tensor&lt;rank=2,double&gt;</span>
+        <span style='color:#898887;'>#          - tensor3 (t): wraps deal.II Tensor&lt;rank=3,double&gt;</span>
+        <span style='color:#898887;'>#          - adouble_tensor1 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#898887;'>#          - adouble_tensor2 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#898887;'>#          - adouble_tensor3 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
 
-        <span style='color:#008000;'>#         First, we need to wrap Function&lt;dim&gt; objects to be used in the weak form using the function_value function:</span>
-        Diffusivity <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#c00000;'>'Diffusivity'</span>, <span style='color:#0000ff;'>self</span>.fun_Diffusivity, xyz_2D(fe_q))
-        Generation  <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#c00000;'>'Generation'</span>,  <span style='color:#0000ff;'>self</span>.fun_Generation,  xyz_2D(fe_q))
+        <span style='color:#898887;'>#         First, we need to wrap Function&lt;dim&gt; objects to be used in the weak form using the function_value function:</span>
+        Diffusivity = function_value_2D(<span style='color:#bf0303;'>'Diffusivity'</span>, <span style='color:#0057ae;'>self</span>.fun_Diffusivity, xyz_2D(fe_q))
+        Generation  = function_value_2D(<span style='color:#bf0303;'>'Generation'</span>,  <span style='color:#0057ae;'>self</span>.fun_Generation,  xyz_2D(fe_q))
 
-        <span style='color:#008000;'>#         Heat conduction equation is a typical example of convection-diffusion equations.</span>
-        <span style='color:#008000;'>#         In the case of pure conduction it simplifies into a diffusion-only equation.</span>
-        <span style='color:#008000;'>#         Its weak formulation is simple and given as:</span>
-        <span style='color:#008000;'>#           - Cell contribution to the mass matrix:      Mij = phi_i * phi_j * JxW</span>
-        <span style='color:#008000;'>#           - Cell contribution to the stiffness matrix: Aij = (dphi_i * dphi_j) * Diffusivity * JxW</span>
-        <span style='color:#008000;'>#           - Cell contribution to the load vector:      Fi  = phi_i * Generation * JxW</span>
-        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#c00000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#c00000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> Diffusivity <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        source       <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#c00000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> Generation <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+        <span style='color:#898887;'>#         Heat conduction equation is a typical example of convection-diffusion equations.</span>
+        <span style='color:#898887;'>#         In the case of pure conduction it simplifies into a diffusion-only equation.</span>
+        <span style='color:#898887;'>#         Its weak formulation is simple and given as:</span>
+        <span style='color:#898887;'>#           - Cell contribution to the mass matrix:      Mij = phi_i * phi_j * JxW</span>
+        <span style='color:#898887;'>#           - Cell contribution to the stiffness matrix: Aij = (dphi_i * dphi_j) * Diffusivity * JxW</span>
+        <span style='color:#898887;'>#           - Cell contribution to the load vector:      Fi  = phi_i * Generation * JxW</span>
+        accumulation = (phi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * phi_2D(<span style='color:#bf0303;'>'T'</span>, fe_j, fe_q)) * JxW_2D(fe_q)
+        diffusion    = (dphi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * dphi_2D(<span style='color:#bf0303;'>'T'</span>, fe_j, fe_q)) * Diffusivity * JxW_2D(fe_q)
+        source       = phi_2D(<span style='color:#bf0303;'>'T'</span>, fe_i, fe_q) * Generation * JxW_2D(fe_q)
 
-        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion,
-                                                  Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,
-                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> source,
-                                                  functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC,
-                                                  surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> surfaceIntegrals,
-                                                  volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> volumeIntegrals)
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
+                                                  Mij = accumulation,
+                                                  Fi  = source,
+                                                  functionsDirichletBC = dirichletBC,
+                                                  surfaceIntegrals = surfaceIntegrals,
+                                                  volumeIntegrals = volumeIntegrals)
 
-        <span style='color:#008000;'># Print the assembled weak form as they will be seen from deal.II wrappers:</span>
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Transient heat conduction equation:'</span>)
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Aij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Aij))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Mij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Mij))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    Fi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.Fi))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    boundaryFaceAij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>enumerate</span>(weakForm.boundaryFaceAij)]))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    boundaryFaceFi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>enumerate</span>(weakForm.boundaryFaceFi)]))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    innerCellFaceAij = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    innerCellFaceFi  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    surfaceIntegrals  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>enumerate</span>(weakForm.surfaceIntegrals)]))
-        <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'    volumeIntegrals  = </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#0000ff;'>str</span>([item <b>for</b> item <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>enumerate</span>(weakForm.volumeIntegrals)]))
+        <span style='color:#898887;'># Print the assembled weak form as they will be seen from deal.II wrappers:</span>
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Transient heat conduction equation:'</span>)
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    Aij = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>(weakForm.Aij))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    Mij = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>(weakForm.Mij))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    Fi  = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>(weakForm.Fi))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    boundaryFaceAij = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>([item <b>for</b> item <b>in</b> <b><span style='color:#644a9b;'>enumerate</span></b>(weakForm.boundaryFaceAij)]))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    boundaryFaceFi  = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>([item <b>for</b> item <b>in</b> <b><span style='color:#644a9b;'>enumerate</span></b>(weakForm.boundaryFaceFi)]))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    innerCellFaceAij = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>(weakForm.innerCellFaceAij))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    innerCellFaceFi  = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>(weakForm.innerCellFaceFi))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    surfaceIntegrals  = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>([item <b>for</b> item <b>in</b> <b><span style='color:#644a9b;'>enumerate</span></b>(weakForm.surfaceIntegrals)]))
+        <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'    volumeIntegrals  = </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % <b><span style='color:#644a9b;'>str</span></b>([item <b>for</b> item <b>in</b> <b><span style='color:#644a9b;'>enumerate</span></b>(weakForm.volumeIntegrals)]))
 
-        <span style='color:#008000;'>#    3.7 Finally, set the weak form of the FE system.</span>
-        <span style='color:#008000;'>#        This will declare a set of equations in the following form:</span>
-        <span style='color:#008000;'>#          [Mij]{dx/dt} + [Aij]{x} = {Fi}</span>
-        <span style='color:#008000;'>#        and the additional (optional) boundary integral equations.</span>
-        <span style='color:#0000ff;'>self</span>.fe_system.WeakForm <b><span style='color:#0000ff;'>=</span></b> weakForm
+        <span style='color:#898887;'>#    3.7 Finally, set the weak form of the FE system.</span>
+        <span style='color:#898887;'>#        This will declare a set of equations in the following form:</span>
+        <span style='color:#898887;'>#          [Mij]{dx/dt} + [Aij]{x} = {Fi}</span>
+        <span style='color:#898887;'>#        and the additional (optional) boundary integral equations.</span>
+        <span style='color:#0057ae;'>self</span>.fe_system.WeakForm = weakForm
 
-        <span style='color:#008000;'># As an exercise, define a time varying quantity T_outer to be used as a Dirichlet boundary condition</span>
-        <span style='color:#008000;'># to illistrate coupling between daetools and deal.II.</span>
-        <span style='color:#008000;'># Here it is a simple constant, but it can be any valid daetools equation.</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;T_outer&quot;</span>, <span style='color:#c00000;'>&quot;Boundary conditions for the outer edge&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T_outer() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#c000c0;'>200</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#898887;'># As an exercise, define a time varying quantity T_outer to be used as a Dirichlet boundary condition</span>
+        <span style='color:#898887;'># to illistrate coupling between daetools and deal.II.</span>
+        <span style='color:#898887;'># Here it is a simple constant, but it can be any valid daetools equation.</span>
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;T_outer&quot;</span>, <span style='color:#bf0303;'>&quot;Boundary conditions for the outer edge&quot;</span>)
+        eq.Residual = <span style='color:#0057ae;'>self</span>.T_outer() - Constant(<span style='color:#b08000;'>200</span> * K)
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;tutorial_dealii_1&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
-        <span style='color:#0000ff;'>self</span>.m.fe_model.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial_dealii_1&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+        <span style='color:#0057ae;'>self</span>.m.fe_model.Description = __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
         <b>pass</b>
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># 4. Set the initial conditions for differential variables using the setFEInitialConditions function.</span>
-        <span style='color:#008000;'>#    This function requires a dof name and either a float variable or a callable object to be called</span>
-        <span style='color:#008000;'>#    for every index in the variable. Here we use a simple constant value of 300 Kelvins.</span>
-        setFEInitialConditions(<span style='color:#0000ff;'>self</span>.m.fe_model, <span style='color:#0000ff;'>self</span>.m.fe_system, <span style='color:#c00000;'>'T'</span>, <span style='color:#c000c0;'>300</span>)
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#898887;'># 4. Set the initial conditions for differential variables using the setFEInitialConditions function.</span>
+        <span style='color:#898887;'>#    This function requires a dof name and either a float variable or a callable object to be called</span>
+        <span style='color:#898887;'>#    for every index in the variable. Here we use a simple constant value of 300 Kelvins.</span>
+        setFEInitialConditions(<span style='color:#0057ae;'>self</span>.m.fe_model, <span style='color:#0057ae;'>self</span>.m.fe_system, <span style='color:#bf0303;'>'T'</span>, <span style='color:#b08000;'>300</span>)
 
-<span style='color:#008000;'># 5. Set-up the main program</span>
-<span style='color:#008000;'>#    The only difference is that to obtain the results from the deal.II FE simulation</span>
-<span style='color:#008000;'>#    a special ata reporter object should be used (dealiiDataReporter).</span>
-<span style='color:#008000;'>#    It is created through the FE system object using the function dealiiFiniteElementSystem.CreateDataReporter()</span>
-<span style='color:#008000;'>#    The connect string represents a full path to the directory where the results will be stored in .vtk file format.</span>
-<span style='color:#008000;'>#    The data reporter will also generate vtk.visit file for easier animation in VisIt.</span>
-<span style='color:#008000;'>#    deal.II data reporter will create files only for FE dofs. The other canbe plotted in an usual fashion.</span>
+<span style='color:#898887;'># 5. Set-up the main program</span>
+<span style='color:#898887;'>#    The only difference is that to obtain the results from the deal.II FE simulation</span>
+<span style='color:#898887;'>#    a special ata reporter object should be used (dealiiDataReporter).</span>
+<span style='color:#898887;'>#    It is created through the FE system object using the function dealiiFiniteElementSystem.CreateDataReporter()</span>
+<span style='color:#898887;'>#    The connect string represents a full path to the directory where the results will be stored in .vtk file format.</span>
+<span style='color:#898887;'>#    The data reporter will also generate vtk.visit file for easier animation in VisIt.</span>
+<span style='color:#898887;'>#    deal.II data reporter will create files only for FE dofs. The other canbe plotted in an usual fashion.</span>
 <b>def</b> guiRun(app):
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simTutorial()
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
 
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    results_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'-results'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'tutorial_deal_II_1-'</span>)
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    results_folder = tempfile.mkdtemp(suffix = <span style='color:#bf0303;'>'-results'</span>, prefix = <span style='color:#bf0303;'>'tutorial_deal_II_1-'</span>)
 
-    <span style='color:#008000;'># Create two data reporters:</span>
-    <span style='color:#008000;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
-    feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
+    <span style='color:#898887;'># Create two data reporters:</span>
+    <span style='color:#898887;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
+    feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> feDataReporter.Connect(results_folder, simName):
+    <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):
         sys.exit()
 
-    <span style='color:#008000;'># 2. TCP/IP</span>
-    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    <span style='color:#898887;'># 2. TCP/IP</span>
+    tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
-    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> tcpipDataReporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName):
+    <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName):
         sys.exit()
 
-    <b>try</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        QtGui.QMessageBox.warning(<span style='color:#0000ff;'>None</span>, <span style='color:#c00000;'>&quot;deal.II&quot;</span>, <span style='color:#c00000;'>&quot;The simulation results will be located in: </span><span style='color:#0057ae;'>%s</span><span style='color:#c00000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results_folder)
-    <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-        <span style='color:#0000ff;'>print</span>(<span style='color:#0000ff;'>str</span>(e))
+    daeQtMessage(<span style='color:#bf0303;'>&quot;deal.II&quot;</span>, <span style='color:#bf0303;'>&quot;The simulation results will be located in: </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>&quot;</span> % results_folder)
     
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>simulation, datareporter <b><span style='color:#0000ff;'>=</span></b> datareporter, lasolver<b><span style='color:#0000ff;'>=</span></b>lasolver)
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
+    simulation.TimeHorizon       = <span style='color:#b08000;'>500</span>
+    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
     simulator.exec_()
     
-<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<span style='color:#898887;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simTutorial()
 
-    lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
 
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0000ff;'>__file__</span>)), <span style='color:#c00000;'>'tutorial_deal_II_1-results'</span>)
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(<span style='color:#0057ae;'>__file__</span>)), <span style='color:#bf0303;'>'tutorial_deal_II_1-results'</span>)
 
-    <span style='color:#008000;'># Create two data reporters:</span>
-    <span style='color:#008000;'># 1. DealII</span>
-    feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
+    <span style='color:#898887;'># Create two data reporters:</span>
+    <span style='color:#898887;'># 1. DealII</span>
+    feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
-    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> feDataReporter.Connect(results_folder, simName):
+    <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):
         sys.exit()
         
-    <span style='color:#008000;'># 2. TCP/IP</span>
-    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    <span style='color:#898887;'># 2. TCP/IP</span>
+    tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
-    <b>if</b> <b><span style='color:#0000ff;'>not</span></b> tcpipDataReporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName):
+    <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName):
         sys.exit()
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>500</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>500</span>
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
     
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    <span style='color:#008000;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    simulation.m.fe_model.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    <span style='color:#898887;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
     
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

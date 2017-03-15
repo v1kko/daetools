@@ -261,7 +261,7 @@ def consoleRun():
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 5
+    simulation.ReportingInterval = 2
     simulation.TimeHorizon = 200
 
     # Initialize the simulation

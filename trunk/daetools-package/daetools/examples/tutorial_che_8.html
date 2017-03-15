@@ -6,397 +6,397 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial_che_8.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                           tutorial_che_8.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>Model of a gas separation on a porous membrane with a metal support. The model employs</span>
-<span style='color:#c00000;'>the Generalised Maxwell-Stefan (GMS) equations to predict fluxes and selectivities.</span>
-<span style='color:#c00000;'>The membrane unit model represents a generic two-dimensonal model of a porous membrane</span>
-<span style='color:#c00000;'>and consists of four models:</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                           tutorial_che_8.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>Model of a gas separation on a porous membrane with a metal support. The model employs</span>
+<span style='color:#bf0303;'>the Generalised Maxwell-Stefan (GMS) equations to predict fluxes and selectivities.</span>
+<span style='color:#bf0303;'>The membrane unit model represents a generic two-dimensonal model of a porous membrane</span>
+<span style='color:#bf0303;'>and consists of four models:</span>
 
-<span style='color:#c00000;'>- Retentate compartment (isothermal axially dispersed plug flow)</span>
-<span style='color:#c00000;'>- Micro-porous membrane</span>
-<span style='color:#c00000;'>- Macro-porous support layer</span>
-<span style='color:#c00000;'>- Permeate compartment (the same transport phenomena as in the retentate compartment)</span>
+<span style='color:#bf0303;'>- Retentate compartment (isothermal axially dispersed plug flow)</span>
+<span style='color:#bf0303;'>- Micro-porous membrane</span>
+<span style='color:#bf0303;'>- Macro-porous support layer</span>
+<span style='color:#bf0303;'>- Permeate compartment (the same transport phenomena as in the retentate compartment)</span>
 
-<span style='color:#c00000;'>The retentate compartment, the porous membrane, the support layer and the permeate</span>
-<span style='color:#c00000;'>compartment are coupled via molar flux, temperature, pressure and gas composition at</span>
-<span style='color:#c00000;'>the interfaces.</span>
-<span style='color:#c00000;'>The model is described in the section 2.2 Membrane modelling of the following article:</span>
+<span style='color:#bf0303;'>The retentate compartment, the porous membrane, the support layer and the permeate</span>
+<span style='color:#bf0303;'>compartment are coupled via molar flux, temperature, pressure and gas composition at</span>
+<span style='color:#bf0303;'>the interfaces.</span>
+<span style='color:#bf0303;'>The model is described in the section 2.2 Membrane modelling of the following article:</span>
 
-<span style='color:#c00000;'>- Nikolic D.D., Kikkinides E.S. (2015) Modelling and optimization of PSA/Membrane</span>
-<span style='color:#c00000;'>  separation processes. Adsorption 21(4):283-305.</span>
-<span style='color:#c00000;'>  `doi:10.1007/s10450-015-9670-z &lt;http://doi.org/10.1007/s10450-015-9670-z&gt;`_</span>
+<span style='color:#bf0303;'>- Nikolic D.D., Kikkinides E.S. (2015) Modelling and optimization of PSA/Membrane</span>
+<span style='color:#bf0303;'>  separation processes. Adsorption 21(4):283-305.</span>
+<span style='color:#bf0303;'>  `doi:10.1007/s10450-015-9670-z &lt;http://doi.org/10.1007/s10450-015-9670-z&gt;`_</span>
 
-<span style='color:#c00000;'>and in the original Krishna article:</span>
+<span style='color:#bf0303;'>and in the original Krishna article:</span>
 
-<span style='color:#c00000;'>- Krishna R. (1993) A unified approach to the modeling of intraparticle</span>
-<span style='color:#c00000;'>  diffusion in adsorption processes. Gas Sep. Purif. 7(2):91-104.</span>
-<span style='color:#c00000;'>  `doi:10.1016/0950-4214(93)85006-H &lt;http://doi.org/10.1016/0950-4214(93)85006-H&gt;`_</span>
+<span style='color:#bf0303;'>- Krishna R. (1993) A unified approach to the modeling of intraparticle</span>
+<span style='color:#bf0303;'>  diffusion in adsorption processes. Gas Sep. Purif. 7(2):91-104.</span>
+<span style='color:#bf0303;'>  `doi:10.1016/0950-4214(93)85006-H &lt;http://doi.org/10.1016/0950-4214(93)85006-H&gt;`_</span>
 
-<span style='color:#c00000;'>This version is somewhat simplified for it only offers an extended Langmuir isotherm.</span>
-<span style='color:#c00000;'>The Ideal Adsorption Solution theory (IAS) and the Real Adsorption Solution theory (RAS)</span>
-<span style='color:#c00000;'>described in the articles are not implemented here.</span>
+<span style='color:#bf0303;'>This version is somewhat simplified for it only offers an extended Langmuir isotherm.</span>
+<span style='color:#bf0303;'>The Ideal Adsorption Solution theory (IAS) and the Real Adsorption Solution theory (RAS)</span>
+<span style='color:#bf0303;'>described in the articles are not implemented here.</span>
 
-<span style='color:#c00000;'>The problem modelled is separation of hydrocarbons (CH4+C2H6) mixture on a zeolite</span>
-<span style='color:#c00000;'>(silicalite-1) membrane with a metal support from the section 'Binary mixture permeation'</span>
-<span style='color:#c00000;'>of the following article:</span>
+<span style='color:#bf0303;'>The problem modelled is separation of hydrocarbons (CH4+C2H6) mixture on a zeolite</span>
+<span style='color:#bf0303;'>(silicalite-1) membrane with a metal support from the section 'Binary mixture permeation'</span>
+<span style='color:#bf0303;'>of the following article:</span>
 
-<span style='color:#c00000;'>- van de Graaf J.M., Kapteijn F., Moulijn J.A. (1999) Modeling Permeation of Binary</span>
-<span style='color:#c00000;'>  Mixtures Through Zeolite Membranes. AIChE J. 45:497–511.</span>
-<span style='color:#c00000;'>  `doi:10.1002/aic.690450307 &lt;http://doi.org/10.1002/aic.690450307&gt;`_</span>
+<span style='color:#bf0303;'>- van de Graaf J.M., Kapteijn F., Moulijn J.A. (1999) Modeling Permeation of Binary</span>
+<span style='color:#bf0303;'>  Mixtures Through Zeolite Membranes. AIChE J. 45:497–511.</span>
+<span style='color:#bf0303;'>  `doi:10.1002/aic.690450307 &lt;http://doi.org/10.1002/aic.690450307&gt;`_</span>
 
-<span style='color:#c00000;'>The CH4 and C2H6 fluxes, and CH4/C2H6 selectivity plots for two cases: GMS and GMS(Dij=∞),</span>
-<span style='color:#c00000;'>1:1 mixture, and T = 303 K:</span>
+<span style='color:#bf0303;'>The CH4 and C2H6 fluxes, and CH4/C2H6 selectivity plots for two cases: GMS and GMS(Dij=∞),</span>
+<span style='color:#bf0303;'>1:1 mixture, and T = 303 K:</span>
 
-<span style='color:#c00000;'>.. image:: _static/tutorial_che_8-results.png</span>
-<span style='color:#c00000;'>   :width: 800px</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>.. image:: _static/tutorial_che_8-results.png</span>
+<span style='color:#bf0303;'>   :width: 800px</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> os,sys, tempfile, math, numpy, pickle
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>import</span> matplotlib.pyplot <span style='color:#0000ff;'>as</span> plt
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#ff5500;'>import</span> os,sys, tempfile, math, numpy, pickle
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
+<span style='color:#ff5500;'>import</span> matplotlib.pyplot <span style='color:#ff5500;'>as</span> plt
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
 <b>try</b>:
-    <span style='color:#0000ff;'>from</span> membrane_unit <span style='color:#0000ff;'>import</span> MembraneUnit
+    <span style='color:#ff5500;'>from</span> membrane_unit <span style='color:#ff5500;'>import</span> MembraneUnit
 <b>except</b>:
-    <span style='color:#0000ff;'>from</span> .membrane_unit <span style='color:#0000ff;'>import</span> MembraneUnit
+    <span style='color:#ff5500;'>from</span> .membrane_unit <span style='color:#ff5500;'>import</span> MembraneUnit
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Phigh):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> MembraneUnit(<span style='color:#c00000;'>&quot;tutorial_che_8&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Phigh):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = MembraneUnit(<span style='color:#bf0303;'>&quot;tutorial_che_8&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
 
-        <span style='color:#0000ff;'>self</span>.Phigh <b><span style='color:#0000ff;'>=</span></b> Phigh
+        <span style='color:#0057ae;'>self</span>.Phigh = Phigh
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        Nc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>2</span>
-        Nz <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>20</span>
-        Nr <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>3</span>
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+        Nc = <span style='color:#b08000;'>2</span>
+        Nz = <span style='color:#b08000;'>20</span>
+        Nr = <span style='color:#b08000;'>3</span>
 
-        <span style='color:#0000ff;'>self</span>.m.Nc.CreateArray(Nc)
-        <span style='color:#0000ff;'>self</span>.m.z.CreateStructuredGrid(Nz, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
+        <span style='color:#0057ae;'>self</span>.m.Nc.CreateArray(Nc)
+        <span style='color:#0057ae;'>self</span>.m.z.CreateStructuredGrid(Nz, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.Tref.SetValue(<span style='color:#c000c0;'>273.14</span> <b><span style='color:#0000ff;'>*</span></b> K)
-        <span style='color:#0000ff;'>self</span>.m.Pref.SetValue(<span style='color:#c000c0;'>1.013E5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
-        <span style='color:#0000ff;'>self</span>.m.Tfeed.SetValue(<span style='color:#c000c0;'>303</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#0057ae;'>self</span>.m.Tref.SetValue(<span style='color:#b08000;'>273.14</span> * K)
+        <span style='color:#0057ae;'>self</span>.m.Pref.SetValue(<span style='color:#b08000;'>1.013E5</span> * Pa)
+        <span style='color:#0057ae;'>self</span>.m.Tfeed.SetValue(<span style='color:#b08000;'>303</span> * K)
 
-        <span style='color:#008000;'># Feed compartment</span>
-        <span style='color:#0000ff;'>self</span>.m.F.Nc.CreateArray(Nc)
-        <span style='color:#0000ff;'>self</span>.m.F.z.CreateStructuredGrid(Nz, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
+        <span style='color:#898887;'># Feed compartment</span>
+        <span style='color:#0057ae;'>self</span>.m.F.Nc.CreateArray(Nc)
+        <span style='color:#0057ae;'>self</span>.m.F.z.CreateStructuredGrid(Nz, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.F.Rc.SetValue(<span style='color:#c000c0;'>8.315</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#0057ae;'>self</span>.m.F.Rc.SetValue(<span style='color:#b08000;'>8.315</span> * J/(mol*K))
         
-        <span style='color:#008000;'># Membrane</span>
-        <span style='color:#0000ff;'>self</span>.m.M.Nc.CreateArray(Nc)
-        <span style='color:#0000ff;'>self</span>.m.M.z.CreateStructuredGrid(Nz, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
-        <span style='color:#0000ff;'>self</span>.m.M.r.CreateStructuredGrid(Nr, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
+        <span style='color:#898887;'># Membrane</span>
+        <span style='color:#0057ae;'>self</span>.m.M.Nc.CreateArray(Nc)
+        <span style='color:#0057ae;'>self</span>.m.M.z.CreateStructuredGrid(Nz, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
+        <span style='color:#0057ae;'>self</span>.m.M.r.CreateStructuredGrid(Nr, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.M.Rc.SetValue(<span style='color:#c000c0;'>8.315</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.M.Ro.SetValue(<span style='color:#c000c0;'>1800</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>))
+        <span style='color:#0057ae;'>self</span>.m.M.Rc.SetValue(<span style='color:#b08000;'>8.315</span> * J/(mol*K))
+        <span style='color:#0057ae;'>self</span>.m.M.Ro.SetValue(<span style='color:#b08000;'>1800</span> * kg/(m**<span style='color:#b08000;'>3</span>))
 
-        <span style='color:#0000ff;'>self</span>.m.M.Qsat.SetValue(<span style='color:#c000c0;'>0</span>, (<span style='color:#c000c0;'>2.456</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>0.002</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.m.Tfeed.GetValue()) <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>kg)
-        <span style='color:#0000ff;'>self</span>.m.M.Qsat.SetValue(<span style='color:#c000c0;'>1</span>, (<span style='color:#c000c0;'>2.456</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>0.002</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.m.Tfeed.GetValue()) <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>kg)
+        <span style='color:#0057ae;'>self</span>.m.M.Qsat.SetValue(<span style='color:#b08000;'>0</span>, (<span style='color:#b08000;'>2.456</span> - <span style='color:#b08000;'>0.002</span> * <span style='color:#0057ae;'>self</span>.m.Tfeed.GetValue()) * mol/kg)
+        <span style='color:#0057ae;'>self</span>.m.M.Qsat.SetValue(<span style='color:#b08000;'>1</span>, (<span style='color:#b08000;'>2.456</span> - <span style='color:#b08000;'>0.002</span> * <span style='color:#0057ae;'>self</span>.m.Tfeed.GetValue()) * mol/kg)
 
-        <span style='color:#0000ff;'>self</span>.m.M.B.SetValue(<span style='color:#c000c0;'>0</span>, math.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>20.5961</span>) <b><span style='color:#0000ff;'>*</span></b> math.exp(<span style='color:#c000c0;'>2399.6807</span> <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.m.Tfeed.GetValue()) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>Pa))
-        <span style='color:#0000ff;'>self</span>.m.M.B.SetValue(<span style='color:#c000c0;'>1</span>, math.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>21.7471</span>) <b><span style='color:#0000ff;'>*</span></b> math.exp(<span style='color:#c000c0;'>3631.2443</span> <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.m.Tfeed.GetValue()) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>Pa))
+        <span style='color:#0057ae;'>self</span>.m.M.B.SetValue(<span style='color:#b08000;'>0</span>, math.exp(-<span style='color:#b08000;'>20.5961</span>) * math.exp(<span style='color:#b08000;'>2399.6807</span> / <span style='color:#0057ae;'>self</span>.m.Tfeed.GetValue()) * (<span style='color:#b08000;'>1</span>/Pa))
+        <span style='color:#0057ae;'>self</span>.m.M.B.SetValue(<span style='color:#b08000;'>1</span>, math.exp(-<span style='color:#b08000;'>21.7471</span>) * math.exp(<span style='color:#b08000;'>3631.2443</span> / <span style='color:#0057ae;'>self</span>.m.Tfeed.GetValue()) * (<span style='color:#b08000;'>1</span>/Pa))
 
-        <span style='color:#008000;'># Support</span>
-        <span style='color:#0000ff;'>self</span>.m.S.Nc.CreateArray(Nc)
-        <span style='color:#0000ff;'>self</span>.m.S.z.CreateStructuredGrid(Nz, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
-        <span style='color:#0000ff;'>self</span>.m.S.r.CreateStructuredGrid(Nr, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
+        <span style='color:#898887;'># Support</span>
+        <span style='color:#0057ae;'>self</span>.m.S.Nc.CreateArray(Nc)
+        <span style='color:#0057ae;'>self</span>.m.S.z.CreateStructuredGrid(Nz, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
+        <span style='color:#0057ae;'>self</span>.m.S.r.CreateStructuredGrid(Nr, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.S.Rc.SetValue(<span style='color:#c000c0;'>8.315</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.S.e.SetValue(<span style='color:#c000c0;'>0.2</span>)
+        <span style='color:#0057ae;'>self</span>.m.S.Rc.SetValue(<span style='color:#b08000;'>8.315</span> * J/(mol*K))
+        <span style='color:#0057ae;'>self</span>.m.S.e.SetValue(<span style='color:#b08000;'>0.2</span>)
 
-        <span style='color:#008000;'># Permeate compartment</span>
-        <span style='color:#0000ff;'>self</span>.m.P.Nc.CreateArray(Nc <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.P.z.CreateStructuredGrid(Nz, <span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>)
+        <span style='color:#898887;'># Permeate compartment</span>
+        <span style='color:#0057ae;'>self</span>.m.P.Nc.CreateArray(Nc + <span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.P.z.CreateStructuredGrid(Nz, <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.P.Rc.SetValue(<span style='color:#c000c0;'>8.315</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#0057ae;'>self</span>.m.P.Rc.SetValue(<span style='color:#b08000;'>8.315</span> * J/(mol*K))
         
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        Tref   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.Tref.GetQuantity()
-        Pref   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.Pref.GetQuantity()
-        Tfeed  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.Tfeed.GetQuantity()
-        _Tfeed <b><span style='color:#0000ff;'>=</span></b> Tfeed.value
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        Tref   = <span style='color:#0057ae;'>self</span>.m.Tref.GetQuantity()
+        Pref   = <span style='color:#0057ae;'>self</span>.m.Pref.GetQuantity()
+        Tfeed  = <span style='color:#0057ae;'>self</span>.m.Tfeed.GetQuantity()
+        _Tfeed = Tfeed.value
         
-        Plow <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>1.0e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
-        MembraneArea <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>2e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        MembraneThickness <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>1e-5</span> <b><span style='color:#0000ff;'>*</span></b> m)
-        SupportThickness <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>3e-3</span> <b><span style='color:#0000ff;'>*</span></b> m)
-        UnitLength <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>0.01</span> <b><span style='color:#0000ff;'>*</span></b> m)
-        Xfeed <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#c000c0;'>0.50</span>, <span style='color:#c000c0;'>0.50</span>]
-        Qfeed_stp <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>1.667e-6</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        Qsweep_stp <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>1.667e-6</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>)<b><span style='color:#0000ff;'>/</span></b>s)
+        Plow = (<span style='color:#b08000;'>1.0e5</span> * Pa)
+        MembraneArea = (<span style='color:#b08000;'>2e-4</span> * (m**<span style='color:#b08000;'>2</span>))
+        MembraneThickness = (<span style='color:#b08000;'>1e-5</span> * m)
+        SupportThickness = (<span style='color:#b08000;'>3e-3</span> * m)
+        UnitLength = (<span style='color:#b08000;'>0.01</span> * m)
+        Xfeed = [<span style='color:#b08000;'>0.50</span>, <span style='color:#b08000;'>0.50</span>]
+        Qfeed_stp = (<span style='color:#b08000;'>1.667e-6</span> * (m**<span style='color:#b08000;'>3</span>)/s)
+        Qsweep_stp = (<span style='color:#b08000;'>1.667e-6</span> * (m**<span style='color:#b08000;'>3</span>)/s)
 
-        <span style='color:#0000ff;'>self</span>.m.MembraneArea.AssignValue(<span style='color:#c000c0;'>2e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <span style='color:#0000ff;'>self</span>.m.MembraneThickness.AssignValue(<span style='color:#c000c0;'>1e-5</span> <b><span style='color:#0000ff;'>*</span></b> m)
-        <span style='color:#0000ff;'>self</span>.m.SupportThickness.AssignValue(<span style='color:#c000c0;'>3e-3</span> <b><span style='color:#0000ff;'>*</span></b> m)
+        <span style='color:#0057ae;'>self</span>.m.MembraneArea.AssignValue(<span style='color:#b08000;'>2e-4</span> * (m**<span style='color:#b08000;'>2</span>))
+        <span style='color:#0057ae;'>self</span>.m.MembraneThickness.AssignValue(<span style='color:#b08000;'>1e-5</span> * m)
+        <span style='color:#0057ae;'>self</span>.m.SupportThickness.AssignValue(<span style='color:#b08000;'>3e-3</span> * m)
 
-        <span style='color:#0000ff;'>self</span>.m.Qfeed_stp.AssignValue(<span style='color:#c000c0;'>1.667e-6</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.Qsweep_stp.AssignValue(<span style='color:#c000c0;'>1.667e-6</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.Phigh.AssignValue(<span style='color:#0000ff;'>self</span>.Phigh)
-        <span style='color:#0000ff;'>self</span>.m.Plow.AssignValue(Plow)
+        <span style='color:#0057ae;'>self</span>.m.Qfeed_stp.AssignValue(<span style='color:#b08000;'>1.667e-6</span> * (m**<span style='color:#b08000;'>3</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.Qsweep_stp.AssignValue(<span style='color:#b08000;'>1.667e-6</span> * (m**<span style='color:#b08000;'>3</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.Phigh.AssignValue(<span style='color:#0057ae;'>self</span>.Phigh)
+        <span style='color:#0057ae;'>self</span>.m.Plow.AssignValue(Plow)
         
-        <span style='color:#0000ff;'>self</span>.m.F.Xin.AssignValue(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.50</span>)
-        <span style='color:#0000ff;'>self</span>.m.F.Xin.AssignValue(<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>0.50</span>)
-        <span style='color:#0000ff;'>self</span>.m.F.Length.AssignValue(<span style='color:#c000c0;'>0.01</span> <b><span style='color:#0000ff;'>*</span></b> m)
+        <span style='color:#0057ae;'>self</span>.m.F.Xin.AssignValue(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.50</span>)
+        <span style='color:#0057ae;'>self</span>.m.F.Xin.AssignValue(<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0.50</span>)
+        <span style='color:#0057ae;'>self</span>.m.F.Length.AssignValue(<span style='color:#b08000;'>0.01</span> * m)
         
-        <span style='color:#0000ff;'>self</span>.m.M.Length.AssignValue(<span style='color:#c000c0;'>0.01</span> <b><span style='color:#0000ff;'>*</span></b> m)
+        <span style='color:#0057ae;'>self</span>.m.M.Length.AssignValue(<span style='color:#b08000;'>0.01</span> * m)
 
-        <span style='color:#0000ff;'>self</span>.m.P.Xin.AssignValue(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0.0</span>)
-        <span style='color:#0000ff;'>self</span>.m.P.Xin.AssignValue(<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>0.0</span>)
-        <span style='color:#0000ff;'>self</span>.m.P.Xin.AssignValue(<span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>1.0</span>)
-        <span style='color:#0000ff;'>self</span>.m.P.Length.AssignValue(<span style='color:#c000c0;'>0.01</span> <b><span style='color:#0000ff;'>*</span></b> m)
+        <span style='color:#0057ae;'>self</span>.m.P.Xin.AssignValue(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.0</span>)
+        <span style='color:#0057ae;'>self</span>.m.P.Xin.AssignValue(<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0.0</span>)
+        <span style='color:#0057ae;'>self</span>.m.P.Xin.AssignValue(<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>1.0</span>)
+        <span style='color:#0057ae;'>self</span>.m.P.Length.AssignValue(<span style='color:#b08000;'>0.01</span> * m)
 
-        <span style='color:#0000ff;'>self</span>.m.F.Qin.AssignValue(Qfeed_stp <b><span style='color:#0000ff;'>*</span></b> (Tfeed <b><span style='color:#0000ff;'>/</span></b> Tref) <b><span style='color:#0000ff;'>*</span></b> (Pref <b><span style='color:#0000ff;'>/</span></b> <span style='color:#0000ff;'>self</span>.Phigh))
+        <span style='color:#0057ae;'>self</span>.m.F.Qin.AssignValue(Qfeed_stp * (Tfeed / Tref) * (Pref / <span style='color:#0057ae;'>self</span>.Phigh))
 
-        <span style='color:#0000ff;'>self</span>.m.F.Pin.AssignValue(<span style='color:#0000ff;'>self</span>.Phigh)
-        <span style='color:#0000ff;'>self</span>.m.F.Area.AssignValue(MembraneArea)
+        <span style='color:#0057ae;'>self</span>.m.F.Pin.AssignValue(<span style='color:#0057ae;'>self</span>.Phigh)
+        <span style='color:#0057ae;'>self</span>.m.F.Area.AssignValue(MembraneArea)
 
-        <span style='color:#0000ff;'>self</span>.m.M.Area.AssignValue(MembraneArea)
-        <span style='color:#0000ff;'>self</span>.m.M.Thickness.AssignValue(MembraneThickness)
+        <span style='color:#0057ae;'>self</span>.m.M.Area.AssignValue(MembraneArea)
+        <span style='color:#0057ae;'>self</span>.m.M.Thickness.AssignValue(MembraneThickness)
 
-        <span style='color:#0000ff;'>self</span>.m.S.Thickness.AssignValue(SupportThickness)
+        <span style='color:#0057ae;'>self</span>.m.S.Thickness.AssignValue(SupportThickness)
 
-        <span style='color:#0000ff;'>self</span>.m.P.Qin.AssignValue(Qsweep_stp <b><span style='color:#0000ff;'>*</span></b> (Tfeed <b><span style='color:#0000ff;'>/</span></b> Tref) <b><span style='color:#0000ff;'>*</span></b> (Pref <b><span style='color:#0000ff;'>/</span></b> Plow))
+        <span style='color:#0057ae;'>self</span>.m.P.Qin.AssignValue(Qsweep_stp * (Tfeed / Tref) * (Pref / Plow))
 
-        <span style='color:#0000ff;'>self</span>.m.P.Pin.AssignValue(Plow)
-        <span style='color:#0000ff;'>self</span>.m.P.Area.AssignValue(MembraneArea)
+        <span style='color:#0057ae;'>self</span>.m.P.Pin.AssignValue(Plow)
+        <span style='color:#0057ae;'>self</span>.m.P.Area.AssignValue(MembraneArea)
         
-        <span style='color:#008000;'># Feed compartment</span>
-        <span style='color:#0000ff;'>self</span>.m.F.Across.AssignValue(<span style='color:#c000c0;'>0.004</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.F.Nc.NumberOfPoints):
-            <b>for</b> z <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.F.z.NumberOfPoints):
-                <span style='color:#0000ff;'>self</span>.m.F.Dz.AssignValue(i, z, <span style='color:#c000c0;'>1e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
+        <span style='color:#898887;'># Feed compartment</span>
+        <span style='color:#0057ae;'>self</span>.m.F.Across.AssignValue(<span style='color:#b08000;'>0.004</span> * (m**<span style='color:#b08000;'>2</span>))
+        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.m.F.Nc.NumberOfPoints):
+            <b>for</b> z <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.m.F.z.NumberOfPoints):
+                <span style='color:#0057ae;'>self</span>.m.F.Dz.AssignValue(i, z, <span style='color:#b08000;'>1e-4</span> * (m**<span style='color:#b08000;'>2</span>)/s)
 
-        <span style='color:#008000;'># Support (start with the Fick law)</span>
-        <span style='color:#0000ff;'>self</span>.m.S.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sFickLaw'</span>
+        <span style='color:#898887;'># Support (start with the Fick law)</span>
+        <span style='color:#0057ae;'>self</span>.m.S.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sFickLaw'</span>
 
-        <span style='color:#0000ff;'>self</span>.m.S.Di.AssignValue(<span style='color:#c000c0;'>0</span>, (<span style='color:#c000c0;'>1.0e-5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>0.000304</span> <b><span style='color:#0000ff;'>*</span></b> (_Tfeed <b><span style='color:#0000ff;'>**</span></b> <span style='color:#c000c0;'>1.75</span>)) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.S.Di.AssignValue(<span style='color:#c000c0;'>1</span>, (<span style='color:#c000c0;'>1.0e-5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>0.000218</span> <b><span style='color:#0000ff;'>*</span></b> (_Tfeed <b><span style='color:#0000ff;'>**</span></b> <span style='color:#c000c0;'>1.75</span>)) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.S.Dij.AssignValue(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0</span>, (<span style='color:#c000c0;'>1.0e-5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>7.589e-5</span> <b><span style='color:#0000ff;'>*</span></b> (_Tfeed <b><span style='color:#0000ff;'>**</span></b> <span style='color:#c000c0;'>1.75</span>)) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.S.Dij.AssignValue(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>, (<span style='color:#c000c0;'>1.0e-5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>7.589e-5</span> <b><span style='color:#0000ff;'>*</span></b> (_Tfeed <b><span style='color:#0000ff;'>**</span></b> <span style='color:#c000c0;'>1.75</span>)) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.S.Dij.AssignValue(<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>0</span>, (<span style='color:#c000c0;'>1.0e-5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>7.589e-5</span> <b><span style='color:#0000ff;'>*</span></b> (_Tfeed <b><span style='color:#0000ff;'>**</span></b> <span style='color:#c000c0;'>1.75</span>)) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.S.Dij.AssignValue(<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>, (<span style='color:#c000c0;'>1.0e-5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>7.589e-5</span> <b><span style='color:#0000ff;'>*</span></b> (_Tfeed <b><span style='color:#0000ff;'>**</span></b> <span style='color:#c000c0;'>1.75</span>)) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
+        <span style='color:#0057ae;'>self</span>.m.S.Di.AssignValue(<span style='color:#b08000;'>0</span>, (<span style='color:#b08000;'>1.0e-5</span> * <span style='color:#b08000;'>0.000304</span> * (_Tfeed ** <span style='color:#b08000;'>1.75</span>)) * (m**<span style='color:#b08000;'>2</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.S.Di.AssignValue(<span style='color:#b08000;'>1</span>, (<span style='color:#b08000;'>1.0e-5</span> * <span style='color:#b08000;'>0.000218</span> * (_Tfeed ** <span style='color:#b08000;'>1.75</span>)) * (m**<span style='color:#b08000;'>2</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.S.Dij.AssignValue(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0</span>, (<span style='color:#b08000;'>1.0e-5</span> * <span style='color:#b08000;'>7.589e-5</span> * (_Tfeed ** <span style='color:#b08000;'>1.75</span>)) * (m**<span style='color:#b08000;'>2</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.S.Dij.AssignValue(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>, (<span style='color:#b08000;'>1.0e-5</span> * <span style='color:#b08000;'>7.589e-5</span> * (_Tfeed ** <span style='color:#b08000;'>1.75</span>)) * (m**<span style='color:#b08000;'>2</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.S.Dij.AssignValue(<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, (<span style='color:#b08000;'>1.0e-5</span> * <span style='color:#b08000;'>7.589e-5</span> * (_Tfeed ** <span style='color:#b08000;'>1.75</span>)) * (m**<span style='color:#b08000;'>2</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.S.Dij.AssignValue(<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>, (<span style='color:#b08000;'>1.0e-5</span> * <span style='color:#b08000;'>7.589e-5</span> * (_Tfeed ** <span style='color:#b08000;'>1.75</span>)) * (m**<span style='color:#b08000;'>2</span>)/s)
 
-        <span style='color:#008000;'># Membrane (start with the Fick law)</span>
-        <span style='color:#0000ff;'>self</span>.m.M.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sFickLaw'</span>
+        <span style='color:#898887;'># Membrane (start with the Fick law)</span>
+        <span style='color:#0057ae;'>self</span>.m.M.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sFickLaw'</span>
 
-        <span style='color:#0000ff;'>self</span>.m.M.Di.AssignValue(<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1.0e-10</span> <b><span style='color:#0000ff;'>*</span></b> math.exp(<span style='color:#c000c0;'>6.0094</span>) <b><span style='color:#0000ff;'>*</span></b> math.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1111.31</span> <b><span style='color:#0000ff;'>/</span></b> _Tfeed) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.M.Di.AssignValue(<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1.0e-10</span> <b><span style='color:#0000ff;'>*</span></b> math.exp(<span style='color:#c000c0;'>7.6324</span>) <b><span style='color:#0000ff;'>*</span></b> math.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>2190.70</span> <b><span style='color:#0000ff;'>/</span></b> _Tfeed) <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
+        <span style='color:#0057ae;'>self</span>.m.M.Di.AssignValue(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1.0e-10</span> * math.exp(<span style='color:#b08000;'>6.0094</span>) * math.exp(-<span style='color:#b08000;'>1111.31</span> / _Tfeed) * (m**<span style='color:#b08000;'>2</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.M.Di.AssignValue(<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1.0e-10</span> * math.exp(<span style='color:#b08000;'>7.6324</span>) * math.exp(-<span style='color:#b08000;'>2190.70</span> / _Tfeed) * (m**<span style='color:#b08000;'>2</span>)/s)
 
-        <span style='color:#008000;'># Sweep gas flux is zero (no back-flow to the support)</span>
-        <b>for</b> z <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.P.z.NumberOfPoints):
-            <span style='color:#0000ff;'>self</span>.m.P.Flux.AssignValue(<span style='color:#c000c0;'>2</span>, z, <span style='color:#c000c0;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>) <b><span style='color:#0000ff;'>*</span></b> s))
+        <span style='color:#898887;'># Sweep gas flux is zero (no back-flow to the support)</span>
+        <b>for</b> z <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.m.P.z.NumberOfPoints):
+            <span style='color:#0057ae;'>self</span>.m.P.Flux.AssignValue(<span style='color:#b08000;'>2</span>, z, <span style='color:#b08000;'>0.0</span> * mol/((m**<span style='color:#b08000;'>2</span>) * s))
 
-        <span style='color:#0000ff;'>self</span>.m.P.Across.AssignValue(<span style='color:#c000c0;'>0.004</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <b>for</b> i <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.P.Nc.NumberOfPoints):
-            <b>for</b> z <b><span style='color:#0000ff;'>in</span></b> <span style='color:#0000ff;'>range</span>(<span style='color:#c000c0;'>0</span>, <span style='color:#0000ff;'>self</span>.m.P.z.NumberOfPoints):
-                <span style='color:#0000ff;'>self</span>.m.P.Dz.AssignValue(i, z, <span style='color:#c000c0;'>1e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)<b><span style='color:#0000ff;'>/</span></b>s)
+        <span style='color:#0057ae;'>self</span>.m.P.Across.AssignValue(<span style='color:#b08000;'>0.004</span> * (m**<span style='color:#b08000;'>2</span>))
+        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.m.P.Nc.NumberOfPoints):
+            <b>for</b> z <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.m.P.z.NumberOfPoints):
+                <span style='color:#0057ae;'>self</span>.m.P.Dz.AssignValue(i, z, <span style='color:#b08000;'>1e-4</span> * (m**<span style='color:#b08000;'>2</span>)/s)
 
-        <span style='color:#008000;'># Set some important initial guesses</span>
-        <span style='color:#008000;'># These variables affect the results extremely if their initial guesses</span>
-        <span style='color:#008000;'># are very far from the solution </span>
-        <span style='color:#0000ff;'>self</span>.m.F.Area.SetInitialGuess(<span style='color:#c000c0;'>2e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <span style='color:#0000ff;'>self</span>.m.M.Area.SetInitialGuess(<span style='color:#c000c0;'>2e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <span style='color:#0000ff;'>self</span>.m.P.Area.SetInitialGuess(<span style='color:#c000c0;'>2e-4</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>))
-        <span style='color:#0000ff;'>self</span>.m.M.Thickness.SetInitialGuess(<span style='color:#c000c0;'>1e-5</span> <b><span style='color:#0000ff;'>*</span></b> m)
-        <span style='color:#0000ff;'>self</span>.m.S.Thickness.SetInitialGuess(<span style='color:#c000c0;'>1e-3</span> <b><span style='color:#0000ff;'>*</span></b> m)
+        <span style='color:#898887;'># Set some important initial guesses</span>
+        <span style='color:#898887;'># These variables affect the results extremely if their initial guesses</span>
+        <span style='color:#898887;'># are very far from the solution </span>
+        <span style='color:#0057ae;'>self</span>.m.F.Area.SetInitialGuess(<span style='color:#b08000;'>2e-4</span> * (m**<span style='color:#b08000;'>2</span>))
+        <span style='color:#0057ae;'>self</span>.m.M.Area.SetInitialGuess(<span style='color:#b08000;'>2e-4</span> * (m**<span style='color:#b08000;'>2</span>))
+        <span style='color:#0057ae;'>self</span>.m.P.Area.SetInitialGuess(<span style='color:#b08000;'>2e-4</span> * (m**<span style='color:#b08000;'>2</span>))
+        <span style='color:#0057ae;'>self</span>.m.M.Thickness.SetInitialGuess(<span style='color:#b08000;'>1e-5</span> * m)
+        <span style='color:#0057ae;'>self</span>.m.S.Thickness.SetInitialGuess(<span style='color:#b08000;'>1e-3</span> * m)
 
-        <span style='color:#0000ff;'>self</span>.m.F.Qin.SetInitialGuess(<span style='color:#c000c0;'>1e-6</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>)<b><span style='color:#0000ff;'>/</span></b>s)
-        <span style='color:#0000ff;'>self</span>.m.P.Qin.SetInitialGuess(<span style='color:#c000c0;'>1e-6</span> <b><span style='color:#0000ff;'>*</span></b> (m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>)<b><span style='color:#0000ff;'>/</span></b>s)
+        <span style='color:#0057ae;'>self</span>.m.F.Qin.SetInitialGuess(<span style='color:#b08000;'>1e-6</span> * (m**<span style='color:#b08000;'>3</span>)/s)
+        <span style='color:#0057ae;'>self</span>.m.P.Qin.SetInitialGuess(<span style='color:#b08000;'>1e-6</span> * (m**<span style='color:#b08000;'>3</span>)/s)
 
-    <b>def</b> Run(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># The causes for the model did not work were:</span>
-        <span style='color:#008000;'>#  - The Flux equation was not ditributed on eClosedOpen r domain but eOpenClosed by mistake</span>
-        <span style='color:#008000;'>#  - cond in Gij was wrong: cond = (i() - k())/(i() - k() + 1E-15)</span>
-        <span style='color:#008000;'>#    but should be: cond = 1 - (i() - k())/(i() - k() + 1E-15)</span>
-        <span style='color:#008000;'>#  - Too tight tolerances for 'fraction_t' and 'J_theta_t' variable types</span>
+    <b>def</b> Run(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#898887;'># The causes for the model did not work were:</span>
+        <span style='color:#898887;'>#  - The Flux equation was not ditributed on eClosedOpen r domain but eOpenClosed by mistake</span>
+        <span style='color:#898887;'>#  - cond in Gij was wrong: cond = (i() - k())/(i() - k() + 1E-15)</span>
+        <span style='color:#898887;'>#    but should be: cond = 1 - (i() - k())/(i() - k() + 1E-15)</span>
+        <span style='color:#898887;'>#  - Too tight tolerances for 'fraction_t' and 'J_theta_t' variable types</span>
 
-        <span style='color:#008000;'># The model is too non-linear for the solver be able to solve it immeadiately.</span>
-        <span style='color:#008000;'># Therefore we start with the simple case (FickLaw for flux in both support and membrane),</span>
-        <span style='color:#008000;'># solve it, and gradually increase the model complexity towards Maxwell-Stefan equations for both.</span>
-        <span style='color:#0000ff;'>self</span>.m.M.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sFickLaw'</span>
-        <span style='color:#0000ff;'>self</span>.m.S.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sFickLaw'</span>
-        <span style='color:#0000ff;'>self</span>.Reinitialize()
-        <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#c00000;'>'Initialised: Membrane(FickLaw) + Support(FickLaw)'</span>, <span style='color:#c000c0;'>0</span>)
-        <span style='color:#0000ff;'>self</span>.Log.SetProgress(<span style='color:#c000c0;'>25</span>)
+        <span style='color:#898887;'># The model is too non-linear for the solver be able to solve it immeadiately.</span>
+        <span style='color:#898887;'># Therefore we start with the simple case (FickLaw for flux in both support and membrane),</span>
+        <span style='color:#898887;'># solve it, and gradually increase the model complexity towards Maxwell-Stefan equations for both.</span>
+        <span style='color:#0057ae;'>self</span>.m.M.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sFickLaw'</span>
+        <span style='color:#0057ae;'>self</span>.m.S.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sFickLaw'</span>
+        <span style='color:#0057ae;'>self</span>.Reinitialize()
+        <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'Initialised: Membrane(FickLaw) + Support(FickLaw)'</span>, <span style='color:#b08000;'>0</span>)
+        <span style='color:#0057ae;'>self</span>.Log.SetProgress(<span style='color:#b08000;'>25</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.M.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sMaxwellStefan_Dijoo'</span>
-        <span style='color:#0000ff;'>self</span>.m.S.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sFickLaw'</span>
-        <span style='color:#0000ff;'>self</span>.Reinitialize()
-        <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#c00000;'>'Initialised: Membrane(MaxwellStefan(Dij=∞)) + Support(FickLaw)'</span>, <span style='color:#c000c0;'>0</span>)
-        <span style='color:#0000ff;'>self</span>.Log.SetProgress(<span style='color:#c000c0;'>50</span>)
+        <span style='color:#0057ae;'>self</span>.m.M.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sMaxwellStefan_Dijoo'</span>
+        <span style='color:#0057ae;'>self</span>.m.S.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sFickLaw'</span>
+        <span style='color:#0057ae;'>self</span>.Reinitialize()
+        <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'Initialised: Membrane(MaxwellStefan(Dij=∞)) + Support(FickLaw)'</span>, <span style='color:#b08000;'>0</span>)
+        <span style='color:#0057ae;'>self</span>.Log.SetProgress(<span style='color:#b08000;'>50</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.M.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sMaxwellStefan_Dijoo'</span>
-        <span style='color:#0000ff;'>self</span>.m.S.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sMaxwellStefan'</span>
-        <span style='color:#0000ff;'>self</span>.Reinitialize()
-        <span style='color:#0000ff;'>self</span>.ReportData(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#c00000;'>'Initialised: Membrane(MaxwellStefan(Dij=∞)) + Support(MaxwellStefan) (the results available at t=1s)'</span>, <span style='color:#c000c0;'>0</span>)
-        <span style='color:#0000ff;'>self</span>.Log.SetProgress(<span style='color:#c000c0;'>75</span>)
+        <span style='color:#0057ae;'>self</span>.m.M.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sMaxwellStefan_Dijoo'</span>
+        <span style='color:#0057ae;'>self</span>.m.S.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sMaxwellStefan'</span>
+        <span style='color:#0057ae;'>self</span>.Reinitialize()
+        <span style='color:#0057ae;'>self</span>.ReportData(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'Initialised: Membrane(MaxwellStefan(Dij=∞)) + Support(MaxwellStefan) (the results available at t=1s)'</span>, <span style='color:#b08000;'>0</span>)
+        <span style='color:#0057ae;'>self</span>.Log.SetProgress(<span style='color:#b08000;'>75</span>)
 
-        <span style='color:#0000ff;'>self</span>.m.M.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sMaxwellStefan'</span>
-        <span style='color:#0000ff;'>self</span>.m.S.stnOperatingMode.ActiveState <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>'sMaxwellStefan'</span>
-        <span style='color:#0000ff;'>self</span>.Reinitialize()
-        <span style='color:#0000ff;'>self</span>.ReportData(<span style='color:#c000c0;'>2</span>)
-        <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#c00000;'>'Initialised: Membrane(MaxwellStefan) + Support(MaxwellStefan) (the results available at t=2s)'</span>, <span style='color:#c000c0;'>0</span>)
-        <span style='color:#0000ff;'>self</span>.Log.SetProgress(<span style='color:#c000c0;'>100</span>)
-        <span style='color:#0000ff;'>self</span>.Log.Message(<span style='color:#c00000;'>'Done!!'</span>, <span style='color:#c000c0;'>0</span>)
+        <span style='color:#0057ae;'>self</span>.m.M.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sMaxwellStefan'</span>
+        <span style='color:#0057ae;'>self</span>.m.S.stnOperatingMode.ActiveState = <span style='color:#bf0303;'>'sMaxwellStefan'</span>
+        <span style='color:#0057ae;'>self</span>.Reinitialize()
+        <span style='color:#0057ae;'>self</span>.ReportData(<span style='color:#b08000;'>2</span>)
+        <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'Initialised: Membrane(MaxwellStefan) + Support(MaxwellStefan) (the results available at t=2s)'</span>, <span style='color:#b08000;'>0</span>)
+        <span style='color:#0057ae;'>self</span>.Log.SetProgress(<span style='color:#b08000;'>100</span>)
+        <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'Done!!'</span>, <span style='color:#b08000;'>0</span>)
 
-<span style='color:#008000;'># Use daeSimulator class</span>
+<span style='color:#898887;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial(<span style='color:#c000c0;'>3e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
-    daesolver <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, daesolver<b><span style='color:#0000ff;'>=</span></b>daesolver)
+    sim = simTutorial(<span style='color:#b08000;'>3e5</span> * Pa)
+    daesolver = daeIDAS()
+    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    sim.ReportingInterval = <span style='color:#b08000;'>1</span>
+    sim.TimeHorizon       = <span style='color:#b08000;'>1</span>
+    daesolver.RelativeTolerance = <span style='color:#b08000;'>1e-6</span>
+    simulator  = daeSimulator(app, simulation=sim, daesolver=daesolver)
     simulator.exec_()
 
 <b>def</b> simulate(Phigh):
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial(Phigh)
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          = daePythonStdOutLog()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simTutorial(Phigh)
+    daesolver    = daeIDAS()
 
-    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-6</span>
+    daesolver.RelativeTolerance = <span style='color:#b08000;'>1e-6</span>
 
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>1</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>1</span>
 
-    dr1 <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    dr2 <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    dr1 = daeTCPIPDataReporter()
+    dr2 = daeNoOpDataReporter()
     datareporter.AddDataReporter(dr1)
     datareporter.AddDataReporter(dr2)
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(dr1.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(dr1.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the simulation</span>
+    <span style='color:#898887;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Solve at time=0 (initialization)</span>
+    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-    results <b><span style='color:#0000ff;'>=</span></b> dr2.Process.dictVariables
-    Flux        <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>'.Membrane.Flux'</span>].Values
-    Selectivity <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>'.Selectivity'</span>].Values
+    results = dr2.Process.dictVariables
+    Flux        = results[simulation.m.Name + <span style='color:#bf0303;'>'.Membrane.Flux'</span>].Values
+    Selectivity = results[simulation.m.Name + <span style='color:#bf0303;'>'.Selectivity'</span>].Values
 
-    CH4_flux_GMS_Dij_oo             <b><span style='color:#0000ff;'>=</span></b> numpy.average(Flux[<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>0</span>, :])
-    C2H6_flux_GMS_Dij_oo            <b><span style='color:#0000ff;'>=</span></b> numpy.average(Flux[<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>, :])
-    CH4_C2H6_selectivity_GMS_Dij_oo <b><span style='color:#0000ff;'>=</span></b> numpy.average(Selectivity[<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>0</span>, :])
+    CH4_flux_GMS_Dij_oo             = numpy.average(Flux[<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, :])
+    C2H6_flux_GMS_Dij_oo            = numpy.average(Flux[<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>, :])
+    CH4_C2H6_selectivity_GMS_Dij_oo = numpy.average(Selectivity[<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, :])
 
-    CH4_flux_GMS             <b><span style='color:#0000ff;'>=</span></b> numpy.average(Flux[<span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>0</span>, :])
-    C2H6_flux_GMS            <b><span style='color:#0000ff;'>=</span></b> numpy.average(Flux[<span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>1</span>, :])
-    CH4_C2H6_selectivity_GMS <b><span style='color:#0000ff;'>=</span></b> numpy.average(Selectivity[<span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>0</span>, :])
+    CH4_flux_GMS             = numpy.average(Flux[<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>0</span>, :])
+    C2H6_flux_GMS            = numpy.average(Flux[<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>1</span>, :])
+    CH4_C2H6_selectivity_GMS = numpy.average(Selectivity[<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, :])
 
     <b>return</b> ((CH4_flux_GMS_Dij_oo, C2H6_flux_GMS_Dij_oo, CH4_C2H6_selectivity_GMS_Dij_oo),
             (CH4_flux_GMS,        C2H6_flux_GMS,        CH4_C2H6_selectivity_GMS))
 
 <b>def</b> full_experiment():
-    pressures <b><span style='color:#0000ff;'>=</span></b> []
-    fluxes <b><span style='color:#0000ff;'>=</span></b> {<span style='color:#c00000;'>'CH4_flux_GMS_Dij_oo'</span>:[],<span style='color:#c00000;'>'CH4_flux_GMS'</span>:[],
-              <span style='color:#c00000;'>'C2H6_flux_GMS_Dij_oo'</span>:[],<span style='color:#c00000;'>'C2H6_flux_GMS'</span>:[]}
-    selectivities <b><span style='color:#0000ff;'>=</span></b> {<span style='color:#c00000;'>'CH4_C2H6_GMS_Dij_oo'</span>:[],<span style='color:#c00000;'>'CH4_C2H6_GMS'</span>:[]}
-    <b>for</b> Phigh <b><span style='color:#0000ff;'>in</span></b> [<span style='color:#c000c0;'>1.0e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>1.5e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>2.0e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>2.5e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>3.0e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>3.5e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>4.0e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>4.5e5</span><b><span style='color:#0000ff;'>*</span></b>Pa, <span style='color:#c000c0;'>5.0e5</span><b><span style='color:#0000ff;'>*</span></b>Pa]:
+    pressures = []
+    fluxes = {<span style='color:#bf0303;'>'CH4_flux_GMS_Dij_oo'</span>:[],<span style='color:#bf0303;'>'CH4_flux_GMS'</span>:[],
+              <span style='color:#bf0303;'>'C2H6_flux_GMS_Dij_oo'</span>:[],<span style='color:#bf0303;'>'C2H6_flux_GMS'</span>:[]}
+    selectivities = {<span style='color:#bf0303;'>'CH4_C2H6_GMS_Dij_oo'</span>:[],<span style='color:#bf0303;'>'CH4_C2H6_GMS'</span>:[]}
+    <b>for</b> Phigh <b>in</b> [<span style='color:#b08000;'>1.0e5</span>*Pa, <span style='color:#b08000;'>1.5e5</span>*Pa, <span style='color:#b08000;'>2.0e5</span>*Pa, <span style='color:#b08000;'>2.5e5</span>*Pa, <span style='color:#b08000;'>3.0e5</span>*Pa, <span style='color:#b08000;'>3.5e5</span>*Pa, <span style='color:#b08000;'>4.0e5</span>*Pa, <span style='color:#b08000;'>4.5e5</span>*Pa, <span style='color:#b08000;'>5.0e5</span>*Pa]:
         <b>try</b>:
-            results <b><span style='color:#0000ff;'>=</span></b> simulate(Phigh)
+            results = simulate(Phigh)
             ((CH4_flux_GMS_Dij_oo, C2H6_flux_GMS_Dij_oo, CH4_C2H6_selectivity_GMS_Dij_oo),
-             (CH4_flux_GMS,        C2H6_flux_GMS,        CH4_C2H6_selectivity_GMS)) <b><span style='color:#0000ff;'>=</span></b> results
+             (CH4_flux_GMS,        C2H6_flux_GMS,        CH4_C2H6_selectivity_GMS)) = results
 
-            pressures.append(Phigh.value<b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>1E5</span>)
-            fluxes[<span style='color:#c00000;'>'CH4_flux_GMS_Dij_oo'</span>] .append(CH4_flux_GMS_Dij_oo)
-            fluxes[<span style='color:#c00000;'>'CH4_flux_GMS'</span>]        .append(CH4_flux_GMS)
-            fluxes[<span style='color:#c00000;'>'C2H6_flux_GMS_Dij_oo'</span>].append(C2H6_flux_GMS_Dij_oo)
-            fluxes[<span style='color:#c00000;'>'C2H6_flux_GMS'</span>]       .append(C2H6_flux_GMS)
-            selectivities[<span style='color:#c00000;'>'CH4_C2H6_GMS_Dij_oo'</span>].append(CH4_C2H6_selectivity_GMS_Dij_oo)
-            selectivities[<span style='color:#c00000;'>'CH4_C2H6_GMS'</span>]       .append(CH4_C2H6_selectivity_GMS)
+            pressures.append(Phigh.value/<span style='color:#b08000;'>1E5</span>)
+            fluxes[<span style='color:#bf0303;'>'CH4_flux_GMS_Dij_oo'</span>] .append(CH4_flux_GMS_Dij_oo)
+            fluxes[<span style='color:#bf0303;'>'CH4_flux_GMS'</span>]        .append(CH4_flux_GMS)
+            fluxes[<span style='color:#bf0303;'>'C2H6_flux_GMS_Dij_oo'</span>].append(C2H6_flux_GMS_Dij_oo)
+            fluxes[<span style='color:#bf0303;'>'C2H6_flux_GMS'</span>]       .append(C2H6_flux_GMS)
+            selectivities[<span style='color:#bf0303;'>'CH4_C2H6_GMS_Dij_oo'</span>].append(CH4_C2H6_selectivity_GMS_Dij_oo)
+            selectivities[<span style='color:#bf0303;'>'CH4_C2H6_GMS'</span>]       .append(CH4_C2H6_selectivity_GMS)
 
-        <b>except</b> <b><span style='color:#054d00;'>Exception</span></b> <span style='color:#0000ff;'>as</span> e:
-            <span style='color:#0000ff;'>print</span>(<span style='color:#0000ff;'>str</span>(e))
+        <b>except</b> <span style='color:#006e28;'>Exception</span> <span style='color:#ff5500;'>as</span> e:
+            <b><span style='color:#644a9b;'>print</span></b>(<b><span style='color:#644a9b;'>str</span></b>(e))
 
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Pressures:'</span>, pressures)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Pressures:'</span>, pressures)
 
-    pickle.dump(pressures,     <span style='color:#0000ff;'>open</span>(<span style='color:#c00000;'>'pressures.pickle'</span>, <span style='color:#c00000;'>'wb'</span>))
-    pickle.dump(fluxes,        <span style='color:#0000ff;'>open</span>(<span style='color:#c00000;'>'fluxes.pickle'</span>, <span style='color:#c00000;'>'wb'</span>))
-    pickle.dump(selectivities, <span style='color:#0000ff;'>open</span>(<span style='color:#c00000;'>'selectivities.pickle'</span>, <span style='color:#c00000;'>'wb'</span>))
+    pickle.dump(pressures,     <b><span style='color:#644a9b;'>open</span></b>(<span style='color:#bf0303;'>'pressures.pickle'</span>, <span style='color:#bf0303;'>'wb'</span>))
+    pickle.dump(fluxes,        <b><span style='color:#644a9b;'>open</span></b>(<span style='color:#bf0303;'>'fluxes.pickle'</span>, <span style='color:#bf0303;'>'wb'</span>))
+    pickle.dump(selectivities, <b><span style='color:#644a9b;'>open</span></b>(<span style='color:#bf0303;'>'selectivities.pickle'</span>, <span style='color:#bf0303;'>'wb'</span>))
 
-    pressures     <b><span style='color:#0000ff;'>=</span></b> pickle.load(<span style='color:#0000ff;'>open</span>(<span style='color:#c00000;'>'pressures.pickle'</span>, <span style='color:#c00000;'>'rb'</span>))
-    fluxes        <b><span style='color:#0000ff;'>=</span></b> pickle.load(<span style='color:#0000ff;'>open</span>(<span style='color:#c00000;'>'fluxes.pickle'</span>, <span style='color:#c00000;'>'rb'</span>))
-    selectivities <b><span style='color:#0000ff;'>=</span></b> pickle.load(<span style='color:#0000ff;'>open</span>(<span style='color:#c00000;'>'selectivities.pickle'</span>, <span style='color:#c00000;'>'rb'</span>))
-    <span style='color:#008000;'>#print(pressures)</span>
-    <span style='color:#008000;'>#print(fluxes)</span>
-    <span style='color:#008000;'>#print(selectivities)</span>
+    pressures     = pickle.load(<b><span style='color:#644a9b;'>open</span></b>(<span style='color:#bf0303;'>'pressures.pickle'</span>, <span style='color:#bf0303;'>'rb'</span>))
+    fluxes        = pickle.load(<b><span style='color:#644a9b;'>open</span></b>(<span style='color:#bf0303;'>'fluxes.pickle'</span>, <span style='color:#bf0303;'>'rb'</span>))
+    selectivities = pickle.load(<b><span style='color:#644a9b;'>open</span></b>(<span style='color:#bf0303;'>'selectivities.pickle'</span>, <span style='color:#bf0303;'>'rb'</span>))
+    <span style='color:#898887;'>#print(pressures)</span>
+    <span style='color:#898887;'>#print(fluxes)</span>
+    <span style='color:#898887;'>#print(selectivities)</span>
 
-    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>14</span>
-    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>11</span>
-    plt.figure(<span style='color:#c000c0;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'white'</span>)
-    plt.subplot(<span style='color:#c000c0;'>121</span>)
-    plt.plot(pressures, selectivities[<span style='color:#c00000;'>'CH4_C2H6_GMS_Dij_oo'</span>], <span style='color:#c00000;'>'rs-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'GMS(Dij=∞)'</span>)
-    plt.plot(pressures, selectivities[<span style='color:#c00000;'>'CH4_C2H6_GMS'</span>],        <span style='color:#c00000;'>'bo-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'GMS'</span>)
-    plt.xlabel(<span style='color:#c00000;'>'Pressure (kPa)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
-    plt.ylabel(<span style='color:#c00000;'>'Selectivity CH4/C2H6'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
-    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
-    plt.xlim((<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>6</span>))
+    fontsize = <span style='color:#b08000;'>14</span>
+    fontsize_legend = <span style='color:#b08000;'>11</span>
+    plt.figure(<span style='color:#b08000;'>1</span>, facecolor=<span style='color:#bf0303;'>'white'</span>)
+    plt.subplot(<span style='color:#b08000;'>121</span>)
+    plt.plot(pressures, selectivities[<span style='color:#bf0303;'>'CH4_C2H6_GMS_Dij_oo'</span>], <span style='color:#bf0303;'>'rs-'</span>, label=<span style='color:#bf0303;'>'GMS(Dij=∞)'</span>)
+    plt.plot(pressures, selectivities[<span style='color:#bf0303;'>'CH4_C2H6_GMS'</span>],        <span style='color:#bf0303;'>'bo-'</span>, label=<span style='color:#bf0303;'>'GMS'</span>)
+    plt.xlabel(<span style='color:#bf0303;'>'Pressure (kPa)'</span>, fontsize=fontsize)
+    plt.ylabel(<span style='color:#bf0303;'>'Selectivity CH4/C2H6'</span>, fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    plt.xlim((<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>6</span>))
 
-    plt.subplot(<span style='color:#c000c0;'>122</span>)
-    plt.plot(pressures, fluxes[<span style='color:#c00000;'>'CH4_flux_GMS_Dij_oo'</span>],  <span style='color:#c00000;'>'rs:'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'CH4-GMS(Dij=∞)'</span>)
-    plt.plot(pressures, fluxes[<span style='color:#c00000;'>'CH4_flux_GMS'</span>],         <span style='color:#c00000;'>'ro-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'CH4-GMS'</span>)
-    plt.plot(pressures, fluxes[<span style='color:#c00000;'>'C2H6_flux_GMS_Dij_oo'</span>], <span style='color:#c00000;'>'bs:'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'C2H6-GMS(Dij=∞)'</span>)
-    plt.plot(pressures, fluxes[<span style='color:#c00000;'>'C2H6_flux_GMS'</span>],        <span style='color:#c00000;'>'bo-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'C2H6-GMS'</span>)
-    plt.xlabel(<span style='color:#c00000;'>'Pressure (kPa)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
-    plt.ylabel(<span style='color:#c00000;'>'Flux mol/(m2.s)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
-    plt.legend(loc<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>0</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
-    plt.xlim((<span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>6</span>))
+    plt.subplot(<span style='color:#b08000;'>122</span>)
+    plt.plot(pressures, fluxes[<span style='color:#bf0303;'>'CH4_flux_GMS_Dij_oo'</span>],  <span style='color:#bf0303;'>'rs:'</span>, label=<span style='color:#bf0303;'>'CH4-GMS(Dij=∞)'</span>)
+    plt.plot(pressures, fluxes[<span style='color:#bf0303;'>'CH4_flux_GMS'</span>],         <span style='color:#bf0303;'>'ro-'</span>, label=<span style='color:#bf0303;'>'CH4-GMS'</span>)
+    plt.plot(pressures, fluxes[<span style='color:#bf0303;'>'C2H6_flux_GMS_Dij_oo'</span>], <span style='color:#bf0303;'>'bs:'</span>, label=<span style='color:#bf0303;'>'C2H6-GMS(Dij=∞)'</span>)
+    plt.plot(pressures, fluxes[<span style='color:#bf0303;'>'C2H6_flux_GMS'</span>],        <span style='color:#bf0303;'>'bo-'</span>, label=<span style='color:#bf0303;'>'C2H6-GMS'</span>)
+    plt.xlabel(<span style='color:#bf0303;'>'Pressure (kPa)'</span>, fontsize=fontsize)
+    plt.ylabel(<span style='color:#bf0303;'>'Flux mol/(m2.s)'</span>, fontsize=fontsize)
+    plt.legend(loc=<span style='color:#b08000;'>0</span>, fontsize=fontsize_legend)
+    plt.xlim((<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>6</span>))
 
     plt.tight_layout()
     plt.show()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
-        simulate(<span style='color:#c000c0;'>3e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
-    <b>elif</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'full_experiment'</span>):
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
+    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+        simulate(<span style='color:#b08000;'>3e5</span> * Pa)
+    <b>elif</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'full_experiment'</span>):
         full_experiment()
     <b>else</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        app = daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

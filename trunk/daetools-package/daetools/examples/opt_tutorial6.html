@@ -6,287 +6,288 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>opt_tutorial6.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#898887;'>#!/usr/bin/env python</span>
+<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            opt_tutorial6.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>daeMinpackLeastSq module test.</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>                            opt_tutorial6.py</span>
+<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#898887;'>***********************************************************************************</span>
+<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#898887;'>************************************************************************************</span>
+<span style='color:#898887;'>&quot;&quot;&quot;</span>
+__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#bf0303;'>daeMinpackLeastSq module test.</span>
+<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys, numpy
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> numpy.linalg <span style='color:#0000ff;'>import</span> cholesky
-<span style='color:#0000ff;'>import</span> matplotlib
-matplotlib.use(<span style='color:#c00000;'>'Qt4Agg'</span>)
-<span style='color:#0000ff;'>import</span> matplotlib.pyplot <span style='color:#0000ff;'>as</span> plt
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> daetools.solvers.minpack <span style='color:#0000ff;'>import</span> daeMinpackLeastSq
+<span style='color:#ff5500;'>import</span> sys, numpy
+<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
+<span style='color:#ff5500;'>from</span> numpy.linalg <span style='color:#ff5500;'>import</span> cholesky
+<span style='color:#ff5500;'>import</span> matplotlib
+matplotlib.use(<span style='color:#bf0303;'>'Qt5Agg'</span>)
+<span style='color:#ff5500;'>import</span> matplotlib.pyplot <span style='color:#ff5500;'>as</span> plt
+<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
+<span style='color:#ff5500;'>from</span> daetools.solvers.minpack <span style='color:#ff5500;'>import</span> daeMinpackLeastSq
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
+        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#008000;'># Model inputs</span>
-        <span style='color:#0000ff;'>self</span>.x     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;x&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#898887;'># Model inputs</span>
+        <span style='color:#0057ae;'>self</span>.x     = daeVariable(<span style='color:#bf0303;'>&quot;x&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
         
-        <span style='color:#008000;'># Model outputs (measured quantities)</span>
-        <span style='color:#0000ff;'>self</span>.y     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;y&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#898887;'># Model outputs (measured quantities)</span>
+        <span style='color:#0057ae;'>self</span>.y     = daeVariable(<span style='color:#bf0303;'>&quot;y&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
         
-        <span style='color:#008000;'># Model parameters</span>
-        <span style='color:#0000ff;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;A&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.k     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;k&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.theta <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;&amp;theta;&quot;</span>, no_t, <span style='color:#0000ff;'>self</span>)
+        <span style='color:#898887;'># Model parameters</span>
+        <span style='color:#0057ae;'>self</span>.A     = daeVariable(<span style='color:#bf0303;'>&quot;A&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.k     = daeVariable(<span style='color:#bf0303;'>&quot;k&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.theta = daeVariable(<span style='color:#bf0303;'>&quot;&amp;theta;&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;y&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.y() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> Sin(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> numpy.pi <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.x() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.theta())
+        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;y&quot;</span>)
+        eq.Residual = <span style='color:#0057ae;'>self</span>.y() - <span style='color:#0057ae;'>self</span>.A() * Sin(<span style='color:#b08000;'>2</span> * numpy.pi * <span style='color:#0057ae;'>self</span>.k() * <span style='color:#0057ae;'>self</span>.x() + <span style='color:#0057ae;'>self</span>.theta())
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;opt_tutorial6&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
+        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;opt_tutorial6&quot;</span>)
+        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
         <b>pass</b>
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.x.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.A.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.k.AssignValue(<span style='color:#c000c0;'>1</span>)
-        <span style='color:#0000ff;'>self</span>.m.theta.AssignValue(<span style='color:#c000c0;'>1</span>)
+    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.m.x.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.A.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.k.AssignValue(<span style='color:#b08000;'>1</span>)
+        <span style='color:#0057ae;'>self</span>.m.theta.AssignValue(<span style='color:#b08000;'>1</span>)
 
-    <b>def</b> SetUpParameterEstimation(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.SetMeasuredVariable(<span style='color:#0000ff;'>self</span>.m.y)
+    <b>def</b> SetUpParameterEstimation(<span style='color:#0057ae;'>self</span>):
+        <span style='color:#0057ae;'>self</span>.SetMeasuredVariable(<span style='color:#0057ae;'>self</span>.m.y)
         
-        <span style='color:#0000ff;'>self</span>.SetInputVariable(<span style='color:#0000ff;'>self</span>.m.x)
+        <span style='color:#0057ae;'>self</span>.SetInputVariable(<span style='color:#0057ae;'>self</span>.m.x)
         
-        <span style='color:#0000ff;'>self</span>.SetModelParameter(<span style='color:#0000ff;'>self</span>.m.A,      <span style='color:#c000c0;'>1.0</span>,  <span style='color:#c000c0;'>50.0</span>, <span style='color:#c000c0;'>10.0</span>)
-        <span style='color:#0000ff;'>self</span>.SetModelParameter(<span style='color:#0000ff;'>self</span>.m.k,     <span style='color:#c000c0;'>10.0</span>, <span style='color:#c000c0;'>100.0</span>, <span style='color:#c000c0;'>33.0</span>)
-        <span style='color:#0000ff;'>self</span>.SetModelParameter(<span style='color:#0000ff;'>self</span>.m.theta,  <span style='color:#c000c0;'>0.1</span>,   <span style='color:#c000c0;'>2.0</span>,  <span style='color:#c000c0;'>0.5</span>)
+        <span style='color:#0057ae;'>self</span>.SetModelParameter(<span style='color:#0057ae;'>self</span>.m.A,      <span style='color:#b08000;'>1.0</span>,  <span style='color:#b08000;'>50.0</span>, <span style='color:#b08000;'>10.0</span>)
+        <span style='color:#0057ae;'>self</span>.SetModelParameter(<span style='color:#0057ae;'>self</span>.m.k,     <span style='color:#b08000;'>10.0</span>, <span style='color:#b08000;'>100.0</span>, <span style='color:#b08000;'>33.0</span>)
+        <span style='color:#0057ae;'>self</span>.SetModelParameter(<span style='color:#0057ae;'>self</span>.m.theta,  <span style='color:#b08000;'>0.1</span>,   <span style='color:#b08000;'>2.0</span>,  <span style='color:#b08000;'>0.5</span>)
 
 <b>def</b> plotConfidenceEllipsoid(minpack, x_param_index, y_param_index, confidence, x_label, y_label):
-    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure()
-    x_ellipse, y_ellipse, x0, y0 <b><span style='color:#0000ff;'>=</span></b> minpack.getConfidenceEllipsoid(x_param_index <b><span style='color:#0000ff;'>=</span></b> x_param_index, 
-                                                                  y_param_index <b><span style='color:#0000ff;'>=</span></b> y_param_index, 
-                                                                  confidence    <b><span style='color:#0000ff;'>=</span></b> confidence)
-    ax <b><span style='color:#0000ff;'>=</span></b> fig.add_subplot(<span style='color:#c000c0;'>111</span>, aspect<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'auto'</span>)
+    fig = plt.figure()
+    x_ellipse, y_ellipse, x0, y0 = minpack.getConfidenceEllipsoid(x_param_index = x_param_index, 
+                                                                  y_param_index = y_param_index, 
+                                                                  confidence    = confidence)
+    ax = fig.add_subplot(<span style='color:#b08000;'>111</span>, aspect=<span style='color:#bf0303;'>'auto'</span>)
     ax.plot(x_ellipse, y_ellipse)
-    ax.plot(x0, y0, <span style='color:#c00000;'>'o'</span>)
+    ax.plot(x0, y0, <span style='color:#bf0303;'>'o'</span>)
 
-    legend <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#0000ff;'>str</span>(confidence)<b><span style='color:#0000ff;'>+</span></b><span style='color:#c00000;'>'%'</span>, <span style='color:#c00000;'>'opt'</span>]
+    legend = [<b><span style='color:#644a9b;'>str</span></b>(confidence)+<span style='color:#bf0303;'>'%'</span>, <span style='color:#bf0303;'>'opt'</span>]
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     
-    ax.legend(legend) <span style='color:#008000;'>#, frameon=False)</span>
+    ax.legend(legend) <span style='color:#898887;'>#, frameon=False)</span>
     <b>return</b> fig
 
 <b>def</b> plotExpFitComparison(minpack, input_variable_index, measured_variable_index, x_label, y_label, legend):
-    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure()
-    x_axis, y_exp, y_fit <b><span style='color:#0000ff;'>=</span></b> minpack.getFit_SS(input_variable_index <b><span style='color:#0000ff;'>=</span></b> input_variable_index, measured_variable_index <b><span style='color:#0000ff;'>=</span></b> measured_variable_index)
-    ax <b><span style='color:#0000ff;'>=</span></b> fig.add_subplot(<span style='color:#c000c0;'>111</span>, aspect<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'auto'</span>)
-    ax.plot(x_axis, y_fit, <span style='color:#c00000;'>'blue'</span>, x_axis, y_exp, <span style='color:#c00000;'>'o'</span>)
+    fig = plt.figure()
+    x_axis, y_exp, y_fit = minpack.getFit_SS(input_variable_index = input_variable_index, measured_variable_index = measured_variable_index)
+    ax = fig.add_subplot(<span style='color:#b08000;'>111</span>, aspect=<span style='color:#bf0303;'>'auto'</span>)
+    ax.plot(x_axis, y_fit, <span style='color:#bf0303;'>'blue'</span>, x_axis, y_exp, <span style='color:#bf0303;'>'o'</span>)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
-    ax.legend(legend) <span style='color:#008000;'>#, frameon=False)</span>
+    ax.legend(legend) <span style='color:#898887;'>#, frameon=False)</span>
     <b>return</b> fig
     
 <b>def</b> run():
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    minpack      <b><span style='color:#0000ff;'>=</span></b> daeMinpackLeastSq()
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    datareporter = daeTCPIPDataReporter()
+    simulation   = simTutorial()
+    minpack      = daeMinpackLeastSq()
 
-    <span style='color:#008000;'># Do no print progress</span>
-    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>
+    <span style='color:#898887;'># Do no print progress</span>
+    log.PrintProgress = <span style='color:#0057ae;'>False</span>
     
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#898887;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.5</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>10</span>
+    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval = <span style='color:#b08000;'>0.5</span>
+    simulation.TimeHorizon = <span style='color:#b08000;'>10</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#898887;'># Connect data reporter</span>
+    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Some info about the experiments</span>
-    Ntime_points         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    Nparameters          <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>3</span>
-    Ninput_variables     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    Nmeasured_variables  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    Nexperiments         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>30</span>
+    <span style='color:#898887;'># Some info about the experiments</span>
+    Ntime_points         = <span style='color:#b08000;'>1</span>
+    Nparameters          = <span style='color:#b08000;'>3</span>
+    Ninput_variables     = <span style='color:#b08000;'>1</span>
+    Nmeasured_variables  = <span style='color:#b08000;'>1</span>
+    Nexperiments         = <span style='color:#b08000;'>30</span>
 
-    <span style='color:#008000;'># Experimental data template</span>
-    <span style='color:#008000;'># Tuple ([time intervals], [input values], [measured values]):</span>
-    <span style='color:#008000;'>#   ( </span>
-    <span style='color:#008000;'>#     [t_0, t_1, ..., t_tn], [x_0, x_1, ..., x_i], [ [y_00, y_01, ..., y_0tn],</span>
-    <span style='color:#008000;'>#                                                    [y_10, y_11, ..., y_1tn],</span>
-    <span style='color:#008000;'>#</span>
-    <span style='color:#008000;'>#                                                    [y_m0, y_m1, ..., y_mtn]</span>
-    <span style='color:#008000;'>#                                                  ]</span>
-    <span style='color:#008000;'>#   )</span>
-    <span style='color:#008000;'>#   where indexes are:</span>
-    <span style='color:#008000;'>#     tn = Ntime_intervals</span>
-    <span style='color:#008000;'>#     m  = Nmeasured_variables</span>
-    <span style='color:#008000;'>#     i  = Ninput_variables</span>
-    data <b><span style='color:#0000ff;'>=</span></b> [
+    <span style='color:#898887;'># Experimental data template</span>
+    <span style='color:#898887;'># Tuple ([time intervals], [input values], [measured values]):</span>
+    <span style='color:#898887;'>#   ( </span>
+    <span style='color:#898887;'>#     [t_0, t_1, ..., t_tn], [x_0, x_1, ..., x_i], [ [y_00, y_01, ..., y_0tn],</span>
+    <span style='color:#898887;'>#                                                    [y_10, y_11, ..., y_1tn],</span>
+    <span style='color:#898887;'>#</span>
+    <span style='color:#898887;'>#                                                    [y_m0, y_m1, ..., y_mtn]</span>
+    <span style='color:#898887;'>#                                                  ]</span>
+    <span style='color:#898887;'>#   )</span>
+    <span style='color:#898887;'>#   where indexes are:</span>
+    <span style='color:#898887;'>#     tn = Ntime_intervals</span>
+    <span style='color:#898887;'>#     m  = Nmeasured_variables</span>
+    <span style='color:#898887;'>#     i  = Ninput_variables</span>
+    data = [
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.000</span>], [[<span style='color:#c000c0;'>5.9567423599999998</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.000</span>], [[<span style='color:#b08000;'>5.9567423599999998</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.002</span>], [[<span style='color:#c000c0;'>10.03610565</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.002</span>], [[<span style='color:#b08000;'>10.03610565</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.004</span>], [[<span style='color:#c000c0;'>10.14475642</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.004</span>], [[<span style='color:#b08000;'>10.14475642</span>]]
             ),
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.006</span>], [[<span style='color:#c000c0;'>9.1672252099999998</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.006</span>], [[<span style='color:#b08000;'>9.1672252099999998</span>]]
             ),
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.008</span>], [[<span style='color:#c000c0;'>8.5209392899999994</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.008</span>], [[<span style='color:#b08000;'>8.5209392899999994</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.010</span>], [[<span style='color:#c000c0;'>4.7884286300000003</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.010</span>], [[<span style='color:#b08000;'>4.7884286300000003</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.012</span>], [[<span style='color:#c000c0;'>2.8746775499999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.012</span>], [[<span style='color:#b08000;'>2.8746775499999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.014</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>3.9342732499999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.014</span>], [[-<span style='color:#b08000;'>3.9342732499999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.016</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>6.1307100999999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.016</span>], [[-<span style='color:#b08000;'>6.1307100999999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.018</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>9.2616808299999995</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.018</span>], [[-<span style='color:#b08000;'>9.2616808299999995</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.020</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>9.2527247500000005</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.020</span>], [[-<span style='color:#b08000;'>9.2527247500000005</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.022</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>10.428504139999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.022</span>], [[-<span style='color:#b08000;'>10.428504139999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.024</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>4.7117558700000002</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.024</span>], [[-<span style='color:#b08000;'>4.7117558700000002</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.026</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>3.6040301299999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.026</span>], [[-<span style='color:#b08000;'>3.6040301299999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.028</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>0.1103975</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.028</span>], [[-<span style='color:#b08000;'>0.1103975</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.030</span>], [[<span style='color:#c000c0;'>3.8037288999999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.030</span>], [[<span style='color:#b08000;'>3.8037288999999999</span>]]
             ),
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.032</span>], [[<span style='color:#c000c0;'>8.5151208199999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.032</span>], [[<span style='color:#b08000;'>8.5151208199999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.034</span>], [[<span style='color:#c000c0;'>9.7823271799999993</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.034</span>], [[<span style='color:#b08000;'>9.7823271799999993</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.036</span>], [[<span style='color:#c000c0;'>9.9193174699999993</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.036</span>], [[<span style='color:#b08000;'>9.9193174699999993</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.038</span>], [[<span style='color:#c000c0;'>5.1710806099999997</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.038</span>], [[<span style='color:#b08000;'>5.1710806099999997</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.040</span>], [[<span style='color:#c000c0;'>6.4746835999999997</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.040</span>], [[<span style='color:#b08000;'>6.4746835999999997</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.042</span>], [[<span style='color:#c000c0;'>0.66528089000000001</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.042</span>], [[<span style='color:#b08000;'>0.66528089000000001</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.044</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>5.1034402700000001</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.044</span>], [[-<span style='color:#b08000;'>5.1034402700000001</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.046</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>7.12668123</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.046</span>], [[-<span style='color:#b08000;'>7.12668123</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.048</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>9.4208056599999992</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.048</span>], [[-<span style='color:#b08000;'>9.4208056599999992</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.050</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>8.2317054299999999</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.050</span>], [[-<span style='color:#b08000;'>8.2317054299999999</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.052</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>6.5608158999999997</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.052</span>], [[-<span style='color:#b08000;'>6.5608158999999997</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.054</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>6.28524014</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.054</span>], [[-<span style='color:#b08000;'>6.28524014</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.056</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>2.3024634000000002</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.056</span>], [[-<span style='color:#b08000;'>2.3024634000000002</span>]]
             ), 
             (
-                [<span style='color:#c000c0;'>1.0</span>], [<span style='color:#c000c0;'>0.058</span>], [[<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>0.79571451999999998</span>]]
+                [<span style='color:#b08000;'>1.0</span>], [<span style='color:#b08000;'>0.058</span>], [[-<span style='color:#b08000;'>0.79571451999999998</span>]]
             )
             ]       
     
-    <span style='color:#008000;'># Initialize MinpackLeastSq</span>
+    <span style='color:#898887;'># Initialize MinpackLeastSq</span>
     minpack.Initialize(simulation, 
                        daesolver,
                        datareporter,
                        log,
-                       experimental_data            <b><span style='color:#0000ff;'>=</span></b> data,
-                       print_residuals_and_jacobian <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>True</span>,
-                       enforce_parameters_bounds    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>False</span>,
-                       minpack_leastsq_arguments    <b><span style='color:#0000ff;'>=</span></b> {<span style='color:#c00000;'>'ftol'</span>   : <span style='color:#c000c0;'>1E-8</span>,
-                                                       <span style='color:#c00000;'>'xtol'</span>   : <span style='color:#c000c0;'>1E-8</span>,
-                                                       <span style='color:#c00000;'>'factor'</span> : <span style='color:#c000c0;'>100.0</span>} )
+                       experimental_data            = data,
+                       print_residuals_and_jacobian = <span style='color:#0057ae;'>True</span>,
+                       enforce_parameters_bounds    = <span style='color:#0057ae;'>False</span>,
+                       minpack_leastsq_arguments    = {<span style='color:#bf0303;'>'ftol'</span>   : <span style='color:#b08000;'>1E-8</span>,
+                                                       <span style='color:#bf0303;'>'xtol'</span>   : <span style='color:#b08000;'>1E-8</span>,
+                                                       <span style='color:#bf0303;'>'factor'</span> : <span style='color:#b08000;'>100.0</span>} )
     
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#898887;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#898887;'># Run</span>
     minpack.Run()
 
-    <span style='color:#008000;'># Print the results</span>
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Status:'</span>, minpack.msg)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Number of function evaluations ='</span>, minpack.infodict[<span style='color:#c00000;'>'nfev'</span>])
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Estimated parameters</span><span style='color:#c00000;'>\'</span><span style='color:#c00000;'> values:'</span>, minpack.p_estimated)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'The real parameters</span><span style='color:#c00000;'>\'</span><span style='color:#c00000;'> values:'</span>, [<span style='color:#c00000;'>'10.0'</span>, <span style='color:#c00000;'>'33.33333333'</span>, <span style='color:#c00000;'>'0.523598333'</span>])
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'chi2 ='</span>, minpack.x2)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Standard deviation ='</span>, minpack.sigma)
-    <span style='color:#0000ff;'>print</span>(<span style='color:#c00000;'>'Covariance matrix:'</span>)
-    <span style='color:#0000ff;'>print</span>(minpack.cov_x)
+    <span style='color:#898887;'># Print the results</span>
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Status:'</span>, minpack.msg)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Number of function evaluations ='</span>, minpack.infodict[<span style='color:#bf0303;'>'nfev'</span>])
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Estimated parameters</span><span style='color:#924c9d;'>\'</span><span style='color:#bf0303;'> values:'</span>, minpack.p_estimated)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'The real parameters</span><span style='color:#924c9d;'>\'</span><span style='color:#bf0303;'> values:'</span>, [<span style='color:#bf0303;'>'10.0'</span>, <span style='color:#bf0303;'>'33.33333333'</span>, <span style='color:#bf0303;'>'0.523598333'</span>])
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'chi2 ='</span>, minpack.x2)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Standard deviation ='</span>, minpack.sigma)
+    <b><span style='color:#644a9b;'>print</span></b>(<span style='color:#bf0303;'>'Covariance matrix:'</span>)
+    <b><span style='color:#644a9b;'>print</span></b>(minpack.cov_x)
     
-    <span style='color:#008000;'># Plot 90, 95, and 99% confidence ellipsoids</span>
-    plotConfidenceEllipsoid(minpack, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>95</span>, <span style='color:#c00000;'>'A'</span>, <span style='color:#c00000;'>'k'</span>)
-    plotConfidenceEllipsoid(minpack, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>95</span>, <span style='color:#c00000;'>'A'</span>, <span style='color:#c00000;'>'theta'</span>)
-    plotConfidenceEllipsoid(minpack, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>95</span>, <span style='color:#c00000;'>'k'</span>, <span style='color:#c00000;'>'theta'</span>)
+    <span style='color:#898887;'># Plot 90, 95, and 99% confidence ellipsoids</span>
+    plotConfidenceEllipsoid(minpack, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>95</span>, <span style='color:#bf0303;'>'A'</span>, <span style='color:#bf0303;'>'k'</span>)
+    plotConfidenceEllipsoid(minpack, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>95</span>, <span style='color:#bf0303;'>'A'</span>, <span style='color:#bf0303;'>'theta'</span>)
+    plotConfidenceEllipsoid(minpack, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>95</span>, <span style='color:#bf0303;'>'k'</span>, <span style='color:#bf0303;'>'theta'</span>)
     
-    <span style='color:#008000;'># Plot exp-fit comparison for y = f(x)</span>
-    plotExpFitComparison(minpack, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>0</span>, <span style='color:#c00000;'>'x'</span>, <span style='color:#c00000;'>'y'</span>, [<span style='color:#c00000;'>'y-fit'</span>, <span style='color:#c00000;'>'y-exp'</span>])
+    <span style='color:#898887;'># Plot exp-fit comparison for y = f(x)</span>
+    plotExpFitComparison(minpack, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0</span>, <span style='color:#bf0303;'>'x'</span>, <span style='color:#bf0303;'>'y'</span>, [<span style='color:#bf0303;'>'y-fit'</span>, <span style='color:#bf0303;'>'y-exp'</span>])
     
     plt.show()
         
     minpack.Finalize()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
+<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
     run()
 </pre>
 </body>
