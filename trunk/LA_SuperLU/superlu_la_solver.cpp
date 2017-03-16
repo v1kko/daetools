@@ -98,10 +98,6 @@ daeSuperLUSolver::daeSuperLUSolver(void)
     m_Options.lwork				= 0;
 #endif
 	
-#ifdef daeSuperLU_CUDA
-    m_superlu_mt_gpuSolver.SetDimensions(1, 512);
-#endif
-	
 #ifdef daeSuperLU
 // Some issues with daeConfig and cross compiling using mingw...
     string strReuse;
@@ -320,19 +316,6 @@ void daeSuperLUSolver::FreeMemory(void)
 	Destroy_SuperMatrix_Store(&m_matX);
 #endif
 
-#ifdef daeSuperLU_CUDA
-	cudaError_t ce = m_superlu_mt_gpuSolver.FreeMemory();
-	if(ce != cudaSuccess)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to free memory for superlu_mt_gpu solver" << cudaGetErrorString(ce);
-		throw e;
-	}
-	
-	std::cout << "Total factorization time = " << toStringFormatted(m_factorize, -1, 3) << " s" << std::endl;
-	std::cout << "Total solve time = "         << toStringFormatted(m_solve, -1, 3)     << " s" << std::endl;
-#endif
-	
 #ifdef daeSuperLU	
 	if(m_etree)
 		SUPERLU_FREE(m_etree);
@@ -414,16 +397,6 @@ void daeSuperLUSolver::InitializeSuperLU(size_t nnz)
 	dCreate_Dense_Matrix(&m_matX, m_nNoEquations, 1, m_vecX, m_nNoEquations, SLU_DN, SLU_D, SLU_GE);
 #endif
 
-#ifdef daeSuperLU_CUDA
-	cudaError_t ce = m_superlu_mt_gpuSolver.Initialize(m_matJacobian.NNZ, m_matJacobian.N, m_matJacobian.IA, m_matJacobian.JA);
-	if(ce != cudaSuccess)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to initialize superlu_mt_gpu solver" << cudaGetErrorString(ce);
-		throw e;
-	}
-#endif
-	
 #ifdef daeSuperLU
 	m_vecB	 = doubleMalloc(m_nNoEquations);
 	m_vecX	 = doubleMalloc(m_nNoEquations);
@@ -471,9 +444,6 @@ std::string daeSuperLUSolver::GetName(void) const
 #endif
 #ifdef daeSuperLU
 	return string("SuperLU");
-#endif
-#ifdef daeSuperLU_CUDA
-	return string("SuperLU_CUDA");
 #endif
 }
 
@@ -690,29 +660,6 @@ int daeSuperLUSolver::Setup(void*		ida,
     //PrintStats();
 #endif
 	
-#ifdef daeSuperLU_CUDA
-	cudaError_t ce;
-	
-	ce = m_superlu_mt_gpuSolver.SetMatrixValues(m_matJacobian.A);
-	if(ce != cudaSuccess)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to copy matrix values to the device (CUDA error: " << cudaGetErrorString(ce) << ")";
-		throw e;
-	}
-	memcopy = dae::GetTimeInSeconds();
-
-	ce = m_superlu_mt_gpuSolver.Factorize(info);
-	if(ce != cudaSuccess || info != 0)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to factorize matrix (CUDA error: " << cudaGetErrorString(ce) << "; "
-		  << "info: " << info << ")";
-		throw e;
-	}
-
-#endif
-	
 #ifdef daeSuperLU
     int panel_size = sp_ienv(1);
     int relax      = sp_ienv(2);
@@ -902,12 +849,6 @@ int daeSuperLUSolver::Setup(void*		ida,
 //	double timeElapsed = end     - start;
 //	m_factorize += timeElapsed;
 	
-#ifdef daeSuperLU_CUDA
-	std::cout << "  Memcopy time = "     << toStringFormatted(timeMemcopy, -1, 3) << " s" << std::endl
-	          << "  Factor time = "      << toStringFormatted(timeFactor, -1, 3) << " s" << std::endl
-	          << "  Total fact. time = " << toStringFormatted(timeElapsed, -1, 3) << " s" << std::endl;
-#endif
-
 	m_bFactorizationDone = true;
 	
 	return IDA_SUCCESS;
@@ -964,22 +905,6 @@ int daeSuperLUSolver::Solve(void*		ida,
 	::memcpy(pdB, m_vecB, Neq*sizeof(real_t));
 #endif
 	
-#ifdef daeSuperLU_CUDA
-	cudaError_t ce = m_superlu_mt_gpuSolver.Solve(&pdB, info);
-	if(ce != cudaSuccess || info != 0)
-	{
-		daeDeclareException(exMiscellanous);
-		e << "Unable to solve the system (CUDA error: " << cudaGetErrorString(ce) << "; "
-		  << "info: " << info << ")";
-		throw e;
-	}
-	
-//	daeDenseArray ba;
-//	ba.InitArray(Neq, pdB);
-//	std::cout << "X: " << std::endl;
-//	ba.Print();
-#endif
-	
 #ifdef daeSuperLU
 	::memcpy(m_vecB, pdB, Neq*sizeof(real_t));
 	
@@ -1002,9 +927,6 @@ int daeSuperLUSolver::Solve(void*		ida,
 	end = dae::GetTimeInSeconds();
 	double timeElapsed = end - start;
 	m_solve += timeElapsed;
-#ifdef daeSuperLU_CUDA
-	std::cout << "  Solve time = " << toStringFormatted(timeElapsed, -1, 3) << " s" << std::endl;
-#endif
 	
 	if(ida_mem->ida_cjratio != 1.0)
 	{
@@ -1019,9 +941,6 @@ int daeSuperLUSolver::Solve(void*		ida,
 void daeSuperLUSolver::PrintStats(void)
 {
 #ifdef daeSuperLU_MT
-#endif
-	
-#ifdef daeSuperLU_CUDA
 #endif
 	
 #ifdef daeSuperLU

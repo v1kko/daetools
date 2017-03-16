@@ -30,7 +30,7 @@ import os, sys, platform, shutil
 from distutils.core import setup
 from distutils import dir_util
 
-daetools_version = '1.7.0b1'
+daetools_version = '1.6.1'
 
 # Python version
 python_major = str(sys.version_info[0])

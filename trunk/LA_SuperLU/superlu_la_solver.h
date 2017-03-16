@@ -14,14 +14,8 @@
 #ifdef daeSuperLU_MT
 extern "C"
 {
-#include <pdsp_defs.h>
+#include <slu_mt_ddefs.h>
 }
-#endif
-
-#ifdef daeSuperLU_CUDA
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include "superlu_mt_gpu.h"
 #endif
 
 #ifdef daeSuperLU
@@ -80,18 +74,6 @@ public:
 	superlumt_options_t& GetOptions(void);
 #endif
 
-#ifdef daeSuperLU_CUDA
-	void SetMatrixValues_A(void);
-	void Factorize(void);
-	void Solve(double** b);
-	void AllocateMatrix_A(void);
-	void AllocateMatrix_B(void);
-	void FreeMatrixStore_A(void);
-	void FreeMatrixStore_B(void);
-	void FreeFactorizationData(void);
-	
-#endif
-
 #ifdef daeSuperLU
 	superlu_options_t& GetOptions(void);
 #endif
@@ -130,10 +112,6 @@ public:
     void*				m_work;
     int*				m_perm_c;
     int*				m_perm_r;
-#endif
-	
-#ifdef daeSuperLU_CUDA
-    superlu_mt_gpu_solver	m_superlu_mt_gpuSolver;
 #endif
 	
 #ifdef daeSuperLU

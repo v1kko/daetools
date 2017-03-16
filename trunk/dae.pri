@@ -11,8 +11,8 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 7
-DAE_TOOLS_BUILD = 0
+DAE_TOOLS_MINOR = 6
+DAE_TOOLS_BUILD = 1
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -531,9 +531,9 @@ SUPERLU_MT_LIBPATH = $${SUPERLU_MT_PATH}/lib
 SUPERLU_MT_INCLUDE = $${SUPERLU_MT_PATH}/SRC
 
 win32-msvc2015::SUPERLU_MT_LIBS =
-win32-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
-win64-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
-unix::SUPERLU_MT_LIBS           = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt_2.0 $${RT} $${PTHREADS_LIB}
+win32-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt -lgomp $${RT}
+win64-g++-*::SUPERLU_MT_LIBS    = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt -lgomp $${RT}
+unix::SUPERLU_MT_LIBS           = -L$${SUPERLU_MT_LIBPATH} -lsuperlu_mt -lgomp $${RT}
 
 ######################################################################################
 #                           Umfpack + AMD + CHOLMOD

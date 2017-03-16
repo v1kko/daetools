@@ -330,7 +330,6 @@ vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
 vDEALII=8.4.1
 vSUPERLU=5.2.1
-# Old versions (require changes in makefiles)
 vSUPERLU_MT=3.1
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
@@ -1164,7 +1163,6 @@ configure_superlu()
     -Denable_single:BOOL=OFF \
     -Denable_tests:BOOL=OFF \
     -Denable_complex16:BOOL=OFF \
-    -DCMAKE_Fortran_COMPILER:FILEPATH=""  \
     -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
     -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} -O3" \
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
@@ -1218,13 +1216,13 @@ configure_superlu_mt()
   if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
     wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
   fi
-  if [ ! -e superlu_mt_makefiles.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_mt_makefiles.tar.gz
+  if [ ! -e superlu_mt_makefiles_${vSUPERLU_MT}.tar.gz ]; then
+    wget ${DAETOOLS_HTTP}/superlu_mt_makefiles_${vSUPERLU_MT}.tar.gz
   fi
   tar -xzf superlu_mt_${vSUPERLU_MT}.tar.gz
   mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
   cd superlu_mt
-  tar -xzf ../superlu_mt_makefiles.tar.gz
+  tar -xzf ../superlu_mt_makefiles_${vSUPERLU_MT}.tar.gz
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
