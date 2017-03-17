@@ -152,8 +152,7 @@ def consoleRun():
 
     # Import desired solver module (uncomment it from below) and set it using SetLASolver function:
     #print("Supported Trilinos 3rd party LA solvers:", str(pyTrilinos.daeTrilinosSupportedSolvers()))
-    #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Superlu", "")
+    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Lapack", "")
     #lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
     #lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()

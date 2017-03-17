@@ -358,9 +358,6 @@ def consoleRun():
     simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    #fileName = '/home/ciroki/' + simulation.m.Name + '.xpm'
-    #lasolver.SaveAsXPM(str(fileName))
-
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

@@ -25,11 +25,11 @@ The software works on both python 2 and 3. The binaries are provided for 2.7, 3.
 
 Mandatory packages:
 
-* Python (2.7, 3.4\ :sup:`+`): `<http://www.python.org>`_
+* Python (2.7, 3.4, 3.5 or 3.6): `<http://www.python.org>`_
 * Numpy (1.8\ :sup:`+`): `<http://www.numpy.org>`_
 * Scipy (0.14\ :sup:`+`): `<http://www.scipy.org>`_
 * Matplotlib (1.4\ :sup:`+`): `<http://matplotlib.sourceforge.net>`_
-* pyQt5: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
+* pyQt4 or pyQt5: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
 * mayavi2
 * python-lxml
 
@@ -68,16 +68,16 @@ or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ web
     From the version 1.6.0 Windows installer is not provided anymore.
 
 The naming convention for the installation files: ``daetools-major.minor.platform-architecture.tar.gz``
-where ``major.minor.build`` represents the version (``1.6.0`` for instance),
+where ``major.minor.build`` represents the version (``1.6.1`` for instance),
 ``platform`` can be ``gnu_linux``, ``win32`` and ``macosx``, and
 ``architecture`` can be ``i686``, ``x86_64`` or ``universal``.
 
-An example: ``daetools-1.6.0-gnu_linux-x86_64.tar.gz`` is the version 1.6.0 for 64 bit GNU/Linux.
+An example: ``daetools-1.6.1-gnu_linux-x86_64.tar.gz`` is the version 1.6.1 for 64 bit GNU/Linux.
 
 For other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the download section
-(``daetools-1.6.0-source.tar.gz`` for instance).
+(``daetools-1.6.1-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -94,6 +94,7 @@ Use the system's Python
 
   .. code-block:: bash
 
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: python-qt4)
      sudo apt-get install python-numpy python-scipy python-matplotlib python-qt5 mayavi2 python-lxml
      # Optional packages:
      sudo apt-get install python-xlwt python-h5py python-pandas
@@ -102,6 +103,7 @@ Use the system's Python
 
   .. code-block:: bash
 
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4)
      sudo yum install numpy scipy python-matplotlib PyQt5 Mayavi python-lxml
      # Optional packages:
      sudo yum install python-xlwt h5py python-pandas
@@ -110,6 +112,7 @@ Use the system's Python
 
   .. code-block:: bash
 
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: python-qt4)
      sudo zypper in python-numpy python-scipy python-matplotlib python-qt5 python-lxml
      # Optional packages:
      sudo zypper in python-xlwt h5py python-pandas
@@ -119,11 +122,13 @@ Use the system's Python
   .. code-block:: bash
 
      # Python 2:
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: python2-pyqt4)
      sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt5 mayavi python-lxml
      # Optional packages:
      sudo pacman -S python2-xlwt python-h5py python-pandas
 
      # Python 3:
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: python-pyqt4)
      sudo pacman -S python-numpy python-scipy python-matplotlib python-pyqt5 mayavi python-lxml
      # Optional packages:
      sudo pacman -S python-xlwt python-h5py python-pandas
@@ -138,6 +143,7 @@ Install one of scientific python distributions
 
   .. code-block:: bash
 
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
 
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
@@ -178,7 +184,8 @@ Install one of scientific python distributions
       
   .. code-block:: bash
 
-    conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: pyqt=4.11)
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -192,7 +199,7 @@ As a starting point the following links can be used:
 * `NumPy <http://sourceforge.net/projects/numpy/files/NumPy>`_
 * `SciPy <http://sourceforge.net/projects/scipy/files/scipy>`_
 * `Matplotlib <http://sourceforge.net/projects/matplotlib/files/matplotlib>`_
-* `PyQt4 <http://www.riverbankcomputing.com/software/pyqt/download>`_
+* `PyQt4 or PyQt5 <http://www.riverbankcomputing.com/software/pyqt/download>`_
 
 Install DAE Tools
 +++++++++++++++++
@@ -224,6 +231,7 @@ The easiest way is to install one of available scientific python distributions:
 
   .. code-block:: bash
 
+     # DAE Tools v1.6.1 requires PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_

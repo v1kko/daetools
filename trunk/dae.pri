@@ -604,7 +604,6 @@ win64-g++-*::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                                $${UMFPACK_LIBS} \
                                $${SUPERLU_LIBS}
 
-# -lteuchosparameterlist -lteuchoscomm -lteuchosnumerics -lteuchoscore
 linux-g++::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                            -laztecoo -lml -lifpack \
                            -lamesos -lepetraext -ltriutils -lepetra \

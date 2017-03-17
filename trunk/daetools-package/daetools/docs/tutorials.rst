@@ -63,14 +63,14 @@ parameter estimation and optimal control tests.
 
 .. toctree::
    :numbered:
-   :maxdepth: 2 
+   :maxdepth: 2
 
    tutorials-basic
    tutorials-advanced
    tutorials-fe
    tutorials-optimisation
    tutorials-chemeng
-   tutorials-chemeng-optimisation 
+   tutorials-chemeng-optimisation
    #tutorials-all
 
 
