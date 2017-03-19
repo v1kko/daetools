@@ -179,7 +179,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
 
     #@QtCore.pyqtSlot()
     def slotPlot2DAutoUpdate(self):
-        msecs, ok = QtWidgets.QInputDialog.getInteger(self, 'Insert the update interval', 'Interval (msecs):', 1000, 1, 1E5, 100)
+        msecs, ok = QtWidgets.QInputDialog.getInt(self, 'Insert the update interval', 'Interval (msecs):', 1000, 1, 1E5, 100)
         if ok:
             self.plot2D(msecs) # 1000 ms
 

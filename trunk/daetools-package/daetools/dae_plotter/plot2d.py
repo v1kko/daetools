@@ -27,10 +27,10 @@ import matplotlib.animation as animation
 # daetools imports
 from daetools.pyDAE import *
 from .choose_variable import daeChooseVariable, daeTableDialog
-from .plot_options import figure_edit, surface_edit
 from .animation_parameters import daeAnimationParameters
 from .save_video import daeSavePlot2DVideo
 from .user_data import daeUserData
+#from .plot_options import figure_edit, surface_edit
 
 images_dir = join(dirname(__file__), 'images')
 
@@ -223,7 +223,7 @@ class dae2DPlot(QtWidgets.QDialog):
         self.mpl_toolbar.addAction(fromUserData)
         self.mpl_toolbar.addAction(remove_line)
         self.mpl_toolbar.addSeparator()
-        self.mpl_toolbar.addAction(properties)
+        #self.mpl_toolbar.addAction(properties)
         #self.mpl_toolbar.addSeparator()
         #self.mpl_toolbar.addAction(exit)
         if self.plotType == daeChooseVariable.plot2DAnimated:
@@ -252,7 +252,7 @@ class dae2DPlot(QtWidgets.QDialog):
 
         if animated == False and self.updateInterval > 0:
             self._timer = QtCore.QTimer()
-            QtCore.QObject.connect(self._timer, QtCore.SIGNAL('timeout()'), self.updateCurves)
+            self._timer.timeout.connect(self.updateCurves)
             self._timer.start(self.updateInterval)
 
     def closeEvent(self, event):

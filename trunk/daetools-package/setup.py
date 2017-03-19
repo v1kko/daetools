@@ -228,7 +228,7 @@ setup(name = 'daetools',
                  'scripts/daeexamples',
                  'scripts/daeplotter.bat',
                  'scripts/daeexamples.bat'],
-      requires = ['numpy', 'scipy', 'matplotlib', 'PyQt4']
+      requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5']
      )
 
 if platform.system() == 'Windows':

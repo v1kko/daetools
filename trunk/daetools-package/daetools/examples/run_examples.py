@@ -103,24 +103,14 @@ class RunExamples(QtWidgets.QDialog):
         screenHeight = sg.height()
         screenWidth  = sg.width()
         #print("The screen resolution is %d x %d" % (screenWidth, screenHeight))
-        if screenWidth <= 800:
-            self.formWidth = 750
-        elif screenWidth <= 960:
+        if screenWidth <= 1024:
+            self.formWidth = screenWidth - 100
+        else:
             self.formWidth = 850
-        elif screenWidth <= 1024:
-            self.formWidth = 900
+        if screenHeight <= 1024:
+            self.formHeight = screenHeight - 100
         else:
-            self.formWidth = 1000
-        if screenHeight <= 600:
-            self.formHeight = 550
-        elif screenHeight <= 800:
-            self.formHeight = 750
-        elif screenHeight <= 1000:
             self.formHeight = 900
-        elif screenHeight <= 1100:
-            self.formHeight = 900
-        else:
-            self.formHeight = 1000
         self.resize(self.formWidth, self.formHeight)
         
         settings = QtWebKit.QWebSettings.globalSettings()
