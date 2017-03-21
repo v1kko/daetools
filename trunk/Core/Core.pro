@@ -53,7 +53,8 @@ SOURCES += xmlreadstream.cpp \
     objfun_constraints.cpp \
     external_function.cpp \
     event_handling.cpp \
-    nodes.cpp
+    nodes.cpp \
+    thermo_package.cpp
 
 HEADERS += xmlfunctions.h \
     xmlfile.h \

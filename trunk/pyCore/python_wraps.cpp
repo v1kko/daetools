@@ -844,6 +844,16 @@ string adouble_array__repr__(const adouble_array& self)
             self.getGatherInfo() % strNode).str();
 }
 
+string daeCapeOpenThermoPhysicalPropertyPackage__str__(daeCapeOpenThermoPhysicalPropertyPackage& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string daeCapeOpenThermoPhysicalPropertyPackage__repr__(daeCapeOpenThermoPhysicalPropertyPackage& self)
+{
+    return daeGetStrippedRelativeName(NULL, &self);
+}
+
 string daeScalarExternalFunction__str__(daeScalarExternalFunction& self)
 {
     return daeGetStrippedRelativeName(NULL, &self);
@@ -4916,6 +4926,27 @@ boost::python::dict daeModel_dictPortConnections(daeModel& self)
 boost::python::dict daeModel_dictEventPortConnections(daeModel& self)
 {
     return getDictFromObjectArray(self.EventPortConnections());
+}
+
+/*******************************************************
+    daeCapeOpenThermoPhysicalPropertyPackage
+*******************************************************/
+void daeCapeOpenThermoPhysicalPropertyPackage_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                                          const std::string& strPackageManager,
+                                                          const std::string& strPackageName,
+                                                          boost::python::list lCompounds)
+{
+    std::vector<std::string> strarrCompounds;
+     boost::python::ssize_t i, n;
+
+    n = boost::python::len(lCompounds);
+    for(i = 0; i < n; i++)
+    {
+        std::string compound = boost::python::extract<std::string>(lCompounds[i]);
+        strarrCompounds.push_back(compound);
+    }
+
+    self.LoadPackage(strPackageManager, strPackageName, strarrCompounds);
 }
 
 /*******************************************************

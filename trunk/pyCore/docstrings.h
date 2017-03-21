@@ -423,6 +423,8 @@ const char* DOCSTR_daeSTN = "";
 const char* DOCSTR_daeIF = "";  
     const char* DOCSTR_daeIF_init = "";  
 
+const char* DOCSTR_daeCapeOpenThermoPhysicalPropertyPackage = "";
+
 const char* DOCSTR_daeScalarExternalFunction = "";  
     const char* DOCSTR_daeScalarExternalFunction_init = "";  
     const char* DOCSTR_daeScalarExternalFunction_Name = "";  

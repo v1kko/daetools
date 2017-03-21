@@ -3771,6 +3771,40 @@ protected:
 	const size_t m_nNumberofArguments;
 };
 
+
+/*********************************************************************************************
+    daeCapeOpenThermoPhysicalPropertyPackage
+**********************************************************************************************/
+class DAE_CORE_API daeCapeOpenThermoPhysicalPropertyPackage : public daeObject
+{
+public:
+    daeDeclareDynamicClass(daeCapeOpenThermoPhysicalPropertyPackage)
+    daeCapeOpenThermoPhysicalPropertyPackage(const string& strName, daeModel* pModel, const string& strDescription = "");
+    virtual ~daeCapeOpenThermoPhysicalPropertyPackage(void);
+
+public:
+    void LoadPackage(const std::string& strPackageManager,
+                     const std::string& strPackageName,
+                     const std::vector<std::string>& strarrCompounds);
+
+    adouble SinglePhaseScalarProperty(const std::string& property,
+                                      const std::string& phase,
+                                      adouble P, adouble T, adouble_array& X,
+                                      const std::string& basis = "Mole");
+
+    adouble_array SinglePhaseVectorProperty(const std::string& property,
+                                            const std::string& phase,
+                                            adouble P, adouble T, adouble_array& X,
+                                            const std::string& basis = "Mole");
+
+    adouble TwoPhaseProperty(const std::string& property,
+                             adouble P, adouble T, adouble_array& X,
+                             const std::string& basis = "Mole");
+
+protected:
+    daeThermoPhysicalPropertyPackage_t* m_package;
+};
+
 /******************************************************************
 	daeCoreClassFactory
 *******************************************************************/

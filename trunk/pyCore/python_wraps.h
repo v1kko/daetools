@@ -186,6 +186,9 @@ string daeOnConditionActions__repr__(const daeOnConditionActions& self);
 string daeAction__str__(daeAction& self);
 string daeAction__repr__(daeAction& self);
 
+string daeCapeOpenThermoPhysicalPropertyPackage__str__(daeCapeOpenThermoPhysicalPropertyPackage& self);
+string daeCapeOpenThermoPhysicalPropertyPackage__repr__(daeCapeOpenThermoPhysicalPropertyPackage& self);
+
 string daeScalarExternalFunction__str__(daeScalarExternalFunction& self);
 string daeScalarExternalFunction__repr__(daeScalarExternalFunction& self);
 
@@ -1321,6 +1324,11 @@ boost::python::dict daeModel_dictSTNs(daeModel& self);
 boost::python::dict daeModel_dictEquations(daeModel& self);
 boost::python::dict daeModel_dictPortConnections(daeModel& self);
 boost::python::dict daeModel_dictEventPortConnections(daeModel& self);
+
+void daeCapeOpenThermoPhysicalPropertyPackage_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                                          const std::string& strPackageManager,
+                                                          const std::string& strPackageName,
+                                                          boost::python::list lCompounds);
 
 class daeArrayWrapper : public daeArray<real_t>,
                         public boost::python::wrapper< daeArray<real_t> >

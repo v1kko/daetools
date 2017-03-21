@@ -1105,6 +1105,27 @@ public:
     virtual daeObject_t*		FindObjectFromRelativeName(std::vector<std::string>& strarrNames)	= 0;
 };
 
+/*********************************************************************************************
+    daeThermoPhysicalPropertyPackage_t
+**********************************************************************************************/
+class daeThermoPhysicalPropertyPackage_t
+{
+public:
+    virtual ~daeThermoPhysicalPropertyPackage_t() {}
+
+public:
+    virtual void SinglePhaseProperty(const std::string& property,
+                                     const std::string& phase,
+                                     real_t P, real_t T, const std::vector<real_t>& X,
+                                     std::vector<real_t>& results,
+                                     const std::string& basis = "Mole") = 0;
+    virtual void TwoPhaseProperty(const std::string& property,
+                                  real_t P, real_t T, const std::vector<double>& X,
+                                  std::vector<real_t>& results,
+                                  const std::string& basis = "Mole") = 0;
+    virtual unit GetUnits(const std::string& property) = 0;
+};
+
 
 /*********************************************************************************************
     daeExternalFunctionArgument_t

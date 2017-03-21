@@ -1825,6 +1825,48 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__repr__",			&daepython::daeIF__repr__)
     ;
 
+
+    class_<daeCapeOpenThermoPhysicalPropertyPackage, boost::noncopyable>("daeCapeOpenThermoPhysicalPropertyPackage", DOCSTR_daeCapeOpenThermoPhysicalPropertyPackage, no_init)
+        .def(init<const string&, daeModel*, const string&>(( arg("self"),
+                                                             arg("name"),
+                                                             arg("parentModel"),
+                                                             arg("descripton") = ""
+                                                           )))
+        // Virtual function that must be implemented in derived classes in python
+        .def("LoadPackage",	&daepython::daeCapeOpenThermoPhysicalPropertyPackage_LoadPackage, (  arg("self"),
+                                                                                                 arg("packageManager"),
+                                                                                                 arg("packageName"),
+                                                                                                 arg("compounds")
+                                                                                               ))
+
+        .def("SinglePhaseScalarProperty",	&daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseScalarProperty, (  arg("self"),
+                                                                                                                     arg("property"),
+                                                                                                                     arg("phase"),
+                                                                                                                     arg("presure"),
+                                                                                                                     arg("temperature"),
+                                                                                                                     arg("composition"),
+                                                                                                                     arg("basis") = "Mole"
+                                                                                                                   ))
+        .def("SinglePhaseVectorProperty",	&daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseVectorProperty, (  arg("self"),
+                                                                                                                     arg("property"),
+                                                                                                                     arg("phase"),
+                                                                                                                     arg("presure"),
+                                                                                                                     arg("temperature"),
+                                                                                                                     arg("composition"),
+                                                                                                                     arg("basis") = "Mole"
+                                                                                                                   ))
+        .def("TwoPhaseProperty",	&daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseProperty, (  arg("self"),
+                                                                                                    arg("property"),
+                                                                                                    arg("presure"),
+                                                                                                    arg("temperature"),
+                                                                                                    arg("composition"),
+                                                                                                    arg("basis") = "Mole"
+                                                                                                  ))
+
+        .def("__str__",		&daepython::daeCapeOpenThermoPhysicalPropertyPackage__str__)
+        .def("__repr__",	&daepython::daeCapeOpenThermoPhysicalPropertyPackage__repr__)
+    ;
+
     class_<daepython::daeScalarExternalFunctionWrapper, boost::noncopyable>("daeScalarExternalFunction", DOCSTR_daeScalarExternalFunction, no_init)
         .def(init<const string&, daeModel*, const unit&, boost::python::dict>(( arg("self"),
                                                                                 arg("name"),

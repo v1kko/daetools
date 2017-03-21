@@ -839,6 +839,49 @@ public:
 	daeScalarExternalFunction* m_pExternalFunction;
 };
 
+
+/*********************************************************************************************
+    adThermoPhysicalPropertyPackageNode
+**********************************************************************************************/
+class DAE_CORE_API adThermoPhysicalPropertyPackageNode : public adNodeImpl
+{
+public:
+    daeDeclareDynamicClass(adThermoPhysicalPropertyPackageNode)
+    adThermoPhysicalPropertyPackageNode(adNodePtr P,
+                                        adNodePtr T,
+                                        adNodeArrayPtr X,
+                                        const std::string& property_,
+                                        const std::string& phase_,
+                                        const std::string& basis_,
+                                        daeThermoPhysicalPropertyPackage_t* pThermoPhysicalPropertyPackage);
+    virtual ~adThermoPhysicalPropertyPackageNode(void);
+
+public:
+    virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNode* Clone(void) const;
+    virtual void	Open(io::xmlTag_t* pTag);
+    virtual void	Save(io::xmlTag_t* pTag) const;
+    virtual string  SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void	AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool	IsLinear(void) const;
+    virtual bool	IsFunctionOfVariables(void) const;
+    virtual bool    IsDifferential(void) const;
+    virtual void	Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual const quantity GetQuantity(void) const;
+
+public:
+    adNodePtr       pressure;
+    adNodePtr       temperature;
+    adNodeArrayPtr  composition;
+    std::string     property;
+    std::string     phase;
+    std::string     basis;
+    daeThermoPhysicalPropertyPackage_t* m_pThermoPhysicalPropertyPackage;
+};
+
+
 //These two classes (adSetupFEMatrixItemNode and adSetupFEVectorItemNode) are both setup and runtime at the same time
 /*********************************************************************************************
     adFEMatrixItemNode
