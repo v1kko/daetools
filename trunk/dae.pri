@@ -11,8 +11,8 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 6
-DAE_TOOLS_BUILD = 1
+DAE_TOOLS_MINOR = 7
+DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -740,6 +740,7 @@ win32-msvc2015::DAE_PARDISO_SOLVER_LIB       = cdaePardiso_LASolver.lib
 win32-msvc2015::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
 win32-msvc2015::DAE_SIMULATION_LOADER_LIB    = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
 win32-msvc2015::DAE_DAETOOLS_FMI_CS_LIB      = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB  = cdaeCapeOpenThermoPackage.lib
 
 win32-g++-*::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_CORE_LIB                 = -lcdaeCore
@@ -759,6 +760,7 @@ win32-g++-*::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 win32-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 win32-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB  =
 
 win64-g++-*::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_CORE_LIB                 = -lcdaeCore
@@ -778,6 +780,7 @@ win64-g++-*::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 win64-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 win64-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB  =
 
 unix::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_CORE_LIB                 = -lcdaeCore
@@ -797,6 +800,7 @@ unix::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
 unix::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
 unix::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::DAE_CAPE_THERMO_PACKAGE_LIB  =
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 

@@ -258,32 +258,32 @@ void adSetupParameterNodeArray::AddVariableIndexToArray(map<size_t, size_t>& map
 }
 
 /*********************************************************************************************
-    adSetupCustomNodeArray
+    adCustomNodeArray
 **********************************************************************************************/
-adSetupCustomNodeArray::adSetupCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes)
+adCustomNodeArray::adCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes)
                       : m_ptrarrNodes(ptrarrNodes)
 {
 }
 
-adSetupCustomNodeArray::adSetupCustomNodeArray()
+adCustomNodeArray::adCustomNodeArray()
 {
 }
 
-adSetupCustomNodeArray::~adSetupCustomNodeArray()
+adCustomNodeArray::~adCustomNodeArray()
 {
 }
 
-void adSetupCustomNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
+void adCustomNodeArray::GetArrayRanges(vector<daeArrayRange>& arrRanges) const
 {
 }
 
-size_t adSetupCustomNodeArray::GetSize(void) const
+size_t adCustomNodeArray::GetSize(void) const
 {
     return m_ptrarrNodes.size();
 }
 
 // Here we have to evaluate every node and return adouble_array with adRuntimeCustomNodeArray as a node
-adouble_array adSetupCustomNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
+adouble_array adCustomNodeArray::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
     if(m_ptrarrNodes.empty())
         daeDeclareAndThrowException(exInvalidCall);
@@ -291,40 +291,42 @@ adouble_array adSetupCustomNodeArray::Evaluate(const daeExecutionContext* pExecu
     adouble_array tmp;
     size_t N = m_ptrarrNodes.size();
 
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    {
+        // Evaluate all nodes to obtain runtime ones and reate a new adCustomNodeArray
+        tmp.setGatherInfo(true);
+
+        std::vector<adNodePtr> ptrarrNodes;
+
+        ptrarrNodes.resize(N);
+        for(size_t i = 0; i < N; i++)
+            ptrarrNodes[i] = m_ptrarrNodes[i]->Evaluate(pExecutionContext).node;
+
+        tmp.node = adNodeArrayPtr(new adCustomNodeArray(ptrarrNodes));
+
+        return tmp;
+    }
+
     tmp.Resize(N);
     for(size_t i = 0; i < N; i++)
         tmp[i] = m_ptrarrNodes[i]->Evaluate(pExecutionContext);
 
     return tmp;
-
-//	if(m_ptrarrNodes.empty())
-//		daeDeclareAndThrowException(exInvalidCall);
-
-//	adouble_array tmp;
-//    std::vector<adNodePtr> ptrarrRuntimeNodes;
-//	size_t N = m_ptrarrNodes.size();
-
-//    ptrarrRuntimeNodes.resize(N);
-//	for(size_t i = 0; i < N; i++)
-//        ptrarrRuntimeNodes[i] = m_ptrarrNodes[i]->Evaluate(pExecutionContext).node;
-//	tmp.node = adNodeArrayPtr(new adRuntimeCustomNodeArray(ptrarrRuntimeNodes));
-
-//	return tmp;
 }
 
-const quantity adSetupCustomNodeArray::GetQuantity(void) const
+const quantity adCustomNodeArray::GetQuantity(void) const
 {
     if(m_ptrarrNodes.empty())
         daeDeclareAndThrowException(exInvalidCall);
     return m_ptrarrNodes[0]->GetQuantity();
 }
 
-adNodeArray* adSetupCustomNodeArray::Clone(void) const
+adNodeArray* adCustomNodeArray::Clone(void) const
 {
-    return new adSetupCustomNodeArray(*this);
+    return new adCustomNodeArray(*this);
 }
 
-void adSetupCustomNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+void adCustomNodeArray::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
     size_t N = m_ptrarrNodes.size();
 
@@ -355,11 +357,11 @@ void adSetupCustomNodeArray::Export(std::string& strContent, daeeModelLanguage e
         daeDeclareAndThrowException(exNotImplemented);
     }
 }
-//string adSetupCustomNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
+//string adCustomNodeArray::SaveAsPlainText(const daeNodeSaveAsContext* c) const
 //{
 //}
 
-string adSetupCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
+string adCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
     string strResult;
 
@@ -380,11 +382,11 @@ string adSetupCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
     return strResult;
 }
 
-void adSetupCustomNodeArray::Open(io::xmlTag_t* /*pTag*/)
+void adCustomNodeArray::Open(io::xmlTag_t* /*pTag*/)
 {
 }
 
-void adSetupCustomNodeArray::Save(io::xmlTag_t* pTag) const
+void adCustomNodeArray::Save(io::xmlTag_t* pTag) const
 {
     string strName;
 
@@ -392,12 +394,12 @@ void adSetupCustomNodeArray::Save(io::xmlTag_t* pTag) const
     pTag->SaveObjectArray(strName, m_ptrarrNodes);
 }
 
-void adSetupCustomNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+void adCustomNodeArray::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
     daeDeclareAndThrowException(exNotImplemented);
 }
 
-void adSetupCustomNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+void adCustomNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
     string strName, strValue;
     io::xmlTag_t *mrow;
@@ -422,7 +424,7 @@ void adSetupCustomNodeArray::SaveAsPresentationMathML(io::xmlTag_t* pTag, const 
     }
 }
 
-void adSetupCustomNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+void adCustomNodeArray::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
     daeDeclareAndThrowException(exInvalidCall)
 }

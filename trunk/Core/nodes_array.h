@@ -550,15 +550,15 @@ public:
 };
 
 /*********************************************************************************************
-    adSetupCustomNodeArray
+    adCustomNodeArray
 **********************************************************************************************/
-class DAE_CORE_API adSetupCustomNodeArray : public adNodeArrayImpl
+class DAE_CORE_API adCustomNodeArray : public adNodeArrayImpl
 {
 public:
-    daeDeclareDynamicClass(adSetupCustomNodeArray)
-    adSetupCustomNodeArray(void);
-    adSetupCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes);
-    virtual ~adSetupCustomNodeArray(void);
+    daeDeclareDynamicClass(adCustomNodeArray)
+    adCustomNodeArray(void);
+    adCustomNodeArray(const std::vector<adNodePtr>& ptrarrNodes);
+    virtual ~adCustomNodeArray(void);
 
 public:
     virtual size_t			GetSize(void) const;
@@ -785,6 +785,50 @@ public:
     daeVectorExternalFunction* m_pExternalFunction;
 };
 
+/*********************************************************************************************
+    adThermoPhysicalPropertyPackageArrayNode
+**********************************************************************************************/
+class DAE_CORE_API adThermoPhysicalPropertyPackageArrayNode : public adNodeArrayImpl
+{
+public:
+    daeDeclareDynamicClass(adThermoPhysicalPropertyPackageArrayNode)
+    adThermoPhysicalPropertyPackageArrayNode(daeeThermoPackagePropertyType propType,
+                                              adNodePtr P,
+                                              adNodePtr T,
+                                              adNodeArrayPtr X,
+                                              daeeThermoPhysicalProperty property_,
+                                              daeeThermoPackagePhase phase_,
+                                              daeeThermoPackageBasis basis_,
+                                              daeThermoPhysicalPropertyPackage_t* tpp);
+    virtual ~adThermoPhysicalPropertyPackageArrayNode(void);
+
+public:
+    virtual size_t			GetSize(void) const;
+    virtual void			GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const;
+    virtual adouble_array   Evaluate(const daeExecutionContext* pExecutionContext) const;
+    virtual adNodeArray*    Clone(void) const;
+    virtual void            Open(io::xmlTag_t* pTag);
+    virtual void            Save(io::xmlTag_t* pTag) const;
+    virtual string          SaveAsLatex(const daeNodeSaveAsContext* c) const;
+    virtual void            SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void            SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const;
+    virtual void            AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed);
+    virtual bool            IsLinear(void) const;
+    virtual bool            IsFunctionOfVariables(void) const;
+    virtual bool            IsDifferential(void) const;
+    virtual void            Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const;
+    virtual const quantity  GetQuantity(void) const;
+
+public:
+    daeeThermoPackagePropertyType       propertyType;
+    adNodePtr                           pressure;
+    adNodePtr                           temperature;
+    adNodeArrayPtr                      composition;
+    daeeThermoPhysicalProperty          property;
+    daeeThermoPackagePhase              phase;
+    daeeThermoPackageBasis              basis;
+    daeThermoPhysicalPropertyPackage_t* thermoPhysicalPropertyPackage;
+};
 
 inline void FillDomains(const std::vector<daeArrayRange>& arrRanges, std::vector<string>& strarrDomains)
 {

@@ -30,7 +30,7 @@ import os, sys, platform, shutil
 from distutils.core import setup
 from distutils import dir_util
 
-daetools_version = '1.6.1'
+daetools_version = '1.7.0'
 
 # Python version
 python_major = str(sys.version_info[0])
@@ -116,6 +116,7 @@ elif platform.system() == 'Windows':
     boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
     boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
     dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
+    cape_open_thermo = 'cdaeCapeOpenThermoPackage'
     #deal_II          = 'deal_II-daetools'
     #sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
     #fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
@@ -132,6 +133,9 @@ elif platform.system() == 'Windows':
                 shared_libs.append(os.path.join(shared_libs_dir, f))
 
             if dae_config in f:
+                shared_libs.append(os.path.join(shared_libs_dir, f))
+
+            if cape_open_thermo in f:
                 shared_libs.append(os.path.join(shared_libs_dir, f))
 
             #if (sim_loader in f) or (fmu_so in f):

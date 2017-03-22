@@ -87,7 +87,8 @@ HEADERS += xmlfunctions.h \
     export.h \
     units_io.h \ 
     event_handling.h \
-    simplify_node.h
+    simplify_node.h \
+    thermo_package.h
 
 #win32{
 #QMAKE_POST_LINK = $${COPY_FILES} $${TARGET}.lib $${STATIC_LIBS_DIR}

@@ -4226,112 +4226,132 @@ bool adScalarExternalFunctionNode::IsDifferential(void) const
     return false;
 }
 
-
-
-
 /*********************************************************************************************
-    adThermoPhysicalPropertyPackageNode
+    adThermoPhysicalPropertyPackageScalarNode
 **********************************************************************************************/
-adThermoPhysicalPropertyPackageNode::adThermoPhysicalPropertyPackageNode(adNodePtr P,
-                                                                         adNodePtr T,
-                                                                         adNodeArrayPtr X,
-                                                                         const std::string& property_,
-                                                                         const std::string& phase_,
-                                                                         const std::string& basis_,
-                                                                         daeThermoPhysicalPropertyPackage_t* pThermoPhysicalPropertyPackage)
+adThermoPhysicalPropertyPackageScalarNode::adThermoPhysicalPropertyPackageScalarNode(daeeThermoPackagePropertyType propType,
+                                                                                     adNodePtr P,
+                                                                                     adNodePtr T,
+                                                                                     adNodeArrayPtr X,
+                                                                                     daeeThermoPhysicalProperty property_,
+                                                                                     daeeThermoPackagePhase phase_,
+                                                                                     daeeThermoPackageBasis basis_,
+                                                                                     daeThermoPhysicalPropertyPackage_t* tpp)
 {
-    pressure = P;
-    temperature = T;
-    composition = X;
-    property = property_;
-    phase = phase_;
-    basis = basis_;
-    m_pThermoPhysicalPropertyPackage = pThermoPhysicalPropertyPackage;
+    propertyType = propType;
+    pressure     = P;
+    temperature  = T;
+    composition  = X;
+    property     = property_;
+    phase        = phase_;
+    basis        = basis_;
+    thermoPhysicalPropertyPackage = tpp;
 }
 
-adThermoPhysicalPropertyPackageNode::~adThermoPhysicalPropertyPackageNode()
+adThermoPhysicalPropertyPackageScalarNode::~adThermoPhysicalPropertyPackageScalarNode()
 {
 }
 
-adouble adThermoPhysicalPropertyPackageNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionContext* pExecutionContext) const
 {
-    if(!m_pThermoPhysicalPropertyPackage)
+    if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
 
     adouble tmp;
 
     // If GetGatherInfo is true Evaluate on P, T and x nodes will create Runtime nodes.
     // Otherwise, they will contain values.
-    adouble       P = pressure->Evaluate(pExecutionContext);
-    adouble       T = temperature->Evaluate(pExecutionContext);
-    adouble_array X = composition->Evaluate(pExecutionContext);
+    adouble       P = (pressure    ? pressure   ->Evaluate(pExecutionContext) : adouble());
+    adouble       T = (temperature ? temperature->Evaluate(pExecutionContext) : adouble());
+    adouble_array x = (composition ? composition->Evaluate(pExecutionContext) : adouble_array());
 
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
-        tmp.node = adNodePtr( new adThermoPhysicalPropertyPackageNode(P.node, T.node, X.node, property, phase, basis, m_pThermoPhysicalPropertyPackage));
+        // Do we need to Clone the node? Yes, P, T and x are now Runtime nodes!
+        tmp.node = adNodePtr(new adThermoPhysicalPropertyPackageScalarNode(propertyType,
+                                                                           P.node, T.node, x.node,
+                                                                           property,
+                                                                           phase,
+                                                                           basis,
+                                                                           thermoPhysicalPropertyPackage));
         return tmp;
     }
 
-    std::vector<real_t> arrX(X.GetSize());
-    for(size_t i = 0; i < X.GetSize(); i++)
-        arrX[i] = X[i].getValue();
+    std::vector<real_t> arrX(x.GetSize());
+    for(size_t i = 0; i < x.GetSize(); i++)
+        arrX[i] = x[i].getValue();
 
-    std::vector<real_t> results;
-    m_pThermoPhysicalPropertyPackage->SinglePhaseProperty(property,
-                                                          phase,
-                                                          P.getValue(), T.getValue(), arrX,
-                                                          results,
-                                                          basis);
-    if(results.size() != 1)
+    double result;
+    if(propertyType == dae::tpp::ePureCompoundConstantProperty)
+        result = thermoPhysicalPropertyPackage->PureCompoundConstantProperty(property, basis);
+
+    else if(propertyType == dae::tpp::ePureCompoundTDProperty)
+        result = thermoPhysicalPropertyPackage->PureCompoundTDProperty(property, T.getValue(), basis);
+
+    else if(propertyType == dae::tpp::ePureCompoundPDProperty)
+        result = thermoPhysicalPropertyPackage->PureCompoundPDProperty(property, P.getValue(), basis);
+
+    else if(propertyType == dae::tpp::eSinglePhaseScalarProperty)
+        result = thermoPhysicalPropertyPackage->SinglePhaseScalarProperty(property,
+                                                                          P.getValue(), T.getValue(), arrX,
+                                                                          phase,
+                                                                          basis);
+
+    else if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+        result = thermoPhysicalPropertyPackage->TwoPhaseScalarProperty(property,
+                                                                       P.getValue(), T.getValue(), arrX,
+                                                                       basis);
+
+    else
         daeDeclareAndThrowException(exInvalidCall);
 
-    tmp.setValue(results[0]);
+    tmp.setValue(result);
 
     return tmp;
 }
 
-const quantity adThermoPhysicalPropertyPackageNode::GetQuantity(void) const
+const quantity adThermoPhysicalPropertyPackageScalarNode::GetQuantity(void) const
 {
-    if(!m_pThermoPhysicalPropertyPackage)
+    if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
-    return quantity(0.0, m_pThermoPhysicalPropertyPackage->GetUnits(property));
+    return quantity(0.0, unit()); //, thermoPhysicalPropertyPackage->GetUnits(property));
 }
 
-adNode* adThermoPhysicalPropertyPackageNode::Clone(void) const
+adNode* adThermoPhysicalPropertyPackageScalarNode::Clone(void) const
 {
-    return new adThermoPhysicalPropertyPackageNode(*this);
+    return new adThermoPhysicalPropertyPackageScalarNode(*this);
 }
 
-void adThermoPhysicalPropertyPackageNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+void adThermoPhysicalPropertyPackageScalarNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
 }
-//string adThermoPhysicalPropertyPackageNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
+//string adThermoPhysicalPropertyPackageScalarNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
 //{
 //	return string("");
 //}
 
-string adThermoPhysicalPropertyPackageNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
+string adThermoPhysicalPropertyPackageScalarNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
     string strLatex;
 
     strLatex += "{ tpp \\left( ";
-    strLatex += property + ", ";
+    strLatex += toString(property) + ", ";
     strLatex += pressure->SaveAsLatex(c) + ", ";
     strLatex += temperature->SaveAsLatex(c) + ", ";
     strLatex += composition->SaveAsLatex(c) + ", ";
-    strLatex += phase + ", ";
-    strLatex += basis;
+    strLatex += toString(phase) + ", ";
+    strLatex += toString(basis);
     strLatex += " \\right) }";
 
     return strLatex;
 }
 
-void adThermoPhysicalPropertyPackageNode::Open(io::xmlTag_t* pTag)
+void adThermoPhysicalPropertyPackageScalarNode::Open(io::xmlTag_t* pTag)
 {
 }
 
-void adThermoPhysicalPropertyPackageNode::Save(io::xmlTag_t* pTag) const
+void adThermoPhysicalPropertyPackageScalarNode::Save(io::xmlTag_t* pTag) const
 {
     string strName, strValue;
 
@@ -4340,17 +4360,17 @@ void adThermoPhysicalPropertyPackageNode::Save(io::xmlTag_t* pTag) const
     pTag->Save(strName, strValue);
 }
 
-void adThermoPhysicalPropertyPackageNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
+void adThermoPhysicalPropertyPackageScalarNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
 {
 }
 
-void adThermoPhysicalPropertyPackageNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+void adThermoPhysicalPropertyPackageScalarNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
 {
 }
 
-void adThermoPhysicalPropertyPackageNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+void adThermoPhysicalPropertyPackageScalarNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
 {
-    if(!m_pThermoPhysicalPropertyPackage)
+    if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
 
     pressure->AddVariableIndexToArray(mapIndexes, bAddFixed);
@@ -4358,21 +4378,195 @@ void adThermoPhysicalPropertyPackageNode::AddVariableIndexToArray(map<size_t, si
     composition->AddVariableIndexToArray(mapIndexes, bAddFixed);
 }
 
-bool adThermoPhysicalPropertyPackageNode::IsLinear(void) const
+bool adThermoPhysicalPropertyPackageScalarNode::IsLinear(void) const
 {
     return false;
 }
 
-bool adThermoPhysicalPropertyPackageNode::IsFunctionOfVariables(void) const
+bool adThermoPhysicalPropertyPackageScalarNode::IsFunctionOfVariables(void) const
 {
     return true;
 }
 
-bool adThermoPhysicalPropertyPackageNode::IsDifferential(void) const
+bool adThermoPhysicalPropertyPackageScalarNode::IsDifferential(void) const
 {
     return false;
 }
 
+
+
+/*********************************************************************************************
+    adThermoPhysicalPropertyPackageArrayNode
+**********************************************************************************************/
+adThermoPhysicalPropertyPackageArrayNode::adThermoPhysicalPropertyPackageArrayNode(daeeThermoPackagePropertyType propType,
+                                                                                   adNodePtr P,
+                                                                                   adNodePtr T,
+                                                                                   adNodeArrayPtr X,
+                                                                                   daeeThermoPhysicalProperty property_,
+                                                                                   daeeThermoPackagePhase phase_,
+                                                                                   daeeThermoPackageBasis basis_,
+                                                                                   daeThermoPhysicalPropertyPackage_t* tpp)
+{
+    propertyType = propType;
+    pressure     = P;
+    temperature  = T;
+    composition  = X;
+    property     = property_;
+    phase        = phase_;
+    basis        = basis_;
+    thermoPhysicalPropertyPackage = tpp;
+}
+
+adThermoPhysicalPropertyPackageArrayNode::~adThermoPhysicalPropertyPackageArrayNode()
+{
+}
+
+adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecutionContext* pExecutionContext) const
+{
+    if(!thermoPhysicalPropertyPackage)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    adouble_array tmp;
+
+    // If GetGatherInfo is true Evaluate on P, T and x nodes will create Runtime nodes.
+    // For some pure compound property calculations some of them can be null ptrs.
+    // Otherwise, they will contain values.
+    adouble       P = (pressure    ? pressure   ->Evaluate(pExecutionContext) : adouble());
+    adouble       T = (temperature ? temperature->Evaluate(pExecutionContext) : adouble());
+    adouble_array x = (composition ? composition->Evaluate(pExecutionContext) : adouble_array());
+
+    if(pExecutionContext->m_pDataProxy->GetGatherInfo())
+    {
+        tmp.setGatherInfo(true);
+        // Do we need to Clone the node? Yes, P, T and x are now Runtime nodes!
+        tmp.node = adNodeArrayPtr(new adThermoPhysicalPropertyPackageArrayNode(propertyType,
+                                                                               P.node, T.node, x.node,
+                                                                               property,
+                                                                               phase,
+                                                                               basis,
+                                                                               thermoPhysicalPropertyPackage));
+        return tmp;
+    }
+
+    std::vector<real_t> arrX(x.GetSize());
+    for(size_t i = 0; i < x.GetSize(); i++)
+        arrX[i] = x[i].getValue();
+
+    std::vector<double> results;
+    if(propertyType == dae::tpp::eSinglePhaseVectorProperty)
+    {
+        thermoPhysicalPropertyPackage->SinglePhaseVectorProperty(property,
+                                                                 P.getValue(), T.getValue(), arrX,
+                                                                 phase,
+                                                                 results,
+                                                                 basis);
+    }
+    else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+    {
+        daeDeclareAndThrowException(exInvalidCall);
+    }
+    else
+    {
+        daeDeclareAndThrowException(exInvalidCall);
+    }
+
+    tmp.Resize(results.size());
+    for(size_t i = 0; i < results.size(); i++)
+        tmp.SetItem(i, adouble(results[i]));
+
+    return tmp;
+}
+
+size_t adThermoPhysicalPropertyPackageArrayNode::GetSize(void) const
+{
+    return 0;
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::GetArrayRanges(std::vector<daeArrayRange>& arrRanges) const
+{
+}
+
+const quantity adThermoPhysicalPropertyPackageArrayNode::GetQuantity(void) const
+{
+    if(!thermoPhysicalPropertyPackage)
+        daeDeclareAndThrowException(exInvalidPointer);
+    return quantity(0.0, unit()); //, thermoPhysicalPropertyPackage->GetUnits(property));
+}
+
+adNodeArray* adThermoPhysicalPropertyPackageArrayNode::Clone(void) const
+{
+    return new adThermoPhysicalPropertyPackageArrayNode(*this);
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
+{
+}
+//string adThermoPhysicalPropertyPackageArrayNode::SaveAsPlainText(const daeNodeSaveAsContext* /*c*/) const
+//{
+//	return string("");
+//}
+
+string adThermoPhysicalPropertyPackageArrayNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
+{
+    string strLatex;
+
+    strLatex += "{ tpp \\left( ";
+    strLatex += toString(property) + ", ";
+    strLatex += pressure->SaveAsLatex(c) + ", ";
+    strLatex += temperature->SaveAsLatex(c) + ", ";
+    strLatex += composition->SaveAsLatex(c) + ", ";
+    strLatex += toString(phase) + ", ";
+    strLatex += toString(basis);
+    strLatex += " \\right) }";
+
+    return strLatex;
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::Open(io::xmlTag_t* pTag)
+{
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::Save(io::xmlTag_t* pTag) const
+{
+    string strName, strValue;
+
+    strName = "Name";
+    strValue = "tpp";
+    pTag->Save(strName, strValue);
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* /*c*/) const
+{
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSaveAsContext* c) const
+{
+}
+
+void adThermoPhysicalPropertyPackageArrayNode::AddVariableIndexToArray(map<size_t, size_t>& mapIndexes, bool bAddFixed)
+{
+    if(!thermoPhysicalPropertyPackage)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    pressure->AddVariableIndexToArray(mapIndexes, bAddFixed);
+    temperature->AddVariableIndexToArray(mapIndexes, bAddFixed);
+    composition->AddVariableIndexToArray(mapIndexes, bAddFixed);
+}
+
+bool adThermoPhysicalPropertyPackageArrayNode::IsLinear(void) const
+{
+    return false;
+}
+
+bool adThermoPhysicalPropertyPackageArrayNode::IsFunctionOfVariables(void) const
+{
+    return true;
+}
+
+bool adThermoPhysicalPropertyPackageArrayNode::IsDifferential(void) const
+{
+    return false;
+}
 
 /*********************************************************************************************
     adFEMatrixItemNode

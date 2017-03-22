@@ -26,6 +26,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include "class_factory.h"
 #include "adouble.h"
 #include "export.h"
+#include "thermo_package.h"
 
 #if defined(DAE_MPI)
 #include <boost/mpi.hpp>
@@ -708,7 +709,7 @@ public:
 		double dValue;
         boost::uint32_t nTotalNumberOfVariables;
         size_t counter;
-        long lRequiredFileSize;
+        std::streamoff lRequiredFileSize;
         std::streamoff lFileSize;
 		std::ifstream file;
 		
@@ -747,8 +748,8 @@ public:
             daeDeclareException(exInvalidCall);
             e << string("The file size of the initialization file ") <<
                  strFileName + string(" does not match; required: ") <<
-                 toString<long>(lRequiredFileSize) + string(", but available: ") <<
-                 toString<long>(lFileSize);
+                 toString<std::streamoff>(lRequiredFileSize) + string(", but available: ") <<
+                 toString<std::streamoff>(lFileSize);
             throw e;
         }
 
@@ -3775,6 +3776,13 @@ protected:
 /*********************************************************************************************
     daeCapeOpenThermoPhysicalPropertyPackage
 **********************************************************************************************/
+using dae::tpp::daeeThermoPackagePropertyType;
+using dae::tpp::daeeThermoPhysicalProperty;
+using dae::tpp::daeeThermoPackagePhase;
+using dae::tpp::daeeThermoPackageBasis;
+using dae::tpp::daeThermoPhysicalPropertyPackage_t;
+using dae::tpp::eMole;
+
 class DAE_CORE_API daeCapeOpenThermoPhysicalPropertyPackage : public daeObject
 {
 public:
@@ -3787,21 +3795,40 @@ public:
                      const std::string& strPackageName,
                      const std::vector<std::string>& strarrCompounds);
 
-    adouble SinglePhaseScalarProperty(const std::string& property,
-                                      const std::string& phase,
-                                      adouble P, adouble T, adouble_array& X,
-                                      const std::string& basis = "Mole");
+    adouble PureCompoundConstantProperty(daeeThermoPhysicalProperty property,
+                                         daeeThermoPackageBasis basis = eMole);
 
-    adouble_array SinglePhaseVectorProperty(const std::string& property,
-                                            const std::string& phase,
-                                            adouble P, adouble T, adouble_array& X,
-                                            const std::string& basis = "Mole");
+    adouble PureCompoundTDProperty(daeeThermoPhysicalProperty property,
+                                   const adouble& T,
+                                   daeeThermoPackageBasis basis = eMole);
 
-    adouble TwoPhaseProperty(const std::string& property,
-                             adouble P, adouble T, adouble_array& X,
-                             const std::string& basis = "Mole");
+    adouble PureCompoundPDProperty(daeeThermoPhysicalProperty property,
+                                   const adouble& P,
+                                   daeeThermoPackageBasis basis = eMole);
 
-protected:
+    adouble SinglePhaseScalarProperty(daeeThermoPhysicalProperty property,
+                                      const adouble& P,
+                                      const adouble& T,
+                                      const adouble_array& X,
+                                      daeeThermoPackagePhase phase,
+                                      daeeThermoPackageBasis basis = eMole);
+
+    adouble_array SinglePhaseVectorProperty(daeeThermoPhysicalProperty property,
+                                            const adouble& P,
+                                            const adouble& T,
+                                            const adouble_array& X,
+                                            daeeThermoPackagePhase phase,
+                                            daeeThermoPackageBasis basis = eMole);
+
+    adouble TwoPhaseScalarProperty(daeeThermoPhysicalProperty property,
+                                   const adouble& P,
+                                   const adouble& T,
+                                   const adouble_array& X,
+                                   daeeThermoPackageBasis basis = eMole);
+
+    unit GetUnits(daeeThermoPhysicalProperty property);
+
+public:
     daeThermoPhysicalPropertyPackage_t* m_package;
 };
 

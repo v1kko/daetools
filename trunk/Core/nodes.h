@@ -14,6 +14,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #define DAE_NODES_H
 
 #include "adouble.h"
+#include "thermo_package.h"
 
 namespace dae 
 {
@@ -841,20 +842,21 @@ public:
 
 
 /*********************************************************************************************
-    adThermoPhysicalPropertyPackageNode
+    adThermoPhysicalPropertyPackageScalarNode
 **********************************************************************************************/
-class DAE_CORE_API adThermoPhysicalPropertyPackageNode : public adNodeImpl
+class DAE_CORE_API adThermoPhysicalPropertyPackageScalarNode : public adNodeImpl
 {
 public:
-    daeDeclareDynamicClass(adThermoPhysicalPropertyPackageNode)
-    adThermoPhysicalPropertyPackageNode(adNodePtr P,
-                                        adNodePtr T,
-                                        adNodeArrayPtr X,
-                                        const std::string& property_,
-                                        const std::string& phase_,
-                                        const std::string& basis_,
-                                        daeThermoPhysicalPropertyPackage_t* pThermoPhysicalPropertyPackage);
-    virtual ~adThermoPhysicalPropertyPackageNode(void);
+    daeDeclareDynamicClass(adThermoPhysicalPropertyPackageScalarNode)
+    adThermoPhysicalPropertyPackageScalarNode(daeeThermoPackagePropertyType propType,
+                                              adNodePtr P,
+                                              adNodePtr T,
+                                              adNodeArrayPtr X,
+                                              daeeThermoPhysicalProperty property_,
+                                              daeeThermoPackagePhase phase_,
+                                              daeeThermoPackageBasis basis_,
+                                              daeThermoPhysicalPropertyPackage_t* tpp);
+    virtual ~adThermoPhysicalPropertyPackageScalarNode(void);
 
 public:
     virtual adouble Evaluate(const daeExecutionContext* pExecutionContext) const;
@@ -872,15 +874,15 @@ public:
     virtual const quantity GetQuantity(void) const;
 
 public:
-    adNodePtr       pressure;
-    adNodePtr       temperature;
-    adNodeArrayPtr  composition;
-    std::string     property;
-    std::string     phase;
-    std::string     basis;
-    daeThermoPhysicalPropertyPackage_t* m_pThermoPhysicalPropertyPackage;
+    daeeThermoPackagePropertyType       propertyType;
+    adNodePtr                           pressure;
+    adNodePtr                           temperature;
+    adNodeArrayPtr                      composition;
+    daeeThermoPhysicalProperty          property;
+    daeeThermoPackagePhase              phase;
+    daeeThermoPackageBasis              basis;
+    daeThermoPhysicalPropertyPackage_t* thermoPhysicalPropertyPackage;
 };
-
 
 //These two classes (adSetupFEMatrixItemNode and adSetupFEVectorItemNode) are both setup and runtime at the same time
 /*********************************************************************************************

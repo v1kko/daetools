@@ -120,6 +120,10 @@ std::string getVectorWithCast__repr__(const std::vector<ITEM*>& arrItems, std::s
     return str;
 }
 
+adouble       create_adouble_from_object(boost::python::object value);
+adouble_array create_adouble_array_from_object(boost::python::object value);
+
+
 /*******************************************************
     String functions
 *******************************************************/
@@ -1325,10 +1329,86 @@ boost::python::dict daeModel_dictEquations(daeModel& self);
 boost::python::dict daeModel_dictPortConnections(daeModel& self);
 boost::python::dict daeModel_dictEventPortConnections(daeModel& self);
 
-void daeCapeOpenThermoPhysicalPropertyPackage_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                                          const std::string& strPackageManager,
-                                                          const std::string& strPackageName,
-                                                          boost::python::list lCompounds);
+void CapeOpen_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                          const std::string& strPackageManager,
+                          const std::string& strPackageName,
+                          boost::python::list lCompounds);
+
+adouble PureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                     daeeThermoPhysicalProperty property,
+                                     daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+adouble PureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                               daeeThermoPhysicalProperty property,
+                               boost::python::object T,
+                               daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+adouble PureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                               daeeThermoPhysicalProperty property,
+                               boost::python::object P,
+                               daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+adouble SinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                  daeeThermoPhysicalProperty property,
+                                  boost::python::object P,
+                                  boost::python::object T,
+                                  boost::python::object x,
+                                  daeeThermoPackagePhase phase,
+                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+adouble_array SinglePhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                        daeeThermoPhysicalProperty property,
+                                        boost::python::object P,
+                                        boost::python::object T,
+                                        boost::python::object x,
+                                        daeeThermoPackagePhase phase,
+                                        daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+adouble TwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                               daeeThermoPhysicalProperty property,
+                               boost::python::object P,
+                               boost::python::object T,
+                               boost::python::object x,
+                               daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+
+double calcPureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                        daeeThermoPhysicalProperty property,
+                                        daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+double calcPureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                  daeeThermoPhysicalProperty property,
+                                  double T,
+                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+double calcPureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                  daeeThermoPhysicalProperty property,
+                                  double P,
+                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+double calcSinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                     daeeThermoPhysicalProperty property,
+                                     double P,
+                                     double T,
+                                      boost::python::list x,
+                                     daeeThermoPackagePhase phase,
+                                     daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+boost::python::list calcSinglePhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                                  daeeThermoPhysicalProperty property,
+                                                  double P,
+                                                  double T,
+                                                  boost::python::list x,
+                                                  daeeThermoPackagePhase phase,
+                                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+double calcTwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
+                                  daeeThermoPhysicalProperty property,
+                                  double P,
+                                  double T,
+                                  boost::python::list x,
+                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+
 
 class daeArrayWrapper : public daeArray<real_t>,
                         public boost::python::wrapper< daeArray<real_t> >

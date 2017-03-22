@@ -257,6 +257,27 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
+
+    enum_<daeeThermoPackageBasis>("daeeThermoPackageBasis")
+        .value("eMole",	dae::tpp::eMole)
+        .value("eMass",	dae::tpp::eMass)
+        .export_values()
+    ;
+
+    enum_<daeeThermoPackagePhase>("daeeThermoPackagePhase")
+        .value("etppPhaseUnknown",	dae::tpp::etppPhaseUnknown)
+        .value("eVapor",            dae::tpp::eVapor)
+        .value("eLiquid",           dae::tpp::eLiquid)
+        .value("eSolid",            dae::tpp::eSolid)
+        .export_values()
+    ;
+
+    enum_<daeeThermoPhysicalProperty>("daeeThermoPhysicalProperty")
+        .value("density",            dae::tpp::density)
+        .value("heatCapacityCp",     dae::tpp::heatCapacityCp)
+        .export_values()
+    ;
+
     class_< std::vector<std::string> >("vector_string")
         .def(vector_indexing_suite< std::vector<std::string> >())
     ;
@@ -501,6 +522,8 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Nodes",      &daepython::adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes)
     ;
 
+    class_<adCustomNodeArray, bases<adNodeArray>, boost::noncopyable>("adCustomNodeArray", no_init)
+    ;
 
     class_<adSingleNodeArray, bases<adNode>, boost::noncopyable>("adSingleNodeArray", no_init)
     ;
@@ -524,9 +547,6 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     class_<adSetupPartialDerivativeNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupPartialDerivativeNodeArray", no_init)
-    ;
-
-    class_<adSetupCustomNodeArray, bases<adNodeArray>, boost::noncopyable>("adSetupCustomNodeArray", no_init)
     ;
 
 
@@ -1833,35 +1853,101 @@ BOOST_PYTHON_MODULE(pyCore)
                                                              arg("descripton") = ""
                                                            )))
         // Virtual function that must be implemented in derived classes in python
-        .def("LoadPackage",	&daepython::daeCapeOpenThermoPhysicalPropertyPackage_LoadPackage, (  arg("self"),
-                                                                                                 arg("packageManager"),
-                                                                                                 arg("packageName"),
-                                                                                                 arg("compounds")
-                                                                                               ))
+        .def("LoadPackage",	&daepython::CapeOpen_LoadPackage, (  arg("self"),
+                                                                 arg("packageManager"),
+                                                                 arg("packageName"),
+                                                                 arg("compounds")
+                                                               ))
 
-        .def("SinglePhaseScalarProperty",	&daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseScalarProperty, (  arg("self"),
-                                                                                                                     arg("property"),
-                                                                                                                     arg("phase"),
-                                                                                                                     arg("presure"),
-                                                                                                                     arg("temperature"),
-                                                                                                                     arg("composition"),
-                                                                                                                     arg("basis") = "Mole"
-                                                                                                                   ))
-        .def("SinglePhaseVectorProperty",	&daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseVectorProperty, (  arg("self"),
-                                                                                                                     arg("property"),
-                                                                                                                     arg("phase"),
-                                                                                                                     arg("presure"),
-                                                                                                                     arg("temperature"),
-                                                                                                                     arg("composition"),
-                                                                                                                     arg("basis") = "Mole"
-                                                                                                                   ))
-        .def("TwoPhaseProperty",	&daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseProperty, (  arg("self"),
+        .def("PureCompoundConstantProperty",	&daepython::PureCompoundConstantProperty, (  arg("self"),
+                                                                                             arg("property"),
+                                                                                             arg("basis") = dae::tpp::eMole
+                                                                                           ))
+
+        .def("PureCompoundTDProperty",	&daepython::PureCompoundTDProperty, ( arg("self"),
+                                                                              arg("property"),
+                                                                              arg("temperature"),
+                                                                              arg("basis") = dae::tpp::eMole
+                                                                            ))
+
+        .def("PureCompoundPDProperty",	&daepython::PureCompoundPDProperty, ( arg("self"),
+                                                                              arg("property"),
+                                                                              arg("presure"),
+                                                                              arg("basis") = dae::tpp::eMole
+                                                                            ))
+
+        .def("SinglePhaseScalarProperty",	&daepython::SinglePhaseScalarProperty, ( arg("self"),
+                                                                                     arg("property"),
+                                                                                     arg("presure"),
+                                                                                     arg("temperature"),
+                                                                                     arg("composition"),
+                                                                                     arg("phase"),
+                                                                                     arg("basis") = dae::tpp::eMole
+                                                                                   ))
+
+        .def("SinglePhaseVectorProperty",	&daepython::SinglePhaseVectorProperty, ( arg("self"),
+                                                                                     arg("property"),
+                                                                                     arg("presure"),
+                                                                                     arg("temperature"),
+                                                                                     arg("composition"),
+                                                                                     arg("phase"),
+                                                                                     arg("basis") = dae::tpp::eMole
+                                                                                   ))
+
+        .def("TwoPhaseScalarProperty",	&daepython::TwoPhaseScalarProperty, ( arg("self"),
+                                                                              arg("property"),
+                                                                              arg("presure"),
+                                                                              arg("temperature"),
+                                                                              arg("composition"),
+                                                                              arg("basis") = dae::tpp::eMole
+                                                                            ))
+
+
+
+
+
+        .def("calcPureCompoundConstantProperty",	&daepython::calcPureCompoundConstantProperty, ( arg("self"),
                                                                                                     arg("property"),
-                                                                                                    arg("presure"),
-                                                                                                    arg("temperature"),
-                                                                                                    arg("composition"),
-                                                                                                    arg("basis") = "Mole"
+                                                                                                    arg("basis") = dae::tpp::eMole
                                                                                                   ))
+
+        .def("calcPureCompoundTDProperty",	&daepython::calcPureCompoundTDProperty, ( arg("self"),
+                                                                                      arg("property"),
+                                                                                      arg("temperature"),
+                                                                                      arg("basis") = dae::tpp::eMole
+                                                                                    ))
+
+        .def("calcPureCompoundPDProperty",	&daepython::calcPureCompoundPDProperty, ( arg("self"),
+                                                                                      arg("property"),
+                                                                                      arg("presure"),
+                                                                                      arg("basis") = dae::tpp::eMole
+                                                                                    ))
+
+        .def("calcSinglePhaseScalarProperty",	&daepython::calcSinglePhaseScalarProperty, (  arg("self"),
+                                                                                              arg("property"),
+                                                                                              arg("presure"),
+                                                                                              arg("temperature"),
+                                                                                              arg("composition"),
+                                                                                              arg("phase"),
+                                                                                              arg("basis") = dae::tpp::eMole
+                                                                                            ))
+
+        .def("calcSinglePhaseVectorProperty",	&daepython::calcSinglePhaseVectorProperty, (  arg("self"),
+                                                                                              arg("property"),
+                                                                                              arg("presure"),
+                                                                                              arg("temperature"),
+                                                                                              arg("composition"),
+                                                                                              arg("phase"),
+                                                                                              arg("basis") = dae::tpp::eMole
+                                                                                            ))
+
+        .def("calcTwoPhaseScalarProperty",	&daepython::calcTwoPhaseScalarProperty, (  arg("self"),
+                                                                                       arg("property"),
+                                                                                       arg("presure"),
+                                                                                       arg("temperature"),
+                                                                                       arg("composition"),
+                                                                                       arg("basis") = dae::tpp::eMole
+                                                                                     ))
 
         .def("__str__",		&daepython::daeCapeOpenThermoPhysicalPropertyPackage__str__)
         .def("__repr__",	&daepython::daeCapeOpenThermoPhysicalPropertyPackage__repr__)

@@ -1,0 +1,34 @@
+// DAEToolsCapeOpen.idl : IDL source for DAEToolsCapeOpen
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (DAEToolsCapeOpen.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(63951F8C-5C22-46F4-B1A5-EA4E5EFFACD0),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IdaeCapeThermoMaterial : IDispatch{
+};
+[
+	uuid(176BB4E1-6647-4A1F-AE44-7FFF59C36D34),
+	version(1.0),
+]
+library DAEToolsCapeOpenLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(6DAB8251-8FC4-46AA-BA9A-3CD6B2E50696)		
+	]
+	coclass daeCapeThermoMaterial
+	{
+		[default] interface IdaeCapeThermoMaterial;
+	};
+};
+

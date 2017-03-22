@@ -46,7 +46,7 @@ const adouble_array Array(const std::vector<adNodePtr>& ptrarrNodes)
 {
     adouble_array tmp;
     tmp.setGatherInfo(true);
-    tmp.node = adNodeArrayPtr(new adSetupCustomNodeArray(ptrarrNodes));
+    tmp.node = adNodeArrayPtr(new adCustomNodeArray(ptrarrNodes));
     return tmp;
 }
 

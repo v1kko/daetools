@@ -1,0 +1,26 @@
+HKCR
+{
+	daetools.ThermoMaterial.1 = s 'daeCapeThermoMaterial Class'
+	{
+		CLSID = s '{6DAB8251-8FC4-46AA-BA9A-3CD6B2E50696}'
+	}
+	daetools.ThermoMaterial = s 'daeCapeThermoMaterial Class'
+	{		
+		CurVer = s 'daetools.ThermoMaterial.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {6DAB8251-8FC4-46AA-BA9A-3CD6B2E50696} = s 'daeCapeThermoMaterial Class'
+		{
+			ProgID = s 'daetools.ThermoMaterial.1'
+			VersionIndependentProgID = s 'daetools.ThermoMaterial'
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{176BB4E1-6647-4A1F-AE44-7FFF59C36D34}'
+			Version = s '1.0'
+		}
+	}
+}
