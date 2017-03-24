@@ -6,7 +6,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Wed Mar 22 21:43:04 2017
+/* at Fri Mar 24 01:20:30 2017
  */
 /* Compiler settings for DAEToolsCapeOpen.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 

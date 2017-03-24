@@ -4999,34 +4999,34 @@ void CapeOpen_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
 // These functions perform actual calculations for given arguments
 double calcPureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                         daeeThermoPhysicalProperty property,
-                                        daeeThermoPackageBasis basis)
+                                        const std::string& compound)
 {
     if(!self.m_package)
         daeDeclareAndThrowException(exInvalidCall);
 
-    return self.m_package->PureCompoundConstantProperty(property, basis);
+    return self.m_package->PureCompoundConstantProperty(property, compound);
 }
 
 double calcPureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                     daeeThermoPhysicalProperty property,
                                     double T,
-                                    daeeThermoPackageBasis basis)
+                                    const std::string& compound)
 {
     if(!self.m_package)
         daeDeclareAndThrowException(exInvalidCall);
 
-    return self.m_package->PureCompoundTDProperty(property, T, basis);
+    return self.m_package->PureCompoundTDProperty(property, T, compound);
 }
 
 double calcPureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                     daeeThermoPhysicalProperty property,
                                     double P,
-                                    daeeThermoPackageBasis basis)
+                                    const std::string& compound)
 {
     if(!self.m_package)
         daeDeclareAndThrowException(exInvalidCall);
 
-    return self.m_package->PureCompoundPDProperty(property, P, basis);
+    return self.m_package->PureCompoundPDProperty(property, P, compound);
 }
 
 double calcSinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
@@ -5101,29 +5101,29 @@ double calcTwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self
 // These functions create adouble with nodes (for equations residuals)
 adouble PureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                      daeeThermoPhysicalProperty property,
-                                     daeeThermoPackageBasis basis)
+                                     const std::string& compound)
 {
-    return self.PureCompoundConstantProperty(property, basis);
+    return self.PureCompoundConstantProperty(property, compound);
 }
 
 adouble PureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                daeeThermoPhysicalProperty property,
                                boost::python::object T,
-                               daeeThermoPackageBasis basis)
+                               const std::string& compound)
 {
     adouble T_ = create_adouble_from_object(T);
 
-    return self.PureCompoundTDProperty(property, T_, basis);
+    return self.PureCompoundTDProperty(property, T_, compound);
 }
 
 adouble PureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                daeeThermoPhysicalProperty property,
                                boost::python::object P,
-                               daeeThermoPackageBasis basis)
+                               const std::string& compound)
 {
     adouble P_ = create_adouble_from_object(P);
 
-    return self.PureCompoundPDProperty(property, P_, basis);
+    return self.PureCompoundPDProperty(property, P_, compound);
 }
 
 adouble SinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,

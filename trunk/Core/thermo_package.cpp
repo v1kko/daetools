@@ -46,7 +46,7 @@ void daeCapeOpenThermoPhysicalPropertyPackage::LoadPackage(const std::string& st
 }
 
 adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundConstantProperty(daeeThermoPhysicalProperty property,
-                                                                               daeeThermoPackageBasis basis)
+                                                                               const std::string& compound)
 {
     adouble tmp;
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
@@ -57,7 +57,8 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundConstantProperty(d
                                                                        adNodeArrayPtr(),
                                                                        property,
                                                                        dae::tpp::etppPhaseUnknown,
-                                                                       basis,
+                                                                       dae::tpp::eUndefinedBasis,
+                                                                       compound,
                                                                        m_package));
 #endif
 
@@ -66,7 +67,7 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundConstantProperty(d
 
 adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundTDProperty(daeeThermoPhysicalProperty property,
                                                                          const adouble& T,
-                                                                         daeeThermoPackageBasis basis)
+                                                                         const std::string& compound)
 {
     adouble tmp;
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
@@ -77,7 +78,8 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundTDProperty(daeeThe
                                                                        adNodeArrayPtr(),
                                                                        property,
                                                                        dae::tpp::etppPhaseUnknown,
-                                                                       basis,
+                                                                       dae::tpp::eUndefinedBasis,
+                                                                       compound,
                                                                        m_package));
 #endif
 
@@ -86,7 +88,7 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundTDProperty(daeeThe
 
 adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundPDProperty(daeeThermoPhysicalProperty property,
                                                                          const adouble& P,
-                                                                         daeeThermoPackageBasis basis)
+                                                                         const std::string& compound)
 {
     adouble tmp;
 
@@ -98,7 +100,8 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundPDProperty(daeeThe
                                                                        adNodeArrayPtr(),
                                                                        property,
                                                                        dae::tpp::etppPhaseUnknown,
-                                                                       basis,
+                                                                       dae::tpp::eUndefinedBasis,
+                                                                       compound,
                                                                        m_package));
 #endif
 
@@ -123,6 +126,7 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseScalarProperty(daee
                                                                        property,
                                                                        phase,
                                                                        basis,
+                                                                       std::string(""),
                                                                        m_package));
 #endif
 
@@ -171,7 +175,31 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseScalarProperty(daeeThe
                                                                        property,
                                                                        dae::tpp::etppPhaseUnknown,
                                                                        basis,
+                                                                       std::string(""),
                                                                        m_package));
+#endif
+
+    return tmp;
+}
+
+adouble_array daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseVectorProperty(daeeThermoPhysicalProperty property,
+                                                                               const adouble& P,
+                                                                               const adouble& T,
+                                                                               const adouble_array& x,
+                                                                               daeeThermoPackageBasis basis)
+{
+    adouble_array tmp;
+
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+    tmp.setGatherInfo(true);
+    tmp.node = adNodeArrayPtr(new adThermoPhysicalPropertyPackageArrayNode(dae::tpp::eTwoPhaseVectorProperty,
+                                                                           P.node,
+                                                                           T.node,
+                                                                           x.node,
+                                                                           property,
+                                                                           dae::tpp::etppPhaseUnknown,
+                                                                           basis,
+                                                                           m_package));
 #endif
 
     return tmp;

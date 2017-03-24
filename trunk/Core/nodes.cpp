@@ -4236,6 +4236,7 @@ adThermoPhysicalPropertyPackageScalarNode::adThermoPhysicalPropertyPackageScalar
                                                                                      daeeThermoPhysicalProperty property_,
                                                                                      daeeThermoPackagePhase phase_,
                                                                                      daeeThermoPackageBasis basis_,
+                                                                                     const std::string& compound_,
                                                                                      daeThermoPhysicalPropertyPackage_t* tpp)
 {
     propertyType = propType;
@@ -4245,6 +4246,7 @@ adThermoPhysicalPropertyPackageScalarNode::adThermoPhysicalPropertyPackageScalar
     property     = property_;
     phase        = phase_;
     basis        = basis_;
+    compound     = compound_;
     thermoPhysicalPropertyPackage = tpp;
 }
 
@@ -4274,6 +4276,7 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
                                                                            property,
                                                                            phase,
                                                                            basis,
+                                                                           compound,
                                                                            thermoPhysicalPropertyPackage));
         return tmp;
     }
@@ -4284,13 +4287,17 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
 
     double result;
     if(propertyType == dae::tpp::ePureCompoundConstantProperty)
-        result = thermoPhysicalPropertyPackage->PureCompoundConstantProperty(property, basis);
+        result = thermoPhysicalPropertyPackage->PureCompoundConstantProperty(property, compound);
 
     else if(propertyType == dae::tpp::ePureCompoundTDProperty)
-        result = thermoPhysicalPropertyPackage->PureCompoundTDProperty(property, T.getValue(), basis);
+        result = thermoPhysicalPropertyPackage->PureCompoundTDProperty(property,
+                                                                       T.getValue(),
+                                                                       compound);
 
     else if(propertyType == dae::tpp::ePureCompoundPDProperty)
-        result = thermoPhysicalPropertyPackage->PureCompoundPDProperty(property, P.getValue(), basis);
+        result = thermoPhysicalPropertyPackage->PureCompoundPDProperty(property,
+                                                                       P.getValue(),
+                                                                       compound);
 
     else if(propertyType == dae::tpp::eSinglePhaseScalarProperty)
         result = thermoPhysicalPropertyPackage->SinglePhaseScalarProperty(property,
@@ -4335,14 +4342,28 @@ string adThermoPhysicalPropertyPackageScalarNode::SaveAsLatex(const daeNodeSaveA
 {
     string strLatex;
 
-    strLatex += "{ tpp \\left( ";
-    strLatex += toString(property) + ", ";
-    strLatex += pressure->SaveAsLatex(c) + ", ";
-    strLatex += temperature->SaveAsLatex(c) + ", ";
-    strLatex += composition->SaveAsLatex(c) + ", ";
-    strLatex += toString(phase) + ", ";
-    strLatex += toString(basis);
+    strLatex += "{ tpp.";
+    if(propertyType == dae::tpp::ePureCompoundConstantProperty)
+        strLatex += "PureCompoundConstantProperty \\left( ";
+    else if(propertyType == dae::tpp::ePureCompoundTDProperty)
+        strLatex += "PureCompoundTDProperty \\left( ";
+    else if(propertyType == dae::tpp::ePureCompoundPDProperty)
+        strLatex += "PureCompoundPDProperty \\left( ";
+    else if(propertyType == dae::tpp::eSinglePhaseScalarProperty)
+        strLatex += "SinglePhaseScalarProperty \\left( ";
+    else if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+        strLatex += "TwoPhaseScalarProperty \\left( ";
+    else
+        strLatex += "UnknownCall \\left( ";
     strLatex += " \\right) }";
+
+//    strLatex += " \\left( ";
+//    strLatex += toString(property) + ", ";
+//    strLatex += pressure->SaveAsLatex(c) + ", ";
+//    strLatex += temperature->SaveAsLatex(c) + ", ";
+//    strLatex += composition->SaveAsLatex(c) + ", ";
+//    strLatex += toString(phase) + ", ";
+//    strLatex += toString(basis);
 
     return strLatex;
 }
@@ -4463,7 +4484,10 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
     }
     else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
     {
-        daeDeclareAndThrowException(exInvalidCall);
+        thermoPhysicalPropertyPackage->TwoPhaseVectorProperty(property,
+                                                              P.getValue(), T.getValue(), arrX,
+                                                              results,
+                                                              basis);
     }
     else
     {
@@ -4472,7 +4496,10 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
 
     tmp.Resize(results.size());
     for(size_t i = 0; i < results.size(); i++)
-        tmp.SetItem(i, adouble(results[i]));
+    {
+        adouble ad(results[i]);
+        tmp.SetItem(i, ad);
+    }
 
     return tmp;
 }
@@ -4510,13 +4537,13 @@ string adThermoPhysicalPropertyPackageArrayNode::SaveAsLatex(const daeNodeSaveAs
 {
     string strLatex;
 
-    strLatex += "{ tpp \\left( ";
-    strLatex += toString(property) + ", ";
-    strLatex += pressure->SaveAsLatex(c) + ", ";
-    strLatex += temperature->SaveAsLatex(c) + ", ";
-    strLatex += composition->SaveAsLatex(c) + ", ";
-    strLatex += toString(phase) + ", ";
-    strLatex += toString(basis);
+    strLatex += "{ tpp.";
+    if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+        strLatex += "TwoPhaseScalarProperty \\left( ";
+    else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+        strLatex += "TwoPhaseVectorProperty \\left( ";
+    else
+        strLatex += "UnknownCall \\left( ";
     strLatex += " \\right) }";
 
     return strLatex;

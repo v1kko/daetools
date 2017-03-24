@@ -3796,15 +3796,15 @@ public:
                      const std::vector<std::string>& strarrCompounds);
 
     adouble PureCompoundConstantProperty(daeeThermoPhysicalProperty property,
-                                         daeeThermoPackageBasis basis = eMole);
+                                         const std::string& compound);
 
     adouble PureCompoundTDProperty(daeeThermoPhysicalProperty property,
                                    const adouble& T,
-                                   daeeThermoPackageBasis basis = eMole);
+                                   const std::string& compound);
 
     adouble PureCompoundPDProperty(daeeThermoPhysicalProperty property,
                                    const adouble& P,
-                                   daeeThermoPackageBasis basis = eMole);
+                                   const std::string& compound);
 
     adouble SinglePhaseScalarProperty(daeeThermoPhysicalProperty property,
                                       const adouble& P,
@@ -3826,7 +3826,13 @@ public:
                                    const adouble_array& X,
                                    daeeThermoPackageBasis basis = eMole);
 
-    unit GetUnits(daeeThermoPhysicalProperty property);
+     adouble_array TwoPhaseVectorProperty(daeeThermoPhysicalProperty property,
+                                          const adouble& P,
+                                          const adouble& T,
+                                          const adouble_array& X,
+                                          daeeThermoPackageBasis basis = eMole);
+
+   unit GetUnits(daeeThermoPhysicalProperty property);
 
 public:
     daeThermoPhysicalPropertyPackage_t* m_package;

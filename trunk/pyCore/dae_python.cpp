@@ -259,8 +259,9 @@ BOOST_PYTHON_MODULE(pyCore)
 
 
     enum_<daeeThermoPackageBasis>("daeeThermoPackageBasis")
-        .value("eMole",	dae::tpp::eMole)
-        .value("eMass",	dae::tpp::eMass)
+        .value("eMole",	          dae::tpp::eMole)
+        .value("eMass",	          dae::tpp::eMass)
+        .value("eUndefinedBasis", dae::tpp::eUndefinedBasis)
         .export_values()
     ;
 
@@ -273,8 +274,38 @@ BOOST_PYTHON_MODULE(pyCore)
     ;
 
     enum_<daeeThermoPhysicalProperty>("daeeThermoPhysicalProperty")
-        .value("density",            dae::tpp::density)
-        .value("heatCapacityCp",     dae::tpp::heatCapacityCp)
+        .value("compressibility",           dae::tpp::compressibility)
+        .value("compressibilityFactor",     dae::tpp::compressibilityFactor)
+        .value("density",                   dae::tpp::density)
+        .value("dissociationConstant",      dae::tpp::dissociationConstant)
+        .value("enthalpy",                  dae::tpp::enthalpy)
+        .value("enthalpyF",                 dae::tpp::enthalpyF)
+        .value("enthalpyNF",                dae::tpp::enthalpyNF)
+        .value("entropy",                   dae::tpp::entropy)
+        .value("entropyF",                  dae::tpp::entropyF)
+        .value("entropyNF",                 dae::tpp::entropyNF)
+        .value("excessGibbsEnergy",         dae::tpp::excessGibbsEnergy)
+        .value("excessHelmholtzEnergy",     dae::tpp::excessHelmholtzEnergy)
+        .value("excessInternalEnergy",      dae::tpp::excessInternalEnergy)
+        .value("excessVolume",              dae::tpp::excessVolume)
+        .value("gibbsEnergy",               dae::tpp::gibbsEnergy)
+        .value("heatCapacityCp",            dae::tpp::heatCapacityCp)
+        .value("heatCapacityCv",            dae::tpp::heatCapacityCv)
+        .value("helmholtzEnergy",           dae::tpp::helmholtzEnergy)
+        .value("internalEnergy",            dae::tpp::internalEnergy)
+        .value("jouleThomsonCoefficient",   dae::tpp::jouleThomsonCoefficient)
+        .value("molecularWeight",           dae::tpp::molecularWeight)
+        .value("osmoticCoefficient",        dae::tpp::osmoticCoefficient)
+        .value("pH",                        dae::tpp::pH)
+        .value("pOH",                       dae::tpp::pOH)
+        .value("phaseFraction",             dae::tpp::phaseFraction)
+        .value("pressure",                  dae::tpp::pressure)
+        .value("speedOfSound",              dae::tpp::speedOfSound)
+        .value("temperature",               dae::tpp::temperature)
+        .value("thermalConductivity",       dae::tpp::thermalConductivity)
+        .value("totalFlow",                 dae::tpp::totalFlow)
+        .value("viscosity",                 dae::tpp::viscosity)
+        .value("volume",                    dae::tpp::volume)
         .export_values()
     ;
 
@@ -1861,19 +1892,19 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("PureCompoundConstantProperty",	&daepython::PureCompoundConstantProperty, (  arg("self"),
                                                                                              arg("property"),
-                                                                                             arg("basis") = dae::tpp::eMole
+                                                                                             arg("compound")
                                                                                            ))
 
         .def("PureCompoundTDProperty",	&daepython::PureCompoundTDProperty, ( arg("self"),
                                                                               arg("property"),
                                                                               arg("temperature"),
-                                                                              arg("basis") = dae::tpp::eMole
+                                                                              arg("compound")
                                                                             ))
 
         .def("PureCompoundPDProperty",	&daepython::PureCompoundPDProperty, ( arg("self"),
                                                                               arg("property"),
                                                                               arg("presure"),
-                                                                              arg("basis") = dae::tpp::eMole
+                                                                              arg("compound")
                                                                             ))
 
         .def("SinglePhaseScalarProperty",	&daepython::SinglePhaseScalarProperty, ( arg("self"),
@@ -1908,19 +1939,19 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("calcPureCompoundConstantProperty",	&daepython::calcPureCompoundConstantProperty, ( arg("self"),
                                                                                                     arg("property"),
-                                                                                                    arg("basis") = dae::tpp::eMole
+                                                                                                    arg("compound")
                                                                                                   ))
 
         .def("calcPureCompoundTDProperty",	&daepython::calcPureCompoundTDProperty, ( arg("self"),
                                                                                       arg("property"),
                                                                                       arg("temperature"),
-                                                                                      arg("basis") = dae::tpp::eMole
+                                                                                      arg("compound")
                                                                                     ))
 
         .def("calcPureCompoundPDProperty",	&daepython::calcPureCompoundPDProperty, ( arg("self"),
                                                                                       arg("property"),
                                                                                       arg("presure"),
-                                                                                      arg("basis") = dae::tpp::eMole
+                                                                                      arg("compound")
                                                                                     ))
 
         .def("calcSinglePhaseScalarProperty",	&daepython::calcSinglePhaseScalarProperty, (  arg("self"),

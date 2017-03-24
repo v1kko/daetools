@@ -1336,17 +1336,17 @@ void CapeOpen_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
 
 adouble PureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                      daeeThermoPhysicalProperty property,
-                                     daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                     const std::string& compound);
 
 adouble PureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                daeeThermoPhysicalProperty property,
                                boost::python::object T,
-                               daeeThermoPackageBasis basis = dae::tpp::eMole);
+                               const std::string& compound);
 
 adouble PureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                daeeThermoPhysicalProperty property,
                                boost::python::object P,
-                               daeeThermoPackageBasis basis = dae::tpp::eMole);
+                               const std::string& compound);
 
 adouble SinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                   daeeThermoPhysicalProperty property,
@@ -1374,23 +1374,23 @@ adouble TwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
 
 double calcPureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                         daeeThermoPhysicalProperty property,
-                                        daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                        const std::string& compound);
 
 double calcPureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                   daeeThermoPhysicalProperty property,
                                   double T,
-                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                  const std::string& compound);
 
 double calcPureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                   daeeThermoPhysicalProperty property,
                                   double P,
-                                  daeeThermoPackageBasis basis = dae::tpp::eMole);
+                                  const std::string& compound);
 
 double calcSinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
                                      daeeThermoPhysicalProperty property,
                                      double P,
                                      double T,
-                                      boost::python::list x,
+                                     boost::python::list x,
                                      daeeThermoPackagePhase phase,
                                      daeeThermoPackageBasis basis = dae::tpp::eMole);
 

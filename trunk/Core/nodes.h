@@ -855,6 +855,7 @@ public:
                                               daeeThermoPhysicalProperty property_,
                                               daeeThermoPackagePhase phase_,
                                               daeeThermoPackageBasis basis_,
+                                              const std::string& compound_,
                                               daeThermoPhysicalPropertyPackage_t* tpp);
     virtual ~adThermoPhysicalPropertyPackageScalarNode(void);
 
@@ -881,6 +882,7 @@ public:
     daeeThermoPhysicalProperty          property;
     daeeThermoPackagePhase              phase;
     daeeThermoPackageBasis              basis;
+    std::string                         compound;
     daeThermoPhysicalPropertyPackage_t* thermoPhysicalPropertyPackage;
 };
 

@@ -7,6 +7,8 @@
 #include <map>
 #include "cape_open_package.h"
 
+using namespace ATL;
+
 using dae::tpp::daeeThermoPackagePropertyType;
 using dae::tpp::daeeThermoPhysicalProperty;
 using dae::tpp::daeeThermoPackagePhase;
@@ -21,9 +23,14 @@ using dae::tpp::eSolid;
 #import "CAPE-OPENv1-1-0.tlb" rename_namespace("CO_COM")
 using namespace CO_COM;
 
-ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*                   compounds = NULL, 
-                                             const std::map<ATL::CComBSTR, _variant_t>* overallProperties = NULL,
-                                             const std::map<ATL::CComBSTR, _variant_t>* singleProperties = NULL);
+typedef std::map<CComBSTR, _variant_t>                          ComBSTR_Variant_PropertyMap;
+typedef std::map<CComBSTR, ComBSTR_Variant_PropertyMap>         ComBSTR_ComBSTR_Variant_PropertyMap;
+typedef std::map<CComBSTR, ComBSTR_ComBSTR_Variant_PropertyMap> ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap;
+
+ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*                           compounds = NULL,
+                                             const ComBSTR_ComBSTR_Variant_PropertyMap*         overallProperties = NULL,
+                                             const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap* singlePhaseProperties = NULL,
+                                             const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap* twoPhaseProperties = NULL);
 
 //	CAPE - OPEN 1.1 Property Package Manager CF51E383 - 0110 - 4ed8 - ACB7 - B50CFDE6908E
 //	CAPE - OPEN 1.1 Property Package CF51E384 - 0110 - 4ed8 - ACB7 - B50CFDE6908E
@@ -56,6 +63,116 @@ void CreatePropertyRoutine(IDispatchPtr& dispatchPackage, ICapeThermoPropertyRou
 _bstr_t phase_to_bstr(daeeThermoPackagePhase phase);
 _bstr_t basis_to_bstr(daeeThermoPackageBasis basis);
 _bstr_t property_to_bstr(daeeThermoPhysicalProperty property);
+double double_from_variant(_variant_t& vals_v);
+std::string cstring_from_variant(_variant_t& vals_v);
+_bstr_t bstring_from_variant(_variant_t& vals_v);
+_variant_t create_array_from_double(double val);
+_variant_t create_array_from_string(_bstr_t& val);
+void print_string_array(BSTR name, _variant_t& vals_v);
+void print_double_array(BSTR name, _variant_t& vals_v);
+void print_thermo_manager_info(ICapeThermoPropertyPackageManagerPtr manager, ICapeIdentificationPtr identification);
+
+void print_thermo_manager_info(ICapeThermoPropertyPackageManagerPtr manager, ICapeIdentificationPtr identification)
+{
+    std::vector<BSTR> strarrPackages;
+    _variant_t pplist = manager->GetPropertyPackageList();
+    CreateStringArray(strarrPackages, pplist);
+    
+    std::wcout << "TPP Manager: " << identification->GetComponentName() << std::endl;
+    std::wcout << "    Description: " << identification->GetComponentDescription() << std::endl;
+    std::wcout << "    Packages:    ";
+    for (size_t i = 0; i < strarrPackages.size(); i++)
+    {
+        BSTR foundPackageName = strarrPackages[i];
+        std::wcout << (i == 0 ? "" : ", ") << "'" << foundPackageName << "'";
+    }
+    std::wcout << std::endl;
+}
+
+void print_string_array(BSTR name, _variant_t& vals_v)
+{
+    std::vector<BSTR> strarrResult;
+    CreateStringArray(strarrResult, vals_v);
+    std::wcout << name << " = [";
+    for (size_t i = 0; i < strarrResult.size(); i++)
+        std::wcout << (i == 0 ? "" : ", ") << "'" << strarrResult[i] << "'";
+    std::wcout << "]" << std::endl;
+}
+
+void print_double_array(BSTR name, _variant_t& vals_v)
+{
+    std::vector<double> strarrResult;
+    CreateDoubleArray(strarrResult, vals_v);
+    std::wcout << name << " = [";
+    for (size_t i = 0; i < strarrResult.size(); i++)
+        std::wcout << (i == 0 ? "" : ", ") << strarrResult[i];
+    std::wcout << "]" << std::endl;
+}
+
+double double_from_variant(_variant_t& vals_v)
+{
+    std::vector<double> results;
+    bool res = CreateDoubleArray(results, vals_v);
+    if (!res || results.size() != 1)
+    {
+        throw std::runtime_error("Cannot create double from variant");
+    }
+
+    return results[0];
+}
+
+std::string cstring_from_variant(_variant_t& vals_v)
+{
+    std::vector<BSTR> results;
+    bool res = CreateStringArray(results, vals_v);
+    if (!res || results.size() != 1)
+    {
+        throw std::runtime_error("Cannot create cstring from variant");
+    }
+
+    _bstr_t bstr_res(results[0]);
+    return std::string((LPCSTR)bstr_res);
+}
+
+_bstr_t bstring_from_variant(_variant_t& vals_v)
+{
+    std::vector<BSTR> results;
+    bool res = CreateStringArray(results, vals_v);
+    if (!res || results.size() != 1)
+    {
+        throw std::runtime_error("Cannot create bstr from variant");
+    }
+
+    return _bstr_t(results[0]);
+}
+
+_variant_t create_array_from_double(double val)
+{
+    _variant_t result_v;
+    std::vector<double> strarr(1);
+    strarr[0] = val;
+    bool res = CreateSafeArray(strarr, result_v);
+    if (!res)
+    {
+        std::cout << "Cannot create variant array from double" << std::endl;
+        throw std::runtime_error("Cannot create variant array from double");
+    }
+    return result_v;
+}
+
+_variant_t create_array_from_string(_bstr_t& val)
+{
+    _variant_t result_v;
+    std::vector<BSTR> strarr(1);
+    strarr[0] = val.GetBSTR();
+    bool res = CreateSafeArray(strarr, result_v);
+    if (!res)
+    {
+        std::cout << "Cannot create variant array from string" << std::endl;
+        throw std::runtime_error("Cannot create variant array from string");
+    }
+    return result_v;
+}
 
 _bstr_t phase_to_bstr(daeeThermoPackagePhase phase)
 {
@@ -77,270 +194,295 @@ _bstr_t basis_to_bstr(daeeThermoPackageBasis basis)
         return _bstr_t("Mole");
     else if (basis == eMass)
         return _bstr_t("Mass");
+    else if (basis == eUndefinedBasis)
+        return _bstr_t("undefined");
     else
-        return _bstr_t("unknown-phase");
+        return _bstr_t("undefined");
 }
 
 _bstr_t property_to_bstr(daeeThermoPhysicalProperty property)
 {
     using namespace dae::tpp;
 
-    if(property == acentricFactor)
+    switch (property)
+    {
+    case avogadroConstant:
+        return _bstr_t("avogadroConstant");
+    case boltzmannConstant:
+        return _bstr_t("boltzmannConstant");
+    case idealGasStateReferencePressure:
+        return _bstr_t("idealGasStateReferencePressure");
+    case molarGasConstant:
+        return _bstr_t("molarGasConstant");
+    case speedOfLightInVacuum:
+        return _bstr_t("speedOfLightInVacuum");
+    case standardAccelerationOfGravity:
+        return _bstr_t("standardAccelerationOfGravity");
+    case casRegistryNumber:
+        return _bstr_t("casRegistryNumber");
+    case chemicalFormula:
+        return _bstr_t("chemicalFormula");
+    case iupacName:
+        return _bstr_t("iupacName");
+    case SMILESformula:
+        return _bstr_t("SMILESformula");
+    case acentricFactor:
         return _bstr_t("acentricFactor");
-    else if(property == associationParameter)
+    case associationParameter:
         return _bstr_t("associationParameter");
-    else if(property == bornRadius)
+    case bornRadius:
         return _bstr_t("bornRadius");
-    else if(property == charge)
+    case charge:
         return _bstr_t("charge");
-    else if(property == criticalCompressibilityFactor)
+    case criticalCompressibilityFactor:
         return _bstr_t("criticalCompressibilityFactor");
-    else if(property == criticalDensity)
+    case criticalDensity:
         return _bstr_t("criticalDensity");
-    else if(property == criticalPressure)
+    case criticalPressure:
         return _bstr_t("criticalPressure");
-    else if(property == criticalTemperature)
+    case criticalTemperature:
         return _bstr_t("criticalTemperature");
-    else if(property == criticalVolume)
+    case criticalVolume:
         return _bstr_t("criticalVolume");
-    else if(property == diffusionVolume)
+    case diffusionVolume:
         return _bstr_t("diffusionVolume");
-    else if(property == dipoleMoment)
+    case dipoleMoment:
         return _bstr_t("dipoleMoment");
-    else if(property == energyLennardJones)
+    case energyLennardJones:
         return _bstr_t("energyLennardJones");
-    else if(property == gyrationRadius)
+    case gyrationRadius:
         return _bstr_t("gyrationRadius");
-    else if(property == heatOfFusionAtNormalFreezingPoint)
+    case heatOfFusionAtNormalFreezingPoint:
         return _bstr_t("heatOfFusionAtNormalFreezingPoint");
-    else if(property == heatOfVaporizationAtNormalBoilingPoint)
+    case heatOfVaporizationAtNormalBoilingPoint:
         return _bstr_t("heatOfVaporizationAtNormalBoilingPoint");
-    else if(property == idealGasEnthalpyOfFormationAt25C)
+    case idealGasEnthalpyOfFormationAt25C:
         return _bstr_t("idealGasEnthalpyOfFormationAt25C");
-    else if(property == idealGasGibbsFreeEnergyOfFormationAt25C)
+    case idealGasGibbsFreeEnergyOfFormationAt25C:
         return _bstr_t("idealGasGibbsFreeEnergyOfFormationAt25C");
-    else if(property == liquidDensityAt25C)
+    case liquidDensityAt25C:
         return _bstr_t("liquidDensityAt25C");
-    else if(property == liquidVolumeAt25C)
+    case liquidVolumeAt25C:
         return _bstr_t("liquidVolumeAt25C");
-    else if(property == lengthLennardJones)
+    case lengthLennardJones:
         return _bstr_t("lengthLennardJones");
-    else if(property == pureMolecularWeight) // was molecularWeight but clashes with the scalar single phase property
+    case pureMolecularWeight: // was molecularWeight but clashes with the scalar single phase property
         return _bstr_t("molecularWeight");
-    else if(property == normalBoilingPoint)
+    case normalBoilingPoint:
         return _bstr_t("normalBoilingPoint");
-    else if(property == normalFreezingPoint)
+    case normalFreezingPoint:
         return _bstr_t("normalFreezingPoint");
-    else if(property == parachor)
+    case parachor:
         return _bstr_t("parachor");
-    else if(property == standardEntropyGas)
+    case standardEntropyGas:
         return _bstr_t("standardEntropyGas");
-    else if(property == standardEntropyLiquid)
+    case standardEntropyLiquid:
         return _bstr_t("standardEntropyLiquid");
-    else if(property == standardEntropySolid)
+    case standardEntropySolid:
         return _bstr_t("standardEntropySolid");
-    else if(property == standardEnthalpyAqueousDilution)
+    case standardEnthalpyAqueousDilution:
         return _bstr_t("standardEnthalpyAqueousDilution");
-    else if(property == standardFormationEnthalpyGas)
+    case standardFormationEnthalpyGas:
         return _bstr_t("standardFormationEnthalpyGas");
-    else if(property == standardFormationEnthalpyLiquid)
+    case standardFormationEnthalpyLiquid:
         return _bstr_t("standardFormationEnthalpyLiquid");
-    else if(property == standardFormationEnthalpySolid)
+    case standardFormationEnthalpySolid:
         return _bstr_t("standardFormationEnthalpySolid");
-    else if(property == standardFormationGibbsEnergyGas)
+    case standardFormationGibbsEnergyGas:
         return _bstr_t("standardFormationGibbsEnergyGas");
-    else if(property == standardFormationGibbsEnergyLiquid)
+    case standardFormationGibbsEnergyLiquid:
         return _bstr_t("standardFormationGibbsEnergyLiquid");
-    else if(property == standardFormationGibbsEnergySolid)
+    case standardFormationGibbsEnergySolid:
         return _bstr_t("standardFormationGibbsEnergySolid");
-    else if(property == standardGibbsAqueousDilution)
+    case standardGibbsAqueousDilution:
         return _bstr_t("standardGibbsAqueousDilution");
-    else if(property == triplePointPressure)
+    case triplePointPressure:
         return _bstr_t("triplePointPressure");
-    else if(property == triplePointTemperature)
+    case triplePointTemperature:
         return _bstr_t("triplePointTemperature");
-    else if(property == vanderwaalsArea)
+    case vanderwaalsArea:
         return _bstr_t("vanderwaalsArea");
-    else if(property == vanderwaalsVolume)
+    case vanderwaalsVolume:
         return _bstr_t("vanderwaalsVolume");
 
-    // daeePureCompoundTDProperty
-    else if(property == cpAqueousInfiniteDilution)
+        // daeePureCompoundTDProperty
+    case cpAqueousInfiniteDilution:
         return _bstr_t("cpAqueousInfiniteDilution");
-    else if(property == dielectricConstant)
+    case dielectricConstant:
         return _bstr_t("dielectricConstant");
-    else if(property == expansivity)
+    case expansivity:
         return _bstr_t("expansivity");
-    else if(property == fugacityCoefficientOfVapor)
+    case fugacityCoefficientOfVapor:
         return _bstr_t("fugacityCoefficientOfVapor");
-    else if(property == glassTransitionPressure)
+    case glassTransitionPressure:
         return _bstr_t("glassTransitionPressure");
-    else if(property == heatCapacityOfLiquid)
+    case heatCapacityOfLiquid:
         return _bstr_t("heatCapacityOfLiquid");
-    else if(property == heatCapacityOfSolid)
+    case heatCapacityOfSolid:
         return _bstr_t("heatCapacityOfSolid");
-    else if(property == heatOfFusion)
+    case heatOfFusion:
         return _bstr_t("heatOfFusion");
-    else if(property == heatOfSublimation)
+    case heatOfSublimation:
         return _bstr_t("heatOfSublimation");
-    else if(property == heatOfSolidSolidPhaseTransition)
+    case heatOfSolidSolidPhaseTransition:
         return _bstr_t("heatOfSolidSolidPhaseTransition");
-    else if(property == heatOfVaporization)
+    case heatOfVaporization:
         return _bstr_t("heatOfVaporization");
-    else if(property == idealGasEnthalpy)
+    case idealGasEnthalpy:
         return _bstr_t("idealGasEnthalpy");
-    else if(property == idealGasEntropy)
+    case idealGasEntropy:
         return _bstr_t("idealGasEntropy");
-    else if(property == idealGasHeatCapacity)
+    case idealGasHeatCapacity:
         return _bstr_t("idealGasHeatCapacity");
-    else if(property == meltingPressure)
+    case meltingPressure:
         return _bstr_t("meltingPressure");
-    else if(property == selfDiffusionCoefficientGas)
+    case selfDiffusionCoefficientGas:
         return _bstr_t("selfDiffusionCoefficientGas");
-    else if(property == selfDiffusionCoefficientLiquid)
+    case selfDiffusionCoefficientLiquid:
         return _bstr_t("selfDiffusionCoefficientLiquid");
-    else if(property == solidSolidPhaseTransitionPressure)
+    case solidSolidPhaseTransitionPressure:
         return _bstr_t("solidSolidPhaseTransitionPressure");
-    else if(property == sublimationPressure)
+    case sublimationPressure:
         return _bstr_t("sublimationPressure");
-    else if(property == surfaceTensionSatLiquid)
+    case surfaceTensionSatLiquid:
         return _bstr_t("surfaceTensionSatLiquid");
-    else if(property == thermalConductivityOfLiquid)
+    case thermalConductivityOfLiquid:
         return _bstr_t("thermalConductivityOfLiquid");
-    else if(property == thermalConductivityOfSolid)
+    case thermalConductivityOfSolid:
         return _bstr_t("thermalConductivityOfSolid");
-    else if(property == thermalConductivityOfVapor)
+    case thermalConductivityOfVapor:
         return _bstr_t("thermalConductivityOfVapor");
-    else if(property == vaporPressure)
+    case vaporPressure:
         return _bstr_t("vaporPressure");
-    else if(property == virialCoefficient)
+    case virialCoefficient:
         return _bstr_t("virialCoefficient");
-    else if(property == viscosityOfLiquid)
+    case viscosityOfLiquid:
         return _bstr_t("viscosityOfLiquid");
-    else if(property == viscosityOfVapor)
+    case viscosityOfVapor:
         return _bstr_t("viscosityOfVapor");
-    else if(property == volumeChangeUponMelting)
+    case volumeChangeUponMelting:
         return _bstr_t("volumeChangeUponMelting");
-    else if(property == volumeChangeUponSolidSolidPhaseTransition)
+    case volumeChangeUponSolidSolidPhaseTransition:
         return _bstr_t("volumeChangeUponSolidSolidPhaseTransition");
-    else if(property == volumeChangeUponSublimation)
+    case volumeChangeUponSublimation:
         return _bstr_t("volumeChangeUponSublimation");
-    else if(property == volumeChangeUponVaporization)
+    case volumeChangeUponVaporization:
         return _bstr_t("volumeChangeUponVaporization");
-    else if(property == volumeOfLiquid)
+    case volumeOfLiquid:
         return _bstr_t("volumeOfLiquid");
 
-    // PureCompoundPDProperty
-    else if(property == boilingPointTemperature)
+        // PureCompoundPDProperty
+    case boilingPointTemperature:
         return _bstr_t("boilingPointTemperature");
-    else if(property == glassTransitionTemperature)
+    case glassTransitionTemperature:
         return _bstr_t("glassTransitionTemperature");
-    else if(property == meltingTemperature)
+    case meltingTemperature:
         return _bstr_t("meltingTemperature");
-    else if(property == solidSolidPhaseTransitionTemperature)
+    case solidSolidPhaseTransitionTemperature:
         return _bstr_t("solidSolidPhaseTransitionTemperature");
 
-    // SinglePhaseScalarProperties
-    else if(property == activity)
+        // SinglePhaseScalarProperties
+    case activity:
         return _bstr_t("activity");
-    else if(property == activityCoefficient)
+    case activityCoefficient:
         return _bstr_t("activityCoefficient");
-    else if(property == compressibility)
+    case compressibility:
         return _bstr_t("compressibility");
-    else if(property == compressibilityFactor)
+    case compressibilityFactor:
         return _bstr_t("compressibilityFactor");
-    else if(property == density)
+    case density:
         return _bstr_t("density");
-    else if(property == dissociationConstant)
+    case dissociationConstant:
         return _bstr_t("dissociationConstant");
-    else if(property == enthalpy)
+    case enthalpy:
         return _bstr_t("enthalpy");
-    else if(property == enthalpyF)
+    case enthalpyF:
         return _bstr_t("enthalpyF");
-    else if(property == enthalpyNF)
+    case enthalpyNF:
         return _bstr_t("enthalpyNF");
-    else if(property == entropy)
+    case entropy:
         return _bstr_t("entropy");
-    else if(property == entropyF)
+    case entropyF:
         return _bstr_t("entropyF");
-    else if(property == entropyNF)
+    case entropyNF:
         return _bstr_t("entropyNF");
-    else if(property == excessEnthalpy)
+    case excessEnthalpy:
         return _bstr_t("excessEnthalpy");
-    else if(property == excessEntropy)
+    case excessEntropy:
         return _bstr_t("excessEntropy");
-    else if(property == excessGibbsEnergy)
+    case excessGibbsEnergy:
         return _bstr_t("excessGibbsEnergy");
-    else if(property == excessHelmholtzEnergy)
+    case excessHelmholtzEnergy:
         return _bstr_t("excessHelmholtzEnergy");
-    else if(property == excessInternalEnergy)
+    case excessInternalEnergy:
         return _bstr_t("excessInternalEnergy");
-    else if(property == excessVolume)
+    case excessVolume:
         return _bstr_t("excessVolume");
-    else if(property == flow)
+    case flow:
         return _bstr_t("flow");
-    else if(property == fraction)
+    case fraction:
         return _bstr_t("fraction");
-    else if(property == fugacity)
+    case fugacity:
         return _bstr_t("fugacity");
-    else if(property == fugacityCoefficient)
+    case fugacityCoefficient:
         return _bstr_t("fugacityCoefficient");
-    else if(property == gibbsEnergy)
+    case gibbsEnergy:
         return _bstr_t("gibbsEnergy");
-    else if(property == heatCapacityCp)
+    case heatCapacityCp:
         return _bstr_t("heatCapacityCp");
-    else if(property == heatCapacityCv)
+    case heatCapacityCv:
         return _bstr_t("heatCapacityCv");
-    else if(property == helmholtzEnergy)
+    case helmholtzEnergy:
         return _bstr_t("helmholtzEnergy");
-    else if(property == internalEnergy)
+    case internalEnergy:
         return _bstr_t("internalEnergy");
-    else if(property == jouleThomsonCoefficient)
+    case jouleThomsonCoefficient:
         return _bstr_t("jouleThomsonCoefficient");
-    else if(property == logFugacity)
+    case logFugacity:
         return _bstr_t("logFugacity");
-    else if(property == logFugacityCoefficient)
+    case logFugacityCoefficient:
         return _bstr_t("logFugacityCoefficient");
-    else if(property == meanActivityCoefficient)
+    case meanActivityCoefficient:
         return _bstr_t("meanActivityCoefficient");
-    else if(property == molecularWeight)
+    case molecularWeight:
         return _bstr_t("molecularWeight");
-    else if(property == osmoticCoefficient)
+    case osmoticCoefficient:
         return _bstr_t("osmoticCoefficient");
-    else if(property == pH)
+    case pH:
         return _bstr_t("pH");
-    else if(property == pOH)
+    case pOH:
         return _bstr_t("pOH");
-    else if(property == phaseFraction)
+    case phaseFraction:
         return _bstr_t("phaseFraction");
-    else if(property == pressure)
+    case pressure:
         return _bstr_t("pressure");
-    else if(property == speedOfSound)
+    case speedOfSound:
         return _bstr_t("speedOfSound");
-    else if(property == temperature)
+    case temperature:
         return _bstr_t("temperature");
-    else if(property == thermalConductivity)
+    case thermalConductivity:
         return _bstr_t("thermalConductivity");
-    else if(property == totalFlow)
+    case totalFlow:
         return _bstr_t("totalFlow");
-    else if(property == viscosity)
+    case viscosity:
         return _bstr_t("viscosity");
-    else if(property == volume)
+    case volume:
         return _bstr_t("volume");
 
-    // SinglePhaseVectorProperties
-    else if(property == diffusionCoefficient)
+        // SinglePhaseVectorProperties
+    case diffusionCoefficient:
         return _bstr_t("diffusionCoefficient");
 
-    // TwoPhaseScalarProperties
-    else if(property == kvalue)
+        // TwoPhaseScalarProperties
+    case kvalue:
         return _bstr_t("kvalue");
-    else if(property == logKvalue)
+    case logKvalue:
         return _bstr_t("logKvalue");
-    else if(property == surfaceTension)
+    case surfaceTension:
         return _bstr_t("surfaceTension");
-    else
+    default:
         return _bstr_t("unknown-property");
+    }
 }
 
 void GetCLSIDsForCategory(GUID catID, std::vector<daeCapeCreatableObject>& objects)

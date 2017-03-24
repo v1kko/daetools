@@ -3,9 +3,10 @@
 #include "stdafx.h"
 #include "daeCapeThermoMaterial.h"
 
-ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*              compounds,
-    const std::map<CComBSTR, _variant_t>* overallProperties,
-    const std::map<CComBSTR, _variant_t>* singleProperties)
+ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*                           compounds,
+                                             const ComBSTR_ComBSTR_Variant_PropertyMap*         overallProperties,
+                                             const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap* singlePhaseProperties,
+                                             const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap* twoPhaseProperties)
 {
     CComObject<daeCapeThermoMaterial>* material;
     HRESULT hr = CComObject<daeCapeThermoMaterial>::CreateInstance(&material);
@@ -14,19 +15,30 @@ ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*           
     material->AddRef();
 
     if (compounds)
-    {
-        size_t N = compounds->size();
-        material->m_strarrCompounds.resize(N);
-        for (size_t i = 0; i < N; i++)
-            material->m_strarrCompounds[i] = ::SysAllocString((*compounds)[i]);
-    }
+        material->m_strarrCompounds = *compounds;
     if(overallProperties)
-        material->overallProperties = *overallProperties;
-    if (singleProperties)
-        material->singleProperties = *singleProperties;
+        material->m_overallProperties = *overallProperties;
+    if (singlePhaseProperties)
+        material->m_singlePhaseProperties = *singlePhaseProperties;
+    if (twoPhaseProperties)
+        material->m_twoPhaseProperties = *twoPhaseProperties;
 
     return material;
 }
+
+__declspec(dllexport) dae::tpp::daeThermoPhysicalPropertyPackage_t* daeCreateCapeOpenPropertyPackage()
+{
+    return new daeCapeThermoPropertyRoutine;
+}
+
+__declspec(dllexport) void daeDeleteCapeOpenPropertyPackage(dae::tpp::daeThermoPhysicalPropertyPackage_t* package)
+{
+    daeCapeThermoPropertyRoutine* co_package = dynamic_cast<daeCapeThermoPropertyRoutine*>(package);
+    if (package)
+        delete package;
+    package = NULL;
+}
+
 
 // CdaeCapeThermoMaterial
 
