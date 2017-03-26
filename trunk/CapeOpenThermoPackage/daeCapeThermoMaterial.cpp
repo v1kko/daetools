@@ -2,11 +2,14 @@
 
 #include "stdafx.h"
 #include "daeCapeThermoMaterial.h"
+#include "daeCapeThermoRoutine.h"
 
-ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*                           compounds,
-                                             const ComBSTR_ComBSTR_Variant_PropertyMap*         overallProperties,
-                                             const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap* singlePhaseProperties,
-                                             const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap* twoPhaseProperties)
+CComObject<daeCapeThermoMaterial>*  daeCreateThermoMaterial(const std::vector<BSTR>*                              compoundIDs,
+                                                            const std::vector<BSTR>*                              compoundCASNumbers,
+                                                            const std::map<std::string, daeeThermoPackagePhase>*  phases,
+                                                            const ComBSTR_ComBSTR_Variant_PropertyMap*            overallProperties,
+                                                            const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap*    singlePhaseProperties,
+                                                            const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap*    twoPhaseProperties)
 {
     CComObject<daeCapeThermoMaterial>* material;
     HRESULT hr = CComObject<daeCapeThermoMaterial>::CreateInstance(&material);
@@ -14,8 +17,12 @@ ICapeThermoMaterial* daeCreateThermoMaterial(const std::vector<BSTR>*           
     // Increment reference count immediately
     material->AddRef();
 
-    if (compounds)
-        material->m_strarrCompounds = *compounds;
+    if (compoundIDs)
+        material->m_strarrCompoundIDs = *compoundIDs;
+    if (compoundCASNumbers)
+        material->m_strarrCompoundCASNumbers = *compoundCASNumbers;
+    if (phases)
+        material->m_mapAvailablePhases = *phases;
     if(overallProperties)
         material->m_overallProperties = *overallProperties;
     if (singlePhaseProperties)

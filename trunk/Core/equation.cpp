@@ -227,7 +227,7 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
     catch(std::exception& se)
     {
         daeDeclareException(exInvalidCall);
-        e << "Residual evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+        e << "Residual evaluation failed in equation " << GetName() << ":\n" << se.what();
         throw e;
     }
 
@@ -299,7 +299,7 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             catch(std::exception& se)
             {
                 daeDeclareException(exInvalidCall);
-                e << "Jacobian evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+                e << "Jacobian evaluation failed in equation " << GetName() << ":\n" << se.what();
                 throw e;
             }
 
@@ -394,7 +394,7 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
         catch(std::exception& se)
         {
             daeDeclareException(exInvalidCall);
-            e << "Sensitivity residual evaluation failed in equation " << GetName() << " (" << se.what() << ")";
+            e << "Sensitivity residual evaluation failed in equation " << GetName() << ":\n" << se.what();
             throw e;
         }
 

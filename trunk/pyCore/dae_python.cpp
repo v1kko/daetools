@@ -257,7 +257,6 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
-
     enum_<daeeThermoPackageBasis>("daeeThermoPackageBasis")
         .value("eMole",	          dae::tpp::eMole)
         .value("eMass",	          dae::tpp::eMass)
@@ -270,42 +269,6 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eVapor",            dae::tpp::eVapor)
         .value("eLiquid",           dae::tpp::eLiquid)
         .value("eSolid",            dae::tpp::eSolid)
-        .export_values()
-    ;
-
-    enum_<daeeThermoPhysicalProperty>("daeeThermoPhysicalProperty")
-        .value("compressibility",           dae::tpp::compressibility)
-        .value("compressibilityFactor",     dae::tpp::compressibilityFactor)
-        .value("density",                   dae::tpp::density)
-        .value("dissociationConstant",      dae::tpp::dissociationConstant)
-        .value("enthalpy",                  dae::tpp::enthalpy)
-        .value("enthalpyF",                 dae::tpp::enthalpyF)
-        .value("enthalpyNF",                dae::tpp::enthalpyNF)
-        .value("entropy",                   dae::tpp::entropy)
-        .value("entropyF",                  dae::tpp::entropyF)
-        .value("entropyNF",                 dae::tpp::entropyNF)
-        .value("excessGibbsEnergy",         dae::tpp::excessGibbsEnergy)
-        .value("excessHelmholtzEnergy",     dae::tpp::excessHelmholtzEnergy)
-        .value("excessInternalEnergy",      dae::tpp::excessInternalEnergy)
-        .value("excessVolume",              dae::tpp::excessVolume)
-        .value("gibbsEnergy",               dae::tpp::gibbsEnergy)
-        .value("heatCapacityCp",            dae::tpp::heatCapacityCp)
-        .value("heatCapacityCv",            dae::tpp::heatCapacityCv)
-        .value("helmholtzEnergy",           dae::tpp::helmholtzEnergy)
-        .value("internalEnergy",            dae::tpp::internalEnergy)
-        .value("jouleThomsonCoefficient",   dae::tpp::jouleThomsonCoefficient)
-        .value("molecularWeight",           dae::tpp::molecularWeight)
-        .value("osmoticCoefficient",        dae::tpp::osmoticCoefficient)
-        .value("pH",                        dae::tpp::pH)
-        .value("pOH",                       dae::tpp::pOH)
-        .value("phaseFraction",             dae::tpp::phaseFraction)
-        .value("pressure",                  dae::tpp::pressure)
-        .value("speedOfSound",              dae::tpp::speedOfSound)
-        .value("temperature",               dae::tpp::temperature)
-        .value("thermalConductivity",       dae::tpp::thermalConductivity)
-        .value("totalFlow",                 dae::tpp::totalFlow)
-        .value("viscosity",                 dae::tpp::viscosity)
-        .value("volume",                    dae::tpp::volume)
         .export_values()
     ;
 
@@ -1883,11 +1846,15 @@ BOOST_PYTHON_MODULE(pyCore)
                                                              arg("parentModel"),
                                                              arg("descripton") = ""
                                                            )))
+
         // Virtual function that must be implemented in derived classes in python
         .def("LoadPackage",	&daepython::CapeOpen_LoadPackage, (  arg("self"),
                                                                  arg("packageManager"),
                                                                  arg("packageName"),
-                                                                 arg("compounds")
+                                                                 arg("compoundIDs"),
+                                                                 arg("compoundCASNumbers"),
+                                                                 arg("availablePhases"),
+                                                                 arg("defaultBasis") = dae::tpp::eMole
                                                                ))
 
         .def("PureCompoundConstantProperty",	&daepython::PureCompoundConstantProperty, (  arg("self"),
@@ -1903,13 +1870,13 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("PureCompoundPDProperty",	&daepython::PureCompoundPDProperty, ( arg("self"),
                                                                               arg("property"),
-                                                                              arg("presure"),
+                                                                              arg("pressure"),
                                                                               arg("compound")
                                                                             ))
 
         .def("SinglePhaseScalarProperty",	&daepython::SinglePhaseScalarProperty, ( arg("self"),
                                                                                      arg("property"),
-                                                                                     arg("presure"),
+                                                                                     arg("pressure"),
                                                                                      arg("temperature"),
                                                                                      arg("composition"),
                                                                                      arg("phase"),
@@ -1918,7 +1885,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("SinglePhaseVectorProperty",	&daepython::SinglePhaseVectorProperty, ( arg("self"),
                                                                                      arg("property"),
-                                                                                     arg("presure"),
+                                                                                     arg("pressure"),
                                                                                      arg("temperature"),
                                                                                      arg("composition"),
                                                                                      arg("phase"),
@@ -1927,9 +1894,27 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("TwoPhaseScalarProperty",	&daepython::TwoPhaseScalarProperty, ( arg("self"),
                                                                               arg("property"),
-                                                                              arg("presure"),
-                                                                              arg("temperature"),
-                                                                              arg("composition"),
+                                                                              arg("pressure1"),
+                                                                              arg("temperature1"),
+                                                                              arg("composition1"),
+                                                                              arg("phase1"),
+                                                                              arg("pressure2"),
+                                                                              arg("temperature2"),
+                                                                              arg("composition2"),
+                                                                              arg("phase2"),
+                                                                              arg("basis") = dae::tpp::eMole
+                                                                            ))
+
+        .def("TwoPhaseVectorProperty",	&daepython::TwoPhaseVectorProperty, ( arg("self"),
+                                                                              arg("property"),
+                                                                              arg("pressure1"),
+                                                                              arg("temperature1"),
+                                                                              arg("composition1"),
+                                                                              arg("phase1"),
+                                                                              arg("pressure2"),
+                                                                              arg("temperature2"),
+                                                                              arg("composition2"),
+                                                                              arg("phase2"),
                                                                               arg("basis") = dae::tpp::eMole
                                                                             ))
 
@@ -1950,13 +1935,13 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("calcPureCompoundPDProperty",	&daepython::calcPureCompoundPDProperty, ( arg("self"),
                                                                                       arg("property"),
-                                                                                      arg("presure"),
+                                                                                      arg("pressure"),
                                                                                       arg("compound")
                                                                                     ))
 
         .def("calcSinglePhaseScalarProperty",	&daepython::calcSinglePhaseScalarProperty, (  arg("self"),
                                                                                               arg("property"),
-                                                                                              arg("presure"),
+                                                                                              arg("pressure"),
                                                                                               arg("temperature"),
                                                                                               arg("composition"),
                                                                                               arg("phase"),
@@ -1965,7 +1950,7 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("calcSinglePhaseVectorProperty",	&daepython::calcSinglePhaseVectorProperty, (  arg("self"),
                                                                                               arg("property"),
-                                                                                              arg("presure"),
+                                                                                              arg("pressure"),
                                                                                               arg("temperature"),
                                                                                               arg("composition"),
                                                                                               arg("phase"),
@@ -1974,9 +1959,27 @@ BOOST_PYTHON_MODULE(pyCore)
 
         .def("calcTwoPhaseScalarProperty",	&daepython::calcTwoPhaseScalarProperty, (  arg("self"),
                                                                                        arg("property"),
-                                                                                       arg("presure"),
-                                                                                       arg("temperature"),
-                                                                                       arg("composition"),
+                                                                                       arg("pressure1"),
+                                                                                       arg("temperature1"),
+                                                                                       arg("composition1"),
+                                                                                       arg("phase1"),
+                                                                                       arg("pressure2"),
+                                                                                       arg("temperature2"),
+                                                                                       arg("composition2"),
+                                                                                       arg("phase2"),
+                                                                                       arg("basis") = dae::tpp::eMole
+                                                                                     ))
+
+        .def("calcTwoPhaseVectorProperty",	&daepython::calcTwoPhaseVectorProperty, (  arg("self"),
+                                                                                       arg("property"),
+                                                                                       arg("pressure1"),
+                                                                                       arg("temperature1"),
+                                                                                       arg("composition1"),
+                                                                                       arg("phase1"),
+                                                                                       arg("pressure2"),
+                                                                                       arg("temperature2"),
+                                                                                       arg("composition2"),
+                                                                                       arg("phase2"),
                                                                                        arg("basis") = dae::tpp::eMole
                                                                                      ))
 

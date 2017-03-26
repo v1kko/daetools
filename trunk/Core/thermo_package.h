@@ -38,180 +38,13 @@ enum daeeThermoPackageBasis
     eUndefinedBasis
 };
 
+// Phase State Of Aggregation
 enum daeeThermoPackagePhase
 {
     etppPhaseUnknown = 0,
     eVapor,
     eLiquid,
     eSolid
-};
-
-// These constants can help in identifying to which group the property belongs.
-// i.e. scalar single phase properties are in the range:
-//     [cSinglePhaseScalarProperties, cSinglePhaseScalarProperties + offset)
-const int cPropertyTypeOffset = 1000;
-
-const int cUniversalConstants                   = 0;
-const int cPureCompoundConstantStringProperties = 1000;
-const int cPureCompoundConstantFloatProperties  = 2000;
-const int cPureCompoundTDProperties             = 3000;
-const int cPureCompoundPDProperties             = 4000;
-const int cSinglePhaseScalarProperties          = 5000;
-const int cSinglePhaseVectorProperties          = 6000;
-const int cTwoPhaseScalarProperties             = 7000;
-const int cTwoPhaseVectorProperties             = 8000;
-
-enum daeeThermoPhysicalProperty
-{
-// Universal constants
-    avogadroConstant = cUniversalConstants,
-    boltzmannConstant,
-    idealGasStateReferencePressure,
-    molarGasConstant,
-    speedOfLightInVacuum,
-    standardAccelerationOfGravity,
-
- // PureCompoundConstantStringProperty
-    casRegistryNumber = cPureCompoundConstantStringProperties,
-    chemicalFormula,
-    iupacName,
-    SMILESformula,
-
-// PureCompoundConstantFloatProperty
-    acentricFactor = cPureCompoundConstantFloatProperties,
-    associationParameter,
-    bornRadius,
-    charge,
-    criticalCompressibilityFactor,
-    criticalDensity,
-    criticalPressure,
-    criticalTemperature,
-    criticalVolume,
-    diffusionVolume,
-    dipoleMoment,
-    energyLennardJones,
-    gyrationRadius,
-    heatOfFusionAtNormalFreezingPoint,
-    heatOfVaporizationAtNormalBoilingPoint,
-    idealGasEnthalpyOfFormationAt25C,
-    idealGasGibbsFreeEnergyOfFormationAt25C,
-    liquidDensityAt25C,
-    liquidVolumeAt25C,
-    lengthLennardJones,
-    pureMolecularWeight, // was molecularWeight but clashes with the scalar single phase property
-    normalBoilingPoint,
-    normalFreezingPoint,
-    parachor,
-    standardEntropyGas,
-    standardEntropyLiquid,
-    standardEntropySolid,
-    standardEnthalpyAqueousDilution,
-    standardFormationEnthalpyGas,
-    standardFormationEnthalpyLiquid,
-    standardFormationEnthalpySolid,
-    standardFormationGibbsEnergyGas,
-    standardFormationGibbsEnergyLiquid,
-    standardFormationGibbsEnergySolid,
-    standardGibbsAqueousDilution,
-    triplePointPressure,
-    triplePointTemperature,
-    vanderwaalsArea,
-    vanderwaalsVolume,
-
-// daeePureCompoundTDProperty
-    cpAqueousInfiniteDilution = cPureCompoundTDProperties,
-    dielectricConstant,
-    expansivity,
-    fugacityCoefficientOfVapor,
-    glassTransitionPressure,
-    heatCapacityOfLiquid,
-    heatCapacityOfSolid,
-    heatOfFusion,
-    heatOfSublimation,
-    heatOfSolidSolidPhaseTransition,
-    heatOfVaporization,
-    idealGasEnthalpy,
-    idealGasEntropy,
-    idealGasHeatCapacity,
-    meltingPressure,
-    selfDiffusionCoefficientGas,
-    selfDiffusionCoefficientLiquid,
-    solidSolidPhaseTransitionPressure,
-    sublimationPressure,
-    surfaceTensionSatLiquid,
-    thermalConductivityOfLiquid,
-    thermalConductivityOfSolid,
-    thermalConductivityOfVapor,
-    vaporPressure,
-    virialCoefficient,
-    viscosityOfLiquid,
-    viscosityOfVapor,
-    volumeChangeUponMelting,
-    volumeChangeUponSolidSolidPhaseTransition,
-    volumeChangeUponSublimation,
-    volumeChangeUponVaporization,
-    volumeOfLiquid,
-
-// PureCompoundPDProperty
-    boilingPointTemperature = cPureCompoundPDProperties,
-    glassTransitionTemperature,
-    meltingTemperature,
-    solidSolidPhaseTransitionTemperature,
-
-// SinglePhaseScalarProperties
-    compressibility = cSinglePhaseScalarProperties,
-    compressibilityFactor,
-    density,
-    dissociationConstant,
-    enthalpy,
-    enthalpyF,
-    enthalpyNF,
-    entropy,
-    entropyF,
-    entropyNF,
-    excessEnthalpy,
-    excessEntropy,
-    excessGibbsEnergy,
-    excessHelmholtzEnergy,
-    excessInternalEnergy,
-    excessVolume,
-    gibbsEnergy,
-    heatCapacityCp,
-    heatCapacityCv,
-    helmholtzEnergy,
-    internalEnergy,
-    jouleThomsonCoefficient,
-    molecularWeight,
-    osmoticCoefficient,
-    pH,
-    pOH,
-    phaseFraction,
-    pressure,
-    speedOfSound,
-    temperature,
-    thermalConductivity,
-    totalFlow,
-    viscosity,
-    volume,
-
-// SinglePhaseVectorProperties
-    activity = cSinglePhaseVectorProperties,
-    activityCoefficient,
-    diffusionCoefficient, // Tensor rank 2
-    flow,
-    fraction,
-    fugacity,
-    fugacityCoefficient,
-    logFugacity,
-    logFugacityCoefficient,
-    meanActivityCoefficient,
-
-// TwoPhaseScalarProperties
-    surfaceTension = cTwoPhaseScalarProperties,
-
-// TwoPhaseVectorProperties
-    kvalue = cTwoPhaseVectorProperties,
-    logKvalue
 };
 
 /*********************************************************************************************
@@ -225,39 +58,52 @@ public:
 public:
     virtual void LoadPackage(const std::string& strPackageManager,
                              const std::string& strPackageName,
-                             const std::vector<std::string>& strarrCompounds) = 0;
+                             const std::vector<std::string>& strarrCompoundIDs,
+                             const std::vector<std::string>& strarrCompoundCASNumbers,
+                             const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
+                             daeeThermoPackageBasis defaultBasis = eMole) = 0;
 
-    virtual double PureCompoundConstantProperty(daeeThermoPhysicalProperty property, const std::string& compound) = 0;
+    virtual double PureCompoundConstantProperty(const std::string& property, const std::string& compound) = 0;
 
-    virtual double PureCompoundTDProperty(daeeThermoPhysicalProperty property, double T, const std::string& compound) = 0;
+    virtual double PureCompoundTDProperty(const std::string& property, double T, const std::string& compound) = 0;
 
-    virtual double PureCompoundPDProperty(daeeThermoPhysicalProperty property, double P, const std::string& compound) = 0;
+    virtual double PureCompoundPDProperty(const std::string& property, double P, const std::string& compound) = 0;
 
-    virtual double SinglePhaseScalarProperty(daeeThermoPhysicalProperty property,
+    virtual double SinglePhaseScalarProperty(const std::string& property,
                                              double P,
                                              double T,
                                              const std::vector<double>& x,
-                                             daeeThermoPackagePhase phase,
+                                             const std::string& phase,
                                              daeeThermoPackageBasis basis = eMole) = 0;
 
-    virtual void SinglePhaseVectorProperty(daeeThermoPhysicalProperty property,
+    virtual void SinglePhaseVectorProperty(const std::string& property,
                                            double P,
                                            double T,
                                            const std::vector<double>& x,
-                                           daeeThermoPackagePhase phase,
+                                           const std::string& phase,
                                            std::vector<double>& results,
                                            daeeThermoPackageBasis basis = eMole) = 0;
 
-    virtual double TwoPhaseScalarProperty(daeeThermoPhysicalProperty property,
-                                          double P,
-                                          double T,
-                                          const std::vector<double>& x,
+    virtual double TwoPhaseScalarProperty(const std::string& property,
+                                          double P1,
+                                          double T1,
+                                          const std::vector<double>& x1,
+                                          const std::string& phase1,
+                                          double P2,
+                                          double T2,
+                                          const std::vector<double>& x2,
+                                          const std::string& phase2,
                                           daeeThermoPackageBasis basis = eMole) = 0;
 
-    virtual void TwoPhaseVectorProperty(daeeThermoPhysicalProperty property,
-                                        double P,
-                                        double T,
-                                        const std::vector<double>& x,
+    virtual void TwoPhaseVectorProperty(const std::string& property,
+                                        double P1,
+                                        double T1,
+                                        const std::vector<double>& x1,
+                                        const std::string& phase1,
+                                        double P2,
+                                        double T2,
+                                        const std::vector<double>& x2,
+                                        const std::string& phase2,
                                         std::vector<double>& results,
                                         daeeThermoPackageBasis basis = eMole) = 0;
 };

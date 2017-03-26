@@ -793,12 +793,9 @@ class DAE_CORE_API adThermoPhysicalPropertyPackageArrayNode : public adNodeArray
 public:
     daeDeclareDynamicClass(adThermoPhysicalPropertyPackageArrayNode)
     adThermoPhysicalPropertyPackageArrayNode(daeeThermoPackagePropertyType propType,
-                                              adNodePtr P,
-                                              adNodePtr T,
-                                              adNodeArrayPtr X,
-                                              daeeThermoPhysicalProperty property_,
-                                              daeeThermoPackagePhase phase_,
+                                              const std::string& property_,
                                               daeeThermoPackageBasis basis_,
+                                              const unit& units_,
                                               daeThermoPhysicalPropertyPackage_t* tpp);
     virtual ~adThermoPhysicalPropertyPackageArrayNode(void);
 
@@ -824,9 +821,14 @@ public:
     adNodePtr                           pressure;
     adNodePtr                           temperature;
     adNodeArrayPtr                      composition;
-    daeeThermoPhysicalProperty          property;
-    daeeThermoPackagePhase              phase;
+    std::string                         phase;
+    adNodePtr                           pressure2;
+    adNodePtr                           temperature2;
+    adNodeArrayPtr                      composition2;
+    std::string                         phase2;
+    std::string                         property;
     daeeThermoPackageBasis              basis;
+    unit                                units;
     daeThermoPhysicalPropertyPackage_t* thermoPhysicalPropertyPackage;
 };
 

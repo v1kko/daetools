@@ -126,7 +126,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>$(SolutionDir)..\debug\cdaeCapeOpenThermoPackage.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(SolutionDir)../release/$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>$(SolutionDir)../debug/$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

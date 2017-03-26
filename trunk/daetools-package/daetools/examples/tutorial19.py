@@ -32,38 +32,132 @@ from daetools.pyDAE import *
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
+def test_single_phase():
+    # calcXXX functions perform actual calculations (return float values)
+    # XXX functions create adouble with adThermoPhysicalPropertyPackageNode
+    ctpp = daeCapeOpenThermoPhysicalPropertyPackage("ChemSepCapeOpenTPP", None, "")
+    ctpp.LoadPackage("ChemSep Property Package Manager", # packageManager name (case sensitive)
+                    "SMROG",                             # package name (case sensitive)
+                    ["Hydrogen", "Carbon monoxide",
+                     "Methane", "Carbon dioxide"],       # compound IDs in the mixture
+                    [],                                  # compund CAS numbers (optional)
+                    {"Vapor":eVapor})                    # dictionary {'phaseLabel' : stateOfAggregation}
+                                                         # where stateOfAggregation can be:
+                                                         # eVapor, eLiquid, eSolid or etppPhaseUnknown
+
+    P = 1e5
+    T = 300
+    x = [0.7557, 0.04, 0.035, 0.1693]
+
+    print("*****************************************************************")
+    print("                         Single phase tests                      ")
+    print("*****************************************************************")
+
+    try:
+        result = ctpp.calcPureCompoundConstantProperty("heatOfFusionAtNormalFreezingPoint", "Hydrogen")
+        print("Test 1. heatOfFusionAtNormalFreezingPoint = %f J/mol" % result)
+    except Exception as e:
+        print("Test 1. Calculation failed")
+        print(str(e))
+
+    try:
+        result = ctpp.calcPureCompoundTDProperty("idealGasEnthalpy", T, "Methane")
+        print("Test 2. idealGasEnthalpy = %f J/mol" % result)
+    except Exception as e:
+        print("Test 2. Calculation failed")
+        print(str(e))
+
+    try:
+        result = ctpp.calcPureCompoundPDProperty("boilingPointTemperature", P, "Hydrogen")
+        print("Test 3. boilingPointTemperature = %f K" % result)
+    except Exception as e:
+        print("Test 3. Calculation failed")
+        print(str(e))
+
+    try:
+        result = ctpp.calcSinglePhaseScalarProperty("density",  P, T, x, "Vapor", eMole)
+        print("Test 4. density = %f mol/m^3" % result)
+    except Exception as e:
+        print("Test 3. Calculation failed")
+        print(str(e))
+
+    try:
+        results = ctpp.calcSinglePhaseVectorProperty("fugacity",  P, T, x, "Vapor", eUndefinedBasis)
+        print("Test 5. fugacity = %s" % results)
+    except Exception as e:
+        print("Test 5. Calculation failed")
+        print(str(e))
+
+def test_two_phase():
+    # calcXXX functions perform actual calculations (return float values)
+    ctpp = daeCapeOpenThermoPhysicalPropertyPackage("ChemSepCapeOpenTPP", None, "")
+    ctpp.LoadPackage("ChemSep Property Package Manager",  # packageManager name (case sensitive)
+                     "Water+Ethanol",                     # package name (case sensitive)
+                     ["Water", "Ethanol"],                # compound IDs in the mixture
+                     [],                                  # compund CAS numbers (optional)
+                     {"Vapor"  : eVapor,
+                      "Liquid" : eLiquid})                # dictionary {'phaseLabel' : stateOfAggregation}
+
+    P1 = 1e5
+    T1 = 300
+    x1 = [0.60, 0.40]
+    P2 = 1e5
+    T2 = 300
+    x2 = [0.60, 0.40]
+
+    print("*****************************************************************")
+    print("                         Two phase tests                         ")
+    print("*****************************************************************")
+
+    try:
+        result = ctpp.calcTwoPhaseScalarProperty("surfaceTension",
+                                                 P1, T1, x1, "Liquid",
+                                                 P2, T2, x2, "Vapor",
+                                                 eUndefinedBasis)
+        print("Test 1. Water+Ethanol mixture surfaceTension = %f N/m" % result)
+    except Exception as e:
+        print("Test 1. Calculation failed")
+        print(str(e))
+
+    try:
+        results = ctpp.calcTwoPhaseVectorProperty("kvalue",
+                                                  P1, T1, x1, "Liquid",
+                                                  P2, T2, x2, "Vapor",
+                                                  eUndefinedBasis)
+        print("Test 2. Water+Ethanol mixture kvalues = %s" % results)
+    except Exception as e:
+        print("Test 2. Calculation failed")
+        print(str(e))
+
 class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        # calcXXX functions perform actual calculations (return float values)
-        # XXX functions create adouble with adThermoPhysicalPropertyPackageNode
-        #self.tpp = daeCapeOpenThermoPhysicalPropertyPackage("ChemSepCapeOpenTPP", self, "")
-        #self.tpp.LoadPackage("ChemSep Property Package Manager", "SMROG", ["Hydrogen", "Carbon monoxide", "Methane", "Carbon dioxide"])
-        #P = 1e5
-        #T = 300
-        #x = [0.7557, 0.04, 0.035, 0.1693]
-        #density = self.tpp.calcSinglePhaseScalarProperty(daeeThermoPhysicalProperty.density, P, T, x, eVapor, eMole)
-        #print("density = %f" % density)
-        #density = self.tpp.SinglePhaseScalarProperty(daeeThermoPhysicalProperty.density, P, T, x, eVapor, eMole)
-        #print("density = %s" % density.NodeAsLatex())
+        test_single_phase()
+        test_two_phase()
 
         self.tpp = daeCapeOpenThermoPhysicalPropertyPackage("ChemSepCapeOpenTPP", self, "")
-        self.tpp.LoadPackage("ChemSep Property Package Manager", "Water+Ethanol", ["Water", "Ethanol"])
+        self.tpp.LoadPackage("ChemSep Property Package Manager", # packageManager name (case sensitive)
+                             "Water+Ethanol",                    # package name (case sensitive)
+                             ["Water", "Ethanol"],               # compound IDs in the mixture
+                             [],                                 # compund CAS numbers (optional)
+                             {'Liquid':eLiquid})                 # dictionary {'phaseLabel' : stateOfAggregation}
+                                                                 # where stateOfAggregation can be:
+                                                                 # eVapor, eLiquid, eSolid or etppPhaseUnknown
 
         self.m    = daeParameter("m",       kg,           self, "Mass of water")
 
-        self.cp   = daeVariable("c_p",   specific_heat_capacity_t, self, "Specific heat capacity of water")
+        self.cp   = daeVariable("c_p",   specific_heat_capacity_t, self, "Specific heat capacity of the liquid")
         self.Qin  = daeVariable("Q_in",  power_t,                  self, "Power of the heater")
-        self.T    = daeVariable("T",     temperature_t,            self, "Temperature of the plate")
+        self.T    = daeVariable("T",     temperature_t,            self, "Temperature of the liquid")
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
         eq = self.CreateEquation("C_p", "Equation to calculate the specific heat capacity of water as a function of the temperature.")
-        tpp_cp = self.tpp.SinglePhaseScalarProperty(daeeThermoPhysicalProperty.heatCapacityCp, 1e5, self.T(), [0.60, 0.40], eLiquid, eMole)
+        tpp_cp = self.tpp.SinglePhaseScalarProperty("heatCapacityCp", 1e5, self.T(), [0.60, 0.40], 'Liquid', eMole)
         # Calculating molecularWeight does not work for some reasons
-        #tpp_MW = self.tpp.calcSinglePhaseScalarProperty(daeeThermoPhysicalProperty.molecularWeight, 1e5, 283, [0.60, 0.40], eLiquid, eMole)
+        #tpp_MW = self.tpp.calcSinglePhaseScalarProperty("molecularWeight", 1e5, 283, [0.60, 0.40], 'Liquid', eMole)
         eq.Residual = self.cp() - tpp_cp/0.018 # TPP package returns cp in J/(mol.K)
         eq.CheckUnitsConsistency = False
 
@@ -116,15 +210,6 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
-    #import pprint
-    #for eq in simulation.m.Equations:
-    #    print(eq.CanonicalName, ':')
-    #    for eei in eq.EquationExecutionInfos:
-    #        print('    %s:' % eei.Name)
-    #        # dictionary {overall_index : (block_index,derivative_node)}
-    #        for oi, (bi,node) in eei.JacobianExpressions.items():
-    #            print('        %d : %s' % (bi, node))
-            
     # Save the model report and the runtime model report
     #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
     #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")

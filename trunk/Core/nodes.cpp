@@ -4230,23 +4230,17 @@ bool adScalarExternalFunctionNode::IsDifferential(void) const
     adThermoPhysicalPropertyPackageScalarNode
 **********************************************************************************************/
 adThermoPhysicalPropertyPackageScalarNode::adThermoPhysicalPropertyPackageScalarNode(daeeThermoPackagePropertyType propType,
-                                                                                     adNodePtr P,
-                                                                                     adNodePtr T,
-                                                                                     adNodeArrayPtr X,
-                                                                                     daeeThermoPhysicalProperty property_,
-                                                                                     daeeThermoPackagePhase phase_,
+                                                                                     const std::string& property_,
                                                                                      daeeThermoPackageBasis basis_,
                                                                                      const std::string& compound_,
+                                                                                     const unit& units_,
                                                                                      daeThermoPhysicalPropertyPackage_t* tpp)
 {
     propertyType = propType;
-    pressure     = P;
-    temperature  = T;
-    composition  = X;
     property     = property_;
-    phase        = phase_;
     basis        = basis_;
     compound     = compound_;
+    units        = units_;
     thermoPhysicalPropertyPackage = tpp;
 }
 
@@ -4263,27 +4257,50 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
 
     // If GetGatherInfo is true Evaluate on P, T and x nodes will create Runtime nodes.
     // Otherwise, they will contain values.
-    adouble       P = (pressure    ? pressure   ->Evaluate(pExecutionContext) : adouble());
-    adouble       T = (temperature ? temperature->Evaluate(pExecutionContext) : adouble());
-    adouble_array x = (composition ? composition->Evaluate(pExecutionContext) : adouble_array());
+    adouble       P  = (pressure     ? pressure    ->Evaluate(pExecutionContext) : adouble());
+    adouble       T  = (temperature  ? temperature ->Evaluate(pExecutionContext) : adouble());
+    adouble_array x  = (composition  ? composition ->Evaluate(pExecutionContext) : adouble_array());
+    adouble       P2 = (pressure2    ? pressure2   ->Evaluate(pExecutionContext) : adouble());
+    adouble       T2 = (temperature2 ? temperature2->Evaluate(pExecutionContext) : adouble());
+    adouble_array x2 = (composition2 ? composition2->Evaluate(pExecutionContext) : adouble_array());
 
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
         // Do we need to Clone the node? Yes, P, T and x are now Runtime nodes!
-        tmp.node = adNodePtr(new adThermoPhysicalPropertyPackageScalarNode(propertyType,
-                                                                           P.node, T.node, x.node,
-                                                                           property,
-                                                                           phase,
-                                                                           basis,
-                                                                           compound,
-                                                                           thermoPhysicalPropertyPackage));
+        adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(propertyType,
+                                                                                                     property,
+                                                                                                     basis,
+                                                                                                     compound,
+                                                                                                     units,
+                                                                                                     thermoPhysicalPropertyPackage);
+        tmp.node = adNodePtr(n);
+        n->pressure     = P.node;
+        n->temperature  = T.node;
+        n->composition  = x.node;
+        n->phase        = phase;
+        n->pressure2    = P2.node;
+        n->temperature2 = T2.node;
+        n->composition2 = x2.node;
+        n->phase2       = phase2;
         return tmp;
     }
 
-    std::vector<real_t> arrX(x.GetSize());
-    for(size_t i = 0; i < x.GetSize(); i++)
-        arrX[i] = x[i].getValue();
+    std::vector<real_t> arrX;
+    if(x.GetSize() > 0)
+    {
+        arrX.resize(x.GetSize());
+        for(size_t i = 0; i < x.GetSize(); i++)
+            arrX[i] = x[i].getValue();
+    }
+
+    std::vector<real_t> arrX2;
+    if(x2.GetSize() > 0)
+    {
+        arrX2.resize(x2.GetSize());
+        for(size_t i = 0; i < x2.GetSize(); i++)
+            arrX2[i] = x2[i].getValue();
+    }
 
     double result;
     if(propertyType == dae::tpp::ePureCompoundConstantProperty)
@@ -4307,7 +4324,8 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
 
     else if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
         result = thermoPhysicalPropertyPackage->TwoPhaseScalarProperty(property,
-                                                                       P.getValue(), T.getValue(), arrX,
+                                                                       P.getValue(), T.getValue(), arrX, phase,
+                                                                       P2.getValue(), T2.getValue(), arrX2, phase2,
                                                                        basis);
 
     else
@@ -4322,7 +4340,7 @@ const quantity adThermoPhysicalPropertyPackageScalarNode::GetQuantity(void) cons
 {
     if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
-    return quantity(0.0, unit()); //, thermoPhysicalPropertyPackage->GetUnits(property));
+    return quantity(0.0, units);
 }
 
 adNode* adThermoPhysicalPropertyPackageScalarNode::Clone(void) const
@@ -4420,21 +4438,15 @@ bool adThermoPhysicalPropertyPackageScalarNode::IsDifferential(void) const
     adThermoPhysicalPropertyPackageArrayNode
 **********************************************************************************************/
 adThermoPhysicalPropertyPackageArrayNode::adThermoPhysicalPropertyPackageArrayNode(daeeThermoPackagePropertyType propType,
-                                                                                   adNodePtr P,
-                                                                                   adNodePtr T,
-                                                                                   adNodeArrayPtr X,
-                                                                                   daeeThermoPhysicalProperty property_,
-                                                                                   daeeThermoPackagePhase phase_,
+                                                                                   const std::string& property_,
                                                                                    daeeThermoPackageBasis basis_,
+                                                                                   const unit& units_,
                                                                                    daeThermoPhysicalPropertyPackage_t* tpp)
 {
     propertyType = propType;
-    pressure     = P;
-    temperature  = T;
-    composition  = X;
     property     = property_;
-    phase        = phase_;
     basis        = basis_;
+    units        = units_;
     thermoPhysicalPropertyPackage = tpp;
 }
 
@@ -4452,26 +4464,49 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
     // If GetGatherInfo is true Evaluate on P, T and x nodes will create Runtime nodes.
     // For some pure compound property calculations some of them can be null ptrs.
     // Otherwise, they will contain values.
-    adouble       P = (pressure    ? pressure   ->Evaluate(pExecutionContext) : adouble());
-    adouble       T = (temperature ? temperature->Evaluate(pExecutionContext) : adouble());
-    adouble_array x = (composition ? composition->Evaluate(pExecutionContext) : adouble_array());
+    adouble       P  = (pressure     ? pressure    ->Evaluate(pExecutionContext) : adouble());
+    adouble       T  = (temperature  ? temperature ->Evaluate(pExecutionContext) : adouble());
+    adouble_array x  = (composition  ? composition ->Evaluate(pExecutionContext) : adouble_array());
+    adouble       P2 = (pressure2    ? pressure2   ->Evaluate(pExecutionContext) : adouble());
+    adouble       T2 = (temperature2 ? temperature2->Evaluate(pExecutionContext) : adouble());
+    adouble_array x2 = (composition2 ? composition2->Evaluate(pExecutionContext) : adouble_array());
 
     if(pExecutionContext->m_pDataProxy->GetGatherInfo())
     {
         tmp.setGatherInfo(true);
         // Do we need to Clone the node? Yes, P, T and x are now Runtime nodes!
-        tmp.node = adNodeArrayPtr(new adThermoPhysicalPropertyPackageArrayNode(propertyType,
-                                                                               P.node, T.node, x.node,
-                                                                               property,
-                                                                               phase,
-                                                                               basis,
-                                                                               thermoPhysicalPropertyPackage));
+        adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(propertyType,
+                                                                                                   property,
+                                                                                                   basis,
+                                                                                                   units,
+                                                                                                   thermoPhysicalPropertyPackage);
+        tmp.node = adNodeArrayPtr(n);
+        n->pressure     = P.node;
+        n->temperature  = T.node;
+        n->composition  = x.node;
+        n->phase        = phase;
+        n->pressure2    = P2.node;
+        n->temperature2 = T2.node;
+        n->composition2 = x2.node;
+        n->phase2       = phase2;
         return tmp;
     }
 
-    std::vector<real_t> arrX(x.GetSize());
-    for(size_t i = 0; i < x.GetSize(); i++)
-        arrX[i] = x[i].getValue();
+    std::vector<real_t> arrX;
+    if(x.GetSize() > 0)
+    {
+        arrX.resize(x.GetSize());
+        for(size_t i = 0; i < x.GetSize(); i++)
+            arrX[i] = x[i].getValue();
+    }
+
+    std::vector<real_t> arrX2;
+    if(x2.GetSize() > 0)
+    {
+        arrX2.resize(x2.GetSize());
+        for(size_t i = 0; i < x2.GetSize(); i++)
+            arrX2[i] = x2[i].getValue();
+    }
 
     std::vector<double> results;
     if(propertyType == dae::tpp::eSinglePhaseVectorProperty)
@@ -4485,7 +4520,8 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
     else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
     {
         thermoPhysicalPropertyPackage->TwoPhaseVectorProperty(property,
-                                                              P.getValue(), T.getValue(), arrX,
+                                                              P.getValue(), T.getValue(), arrX, phase,
+                                                              P2.getValue(), T2.getValue(), arrX2, phase2,
                                                               results,
                                                               basis);
     }
@@ -4517,7 +4553,7 @@ const quantity adThermoPhysicalPropertyPackageArrayNode::GetQuantity(void) const
 {
     if(!thermoPhysicalPropertyPackage)
         daeDeclareAndThrowException(exInvalidPointer);
-    return quantity(0.0, unit()); //, thermoPhysicalPropertyPackage->GetUnits(property));
+    return quantity(0.0, units);
 }
 
 adNodeArray* adThermoPhysicalPropertyPackageArrayNode::Clone(void) const
