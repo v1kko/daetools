@@ -10,51 +10,21 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
-#ifndef DAE_THERMO_PACKAGE_H
-#define DAE_THERMO_PACKAGE_H
+#ifndef DAE_COOL_PROP_THERMO_H
+#define DAE_COOL_PROP_THERMO_H
 
-#include <string>
-#include <vector>
-#include <map>
+#include "../Core/thermo_package.h"
+using namespace dae::tpp;
+#include "CoolProp.h"
+#include "AbstractState.h"
+#include "crossplatform_shared_ptr.h"
+using namespace CoolProp;
 
-namespace dae
-{
-namespace tpp
-{
-enum daeeThermoPackagePropertyType
-{
-    ePureCompoundConstantProperty,
-    ePureCompoundTDProperty,
-    ePureCompoundPDProperty,
-    eSinglePhaseScalarProperty,
-    eSinglePhaseVectorProperty,
-    eTwoPhaseScalarProperty,
-    eTwoPhaseVectorProperty
-};
-
-enum daeeThermoPackageBasis
-{
-    eMole = 0,
-    eMass,
-    eUndefinedBasis
-};
-
-// Phase State Of Aggregation
-enum daeeThermoPackagePhase
-{
-    etppPhaseUnknown = 0,
-    eVapor,
-    eLiquid,
-    eSolid
-};
-
-/*********************************************************************************************
-    daeThermoPhysicalPropertyPackage_t
-**********************************************************************************************/
-class daeThermoPhysicalPropertyPackage_t
+class daeCoolPropThermoPhysicalPropertyPackage : public daeThermoPhysicalPropertyPackage_t
 {
 public:
-    virtual ~daeThermoPhysicalPropertyPackage_t() {}
+    daeCoolPropThermoPhysicalPropertyPackage();
+    virtual ~daeCoolPropThermoPhysicalPropertyPackage();
 
 public:
     virtual void LoadPackage(const std::string& strPackageManager,
@@ -63,14 +33,14 @@ public:
                              const std::vector<std::string>& strarrCompoundCASNumbers,
                              const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
                              daeeThermoPackageBasis defaultBasis = eMole,
-                             const std::map<std::string,std::string>& mapOptions = std::map<std::string,std::string>()) = 0;
+                             const std::map<std::string,std::string>& mapOptions = std::map<std::string,std::string>());
 
-    virtual std::string GetTPPName() = 0;
+    virtual std::string GetTPPName();
 
     // ICapeThermoCompounds interface
-    virtual double GetCompoundConstant(const std::string& property, const std::string& compound) = 0;
-    virtual double GetTDependentProperty(const std::string& property, double T, const std::string& compound) = 0;
-    virtual double GetPDependentProperty(const std::string& property, double P, const std::string& compound) = 0;
+    virtual double GetCompoundConstant(const std::string& property, const std::string& compound);
+    virtual double GetTDependentProperty(const std::string& property, double T, const std::string& compound);
+    virtual double GetPDependentProperty(const std::string& property, double P, const std::string& compound);
 
     // ICapeThermoPropertyRoutine interface
     virtual double CalcSinglePhaseScalarProperty(const std::string& property,
@@ -78,7 +48,7 @@ public:
                                                  double T,
                                                  const std::vector<double>& x,
                                                  const std::string& phase,
-                                                 daeeThermoPackageBasis basis = eMole) = 0;
+                                                 daeeThermoPackageBasis basis = eMole);
 
     virtual void CalcSinglePhaseVectorProperty(const std::string& property,
                                                double P,
@@ -86,7 +56,7 @@ public:
                                                const std::vector<double>& x,
                                                const std::string& phase,
                                                std::vector<double>& results,
-                                               daeeThermoPackageBasis basis = eMole) = 0;
+                                               daeeThermoPackageBasis basis = eMole);
 
     virtual double CalcTwoPhaseScalarProperty(const std::string& property,
                                               double P1,
@@ -97,7 +67,7 @@ public:
                                               double T2,
                                               const std::vector<double>& x2,
                                               const std::string& phase2,
-                                              daeeThermoPackageBasis basis = eMole) = 0;
+                                              daeeThermoPackageBasis basis = eMole);
 
     virtual void CalcTwoPhaseVectorProperty(const std::string& property,
                                             double P1,
@@ -109,10 +79,20 @@ public:
                                             const std::vector<double>& x2,
                                             const std::string& phase2,
                                             std::vector<double>& results,
-                                            daeeThermoPackageBasis basis = eMole) = 0;
-};
+                                            daeeThermoPackageBasis basis = eMole);
 
-}
-}
+protected:
+    double GetScalarProperty(const std::string& capeOpenProperty, daeeThermoPackageBasis eBasis);
+    void   GetVectorProperty(const std::string& capeOpenProperty, daeeThermoPackageBasis eBasis, std::vector<double>& results);
+
+protected:
+    shared_ptr<AbstractState>                       m_mixture;
+    std::vector<std::string>                        m_strarrCompoundIDs;
+    std::vector<std::string>                        m_strarrCompoundCASNumbers;
+    std::map<std::string, daeeThermoPackagePhase>   m_mapAvailablePhases;
+    daeeThermoPackageBasis                          m_defaultBasis;
+    std::string                                     m_defaultBackend;
+    std::string                                     m_defaultReferenceState;
+};
 
 #endif

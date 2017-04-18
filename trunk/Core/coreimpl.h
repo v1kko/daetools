@@ -3780,70 +3780,80 @@ using dae::tpp::daeeThermoPackagePropertyType;
 using dae::tpp::daeeThermoPackagePhase;
 using dae::tpp::daeeThermoPackageBasis;
 using dae::tpp::daeThermoPhysicalPropertyPackage_t;
+using dae::tpp::eMole;
 
-class DAE_CORE_API daeCapeOpenThermoPhysicalPropertyPackage : public daeObject
+class DAE_CORE_API daeThermoPhysicalPropertyPackage : public daeObject
 {
 public:
-    daeDeclareDynamicClass(daeCapeOpenThermoPhysicalPropertyPackage)
-    daeCapeOpenThermoPhysicalPropertyPackage(const string& strName, daeModel* pModel, const string& strDescription = "");
-    virtual ~daeCapeOpenThermoPhysicalPropertyPackage(void);
+    daeDeclareDynamicClass(daeThermoPhysicalPropertyPackage)
+    daeThermoPhysicalPropertyPackage(const string& strName, daeModel* pModel, const string& strDescription = "");
+    virtual ~daeThermoPhysicalPropertyPackage(void);
 
 public:
-    void LoadPackage(const std::string& strPackageManager,
-                     const std::string& strPackageName,
-                     const std::vector<std::string>& strarrCompoundIDs,
-                     const std::vector<std::string>& strarrCompoundCASNumbers,
-                     const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
-                     daeeThermoPackageBasis defaultBasis = dae::tpp::eMole);
+    void Load_CoolProp_TPP(const std::vector<std::string>& strarrCompoundIDs,
+                           const std::vector<std::string>& strarrCompoundCASNumbers,
+                           const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
+                           daeeThermoPackageBasis defaultBasis = eMole,
+                           const std::map<std::string,std::string>& mapOptions = std::map<std::string,std::string>());
 
-    adouble PureCompoundConstantProperty(const std::string& property,
-                                         const std::string& compound);
+    void Load_CapeOpen_TPP(const std::string& strPackageManager,
+                           const std::string& strPackageName,
+                           const std::vector<std::string>& strarrCompoundIDs,
+                           const std::vector<std::string>& strarrCompoundCASNumbers,
+                           const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
+                           daeeThermoPackageBasis defaultBasis = eMole,
+                           const std::map<std::string,std::string>& mapOptions = std::map<std::string,std::string>());
 
-    adouble PureCompoundTDProperty(const std::string& property,
-                                   const adouble& T,
-                                   const std::string& compound);
+public:
+    std::string GetTPPName();
 
-    adouble PureCompoundPDProperty(const std::string& property,
-                                   const adouble& P,
-                                   const std::string& compound);
+    adouble GetCompoundConstant(const std::string& property, const std::string& compound);
 
-    adouble SinglePhaseScalarProperty(const std::string& property,
-                                      const adouble& P,
-                                      const adouble& T,
-                                      const adouble_array& X,
-                                      const std::string& phase,
-                                      daeeThermoPackageBasis basis = dae::tpp::eMole);
+    adouble GetTDependentProperty(const std::string& property,
+                                  const adouble& T,
+                                  const std::string& compound);
 
-    adouble_array SinglePhaseVectorProperty(const std::string& property,
-                                            const adouble& P,
-                                            const adouble& T,
-                                            const adouble_array& X,
-                                            const std::string& phase,
-                                            daeeThermoPackageBasis basis = dae::tpp::eMole);
+    adouble GetPDependentProperty(const std::string& property,
+                                  const adouble& P,
+                                  const std::string& compound);
 
-    adouble TwoPhaseScalarProperty(const std::string& property,
-                                   const adouble& P1,
-                                   const adouble& T1,
-                                   const adouble_array& X1,
-                                   const std::string& phase1,
-                                   const adouble& P2,
-                                   const adouble& T2,
-                                   const adouble_array& X2,
-                                   const std::string& phase2,
-                                   daeeThermoPackageBasis basis = dae::tpp::eMole);
-
-     adouble_array TwoPhaseVectorProperty(const std::string& property,
-                                          const adouble& P1,
-                                          const adouble& T1,
-                                          const adouble_array& X1,
-                                          const std::string& phase1,
-                                          const adouble& P2,
-                                          const adouble& T2,
-                                          const adouble_array& X2,
-                                          const std::string& phase2,
+    adouble CalcSinglePhaseScalarProperty(const std::string& property,
+                                          const adouble& P,
+                                          const adouble& T,
+                                          const adouble_array& X,
+                                          const std::string& phase,
                                           daeeThermoPackageBasis basis = dae::tpp::eMole);
 
-   unit GetUnits(const std::string& property, daeeThermoPackageBasis basis = dae::tpp::eMole);
+    adouble_array CalcSinglePhaseVectorProperty(const std::string& property,
+                                                const adouble& P,
+                                                const adouble& T,
+                                                const adouble_array& X,
+                                                const std::string& phase,
+                                                daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+    adouble CalcTwoPhaseScalarProperty(const std::string& property,
+                                       const adouble& P1,
+                                       const adouble& T1,
+                                       const adouble_array& X1,
+                                       const std::string& phase1,
+                                       const adouble& P2,
+                                       const adouble& T2,
+                                       const adouble_array& X2,
+                                       const std::string& phase2,
+                                       daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+     adouble_array CalcTwoPhaseVectorProperty(const std::string& property,
+                                              const adouble& P1,
+                                              const adouble& T1,
+                                              const adouble_array& X1,
+                                              const std::string& phase1,
+                                              const adouble& P2,
+                                              const adouble& T2,
+                                              const adouble_array& X2,
+                                              const std::string& phase2,
+                                              daeeThermoPackageBasis basis = dae::tpp::eMole);
+
+    unit GetUnits(const std::string& property, daeeThermoPackageBasis basis = dae::tpp::eMole);
 
 public:
     daeThermoPhysicalPropertyPackage_t* m_package;

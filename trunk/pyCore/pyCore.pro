@@ -19,6 +19,8 @@ LIBS +=	$${DAE_CORE_LIB} \
         $${DAE_UNITS_LIB} \
         $${DAE_CONFIG_LIB} \
         $${DAE_CAPE_THERMO_PACKAGE_LIB} \
+        $${DAE_COOLPROP_THERMO_PACKAGE_LIB} \
+        $${COOLPROP_LIBS} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
         $${MPI_LIBS}

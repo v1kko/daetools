@@ -28,9 +28,10 @@ typedef std::map<CComBSTR, _variant_t>                          ComBSTR_Variant_
 typedef std::map<CComBSTR, ComBSTR_Variant_PropertyMap>         ComBSTR_ComBSTR_Variant_PropertyMap;
 typedef std::map<CComBSTR, ComBSTR_ComBSTR_Variant_PropertyMap> ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap;
 
-CComObject<daeCapeThermoMaterial>* daeCreateThermoMaterial(const std::vector<BSTR>*                               compoundIDs = NULL,
-                                                           const std::vector<BSTR>*                               compoundCASNumbers = NULL,
-                                                           const std::map<std::string, daeeThermoPackagePhase>*   phases = NULL,
+CComObject<daeCapeThermoMaterial>* daeCreateThermoMaterial(const std::vector<BSTR>*                               compoundIDs,
+                                                           const std::vector<BSTR>*                               compoundCASNumbers,
+                                                           const std::map<std::string, daeeThermoPackagePhase>*   phases,
+                                                           const std::map<std::string, eCapePhaseStatus>*         phasesStatus = NULL,
                                                            const ComBSTR_ComBSTR_Variant_PropertyMap*             overallProperties = NULL,
                                                            const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap*     singlePhaseProperties = NULL,
                                                            const ComBSTR_ComBSTR_ComBSTR_Variant_PropertyMap*     twoPhaseProperties = NULL);
@@ -59,9 +60,11 @@ void get_cape_user_info(ECapeUserPtr capeUser, std::wstringstream& ss);
 
 bool CreateVariantArray(std::vector<VARIANT>& varrResult, _variant_t& varSource);
 bool CreateDoubleArray(std::vector<double>& darrResult, _variant_t& varSource);
+bool CreateEnumArray(std::vector<eCapePhaseStatus>& darrResult, _variant_t& varSource);
 bool CreateStringArray(std::vector<BSTR>& strarrResult, _variant_t& varSource);
 bool CreateSafeArray(std::vector<double>& darrSource, _variant_t& varResult);
 bool CreateSafeArray(std::vector<BSTR>& strarrSource, _variant_t& varResult);
+bool CreateSafeArray(std::vector<eCapePhaseStatus>& earrSource, _variant_t& varResult);
 
 void GetCLSIDsForCategory(GUID catID, std::vector<daeCapeCreatableObject>& objects);
 HRESULT CreateTPPManager(daeCapeCreatableObject* pObject, ICapeThermoPropertyPackageManagerPtr& manager, ICapeIdentificationPtr& identification);
@@ -336,6 +339,46 @@ bool CreateSafeArray(std::vector<BSTR>& strarrSource, _variant_t& varResult)
     return true;
 }
 
+bool CreateSafeArray(std::vector<eCapePhaseStatus>& earrSource, _variant_t& varResult)
+{
+    int* pData;
+    HRESULT hr;
+    SAFEARRAY * pSafeArray;
+    SAFEARRAYBOUND rgsabound[1];
+
+    // Set the type of data it contains
+    varResult.vt = VT_ARRAY | VT_I4;
+    // Get the SAFEARRAY pointer
+    rgsabound[0].lLbound = 0;
+    rgsabound[0].cElements = earrSource.size();
+    pSafeArray = SafeArrayCreate(VT_I4, 1, rgsabound);
+    if (!pSafeArray)
+        return false;
+
+    varResult.parray = pSafeArray;
+    // Lock the SAFEARRAY
+    hr = SafeArrayLock(pSafeArray);
+    if (FAILED(hr))
+        return false;
+
+    pData = (int*)pSafeArray->pvData;
+    if (!pData)
+        return false;
+
+    for (size_t i = 0; i < earrSource.size(); i++)
+    {
+        *pData = (int)earrSource[i];
+        pData++;
+    }
+
+    // Unock the SAFEARRAY
+    hr = SafeArrayUnlock(pSafeArray);
+    if (FAILED(hr))
+        return false;
+
+    return true;
+}
+
 bool CreateSafeArray(std::vector<double>& darrSource, _variant_t& varResult)
 {
     double* pData;
@@ -372,6 +415,40 @@ bool CreateSafeArray(std::vector<double>& darrSource, _variant_t& varResult)
     if (FAILED(hr))
         return false;
 
+    return true;
+}
+
+bool CreateEnumArray(std::vector<eCapePhaseStatus>& earrResult, _variant_t& varSource)
+{
+    int* pData;
+    HRESULT hr;
+    SAFEARRAY * pSafeArray;
+
+    // Check the type of data it contains
+    if (varSource.vt != (VT_ARRAY | VT_I4))
+        return false;
+    // Get the SAFEARRAY pointer
+    pSafeArray = varSource.parray;
+    if (!pSafeArray)
+        return false;
+    // Lock the SAFEARRAY
+    hr = SafeArrayLock(pSafeArray);
+    if (FAILED(hr))
+        return false;
+    // Get the pointer to the data
+    pData = (int*)pSafeArray->pvData;
+    if (!pData)
+        return false;
+    // Get the data
+    for (unsigned long i = 0; i < pSafeArray->rgsabound->cElements; i++)
+    {
+        earrResult.push_back((eCapePhaseStatus)*pData);
+        pData++;
+    }
+    // Unock the SAFEARRAY
+    hr = SafeArrayUnlock(pSafeArray);
+    if (FAILED(hr))
+        return false;
     return true;
 }
 

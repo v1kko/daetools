@@ -12,11 +12,14 @@ namespace daepython
 {
 adouble create_adouble_from_object(boost::python::object value)
 {
-    boost::python::extract<real_t>  rValue(value);
-    boost::python::extract<adouble> adValue(value);
+    boost::python::extract<real_t>   rValue(value);
+    boost::python::extract<quantity> qValue(value);
+    boost::python::extract<adouble>  adValue(value);
 
     if(rValue.check())
-        return adouble(rValue(), 0.0, true);
+        return Constant(rValue());
+    else if(qValue.check())
+        return Constant(qValue());
     else if(adValue.check())
         return adValue();
     else
@@ -880,12 +883,12 @@ string adouble_array__repr__(const adouble_array& self)
             self.getGatherInfo() % strNode).str();
 }
 
-string daeCapeOpenThermoPhysicalPropertyPackage__str__(daeCapeOpenThermoPhysicalPropertyPackage& self)
+string daeThermoPhysicalPropertyPackage__str__(daeThermoPhysicalPropertyPackage& self)
 {
     return daeGetStrippedRelativeName(NULL, &self);
 }
 
-string daeCapeOpenThermoPhysicalPropertyPackage__repr__(daeCapeOpenThermoPhysicalPropertyPackage& self)
+string daeThermoPhysicalPropertyPackage__repr__(daeThermoPhysicalPropertyPackage& self)
 {
     return daeGetStrippedRelativeName(NULL, &self);
 }
@@ -1095,12 +1098,17 @@ const adouble_array adarr_FromNumpyArray(boost::python::object ndValues)
     {
         boost::python::object value = ndValues.attr("__getitem__")(i);
 
-        boost::python::extract<adouble> get_adouble(value);
-        boost::python::extract<real_t>  get_double(value);
+        boost::python::extract<adouble>  get_adouble(value);
+        boost::python::extract<quantity> get_quantity(value[i]);
+        boost::python::extract<real_t>   get_double(value);
 
         if(get_double.check())
         {
-            ad = adouble(get_double(), 0.0, true);
+            ad = Constant(get_double());
+        }
+        else if(get_quantity.check())
+        {
+            ad = Constant(get_quantity());
         }
         else if(get_adouble.check())
         {
@@ -1135,12 +1143,17 @@ const adouble_array adarr_FromList(boost::python::list lValues)
     ptrarrValues.resize(n);
     for(i = 0; i < n; i++)
     {
-        boost::python::extract<real_t>  get_double(lValues[i]);
-        boost::python::extract<adouble> get_adouble(lValues[i]);
+        boost::python::extract<real_t>   get_double(lValues[i]);
+        boost::python::extract<quantity> get_quantity(lValues[i]);
+        boost::python::extract<adouble>  get_adouble(lValues[i]);
 
         if(get_double.check())
         {
-            ad = adouble(get_double(), 0.0, true);
+            ad = Constant(get_double());
+        }
+        else if(get_quantity.check())
+        {
+            ad = Constant(get_quantity());
         }
         else if(get_adouble.check())
         {
@@ -4976,18 +4989,20 @@ boost::python::dict daeModel_dictEventPortConnections(daeModel& self)
 }
 
 /*******************************************************
-    daeCapeOpenThermoPhysicalPropertyPackage
+    daeThermoPhysicalPropertyPackageManager
 *******************************************************/
-void CapeOpen_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
+void CapeOpen_LoadPackage(daeThermoPhysicalPropertyPackage& self,
                           const std::string& strPackageManager,
                           const std::string& strPackageName,
                           boost::python::list lCompoundIDs,
                           boost::python::list lCompoundCASNumbers,
                           boost::python::dict dAvailablePhases,
-                          daeeThermoPackageBasis defaultBasis)
+                          daeeThermoPackageBasis defaultBasis,
+                          boost::python::dict dOptions)
 {
     std::vector<std::string> strarrCompoundIDs, strarrCompoundCASNumbers;
     std::map<std::string,daeeThermoPackagePhase> mapAvailablePhases;
+    std::map<std::string,std::string> mapOptions;
     boost::python::ssize_t i, n;
 
     n = boost::python::len(lCompoundIDs);
@@ -5014,52 +5029,130 @@ void CapeOpen_LoadPackage(daeCapeOpenThermoPhysicalPropertyPackage& self,
         mapAvailablePhases[phaseLabel] = stateOfAggregation;
     }
 
-    self.LoadPackage(strPackageManager, strPackageName, strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis);
+    keys   = dOptions.keys();
+    values = dOptions.values();
+    n = boost::python::len(keys);
+    for(i = 0; i < n; i++)
+    {
+        std::string strOption = boost::python::extract<std::string>(keys[i]);
+        std::string strValue  = boost::python::extract<std::string>(values[i]);
+        mapOptions[strOption] = strValue;
+    }
+
+    self.Load_CapeOpen_TPP(strPackageManager, strPackageName, strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis, mapOptions);
 }
 
+void CoolProp_LoadPackage(daeThermoPhysicalPropertyPackage& self,
+                          boost::python::list lCompoundIDs,
+                          boost::python::list lCompoundCASNumbers,
+                          boost::python::dict dAvailablePhases,
+                          daeeThermoPackageBasis defaultBasis,
+                          boost::python::dict dOptions)
+{
+    std::vector<std::string> strarrCompoundIDs, strarrCompoundCASNumbers;
+    std::map<std::string,daeeThermoPackagePhase> mapAvailablePhases;
+    std::map<std::string,std::string> mapOptions;
+    boost::python::ssize_t i, n;
+
+    n = boost::python::len(lCompoundIDs);
+    for(i = 0; i < n; i++)
+    {
+        std::string id = boost::python::extract<std::string>(lCompoundIDs[i]);
+        strarrCompoundIDs.push_back(id);
+    }
+
+    n = boost::python::len(lCompoundCASNumbers);
+    for(i = 0; i < n; i++)
+    {
+        std::string cas = boost::python::extract<std::string>(lCompoundCASNumbers[i]);
+        strarrCompoundCASNumbers.push_back(cas);
+    }
+
+    boost::python::list keys   = dAvailablePhases.keys();
+    boost::python::list values = dAvailablePhases.values();
+    n = boost::python::len(keys);
+    for(i = 0; i < n; i++)
+    {
+        std::string            phaseLabel         = boost::python::extract<std::string>(keys[i]);
+        daeeThermoPackagePhase stateOfAggregation = boost::python::extract<daeeThermoPackagePhase>(values[i]);
+        mapAvailablePhases[phaseLabel] = stateOfAggregation;
+    }
+
+    keys   = dOptions.keys();
+    values = dOptions.values();
+    n = boost::python::len(keys);
+    for(i = 0; i < n; i++)
+    {
+        std::string strOption = boost::python::extract<std::string>(keys[i]);
+        std::string strValue  = boost::python::extract<std::string>(values[i]);
+        mapOptions[strOption] = strValue;
+    }
+
+    self.Load_CoolProp_TPP(strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis, mapOptions);
+}
+
+/*******************************************************
+    daeThermoPhysicalPropertyPackage
+*******************************************************/
 // These functions perform actual calculations for given arguments
-double calcPureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                        const std::string& property,
-                                        const std::string& compound)
+double _GetCompoundConstant(daeThermoPhysicalPropertyPackage& self,
+                                const std::string& property,
+                                const std::string& compound)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
-    return self.m_package->PureCompoundConstantProperty(property, compound);
+    return self.m_package->GetCompoundConstant(property, compound);
 }
 
-double calcPureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                    const std::string& property,
-                                    double T,
-                                    const std::string& compound)
+double _GetTDependentProperty(daeThermoPhysicalPropertyPackage& self,
+                                  const std::string& property,
+                                  double T,
+                                  const std::string& compound)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
-    return self.m_package->PureCompoundTDProperty(property, T, compound);
+    return self.m_package->GetTDependentProperty(property, T, compound);
 }
 
-double calcPureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                    const std::string& property,
-                                    double P,
-                                    const std::string& compound)
+double _GetPDependentProperty(daeThermoPhysicalPropertyPackage& self,
+                                  const std::string& property,
+                                  double P,
+                                  const std::string& compound)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
-    return self.m_package->PureCompoundPDProperty(property, P, compound);
+    return self.m_package->GetPDependentProperty(property, P, compound);
 }
 
-double calcSinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                     const std::string& property,
-                                     double P,
-                                     double T,
-                                     boost::python::list x,
-                                     const std::string& phase,
-                                     daeeThermoPackageBasis basis)
+double _CalcSinglePhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
+                                      const std::string& property,
+                                      double P,
+                                      double T,
+                                      boost::python::list x,
+                                      const std::string& phase,
+                                      daeeThermoPackageBasis basis)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
     std::vector<double> X;
     boost::python::ssize_t n = boost::python::len(x);
@@ -5069,19 +5162,23 @@ double calcSinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& s
         X.push_back(val);
     }
 
-    return self.m_package->SinglePhaseScalarProperty(property, P, T, X, phase, basis);
+    return self.m_package->CalcSinglePhaseScalarProperty(property, P, T, X, phase, basis);
 }
 
-boost::python::list calcSinglePhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                                  const std::string& property,
-                                                  double P,
-                                                  double T,
-                                                  boost::python::list x,
-                                                  const std::string& phase,
-                                                  daeeThermoPackageBasis basis)
+boost::python::list _CalcSinglePhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
+                                                   const std::string& property,
+                                                   double P,
+                                                   double T,
+                                                   boost::python::list x,
+                                                   const std::string& phase,
+                                                   daeeThermoPackageBasis basis)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
     std::vector<double> X;
     boost::python::ssize_t n = boost::python::len(x);
@@ -5092,25 +5189,29 @@ boost::python::list calcSinglePhaseVectorProperty(daeCapeOpenThermoPhysicalPrope
     }
 
     std::vector<double> results;
-    self.m_package->SinglePhaseVectorProperty(property, P, T, X, phase, results, basis);
+    self.m_package->CalcSinglePhaseVectorProperty(property, P, T, X, phase, results, basis);
 
     return getListFromVectorByValue<double>(results);
 }
 
-double calcTwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                  const std::string& property,
-                                  double P1,
-                                  double T1,
-                                  boost::python::list x1,
-                                  const std::string& phase1,
-                                  double P2,
-                                  double T2,
-                                  boost::python::list x2,
-                                  const std::string& phase2,
-                                  daeeThermoPackageBasis basis)
+double _CalcTwoPhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
+                                   const std::string& property,
+                                   double P1,
+                                   double T1,
+                                   boost::python::list x1,
+                                   const std::string& phase1,
+                                   double P2,
+                                   double T2,
+                                   boost::python::list x2,
+                                   const std::string& phase2,
+                                   daeeThermoPackageBasis basis)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
     std::vector<double> X1, X2;
     boost::python::ssize_t n = boost::python::len(x1);
@@ -5127,26 +5228,30 @@ double calcTwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self
         X2.push_back(val);
     }
 
-    return self.m_package->TwoPhaseScalarProperty(property,
-                                                  P1, T1, X1, phase1,
-                                                  P2, T2, X2, phase2,
-                                                  basis);
+    return self.m_package->CalcTwoPhaseScalarProperty(property,
+                                                      P1, T1, X1, phase1,
+                                                      P2, T2, X2, phase2,
+                                                      basis);
 }
 
-boost::python::list calcTwoPhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                               const std::string& property,
-                                               double P1,
-                                               double T1,
-                                               boost::python::list x1,
-                                               const std::string& phase1,
-                                               double P2,
-                                               double T2,
-                                               boost::python::list x2,
-                                               const std::string& phase2,
-                                               daeeThermoPackageBasis basis)
+boost::python::list _CalcTwoPhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
+                                                const std::string& property,
+                                                double P1,
+                                                double T1,
+                                                boost::python::list x1,
+                                                const std::string& phase1,
+                                                double P2,
+                                                double T2,
+                                                boost::python::list x2,
+                                                const std::string& phase2,
+                                                daeeThermoPackageBasis basis)
 {
     if(!self.m_package)
-        daeDeclareAndThrowException(exInvalidCall);
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
 
     std::vector<double> X1, X2;
     boost::python::ssize_t n = boost::python::len(x1);
@@ -5164,84 +5269,84 @@ boost::python::list calcTwoPhaseVectorProperty(daeCapeOpenThermoPhysicalProperty
     }
 
     std::vector<double> results;
-    self.m_package->TwoPhaseVectorProperty(property,
-                                           P1, T1, X1, phase1,
-                                           P2, T2, X2, phase2,
-                                           results,
-                                           basis);
+    self.m_package->CalcTwoPhaseVectorProperty(property,
+                                               P1, T1, X1, phase1,
+                                               P2, T2, X2, phase2,
+                                               results,
+                                               basis);
 
     return getListFromVectorByValue<double>(results);
 }
 
 // These functions create adouble with nodes (for equations residuals)
-adouble PureCompoundConstantProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                     const std::string& property,
-                                     const std::string& compound)
+adouble GetCompoundConstant(daeThermoPhysicalPropertyPackage& self,
+                            const std::string& property,
+                            const std::string& compound)
 {
-    return self.PureCompoundConstantProperty(property, compound);
+    return self.GetCompoundConstant(property, compound);
 }
 
-adouble PureCompoundTDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                               const std::string& property,
-                               boost::python::object T,
-                               const std::string& compound)
+adouble GetTDependentProperty(daeThermoPhysicalPropertyPackage& self,
+                              const std::string& property,
+                              boost::python::object T,
+                              const std::string& compound)
 {
     adouble T_ = create_adouble_from_object(T);
 
-    return self.PureCompoundTDProperty(property, T_, compound);
+    return self.GetTDependentProperty(property, T_, compound);
 }
 
-adouble PureCompoundPDProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                               const std::string& property,
-                               boost::python::object P,
-                               const std::string& compound)
+adouble GetPDependentProperty(daeThermoPhysicalPropertyPackage& self,
+                              const std::string& property,
+                              boost::python::object P,
+                              const std::string& compound)
 {
     adouble P_ = create_adouble_from_object(P);
 
-    return self.PureCompoundPDProperty(property, P_, compound);
+    return self.GetPDependentProperty(property, P_, compound);
 }
 
-adouble SinglePhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                  const std::string& property,
-                                  boost::python::object P,
-                                  boost::python::object T,
-                                  boost::python::object x,
-                                  const std::string& phase,
-                                  daeeThermoPackageBasis basis)
+adouble CalcSinglePhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
+                                      const std::string& property,
+                                      boost::python::object P,
+                                      boost::python::object T,
+                                      boost::python::object x,
+                                      const std::string& phase,
+                                      daeeThermoPackageBasis basis)
 {
     adouble       T_ = create_adouble_from_object(T);
     adouble       P_ = create_adouble_from_object(P);
     adouble_array x_ = create_adouble_array_from_object(x);
 
-    return self.SinglePhaseScalarProperty(property, P_, T_, x_, phase, basis);
+    return self.CalcSinglePhaseScalarProperty(property, P_, T_, x_, phase, basis);
 }
 
-adouble_array SinglePhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                        const std::string& property,
-                                        boost::python::object P,
-                                        boost::python::object T,
-                                        boost::python::object x,
-                                        const std::string& phase,
-                                        daeeThermoPackageBasis basis)
+adouble_array CalcSinglePhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
+                                            const std::string& property,
+                                            boost::python::object P,
+                                            boost::python::object T,
+                                            boost::python::object x,
+                                            const std::string& phase,
+                                            daeeThermoPackageBasis basis)
 {
     adouble       T_ = create_adouble_from_object(T);
     adouble       P_ = create_adouble_from_object(P);
     adouble_array x_ = create_adouble_array_from_object(x);
 
-    return self.SinglePhaseVectorProperty(property, P_, T_, x_, phase, basis);
+    return self.CalcSinglePhaseVectorProperty(property, P_, T_, x_, phase, basis);
 }
 
-adouble TwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                               const std::string& property,
-                               boost::python::object P1,
-                               boost::python::object T1,
-                               boost::python::object x1,
-                               const std::string& phase1,
-                               boost::python::object P2,
-                               boost::python::object T2,
-                               boost::python::object x2,
-                               const std::string& phase2,
-                               daeeThermoPackageBasis basis)
+adouble CalcTwoPhaseScalarProperty(daeThermoPhysicalPropertyPackage& self,
+                                   const std::string& property,
+                                   boost::python::object P1,
+                                   boost::python::object T1,
+                                   boost::python::object x1,
+                                   const std::string& phase1,
+                                   boost::python::object P2,
+                                   boost::python::object T2,
+                                   boost::python::object x2,
+                                   const std::string& phase2,
+                                   daeeThermoPackageBasis basis)
 {
     adouble       T1_ = create_adouble_from_object(T1);
     adouble       P1_ = create_adouble_from_object(P1);
@@ -5250,20 +5355,20 @@ adouble TwoPhaseScalarProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
     adouble       P2_ = create_adouble_from_object(P1);
     adouble_array x2_ = create_adouble_array_from_object(x1);
 
-    return self.TwoPhaseScalarProperty(property, P1_, T1_, x1_, phase1, P2_, T2_, x2_, phase2, basis);
+    return self.CalcTwoPhaseScalarProperty(property, P1_, T1_, x1_, phase1, P2_, T2_, x2_, phase2, basis);
 }
 
-adouble_array TwoPhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& self,
-                                     const std::string& property,
-                                     boost::python::object P1,
-                                     boost::python::object T1,
-                                     boost::python::object x1,
-                                     const std::string& phase1,
-                                     boost::python::object P2,
-                                     boost::python::object T2,
-                                     boost::python::object x2,
-                                     const std::string& phase2,
-                                     daeeThermoPackageBasis basis)
+adouble_array CalcTwoPhaseVectorProperty(daeThermoPhysicalPropertyPackage& self,
+                                         const std::string& property,
+                                         boost::python::object P1,
+                                         boost::python::object T1,
+                                         boost::python::object x1,
+                                         const std::string& phase1,
+                                         boost::python::object P2,
+                                         boost::python::object T2,
+                                         boost::python::object x2,
+                                         const std::string& phase2,
+                                         daeeThermoPackageBasis basis)
 {
     adouble       T1_ = create_adouble_from_object(T1);
     adouble       P1_ = create_adouble_from_object(P1);
@@ -5272,7 +5377,7 @@ adouble_array TwoPhaseVectorProperty(daeCapeOpenThermoPhysicalPropertyPackage& s
     adouble       P2_ = create_adouble_from_object(P1);
     adouble_array x2_ = create_adouble_array_from_object(x1);
 
-    return self.TwoPhaseVectorProperty(property, P1_, T1_, x1_, phase1, P2_, T2_, x2_, phase2, basis);
+    return self.CalcTwoPhaseVectorProperty(property, P1_, T1_, x1_, phase1, P2_, T2_, x2_, phase2, basis);
 }
 
 /*******************************************************

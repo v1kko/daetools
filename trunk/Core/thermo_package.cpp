@@ -8,6 +8,7 @@
 #include "../CapeOpenThermoPackage/cape_open_package.h"
 #include <objbase.h>
 #endif
+#include "../CoolPropThermoPackage/cool_prop.h"
 
 using dae::tpp::eMole;
 using dae::tpp::eMass;
@@ -18,7 +19,7 @@ namespace dae
 {
 namespace core
 {
-daeCapeOpenThermoPhysicalPropertyPackage::daeCapeOpenThermoPhysicalPropertyPackage(const string& strName, daeModel* pModel, const string& strDescription)
+daeThermoPhysicalPropertyPackage::daeThermoPhysicalPropertyPackage(const string& strName, daeModel* pModel, const string& strDescription)
 {
     m_package = NULL;
     m_pModel = pModel;
@@ -30,34 +31,80 @@ daeCapeOpenThermoPhysicalPropertyPackage::daeCapeOpenThermoPhysicalPropertyPacka
 #endif
 }
 
-daeCapeOpenThermoPhysicalPropertyPackage::~daeCapeOpenThermoPhysicalPropertyPackage(void)
+void daeThermoPhysicalPropertyPackage::Load_CoolProp_TPP(const std::vector<std::string>& strarrCompoundIDs,
+                                                         const std::vector<std::string>& strarrCompoundCASNumbers,
+                                                         const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
+                                                         daeeThermoPackageBasis defaultBasis,
+                                                         const std::map<std::string,std::string>& mapOptions)
 {
+    daeThermoPhysicalPropertyPackage_t* tppPackage = daeCreateCoolPropPropertyPackage();
+    if(!tppPackage)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Failed to create CoolProp thermophysical property package.";
+        throw e;
+    }
+
+    tppPackage->LoadPackage("", "", strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis, mapOptions);
+    m_package = tppPackage;
+}
+
+void daeThermoPhysicalPropertyPackage::Load_CapeOpen_TPP(const std::string& strPackageManager,
+                                                         const std::string& strPackageName,
+                                                         const std::vector<std::string>& strarrCompoundIDs,
+                                                         const std::vector<std::string>& strarrCompoundCASNumbers,
+                                                         const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
+                                                         daeeThermoPackageBasis defaultBasis,
+                                                         const std::map<std::string,std::string>& mapOptions)
+{
+    m_package = NULL;
+
 #if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-    daeDeleteCapeOpenPropertyPackage(m_package);
+    daeThermoPhysicalPropertyPackage_t* tppPackage = daeCreateCapeOpenPropertyPackage();
+    if(!tppPackage)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Failed to create CapeOpen thermophysical property package.";
+        throw e;
+    }
+    tppPackage->LoadPackage(strPackageManager, strPackageName, strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis, mapOptions);
+    m_package = tppPackage;
+#endif
+}
+
+daeThermoPhysicalPropertyPackage::~daeThermoPhysicalPropertyPackage(void)
+{
+    if(m_package)
+        delete m_package;
+    m_package = NULL;
+#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     ::CoUninitialize();
 #endif
 }
 
-void daeCapeOpenThermoPhysicalPropertyPackage::LoadPackage(const std::string& strPackageManager,
-                                                           const std::string& strPackageName,
-                                                           const std::vector<std::string>& strarrCompoundIDs,
-                                                           const std::vector<std::string>& strarrCompoundCASNumbers,
-                                                           const std::map<std::string,daeeThermoPackagePhase>& mapAvailablePhases,
-                                                           daeeThermoPackageBasis defaultBasis)
+std::string daeThermoPhysicalPropertyPackage::GetTPPName()
 {
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-    m_package = daeCreateCapeOpenPropertyPackage();
     if(!m_package)
-        daeDeclareAndThrowException(exInvalidPointer);
-    m_package->LoadPackage(strPackageManager, strPackageName, strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis);
-#endif
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
+    return m_package->GetTPPName();
 }
 
-adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundConstantProperty(const std::string& property,
-                                                                               const std::string& compound)
+adouble daeThermoPhysicalPropertyPackage::GetCompoundConstant(const std::string& property, const std::string& compound)
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble tmp;
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
     tmp.setGatherInfo(true);
     daeeThermoPackageBasis basis = eUndefinedBasis;
     adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::ePureCompoundConstantProperty,
@@ -75,17 +122,24 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundConstantProperty(c
      n->temperature2 = adNodePtr();
      n->composition2 = adNodeArrayPtr();
      n->phase2       = "Unknown";
-#endif
+
 
     return tmp;
 }
 
-adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundTDProperty(const std::string& property,
-                                                                         const adouble& T,
-                                                                         const std::string& compound)
+adouble daeThermoPhysicalPropertyPackage::GetTDependentProperty(const std::string& property,
+                                                                const adouble& T,
+                                                                const std::string& compound)
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble tmp;
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
+
     tmp.setGatherInfo(true);
     daeeThermoPackageBasis basis = eUndefinedBasis;
     adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::ePureCompoundTDProperty,
@@ -103,18 +157,24 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundTDProperty(const s
      n->temperature2 = adNodePtr();
      n->composition2 = adNodeArrayPtr();
      n->phase2       = "Unknown";
-#endif
+
 
     return tmp;
 }
 
-adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundPDProperty(const std::string& property,
-                                                                         const adouble& P,
-                                                                         const std::string& compound)
+adouble daeThermoPhysicalPropertyPackage::GetPDependentProperty(const std::string& property,
+                                                                const adouble& P,
+                                                                const std::string& compound)
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble tmp;
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     tmp.setGatherInfo(true);
     daeeThermoPackageBasis basis = eUndefinedBasis;
     adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::ePureCompoundPDProperty,
@@ -132,21 +192,26 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::PureCompoundPDProperty(const s
      n->temperature2 = adNodePtr();
      n->composition2 = adNodeArrayPtr();
      n->phase2       = "Unknown";
-#endif
 
     return tmp;
 }
 
-adouble daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseScalarProperty(const std::string& property,
-                                                                            const adouble& P,
-                                                                            const adouble& T,
-                                                                            const adouble_array& x,
-                                                                            const std::string& phase,
-                                                                            daeeThermoPackageBasis basis)
+adouble daeThermoPhysicalPropertyPackage::CalcSinglePhaseScalarProperty(const std::string& property,
+                                                                        const adouble& P,
+                                                                        const adouble& T,
+                                                                        const adouble_array& x,
+                                                                        const std::string& phase,
+                                                                        daeeThermoPackageBasis basis)
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble tmp;
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     tmp.setGatherInfo(true);
     adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::eSinglePhaseScalarProperty,
                                                                                                  property,
@@ -163,21 +228,26 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseScalarProperty(cons
     n->temperature2 = adNodePtr();
     n->composition2 = adNodeArrayPtr();
     n->phase2       = "Unknown";
-#endif
 
     return tmp;
 }
 
-adouble_array daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseVectorProperty(const std::string& property,
-                                                                                  const adouble& P,
-                                                                                  const adouble& T,
-                                                                                  const adouble_array& x,
-                                                                                  const std::string& phase,
-                                                                                  daeeThermoPackageBasis basis)
+adouble_array daeThermoPhysicalPropertyPackage::CalcSinglePhaseVectorProperty(const std::string& property,
+                                                                              const adouble& P,
+                                                                              const adouble& T,
+                                                                              const adouble_array& x,
+                                                                              const std::string& phase,
+                                                                              daeeThermoPackageBasis basis)
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble_array tmp;
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     tmp.setGatherInfo(true);
     adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(dae::tpp::eSinglePhaseVectorProperty,
                                                                                                property,
@@ -193,26 +263,31 @@ adouble_array daeCapeOpenThermoPhysicalPropertyPackage::SinglePhaseVectorPropert
     n->temperature2 = adNodePtr();
     n->composition2 = adNodeArrayPtr();
     n->phase2       = "Unknown";
-#endif
 
     return tmp;
 }
 
-adouble daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseScalarProperty(const std::string& property,
-                                                                         const adouble& P1,
-                                                                         const adouble& T1,
-                                                                         const adouble_array& x1,
-                                                                         const std::string& phase1,
-                                                                         const adouble& P2,
-                                                                         const adouble& T2,
-                                                                         const adouble_array& x2,
-                                                                         const std::string& phase2,
-                                                                         daeeThermoPackageBasis basis)
+adouble daeThermoPhysicalPropertyPackage::CalcTwoPhaseScalarProperty(const std::string& property,
+                                                                     const adouble& P1,
+                                                                     const adouble& T1,
+                                                                     const adouble_array& x1,
+                                                                     const std::string& phase1,
+                                                                     const adouble& P2,
+                                                                     const adouble& T2,
+                                                                     const adouble_array& x2,
+                                                                     const std::string& phase2,
+                                                                     daeeThermoPackageBasis basis)
 
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble tmp;
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     tmp.setGatherInfo(true);
     adThermoPhysicalPropertyPackageScalarNode* n = new adThermoPhysicalPropertyPackageScalarNode(dae::tpp::eTwoPhaseScalarProperty,
                                                                                                  property,
@@ -229,25 +304,30 @@ adouble daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseScalarProperty(const s
     n->temperature2 = T2.node;
     n->composition2 = x2.node;
     n->phase2       = phase2;
-#endif
 
     return tmp;
 }
 
-adouble_array daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseVectorProperty(const std::string& property,
-                                                                               const adouble& P1,
-                                                                               const adouble& T1,
-                                                                               const adouble_array& x1,
-                                                                               const std::string& phase1,
-                                                                               const adouble& P2,
-                                                                               const adouble& T2,
-                                                                               const adouble_array& x2,
-                                                                               const std::string& phase2,
-                                                                               daeeThermoPackageBasis basis)
+adouble_array daeThermoPhysicalPropertyPackage::CalcTwoPhaseVectorProperty(const std::string& property,
+                                                                           const adouble& P1,
+                                                                           const adouble& T1,
+                                                                           const adouble_array& x1,
+                                                                           const std::string& phase1,
+                                                                           const adouble& P2,
+                                                                           const adouble& T2,
+                                                                           const adouble_array& x2,
+                                                                           const std::string& phase2,
+                                                                           daeeThermoPackageBasis basis)
 {
+    if(!m_package)
+    {
+        daeDeclareException(exInvalidCall);
+        e << "The thermophysical property package is not loaded.";
+        throw e;
+    }
+
     adouble_array tmp;
 
-#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
     tmp.setGatherInfo(true);
     adThermoPhysicalPropertyPackageArrayNode* n = new adThermoPhysicalPropertyPackageArrayNode(dae::tpp::eTwoPhaseVectorProperty,
                                                                                                property,
@@ -263,7 +343,6 @@ adouble_array daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseVectorProperty(c
     n->temperature2 = T2.node;
     n->composition2 = x2.node;
     n->phase2       = phase2;
-#endif
 
     return tmp;
 }
@@ -271,7 +350,7 @@ adouble_array daeCapeOpenThermoPhysicalPropertyPackage::TwoPhaseVectorProperty(c
 #include "../Units/units_pool.h"
 using namespace units::units_pool;
 
-unit daeCapeOpenThermoPhysicalPropertyPackage::GetUnits(const std::string& property, daeeThermoPackageBasis basis)
+unit daeThermoPhysicalPropertyPackage::GetUnits(const std::string& property, daeeThermoPackageBasis basis)
 {
     unit basis_u;
     if(basis == eMole)

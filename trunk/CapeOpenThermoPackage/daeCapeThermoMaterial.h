@@ -62,6 +62,7 @@ public:
     std::vector<BSTR>                               m_strarrCompoundIDs;
     std::vector<BSTR>                               m_strarrCompoundCASNumbers;
     std::map<std::string, daeeThermoPackagePhase>   m_mapAvailablePhases;
+    std::map<std::string, eCapePhaseStatus>         m_mapPhasesStatus;
 
     _bstr_t m_name;             /*!< the name of this object */
     HRESULT m_hr;               /*!< the error code */
@@ -94,13 +95,25 @@ public:
 
         // Double check this.
         // Create a local object using the CComObject<daeCapeThermoMaterial>::CreateInstance function.
-        ICapeThermoMaterial* newMaterial = daeCreateThermoMaterial(&m_strarrCompoundIDs, 
-                                                                   &m_strarrCompoundCASNumbers, 
-                                                                   &m_mapAvailablePhases,
-                                                                   &m_overallProperties, 
-                                                                   &m_singlePhaseProperties, 
-                                                                   &m_twoPhaseProperties);
-        
+        // Nota bene:
+        //   Here, we copied not only all settings but all properties, too. Is that correct?
+        //   The function CopyFromMaterial should be used to copy properties from current material.
+        CComObject<daeCapeThermoMaterial>* newMaterial = daeCreateThermoMaterial(&m_strarrCompoundIDs,
+                                                                                 &m_strarrCompoundCASNumbers,
+                                                                                 &m_mapAvailablePhases,
+                                                                                 &m_mapPhasesStatus,
+                                                                                 &m_overallProperties,
+                                                                                 &m_singlePhaseProperties,
+                                                                                 &m_twoPhaseProperties);
+
+        if (!newMaterial)
+        {
+            std::wstringstream ss;
+            ss << "Cannot create the the new material object" << std::endl;
+            SetCapeError(ECapeUnknownHR, ss.str().c_str(), "CreateMaterial");
+            return ECapeUnknownHR;
+        }
+
         // Call QueryInterface to get the ICapeThermoMaterial interface stored in the materialObject pointer sent.
         HRESULT hr = newMaterial->QueryInterface(__uuidof(ICapeThermoMaterial), (void**)materialObject);
         if (FAILED(hr))
@@ -111,7 +124,8 @@ public:
             return ECapeUnknownHR;
         }
 
-        // materialObject has a reference to ICapeThermoMaterial so release newMaterial
+        // The caller of CreateMaterial() function now has a reference to ICapeThermoMaterial in the materialObject
+        // so we can release our newMaterial object. The object will be deleted when the materialObject is released.
         newMaterial->Release();
         newMaterial = NULL;
 
@@ -226,7 +240,22 @@ public:
     {
         //std::wcout << "raw_GetPresentPhases " << std::endl;
 
-        return E_NOTIMPL;
+        _variant_t phaseLabels_v, phaseStatus_v;
+        std::vector<BSTR> barrPhaseLabels;
+        std::vector<eCapePhaseStatus> earrPhaseStatuses;
+        for (std::map<std::string, eCapePhaseStatus>::iterator it = m_mapPhasesStatus.begin(); it != m_mapPhasesStatus.end(); it++)
+        {
+            barrPhaseLabels.push_back(_bstr_t(it->first.c_str()).Detach());
+            earrPhaseStatuses.push_back(it->second);
+        }
+
+        CreateSafeArray(barrPhaseLabels, phaseLabels_v);
+        CreateSafeArray(earrPhaseStatuses, phaseStatus_v);
+
+        VariantCopy(phaseLabels, &phaseLabels_v);
+        VariantCopy(phaseStatus, &phaseStatus_v);
+
+        return S_OK;
     }
 
     virtual HRESULT __stdcall raw_GetSinglePhaseProp(/*[in]*/     BSTR     property,
@@ -442,7 +471,20 @@ public:
                                                    /*[in]*/ VARIANT phaseStatus)
     {
         //std::wcout << "raw_SetPresentPhases " << std::endl;
-        return E_NOTIMPL;
+
+        std::vector<BSTR> barrPhaseLabels;
+        std::vector<eCapePhaseStatus> earrPhaseStatuses;
+        CreateStringArray(barrPhaseLabels, _variant_t(phaseLabels));
+        CreateEnumArray(earrPhaseStatuses, _variant_t(phaseStatus));
+
+        m_mapPhasesStatus.clear();
+        for (size_t i = 0; i < barrPhaseLabels.size(); i++)
+        {
+            std::string label = (LPCSTR)bstr_t(barrPhaseLabels[i]);
+            m_mapPhasesStatus[label] = earrPhaseStatuses[i];
+        }
+
+        return S_OK;
     }
 
     virtual HRESULT __stdcall raw_SetSinglePhaseProp(/*[in]*/ BSTR    property,
@@ -635,7 +677,7 @@ public:
                                                /*[out,retval]*/ VARIANT * value)
     {
         //std::wcout << "raw_GetPhaseInfo " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
     virtual HRESULT __stdcall raw_GetPhaseList(/*[in,out]*/ VARIANT * phaseLabels,
@@ -671,7 +713,7 @@ public:
                                                       /*[out,retval]*/ VARIANT * propVals)
     {
         //std::wcout << "raw_GetCompoundConstant " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
     virtual HRESULT __stdcall raw_GetCompoundList(/*[in,out]*/ VARIANT * compIds,
@@ -703,7 +745,7 @@ public:
     virtual HRESULT __stdcall raw_GetConstPropList(/*[out,retval]*/ VARIANT * props)
     {
         //std::wcout << "raw_GetConstPropList " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
     virtual HRESULT __stdcall raw_GetNumCompounds(/*[out,retval]*/ long * num)
@@ -719,13 +761,13 @@ public:
                                                         /*[in,out]*/ VARIANT * propVals)
     {
         //std::wcout << "raw_GetPDependentProperty " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
     virtual HRESULT __stdcall raw_GetPDependentPropList(/*[out,retval]*/ VARIANT * props)
     {
         //std::wcout << "raw_GetPDependentPropList " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
     virtual HRESULT __stdcall raw_GetTDependentProperty(/*[in]*/ VARIANT props,
@@ -734,13 +776,13 @@ public:
                                                         /*[in,out]*/ VARIANT * propVals)
     {
         //std::wcout << "raw_GetTDependentProperty " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
     virtual HRESULT __stdcall raw_GetTDependentPropList(/*[out,retval]*/ VARIANT * props)
     {
         //std::wcout << "raw_GetTDependentPropList " << std::endl;
-        return E_NOTIMPL;
+        return ECapeNoImplHR;
     }
 
 

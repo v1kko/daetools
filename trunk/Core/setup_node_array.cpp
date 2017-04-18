@@ -368,7 +368,7 @@ string adCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
     if(m_ptrarrNodes.empty())
         daeDeclareAndThrowException(exInvalidCall);
 
-    strResult  = "{ ";
+    strResult  = "{ \\left[";
 
     size_t N = m_ptrarrNodes.size();
     for(size_t i = 0; i < N; i++)
@@ -378,7 +378,7 @@ string adCustomNodeArray::SaveAsLatex(const daeNodeSaveAsContext* c) const
         strResult += m_ptrarrNodes[i]->SaveAsLatex(c);
     }
 
-    strResult  += "} ";
+    strResult  += " \\right] } ";
     return strResult;
 }
 

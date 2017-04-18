@@ -4304,29 +4304,29 @@ adouble adThermoPhysicalPropertyPackageScalarNode::Evaluate(const daeExecutionCo
 
     double result;
     if(propertyType == dae::tpp::ePureCompoundConstantProperty)
-        result = thermoPhysicalPropertyPackage->PureCompoundConstantProperty(property, compound);
+        result = thermoPhysicalPropertyPackage->GetCompoundConstant(property, compound);
 
     else if(propertyType == dae::tpp::ePureCompoundTDProperty)
-        result = thermoPhysicalPropertyPackage->PureCompoundTDProperty(property,
+        result = thermoPhysicalPropertyPackage->GetTDependentProperty(property,
                                                                        T.getValue(),
                                                                        compound);
 
     else if(propertyType == dae::tpp::ePureCompoundPDProperty)
-        result = thermoPhysicalPropertyPackage->PureCompoundPDProperty(property,
+        result = thermoPhysicalPropertyPackage->GetPDependentProperty(property,
                                                                        P.getValue(),
                                                                        compound);
 
     else if(propertyType == dae::tpp::eSinglePhaseScalarProperty)
-        result = thermoPhysicalPropertyPackage->SinglePhaseScalarProperty(property,
-                                                                          P.getValue(), T.getValue(), arrX,
-                                                                          phase,
-                                                                          basis);
+        result = thermoPhysicalPropertyPackage->CalcSinglePhaseScalarProperty(property,
+                                                                              P.getValue(), T.getValue(), arrX,
+                                                                              phase,
+                                                                              basis);
 
     else if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
-        result = thermoPhysicalPropertyPackage->TwoPhaseScalarProperty(property,
-                                                                       P.getValue(), T.getValue(), arrX, phase,
-                                                                       P2.getValue(), T2.getValue(), arrX2, phase2,
-                                                                       basis);
+        result = thermoPhysicalPropertyPackage->CalcTwoPhaseScalarProperty(property,
+                                                                           P.getValue(), T.getValue(), arrX, phase,
+                                                                           P2.getValue(), T2.getValue(), arrX2, phase2,
+                                                                           basis);
 
     else
         daeDeclareAndThrowException(exInvalidCall);
@@ -4360,28 +4360,45 @@ string adThermoPhysicalPropertyPackageScalarNode::SaveAsLatex(const daeNodeSaveA
 {
     string strLatex;
 
-    strLatex += "{ tpp.";
+    strLatex += " { tpp.";
+    strLatex += toString(property);
+    strLatex += " \\left( ";
     if(propertyType == dae::tpp::ePureCompoundConstantProperty)
-        strLatex += "PureCompoundConstantProperty \\left( ";
+    {
+        strLatex += compound;
+    }
     else if(propertyType == dae::tpp::ePureCompoundTDProperty)
-        strLatex += "PureCompoundTDProperty \\left( ";
+    {
+        strLatex += compound + ", ";
+        strLatex += temperature->SaveAsLatex(c) + ", ";
+    }
     else if(propertyType == dae::tpp::ePureCompoundPDProperty)
-        strLatex += "PureCompoundPDProperty \\left( ";
-    else if(propertyType == dae::tpp::eSinglePhaseScalarProperty)
-        strLatex += "SinglePhaseScalarProperty \\left( ";
-    else if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
-        strLatex += "TwoPhaseScalarProperty \\left( ";
+    {
+        strLatex += compound + ", ";
+        strLatex += pressure->SaveAsLatex(c) + ", ";
+    }
     else
-        strLatex += "UnknownCall \\left( ";
-    strLatex += " \\right) }";
-
-//    strLatex += " \\left( ";
-//    strLatex += toString(property) + ", ";
-//    strLatex += pressure->SaveAsLatex(c) + ", ";
-//    strLatex += temperature->SaveAsLatex(c) + ", ";
-//    strLatex += composition->SaveAsLatex(c) + ", ";
-//    strLatex += toString(phase) + ", ";
-//    strLatex += toString(basis);
+    {
+        strLatex += pressure->SaveAsLatex(c) + ", ";
+        strLatex += temperature->SaveAsLatex(c) + ", ";
+        strLatex += composition->SaveAsLatex(c) + ", ";
+        strLatex += phase + ", ";
+        if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+        {
+            strLatex += pressure2->SaveAsLatex(c) + ", ";
+            strLatex += temperature2->SaveAsLatex(c) + ", ";
+            strLatex += composition2->SaveAsLatex(c) + ", ";
+            strLatex += phase2 + ", ";
+        }
+        if(basis == tpp::eMole)
+            strLatex += "mole";
+        else if(basis == tpp::eMass)
+            strLatex += "mass";
+        else if(basis == tpp::eUndefinedBasis)
+            strLatex += "undefined";
+    }
+    strLatex += " \\right)";
+    strLatex += "}";
 
     return strLatex;
 }
@@ -4511,19 +4528,19 @@ adouble_array adThermoPhysicalPropertyPackageArrayNode::Evaluate(const daeExecut
     std::vector<double> results;
     if(propertyType == dae::tpp::eSinglePhaseVectorProperty)
     {
-        thermoPhysicalPropertyPackage->SinglePhaseVectorProperty(property,
-                                                                 P.getValue(), T.getValue(), arrX,
-                                                                 phase,
-                                                                 results,
-                                                                 basis);
+        thermoPhysicalPropertyPackage->CalcSinglePhaseVectorProperty(property,
+                                                                     P.getValue(), T.getValue(), arrX,
+                                                                     phase,
+                                                                     results,
+                                                                     basis);
     }
     else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
     {
-        thermoPhysicalPropertyPackage->TwoPhaseVectorProperty(property,
-                                                              P.getValue(), T.getValue(), arrX, phase,
-                                                              P2.getValue(), T2.getValue(), arrX2, phase2,
-                                                              results,
-                                                              basis);
+        thermoPhysicalPropertyPackage->CalcTwoPhaseVectorProperty(property,
+                                                                  P.getValue(), T.getValue(), arrX, phase,
+                                                                  P2.getValue(), T2.getValue(), arrX2, phase2,
+                                                                  results,
+                                                                  basis);
     }
     else
     {
@@ -4573,14 +4590,37 @@ string adThermoPhysicalPropertyPackageArrayNode::SaveAsLatex(const daeNodeSaveAs
 {
     string strLatex;
 
-    strLatex += "{ tpp.";
-    if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
-        strLatex += "TwoPhaseScalarProperty \\left( ";
-    else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
-        strLatex += "TwoPhaseVectorProperty \\left( ";
-    else
-        strLatex += "UnknownCall \\left( ";
-    strLatex += " \\right) }";
+//    strLatex += "{ tpp.";
+//    if(propertyType == dae::tpp::eTwoPhaseScalarProperty)
+//        strLatex += "TwoPhaseScalarProperty \\left( ";
+//    else if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+//        strLatex += "TwoPhaseVectorProperty \\left( ";
+//    else
+//        strLatex += "UnknownCall \\left( ";
+//    strLatex += " \\right) }";
+
+    strLatex += " { tpp.";
+    strLatex += toString(property);
+    strLatex += " \\left( ";
+    strLatex += pressure->SaveAsLatex(c) + ", ";
+    strLatex += temperature->SaveAsLatex(c) + ", ";
+    strLatex += composition->SaveAsLatex(c) + ", ";
+    strLatex += phase + ", ";
+    if(propertyType == dae::tpp::eTwoPhaseVectorProperty)
+    {
+        strLatex += pressure2->SaveAsLatex(c) + ", ";
+        strLatex += temperature2->SaveAsLatex(c) + ", ";
+        strLatex += composition2->SaveAsLatex(c) + ", ";
+        strLatex += phase2 + ", ";
+    }
+    if(basis == tpp::eMole)
+        strLatex += "mole";
+    else if(basis == tpp::eMass)
+        strLatex += "mass";
+    else if(basis == tpp::eUndefinedBasis)
+        strLatex += "undefined";
+    strLatex += " \\right)";
+    strLatex += "}";
 
     return strLatex;
 }

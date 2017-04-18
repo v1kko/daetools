@@ -33,6 +33,7 @@ from pyIDAS import *
 from .logs import daePythonStdOutLog
 from .variable_types import *
 from .simulation_loader_aux import *
+from .thermo_packages import *
 
 try:
     from daetools.dae_simulator.simulator import daeSimulator

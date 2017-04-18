@@ -34,7 +34,7 @@ from .RunExamples_ui import Ui_RunExamplesDialog
 
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
-for i in range(1, 19):
+for i in range(1, 20):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 5):
     tutorial_modules.append(('tutorial_adv_%d' % i, []))

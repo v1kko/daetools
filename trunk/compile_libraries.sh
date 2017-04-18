@@ -26,21 +26,21 @@ getopt command might be missing - that line should be commented out.
 
 OPTIONS:
    -h | --help                  Show this message.
-   
+
    Control options (if not set default is: --clean and --build):
     --configure                 Configure the specified library(ies)/solver(s).
     --build                     Build  the specified library(ies)/solver(s).
     --clean                     Clean  the specified library(ies)/solver(s).
-   
+
    Python options (if not set use system's default python). One of the following:
     --with-python-binary          Path to python binary to use.
     --with-python-version         Version of the system's python in the format: major.minor (i.e 2.7).
 
    Cross compiling options:
-    --host                        Example: --host i686-w64-mingw32 (defines --host option for cross-compiling with the GNU gcc toolchain).    
+    --host                        Example: --host i686-w64-mingw32 (defines --host option for cross-compiling with the GNU gcc toolchain).
     --cross-compile-python-root   An absolute path to the python root folder (for the native python cannot be run under the build OS).
                                   Has to be: ~/daetools/trunk/Python[Major][Minor]-[arch] (i.e. ~/daetools-win32-cross/trunk/Python27-win32)
-                   
+
 LIBRARY:
     all    All libraries and solvers.
            On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt trilinos deal.ii
@@ -56,9 +56,10 @@ LIBRARY:
     superlu          SuperLU solver
     superlu_mt       SuperLU_MT solver
     bonmin           Bonmin solver
-    nlopt            NLopt solver 
+    nlopt            NLopt solver
     trilinos         Trilinos Amesos and AztecOO solvers
     deal.ii          deal.II finite elements library
+    coolprop         CoolProp thermophysical property library
 
 CROSS-COMPILATION (GNU/Linux -> Windows):
 Prerequisities:
@@ -155,7 +156,7 @@ HOST_ARCH=`uname -m`
 PLATFORM=`uname -s`
 if [[ "${PLATFORM}" == *"MSYS_"* ]]; then
   PLATFORM="Windows"
-  # Platform should be set by i.e. vcbuildtools.bat 
+  # Platform should be set by i.e. vcbuildtools.bat
   VC_PLAT=`cmd "/C echo %Platform% "`
   echo $VC_PLAT
   if [[ "${VC_PLAT}" == *"X86"* ]]; then
@@ -195,25 +196,25 @@ for i; do
     -h|--help)  usage
                 exit 1
                 ;;
-                  
+
     --with-python-binary)  PYTHON=$2
-                           shift ; shift 
+                           shift ; shift
                            ;;
-                            
+
     --with-python-version )  PYTHON=python$2
                              PYTHON_MAJOR=${2%.*}
                              PYTHON_MINOR=${2##*.}
-                             shift ; shift 
+                             shift ; shift
                              ;;
-                                    
+
     --cross-compile-python-root)  DAE_CROSS_COMPILE_PYTHON_ROOT=$2
-                                  shift ; shift 
+                                  shift ; shift
                                   ;;
-                            
+
     --configure) DO_CONFIGURE="yes"
                     shift
                     ;;
-                         
+
     --build) DO_BUILD="yes"
                 shift
                 ;;
@@ -234,7 +235,7 @@ for i; do
             shift ; shift
             ;;
 
-    --) shift; break 
+    --) shift; break
        ;;
   esac
 done
@@ -275,7 +276,7 @@ fi
 if [ ${PLATFORM} = "Darwin" ]; then
   DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch x86_64"
   BOOST_MACOSX_FLAGS="macosx-version-min=10.5 architecture=x86 address-model=32_64"
-  
+
   if type "wget" > /dev/null ; then
     echo "wget found"
   else
@@ -387,9 +388,10 @@ else
         superlu)          ;;
         superlu_mt)       ;;
         bonmin)           ;;
-        nlopt)            ;; 
+        nlopt)            ;;
         libmesh)          ;;
         deal.ii)          ;;
+        coolprop)         ;;
         *) echo Unrecognized solver: "$solver"
         exit
         ;;
@@ -421,7 +423,7 @@ cd "${TRUNK}"
 #######################################################
 #                       BOOST                         #
 #######################################################
-configure_boost() 
+configure_boost()
 {
   if [ -e boost${PYTHON_VERSION} ]; then
     rm -r boost${PYTHON_VERSION}
@@ -453,16 +455,16 @@ configure_boost()
   echo ""
 }
 
-compile_boost() 
+compile_boost()
 {
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     cd boost${PYTHON_VERSION}
     echo ""
     echo "[*] Building boost"
     echo ""
-    
+
     BOOST_USER_CONFIG=~/user-config.jam
-    
+
     #GCC_CROSS="${DAE_CROSS_COMPILER}-g++ -Wl,${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a"
     echo "using gcc : : ${DAE_CROSS_COMPILER}-g++ ;"                                              > ${BOOST_USER_CONFIG}
     echo "using python"                                                                          >> ${BOOST_USER_CONFIG}
@@ -472,10 +474,10 @@ compile_boost()
     echo "    : ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a" >> ${BOOST_USER_CONFIG}
     echo "    : <toolset>gcc"                                                                    >> ${BOOST_USER_CONFIG}
     echo "    ;"                                                                                 >> ${BOOST_USER_CONFIG}
-       
+
     # https://stackoverflow.com/questions/3778370/python-extensions-for-win64-via-gcc
-    # There is a mechanism in Python to prevent linking a module against the wrong version of the library. 
-    # The Py_InitModule4 function is renamed to Py_InitModule4_64 (via a macro) when the library / module is compiled 
+    # There is a mechanism in Python to prevent linking a module against the wrong version of the library.
+    # The Py_InitModule4 function is renamed to Py_InitModule4_64 (via a macro) when the library / module is compiled
     # for a 64-bit architecture (see modsupport.h) :
     #    #if SIZEOF_SIZE_T != SIZEOF_INT
     #    /* On a 64-bit system, rename the Py_InitModule4 so that 2.4
@@ -487,7 +489,7 @@ compile_boost()
       export CPPFLAGS=MS_WIN64
     fi
     export CPLUS_INCLUDE_PATH=${DAE_CROSS_COMPILE_PYTHON_ROOT}/include
-    
+
     ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
            --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread \
            toolset=gcc target-os=windows threadapi=win32 \
@@ -499,32 +501,32 @@ compile_boost()
 
     # Achtung, Achtung!
     # The following will fail at the linking phase!
-    # Redo the link with the value of: 
+    # Redo the link with the value of:
     #     ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a
     # appended at the end of the linking line, and manually copy the .dll to the "daetools/solibs/${PLATFORM}_${HOST_ARCH}" directory.
     ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
            --with-python \
            toolset=gcc target-os=windows threadapi=win32 \
            variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
-    
+
     # Restore the variables
     export CXX=
     export CPPFLAGS=
     export CPLUS_INCLUDE_PATH=
-    
+
     LIBBOOST_PYTHON_SUF="${PYTHON_MAJOR}"
     if [ "${PYTHON_MAJOR}" = "2" ]; then
       LIBBOOST_PYTHON_SUF=""
     fi
     cp -fa stage/lib/libboost_python${LIBBOOST_PYTHON_SUF}-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*  ${SOLIBS_DIR}
-  
+
   else # regular compiler (not a cross-compiler)
-    
+
     cd boost${PYTHON_VERSION}
     echo ""
     echo "[*] Building boost"
     echo ""
-    
+
     BOOST_USER_CONFIG=~/user-config.jam
     if [ ${PLATFORM} = "Windows" ]; then
       echo "using python"                           >  ${BOOST_USER_CONFIG}
@@ -572,10 +574,10 @@ compile_boost()
       cp -fa stage/lib/libboost_system-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
       cp -fa stage/lib/libboost_thread-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                        ${SOLIBS_DIR}
       cp -fa stage/lib/libboost_filesystem-${BOOST_BUILD_ID}${BOOST_PYTHON_BUILD_ID}*                    ${SOLIBS_DIR}
-    fi    
+    fi
 
   fi
-  
+
   echo ""
   echo "[*] Done!"
   echo ""
@@ -598,17 +600,17 @@ clean_boost()
 #######################################################
 #                   OpenBLAS                          #
 #######################################################
-configure_openblas() 
+configure_openblas()
 {
   if [ "${DAE_IF_CROSS_COMPILING}" = 1 ]; then
     echo "OpenBLAS not configured for cross-compiling at the moment"
     exit
   fi
-  
+
   if [ -e openblas ]; then
     rm -r openblas
   fi
-  
+
   echo ""
   echo "Setting-up openblas..."
   echo ""
@@ -623,20 +625,20 @@ configure_openblas()
   cd openblas
   mkdir build
   cd "${TRUNK}"
-  
+
   echo ""
   echo "[*] Done!"
   echo ""
 }
 
-compile_openblas() 
+compile_openblas()
 {
   cd openblas
   echo ""
   echo "[*] Building openblas..."
   echo ""
   ${MAKE_Ncpu} libs
-  ${MAKE_Ncpu} 
+  ${MAKE_Ncpu}
   ${MAKE} prefix=build install
   cp -a libopenblas_daetools* ${SOLIBS_DIR}
   echo ""
@@ -661,12 +663,12 @@ clean_openblas()
 #######################################################
 #            Reference BLAS and LAPACK                #
 #######################################################
-configure_ref_blas_lapack() 
+configure_ref_blas_lapack()
 {
   if [ -e lapack ]; then
     rm -r lapack
   fi
-  
+
   echo ""
   echo "[*] Setting-up reference blas & lapack..."
   echo ""
@@ -678,9 +680,9 @@ configure_ref_blas_lapack()
   fi
   tar -xzf lapack-${vLAPACK}.tgz
   mv lapack-${vLAPACK} lapack
-  
+
   cd lapack
-  
+
   cmake \
     -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=Release \
@@ -689,15 +691,15 @@ configure_ref_blas_lapack()
     -DBUILD_STATIC_LIBS:BOOL=ON \
     -DCMAKE_Fortran_FLAGS:STRING="${DAE_COMPILER_FLAGS}" \
     ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE}
-  
+
   cd "${TRUNK}"
-  
+
   echo ""
   echo "[*] Done!"
   echo ""
 }
 
-compile_ref_blas_lapack() 
+compile_ref_blas_lapack()
 {
   cd lapack
   echo ""
@@ -790,6 +792,83 @@ clean_cblas_clapack()
 }
 
 #######################################################
+#                     CoolProp                        #
+#######################################################
+configure_coolprop()
+{
+  if [ -e coolprop ]; then
+    rm -r coolprop
+  fi
+
+  echo ""
+  echo "[*] Setting-up coolprop..."
+  echo ""
+  vCOOLPROP=6.1.0
+  COOLPROP_HTTP=https://sourceforge.net/projects/coolprop/files/CoolProp/${vCOOLPROP}/source
+  if [ ! -e CoolProp_sources.zip ]; then
+    wget ${COOLPROP_HTTP}/CoolProp_sources.zip
+  fi
+  unzip CoolProp_sources.zip
+  mv CoolProp.sources coolprop
+
+  cd coolprop
+  mkdir -p build
+  cd build
+
+  COOLPROP_CXX_FLAGS=
+  if [ ${PLATFORM} = "Windows" ]; then
+    COOLPROP_CXX_FLAGS="/MD /EHsc"
+  fi
+
+  cmake \
+    -G"${CMAKE_GENERATOR}" \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DCOOLPROP_RELEASE:BOOL=ON \
+    -DCOOLPROP_DEBUG:BOOL=OFF \
+    -DCOOLPROP_STATIC_LIBRARY:BOOL=ON \
+    -DBUILD_TESTING:BOOL=OFF \
+    -DCMAKE_INSTALL_PREFIX:STRING="${TRUNK}/coolprop/build" \
+    -DCOOLPROP_INSTALL_PREFIX="${TRUNK}/coolprop/build" \
+    -DCMAKE_CXX_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} ${COOLPROP_CXX_FLAGS}" \
+    -DCMAKE_C_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS} ${COOLPROP_CXX_FLAGS}" \
+    ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} \
+    ..
+
+  cd "${TRUNK}"
+
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_coolprop()
+{
+  cd coolprop
+  cd build
+  echo ""
+  echo "[*] Building coolprop..."
+  echo ""
+  ${MAKE_Ncpu} install
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_coolprop()
+{
+  echo ""
+  echo "[*] Cleaning coolprop..."
+  echo ""
+  cd coolprop
+  ${MAKE} clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+#######################################################
 #                      Mumps                          #
 #######################################################
 configure_mumps()
@@ -846,7 +925,7 @@ clean_mumps()
 #######################################################
 #                      UMFPACK                        #
 #######################################################
-configure_umfpack() 
+configure_umfpack()
 {
   if [ -e umfpack ]; then
     rm -rf umfpack
@@ -856,7 +935,7 @@ configure_umfpack()
   echo ""
   if [ ! -e SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz ]; then
     wget ${DAETOOLS_HTTP}/SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
-  fi 
+  fi
   if [ ! -e CHOLMOD-${vCHOLMOD}.tar.gz ]; then
     wget ${DAETOOLS_HTTP}/CHOLMOD-${vCHOLMOD}.tar.gz
   fi
@@ -887,7 +966,7 @@ configure_umfpack()
   #if [ ! -e Makefile-CHOLMOD.patch ]; then
   #  wget ${DAETOOLS_HTTP}/Makefile-CHOLMOD.patch
   #fi
-  
+
   mkdir umfpack
   cd umfpack
   tar -xzf ../SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
@@ -904,18 +983,18 @@ configure_umfpack()
   # Apply Metis 5.1.0 patch for CHOLMOD
   #cd CHOLMOD/Lib
   #patch < ../../../Makefile-CHOLMOD.patch
-  
+
   mkdir build
   mkdir build/lib
   mkdir build/include
   cd "${TRUNK}"
-  
+
   echo ""
   echo "[*] Done!"
   echo ""
 }
 
-compile_umfpack() 
+compile_umfpack()
 {
 #  cd umfpack/metis-${vMETIS}
 #  echo "[*] Building metis..."
@@ -1019,35 +1098,35 @@ clean_umfpack()
   #cd umfpack/metis-${vMETIS}
   #make clean
   #cd "${TRUNK}"
-  
+
   cd umfpack/SuiteSparse_config
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   cd umfpack/AMD
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   cd umfpack/CAMD
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   cd umfpack/COLAMD
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   cd umfpack/CCOLAMD
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   cd umfpack/CHOLMOD
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   cd umfpack/UMFPACK
   ${MAKE} clean
   cd "${TRUNK}"
-  
+
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1056,7 +1135,7 @@ clean_umfpack()
 #######################################################
 #                       IDAS                          #
 #######################################################
-configure_idas() 
+configure_idas()
 {
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     echo ""
@@ -1064,7 +1143,7 @@ configure_idas()
     echo "  Cross-compilation must be performed using the cmake-gui and the ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} cross compile toolchain"
     exit 1
   fi
-    
+
   if [ -e idas ]; then
     rm -r idas
   fi
@@ -1096,14 +1175,14 @@ configure_idas()
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     $EXTRA_ARGS \
     ${IDAS_HOME}
-    
+
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
   echo ""
 }
 
-compile_idas() 
+compile_idas()
 {
   cd idas
   cd build
@@ -1133,7 +1212,7 @@ clean_idas()
 #######################################################
 #                     SUPERLU                         #
 #######################################################
-configure_superlu() 
+configure_superlu()
 {
   if [ -e superlu ]; then
     rm -r superlu
@@ -1174,7 +1253,7 @@ configure_superlu()
   echo ""
 }
 
-compile_superlu() 
+compile_superlu()
 {
   cd superlu
   cd build
@@ -1205,7 +1284,7 @@ clean_superlu()
 #######################################################
 #                    SUPERLU_MT                       #
 #######################################################
-configure_superlu_mt() 
+configure_superlu_mt()
 {
   if [ -e superlu_mt ]; then
     rm -r superlu_mt
@@ -1229,13 +1308,13 @@ configure_superlu_mt()
   echo ""
 }
 
-compile_superlu_mt() 
+compile_superlu_mt()
 {
   cd superlu_mt
   echo ""
   echo "[*] Building superlu_mt..."
   echo ""
-  
+
   ${MAKE_Ncpu} lib DAE_CROSS_COMPILER_PREFIX=${DAE_CROSS_COMPILER_PREFIX} DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS}"
   echo ""
   echo "[*] Done!"
@@ -1259,7 +1338,7 @@ clean_superlu_mt()
 #######################################################
 #                      BONMIN                         #
 #######################################################
-configure_bonmin() 
+configure_bonmin()
 {
   if [ -e bonmin ]; then
     rm -r bonmin
@@ -1273,21 +1352,21 @@ configure_bonmin()
   unzip Bonmin-${vBONMIN}.zip
   rm -rf bonmin/Bonmin-${vBONMIN}
   mv Bonmin-${vBONMIN} bonmin
-  
+
   cd bonmin
-  
+
   cd ThirdParty/Mumps
   sh get.Mumps
   cd ../..
-  
+
   cd ThirdParty/Blas
   sh get.Blas
   cd ../..
-  
+
   cd ThirdParty/Lapack
   sh get.Lapack
   cd ../..
-  
+
   mkdir -p build
   cd build
   ../configure ${DAE_CROSS_COMPILE_FLAGS} --disable-dependency-tracking --enable-shared=no --enable-static=yes \
@@ -1299,7 +1378,7 @@ configure_bonmin()
   echo ""
 }
 
-compile_bonmin() 
+compile_bonmin()
 {
   cd bonmin/build
   echo "[*] Building bonmin..."
@@ -1328,7 +1407,7 @@ clean_bonmin()
 #######################################################
 #                      NLOPT                          #
 #######################################################
-configure_nlopt() 
+configure_nlopt()
 {
   if [ -e nlopt ]; then
     rm -r nlopt
@@ -1348,12 +1427,12 @@ configure_nlopt()
 
   tar -xzf nlopt-${vNLOPT}.tar.gz
   mv nlopt-${vNLOPT} nlopt
-  cp nlopt-config.cmake.h.in nlopt/config.cmake.h.in 
+  cp nlopt-config.cmake.h.in nlopt/config.cmake.h.in
   cp nlopt-CMakeLists.txt    nlopt/CMakeLists.txt
   cd nlopt
   mkdir build
   cd build
-  
+
   export NLOPT_HOME="${TRUNK}/nlopt"
 
   NLOPT_CXX_FLAGS=
@@ -1378,7 +1457,7 @@ configure_nlopt()
   echo ""
 }
 
-compile_nlopt() 
+compile_nlopt()
 {
   cd nlopt/build
   echo "[*] Building nlopt..."
@@ -1406,12 +1485,12 @@ clean_nlopt()
 #######################################################
 #                   TRILINOS                          #
 #######################################################
-configure_trilinos() 
+configure_trilinos()
 {
   if [ -e trilinos ]; then
     rm -r trilinos
   fi
-  
+
   echo "[*] Setting-up trilinos..."
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
     wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
@@ -1427,7 +1506,7 @@ configure_trilinos()
   EXTRA_ARGS=
 
   UMFPACK_INCLUDE_DIR="${DAE_UMFPACK_INSTALL_DIR}/include"
-  
+
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     EXTRA_ARGS="$EXTRA_ARGS ${DAE_CROSS_COMPILE_TOOLCHAIN_FILE} -DHAVE_GCC_ABI_DEMANGLE_EXITCODE=0 "
   fi
@@ -1440,7 +1519,7 @@ configure_trilinos()
     BLAS_LIBRARIES="${TRUNK}/clapack/build/lib/blas.lib ${TRUNK}/clapack/build/lib/libf2c.lib"
     LAPACK_LIBRARIES="${TRUNK}/clapack/build/lib/lapack.lib ${TRUNK}/clapack/build/lib/libf2c.lib"
   fi
-  
+
   cmake \
     -G"${CMAKE_GENERATOR}" \
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
@@ -1472,14 +1551,14 @@ configure_trilinos()
     -DCMAKE_Fortran_FLAGS:STRING="-DNDEBUG ${DAE_COMPILER_FLAGS}" \
     $EXTRA_ARGS \
     ${TRILINOS_HOME}
-    
+
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
   echo ""
 }
 
-compile_trilinos() 
+compile_trilinos()
 {
 # Note: there may be problems while cross-compiling with some of the files:
 #  i686-w64-mingw32:
@@ -1492,8 +1571,8 @@ compile_trilinos()
 #      #  endif
 #          template class BLAS<long int, float>;
 #          template class BLAS<long int, double>;
-#      #endif      
-#  2. trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp, 
+#      #endif
+#  2. trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp,
 #     trilinos/packages/ml/src/Utils/ml_utils.c
 #     trilinos/packages/ml/src/MLAPI/MLAPI_Workspace.cpp:
 #     Functions gethostname and sleep do not exist
@@ -1530,11 +1609,11 @@ clean_trilinos()
 #######################################################
 #                     deal.II                         #
 #######################################################
-configure_dealii() 
+configure_dealii()
 {
   if [ "${DAE_IF_CROSS_COMPILING}" = "1" ]; then
     # Cross-compilation requires the toolchain file: set it up using: -DCMAKE_TOOLCHAIN_FILE=path_to_toolchain_file.cmake
-    # 
+    #
     # The problem with cross-compilation is that expand_instantiations_exe cannot be run under the build architecture.
     # deal.II/bin/expand_instantiations.exe is required but not existing and must be used from the native build.
     # Therefore, set up a native deal.II build directory first and run the following command in it:
@@ -1542,10 +1621,10 @@ configure_dealii()
     # Locate the expand_instantiations executable (it usually resides under ${CMAKE_BINARY_DIR}/common/scripts
     # and export its location using the PATH environment variable.
     export PATH=${TRUNK}/../../daetools/trunk/deal.II/bin:${PATH}
-        
+
     DEALII_CROSS_COMPILE_OPTIONS="${DAE_CROSS_COMPILE_TOOLCHAIN_FILE}"
   fi
-  
+
   if [ -e deal.II ]; then
     rm -r deal.II
   fi
@@ -1555,7 +1634,7 @@ configure_dealii()
   if [ ! -e dealii-${vDEALII}.tar.gz ]; then
     wget ${DEALII_HTTP}/v${vDEALII}/dealii-${vDEALII}.tar.gz
   fi
-  
+
   tar -xzf dealii-${vDEALII}.tar.gz
 
   # The line below should be enabled for newer versions of deal.ii
@@ -1612,16 +1691,16 @@ configure_dealii()
   echo ""
 }
 
-compile_dealii() 
+compile_dealii()
 {
   cd deal.II
   echo ""
   echo "[*] Building deal.II..."
   echo ""
-  
+
   ${MAKE} expand_instantiations_exe
   ${MAKE_Ncpu} install
-  
+
   # Nota bene:
   #   No need to copy anything since we are producing a static lib (.a)
   # Not anymore!
@@ -1681,8 +1760,8 @@ do
                           configure_dealii
                         fi
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         if [ ${PLATFORM} = "Windows" ]; then
                           compile_boost
                           compile_cblas_clapack
@@ -1705,8 +1784,8 @@ do
                           compile_dealii
                         fi
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         if [ ${PLATFORM} = "Windows" ]; then
                           clean_boost
                           clean_cblas_clapack
@@ -1730,33 +1809,33 @@ do
                         fi
                       fi
                       ;;
-    
+
     boost)            if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_boost
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_boost
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_boost
                       fi
                       ;;
-                      
+
     ref_blas_lapack)  if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_ref_blas_lapack
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_ref_blas_lapack
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_ref_blas_lapack
                       fi
                       ;;
-                      
+
     cblas_clapack)  if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_cblas_clapack
                       fi
@@ -1767,6 +1846,19 @@ do
 
                       if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_cblas_clapack
+                      fi
+                      ;;
+
+    coolprop)         if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_coolprop
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_coolprop
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_coolprop
                       fi
                       ;;
 
@@ -1786,133 +1878,133 @@ do
     openblas)         if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_openblas
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_openblas
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_openblas
                       fi
                       ;;
-                      
+
     umfpack)          if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_umfpack
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_umfpack
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_umfpack
                       fi
                       ;;
-                      
+
     idas)             if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_idas
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_idas
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_idas
                       fi
                       ;;
-                      
+
     trilinos)         if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_trilinos
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_trilinos
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_trilinos
                       fi
                       ;;
-                      
+
     superlu)          if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_superlu
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_superlu
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_superlu
                       fi
                       ;;
-                      
+
     superlu_mt)       if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_superlu_mt
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_superlu_mt
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_superlu_mt
                       fi
                       ;;
-                      
+
     bonmin)           if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_bonmin
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_bonmin
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_bonmin
                       fi
                       ;;
-                      
+
     nlopt)            if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_nlopt
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_nlopt
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_nlopt
                       fi
-                      ;; 
-                      
+                      ;;
+
     libmesh)          if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_libmesh
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_libmesh
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_libmesh
                       fi
-                      ;; 
-                      
+                      ;;
+
     deal.ii)          if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_dealii
                       fi
-                      
-                      if [ "${DO_BUILD}" = "yes" ]; then 
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
                         compile_dealii
                       fi
-                      
-                      if [ "${DO_CLEAN}" = "yes" ]; then 
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
                         clean_dealii
                       fi
-                      ;; 
-                      
+                      ;;
+
     *) echo Unrecognized solver: "$solver"
        exit
        ;;

@@ -21,7 +21,8 @@ public:
                      const std::vector<std::string>& strarrCompoundIDs,
                      const std::vector<std::string>& strarrCompoundCASNumbers,
                      const std::map<std::string, daeeThermoPackagePhase>& mapPhases,
-                     daeeThermoPackageBasis defaultBasis = eMole)
+                     daeeThermoPackageBasis defaultBasis = eMole,
+                     const std::map<std::string, std::string>& mapOptions = std::map<std::string, std::string>())
     {
         if (strarrCompoundIDs.size() == 0)
         {
@@ -184,7 +185,7 @@ public:
         for (size_t i = 0; i < strarrCompoundCASNumbers.size(); i++)
             bstrCompoundCASNumbers.push_back(_bstr_t(strarrCompoundCASNumbers[i].c_str()).Detach());
 
-        material = daeCreateThermoMaterial(&bstrCompoundIDs, &bstrCompoundCASNumbers, &m_mapPhases, NULL, NULL, NULL);
+        material = daeCreateThermoMaterial(&bstrCompoundIDs, &bstrCompoundCASNumbers, &m_mapPhases, NULL, NULL, NULL, NULL);
         if (!material)
         {
             std::stringstream ss;
@@ -245,6 +246,11 @@ public:
         errorPackageCapeUser.Release();
     }
 
+    std::string GetTPPName()
+    {
+        return std::string("CapeOpen TPP");
+    }
+
     HRESULT Set_SinglePhase_PTx(double P, double T, const std::vector<double>& x, _bstr_t& phase_bstr)
     {
         HRESULT hr;
@@ -270,7 +276,7 @@ public:
         //   It would be more efficient if I set these data directly to my material object
         //   rather than indirectly through SetSinglePhaseProp function calls.
         // These functions will throw an exception if some error occurs.
-        // No need to catch it here - the calling routinewill do it.
+        // No need to catch it here - the calling routine will do it.
         hr = material->SetSinglePhaseProp(L"pressure", phase_bstr, undefined_basis_bstr, pressure_v);
         if (FAILED(hr))
             return hr;
@@ -286,7 +292,8 @@ public:
         return S_OK;
     }
 
-    double PureCompoundConstantProperty(const std::string& property, const std::string& compound)
+    // ICapeThermoCompounds interface
+    double GetCompoundConstant(const std::string& property, const std::string& compound)
     {
         _bstr_t property_bstr = property.c_str();
         _bstr_t compound_bstr = compound.c_str();
@@ -305,7 +312,7 @@ public:
         return (double)value_t;
     }
 
-    double PureCompoundTDProperty(const std::string& property, double T, const std::string& compound)
+    double GetTDependentProperty(const std::string& property, double T, const std::string& compound)
     {
         HRESULT hr;
 
@@ -323,8 +330,8 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "PureCompoundTDProperty failed to calculate the property '" << (LPWSTR)property_bstr
-                << "' requested for the compound '" << (LPWSTR)compound_bstr << "' (or returned empty results)" << std::endl;
+            ss << "GetTDependentProperty failed to calculate the property '" << (LPWSTR)property_bstr
+               << "' requested for the compound '" << (LPWSTR)compound_bstr << "' (or returned empty results)" << std::endl;
 
             _variant_t property_list_v;
             std::vector<BSTR> arrPropertyList;
@@ -342,7 +349,7 @@ public:
         if (results_v.vt == VT_EMPTY)
         {
             std::wstringstream ss;
-            ss << "PureCompoundTDProperty returned empty results for the property '" << (LPWSTR)property_bstr
+            ss << "GetTDependentProperty returned empty results for the property '" << (LPWSTR)property_bstr
                 << "' requested for the compound '" << (LPWSTR)compound_bstr << "'" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
@@ -350,7 +357,7 @@ public:
         return double_from_variant(results_v);
     }
 
-    double PureCompoundPDProperty(const std::string& property, double P, const std::string& compound)
+    double GetPDependentProperty(const std::string& property, double P, const std::string& compound)
     {
         HRESULT hr;
 
@@ -368,7 +375,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "PureCompoundPDProperty failed to calculate the property '" << (LPWSTR)property_bstr 
+            ss << "GetPDependentProperty failed to calculate the property '" << (LPWSTR)property_bstr 
                << "' requested for the compound '" << (LPWSTR)compound_bstr << "'" << std::endl;
 
             _variant_t property_list_v;
@@ -387,7 +394,7 @@ public:
         if (results_v.vt == VT_EMPTY)
         {
             std::wstringstream ss;
-            ss << "PureCompoundPDProperty returned empty results for the property '" << (LPWSTR)property_bstr
+            ss << "GetPDependentProperty returned empty results for the property '" << (LPWSTR)property_bstr
                 << "' requested for the compound '" << (LPWSTR)compound_bstr << "'" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
@@ -395,12 +402,13 @@ public:
         return double_from_variant(results_v);
     }
 
-    double SinglePhaseScalarProperty(const std::string& property,
-                                     double P,
-                                     double T,
-                                     const std::vector<double>& x,
-                                     const std::string& phase,
-                                     daeeThermoPackageBasis basis = eMole)
+    // ICapeThermoPropertyRoutine interface
+    double CalcSinglePhaseScalarProperty(const std::string& property,
+                                         double P,
+                                         double T,
+                                         const std::vector<double>& x,
+                                         const std::string& phase,
+                                         daeeThermoPackageBasis basis = eMole)
     {
         HRESULT hr;
 
@@ -411,7 +419,7 @@ public:
         if(m_mapPhases.find(phase) == m_mapPhases.end())
         {
             std::wstringstream ss;
-            ss << "SinglePhaseScalarProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase_bstr 
+            ss << "CalcSinglePhaseScalarProperty: the property '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase_bstr 
                << "' not found in the material object" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
@@ -426,26 +434,26 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseScalarProperty: Cannot set T, P or x" << std::endl;
+            ss << "CalcSinglePhaseScalarProperty: Cannot set T, P or x" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorMaterialCapeUser);
         }
 
         _variant_t results_v;
         _variant_t properties_v = create_array_from_string(property_bstr);
 
-        try
-        {
-            VARIANT_BOOL valid = propertyRoutine->CheckSinglePhasePropSpec(property_bstr, phase_bstr);
-            if (!valid)
-                _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
-        }
-        catch (_com_error& e)
-        {
-            std::wstringstream ss;
-            ss << "SinglePhaseScalarProperty: Checking the property specification returned FALSE" << std::endl;
-            ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phase '" << (LPWSTR)phase_bstr << "'" << std::endl;
-            DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
-        }
+        //try
+        //{
+        //    VARIANT_BOOL valid = propertyRoutine->CheckSinglePhasePropSpec(property_bstr, phase_bstr);
+        //    if (!valid)
+        //        _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
+        //}
+        //catch (_com_error& e)
+        //{
+        //    std::wstringstream ss;
+        //    ss << "CalcSinglePhaseScalarProperty: Checking the property specification returned FALSE" << std::endl;
+        //    ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phase '" << (LPWSTR)phase_bstr << "'" << std::endl;
+        //    DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
+        //}
 
         try
         {
@@ -454,7 +462,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseScalarProperty: Calculation of the property failed" << std::endl;
+            ss << "CalcSinglePhaseScalarProperty: Calculation of the property failed" << std::endl;
             ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phase: " << (LPWSTR)phase_bstr << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
         }
@@ -469,7 +477,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseScalarProperty failed to obtain the property '" << (LPWSTR)property_bstr 
+            ss << "CalcSinglePhaseScalarProperty failed to obtain the property '" << (LPWSTR)property_bstr 
                << "' from the material for the phase '" << (LPWSTR)phase_bstr << "' and basis '" << (LPWSTR)basis_bstr << "'" << std::endl;
             ss << "Perhaps it was calculated for different basis (eMole, eMass, eUndefinedBasis)?" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorMaterialCapeUser);
@@ -478,13 +486,13 @@ public:
         return double_from_variant(results_v);
     }
 
-    void SinglePhaseVectorProperty(const std::string& property,
-                                   double P,
-                                   double T,
-                                   const std::vector<double>& x,
-                                   const std::string& phase,
-                                   std::vector<double>& results,
-                                   daeeThermoPackageBasis basis = eMole)
+    void CalcSinglePhaseVectorProperty(const std::string& property,
+                                       double P,
+                                       double T,
+                                       const std::vector<double>& x,
+                                       const std::string& phase,
+                                       std::vector<double>& results,
+                                       daeeThermoPackageBasis basis = eMole)
     {
         HRESULT hr;
 
@@ -495,7 +503,7 @@ public:
         if (m_mapPhases.find(phase) == m_mapPhases.end())
         {
             std::wstringstream ss;
-            ss << "SinglePhaseVectorProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase_bstr
+            ss << "CalcSinglePhaseVectorProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase_bstr
                 << "' not found in the material object" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
@@ -510,26 +518,26 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseVectorProperty: Cannot set T, P or x" << std::endl;
+            ss << "CalcSinglePhaseVectorProperty: Cannot set T, P or x" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorMaterialCapeUser);
         }
 
         _variant_t results_v;
         _variant_t properties_v = create_array_from_string(property_bstr);
 
-        try
-        {
-            VARIANT_BOOL valid = propertyRoutine->CheckSinglePhasePropSpec(property_bstr, phase_bstr);
-            if (!valid)
-                _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
-        }
-        catch (_com_error& e)
-        {
-            std::wstringstream ss;
-            ss << "SinglePhaseVectorProperty: Checking the property specification returned FALSE" << std::endl;
-            ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phase '" << (LPWSTR)phase_bstr << "'" << std::endl;
-            DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
-        }
+        //try
+        //{
+        //    VARIANT_BOOL valid = propertyRoutine->CheckSinglePhasePropSpec(property_bstr, phase_bstr);
+        //    if (!valid)
+        //        _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
+        //}
+        //catch (_com_error& e)
+        //{
+        //    std::wstringstream ss;
+        //    ss << "CalcSinglePhaseVectorProperty: Checking the property specification returned FALSE" << std::endl;
+        //    ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phase '" << (LPWSTR)phase_bstr << "'" << std::endl;
+        //    DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
+        //}
 
         try
         {
@@ -538,7 +546,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseVectorProperty: Calculation of the property failed" << std::endl;
+            ss << "CalcSinglePhaseVectorProperty: Calculation of the property failed" << std::endl;
             ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phase: " << (LPWSTR)phase_bstr << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
         }
@@ -553,7 +561,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseVectorProperty failed to obtain the property '" << (LPWSTR)property_bstr
+            ss << "CalcSinglePhaseVectorProperty failed to obtain the property '" << (LPWSTR)property_bstr
                 << "' from the material for the phase '" << (LPWSTR)phase_bstr << "' and basis '" << (LPWSTR)basis_bstr << "'" << std::endl;
             ss << "Perhaps it was calculated for different basis (eMole, eMass, eUndefinedBasis)?" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorMaterialCapeUser);
@@ -564,17 +572,17 @@ public:
         if(!res)
         {
             std::wstringstream ss;
-            ss << "SinglePhaseVectorProperty: Cannot get an array from the results for the property '" << (LPWSTR)property_bstr << std::endl;
+            ss << "CalcSinglePhaseVectorProperty: Cannot get an array from the results for the property '" << (LPWSTR)property_bstr << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
     }
 
-    double TwoPhaseScalarProperty(const std::string& property,
-                                  double P1, double T1, const std::vector<double>& x1,
-                                  const std::string& phase1,
-                                  double P2, double T2, const std::vector<double>& x2,
-                                  const std::string& phase2,
-                                  daeeThermoPackageBasis basis = eMole)
+    double CalcTwoPhaseScalarProperty(const std::string& property,
+                                      double P1, double T1, const std::vector<double>& x1,
+                                      const std::string& phase1,
+                                      double P2, double T2, const std::vector<double>& x2,
+                                      const std::string& phase2,
+                                      daeeThermoPackageBasis basis = eMole)
     {
         HRESULT hr;
 
@@ -592,14 +600,14 @@ public:
         if(m_mapPhases.find(phase1) == m_mapPhases.end())
         {
             std::wstringstream ss;
-            ss << "TwoPhaseScalarProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase1_bstr
+            ss << "CalcTwoPhaseScalarProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase1_bstr
                << "' not found in the material object" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
-        if (m_mapPhases.find(phase1) == m_mapPhases.end())
+        if (m_mapPhases.find(phase2) == m_mapPhases.end())
         {
             std::wstringstream ss;
-            ss << "TwoPhaseScalarProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase2_bstr
+            ss << "CalcTwoPhaseScalarProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase2_bstr
                 << "' not found in the material object" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
@@ -615,27 +623,27 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseScalarProperty: Cannot set T, P or x" << std::endl;
+            ss << "CalcTwoPhaseScalarProperty: Cannot set T, P or x" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorMaterialCapeUser);
         }
 
         _variant_t results_v;
         _variant_t properties_v = create_array_from_string(property_bstr);
 
-        try
-        {
-            VARIANT_BOOL valid = propertyRoutine->CheckTwoPhasePropSpec(property_bstr, phases_v);
-            if (!valid)
-                _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
-        }
-        catch (_com_error& e)
-        {
-            std::wstringstream ss;
-            ss << "TwoPhaseScalarProperty: Checking the property specification returned FALSE" << std::endl;
-            ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phases '" 
-               << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'" << std::endl;
-            DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
-        }
+        //try
+        //{
+        //    VARIANT_BOOL valid = propertyRoutine->CheckTwoPhasePropSpec(property_bstr, phases_v);
+        //    if (!valid)
+        //        _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
+        //}
+        //catch (_com_error& e)
+        //{
+        //    std::wstringstream ss;
+        //    ss << "CalcTwoPhaseScalarProperty: Checking the property specification returned FALSE" << std::endl;
+        //    ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phases '" 
+        //       << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'" << std::endl;
+        //    DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
+        //}
 
         try
         {
@@ -644,7 +652,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseScalarProperty: Calculation of the property failed" << std::endl;
+            ss << "CalcTwoPhaseScalarProperty: Calculation of the property failed" << std::endl;
             ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phases '" 
                << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
@@ -660,7 +668,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseScalarProperty failed to obtain the property '" << (LPWSTR)property_bstr 
+            ss << "CalcTwoPhaseScalarProperty failed to obtain the property '" << (LPWSTR)property_bstr 
                << "' from the material for the phases '" << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'"
                << "' and basis '" << (LPWSTR)basis_bstr << "'" << std::endl;
             ss << "Perhaps it was calculated for different basis (eMole, eMass, eUndefinedBasis)?" << std::endl;
@@ -670,13 +678,13 @@ public:
         return double_from_variant(results_v);
     }
 
-    void TwoPhaseVectorProperty(const std::string& property,
-                                double P1, double T1, const std::vector<double>& x1,
-                                const std::string& phase1,
-                                double P2, double T2, const std::vector<double>& x2,
-                                const std::string& phase2,
-                                std::vector<double>& results,
-                                daeeThermoPackageBasis basis = eMole)
+    void CalcTwoPhaseVectorProperty(const std::string& property,
+                                    double P1, double T1, const std::vector<double>& x1,
+                                    const std::string& phase1,
+                                    double P2, double T2, const std::vector<double>& x2,
+                                    const std::string& phase2,
+                                    std::vector<double>& results,
+                                    daeeThermoPackageBasis basis = eMole)
     {
         HRESULT hr;
 
@@ -694,14 +702,14 @@ public:
         if (m_mapPhases.find(phase1) == m_mapPhases.end())
         {
             std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase1_bstr
+            ss << "CalcTwoPhaseVectorProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase1_bstr
                 << "' not found in the material object" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
-        if (m_mapPhases.find(phase1) == m_mapPhases.end())
+        if (m_mapPhases.find(phase2) == m_mapPhases.end())
         {
             std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase2_bstr
+            ss << "CalcTwoPhaseVectorProperty '" << (LPWSTR)property_bstr << "' requested for the phase '" << (LPWSTR)phase2_bstr
                 << "' not found in the material object" << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
@@ -717,27 +725,27 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty: Cannot set T, P or x" << std::endl;
+            ss << "CalcTwoPhaseVectorProperty: Cannot set T, P or x" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorMaterialCapeUser);
         }
 
         _variant_t results_v;
         _variant_t properties_v = create_array_from_string(property_bstr);
 
-        try
-        {
-            VARIANT_BOOL valid = propertyRoutine->CheckTwoPhasePropSpec(property_bstr, phases_v);
-            if (!valid)
-                _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
-        }
-        catch (_com_error& e)
-        {
-            std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty: Checking the property specification returned FALSE" << std::endl;
-            ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phases '"
-                << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'" << std::endl;
-            DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
-        }
+        //try
+        //{
+        //    VARIANT_BOOL valid = propertyRoutine->CheckTwoPhasePropSpec(property_bstr, phases_v);
+        //    if (!valid)
+        //        _com_issue_errorex(ECapeUnknownHR, propertyRoutine, __uuidof(propertyRoutine));
+        //}
+        //catch (_com_error& e)
+        //{
+        //    std::wstringstream ss;
+        //    ss << "TwoPhaseVectorProperty: Checking the property specification returned FALSE" << std::endl;
+        //    ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phases '"
+        //        << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'" << std::endl;
+        //    DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
+        //}
 
         try
         {
@@ -746,7 +754,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty: Calculation of the property failed" << std::endl;
+            ss << "CalcTwoPhaseVectorProperty: Calculation of the property failed" << std::endl;
             ss << "The property '" << (LPWSTR)property_bstr << "' cannot be calculated for the phases '"
                 << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'" << std::endl;
             DAE_THROW_EXCEPTION(ss, e, errorPackageCapeUser);
@@ -762,7 +770,7 @@ public:
         catch (_com_error& e)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty failed to obtain the property '" << (LPWSTR)property_bstr
+            ss << "CalcTwoPhaseVectorProperty failed to obtain the property '" << (LPWSTR)property_bstr
                 << "' from the material for the phases '" << (LPWSTR)phase1_bstr << "-" << (LPWSTR)phase2_bstr << "'"
                 << "' and basis '" << (LPWSTR)basis_bstr << "'" << std::endl;
             ss << "Perhaps it was calculated for different basis (eMole, eMass, eUndefinedBasis)?" << std::endl;
@@ -774,7 +782,7 @@ public:
         if (!res)
         {
             std::wstringstream ss;
-            ss << "TwoPhaseVectorProperty: Cannot get an array from the results for the property '" << (LPWSTR)property_bstr << std::endl;
+            ss << "CalcTwoPhaseVectorProperty: Cannot get an array from the results for the property '" << (LPWSTR)property_bstr << std::endl;
             DAE_THROW_EXCEPTION2(ss);
         }
     }

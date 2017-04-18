@@ -700,6 +700,23 @@ win32-g++-*::DEALII_LIBS    = -ldeal_II-daetools -lblas -lgfortran -lm
 win64-g++-*::DEALII_LIBS    = -ldeal_II-daetools -lblas -lgfortran -lm
 
 #####################################################################################
+#                        CoolProp thermo package
+#####################################################################################
+COOLPROP_DIR      = ../coolprop
+
+COOLPROP_INCLUDE = $${COOLPROP_DIR}/include \
+                   $${COOLPROP_DIR}/externals/cppformat
+COOLPROP_LIB_DIR = $${COOLPROP_DIR}/build/static_library
+
+win32-msvc2015::COOLPROP_LIBS = $${COOLPROP_LIB_DIR}/Windows/CoolProp.lib
+unix::COOLPROP_LIBS           = -L$${COOLPROP_LIB_DIR}/Linux   -lCoolProp
+win32-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
+win64-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
+macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/???     -lCoolProp
+
+
+cdaeCoolPropThermoPackage
+#####################################################################################
 #                                 MPI SUPPORT
 #####################################################################################
 enable_mpi {
@@ -722,85 +739,89 @@ unix::MPI_LIBS           = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
 #####################################################################################
 #                                  DAE Tools
 #####################################################################################
-win32-msvc2015::DAE_CONFIG_LIB               = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
-win32-msvc2015::DAE_CORE_LIB                 = cdaeCore.lib
-win32-msvc2015::DAE_DATAREPORTING_LIB        = cdaeDataReporting.lib
-win32-msvc2015::DAE_ACTIVITY_LIB             = cdaeActivity.lib
-win32-msvc2015::DAE_IDAS_SOLVER_LIB          = cdaeIDAS_DAESolver.lib
-win32-msvc2015::DAE_UNITS_LIB                = cdaeUnits.lib
-win32-msvc2015::DAE_SUPERLU_SOLVER_LIB       = cdaeSuperLU_LASolver.lib
-win32-msvc2015::DAE_SUPERLU_MT_SOLVER_LIB    = cdaeSuperLU_MT_LASolver.lib
-win32-msvc2015::DAE_SUPERLU_CUDA_SOLVER_LIB  = cdaeSuperLU_CUDA_LASolver.lib
-win32-msvc2015::DAE_BONMIN_SOLVER_LIB        = cdaeBONMIN_MINLPSolver.lib
-win32-msvc2015::DAE_IPOPT_SOLVER_LIB         = cdaeIPOPT_NLPSolver.lib
-win32-msvc2015::DAE_NLOPT_SOLVER_LIB         = cdaeNLOPT_NLPSolver.lib
-win32-msvc2015::DAE_TRILINOS_SOLVER_LIB      = cdaeTrilinos_LASolver.lib
-win32-msvc2015::DAE_INTEL_PARDISO_SOLVER_LIB = cdaeIntelPardiso_LASolver.lib
-win32-msvc2015::DAE_PARDISO_SOLVER_LIB       = cdaePardiso_LASolver.lib
-win32-msvc2015::DAE_DEALII_SOLVER_LIB        = cdaeDealII_FESolver.lib
-win32-msvc2015::DAE_SIMULATION_LOADER_LIB    = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
-win32-msvc2015::DAE_DAETOOLS_FMI_CS_LIB      = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
-win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB  = cdaeCapeOpenThermoPackage.lib
+win32-msvc2015::DAE_CONFIG_LIB                  = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_CORE_LIB                    = cdaeCore.lib
+win32-msvc2015::DAE_DATAREPORTING_LIB           = cdaeDataReporting.lib
+win32-msvc2015::DAE_ACTIVITY_LIB                = cdaeActivity.lib
+win32-msvc2015::DAE_IDAS_SOLVER_LIB             = cdaeIDAS_DAESolver.lib
+win32-msvc2015::DAE_UNITS_LIB                   = cdaeUnits.lib
+win32-msvc2015::DAE_SUPERLU_SOLVER_LIB          = cdaeSuperLU_LASolver.lib
+win32-msvc2015::DAE_SUPERLU_MT_SOLVER_LIB       = cdaeSuperLU_MT_LASolver.lib
+win32-msvc2015::DAE_SUPERLU_CUDA_SOLVER_LIB     = cdaeSuperLU_CUDA_LASolver.lib
+win32-msvc2015::DAE_BONMIN_SOLVER_LIB           = cdaeBONMIN_MINLPSolver.lib
+win32-msvc2015::DAE_IPOPT_SOLVER_LIB            = cdaeIPOPT_NLPSolver.lib
+win32-msvc2015::DAE_NLOPT_SOLVER_LIB            = cdaeNLOPT_NLPSolver.lib
+win32-msvc2015::DAE_TRILINOS_SOLVER_LIB         = cdaeTrilinos_LASolver.lib
+win32-msvc2015::DAE_INTEL_PARDISO_SOLVER_LIB    = cdaeIntelPardiso_LASolver.lib
+win32-msvc2015::DAE_PARDISO_SOLVER_LIB          = cdaePardiso_LASolver.lib
+win32-msvc2015::DAE_DEALII_SOLVER_LIB           = cdaeDealII_FESolver.lib
+win32-msvc2015::DAE_SIMULATION_LOADER_LIB       = cdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_DAETOOLS_FMI_CS_LIB         = cdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
+win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB     = cdaeCapeOpenThermoPackage.lib
+win32-msvc2015::DAE_COOLPROP_THERMO_PACKAGE_LIB = cdaeCoolPropThermoPackage.lib
 
-win32-g++-*::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::DAE_CORE_LIB                 = -lcdaeCore
-win32-g++-*::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
-win32-g++-*::DAE_ACTIVITY_LIB             = -lcdaeActivity
-win32-g++-*::DAE_IDAS_SOLVER_LIB          = -lcdaeIDAS_DAESolver
-win32-g++-*::DAE_UNITS_LIB                = -lcdaeUnits
-win32-g++-*::DAE_SUPERLU_SOLVER_LIB       = -lcdaeSuperLU_LASolver
-win32-g++-*::DAE_SUPERLU_MT_SOLVER_LIB    = -lcdaeSuperLU_MT_LASolver
-win32-g++-*::DAE_SUPERLU_CUDA_SOLVER_LIB  = -lcdaeSuperLU_CUDA_LASolver
-win32-g++-*::DAE_BONMIN_SOLVER_LIB        = -lcdaeBONMIN_MINLPSolver
-win32-g++-*::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
-win32-g++-*::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
-win32-g++-*::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
-win32-g++-*::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
-win32-g++-*::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
-win32-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
-win32-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB  =
+win32-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::DAE_CORE_LIB                    = -lcdaeCore
+win32-g++-*::DAE_DATAREPORTING_LIB           = -lcdaeDataReporting
+win32-g++-*::DAE_ACTIVITY_LIB                = -lcdaeActivity
+win32-g++-*::DAE_IDAS_SOLVER_LIB             = -lcdaeIDAS_DAESolver
+win32-g++-*::DAE_UNITS_LIB                   = -lcdaeUnits
+win32-g++-*::DAE_SUPERLU_SOLVER_LIB          = -lcdaeSuperLU_LASolver
+win32-g++-*::DAE_SUPERLU_MT_SOLVER_LIB       = -lcdaeSuperLU_MT_LASolver
+win32-g++-*::DAE_SUPERLU_CUDA_SOLVER_LIB     = -lcdaeSuperLU_CUDA_LASolver
+win32-g++-*::DAE_BONMIN_SOLVER_LIB           = -lcdaeBONMIN_MINLPSolver
+win32-g++-*::DAE_IPOPT_SOLVER_LIB            = -lcdaeIPOPT_NLPSolver
+win32-g++-*::DAE_NLOPT_SOLVER_LIB            = -lcdaeNLOPT_NLPSolver
+win32-g++-*::DAE_TRILINOS_SOLVER_LIB         = -lcdaeTrilinos_LASolver
+win32-g++-*::DAE_INTEL_PARDISO_SOLVER_LIB    = -lcdaeIntelPardiso_LASolver
+win32-g++-*::DAE_PARDISO_SOLVER_LIB          = -lcdaePardiso_LASolver
+win32-g++-*::DAE_DEALII_SOLVER_LIB           = -lcdaeDealII_FESolver
+win32-g++-*::DAE_SIMULATION_LOADER_LIB       = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB         = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
+win32-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB =
 
-win64-g++-*::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::DAE_CORE_LIB                 = -lcdaeCore
-win64-g++-*::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
-win64-g++-*::DAE_ACTIVITY_LIB             = -lcdaeActivity
-win64-g++-*::DAE_IDAS_SOLVER_LIB          = -lcdaeIDAS_DAESolver
-win64-g++-*::DAE_UNITS_LIB                = -lcdaeUnits
-win64-g++-*::DAE_SUPERLU_SOLVER_LIB       = -lcdaeSuperLU_LASolver
-win64-g++-*::DAE_SUPERLU_MT_SOLVER_LIB    = -lcdaeSuperLU_MT_LASolver
-win64-g++-*::DAE_SUPERLU_CUDA_SOLVER_LIB  = -lcdaeSuperLU_CUDA_LASolver
-win64-g++-*::DAE_BONMIN_SOLVER_LIB        = -lcdaeBONMIN_MINLPSolver
-win64-g++-*::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
-win64-g++-*::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
-win64-g++-*::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
-win64-g++-*::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
-win64-g++-*::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
-win64-g++-*::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
-win64-g++-*::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB  =
+win64-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win64-g++-*::DAE_CORE_LIB                    = -lcdaeCore
+win64-g++-*::DAE_DATAREPORTING_LIB           = -lcdaeDataReporting
+win64-g++-*::DAE_ACTIVITY_LIB                = -lcdaeActivity
+win64-g++-*::DAE_IDAS_SOLVER_LIB             = -lcdaeIDAS_DAESolver
+win64-g++-*::DAE_UNITS_LIB                   = -lcdaeUnits
+win64-g++-*::DAE_SUPERLU_SOLVER_LIB          = -lcdaeSuperLU_LASolver
+win64-g++-*::DAE_SUPERLU_MT_SOLVER_LIB       = -lcdaeSuperLU_MT_LASolver
+win64-g++-*::DAE_SUPERLU_CUDA_SOLVER_LIB     = -lcdaeSuperLU_CUDA_LASolver
+win64-g++-*::DAE_BONMIN_SOLVER_LIB           = -lcdaeBONMIN_MINLPSolver
+win64-g++-*::DAE_IPOPT_SOLVER_LIB            = -lcdaeIPOPT_NLPSolver
+win64-g++-*::DAE_NLOPT_SOLVER_LIB            = -lcdaeNLOPT_NLPSolver
+win64-g++-*::DAE_TRILINOS_SOLVER_LIB         = -lcdaeTrilinos_LASolver
+win64-g++-*::DAE_INTEL_PARDISO_SOLVER_LIB    = -lcdaeIntelPardiso_LASolver
+win64-g++-*::DAE_PARDISO_SOLVER_LIB          = -lcdaePardiso_LASolver
+win64-g++-*::DAE_DEALII_SOLVER_LIB           = -lcdaeDealII_FESolver
+win64-g++-*::DAE_SIMULATION_LOADER_LIB       = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win64-g++-*::DAE_DAETOOLS_FMI_CS_LIB         = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
+win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB =
 
-unix::DAE_CONFIG_LIB               = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::DAE_CORE_LIB                 = -lcdaeCore
-unix::DAE_DATAREPORTING_LIB        = -lcdaeDataReporting
-unix::DAE_ACTIVITY_LIB             = -lcdaeActivity
-unix::DAE_IDAS_SOLVER_LIB          = -lcdaeIDAS_DAESolver
-unix::DAE_UNITS_LIB                = -lcdaeUnits
-unix::DAE_SUPERLU_SOLVER_LIB       = -lcdaeSuperLU_LASolver
-unix::DAE_SUPERLU_MT_SOLVER_LIB    = -lcdaeSuperLU_MT_LASolver
-unix::DAE_SUPERLU_CUDA_SOLVER_LIB  = -lcdaeSuperLU_CUDA_LASolver
-unix::DAE_BONMIN_SOLVER_LIB        = -lcdaeBONMIN_MINLPSolver
-unix::DAE_IPOPT_SOLVER_LIB         = -lcdaeIPOPT_NLPSolver
-unix::DAE_NLOPT_SOLVER_LIB         = -lcdaeNLOPT_NLPSolver
-unix::DAE_TRILINOS_SOLVER_LIB      = -lcdaeTrilinos_LASolver
-unix::DAE_INTEL_PARDISO_SOLVER_LIB = -lcdaeIntelPardiso_LASolver
-unix::DAE_PARDISO_SOLVER_LIB       = -lcdaePardiso_LASolver
-unix::DAE_DEALII_SOLVER_LIB        = -lcdaeDealII_FESolver
-unix::DAE_SIMULATION_LOADER_LIB    = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::DAE_DAETOOLS_FMI_CS_LIB      = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::DAE_CAPE_THERMO_PACKAGE_LIB  =
+unix::DAE_CONFIG_LIB                    = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::DAE_CORE_LIB                      = -lcdaeCore
+unix::DAE_DATAREPORTING_LIB             = -lcdaeDataReporting
+unix::DAE_ACTIVITY_LIB                  = -lcdaeActivity
+unix::DAE_IDAS_SOLVER_LIB               = -lcdaeIDAS_DAESolver
+unix::DAE_UNITS_LIB                     = -lcdaeUnits
+unix::DAE_SUPERLU_SOLVER_LIB            = -lcdaeSuperLU_LASolver
+unix::DAE_SUPERLU_MT_SOLVER_LIB         = -lcdaeSuperLU_MT_LASolver
+unix::DAE_SUPERLU_CUDA_SOLVER_LIB       = -lcdaeSuperLU_CUDA_LASolver
+unix::DAE_BONMIN_SOLVER_LIB             = -lcdaeBONMIN_MINLPSolver
+unix::DAE_IPOPT_SOLVER_LIB              = -lcdaeIPOPT_NLPSolver
+unix::DAE_NLOPT_SOLVER_LIB              = -lcdaeNLOPT_NLPSolver
+unix::DAE_TRILINOS_SOLVER_LIB           = -lcdaeTrilinos_LASolver
+unix::DAE_INTEL_PARDISO_SOLVER_LIB      = -lcdaeIntelPardiso_LASolver
+unix::DAE_PARDISO_SOLVER_LIB            = -lcdaePardiso_LASolver
+unix::DAE_DEALII_SOLVER_LIB             = -lcdaeDealII_FESolver
+unix::DAE_SIMULATION_LOADER_LIB         = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::DAE_DAETOOLS_FMI_CS_LIB           = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
+unix::DAE_CAPE_THERMO_PACKAGE_LIB       =
+unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -LcdaeCoolPropThermoPackage
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 

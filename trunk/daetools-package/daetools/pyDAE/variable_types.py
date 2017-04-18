@@ -50,7 +50,7 @@ power_t                      = daeVariableType("power_t",                      W
 
 specific_heat_capacity_t     = daeVariableType("specific_heat_capacity_t",     J/(kg*K),        0.0, 1.0e+20, 1.0e+03, 1e-05)
 density_t                    = daeVariableType("density_t",                    kg/(m**3),       0.0, 1.0e+20, 1.0e+03, 1e-05)
-specific_heat_conductivity_t = daeVariableType("specific_heat_conductivity_t", W/(m*K),         0.0, 1.0e+10,     1.0, 1e-05)
+thermal_conductivity_t       = daeVariableType("thermal_conductivity_t",       W/(m*K),         0.0, 1.0e+10,     1.0, 1e-05)
 dynamic_viscosity_t          = daeVariableType("dynamic_viscosity_t",          Pa*s,            0.0, 1.0e+10, 1.0e-03, 1e-06)
 diffusivity_t                = daeVariableType("diffusivity_t",                (m**2)/s,        0.0, 1.0e+05, 1.0e-03, 1e-08)
 
