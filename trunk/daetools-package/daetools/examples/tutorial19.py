@@ -24,72 +24,93 @@ standard has been adopted in daetools. This way, all thermo packages implementin
 the CapeOpen thermo interfaces are automatically vailable to daetools. Those which
 do not are wrapped by the class with the CapeOpen conforming API.
 At the moment, two types of thermophysical property packages are implemented:
-    - Any CapeOpen v1.1 thermo package (available only in Windows)
-    - CoolProp thermo package (available for all platforms) wrapped in
-      the class with the CapeOpen interface.
+    
+- Any CapeOpen v1.1 thermo package (available only in Windows)
+- CoolProp thermo package (available for all platforms) wrapped in
+  the class with the CapeOpen interface.
+  
 The central point is the daeThermoPhysicalPropertyPackage class. It can load any
 COM component that implements CapeOpen 1.1 ICapeThermoPropertyPackageManager interface
 or the CoolProp thermo package.
 
 The framework provides low-level functions (specified in the CapeOpen standard) in the
 daeThermoPhysicalPropertyPackage class and the higher-level functions in the auxiliary
-class daeThermoPackage defined in the daetools/pyDAE/thermo_packages.py file.
+daeThermoPackage class defined in the daetools/pyDAE/thermo_packages.py file.
 The low-level functions are defined in the ICapeThermoCoumpounds and ICapeThermoPropertyRoutine
 CapeOpen interfaces. These functions come in two flavours:
- (a) The ordinary functions return adouble/adouble_array objects and can only be used to specify equations:
-     - GetCompoundConstant (from ICapeThermoCoumpounds interface)
-     - GetTDependentProperty (from ICapeThermoCoumpounds interface)
-     - GetPDependentProperty (from ICapeThermoCoumpounds interface)
-     - CalcSinglePhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)
-     - CalcSinglePhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)
-     - CalcTwoPhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)
-     - CalcTwoPhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)
- (b) The functions starting with the underscores can be used for calculations (they use and return float values):
-     - _GetCompoundConstant
-     - _GetTDependentProperty
-     - _GetPDependentProperty
-     - _CalcSinglePhaseScalarProperty
-     - _CalcSinglePhaseVectorProperty
-     - _CalcTwoPhaseScalarProperty
-     - _CalcTwoPhaseVectorProperty
+    
+(a) The ordinary functions return adouble/adouble_array objects and can only be used to specify equations:
+    
+    - GetCompoundConstant (from ICapeThermoCoumpounds interface)
+    - GetTDependentProperty (from ICapeThermoCoumpounds interface)
+    - GetPDependentProperty (from ICapeThermoCoumpounds interface)
+    - CalcSinglePhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)
+    - CalcSinglePhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)
+    - CalcTwoPhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)
+    - CalcTwoPhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)
+    
+(b) The functions starting with the underscores can be used for calculations (they use and return float values):
+    
+    - _GetCompoundConstant
+    - _GetTDependentProperty
+    - _GetPDependentProperty
+    - _CalcSinglePhaseScalarProperty
+    - _CalcSinglePhaseVectorProperty
+    - _CalcTwoPhaseScalarProperty
+    - _CalcTwoPhaseVectorProperty
+
 The daeThermoPackage auxiliary class offers functions to calculate specified properties, for instance:
-  - Transport properties:
-    - cp, kappa, mu, Dab (heat capacity, thermal conductivity, dyn. viscosity, diff. coefficient)
-  - Thermodynamic properties:
-    - rho
-    - h, s, G, H, I (enthalpy, entropy, gibbs/helmholtz/internal energy)
-    - h_E, s_E, G_E, H_E, I_E, V_E (excess enthalpy, entropy, gibbs/helmholtz/internal energy, volume)
-    - f and phi (fugacity and coefficient of fugacity)
-    - a and gamma (activity and the coefficient of activity)
-    - z (compressibility factor)
-    - K, surfaceTension (ratio of fugacity coefficients and the surface tension)
+    
+- Transport properties:
+      
+  - cp, kappa, mu, Dab (heat capacity, thermal conductivity, dynamic viscosity, diffusion coefficient)
+    
+- Thermodynamic properties:
+      
+  - rho
+  - h, s, G, H, I (enthalpy, entropy, gibbs/helmholtz/internal energy)
+  - h_E, s_E, G_E, H_E, I_E, V_E (excess enthalpy, entropy, gibbs/helmholtz/internal energy, volume)
+  - f and phi (fugacity and coefficient of fugacity)
+  - a and gamma (activity and the coefficient of activity)
+  - z (compressibility factor)
+  - K, surfaceTension (ratio of fugacity coefficients and the surface tension)
+
 Nota bene:
-  Some of the above functions return a scalar while the others return an array of values.
+  Some of the above functions return scalars while the others return arrays of values.
   Check the thermo_packages.py file for details.
 
 All functions return properties in the SI units (as specified in the CapeOpen 1.1 standard).
 
 Known issues:
-  - Many properties from the CapeOpen standard are not supported by all thermo packages.
-  - CalcEquilibrium from the ICapeThermoEquilibriumRoutine is not supported.
-  - CoolProp does not provide transort models for many compounds.
-  - The functoin calls are NOT thread safe.
-  - The code generation will NOT work for models using the thermo packages.
-  - Some CapeOpen thermo packags refuse to return properties for mass basis (i.e. density).
+    
+- Many properties from the CapeOpen standard are not supported by all thermo packages.
+- CalcEquilibrium from the ICapeThermoEquilibriumRoutine is not supported.
+- CoolProp does not provide transport models for many compounds.
+- The function calls are NOT thread safe.
+- The code generation will NOT work for models using the thermo packages.
+- Some CapeOpen thermo packags refuse to return properties for mass basis (i.e. density).
 
-In this tutorial, we use a very simple model: a quantity of liquid (water + ethanol mixture) is heated
-using the constant input power. The model uses a thermo package to calculate the heat capacity.
-First, the low-level functions are tested for CapeOpen and CoolProp packages in the
-test_single_phase, test_two_phase, test_coolprop_single_phase functions. The results will depend
-on the options selected in the CapeOpen package (equation of state, property models etc.).
+In this tutorial, we use a very simple model: a quantity of liquid (water + ethanol mixture) 
+is heated using the constant input power. The model uses a thermo package to calculate the commonly
+used transport properties such as specific heat capacity, thermal conductivity, dynamic viscosity
+and binary diffusion coefficients. First, the low-level functions are tested for CapeOpen and 
+CoolProp packages in the test_single_phase, test_two_phase, test_coolprop_single_phase functions. 
+The results depend on the options selected in the CapeOpen package (equation of state, etc.).
 Then, the model that uses a thermo package is simulated.
 
+The plot of the specific heat capacity as a function of temperature:
+    
 .. image:: _static/tutorial19-results.png
    :width: 500px
+   
+Nota bene:
+  There is a difference between results in Windows and other platforms since 
+  the CapeOpen thermo packages are available only in Windows.
 """
 
 import sys
 from time import localtime, strftime
+import daetools
 from daetools.pyDAE import *
 
 # Standard variable types are defined in variable_types.py
@@ -304,16 +325,23 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.tpp = daeThermoPackage("ChemSepCapeOpenTPP", self, "")
-        self.tpp.LoadCapeOpen("ChemSep Property Package Manager", # packageManager name (case sensitive)
-                              "Water+Ethanol",                    # package name (case sensitive)
-                              ["Water", "Ethanol"],               # compound IDs in the mixture
-                              [],                                 # compund CAS numbers (optional)
-                              {'Liquid':eLiquid},                 # dictionary {'phaseLabel' : stateOfAggregation}
-                                                                  # where stateOfAggregation can be:
-                                                                  # eVapor, eLiquid, eSolid or etppPhaseUnknown
-                              eMole,                              # default basis is eMole (other options are eMass or eUndefinedBasis)
-                              {})                                 # options dictionary (defaut is empty)
+        self.tpp = daeThermoPackage("TPP", self, "")
+        # CapeOpen thermo packages are available only in Windows.
+        # For other platforms use CoolProp thermo package.
+        if daetools.daetools_system == 'Windows':
+            self.tpp.LoadCapeOpen("ChemSep Property Package Manager", # packageManager name (case sensitive)
+                                  "Water+Ethanol",                    # package name (case sensitive)
+                                  ["Water", "Ethanol"],               # compound IDs in the mixture
+                                  [],                                 # compund CAS numbers (optional)
+                                  {'Liquid':eLiquid},                 # dictionary {'phaseLabel' : stateOfAggregation}
+                                  eMole,                              # default basis is eMole (other options are eMass or eUndefinedBasis)
+                                  {})                                 # options dictionary (defaut is empty)
+        else:
+            self.tpp.LoadCoolProp(["Water", "Ethanol"],               # compound IDs in the mixture
+                                  [],                                 # compund CAS numbers (optional)
+                                  {'Liquid':eLiquid},                 # dictionary {'phaseLabel' : stateOfAggregation}
+                                  eMole,                              # default basis is eMole (other options are eMass or eUndefinedBasis)
+                                  {})                                 # options dictionary (defaut is empty)
 
         self.m    = daeParameter("m", kg, self, "Mass of water")
 
@@ -382,8 +410,9 @@ def guiRun(app):
 # Setup everything manually and run in a console
 def consoleRun():
     # Test low-level calculation routines
-    test_single_phase()
-    test_two_phase()
+    if daetools.daetools_system == 'Windows':
+        test_single_phase()
+        test_two_phase()
     test_coolprop_single_phase()
 
     # Create Log, Solver, DataReporter and Simulation object

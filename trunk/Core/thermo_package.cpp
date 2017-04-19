@@ -69,6 +69,11 @@ void daeThermoPhysicalPropertyPackage::Load_CapeOpen_TPP(const std::string& strP
     }
     tppPackage->LoadPackage(strPackageManager, strPackageName, strarrCompoundIDs, strarrCompoundCASNumbers, mapAvailablePhases, defaultBasis, mapOptions);
     m_package = tppPackage;
+
+#else
+    daeDeclareException(exInvalidCall);
+    e << "CapeOpen thermophysical property packages are available only in Windows.";
+    throw e;
 #endif
 }
 

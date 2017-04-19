@@ -779,7 +779,7 @@ win32-g++-*::DAE_DEALII_SOLVER_LIB           = -lcdaeDealII_FESolver
 win32-g++-*::DAE_SIMULATION_LOADER_LIB       = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_DAETOOLS_FMI_CS_LIB         = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
-win32-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB =
+win32-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 
 win64-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_CORE_LIB                    = -lcdaeCore
@@ -800,7 +800,7 @@ win64-g++-*::DAE_DEALII_SOLVER_LIB           = -lcdaeDealII_FESolver
 win64-g++-*::DAE_SIMULATION_LOADER_LIB       = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_DAETOOLS_FMI_CS_LIB         = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
-win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB =
+win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 
 unix::DAE_CONFIG_LIB                    = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_CORE_LIB                      = -lcdaeCore
@@ -821,7 +821,7 @@ unix::DAE_DEALII_SOLVER_LIB             = -lcdaeDealII_FESolver
 unix::DAE_SIMULATION_LOADER_LIB         = -lcdaeSimulationLoader-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_DAETOOLS_FMI_CS_LIB           = -lcdaeFMU_CS-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
 unix::DAE_CAPE_THERMO_PACKAGE_LIB       =
-unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -LcdaeCoolPropThermoPackage
+unix::DAE_COOLPROP_THERMO_PACKAGE_LIB   = -lcdaeCoolPropThermoPackage
 
 QMAKE_LIBDIR += $${DAE_DEST_DIR} $${BOOSTLIBPATH} $${PYTHON_LIB_DIR}
 

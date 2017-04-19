@@ -101,22 +101,6 @@ double daeCoolPropThermoPhysicalPropertyPackage::CalcSinglePhaseScalarProperty(c
                                                                                const std::string& phase,
                                                                                daeeThermoPackageBasis basis)
 {
-/*
-    std::vector< std::vector<double> > matResults;
-    std::vector<double> T(1, T_), P(1, P_);
-    std::vector<std::string> properties;
-    std::string coolPropProperty;
-    CapeOpen_to_CoolPropName(capeOpenProperty, basis, coolPropProperty);
-    properties.push_back(coolPropProperty);
-
-    matResults = PropsSImulti(properties, "T", T, "P", P, m_defaultBackend, m_strarrCompoundIDs, x);
-    if(matResults.size() != 1 || matResults[0].size() != 1)
-    {
-        std::string msg = "Invalid number of results in CoolProp SinglePhaseScalarProperty function";
-        throw std::runtime_error(msg);
-    }
-    return matResults[0][0];
-*/
     std::map<std::string, daeeThermoPackagePhase>::iterator it = m_mapAvailablePhases.find(phase);
     if(it != m_mapAvailablePhases.end())
     {
@@ -166,8 +150,7 @@ double daeCoolPropThermoPhysicalPropertyPackage::CalcTwoPhaseScalarProperty(cons
 {
 // CoolProp does not use T,P,x for both phases but calculates the equilibrium based on T,P,x of the mixture.
 // To check: how to fit this into the Cape-Open interface?
-//           temporary solution is to use only T1,P1,x1 (the data for the first phase).
-    std::string msg = "CoolProp CalcTwoPhaseScalarProperty function is not implemented";
+    std::string msg = "CalcTwoPhaseScalarProperty function is not implemented in CoolProp";
     throw std::runtime_error(msg);
     return 0;
 }
@@ -186,46 +169,9 @@ void daeCoolPropThermoPhysicalPropertyPackage::CalcTwoPhaseVectorProperty(const 
 {
 // CoolProp does not use T,P,x for both phases but calculates the equilibrium based on T,P,x of the mixture.
 // To check: how to fit this into the Cape-Open interface?
-//           temporary solution is to use only T1,P1,x1 (the data for the first phase).
-    std::string msg = "CoolProp CalcTwoPhaseVectorProperty function is not implemented";
+    std::string msg = "CalcTwoPhaseVectorProperty function is not implemented in CoolProp";
     throw std::runtime_error(msg);
 }
-
-/*
-void daeCoolPropThermoPhysicalPropertyPackage::CapeOpen_to_CoolPropName(const std::string& capeOpenProperty, daeeThermoPackageBasis eBasis, std::string& coolPropProperty)
-{
-    std::string basis;
-    if(eBasis == eMole)
-        basis = "molar";
-    else if(eBasis == eMass)
-        basis = "mass";
-
-    if(capeOpenProperty == "density")
-        coolPropProperty = "D" + basis;
-    else if(capeOpenProperty == "heatCapacityCp")
-        coolPropProperty = "Cp" + basis;
-    else if(capeOpenProperty == "heatCapacityCv")
-        coolPropProperty = "Cv" + basis;
-    else if(capeOpenProperty == "viscosity")
-        coolPropProperty = "V";
-    else if(capeOpenProperty == "entropy")
-        coolPropProperty = "S" + basis;
-    else if(capeOpenProperty == "gibbsEnergy")
-        coolPropProperty = "G" + basis;
-    else if(capeOpenProperty == "helmholtzEnergy")
-        coolPropProperty = "Helmholtz" + basis;
-    else if(capeOpenProperty == "conductivity")
-        coolPropProperty = "L";
-    else if(capeOpenProperty == "temperature")
-        coolPropProperty = "T";
-    else if(capeOpenProperty == "pressure")
-        coolPropProperty = "P";
-    else // if not found return the same name
-        coolPropProperty = capeOpenProperty;
-
-     std::cout << "coolPropProperty = " << coolPropProperty << std::endl;
-}
-*/
 
 double daeCoolPropThermoPhysicalPropertyPackage::GetScalarProperty(const std::string& capeOpenProperty, daeeThermoPackageBasis eBasis)
 {
@@ -387,6 +333,15 @@ double daeCoolPropThermoPhysicalPropertyPackage::GetScalarProperty(const std::st
         return m_mixture->compressibility_factor();
     }
 
+    else if(capeOpenProperty == "molecularWeight")
+    {
+        // Molar mass in CoolProp is in kg/mol. We should return dimensionless number
+        // which should be multiplied by the 'molar mass constant' (1 g/mol)
+        // to obtain the molar mass. Therefore, multiply the molar mass by 1000
+        // to get the molar mass in g/mol and then divide by 1 g/mol.
+        return m_mixture->molar_mass() * 1000; // MM kg/mol * (1000 g/kg) / (1 g/mol) -> dimensionless MW
+    }
+
     // Two phase properties
     else if(capeOpenProperty == "surfaceTension")
     {
@@ -440,85 +395,3 @@ void daeCoolPropThermoPhysicalPropertyPackage::GetVectorProperty(const std::stri
     std::string msg = "Invalid single phase CoolProp property: " + capeOpenProperty;
     throw std::runtime_error(msg);
 }
-
-/*
-    {iT,      "T",      "IO", "K",       "Temperature",                           false},
-    {iP,      "P",      "IO", "Pa",      "Pressure",                              false},
-    {iDmolar, "Dmolar", "IO", "mol/m^3", "Molar density",                         false},
-    {iHmolar, "Hmolar", "IO", "J/mol",   "Molar specific enthalpy",               false},
-    {iSmolar, "Smolar", "IO", "J/mol/K", "Molar specific entropy",                false},
-    {iUmolar, "Umolar", "IO", "J/mol",   "Molar specific internal energy",        false},
-    {iGmolar, "Gmolar", "O",  "J/mol",   "Molar specific Gibbs energy",           false},
-    {iHelmholtzmolar, "Helmholtzmolar", "O",  "J/mol",   "Molar specific Helmholtz energy",           false},
-    {iDmass,  "Dmass",  "IO", "kg/m^3",  "Mass density",                          false},
-    {iHmass,  "Hmass",  "IO", "J/kg",    "Mass specific enthalpy",                false},
-    {iSmass,  "Smass",  "IO", "J/kg/K",  "Mass specific entropy",                 false},
-    {iUmass,  "Umass",  "IO", "J/kg",    "Mass specific internal energy",         false},
-    {iGmass,  "Gmass",  "O",  "J/kg",    "Mass specific Gibbs energy",            false},
-    {iHelmholtzmass,  "Helmholtzmass",  "O",  "J/kg",    "Mass specific Helmholtz energy",            false},
-    {iQ,      "Q",      "IO", "mol/mol", "Mass vapor quality",                    false},
-    {iDelta,  "Delta",  "IO", "-",       "Reduced density (rho/rhoc)",            false},
-    {iTau,    "Tau",    "IO", "-",       "Reciprocal reduced temperature (Tc/T)", false},
-    /// Output only
-    {iCpmolar,           "Cpmolar",           "O", "J/mol/K", "Molar specific constant pressure specific heat", false},
-    {iCpmass,            "Cpmass",            "O", "J/kg/K",  "Mass specific constant pressure specific heat",  false},
-    {iCvmolar,           "Cvmolar",           "O", "J/mol/K", "Molar specific constant volume specific heat",    false},
-    {iCvmass,            "Cvmass",            "O", "J/kg/K",  "Mass specific constant volume specific heat",     false},
-    {iCp0molar,          "Cp0molar",          "O", "J/mol/K", "Ideal gas molar specific constant pressure specific heat",false},
-    {iCp0mass,           "Cp0mass",           "O", "J/kg/K",  "Ideal gas mass specific constant pressure specific heat",false},
-    {iSmolar_residual,   "Smolar_residual",   "O", "J/mol/K", "Residual molar entropy (sr/R = tau*dar_dtau-ar)",false},
-    {iGWP20,             "GWP20",             "O", "-",       "20-year global warming potential",                 true},
-    {iGWP100,            "GWP100",            "O", "-",       "100-year global warming potential",                true},
-    {iGWP500,            "GWP500",            "O", "-",       "500-year global warming potential",                true},
-    {iFH,                "FH",                "O", "-",       "Flammability hazard",                             true},
-    {iHH,                "HH",                "O", "-",       "Health hazard",                                   true},
-    {iPH,                "PH",                "O", "-",       "Physical hazard",                                 true},
-    {iODP,               "ODP",               "O", "-",       "Ozone depletion potential",                       true},
-    {iBvirial,           "Bvirial",           "O", "-",       "Second virial coefficient",                       false},
-    {iCvirial,           "Cvirial",           "O", "-",       "Third virial coefficient",                        false},
-    {idBvirial_dT,       "dBvirial_dT",       "O", "-",       "Derivative of second virial coefficient with respect to T",false},
-    {idCvirial_dT,       "dCvirial_dT",       "O", "-",       "Derivative of third virial coefficient with respect to T",false},
-    {igas_constant,      "gas_constant",      "O", "J/mol/K", "Molar gas constant",                              true},
-    {imolar_mass,        "molar_mass",        "O", "kg/mol",  "Molar mass",                                      true},
-    {iacentric_factor,   "acentric",          "O", "-",       "Acentric factor",                                 true},
-    {idipole_moment,     "dipole_moment",     "O", "C-m",     "Dipole moment",                                   true},
-    {irhomass_reducing,  "rhomass_reducing",  "O", "kg/m^3",  "Mass density at reducing point",                  true},
-    {irhomolar_reducing, "rhomolar_reducing", "O", "mol/m^3", "Molar density at reducing point",                 true},
-    {irhomolar_critical, "rhomolar_critical", "O", "mol/m^3", "Molar density at critical point",                 true},
-    {irhomass_critical,  "rhomass_critical",  "O", "kg/m^3",  "Mass density at critical point",                  true},
-    {iT_reducing,        "T_reducing",        "O", "K",       "Temperature at the reducing point",               true},
-    {iT_critical,        "T_critical",        "O", "K",       "Temperature at the critical point",               true},
-    {iT_triple,          "T_triple",          "O", "K",       "Temperature at the triple point",                 true},
-    {iT_max,             "T_max",             "O", "K",       "Maximum temperature limit",                       true},
-    {iT_min,             "T_min",             "O", "K",       "Minimum temperature limit",                       true},
-    {iP_min,             "P_min",             "O", "Pa",      "Minimum pressure limit",                          true},
-    {iP_max,             "P_max",             "O", "Pa",      "Maximum pressure limit",                          true},
-    {iP_critical,        "p_critical",        "O", "Pa",      "Pressure at the critical point",                  true},
-    {iP_reducing,        "p_reducing",        "O", "Pa",      "Pressure at the reducing point",                  true},
-    {iP_triple,          "p_triple",          "O", "Pa",      "Pressure at the triple point (pure only)",        true},
-    {ifraction_min,      "fraction_min",      "O", "-",       "Fraction (mole, mass, volume) minimum value for incompressible solutions",true},
-    {ifraction_max,      "fraction_max",      "O", "-",       "Fraction (mole, mass, volume) maximum value for incompressible solutions",true},
-    {iT_freeze,          "T_freeze",          "O", "K",       "Freezing temperature for incompressible solutions",true},
-
-    {ispeed_sound,     "speed_of_sound",  "O", "m/s",   "Speed of sound",       false},
-    {iviscosity,       "viscosity",       "O", "Pa-s",  "Viscosity",            false},
-    {iconductivity,    "conductivity",    "O", "W/m/K", "Thermal conductivity", false},
-    {isurface_tension, "surface_tension", "O", "N/m",   "Surface tension",      false},
-    {iPrandtl,         "Prandtl",         "O", "-",     "Prandtl number",       false},
-
-    {iisothermal_compressibility,             "isothermal_compressibility",             "O", "1/Pa", "Isothermal compressibility",false},
-    {iisobaric_expansion_coefficient,         "isobaric_expansion_coefficient",         "O", "1/K",  "Isobaric expansion coefficient",false},
-    {iZ,                                      "Z",                                      "O", "-",    "Compressibility factor",false},
-    {ifundamental_derivative_of_gas_dynamics, "fundamental_derivative_of_gas_dynamics", "O", "-",    "Fundamental derivative of gas dynamics",false},
-    {iPIP,                                    "PIP",                                    "O", "-",    "Phase identification parameter", false},
-
-    {ialphar,                  "alphar",                  "O", "-", "Residual Helmholtz energy", false},
-    {idalphar_dtau_constdelta, "dalphar_dtau_constdelta", "O", "-", "Derivative of residual Helmholtz energy with tau",false},
-    {idalphar_ddelta_consttau, "dalphar_ddelta_consttau", "O", "-", "Derivative of residual Helmholtz energy with delta",false},
-
-    {ialpha0,                  "alpha0",                  "O", "-", "Ideal Helmholtz energy", false},
-    {idalpha0_dtau_constdelta, "dalpha0_dtau_constdelta", "O", "-", "Derivative of ideal Helmholtz energy with tau",false},
-    {idalpha0_ddelta_consttau, "dalpha0_ddelta_consttau", "O", "-", "Derivative of ideal Helmholtz energy with delta",false},
-
-    {iPhase, "Phase", "O", "-", "Phase index as a float", false},
-*/

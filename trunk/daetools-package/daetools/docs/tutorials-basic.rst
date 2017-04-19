@@ -79,6 +79,11 @@ Basic Tutorials
 :ref:`tutorial18`        |t_18|
 =======================   =================================================================
 
+.. rubric:: Thermophysical property packages:
+=======================   =================================================================
+:ref:`tutorial19`         |t_19|
+=======================   =================================================================
+
 
 .. |witt| replace:: Importing DAE Tools pyDAE module(s), units and variable types
                     developing models, setting up a simulation, declaring auxiliary
@@ -127,6 +132,8 @@ Basic Tutorials
 .. |t_17| replace:: Using TCPIP Log and TCPIPLogServer.
 
 .. |t_18| replace:: Using DAE Tools variables and NumPy functions to generate and solve a simple ODE system.
+
+.. |t_19| replace:: Using thermophysical property packages in DAE Tools.
 
 
 .. begin-command
@@ -470,5 +477,24 @@ Model report            `tutorial18.xml <../examples/tutorial18.xml>`_
 Runtime model report    `tutorial18-rt.xml <../examples/tutorial18-rt.xml>`_
 Source code             `tutorial18.py <../examples/tutorial18.html>`_
 =====================   =================================================================
+
+
+.. _tutorial19:
+
+Tutorial 19
+===========
+
+.. automodule:: daetools.examples.tutorial19
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial19.xml <../examples/tutorial19.xml>`_
+Runtime model report    `tutorial19-rt.xml <../examples/tutorial19-rt.xml>`_
+Source code             `tutorial19.py <../examples/tutorial19.html>`_
+=====================   =================================================================
+
 
 .. end-command

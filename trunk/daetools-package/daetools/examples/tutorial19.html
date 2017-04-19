@@ -1,428 +1,469 @@
-<code><pre>
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial19.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-"""
-***********************************************************************************
-                            tutorial19.py
-                DAE Tools: pyDAE module, www.daetools.com
-                Copyright (C) Dragan Nikolic
-***********************************************************************************
-DAE Tools is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 as published by the Free Software
-Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License along with the
-DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-************************************************************************************
-"""
-__doc__ = """
-This tutorial introduces the thermo physical property packages.
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial19.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial introduces the thermo physical property packages.</span>
 
-Since there are many thermo packages with a very different API the CapeOpen
-standard has been adopted in daetools. This way, all thermo packages implementing
-the CapeOpen thermo interfaces are automatically vailable to daetools. Those which
-do not are wrapped by the class with the CapeOpen conforming API.
-At the moment, two types of thermophysical property packages are implemented:
-    - Any CapeOpen v1.1 thermo package (available only in Windows)
-    - CoolProp thermo package (available for all platforms) wrapped in
-      the class with the CapeOpen interface.
-The central point is the daeThermoPhysicalPropertyPackage class. It can load any
-COM component that implements CapeOpen 1.1 ICapeThermoPropertyPackageManager interface
-or the CoolProp thermo package.
+<span style='color:#cc0000;'>Since there are many thermo packages with a very different API the CapeOpen</span>
+<span style='color:#cc0000;'>standard has been adopted in daetools. This way, all thermo packages implementing</span>
+<span style='color:#cc0000;'>the CapeOpen thermo interfaces are automatically vailable to daetools. Those which</span>
+<span style='color:#cc0000;'>do not are wrapped by the class with the CapeOpen conforming API.</span>
+<span style='color:#cc0000;'>At the moment, two types of thermophysical property packages are implemented:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Any CapeOpen v1.1 thermo package (available only in Windows)</span>
+<span style='color:#cc0000;'>- CoolProp thermo package (available for all platforms) wrapped in</span>
+<span style='color:#cc0000;'>  the class with the CapeOpen interface.</span>
+<span style='color:#cc0000;'>  </span>
+<span style='color:#cc0000;'>The central point is the daeThermoPhysicalPropertyPackage class. It can load any</span>
+<span style='color:#cc0000;'>COM component that implements CapeOpen 1.1 ICapeThermoPropertyPackageManager interface</span>
+<span style='color:#cc0000;'>or the CoolProp thermo package.</span>
 
-The framework provides low-level functions (specified in the CapeOpen standard) in the
-daeThermoPhysicalPropertyPackage class and the higher-level functions in the auxiliary
-class daeThermoPackage defined in the daetools/pyDAE/thermo_packages.py file.
-The low-level functions are defined in the ICapeThermoCoumpounds and ICapeThermoPropertyRoutine
-CapeOpen interfaces. These functions come in two flavours:
- (a) The ordinary functions return adouble/adouble_array objects and can only be used to specify equations:
-     - GetCompoundConstant (from ICapeThermoCoumpounds interface)
-     - GetTDependentProperty (from ICapeThermoCoumpounds interface)
-     - GetPDependentProperty (from ICapeThermoCoumpounds interface)
-     - CalcSinglePhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)
-     - CalcSinglePhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)
-     - CalcTwoPhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)
-     - CalcTwoPhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)
- (b) The functions starting with the underscores can be used for calculations (they use and return float values):
-     - _GetCompoundConstant
-     - _GetTDependentProperty
-     - _GetPDependentProperty
-     - _CalcSinglePhaseScalarProperty
-     - _CalcSinglePhaseVectorProperty
-     - _CalcTwoPhaseScalarProperty
-     - _CalcTwoPhaseVectorProperty
-The daeThermoPackage auxiliary class offers functions to calculate specified properties, for instance:
-  - Transport properties:
-    - cp, kappa, mu, Dab (heat capacity, thermal conductivity, dyn. viscosity, diff. coefficient)
-  - Thermodynamic properties:
-    - rho
-    - h, s, G, H, I (enthalpy, entropy, gibbs/helmholtz/internal energy)
-    - h_E, s_E, G_E, H_E, I_E, V_E (excess enthalpy, entropy, gibbs/helmholtz/internal energy, volume)
-    - f and phi (fugacity and coefficient of fugacity)
-    - a and gamma (activity and the coefficient of activity)
-    - z (compressibility factor)
-    - K, surfaceTension (ratio of fugacity coefficients and the surface tension)
-Nota bene:
-  Some of the above functions return a scalar while the others return an array of values.
-  Check the thermo_packages.py file for details.
+<span style='color:#cc0000;'>The framework provides low-level functions (specified in the CapeOpen standard) in the</span>
+<span style='color:#cc0000;'>daeThermoPhysicalPropertyPackage class and the higher-level functions in the auxiliary</span>
+<span style='color:#cc0000;'>daeThermoPackage class defined in the daetools/pyDAE/thermo_packages.py file.</span>
+<span style='color:#cc0000;'>The low-level functions are defined in the ICapeThermoCoumpounds and ICapeThermoPropertyRoutine</span>
+<span style='color:#cc0000;'>CapeOpen interfaces. These functions come in two flavours:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>(a) The ordinary functions return adouble/adouble_array objects and can only be used to specify equations:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>    - GetCompoundConstant (from ICapeThermoCoumpounds interface)</span>
+<span style='color:#cc0000;'>    - GetTDependentProperty (from ICapeThermoCoumpounds interface)</span>
+<span style='color:#cc0000;'>    - GetPDependentProperty (from ICapeThermoCoumpounds interface)</span>
+<span style='color:#cc0000;'>    - CalcSinglePhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)</span>
+<span style='color:#cc0000;'>    - CalcSinglePhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)</span>
+<span style='color:#cc0000;'>    - CalcTwoPhaseScalarProperty (from ICapeThermoPropertyRoutine interface: scalar version)</span>
+<span style='color:#cc0000;'>    - CalcTwoPhaseVectorProperty (from ICapeThermoPropertyRoutine interface: vector version)</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>(b) The functions starting with the underscores can be used for calculations (they use and return float values):</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>    - _GetCompoundConstant</span>
+<span style='color:#cc0000;'>    - _GetTDependentProperty</span>
+<span style='color:#cc0000;'>    - _GetPDependentProperty</span>
+<span style='color:#cc0000;'>    - _CalcSinglePhaseScalarProperty</span>
+<span style='color:#cc0000;'>    - _CalcSinglePhaseVectorProperty</span>
+<span style='color:#cc0000;'>    - _CalcTwoPhaseScalarProperty</span>
+<span style='color:#cc0000;'>    - _CalcTwoPhaseVectorProperty</span>
 
-All functions return properties in the SI units (as specified in the CapeOpen 1.1 standard).
+<span style='color:#cc0000;'>The daeThermoPackage auxiliary class offers functions to calculate specified properties, for instance:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Transport properties:</span>
+<span style='color:#cc0000;'>      </span>
+<span style='color:#cc0000;'>  - cp, kappa, mu, Dab (heat capacity, thermal conductivity, dynamic viscosity, diffusion coefficient)</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Thermodynamic properties:</span>
+<span style='color:#cc0000;'>      </span>
+<span style='color:#cc0000;'>  - rho</span>
+<span style='color:#cc0000;'>  - h, s, G, H, I (enthalpy, entropy, gibbs/helmholtz/internal energy)</span>
+<span style='color:#cc0000;'>  - h_E, s_E, G_E, H_E, I_E, V_E (excess enthalpy, entropy, gibbs/helmholtz/internal energy, volume)</span>
+<span style='color:#cc0000;'>  - f and phi (fugacity and coefficient of fugacity)</span>
+<span style='color:#cc0000;'>  - a and gamma (activity and the coefficient of activity)</span>
+<span style='color:#cc0000;'>  - z (compressibility factor)</span>
+<span style='color:#cc0000;'>  - K, surfaceTension (ratio of fugacity coefficients and the surface tension)</span>
 
-Known issues:
-  - Many properties from the CapeOpen standard are not supported by all thermo packages.
-  - CalcEquilibrium from the ICapeThermoEquilibriumRoutine is not supported.
-  - CoolProp does not provide transort models for many compounds.
-  - The functoin calls are NOT thread safe.
-  - The code generation will NOT work for models using the thermo packages.
-  - Some CapeOpen thermo packags refuse to return properties for mass basis (i.e. density).
+<span style='color:#cc0000;'>Nota bene:</span>
+<span style='color:#cc0000;'>  Some of the above functions return scalars while the others return arrays of values.</span>
+<span style='color:#cc0000;'>  Check the thermo_packages.py file for details.</span>
 
-In this tutorial, we use a very simple model: a quantity of liquid (water + ethanol mixture) is heated
-using the constant input power. The model uses a thermo package to calculate the heat capacity.
-First, the low-level functions are tested for CapeOpen and CoolProp packages in the
-test_single_phase, test_two_phase, test_coolprop_single_phase functions. The results will depend
-on the options selected in the CapeOpen package (equation of state, property models etc.).
-Then, the model that uses a thermo package is simulated.
+<span style='color:#cc0000;'>All functions return properties in the SI units (as specified in the CapeOpen 1.1 standard).</span>
 
-.. image:: _static/tutorial19-results.png
-   :width: 500px
-"""
+<span style='color:#cc0000;'>Known issues:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Many properties from the CapeOpen standard are not supported by all thermo packages.</span>
+<span style='color:#cc0000;'>- CalcEquilibrium from the ICapeThermoEquilibriumRoutine is not supported.</span>
+<span style='color:#cc0000;'>- CoolProp does not provide transport models for many compounds.</span>
+<span style='color:#cc0000;'>- The function calls are NOT thread safe.</span>
+<span style='color:#cc0000;'>- The code generation will NOT work for models using the thermo packages.</span>
+<span style='color:#cc0000;'>- Some CapeOpen thermo packags refuse to return properties for mass basis (i.e. density).</span>
 
-import sys
-from time import localtime, strftime
-from daetools.pyDAE import *
+<span style='color:#cc0000;'>In this tutorial, we use a very simple model: a quantity of liquid (water + ethanol mixture) </span>
+<span style='color:#cc0000;'>is heated using the constant input power. The model uses a thermo package to calculate the commonly</span>
+<span style='color:#cc0000;'>used transport properties such as specific heat capacity, thermal conductivity, dynamic viscosity</span>
+<span style='color:#cc0000;'>and binary diffusion coefficients. First, the low-level functions are tested for CapeOpen and </span>
+<span style='color:#cc0000;'>CoolProp packages in the test_single_phase, test_two_phase, test_coolprop_single_phase functions. </span>
+<span style='color:#cc0000;'>The results depend on the options selected in the CapeOpen package (equation of state, etc.).</span>
+<span style='color:#cc0000;'>Then, the model that uses a thermo package is simulated.</span>
 
-# Standard variable types are defined in variable_types.py
-from pyUnits import m, g, kg, s, K, Pa, mol, J, W
+<span style='color:#cc0000;'>The plot of the specific heat capacity as a function of temperature:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial19-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>Nota bene:</span>
+<span style='color:#cc0000;'>  There is a difference between results in Windows and other platforms since </span>
+<span style='color:#cc0000;'>  the CapeOpen thermo packages are available only in Windows.</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-def test_single_phase():
-    """
-    Test the low-level functions offered by the CapeOpen standard (functions starting with underscores):
-      - _GetCompoundConstant
-      - _GetTDependentProperty
-      - _GetPDependentProperty
-      - _CalcSinglePhaseScalarProperty
-      - _CalcSinglePhaseVectorProperty
-    Here we use the ChemSep property package.
-    In general, any package implementing thermo 1.1 standard can be used.
-    The package "H2+CH4+CO2" must be created and configured using the property package manager.
-    It contains three components (H2, CH4 and CO2).
-    """
-    ctpp = daeThermoPackage("ChemSepCapeOpenTPP", None, "")
-    ctpp.LoadCapeOpen("ChemSep Property Package Manager",  # packageManager name (case sensitive)
-                      "H2+CH4+CO2",                        # package name (case sensitive)
-                      ["Hydrogen", "Methane",
-                       "Carbon dioxide"],                  # compound IDs in the mixture
-                      [],                                  # compund CAS numbers (optional)
-                      {"Vapor":eVapor},                    # dictionary {'phaseLabel' : stateOfAggregation}
-                                                           #   where stateOfAggregation can be:
-                                                           #   eVapor, eLiquid, eSolid or etppPhaseUnknown
-                      eMole,                               # optional: default basis (eMole  by default)
-                      {})                                  # optional: options dictionary (empty by default)
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>import</span> daetools
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
-    P = 2e5
-    T = 300
-    x = [0.755, 0.075, 0.170]
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, g, kg, s, K, Pa, mol, J, W
 
-    print("*****************************************************************")
-    print("                 Cape-Open single phase tests                    ")
-    print("*****************************************************************")
+<b>def</b> test_single_phase():
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    Test the low-level functions offered by the CapeOpen standard (functions starting with underscores):</span>
+<span style='color:#017a31;'>      - _GetCompoundConstant</span>
+<span style='color:#017a31;'>      - _GetTDependentProperty</span>
+<span style='color:#017a31;'>      - _GetPDependentProperty</span>
+<span style='color:#017a31;'>      - _CalcSinglePhaseScalarProperty</span>
+<span style='color:#017a31;'>      - _CalcSinglePhaseVectorProperty</span>
+<span style='color:#017a31;'>    Here we use the ChemSep property package.</span>
+<span style='color:#017a31;'>    In general, any package implementing thermo 1.1 standard can be used.</span>
+<span style='color:#017a31;'>    The package &quot;H2+CH4+CO2&quot; must be created and configured using the property package manager.</span>
+<span style='color:#017a31;'>    It contains three components (H2, CH4 and CO2).</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    ctpp <b><span style='color:#0000ff;'>=</span></b> daeThermoPackage(<span style='color:#cc0000;'>&quot;ChemSepCapeOpenTPP&quot;</span>, <span style='color:#3605fb;'>None</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+    ctpp.LoadCapeOpen(<span style='color:#cc0000;'>&quot;ChemSep Property Package Manager&quot;</span>,  <span style='color:#017a31;'># packageManager name (case sensitive)</span>
+                      <span style='color:#cc0000;'>&quot;H2+CH4+CO2&quot;</span>,                        <span style='color:#017a31;'># package name (case sensitive)</span>
+                      [<span style='color:#cc0000;'>&quot;Hydrogen&quot;</span>, <span style='color:#cc0000;'>&quot;Methane&quot;</span>,
+                       <span style='color:#cc0000;'>&quot;Carbon dioxide&quot;</span>],                  <span style='color:#017a31;'># compound IDs in the mixture</span>
+                      [],                                  <span style='color:#017a31;'># compund CAS numbers (optional)</span>
+                      {<span style='color:#cc0000;'>&quot;Vapor&quot;</span>:eVapor},                    <span style='color:#017a31;'># dictionary {'phaseLabel' : stateOfAggregation}</span>
+                                                           <span style='color:#017a31;'>#   where stateOfAggregation can be:</span>
+                                                           <span style='color:#017a31;'>#   eVapor, eLiquid, eSolid or etppPhaseUnknown</span>
+                      eMole,                               <span style='color:#017a31;'># optional: default basis (eMole  by default)</span>
+                      {})                                  <span style='color:#017a31;'># optional: options dictionary (empty by default)</span>
 
-    # Pure compound properties from the ICapeThermoCompounds interface.
-    try:
-        result = ctpp._GetCompoundConstant("heatOfFusionAtNormalFreezingPoint", "Hydrogen")
-        print("Test 1. heatOfFusionAtNormalFreezingPoint = %f J/mol" % result)
-    except Exception as e:
-        print("Test 1. Calculation failed")
-        print(str(e))
+    P <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2e5</span>
+    T <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>300</span>
+    x <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0.755</span>, <span style='color:#cc047c;'>0.075</span>, <span style='color:#cc047c;'>0.170</span>]
 
-    try:
-        result = ctpp._GetTDependentProperty("idealGasEnthalpy", T, "Methane")
-        print("Test 2. idealGasEnthalpy = %f J/mol" % result)
-    except Exception as e:
-        print("Test 2. Calculation failed")
-        print(str(e))
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;*****************************************************************&quot;</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;                 Cape-Open single phase tests                    &quot;</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;*****************************************************************&quot;</span>)
 
-    try:
-        result = ctpp._GetPDependentProperty("boilingPointTemperature", P, "Hydrogen")
-        print("Test 3. boilingPointTemperature = %f K" % result)
-    except Exception as e:
-        print("Test 3. Calculation failed")
-        print(str(e))
+    <span style='color:#017a31;'># Pure compound properties from the ICapeThermoCompounds interface.</span>
+    <b>try</b>:
+        result <b><span style='color:#0000ff;'>=</span></b> ctpp._GetCompoundConstant(<span style='color:#cc0000;'>&quot;heatOfFusionAtNormalFreezingPoint&quot;</span>, <span style='color:#cc0000;'>&quot;Hydrogen&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 1. heatOfFusionAtNormalFreezingPoint = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> J/mol&quot;</span> <b><span style='color:#0000ff;'>%</span></b> result)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 1. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    # Mixture properties from the ICapeThermoPropertyRoutine interface
-    try:
-        result = ctpp._CalcSinglePhaseScalarProperty("density",  P, T, x, "Vapor", eMole)
-        print("Test 4. density = %f mol/m^3" % result)
-    except Exception as e:
-        print("Test 3. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        result <b><span style='color:#0000ff;'>=</span></b> ctpp._GetTDependentProperty(<span style='color:#cc0000;'>&quot;idealGasEnthalpy&quot;</span>, T, <span style='color:#cc0000;'>&quot;Methane&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 2. idealGasEnthalpy = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> J/mol&quot;</span> <b><span style='color:#0000ff;'>%</span></b> result)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 2. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseScalarProperty("heatCapacityCp",  P, T, x, "Vapor", eMole)
-        print("Test 5. heatCapacityCp = %s J/(mol.K)" % results)
-    except Exception as e:
-        print("Test 5. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        result <b><span style='color:#0000ff;'>=</span></b> ctpp._GetPDependentProperty(<span style='color:#cc0000;'>&quot;boilingPointTemperature&quot;</span>, P, <span style='color:#cc0000;'>&quot;Hydrogen&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 3. boilingPointTemperature = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> K&quot;</span> <b><span style='color:#0000ff;'>%</span></b> result)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 3. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseScalarProperty("thermalConductivity",  P, T, x, "Vapor", eUndefinedBasis)
-        print("Test 6. thermalConductivity = %s W/(m.K)" % results)
-    except Exception as e:
-        print("Test 6. Calculation failed")
-        print(str(e))
+    <span style='color:#017a31;'># Mixture properties from the ICapeThermoPropertyRoutine interface</span>
+    <b>try</b>:
+        result <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;density&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eMole)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 4. density = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> mol/m^3&quot;</span> <b><span style='color:#0000ff;'>%</span></b> result)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 3. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseScalarProperty("viscosity",  P, T, x, "Vapor", eUndefinedBasis)
-        print("Test 7. viscosity = %s Pa.s" % results)
-    except Exception as e:
-        print("Test 7. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;heatCapacityCp&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eMole)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 5. heatCapacityCp = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> J/(mol.K)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 5. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseVectorProperty("diffusionCoefficient",  P, T, x, "Vapor", eUndefinedBasis)
-        print("Test 8. diffusionCoefficient = %s m^2/s" % results)
-    except Exception as e:
-        print("Test 8. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;thermalConductivity&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eUndefinedBasis)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 6. thermalConductivity = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> W/(m.K)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 6. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-def test_two_phase():
-    """
-    Test the two phase low-level functions.
-      - _CalcTwoPhaseScalarProperty
-      - _CalcTwoPhaseVectorProperty
-    Here we use the ChemSep property package.
-    The package "Water+Ethanol" must be created and configured using the property package manager.
-    It contains two components (water and ethanol).
-    """
-    ctpp = daeThermoPackage("ChemSepCapeOpenTPP", None, "")
-    ctpp.LoadCapeOpen("ChemSep Property Package Manager",  # packageManager name (case sensitive)
-                      "Water+Ethanol",                     # package name (case sensitive)
-                      ["Water", "Ethanol"],                # compound IDs in the mixture
-                      [],                                  # compund CAS numbers (optional)
-                      {"Vapor"  : eVapor,
-                       "Liquid" : eLiquid},                # dictionary {'phaseLabel' : stateOfAggregation}
-                      eMole,                               # optional: default basis (eMole by default)
-                      {})                                  # optional: options dictionary (empty by default)
-    P1 = 1e5
-    T1 = 300
-    x1 = [0.60, 0.40]
-    P2 = 1e5
-    T2 = 300
-    x2 = [0.60, 0.40]
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;viscosity&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eUndefinedBasis)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 7. viscosity = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> Pa.s&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 7. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    print("*****************************************************************")
-    print("                   Cape-Open two phase tests                     ")
-    print("*****************************************************************")
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseVectorProperty(<span style='color:#cc0000;'>&quot;diffusionCoefficient&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eUndefinedBasis)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 8. diffusionCoefficient = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> m^2/s&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 8. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    # Two-pahase mixture properties from the ICapeThermoPropertyRoutine interface
-    try:
-        result = ctpp._CalcTwoPhaseScalarProperty("surfaceTension",
-                                                 P1, T1, x1, "Liquid",
-                                                 P2, T2, x2, "Vapor",
+<b>def</b> test_two_phase():
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    Test the two phase low-level functions.</span>
+<span style='color:#017a31;'>      - _CalcTwoPhaseScalarProperty</span>
+<span style='color:#017a31;'>      - _CalcTwoPhaseVectorProperty</span>
+<span style='color:#017a31;'>    Here we use the ChemSep property package again.</span>
+<span style='color:#017a31;'>    The package &quot;Water+Ethanol&quot; must be created and configured using the property package manager.</span>
+<span style='color:#017a31;'>    It contains two components (water and ethanol).</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    ctpp <b><span style='color:#0000ff;'>=</span></b> daeThermoPackage(<span style='color:#cc0000;'>&quot;ChemSepCapeOpenTPP&quot;</span>, <span style='color:#3605fb;'>None</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+    ctpp.LoadCapeOpen(<span style='color:#cc0000;'>&quot;ChemSep Property Package Manager&quot;</span>,  <span style='color:#017a31;'># packageManager name (case sensitive)</span>
+                      <span style='color:#cc0000;'>&quot;Water+Ethanol&quot;</span>,                     <span style='color:#017a31;'># package name (case sensitive)</span>
+                      [<span style='color:#cc0000;'>&quot;Water&quot;</span>, <span style='color:#cc0000;'>&quot;Ethanol&quot;</span>],                <span style='color:#017a31;'># compound IDs in the mixture</span>
+                      [],                                  <span style='color:#017a31;'># compund CAS numbers (optional)</span>
+                      {<span style='color:#cc0000;'>&quot;Vapor&quot;</span>  : eVapor,
+                       <span style='color:#cc0000;'>&quot;Liquid&quot;</span> : eLiquid},                <span style='color:#017a31;'># dictionary {'phaseLabel' : stateOfAggregation}</span>
+                      eMole,                               <span style='color:#017a31;'># optional: default basis (eMole by default)</span>
+                      {})                                  <span style='color:#017a31;'># optional: options dictionary (empty by default)</span>
+    P1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e5</span>
+    T1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>300</span>
+    x1 <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0.60</span>, <span style='color:#cc047c;'>0.40</span>]
+    P2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e5</span>
+    T2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>300</span>
+    x2 <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0.60</span>, <span style='color:#cc047c;'>0.40</span>]
+
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;*****************************************************************&quot;</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;                   Cape-Open two phase tests                     &quot;</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;*****************************************************************&quot;</span>)
+
+    <span style='color:#017a31;'># Two-pahase mixture properties from the ICapeThermoPropertyRoutine interface</span>
+    <b>try</b>:
+        result <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcTwoPhaseScalarProperty(<span style='color:#cc0000;'>&quot;surfaceTension&quot;</span>,
+                                                 P1, T1, x1, <span style='color:#cc0000;'>&quot;Liquid&quot;</span>,
+                                                 P2, T2, x2, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>,
                                                  eUndefinedBasis)
-        print("Test 1. Water+Ethanol mixture surfaceTension = %f N/m" % result)
-    except Exception as e:
-        print("Test 1. Calculation failed")
-        print(str(e))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 1. Water+Ethanol mixture surfaceTension = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> N/m&quot;</span> <b><span style='color:#0000ff;'>%</span></b> result)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 1. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcTwoPhaseVectorProperty("kvalue",
-                                                  P1, T1, x1, "Liquid",
-                                                  P2, T2, x2, "Vapor",
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcTwoPhaseVectorProperty(<span style='color:#cc0000;'>&quot;kvalue&quot;</span>,
+                                                  P1, T1, x1, <span style='color:#cc0000;'>&quot;Liquid&quot;</span>,
+                                                  P2, T2, x2, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>,
                                                   eUndefinedBasis)
-        print("Test 2. Water+Ethanol mixture kvalues = %s" % results)
-    except Exception as e:
-        print("Test 2. Calculation failed")
-        print(str(e))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 2. Water+Ethanol mixture kvalues = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 2. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-def test_coolprop_single_phase():
-    """
-    Test the CoolProp library.
-    Default backend is HEOS and the default reference state is DEF.
-    Different backends/ref.states can be specified in the options dictionary.
-    Nota bene:
-      CoolProp does not have transport properties models defined for some compounds (i.e. CarbonMonoxide).
-    """
-    ctpp = daeThermoPackage("CoolPropTPP", None, "")
-    ctpp.LoadCoolProp(["Hydrogen", "Methane",
-                       "CarbonDioxide"],                # compound IDs in the mixture
-                       [],                              # unused (compund CAS numbers)
-                       {"Vapor"  : eVapor},             # dictionary {'phaseLabel' : stateOfAggregation}
-                       eMole,                           # optional: default basis (eMole by default)
-                       {"backend"        : "HEOS",
-                        "referenceState" : "DEF",
-                        "debugLevel"     : "0"})        # optional: options dictionary (empty by default)
+<b>def</b> test_coolprop_single_phase():
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    Test the CoolProp library.</span>
+<span style='color:#017a31;'>    Default backend is HEOS and the default reference state is DEF.</span>
+<span style='color:#017a31;'>    Different backends/ref.states can be specified in the options dictionary.</span>
+<span style='color:#017a31;'>    Nota bene:</span>
+<span style='color:#017a31;'>      CoolProp does not have transport properties models defined for some compounds (i.e. CarbonMonoxide).</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    ctpp <b><span style='color:#0000ff;'>=</span></b> daeThermoPackage(<span style='color:#cc0000;'>&quot;CoolPropTPP&quot;</span>, <span style='color:#3605fb;'>None</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+    ctpp.LoadCoolProp([<span style='color:#cc0000;'>&quot;Hydrogen&quot;</span>, <span style='color:#cc0000;'>&quot;Methane&quot;</span>,
+                       <span style='color:#cc0000;'>&quot;CarbonDioxide&quot;</span>],                <span style='color:#017a31;'># compound IDs in the mixture</span>
+                       [],                              <span style='color:#017a31;'># unused (compund CAS numbers)</span>
+                       {<span style='color:#cc0000;'>&quot;Vapor&quot;</span>  : eVapor},             <span style='color:#017a31;'># dictionary {'phaseLabel' : stateOfAggregation}</span>
+                       eMole,                           <span style='color:#017a31;'># optional: default basis (eMole by default)</span>
+                       {<span style='color:#cc0000;'>&quot;backend&quot;</span>        : <span style='color:#cc0000;'>&quot;HEOS&quot;</span>,
+                        <span style='color:#cc0000;'>&quot;referenceState&quot;</span> : <span style='color:#cc0000;'>&quot;DEF&quot;</span>,
+                        <span style='color:#cc0000;'>&quot;debugLevel&quot;</span>     : <span style='color:#cc0000;'>&quot;0&quot;</span>})        <span style='color:#017a31;'># optional: options dictionary (empty by default)</span>
 
 
-    P = 2.0e5 # Must be in Pascals
-    T = 300   # Must be in Kelvins
-    x = [0.755, 0.075, 0.170]
+    P <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2.0e5</span> <span style='color:#017a31;'># Must be in Pascals</span>
+    T <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>300</span>   <span style='color:#017a31;'># Must be in Kelvins</span>
+    x <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0.755</span>, <span style='color:#cc047c;'>0.075</span>, <span style='color:#cc047c;'>0.170</span>]
 
-    print("*****************************************************************")
-    print("                  CoolProp single phase tests                    ")
-    print("*****************************************************************")
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;*****************************************************************&quot;</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;                  CoolProp single phase tests                    &quot;</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;*****************************************************************&quot;</span>)
 
-    # CoolProp does not implement functions for pure compound properties from the ICapeThermoCompounds interface.
-    # Transport mixture properties from the ICapeThermoPropertyRoutine interface
-    try:
-        result = ctpp._CalcSinglePhaseScalarProperty("density",  P, T, x, "Vapor", eMole)
-        print("Test 1. density = %f mol/m^3" % result)
-    except Exception as e:
-        print("Test 1. Calculation failed")
-        print(str(e))
+    <span style='color:#017a31;'># CoolProp does not implement functions for pure compound properties from the ICapeThermoCompounds interface.</span>
+    <span style='color:#017a31;'># Transport mixture properties from the ICapeThermoPropertyRoutine interface</span>
+    <b>try</b>:
+        result <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;density&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eMole)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 1. density = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> mol/m^3&quot;</span> <b><span style='color:#0000ff;'>%</span></b> result)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 1. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseScalarProperty("heatCapacityCp",  P, T, x, "Vapor", eMole)
-        print("Test 2. heatCapacityCp = %s J/(mol.K)" % results)
-    except Exception as e:
-        print("Test 2. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;heatCapacityCp&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eMole)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 2. heatCapacityCp = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> J/(mol.K)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 2. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseScalarProperty("thermalConductivity",  P, T, x, "Vapor", eUndefinedBasis)
-        print("Test 3. thermalConductivity = %s W/(m.K)" % results)
-    except Exception as e:
-        print("Test 3. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;thermalConductivity&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eUndefinedBasis)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 3. thermalConductivity = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> W/(m.K)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 3. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseScalarProperty("viscosity",  P, T, x, "Vapor", eUndefinedBasis)
-        print("Test 4. viscosity = %s Pa.s" % results)
-    except Exception as e:
-        print("Test 4. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseScalarProperty(<span style='color:#cc0000;'>&quot;viscosity&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eUndefinedBasis)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 4. viscosity = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> Pa.s&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 4. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-    try:
-        results = ctpp._CalcSinglePhaseVectorProperty("diffusionCoefficient",  P, T, x, "Vapor", eUndefinedBasis)
-        print("Test 5. diffusionCoefficient = %s m^2/s" % results)
-    except Exception as e:
-        print("Test 5. Calculation failed")
-        print(str(e))
+    <b>try</b>:
+        results <b><span style='color:#0000ff;'>=</span></b> ctpp._CalcSinglePhaseVectorProperty(<span style='color:#cc0000;'>&quot;diffusionCoefficient&quot;</span>,  P, T, x, <span style='color:#cc0000;'>&quot;Vapor&quot;</span>, eUndefinedBasis)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 5. diffusionCoefficient = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> m^2/s&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;Test 5. Calculation failed&quot;</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
 
-class modTutorial(daeModel):
-    def __init__(self, Name, Parent = None, Description = ""):
-        daeModel.__init__(self, Name, Parent, Description)
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        self.tpp = daeThermoPackage("ChemSepCapeOpenTPP", self, "")
-        self.tpp.LoadCapeOpen("ChemSep Property Package Manager", # packageManager name (case sensitive)
-                              "Water+Ethanol",                    # package name (case sensitive)
-                              ["Water", "Ethanol"],               # compound IDs in the mixture
-                              [],                                 # compund CAS numbers (optional)
-                              {'Liquid':eLiquid},                 # dictionary {'phaseLabel' : stateOfAggregation}
-                                                                  # where stateOfAggregation can be:
-                                                                  # eVapor, eLiquid, eSolid or etppPhaseUnknown
-                              eMole,                              # default basis is eMole (other options are eMass or eUndefinedBasis)
-                              {})                                 # options dictionary (defaut is empty)
+        <span style='color:#3605fb;'>self</span>.tpp <b><span style='color:#0000ff;'>=</span></b> daeThermoPackage(<span style='color:#cc0000;'>&quot;TPP&quot;</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#017a31;'># CapeOpen thermo packages are available only in Windows.</span>
+        <span style='color:#017a31;'># For other platforms use CoolProp thermo package.</span>
+        <b>if</b> daetools.daetools_system <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Windows'</span>:
+            <span style='color:#3605fb;'>self</span>.tpp.LoadCapeOpen(<span style='color:#cc0000;'>&quot;ChemSep Property Package Manager&quot;</span>, <span style='color:#017a31;'># packageManager name (case sensitive)</span>
+                                  <span style='color:#cc0000;'>&quot;Water+Ethanol&quot;</span>,                    <span style='color:#017a31;'># package name (case sensitive)</span>
+                                  [<span style='color:#cc0000;'>&quot;Water&quot;</span>, <span style='color:#cc0000;'>&quot;Ethanol&quot;</span>],               <span style='color:#017a31;'># compound IDs in the mixture</span>
+                                  [],                                 <span style='color:#017a31;'># compund CAS numbers (optional)</span>
+                                  {<span style='color:#cc0000;'>'Liquid'</span>:eLiquid},                 <span style='color:#017a31;'># dictionary {'phaseLabel' : stateOfAggregation}</span>
+                                  eMole,                              <span style='color:#017a31;'># default basis is eMole (other options are eMass or eUndefinedBasis)</span>
+                                  {})                                 <span style='color:#017a31;'># options dictionary (defaut is empty)</span>
+        <b>else</b>:
+            <span style='color:#3605fb;'>self</span>.tpp.LoadCoolProp([<span style='color:#cc0000;'>&quot;Water&quot;</span>, <span style='color:#cc0000;'>&quot;Ethanol&quot;</span>],               <span style='color:#017a31;'># compound IDs in the mixture</span>
+                                  [],                                 <span style='color:#017a31;'># compund CAS numbers (optional)</span>
+                                  {<span style='color:#cc0000;'>'Liquid'</span>:eLiquid},                 <span style='color:#017a31;'># dictionary {'phaseLabel' : stateOfAggregation}</span>
+                                  eMole,                              <span style='color:#017a31;'># default basis is eMole (other options are eMass or eUndefinedBasis)</span>
+                                  {})                                 <span style='color:#017a31;'># options dictionary (defaut is empty)</span>
 
-        self.m    = daeParameter("m", kg, self, "Mass of water")
+        <span style='color:#3605fb;'>self</span>.m    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>, kg, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of water&quot;</span>)
 
-        self.cp    = daeVariable("c_p",   specific_heat_capacity_t, self, "Specific heat capacity of the liquid")
-        self.kappa = daeVariable("k",     thermal_conductivity_t,   self, "Thermal conductivity of the liquid")
-        self.mu    = daeVariable("mu",    dynamic_viscosity_t,      self, "Viscosity of the liquid")
-        self.Qin   = daeVariable("Q_in",  power_t,                  self, "Power of the heater")
-        self.T     = daeVariable("T",     temperature_t,            self, "Temperature of the liquid")
+        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,   specific_heat_capacity_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the liquid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.kappa <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;k&quot;</span>,     thermal_conductivity_t,   <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Thermal conductivity of the liquid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.mu    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;mu&quot;</span>,    dynamic_viscosity_t,      <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Viscosity of the liquid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qin   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Q_in&quot;</span>,  power_t,                  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,     temperature_t,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the liquid&quot;</span>)
 
-    def DeclareEquations(self):
-        daeModel.DeclareEquations(self)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        # P, T, x arguments can be floats or adouble objects/arrays as illustrated here.
-        P = 1e5 * Pa
-        T = self.T()
-        x = [0.60, 0.40]
+        <span style='color:#017a31;'># P, T, x arguments can be floats or adouble objects/arrays as illustrated here.</span>
+        P <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa
+        T <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T()
+        x <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0.60</span>, <span style='color:#cc047c;'>0.40</span>]
 
-        # daeThermoPackage uses the default basis to calculate the properties.
-        # If a property for a different basis is required it should be specified as a keyword argument 'basis'=eMole|eMass|eUndefinedBasis.
-        # Also, it needs the phase information. If there is only one phase it will be used as a default.
-        # Otherwise, it must be specified as a keyword argument 'phase'='phaseLabel'.
-        # For instance:
-        #    self.tpp.kappa(P,T,x, phase='Vapor', basis=eUndefinedBasis)
+        <span style='color:#017a31;'># daeThermoPackage uses the default basis to calculate the properties.</span>
+        <span style='color:#017a31;'># If a property for a different basis is required it should be specified as a keyword argument 'basis'=eMole|eMass|eUndefinedBasis.</span>
+        <span style='color:#017a31;'># Also, it needs the phase information. If there is only one phase it will be used as a default.</span>
+        <span style='color:#017a31;'># Otherwise, it must be specified as a keyword argument 'phase'='phaseLabel'.</span>
+        <span style='color:#017a31;'># For instance:</span>
+        <span style='color:#017a31;'>#    self.tpp.kappa(P,T,x, phase='Vapor', basis=eUndefinedBasis)</span>
 
-        # Calculate transport properties:
-        # 1. Specific heat capacity (cp) in J/(kg*K)
-        #    TPP package returns cp in J/(mol.K) (mole basis) - for some reasons it refuses to calculate it for the mass basis.
-        #    Therefore, divide it by the molar mass of the mixture.
-        eq = self.CreateEquation("C_p", "Specific heat capacity as a function of the temperature.")
-        eq.Residual = self.cp() - self.tpp.cp(P,T,x) / self.tpp.M(P,T,x)
+        <span style='color:#017a31;'># Calculate transport properties:</span>
+        <span style='color:#017a31;'># 1. Specific heat capacity (cp) in J/(kg*K)</span>
+        <span style='color:#017a31;'>#    TPP package returns cp in J/(mol.K) (mole basis) - for some reasons it refuses to calculate it for the mass basis.</span>
+        <span style='color:#017a31;'>#    Therefore, divide it by the molar mass of the mixture.</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;C_p&quot;</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity as a function of the temperature.&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.tpp.cp(P,T,x) <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.tpp.M(P,T,x)
 
-        # 2. Thermal conductivity (kappa) in W/(m*K)
-        eq = self.CreateEquation("kappa", "Thermal conductivity as a function of the temperature.")
-        eq.Residual = self.kappa() - self.tpp.kappa(P,T,x)
+        <span style='color:#017a31;'># 2. Thermal conductivity (kappa) in W/(m*K)</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;kappa&quot;</span>, <span style='color:#cc0000;'>&quot;Thermal conductivity as a function of the temperature.&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.kappa() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.tpp.kappa(P,T,x)
 
-        # 3. Dynamic viscosity (mu) in Pa*s
-        eq = self.CreateEquation("mu", "Viscosity as a function of the temperature.")
-        eq.Residual = self.mu() - self.tpp.mu(P,T,x)
+        <span style='color:#017a31;'># 3. Dynamic viscosity (mu) in Pa*s</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;mu&quot;</span>, <span style='color:#cc0000;'>&quot;Viscosity as a function of the temperature.&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.mu() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.tpp.mu(P,T,x)
 
-        # Simple integral heat balance for the liquid
-        eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
-        eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin()
+        <span style='color:#017a31;'># Simple integral heat balance for the liquid</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;Integral heat balance equation&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#3605fb;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Qin()
 
-class simTutorial(daeSimulation):
-    def __init__(self):
-        daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial19")
-        self.m.Description = __doc__
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial19&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    def SetUpParametersAndDomains(self):
-        self.m.m.SetValue(1 * kg)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.m.SetValue(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> kg)
 
-    def SetUpVariables(self):
-        self.m.Qin.AssignValue(500 * W)
-        self.m.T.SetInitialCondition(283 * K)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.Qin.AssignValue(<span style='color:#cc047c;'>500</span> <b><span style='color:#0000ff;'>*</span></b> W)
+        <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 500
-    simulator  = daeSimulator(app, simulation=sim)
+<span style='color:#017a31;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
     simulator.exec_()
 
-# Setup everything manually and run in a console
-def consoleRun():
-    # Test low-level calculation routines
-    test_single_phase()
-    test_two_phase()
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
+<b>def</b> consoleRun():
+    <span style='color:#017a31;'># Test low-level calculation routines</span>
+    <b>if</b> daetools.daetools_system <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Windows'</span>:
+        test_single_phase()
+        test_two_phase()
     test_coolprop_single_phase()
 
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 500
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
 
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    # Initialize the simulation
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    # Solve at time=0 (initialization)
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    # Run
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
+    <b>else</b>:
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
-</code></pre>
+</pre>
+</body>
+</html>

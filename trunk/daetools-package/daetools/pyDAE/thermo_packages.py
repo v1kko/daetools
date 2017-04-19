@@ -95,7 +95,7 @@ class daeThermoPackage(daeThermoPhysicalPropertyPackage):
         # Multiply it by the 'molar mass constant' (1 g/mol) and convert it to kg/mol.
         MW = self.CalcSinglePhaseScalarProperty("molecularWeight", P, T, x, phase, eUndefinedBasis)
         return MW * Constant(0.001 * kg/mol)
-
+        
     def rho(self, P, T, x, **kwargs):
         # Density, kg/m**3 for mass basis or mol/m**3 for molar basis
         phase = (kwargs['phase'] if 'phase' in kwargs else self.defaultPhase)
