@@ -119,6 +119,9 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("CalculateSensitivities", &daeSimulation::GetCalculateSensitivities,
                                                 &daeSimulation::SetCalculateSensitivities,                  DOCSTR_daeSimulation_CalculateSensitivities)
 
+        .add_property("SensitivityDataDirectory", &daeSimulation::GetSensitivityDataDirectory,
+                                                  &daeSimulation::SetSensitivityDataDirectory,              DOCSTR_daeSimulation_SensitivityDataDirectory)
+
         .add_property("JSONRuntimeSettings",    &daeSimulation::GetJSONRuntimeSettings,
                                                 &daeSimulation::SetJSONRuntimeSettings,                     DOCSTR_daeSimulation_JSONRuntimeSettings)
 
@@ -202,6 +205,9 @@ BOOST_PYTHON_MODULE(pyActivity)
                                             ( arg("self"), arg("description") ), DOCSTR_daeSimulation_CreateEqualityConstraint)
         .def("CreateInequalityConstraint",  &daeSimulation::CreateInequalityConstraint, return_internal_reference<>(),
                                             ( arg("self"), arg("description") ), DOCSTR_daeSimulation_CreateInequalityConstraint)
+
+        .def("SetSensitivityParameter",	&daepython::daeDefaultSimulationWrapper::SetSensitivityParameter1, return_internal_reference<>(), ( arg("self"), arg("variable")))
+        .def("SetSensitivityParameter",	&daepython::daeDefaultSimulationWrapper::SetSensitivityParameter2, return_internal_reference<>(), ( arg("self"), arg("ad")))
 
         .def("SetContinuousOptimizationVariable",	&daepython::daeDefaultSimulationWrapper::SetContinuousOptimizationVariable11,
                                                     return_internal_reference<>(), ( arg("self"), arg("variable"), arg("lowerBound"), arg("upperBound"), arg("defaultValue") ), DOCSTR_daeSimulation_SetContinuousOptimizationVariable)

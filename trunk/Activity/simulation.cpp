@@ -7,6 +7,10 @@
 #include <math.h>
 #include <limits>
 #include <boost/foreach.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include "../IDAS_DAESolver/dae_array_matrix.h"
+#include <boost/format.hpp>
 
 namespace dae
 {
@@ -27,6 +31,7 @@ daeSimulation::daeSimulation(void)
     m_bIsInitialized				= false;
     m_bIsSolveInitial				= false;
     m_bCalculateSensitivities		= false;
+    m_iNoSensitivityFiles           = 0;
     m_nNumberOfObjectiveFunctions	= 1;
 }
 
@@ -227,6 +232,23 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
             daeDeclareException(exInvalidCall);
             e << "Sensitivity calculation is enabled but no optimization variables have been defined";
             throw e;
+        }
+
+        m_iNoSensitivityFiles = 0;
+
+        // If sensitivity data folder is specified, check if it exists and create it if necessary
+        if(!m_strSensitivityDataDirectory.empty())
+        {
+            boost::filesystem::path sensitivityDataDirectory = m_strSensitivityDataDirectory;
+            if(!boost::filesystem::is_directory(sensitivityDataDirectory))
+            {
+                if(!boost::filesystem::create_directories(sensitivityDataDirectory))
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "An invalid sensitivity data directory specified: cannot create the " << m_strSensitivityDataDirectory << " directory";
+                    throw e;
+                }
+            }
         }
     }
 
@@ -1241,6 +1263,16 @@ void daeSimulation::Reinitialize(void)
     m_pDAESolver->Reinitialize(true, false);
 }
 
+
+std::string daeSimulation::GetSensitivityDataDirectory(void) const
+{
+    return m_strSensitivityDataDirectory;
+}
+
+void daeSimulation::SetSensitivityDataDirectory(const std::string strSensitivityDataDirectory)
+{
+    m_strSensitivityDataDirectory = strSensitivityDataDirectory;
+}
 
 void daeSimulation::EnterConditionalIntegrationMode(void)
 {
@@ -2308,6 +2340,17 @@ void daeSimulation::ReportData(real_t dCurrentTime)
 
     // OLD:
     //Report(m_pModel, dCurrentTime);
+
+    boost::filesystem::path sensitivityDataDirectory = m_strSensitivityDataDirectory;
+    if(boost::filesystem::is_directory(sensitivityDataDirectory))
+    {
+        daeMatrix<real_t>& sm = m_pDAESolver->GetSensitivities();
+        daeDenseMatrix& dsm = dynamic_cast<daeDenseMatrix&>(sm);
+        std::string filename = (boost::format("%06d-%.12f.mmx") % m_iNoSensitivityFiles % dCurrentTime).str();
+        boost::filesystem::path mmxFile = sensitivityDataDirectory / filename;
+        dsm.SaveAsMatrixMarketFile(mmxFile.string(), "Sensitivity Matrix", "Sensitivity[Nparams,Nvariables]");
+        m_iNoSensitivityFiles++;
+    }
 }
 
 //void daeSimulation::Report(daeModel* pModel, real_t time)

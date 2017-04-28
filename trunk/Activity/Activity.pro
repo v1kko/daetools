@@ -14,13 +14,16 @@ LIBS += $${DAE_CONFIG_LIB} \
 HEADERS += stdafx.h \
     simulation.h \
     activity_class_factory.h \
-    base_activities.h 
+    base_activities.h \
+    ../mmio.h
+
 SOURCES += stdafx.cpp \
     simulation.cpp \
     dllmain.cpp \ 
     class_factory.cpp \
     base_activities.cpp \
-    optimization.cpp
+    optimization.cpp \
+    ../mmio.c
 
 
 #win32{

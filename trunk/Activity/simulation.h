@@ -138,6 +138,9 @@ public:
     bool GetIsInitialized(void) const;
     bool GetIsSolveInitial(void) const;
 
+    std::string GetSensitivityDataDirectory(void) const;
+    void        SetSensitivityDataDirectory(const std::string strSensitivityDataDirectory);
+
 protected:
 //	void	SetInitialConditionsToZero(void);
     void	CheckSystem(void) const;
@@ -181,6 +184,9 @@ protected:
 
 // Optimization related data
     bool														m_bCalculateSensitivities;
+    std::string                                                 m_strSensitivityDataDirectory;
+    int                                                         m_iNoSensitivityFiles;
+
     size_t														m_nNumberOfObjectiveFunctions;
     std::vector< boost::shared_ptr<daeObjectiveFunction> >		m_arrObjectiveFunctions;
     std::vector< boost::shared_ptr<daeOptimizationConstraint> >	m_arrConstraints;

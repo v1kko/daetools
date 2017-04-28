@@ -404,6 +404,16 @@ public:
         this->daeSimulation::SetUpSensitivityAnalysis();
     }
 
+    daeOptimizationVariable* SetSensitivityParameter1(daeVariable& variable)
+    {
+        return this->daeSimulation::SetContinuousOptimizationVariable(variable, 0, 1, 1);
+    }
+
+    daeOptimizationVariable* SetSensitivityParameter2(adouble a)
+    {
+        return this->daeSimulation::SetContinuousOptimizationVariable(a, 0, 1, 1);
+    }
+
     daeOptimizationVariable* SetContinuousOptimizationVariable11(daeVariable& variable, real_t LB, real_t UB, real_t defaultValue)
 	{
         return this->daeSimulation::SetContinuousOptimizationVariable(variable, LB, UB, defaultValue);

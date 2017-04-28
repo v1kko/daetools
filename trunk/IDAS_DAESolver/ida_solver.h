@@ -112,7 +112,7 @@ public:
 	boost::shared_ptr<daeIDASolverData>	m_pIDASolverData;
 	bool								m_bIsModelDynamic;
 	bool								m_bCalculateSensitivities;
-	std::vector<size_t>					m_narrParametersIndexes;
+    std::vector<size_t>					m_narrParametersIndexes;
 	int									m_eSensitivityMethod;
 	std::string							m_strSensitivityMethod;
 	bool								m_bErrorControl;
