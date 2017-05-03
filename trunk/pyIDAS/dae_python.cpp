@@ -16,6 +16,7 @@ namespace boost
 POINTER_CONVERSION(daeLog_t)
 POINTER_CONVERSION(daeLASolver_t)
 POINTER_CONVERSION(daeIDALASolver_t)
+POINTER_CONVERSION(daeMatrix<real_t>)
 POINTER_CONVERSION(daeDenseMatrix)
 POINTER_CONVERSION(daeRawDataArray<real_t>)
 }
