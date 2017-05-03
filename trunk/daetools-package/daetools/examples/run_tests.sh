@@ -66,6 +66,12 @@ $PYTHON $ROOT/tutorial17.py console
 echo tutorial18.py
 $PYTHON $ROOT/tutorial18.py console
 
+echo tutorial19.py
+$PYTHON $ROOT/tutorial19.py console
+
+echo tutorial20.py
+$PYTHON $ROOT/tutorial20.py console
+
 
 echo tutorial_adv_1.py
 $PYTHON $ROOT/tutorial_adv_1.py console

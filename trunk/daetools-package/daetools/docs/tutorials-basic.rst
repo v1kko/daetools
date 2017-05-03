@@ -47,11 +47,13 @@ Basic Tutorials
 =======================   =================================================================
 
 .. rubric:: Data reporting:
+
 =======================   =================================================================
 :ref:`tutorial8`          |t_8|
 =======================   =================================================================
 
 .. rubric:: DAE and LA solvers:
+
 =======================   =================================================================
 :ref:`tutorial9`          |t_9|
 -----------------------   -----------------------------------------------------------------
@@ -67,6 +69,7 @@ Basic Tutorials
 =======================   =================================================================
 
 .. rubric:: Logging:
+
 =======================   =================================================================
 :ref:`tutorial17`         |t_17|
 =======================   =================================================================
@@ -74,14 +77,21 @@ Basic Tutorials
 .. rubric:: Interoperability with NumPy:
 
 =======================   =================================================================
-:ref:`tutorial16`        |t_16|
+:ref:`tutorial16`         |t_16|
 -----------------------   -----------------------------------------------------------------
-:ref:`tutorial18`        |t_18|
+:ref:`tutorial18`         |t_18| 
 =======================   =================================================================
 
 .. rubric:: Thermophysical property packages:
+
 =======================   =================================================================
 :ref:`tutorial19`         |t_19|
+=======================   =================================================================
+
+.. rubric:: Sensitivity analysis:
+
+=======================   =================================================================
+:ref:`tutorial20`         |t_20|
 =======================   =================================================================
 
 
@@ -134,6 +144,8 @@ Basic Tutorials
 .. |t_18| replace:: Using DAE Tools variables and NumPy functions to generate and solve a simple ODE system.
 
 .. |t_19| replace:: Using thermophysical property packages in DAE Tools.
+
+.. |t_20| replace:: Using the sensitivity analysis in DAE Tools.
 
 
 .. begin-command
@@ -494,6 +506,24 @@ Tutorial 19
 Model report            `tutorial19.xml <../examples/tutorial19.xml>`_
 Runtime model report    `tutorial19-rt.xml <../examples/tutorial19-rt.xml>`_
 Source code             `tutorial19.py <../examples/tutorial19.html>`_
+=====================   =================================================================
+
+
+.. _tutorial20:
+
+Tutorial 20
+===========
+
+.. automodule:: daetools.examples.tutorial20
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial20.xml <../examples/tutorial20.xml>`_
+Runtime model report    `tutorial20-rt.xml <../examples/tutorial20-rt.xml>`_
+Source code             `tutorial20.py <../examples/tutorial20.html>`_
 =====================   =================================================================
 
 

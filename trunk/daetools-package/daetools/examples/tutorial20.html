@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial20.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial20.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial illustrates the sensitivity analysis features.</span>
+
+<span style='color:#cc0000;'>This model has one state variable (T) and one degree of freedom (Qin).</span>
+<span style='color:#cc0000;'>The sensitivity analysis is enabled and the directory for sensitivity matrix files</span>
+<span style='color:#cc0000;'>set using the SensitivityDataDirectory property (before a call to Initialize).</span>
+<span style='color:#cc0000;'>Qin is set as a parameter for sensitivity intergation.</span>
+<span style='color:#cc0000;'>The sensitivity matrix is saved in mmx coordinate format where the first</span>
+<span style='color:#cc0000;'>dimensions is Nparameters and second Nvariables: S[Np, Nvars].</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, tempfile, numpy, scipy, scipy.io
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#3605fb;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>,       kg,           <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>,         <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the surroundings&quot;</span>)
+
+        <span style='color:#3605fb;'>self</span>.Qin  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;Integral heat balance equation&quot;</span>)
+        eq.BuildJacobianExpressions <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#3605fb;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Tsurr())
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial20&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.m.SetValue(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> kg)
+        <span style='color:#3605fb;'>self</span>.m.alpha.SetValue(<span style='color:#cc047c;'>200</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.A.SetValue(<span style='color:#cc047c;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
+        <span style='color:#3605fb;'>self</span>.m.Tsurr.SetValue(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.Qin.AssignValue(<span style='color:#cc047c;'>1000</span> <b><span style='color:#0000ff;'>*</span></b> W)
+        <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        
+    <b>def</b> SetUpSensitivityAnalysis(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># SetSensitivityParameter is a handy alias for SetContinuousOptimizationVariable(variable, LB=0.0, UB=1.0, defaultValue=1.0)</span>
+        <span style='color:#017a31;'># In this scenario, the lower bound, the upper bound and the default value are unused.</span>
+        <span style='color:#017a31;'># If required, the optimisation functions can be added using the simulation.SetNumberOfObjectiveFunctions(n) function.</span>
+        <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.Qin)
+
+<b>def</b> run():
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
+
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
+        sys.exit()
+
+    <span style='color:#017a31;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># The .mmx files with the sensitivity matrices will be saved in the temporary folder</span>
+    sensitivity_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'-sensitivities'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial20-'</span>)
+    simulation.SensitivityDataDirectory <b><span style='color:#0000ff;'>=</span></b> sensitivity_folder
+    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
+
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+    
+    <span style='color:#017a31;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+
+    <span style='color:#017a31;'># Alias for log.Message</span>
+    printf <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> msg: log.Message(msg, <span style='color:#cc047c;'>0</span>)
+    
+    <span style='color:#017a31;'># Load the matrix from one of the sensitivity files (i.e. at time = 10s).</span>
+    <span style='color:#017a31;'># Filenames are in the &quot;%06d-%.12f.mmx&quot; % (counter, time) format.</span>
+    <span style='color:#017a31;'># The result is the matrix in the coordinate format (although it is actually a dense matrix).</span>
+    <span style='color:#017a31;'># Some binary file format might be used in the future (IO operations will be much faster).</span>
+    mf <b><span style='color:#0000ff;'>=</span></b> os.path.join(sensitivity_folder, <span style='color:#cc0000;'>'000001-10.000000000000.mmx'</span>)
+    coo_mat <b><span style='color:#0000ff;'>=</span></b> scipy.io.mmread(mf)
+    printf(<span style='color:#cc0000;'>'Coordinate matrix from the .mmx file at time = 10.0s:'</span>)
+    printf(<span style='color:#2a00d6;'>str</span>(coo_mat))
+
+    <span style='color:#017a31;'># The sensitivity matrix has the following dimensions: S[Nparams, Nvars]</span>
+    nd_mat <b><span style='color:#0000ff;'>=</span></b> coo_mat.toarray()
+    
+    <span style='color:#017a31;'># Unfortunately, using the raw sensitivity matrix requires some additional proccessing.</span>
+    <span style='color:#017a31;'># Every variable has an overall index used to identify it.</span>
+    <span style='color:#017a31;'># However, since some variables are fixed they are not part of the DAE system. </span>
+    <span style='color:#017a31;'># Therefore, the DAE solver uses the block indexes: variable indexes within the DAE system (&quot;block of equations&quot;).</span>
+    <span style='color:#017a31;'># Consequently, the sensitivity matrix also uses the block indexes.</span>
+    <span style='color:#017a31;'># Overall indexes can be obtained using the variable.OverallIndex property.</span>
+    <span style='color:#017a31;'># The corresponding block index can be obtained from the model.OverallIndex_BlockIndex_VariableNameMap</span>
+    <span style='color:#017a31;'># which is a dictionary {overallIndex : tuple(blockIndex,variableName)}.</span>
+    <span style='color:#017a31;'># Assigned variables (DOFs) have the block indexes with ULONG_MAX values (very large numbers).</span>
+    oi_bi_map <b><span style='color:#0000ff;'>=</span></b> simulation.m.OverallIndex_BlockIndex_VariableNameMap
+    printf(<span style='color:#cc0000;'>'Dictionary OverallIndex_BlockIndex_VariableNameMap:'</span>)
+    printf(<span style='color:#2a00d6;'>str</span>(oi_bi_map))
+    
+    <span style='color:#017a31;'># Toi is an overall index for variable T:</span>
+    Toi <b><span style='color:#0000ff;'>=</span></b> simulation.m.T.OverallIndex
+    <span style='color:#017a31;'># T_bi_name is a tuple containing (blockIndex, variableName) for the variable T:</span>
+    T_bi_name <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[Toi]
+    <span style='color:#017a31;'># Tbi is the block index for the variable 'T'</span>
+    Tbi <b><span style='color:#0000ff;'>=</span></b> T_bi_name[<span style='color:#cc047c;'>0</span>]
+    printf(<span style='color:#cc0000;'>'Variable T: overallIndex = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>, blockIndex = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (Toi, Tbi))
+    <span style='color:#017a31;'># Qi is parameter index</span>
+    Qi <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
+    printf(<span style='color:#cc0000;'>'dT/dQin   = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> nd_mat[Qi,Tbi])
+    
+    <span style='color:#017a31;'># The DAE solver has SensitivityMatrix property which contains a dense sensitivity matrix.</span>
+    <span style='color:#017a31;'># It can be called after Integrate... functions to obtain sensitivities at the current time.</span>
+    <span style='color:#017a31;'># daeDenseMatrix has operator __call__(row,column) to get the items and the functions</span>
+    <span style='color:#017a31;'># GetItem(row,column)/SetItem(row,column,newValue) to get/set the items.</span>
+    <span style='color:#017a31;'># Since we call it here at the end of simulation it returns sensitivities at time = TimeHorizon.</span>
+    sm <b><span style='color:#0000ff;'>=</span></b> daesolver.SensitivityMatrix
+    printf(<span style='color:#cc0000;'>'Sensitivities at time = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>:'</span> <b><span style='color:#0000ff;'>%</span></b> simulation.TimeHorizon)
+    printf(sm)
+    printf(<span style='color:#cc0000;'>'dT/dQin (at time = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>s) = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> (from the matrix)'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.TimeHorizon, sm(Qi,Tbi)))
+    
+    <span style='color:#017a31;'># The dense matrix object has npyValues property that returns a numpy array (the copy of the matrix).</span>
+    ndsm <b><span style='color:#0000ff;'>=</span></b> sm.npyValues
+    printf(ndsm)
+    printf(<span style='color:#cc0000;'>'dT/dQin (at time = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>s) = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> (from the numpy array)'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.TimeHorizon, ndsm[Qi,Tbi]))
+    
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    run()
+</pre>
+</body>
+</html>

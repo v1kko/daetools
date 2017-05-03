@@ -269,7 +269,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'DAE Tools Project', u'DAE Tools Project Documentation',
-   u'Dragan Nikolic', 'DAE Tools Project', 'A cross-platform equation-oriented process modelling, simulation and optimization software.',
+   u'Dragan Nikolic', 'DAE Tools Project', 'Cross platform equation-based object-oriented modelling, simulation and optimisation software.',
    'Miscellaneous'),
 ]
 

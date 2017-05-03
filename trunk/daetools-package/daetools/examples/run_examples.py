@@ -34,7 +34,7 @@ from .RunExamples_ui import Ui_RunExamplesDialog
 
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
-for i in range(1, 20):
+for i in range(1, 21):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 5):
     tutorial_modules.append(('tutorial_adv_%d' % i, []))
@@ -215,7 +215,7 @@ class RunExamples(QtWidgets.QDialog):
             module, doc = data
         
         try:
-            if m_name in ["opt_tutorial4", "opt_tutorial5", "opt_tutorial6"]:
+            if m_name in ["tutorial20", "opt_tutorial4", "opt_tutorial5", "opt_tutorial6"]:
                 self.consoleRunAndShowResults(module)
             else:
                 module.guiRun(self.app)
