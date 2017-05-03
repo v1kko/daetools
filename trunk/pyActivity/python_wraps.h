@@ -489,8 +489,9 @@ public:
 		if(m_arrObjectiveFunctions.empty())
         {
 			daeDeclareException(exInvalidCall);
-            e << "No objective functions are defined (did you forget to enable calculateSensitivities flag in Initialize() function or "
-              << "to implement SetUpOptimization/SetUpSensitivityAnalysis functions?)";
+            e << "No objective functions are defined (did you forget to enable calculateSensitivities flag in daeSimulation.Initialize() "
+              << "function, implement the daeSimulation.SetUpSensitivityAnalysis function and set the number of objective functions "
+              << " using the daeSimulation.SetNumberOfObjectiveFunctions() function?)";
             throw e;
         }
 		

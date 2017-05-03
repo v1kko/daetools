@@ -65,16 +65,17 @@ class simTutorial(daeSimulation):
         self.m.x5.AssignValue(1)
 
     def SetUpSensitivityAnalysis(self):
+        self.SetNumberOfObjectiveFunctions(1)
         self.ObjectiveFunction.Residual = 100 * (self.m.x2() - self.m.x1()**2)**2 + (1 - self.m.x1())**2 + \
                                           100 * (self.m.x3() - self.m.x2()**2)**2 + (1 - self.m.x2())**2 + \
                                           100 * (self.m.x3() - self.m.x3()**2)**2 + (1 - self.m.x3())**2 + \
                                           100 * (self.m.x5() - self.m.x4()**2)**2 + (1 - self.m.x4())**2 
         
-        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, -10, 10, 1.3);
-        self.ov2 = self.SetContinuousOptimizationVariable(self.m.x2, -10, 10, 0.7);
-        self.ov3 = self.SetContinuousOptimizationVariable(self.m.x3, -10, 10, 0.8);
-        self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, -10, 10, 1.9);
-        self.ov5 = self.SetContinuousOptimizationVariable(self.m.x5, -10, 10, 1.2);
+        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, -10, 10, 1.3)
+        self.ov2 = self.SetContinuousOptimizationVariable(self.m.x2, -10, 10, 0.7)
+        self.ov3 = self.SetContinuousOptimizationVariable(self.m.x3, -10, 10, 0.8)
+        self.ov4 = self.SetContinuousOptimizationVariable(self.m.x4, -10, 10, 1.9)
+        self.ov5 = self.SetContinuousOptimizationVariable(self.m.x5, -10, 10, 1.2)
 
 def ObjectiveFunction(x, *args):
     simulation = args[0]

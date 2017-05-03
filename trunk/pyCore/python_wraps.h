@@ -123,6 +123,7 @@ std::string getVectorWithCast__repr__(const std::vector<ITEM*>& arrItems, std::s
 adouble       create_adouble_from_object(boost::python::object value);
 adouble_array create_adouble_array_from_object(boost::python::object value);
 
+boost::python::list daeArray_GetValues(daeArray<real_t>& self);
 
 /*******************************************************
     String functions

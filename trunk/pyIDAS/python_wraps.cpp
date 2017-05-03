@@ -8,11 +8,6 @@ using namespace boost::python;
   
 namespace daepython
 {
-real_t daeArray_GetItem(daeArray<real_t>& self, size_t index)
-{
-    return self.GetItem(index);
-}
-
 boost::python::list daeArray_GetValues(daeArray<real_t>& self)
 {
     boost::python::list l;
@@ -23,10 +18,39 @@ boost::python::list daeArray_GetValues(daeArray<real_t>& self)
     return l;
 }
 
-real_t daeDenseMatrix_GetItem(daeDenseMatrix& self, size_t i, size_t j)
+boost::python::object daeDenseMatrix_ndarray(daeDenseMatrix& self)
 {
-    return self.GetItem(i, j);
-}
+    // Import numpy
+    boost::python::object main_module = import("__main__");
+    boost::python::object main_namespace = main_module.attr("__dict__");
+    exec("import numpy", main_namespace);
+    boost::python::object numpy = main_namespace["numpy"];
 
+    // Create shape
+    int N = self.GetNrows();
+    int M = self.GetNcols();
+    boost::python::tuple shape = boost::python::make_tuple(N, M);
+
+    // Create a 2d list of values
+    boost::python::list lrows;
+    for(size_t row = 0; row < N; row++)
+    {
+        boost::python::list lcols;
+        for(size_t col = 0; col < M; col++)
+            lcols.append(self.GetItem(row,col));
+        lrows.append(lcols);
+    }
+
+    // Create a flat ndarray
+    boost::python::dict kwargs;
+    if(typeid(real_t) == typeid(double))
+        kwargs["dtype"] = numpy.attr("float64");
+    else
+        kwargs["dtype"] = numpy.attr("float32");
+    boost::python::tuple args = boost::python::make_tuple(lrows);
+    boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+    return ndarray;
+}
 
 }

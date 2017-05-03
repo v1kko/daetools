@@ -409,7 +409,8 @@ def guiRun(app):
 
 # Setup everything manually and run in a console
 def consoleRun():
-    # Test low-level calculation routines
+    # Test low-level calculation routines.
+    # CapeOpen thermo packages are available only on Windows.
     if daetools.daetools_system == 'Windows':
         test_single_phase()
         test_two_phase()

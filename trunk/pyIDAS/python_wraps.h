@@ -27,10 +27,8 @@ boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
     return l;
 }
 
-real_t daeArray_GetItem(daeArray<real_t>& self, size_t index);
 boost::python::list daeArray_GetValues(daeArray<real_t>& self);
-
-real_t daeDenseMatrix_GetItem(daeDenseMatrix& self, size_t i, size_t j);
+boost::python::object daeDenseMatrix_ndarray(daeDenseMatrix& self);
 
 /*******************************************************
 	daeDAESolver

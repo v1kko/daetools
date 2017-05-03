@@ -216,10 +216,13 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     {
         if(m_bCalculateSensitivities)
         {
-            SetNumberOfObjectiveFunctions(1);
+        // There are no optmisation functions by default
+        // They can be setup using the SetNumberOfObjectiveFunctions function that can be
+        // called from the SetUpSensitivityAnalysis function
+        //    SetNumberOfObjectiveFunctions(1);
 
-        // Call SetUpSensitivityAnalysis to define obj.function(s), constraint(s) and opt.variable(s)
-        // and whatever else is needed
+        // Call SetUpSensitivityAnalysis to define sensitivity parameters using SetSensitivityParameter function
+        // which is just an alias for SetContinuousOptimizationVariable(variable, LB=0.0, UB=1.0, defaultValue=1.0).
             SetUpSensitivityAnalysis();
         }
     }

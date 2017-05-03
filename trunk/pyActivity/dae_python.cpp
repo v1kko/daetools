@@ -206,6 +206,8 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("CreateInequalityConstraint",  &daeSimulation::CreateInequalityConstraint, return_internal_reference<>(),
                                             ( arg("self"), arg("description") ), DOCSTR_daeSimulation_CreateInequalityConstraint)
 
+        .def("SetNumberOfObjectiveFunctions",	&daeSimulation::SetNumberOfObjectiveFunctions, ( arg("self"), arg("numberOfOptimizationFunctions")))
+
         .def("SetSensitivityParameter",	&daepython::daeDefaultSimulationWrapper::SetSensitivityParameter1, return_internal_reference<>(), ( arg("self"), arg("variable")))
         .def("SetSensitivityParameter",	&daepython::daeDefaultSimulationWrapper::SetSensitivityParameter2, return_internal_reference<>(), ( arg("self"), arg("ad")))
 

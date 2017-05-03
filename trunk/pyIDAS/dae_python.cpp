@@ -40,16 +40,25 @@ BOOST_PYTHON_MODULE(pyIDAS)
 		.export_values()
 	;
     
-    class_<daeArray<real_t>, boost::noncopyable>("daeArray", no_init)
-        .add_property("N",	     &daeArray<real_t>::GetSize)
+    class_<daeArray<real_t>, boost::noncopyable>("daeArray_real", no_init)
+        .add_property("n",	     &daeArray<real_t>::GetSize)
         .add_property("Values",	 &daepython::daeArray_GetValues)
-        .def("__getitem__",	     &daepython::daeArray_GetItem)
+        .def("__getitem__",  &daeArray<real_t>::GetItem,   ( arg("self"), arg("item") ))
+        .def("__setitem__",  &daeArray<real_t>::SetItem,   ( arg("self"), arg("item"), arg("value") ))
+        .def("GetItem",      &daeArray<real_t>::GetItem,   ( arg("self"), arg("item") ))
+        .def("SetItem",      &daeArray<real_t>::SetItem,   ( arg("self"), arg("item"), arg("value") ))
     ;
     
-    class_<daeDenseMatrix, boost::noncopyable>("daeDenseMatrix", no_init)
-        .add_property("N",	 &daeDenseMatrix::GetNrows)
-        .add_property("M",	 &daeDenseMatrix::GetNcols)
-        .def("__getitem__",	 &daepython::daeDenseMatrix_GetItem)
+    class_<daeMatrix<real_t>, boost::noncopyable>("daeMatrix_real", no_init)
+        .add_property("n",	 &daeMatrix<real_t>::GetNrows)
+        .add_property("m",	 &daeMatrix<real_t>::GetNcols)
+        .def("__call__",     &daeMatrix<real_t>::GetItem,  ( arg("self"), arg("row"), arg("column") ))
+        .def("GetItem",      &daeMatrix<real_t>::GetItem,  ( arg("self"), arg("row"), arg("column") ))
+        .def("SetItem",      &daeMatrix<real_t>::SetItem,  ( arg("self"), arg("row"), arg("column"), arg("value") ))
+    ;
+
+    class_<daeDenseMatrix, bases< daeMatrix<real_t> >, boost::noncopyable>("daeDenseMatrix", no_init)
+        .add_property("npyValues",  &daepython::daeDenseMatrix_ndarray)
     ;
 
 /**************************************************************
@@ -63,7 +72,8 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .add_property("InitialConditionMode",	&daeDAESolver_t::GetInitialConditionMode,
                                                 &daeDAESolver_t::SetInitialConditionMode, DOCSTR_daeDAESolver_t_InitialConditionMode)
         .add_property("Name",					&daeDAESolver_t::GetName, DOCSTR_daeDAESolver_t_Name)
-        
+        .add_property("SensitivityMatrix",      make_function(&daeDAESolver_t::GetSensitivities, return_internal_reference<>()))
+
         .def("OnCalculateResiduals",		    pure_virtual(&daeDAESolver_t::OnCalculateResiduals), 
                                                 ( arg("self") ), DOCSTR_daeDAESolver_t_OnCalculateResiduals)
         .def("OnCalculateConditions",		    pure_virtual(&daeDAESolver_t::OnCalculateConditions), 
@@ -92,8 +102,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .def("SetLASolver",		&daepython::daeIDASolverWrapper::SetLASolver2, ( arg("self"), arg("laSolver") ),     DOCSTR_daeIDAS_SetLASolver2)
         .def("SaveMatrixAsXPM",	&daeIDASolver::SaveMatrixAsXPM,                ( arg("self"), arg("xpmFilename") ),  DOCSTR_daeIDAS_SaveMatrixAsXPM)
 
-            
-        .def("OnCalculateResiduals",		    &daeDAESolver_t::OnCalculateResiduals, &daepython::daeIDASolverWrapper::def_OnCalculateResiduals, 
+        .def("OnCalculateResiduals",		    &daeDAESolver_t::OnCalculateResiduals, &daepython::daeIDASolverWrapper::def_OnCalculateResiduals,
                                                 ( arg("self") ), DOCSTR_daeIDAS_OnCalculateResiduals)
         .def("OnCalculateConditions",		    &daeDAESolver_t::OnCalculateConditions, &daepython::daeIDASolverWrapper::def_OnCalculateConditions, 
                                                 ( arg("self") ), DOCSTR_daeIDAS_OnCalculateConditions)

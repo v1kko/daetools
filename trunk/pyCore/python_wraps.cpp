@@ -400,6 +400,16 @@ void daeConfig__setitem__(daeConfig& self, boost::python::object key, boost::pyt
     }
 }
 
+boost::python::list daeArray_GetValues(daeArray<real_t>& self)
+{
+    boost::python::list l;
+
+    for(size_t i = 0; i < self.GetSize(); i++)
+        l.append(self.GetItem(i));
+
+    return l;
+}
+
 /*******************************************************
     __str__ and __repr__ funkcije
 *******************************************************/
