@@ -152,7 +152,7 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{21 December 2016} 
+\date{4 May 2017} 
 
 \hypersetup{
 pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -188,7 +188,7 @@ pdfcreator = {Dragan Nikolić}
 \section{General Information}
 
 \begin{frame}{What is DAE Tools?} 
-Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
+\alert{Modelling}, \alert{simulation}, \alert{optimisation} \& \alert{parameter estimation} software
 \footnote{\tiny{Nikolić DD. (2016) \textit{DAE Tools: equation-based object-oriented modelling, simulation and optimisation software}.
           \href{https://doi.org/10.7717/peerj-cs.54}{PeerJ Computer Science 2:e54}}
          }
@@ -245,9 +245,6 @@ Process \alert{modelling}, \alert{simulation}, and \alert{optimisation} software
       \item Mixed Integer Non-Linear Programming (MINLP) problems
     \end{itemize}
   \item \alert{Parameter estimation}
-    \begin{itemize}
-      \item Levenberg–Marquardt algorithm
-    \end{itemize}
   \item \alert{Code-generation}, \alert{model-exchange}, \alert{co-simulation} 
     \begin{itemize}
       \item Modelica, gPROMS
@@ -822,32 +819,73 @@ Current approaches to mathematical modelling:
 \section{Use Cases} 
 
 \begin{frame}[plain]{Use Case 1 - Chemical Engineering}
-    \begin{center}
-        \alert{Simulation, optimisation, parameter estimation}
-    \end{center}  
-    {\small
-      \begin{itemize}
-        \item Sample models: 
-            \begin{itemize}
-                \item CSTR/PFR
-                \item Distillation column
-                \item Batch crystalliser
-                \item Discretised Population Balance equations
-                \item Li-ion battery (Newman porous electrode theory) 
-                \item Generalised Maxwell-Stefan equations for gas separation
-            \end{itemize}
-        \item Finite Element problems:
-            \begin{itemize}
-                \item Transient heat conduction/convection
-                \item Cahn-Hilliard equation
-                \item Flow through the porous media
-            \end{itemize}
-        \item Optimisation, parameter estimation and optimal control (Constrained Optimization Problem Set tests, COPS)
+    \begin{itemize}
+       {\small
+          \item \alert{Continuously Stirred Tank Reactor} (Van de Vusse)
+                \href{https://doi.org/10.1021/i160048a700}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-1}{[code]}
+          \item \alert{Plug Flow Reactor}
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-7}{[code]}
+          \item \alert{Distillation column}
+                \href{http://dx.doi.org/10.1016/S0098-1354(02)00120-5}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-2}{[code]}
+          \item \alert{Batch crystalliser}
+                \href{http://dx.doi.org/10.1016/j.jcrysgro.2011.06.016}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-3}{[code]}
+          \item \alert{Discretised Population Balance equations}
+                \href{http://dx.doi.org/10.20944/preprints201611.0012.v1}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-4}{[code1]}
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-5}{[code2]}
+          \item \alert{Newman Porous Electrode Theory} (PET) 
+                \href{http://dx.doi.org/10.1007/0-306-47508-1_13}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-6}{[code1]}
+                \href{https://github.com/raybsmith/daetools-example-battery}{[code2]}
+          \item \alert{Multiphase Porous Electrode Theory} (MPET)
+                \href{https://arxiv.org/abs/1702.08432}{[ref]} \href{https://bitbucket.org/bazantgroup/mpet}{[code]}
+          \item \alert{Hydroxide Exchange Membrane Fuel Cells} (HEMFCs)
+                \href{http://doi.org/10.1038/nnano.2016.265}{[ref]}
+          \item \alert{Maxwell-Stefan equations} (porous membranes)
+                \href{http://doi.org/10.1007/s10450-015-9670-z}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-8}{[code]}
+          \item \alert{Presssure Swing Adsorption}
+                \href{http://doi.org/10.1021/ie801357a}{[ref1]} \href{http://doi.org/10.1021/ie0712582}{[ref2]}
+       }
     \end{itemize}
-    }
 \end{frame}
 
-\begin{frame}[plain]{Use Case 2 - Multi-scale modelling}
+\begin{frame}[plain]{Use Case 2 - Finite Element Method}
+    \begin{itemize}
+      {\small
+          \item \alert{Transient heat conduction/convection}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-2}{[code]}
+          \item \alert{Cahn-Hilliard equation}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-3}{[code]}
+          \item \alert{Flow through the porous media}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-5}{[code]}
+          \item \alert{Diffusion/reaction in an irregular catalyst shape}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-6}{[code]}
+      }
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Use Case 3 - Parameter Estimation \& Optimal Control}
+    \begin{center}
+        {\small
+            \alert{Large-scale Constrained Optimization Problem Set (COPS)}
+        }
+    \end{center}  
+    \begin{itemize}
+      {\small
+          \item Determination of the reaction coefficients in the thermal isomerization of $\alpha$-pinene (COPS 5)
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-2}{[code]}
+          \item Determination of stage specific growth and mortality rates for species at each stage as a function of time (COPS 6)
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-3}{[code]}
+          \item Determination of the reaction coefficients for the catalytic cracking of gas oil and other byproducts (COPS 12)
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-4}{[code]}
+          \item Determination of the reaction coefficients for the conversion of methanol into various hydrocarbons (COPS 13)
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-5}{[code]}
+          \item Catalyst mixing in a tubular plug flow reactor (COPS 14)
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-6}{[code]}
+      }
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]{Use Case 4 - Multi-scale modelling}
     \begin{center}
         \alert{Multi-scale model of phase-separating battery electrodes}
         \footnote{\tiny{Li et al. (2014) \textit{Current-induced transition
@@ -880,7 +918,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}{Use Case 2 - Multi-scale modelling (cont'd)}
+\begin{frame}{Use Case 4 - Multi-scale modelling (cont'd)}
     \begin{columns}[c]
       \begin{column}{0.55\paperwidth}
         {\scriptsize
@@ -924,7 +962,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 3 - Embedded simulator (back end)}
+\begin{frame}[plain]{Use Case 5 - Embedded simulator (back end)}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   
@@ -974,7 +1012,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 4 - Web application / Web service}
+\begin{frame}[plain]{Use Case 6 - Web application / Web service}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   
