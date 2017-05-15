@@ -80,7 +80,13 @@ protected:
 			_currentVariablesIndex = it->_currentVariablesIndex;
 		}
 	}
-	
+
+    virtual void InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+    {
+        for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)
+            it->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+
 	virtual void SetDefaultAbsoluteTolerances(void)
 	{
 		for(iterator it = this->m_ptrarrObjects.begin(); it != this->m_ptrarrObjects.end(); it++)

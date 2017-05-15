@@ -9,7 +9,7 @@
 #include <boost/foreach.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include "../IDAS_DAESolver/dae_array_matrix.h"
+//#include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <boost/format.hpp>
 
 namespace dae
@@ -31,8 +31,11 @@ daeSimulation::daeSimulation(void)
     m_bIsInitialized				= false;
     m_bIsSolveInitial				= false;
     m_bCalculateSensitivities		= false;
+    m_bReportTimeDerivatives        = false;
+    m_bReportSensitivities          = false;
     m_iNoSensitivityFiles           = 0;
     m_nNumberOfObjectiveFunctions	= 1;
+    m_pCurrentSensitivityMatrix     = NULL;
 }
 
 daeSimulation::~daeSimulation(void)
@@ -141,7 +144,10 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 
     daeConfig& cfg = daeConfig::GetConfig();
     bool bPrintHeader = cfg.GetBoolean("daetools.activity.printHeader", true);
-    bool bPrintInfo   = cfg.GetBoolean("daetools.core.printInfo", false);
+    bool bPrintInfo   = cfg.GetBoolean("daetools.core.printInfo",       false);
+
+    m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
+    m_bReportSensitivities   = cfg.GetBoolean("daetools.activity.reportSensitivities",   false);
 
     if(bPrintHeader)
     {
@@ -194,8 +200,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 
     if(m_eSimulationMode == eOptimization)
     {
-        if(!m_bCalculateSensitivities)
-            m_bCalculateSensitivities = true;
+        m_bCalculateSensitivities = true;
 
         SetNumberOfObjectiveFunctions(1);
 
@@ -204,8 +209,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     }
     else if(m_eSimulationMode == eParameterEstimation)
     {
-        if(!m_bCalculateSensitivities)
-            m_bCalculateSensitivities = true;
+        m_bCalculateSensitivities = true;
 
         SetNumberOfObjectiveFunctions(0);
 
@@ -216,7 +220,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     {
         if(m_bCalculateSensitivities)
         {
-        // There are no optmisation functions by default
+        // There are no optmisation functions by default.
         // They can be setup using the SetNumberOfObjectiveFunctions function that can be
         // called from the SetUpSensitivityAnalysis function
         //    SetNumberOfObjectiveFunctions(1);
@@ -2065,6 +2069,26 @@ bool daeSimulation::GetIsSolveInitial(void) const
     return m_bIsSolveInitial;
 }
 
+bool daeSimulation::GetReportTimeDerivatives(void) const
+{
+    return m_bReportTimeDerivatives;
+}
+
+void daeSimulation::SetReportTimeDerivatives(bool bReportTimeDerivatives)
+{
+    m_bReportTimeDerivatives = bReportTimeDerivatives;
+}
+
+bool daeSimulation::GetReportSensitivities(void) const
+{
+    return m_bReportSensitivities;
+}
+
+void daeSimulation::SetReportSensitivities(bool bReportSensitivities)
+{
+    m_bReportSensitivities = bReportSensitivities;
+}
+
 void daeSimulation::SetJSONRuntimeSettings(const std::string& strJSONRuntimeSettings)
 {
     try
@@ -2264,6 +2288,42 @@ void daeSimulation::Register(daeVariable* pVariable)
         e << "Simulation dastardly failed to register variable [" << var.m_strName << "]";
         throw e;
     }
+
+    // Register a variable for a time derivative
+    // Reuse the daeDataReporterVariable!!
+    if(m_bReportTimeDerivatives)
+    {
+        var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("time_derivatives.d(");
+        var.m_strName += ")_dt";
+
+        if(!m_pDataReporter->RegisterVariable(&var))
+        {
+            daeDeclareException(exDataReportingError);
+            e << "Simulation dastardly failed to register the time derivative for the variable [" << var.m_strName << "]";
+            throw e;
+        }
+    }
+
+    // Register a variable for a sensitivity
+    // Reuse the daeDataReporterVariable!!
+    if(m_bReportSensitivities && m_bCalculateSensitivities)
+    {
+        for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
+        {
+            boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+
+            var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
+            var.m_strName += ")_d(" + optVar->GetName() + ")";
+
+            if(!m_pDataReporter->RegisterVariable(&var))
+            {
+                daeDeclareException(exDataReportingError);
+                e << "Simulation dastardly failed to register the sensitivity for the variable [" << var.m_strName << "]"
+                  << " per parameter [" << optVar->GetName() << "]";
+                throw e;
+            }
+        }
+    }
 }
 
 void daeSimulation::Register(daeParameter* pParameter)
@@ -2334,6 +2394,38 @@ void daeSimulation::ReportData(real_t dCurrentTime)
         throw e;
     }
 
+    // Get the current sensitivity matrix and save it if the output directory is set.
+    bool bSaveSensitivityMatrix = !m_strSensitivityDataDirectory.empty();
+    m_pCurrentSensitivityMatrix = NULL;
+    if(m_bCalculateSensitivities && (bSaveSensitivityMatrix || m_bReportSensitivities))
+    {
+    // Call m_pDAESolver->GetSensitivities() only once since it is very expensive!
+        daeMatrix<real_t>& sm = m_pDAESolver->GetSensitivities();
+        daeDenseMatrix& dsm = dynamic_cast<daeDenseMatrix&>(sm);
+
+        // Set the current sensitivity matrix for use in reporting sensitivities.
+        m_pCurrentSensitivityMatrix = &dsm;
+    }
+
+    if(m_bCalculateSensitivities && bSaveSensitivityMatrix)
+    {
+        std::string filename = (boost::format("%06d-%.12f.mmx") % m_iNoSensitivityFiles % dCurrentTime).str();
+        boost::filesystem::path sensitivityDataDirectory = m_strSensitivityDataDirectory;
+        if(m_iNoSensitivityFiles == 0) // test the validity of the directory only at the beginning of the simulation
+        {
+            if(!boost::filesystem::is_directory(sensitivityDataDirectory))
+            {
+                daeDeclareException(exDataReportingError);
+                e << "An invalid sensitivity data directory specified: " << m_strSensitivityDataDirectory;
+                throw e;
+            }
+        }
+        boost::filesystem::path mmxFile = sensitivityDataDirectory / filename;
+        if(m_pCurrentSensitivityMatrix)
+            m_pCurrentSensitivityMatrix->SaveAsMatrixMarketFile(mmxFile.string(), "Sensitivity Matrix", "Sensitivity[Nparams,Nvariables]");
+        m_iNoSensitivityFiles++;
+    }
+
     daeReportObject<daeVariable*>  repVariables(*this, dCurrentTime);
     daeReportObject<daeParameter*> repParameters(*this, dCurrentTime);
 
@@ -2341,19 +2433,11 @@ void daeSimulation::ReportData(real_t dCurrentTime)
     if(dCurrentTime == 0)
         std::for_each(m_ptrarrReportParameters.begin(), m_ptrarrReportParameters.end(), repParameters);
 
+    // Reset the current sensitivity matrix to NULL again.
+    m_pCurrentSensitivityMatrix = NULL;
+
     // OLD:
     //Report(m_pModel, dCurrentTime);
-
-    boost::filesystem::path sensitivityDataDirectory = m_strSensitivityDataDirectory;
-    if(boost::filesystem::is_directory(sensitivityDataDirectory))
-    {
-        daeMatrix<real_t>& sm = m_pDAESolver->GetSensitivities();
-        daeDenseMatrix& dsm = dynamic_cast<daeDenseMatrix&>(sm);
-        std::string filename = (boost::format("%06d-%.12f.mmx") % m_iNoSensitivityFiles % dCurrentTime).str();
-        boost::filesystem::path mmxFile = sensitivityDataDirectory / filename;
-        dsm.SaveAsMatrixMarketFile(mmxFile.string(), "Sensitivity Matrix", "Sensitivity[Nparams,Nvariables]");
-        m_iNoSensitivityFiles++;
-    }
 }
 
 //void daeSimulation::Report(daeModel* pModel, real_t time)
@@ -2394,7 +2478,7 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
         return;
 
     daeDataReporterVariableValue var;
-    size_t i, k, nEnd, nStart, nPoints;
+    size_t i, k, nEnd, nStart, nPoints, bi;
 
     var.m_strName = m_strIteration + pVariable->GetCanonicalName();
     nPoints = pVariable->GetNumberOfPoints();
@@ -2411,6 +2495,56 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
         daeDeclareException(exDataReportingError);
         e << "Simulation dastardly failed to report variable [" << var.m_strName << "] at TIME: [" << time << "]";
         throw e;
+    }
+
+    // Report a time dervative for a variable
+    // Reuse the daeDataReporterVariableValue!!
+    if(m_bReportTimeDerivatives)
+    {
+        var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("time_derivatives.d(");
+        var.m_strName += ")_dt";
+
+        for(k = 0, i = nStart; i < nEnd; i++, k++)
+            var.m_pValues[k] = pDataProxy->GetTimeDerivative_or_zero(i);
+
+        if(!m_pDataReporter->SendVariable(&var))
+        {
+            daeDeclareException(exDataReportingError);
+            e << "Simulation dastardly failed to report the time derivative for the variable [" << var.m_strName << "]";
+            throw e;
+        }
+    }
+
+    // Report sensitivities of a variable per every sensitivity parameter
+    // Reuse the daeDataReporterVariableValue!!
+    if(m_bReportSensitivities && m_bCalculateSensitivities)
+    {
+        const std::vector<size_t>& bis = pVariable->GetBlockIndexes();
+
+        for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
+        {
+            boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+
+            var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
+            var.m_strName += ")_d(" + optVar->GetName() + ")";
+
+            for(k = 0; k < bis.size(); k++)
+            {
+                bi = bis[k];
+                if(bi != ULONG_MAX)
+                    var.m_pValues[k] = m_pCurrentSensitivityMatrix->GetItem(pi, bi);
+                else
+                    var.m_pValues[k] = 0;
+            }
+
+            if(!m_pDataReporter->SendVariable(&var))
+            {
+                daeDeclareException(exDataReportingError);
+                e << "Simulation dastardly failed to report the sensitivity for the variable [" << var.m_strName << "]"
+                  << " per parameter [" << optVar->GetName() << "]";
+                throw e;
+            }
+        }
     }
 }
 

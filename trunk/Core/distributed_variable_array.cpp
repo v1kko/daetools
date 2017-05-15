@@ -58,10 +58,34 @@ size_t daeVariable::CalculateIndex(const std::vector<size_t>& narrDomainIndexes)
 	return index;
 }
 
+void daeVariable::InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+{
+    std::map<size_t, size_t>::const_iterator iter;
+    size_t noPoints = GetNumberOfPoints();
+    size_t startOI = m_nOverallIndex;
+    size_t endOI   = m_nOverallIndex + noPoints;
+
+    m_narrBlockIndexes.resize(noPoints);
+    for(size_t i = 0, oi = startOI; oi < endOI; i++, oi++)
+    {
+        iter = mapOverallIndex_BlockIndex.find(oi);
+        if(iter != mapOverallIndex_BlockIndex.end()) // if found
+            m_narrBlockIndexes[i] = iter->second;
+        else
+            m_narrBlockIndexes[i] = ULONG_MAX;
+    }
+}
+
 size_t daeVariable::GetOverallIndex(void) const
 {
 	return m_nOverallIndex;
 }
+
+const std::vector<size_t>& daeVariable::GetBlockIndexes() const
+{
+    return m_narrBlockIndexes;
+}
+
 
 int daeVariable::GetType() const
 {

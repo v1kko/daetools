@@ -175,6 +175,7 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
+    sim.ReportTimeDerivatives = True
     sim.ReportingInterval = 2
     sim.TimeHorizon       = 500
     simulator  = daeSimulator(app, simulation=sim)
@@ -190,6 +191,9 @@ def consoleRun():
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
+
+    # Enable reporting of time derivatives for all reported variables
+    simulation.ReportTimeDerivatives = True
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 2

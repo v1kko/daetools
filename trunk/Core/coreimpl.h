@@ -201,7 +201,8 @@ public:
 	string GetNameRelativeToParentModel(void) const;
 	string GetStrippedName(void) const;
 	string GetStrippedNameRelativeToParentModel(void) const;
-	
+    string GetCanonicalNameAndPrepend(const std::string& prependToName) const;
+
 protected:
 	string			m_strDescription;
 	string 			m_strShortName;
@@ -1035,7 +1036,7 @@ public:
 		*(m_pdarrValuesReferences[nOverallIndex]) = Value;
 	}
 
-	real_t GetTimeDerivative(size_t nOverallIndex) const
+    real_t GetTimeDerivative(size_t nOverallIndex) const
 	{
 		if(m_pdarrTimeDerivativesReferences.empty())
 		{
@@ -1063,6 +1064,24 @@ public:
 		}
 		*(m_pdarrTimeDerivativesReferences[nOverallIndex]) = Value;
 	}
+
+    // This function is only used for reporting time derivatives in ReportData(time).
+    // It returns 0.0 for non-differential variables (does not throw exceptions).
+    real_t GetTimeDerivative_or_zero(size_t nOverallIndex) const
+    {
+        if(m_pdarrTimeDerivativesReferences.empty())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot get the time derivative for the system has not been initialized yet";
+            throw e;
+        }
+
+        // Assigned variables do not have time derivatives indexes mapped so return zero
+        if(m_pdarrTimeDerivativesReferences[nOverallIndex] == NULL)
+            return real_t(0);
+        else
+            return *(m_pdarrTimeDerivativesReferences[nOverallIndex]);
+    }
 
 	void ReSetInitialCondition(size_t nOverallIndex, real_t Value, daeeInitialConditionMode eMode)
 	{
@@ -1974,6 +1993,8 @@ public:
     daePort* GetParentPort(void) const;
     const std::vector<daeDomain*>& Domains(void) const;
 
+    string GetCanonicalNameAndPrepend(const std::string& prependToName) const;
+
 public:
 	adouble	operator()(void);
 	template<typename TYPE1>
@@ -2113,6 +2134,8 @@ public:
     template<typename TYPE1, typename TYPE2, typename TYPE3, typename TYPE4, typename TYPE5, typename TYPE6, typename TYPE7, typename TYPE8>
         adouble_array d2_array(const daeDomain_t& rDomain, TYPE1 d1, TYPE2 d2, TYPE3 d3, TYPE4 d4, TYPE5 d5, TYPE6 d6, TYPE7 d7, TYPE8 d8);
 
+    const std::vector<size_t>& GetBlockIndexes() const;
+
 protected:
 	adouble	Create_adouble(const size_t* indexes, const size_t N) const;
 	adouble	Calculate_dt(const size_t* indexes, const size_t N) const;
@@ -2164,12 +2187,16 @@ protected:
 	size_t	CalculateIndex(const size_t* indexes, size_t N) const; 
 	size_t	CalculateIndex(const std::vector<size_t>& narrDomainIndexes) const;
 
+    void    InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
+
 protected:
 	size_t					m_nOverallIndex;
 	daeVariableType			m_VariableType;
 	bool					m_bReportingOn;
 	std::vector<daeDomain*>	m_ptrDomains;
 	daePort*				m_pParentPort;
+
+    std::vector<size_t>     m_narrBlockIndexes;
 
     std::map<size_t, adouble> m_mapSetupVariableNodes;
     std::map<size_t, adouble> m_mapSetupTimeDerivativeNodes;
@@ -2279,7 +2306,8 @@ public:
 protected:
 	void			InitializeParameters(void);
 	void			InitializeVariables(void);
-	size_t			GetNumberOfVariables(void) const;
+    void            InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
+    size_t			GetNumberOfVariables(void) const;
 
 	size_t			GetVariablesStartingIndex(void) const;
 	void			SetVariablesStartingIndex(size_t nVariablesStartingIndex);
@@ -2835,6 +2863,7 @@ protected:
 	void		InitializePortAndModelArrays(void);
 	void		InitializeSTNs(void);
 	void		InitializeOnEventAndOnConditionActions(void);
+    void        InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex);
     daeBlock*	DoBlockDecomposition(void);
     void        PopulateBlockIndexes(daeBlock* pBlock);
     void		SetDefaultAbsoluteTolerances(void);
@@ -2968,6 +2997,8 @@ protected:
 	virtual void InitializeSTNs(void)                                                               								= 0;
 	virtual void InitializeOnEventAndOnConditionActions(void)																		= 0;
 	virtual void InitializeDEDIs(void)                                                                  		                    = 0;
+    virtual void InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)                                 = 0;
+
 	virtual void CreatePortConnectionEquations(void)                                                        						= 0;
 	virtual void PropagateDataProxy(boost::shared_ptr<daeDataProxy_t> pDataProxy)                               					= 0;
 	virtual void PropagateGlobalExecutionContext(daeExecutionContext* pExecutionContext)                            				= 0;
@@ -3068,6 +3099,7 @@ protected:
 	virtual void InitializeVariables(void)			= 0;
 	virtual void SetDefaultAbsoluteTolerances(void)	= 0;
 	virtual void SetDefaultInitialGuesses(void)		= 0;	
+    virtual void InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex) = 0;
     virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                                const std::map<size_t, size_t>& mapOverallIndex_BlockIndex) = 0;
     virtual void PropagateDomain(daeDomain& propagatedDomain)          = 0;

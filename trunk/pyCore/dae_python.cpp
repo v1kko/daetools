@@ -1105,6 +1105,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ReportingOn",        &daeVariable::GetReportingOn,
                                             &daeVariable::SetReportingOn,             DOCSTR_daeVariable_ReportingOn)
         .add_property("OverallIndex",       &daeVariable::GetOverallIndex,            DOCSTR_daeVariable_OverallIndex)
+        .add_property("BlockIndexes",       &daepython::daeVariable_BlockIndexes,     DOCSTR_daeVariable_BlockIndexes)
         .add_property("NumberOfPoints",     &daeVariable::GetNumberOfPoints,          DOCSTR_daeVariable_NumberOfPoints)
         .add_property("npyValues",          &daepython::daeVariable_Values,           DOCSTR_daeVariable_npyValues)
         .add_property("npyTimeDerivatives", &daepython::daeVariable_TimeDerivatives,  DOCSTR_daeVariable_npyTimeDerivatives)

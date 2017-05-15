@@ -72,6 +72,9 @@ $PYTHON $ROOT/tutorial19.py console
 echo tutorial20.py
 $PYTHON $ROOT/tutorial20.py console
 
+echo tutorial21.py
+$PYTHON $ROOT/tutorial21.py console
+
 
 echo tutorial_adv_1.py
 $PYTHON $ROOT/tutorial_adv_1.py console
@@ -110,6 +113,9 @@ $PYTHON $ROOT/tutorial_che_7.py console
 
 echo tutorial_che_8.py
 $PYTHON $ROOT/tutorial_che_8.py console
+
+echo tutorial_che_9.py
+$PYTHON $ROOT/tutorial_che_9.py console
 
 
 echo tutorial_che_opt_1.py

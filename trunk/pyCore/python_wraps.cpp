@@ -2539,6 +2539,45 @@ boost::python::object daeVariable_TimeDerivatives(daeVariable& self)
     }
 }
 
+boost::python::object daeVariable_BlockIndexes(daeVariable& self)
+{
+    const std::vector<daeDomain*>& domains = self.Domains();
+    const std::vector<size_t>& bis = self.GetBlockIndexes();
+
+    if(domains.size() == 0)
+    {
+        return boost::python::object(bis[0]);
+    }
+    else
+    {
+        // Import numpy
+        boost::python::object main_module = import("__main__");
+        boost::python::object main_namespace = main_module.attr("__dict__");
+        exec("import numpy", main_namespace);
+        boost::python::object numpy = main_namespace["numpy"];
+
+        // Create shape
+        boost::python::list ldimensions;
+        for(size_t i = 0; i < domains.size(); i++)
+            ldimensions.append(domains[i]->GetNumberOfPoints());
+        boost::python::tuple shape = boost::python::tuple(ldimensions);
+
+        // Create a flat list of values
+        boost::python::list lblock_indexes;
+        for(size_t i = 0; i < bis.size(); i++)
+            lblock_indexes.append(bis[i]);
+
+        // Create a flat ndarray
+        boost::python::dict kwargs;
+        kwargs["dtype"] = numpy.attr("int");
+        boost::python::tuple args = boost::python::make_tuple(lblock_indexes);
+        boost::python::object ndarray = numpy.attr("array")(*args, **kwargs);
+
+        // Return a re-shaped ndarray
+        return ndarray.attr("reshape")(shape);
+    }
+}
+
 boost::python::object daeVariable_Values(daeVariable& self)
 {
 /* NUMPY

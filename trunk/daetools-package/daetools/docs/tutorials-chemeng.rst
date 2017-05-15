@@ -28,6 +28,8 @@ Chemical Engineering Examples
 :ref:`tutorial_che_7`     |tce_7|
 -----------------------   -----------------------------------------------------------------
 :ref:`tutorial_che_8`     |tce_8|
+-----------------------   -----------------------------------------------------------------
+:ref:`tutorial_che_9`     |tce_9|
 =======================   =================================================================
 
 
@@ -50,6 +52,8 @@ Chemical Engineering Examples
 .. |tce_8| replace:: Gas separation using a porous membrane on a metal support.
                      The model applies generalised Maxwell-Stefan equations to predict the fluxes and the selectivities.
                      The problem modelled is separation of CH4+C2H6 mixture on a zeolite (silicalite-1) membrane.
+
+.. |tce_9| replace:: Industrial batch reactor example from Dow Chemical Company.
 
 .. begin-command
 
@@ -213,6 +217,24 @@ Variable types          `membrane_variable_types.py <../examples/membrane_variab
 Membrane model          `membrane.py <../examples/membrane.html>`_
 Support model           `support.py <../examples/support.html>`_
 In/out compartment      `compartment.py <../examples/compartment.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_che_9:
+
+Chem. Eng. Example 9
+=====================
+
+.. automodule:: daetools.examples.tutorial_che_9
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_che_9.xml <../examples/tutorial_che_9.xml>`_
+Runtime model report    `tutorial_che_9-rt.xml <../examples/tutorial_che_9-rt.xml>`_
+Source code             `tutorial_che_9.py <../examples/tutorial_che_9.html>`_
 =====================   =================================================================
 
 

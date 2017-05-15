@@ -207,6 +207,14 @@ string daeVariable::GetCanonicalName(void) const
 		return daeObject::GetCanonicalName();
 }
 
+string daeVariable::GetCanonicalNameAndPrepend(const std::string& prependToName) const
+{
+    if(m_pParentPort)
+        return m_pParentPort->GetCanonicalName() + '.' + prependToName + m_strShortName;
+    else
+        return daeObject::GetCanonicalNameAndPrepend(prependToName);
+}
+
 daePort* daeVariable::GetParentPort(void) const
 {
     return m_pParentPort;

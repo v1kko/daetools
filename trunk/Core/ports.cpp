@@ -335,6 +335,18 @@ void daePort::InitializeVariables()
 	}
 }
 
+void daePort::InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+{
+    size_t i;
+    daeVariable* pVariable;
+
+    for(i = 0; i < m_ptrarrVariables.size(); i++)
+    {
+        pVariable = m_ptrarrVariables[i];
+        pVariable->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+}
+
 void daePort::InitializeParameters()
 {
 	size_t i;

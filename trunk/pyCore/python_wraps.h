@@ -892,6 +892,7 @@ quantity daeVariable_GetVariableQuantity6(daeVariable& self, size_t n1, size_t n
 quantity daeVariable_GetVariableQuantity7(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7);
 quantity daeVariable_GetVariableQuantity8(daeVariable& self, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8);
 
+boost::python::object daeVariable_BlockIndexes(daeVariable& self);
 boost::python::object daeVariable_Values(daeVariable& var);
 boost::python::object daeVariable_TimeDerivatives(daeVariable& var);
 boost::python::object daeVariable_IDs(daeVariable& var);

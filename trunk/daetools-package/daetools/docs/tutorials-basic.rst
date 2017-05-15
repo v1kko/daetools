@@ -92,6 +92,7 @@ Basic Tutorials
 
 =======================   =================================================================
 :ref:`tutorial20`         |t_20|
+:ref:`tutorial21`         |t_21|
 =======================   =================================================================
 
 
@@ -146,6 +147,8 @@ Basic Tutorials
 .. |t_19| replace:: Using thermophysical property packages in DAE Tools.
 
 .. |t_20| replace:: Using the sensitivity analysis in DAE Tools.
+
+.. |t_21| replace:: Benchmark for the first order differential equations with constant coefficients.
 
 
 .. begin-command
@@ -524,6 +527,24 @@ Tutorial 20
 Model report            `tutorial20.xml <../examples/tutorial20.xml>`_
 Runtime model report    `tutorial20-rt.xml <../examples/tutorial20-rt.xml>`_
 Source code             `tutorial20.py <../examples/tutorial20.html>`_
+=====================   =================================================================
+
+
+.. _tutorial21:
+
+Tutorial 21
+===========
+
+.. automodule:: daetools.examples.tutorial21
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial21.xml <../examples/tutorial21.xml>`_
+Runtime model report    `tutorial21-rt.xml <../examples/tutorial21-rt.xml>`_
+Source code             `tutorial21.py <../examples/tutorial21.html>`_
 =====================   =================================================================
 
 

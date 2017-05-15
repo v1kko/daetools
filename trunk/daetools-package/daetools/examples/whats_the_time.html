@@ -6,352 +6,356 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>whats_the_time.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                            whats_the_time.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>What is the time? (AKA Hello world!) is a very simple model. The model consists of</span>
-<span style='color:#c00000;'>a single variable (called 'time') and a single differential equation::</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            whats_the_time.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>What is the time? (AKA Hello world!) is a very simple model. The model consists of</span>
+<span style='color:#cc0000;'>a single variable (called 'time') and a single differential equation::</span>
 
-<span style='color:#c00000;'>  d(time)/dt = 1</span>
+<span style='color:#cc0000;'>  d(time)/dt = 1</span>
 
-<span style='color:#c00000;'>This way, the value of the variable 'time' is equal to the elapsed time in the</span>
-<span style='color:#c00000;'>simulation at any moment.</span>
+<span style='color:#cc0000;'>This way, the value of the variable 'time' is equal to the elapsed time in the</span>
+<span style='color:#cc0000;'>simulation at any moment.</span>
 
-<span style='color:#c00000;'>This tutorial presents the basic structure of daeModel and daeSimulation classes.</span>
-<span style='color:#c00000;'>A typical DAETools simulation requires the following 8 tasks:</span>
+<span style='color:#cc0000;'>This tutorial presents the basic structure of daeModel and daeSimulation classes.</span>
+<span style='color:#cc0000;'>A typical DAETools simulation requires the following 8 tasks:</span>
 
-<span style='color:#c00000;'>1. Importing DAE Tools pyDAE module(s)</span>
+<span style='color:#cc0000;'>1. Importing DAE Tools pyDAE module(s)</span>
 
-<span style='color:#c00000;'>2. Importing or declaration of units and variable types</span>
-<span style='color:#c00000;'>   (unit and daeVariableType classes)</span>
-<span style='color:#c00000;'>   </span>
-<span style='color:#c00000;'>3. Developing a model by deriving a class from the base daeModel class and:</span>
+<span style='color:#cc0000;'>2. Importing or declaration of units and variable types</span>
+<span style='color:#cc0000;'>   (unit and daeVariableType classes)</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>3. Developing a model by deriving a class from the base daeModel class and:</span>
 
-<span style='color:#c00000;'>   - Declaring domains, parameters and variables in the daeModel.__init__ function</span>
-<span style='color:#c00000;'>   - Declaring equations and their residual expressions in the</span>
-<span style='color:#c00000;'>     daeModel.DeclareEquations function</span>
-<span style='color:#c00000;'>     </span>
-<span style='color:#c00000;'>4. Setting up a simulation by deriving a class from the base daeSimulation class and:</span>
+<span style='color:#cc0000;'>   - Declaring domains, parameters and variables in the daeModel.__init__ function</span>
+<span style='color:#cc0000;'>   - Declaring equations and their residual expressions in the</span>
+<span style='color:#cc0000;'>     daeModel.DeclareEquations function</span>
+<span style='color:#cc0000;'>     </span>
+<span style='color:#cc0000;'>4. Setting up a simulation by deriving a class from the base daeSimulation class and:</span>
 
-<span style='color:#c00000;'>   - Specifying a model to be used in the simulation in the daeSimulation.__init__ function</span>
-<span style='color:#c00000;'>   - Setting the values of parameters in the daeSimulation.SetUpParametersAndDomains function</span>
-<span style='color:#c00000;'>   - Setting initial conditions in the daeSimulation.SetUpVariables function</span>
-<span style='color:#c00000;'>   </span>
-<span style='color:#c00000;'>5. Declaring auxiliary objects required for the simulation</span>
+<span style='color:#cc0000;'>   - Specifying a model to be used in the simulation in the daeSimulation.__init__ function</span>
+<span style='color:#cc0000;'>   - Setting the values of parameters in the daeSimulation.SetUpParametersAndDomains function</span>
+<span style='color:#cc0000;'>   - Setting initial conditions in the daeSimulation.SetUpVariables function</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>5. Declaring auxiliary objects required for the simulation</span>
 
-<span style='color:#c00000;'>   - DAE solver object</span>
-<span style='color:#c00000;'>   - Data reporter object</span>
-<span style='color:#c00000;'>   - Log object</span>
-<span style='color:#c00000;'>   </span>
-<span style='color:#c00000;'>6. Setting the run-time options for the simulation:</span>
+<span style='color:#cc0000;'>   - DAE solver object</span>
+<span style='color:#cc0000;'>   - Data reporter object</span>
+<span style='color:#cc0000;'>   - Log object</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>6. Setting the run-time options for the simulation:</span>
 
-<span style='color:#c00000;'>   - ReportingInterval</span>
-<span style='color:#c00000;'>   - TimeHorizon</span>
+<span style='color:#cc0000;'>   - ReportingInterval</span>
+<span style='color:#cc0000;'>   - TimeHorizon</span>
 
-<span style='color:#c00000;'>7. Connecting a data reporter</span>
+<span style='color:#cc0000;'>7. Connecting a data reporter</span>
 
-<span style='color:#c00000;'>8. Initializing, running and finalizing the simulation</span>
+<span style='color:#cc0000;'>8. Initializing, running and finalizing the simulation</span>
 
-<span style='color:#c00000;'>The 'time' variable plot:</span>
+<span style='color:#cc0000;'>The 'time' variable plot:</span>
 
-<span style='color:#c00000;'>.. image:: _static/whats_the_time-results.png</span>
-<span style='color:#c00000;'>   :width: 500px</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/whats_the_time-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#008000;'># 1. Import the modules</span>
-<span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#017a31;'># 1. Import the modules</span>
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
-<span style='color:#008000;'># 2a. Import some unit definitions (if needed) from the pyUnits module</span>
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W
+<span style='color:#017a31;'># 2a. Import some unit definitions (if needed) from the pyUnits module</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>2b. Import or declare variable types</span>
-<span style='color:#008000;'>    Variable types are typically declared outside of model classes since</span>
-<span style='color:#008000;'>    they define common, reusable types.</span>
-<span style='color:#008000;'>    The daeVariable constructor takes 6 arguments:</span>
-<span style='color:#008000;'>     - Name: string</span>
-<span style='color:#008000;'>     - Units: unit object</span>
-<span style='color:#008000;'>     - LowerBound: float (not enforced at the moment)</span>
-<span style='color:#008000;'>     - UpperBound: float (not enforced at the moment)</span>
-<span style='color:#008000;'>     - InitialGuess: float</span>
-<span style='color:#008000;'>     - AbsoluteTolerance: float</span>
-<span style='color:#008000;'>    </span>
-<span style='color:#008000;'>    Standard variable types are defined in variable_types.py and can be imported with:</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>2b. Import or declare variable types</span>
+<span style='color:#017a31;'>    Variable types are typically declared outside of model classes since</span>
+<span style='color:#017a31;'>    they define common, reusable types.</span>
+<span style='color:#017a31;'>    The daeVariable constructor takes 6 arguments:</span>
+<span style='color:#017a31;'>     - Name: string</span>
+<span style='color:#017a31;'>     - Units: unit object</span>
+<span style='color:#017a31;'>     - LowerBound: float (not enforced at the moment)</span>
+<span style='color:#017a31;'>     - UpperBound: float (not enforced at the moment)</span>
+<span style='color:#017a31;'>     - InitialGuess: float</span>
+<span style='color:#017a31;'>     - AbsoluteTolerance: float</span>
+<span style='color:#017a31;'>    </span>
+<span style='color:#017a31;'>    Standard variable types are defined in variable_types.py and can be imported with:</span>
 
-<span style='color:#008000;'>    &gt;&gt; from variable_types import length_t, volume_t, area_t ...</span>
-<span style='color:#008000;'>    </span>
-<span style='color:#008000;'>    Here, just as an example, a simple variable type with the time units is declared: time_type.</span>
-<span style='color:#008000;'>    Normally the time_t variable type should be used for time.</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;typeNone&quot;</span>, s, <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E10</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
+<span style='color:#017a31;'>    &gt;&gt; from variable_types import length_t, volume_t, area_t ...</span>
+<span style='color:#017a31;'>    </span>
+<span style='color:#017a31;'>    Here, just as an example, a simple variable type with the time units is declared: time_type.</span>
+<span style='color:#017a31;'>    Normally the time_t variable type should be used for time.</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;typeNone&quot;</span>, s, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E10</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-5</span>)
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>3. Declare a model by deriving a class from the base daeModel class.</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>3. Declare a model by deriving a class from the base daeModel class.</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        3.1 Declare domains/parameters/variables/ports etc.</span>
-<span style='color:#008000;'>            Domains, parameters, variables, ports, etc has to be defined in the constructor: __init__</span>
-<span style='color:#008000;'>            First, the base class constructor has to be called.</span>
-<span style='color:#008000;'>            Then, all domains, parameters, variables, ports etc have to be declared as members of</span>
-<span style='color:#008000;'>            the new model class (except equations which are handled by the framework), since the base class</span>
-<span style='color:#008000;'>            keeps only their references. Therefore we write:</span>
-<span style='color:#008000;'>                     self.variable = daeVariable(...)</span>
-<span style='color:#008000;'>            and not:</span>
-<span style='color:#008000;'>                     variable = daeVariable(...)</span>
-<span style='color:#008000;'>            In this example we declare only one variable: tau.</span>
-<span style='color:#008000;'>            daeVariable constructor accepts 4 arguments:</span>
-<span style='color:#008000;'>             - Name: string</span>
-<span style='color:#008000;'>             - VariableType: daeVariableType</span>
-<span style='color:#008000;'>             - Parent: daeModel object (indicating the model where the variable will be added)</span>
-<span style='color:#008000;'>             - Description: string (optional argument - the variable description; the default value is an empty string)</span>
-<span style='color:#008000;'>            Variable names can consists of letters, numbers, underscores '_', brackets '(', ')',  commas ',' and</span>
-<span style='color:#008000;'>            standard html code names, such as Greek characters: &amp;alpha; &amp;beta; &amp;gamma; etc. Spaces are not allowed.</span>
-<span style='color:#008000;'>            Examples of valid object names: Foo, bar_1, foo(1,2), &amp;Alpha;_k1 </span>
-<span style='color:#008000;'>            Internally they will be used without '&amp;' and ';' characters: alpha, beta, gamma, ...;</span>
-<span style='color:#008000;'>            but, in the equations exported to the MathML or Latex format they will be shown as native Greek letters.</span>
-<span style='color:#008000;'>            Also if you write the variable name as: Name_1 it will be transformed into Name with the subscript 1.</span>
-<span style='color:#008000;'>            In this example we use Greek character 'τ' to name the variable 'tau'.</span>
-<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        3.1 Declare domains/parameters/variables/ports etc.</span>
+<span style='color:#017a31;'>            Domains, parameters, variables, ports, etc has to be defined in the constructor: __init__</span>
+<span style='color:#017a31;'>            First, the base class constructor has to be called.</span>
+<span style='color:#017a31;'>            Then, all domains, parameters, variables, ports etc have to be declared as members of</span>
+<span style='color:#017a31;'>            the new model class (except equations which are handled by the framework), since the base class</span>
+<span style='color:#017a31;'>            keeps only their references. Therefore we write:</span>
+<span style='color:#017a31;'>                     self.variable = daeVariable(...)</span>
+<span style='color:#017a31;'>            and not:</span>
+<span style='color:#017a31;'>                     variable = daeVariable(...)</span>
+<span style='color:#017a31;'>            In this example we declare only one variable: tau.</span>
+<span style='color:#017a31;'>            daeVariable constructor accepts 4 arguments:</span>
+<span style='color:#017a31;'>             - Name: string</span>
+<span style='color:#017a31;'>             - VariableType: daeVariableType</span>
+<span style='color:#017a31;'>             - Parent: daeModel object (indicating the model where the variable will be added)</span>
+<span style='color:#017a31;'>             - Description: string (optional argument - the variable description; the default value is an empty string)</span>
+<span style='color:#017a31;'>            Variable names can consists of letters, numbers, underscores '_', brackets '(', ')',  commas ',' and</span>
+<span style='color:#017a31;'>            standard html code names, such as Greek characters: &amp;alpha; &amp;beta; &amp;gamma; etc. Spaces are not allowed.</span>
+<span style='color:#017a31;'>            Examples of valid object names: Foo, bar_1, foo(1,2), &amp;Alpha;_k1 </span>
+<span style='color:#017a31;'>            Internally they will be used without '&amp;' and ';' characters: alpha, beta, gamma, ...;</span>
+<span style='color:#017a31;'>            but, in the equations exported to the MathML or Latex format they will be shown as native Greek letters.</span>
+<span style='color:#017a31;'>            Also if you write the variable name as: Name_1 it will be transformed into Name with the subscript 1.</span>
+<span style='color:#017a31;'>            In this example we use Greek character 'τ' to name the variable 'tau'.</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
         
-        <span style='color:#0000ff;'>self</span>.tau <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;&amp;tau;&quot;</span>, time_type, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Time elapsed in the process&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.tau <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;&amp;tau;&quot;</span>, time_type, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Time elapsed in the process&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        3.2 Declare equations and state transition networks</span>
-<span style='color:#008000;'>            All models must implement DeclareEquations function and all equations must be specified here.</span>
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        3.2 Declare equations and state transition networks</span>
+<span style='color:#017a31;'>            All models must implement DeclareEquations function and all equations must be specified here.</span>
 
-<span style='color:#008000;'>            Tipically the user-defined DeclareEquations function should first call the DeclareEquations</span>
-<span style='color:#008000;'>            function from the parent class (here daeModel). This is important when a model contains instances</span>
-<span style='color:#008000;'>            of other models to allow DeclareEquations calls from those (child-)models. If a model is simple</span>
-<span style='color:#008000;'>            (like in this example) there is no need for daeModel.DeclareEquations(self) call since it does nothing.</span>
-<span style='color:#008000;'>            However, it is a good idea to call it always (to avoid mistakes).</span>
-<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-        daeModel.DeclareEquations(<span style='color:#0000ff;'>self</span>)
+<span style='color:#017a31;'>            Tipically the user-defined DeclareEquations function should first call the DeclareEquations</span>
+<span style='color:#017a31;'>            function from the parent class (here daeModel). This is important when a model contains instances</span>
+<span style='color:#017a31;'>            of other models to allow DeclareEquations calls from those (child-)models. If a model is simple</span>
+<span style='color:#017a31;'>            (like in this example) there is no need for daeModel.DeclareEquations(self) call since it does nothing.</span>
+<span style='color:#017a31;'>            However, it is a good idea to call it always (to avoid mistakes).</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        In this example we declare only one equation.</span>
-<span style='color:#008000;'>        CreateEquation function accepts two arguments: equation name and description (optional).</span>
-<span style='color:#008000;'>        All naming conventions apply here as well. Equations are written in an implicit form (as a residual):</span>
-<span style='color:#008000;'>                        'residual expression' = 0</span>
-<span style='color:#008000;'>        Residual expressions are defined by using the basic mathematical operations (+, -, *, /)</span>
-<span style='color:#008000;'>        and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several</span>
-<span style='color:#008000;'>        useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation</span>
-<span style='color:#008000;'>        evaluation trees. adouble objects are used only for building the equation evaluation trees during the</span>
-<span style='color:#008000;'>        simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative</span>
-<span style='color:#008000;'>        (required for construction of a Jacobian matrix) and the tree evaluation information. The most</span>
-<span style='color:#008000;'>        otenly used functions are:</span>
-<span style='color:#008000;'>            - operator () which returns adouble object that holds the variable value</span>
-<span style='color:#008000;'>            - function dt() which returns adouble object that holds a time derivative of the variable</span>
-<span style='color:#008000;'>            - function d() and d2() which return adouble object that holds a partial derivative of the variable</span>
-<span style='color:#008000;'>            of the 1st and the 2nd order, respectively</span>
-<span style='color:#008000;'>        In this example we simply write that the variable time derivative is equal to 1:</span>
-<span style='color:#008000;'>                                d(tau) / dt = 1</span>
-<span style='color:#008000;'>        with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation</span>
-<span style='color:#008000;'>        (normally, the built-in function Time() should be used to get the current time in the simulation;</span>
-<span style='color:#008000;'>        however, this is just an example explaining the basic daetools concepts).</span>
-<span style='color:#008000;'>        Note that the variable objects should be declared as data members of the models they belong to and</span>
-<span style='color:#008000;'>        therefore accessed through the model objects.</span>
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        In this example we declare only one equation.</span>
+<span style='color:#017a31;'>        CreateEquation function accepts two arguments: equation name and description (optional).</span>
+<span style='color:#017a31;'>        All naming conventions apply here as well. Equations are written in an implicit form (as a residual):</span>
+<span style='color:#017a31;'>                        'residual expression' = 0</span>
+<span style='color:#017a31;'>        Residual expressions are defined by using the basic mathematical operations (+, -, *, /)</span>
+<span style='color:#017a31;'>        and functions (sqrt, log, sin, cos, max, min, ...) on variables and parameters. Variables define several</span>
+<span style='color:#017a31;'>        useful functions which return modified ADOL-C 'adouble' objects needed for construction of equation</span>
+<span style='color:#017a31;'>        evaluation trees. adouble objects are used only for building the equation evaluation trees during the</span>
+<span style='color:#017a31;'>        simulation initialization phase and cannot be used otherwise. They hold a variable value, a derivative</span>
+<span style='color:#017a31;'>        (required for construction of a Jacobian matrix) and the tree evaluation information. The most</span>
+<span style='color:#017a31;'>        otenly used functions are:</span>
+<span style='color:#017a31;'>            - operator () which returns adouble object that holds the variable value</span>
+<span style='color:#017a31;'>            - function dt() which returns adouble object that holds a time derivative of the variable</span>
+<span style='color:#017a31;'>            - function d() and d2() which return adouble object that holds a partial derivative of the variable</span>
+<span style='color:#017a31;'>            of the 1st and the 2nd order, respectively</span>
+<span style='color:#017a31;'>        In this example we simply write that the variable time derivative is equal to 1:</span>
+<span style='color:#017a31;'>                                d(tau) / dt = 1</span>
+<span style='color:#017a31;'>        with the effect that the value of the 'tau' variable is equal to the time elapsed in the simulation</span>
+<span style='color:#017a31;'>        (normally, the built-in function Time() should be used to get the current time in the simulation;</span>
+<span style='color:#017a31;'>        however, this is just an example explaining the basic daetools concepts).</span>
+<span style='color:#017a31;'>        Note that the variable objects should be declared as data members of the models they belong to and</span>
+<span style='color:#017a31;'>        therefore accessed through the model objects.</span>
 
-<span style='color:#008000;'>        As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)</span>
-<span style='color:#008000;'>        and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,</span>
-<span style='color:#008000;'>        or for particular equations by setting the equation's boolean 'CheckUnitsConsistency' property to false.</span>
-<span style='color:#008000;'>        The config files are searched for in the following directories:</span>
-<span style='color:#008000;'>          - %{HOME}/.daetools directory</span>
-<span style='color:#008000;'>          - .../site-packages/daetools directory</span>
-<span style='color:#008000;'>          - the directory where the executable is located</span>
-<span style='color:#008000;'>        All values and constants must be declared with the information about their units (unless dimensionless).</span>
-<span style='color:#008000;'>        Units of variables, parameters and domains are specified in their constructor while constants</span>
-<span style='color:#008000;'>        and arrays of constants are instantiated with the built-in Constant() and Array() functions.</span>
-<span style='color:#008000;'>        Obviously, the very strict unit-consistency requires an extra effort during the model development phase</span>
-<span style='color:#008000;'>        and makes models more verbose. However, it helps to eliminate some very hard to find errors.</span>
-<span style='color:#008000;'>        'quantity' objects have two properties: the 'value' and the 'units'.</span>
-<span style='color:#008000;'>        The pyDAE.pyUnits module offers the following predefined set of units:</span>
-<span style='color:#008000;'>            - All base SI units: m, kg, s, A, K, cd, mol</span>
-<span style='color:#008000;'>            - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc</span>
-<span style='color:#008000;'>            (see units_pool.h file in trunk/Units folder)</span>
-<span style='color:#008000;'>            - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-</span>
-<span style='color:#008000;'>            using the symbols: da, h, k, M, G, T, P, E, Z, Y</span>
-<span style='color:#008000;'>            - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-</span>
-<span style='color:#008000;'>            using the symbols: d, c, m, u, n, p, f, a, z, y</span>
+<span style='color:#017a31;'>        As of the version 1.2.0 all daetools objects have numerical values in terms of a unit of measurement (quantity)</span>
+<span style='color:#017a31;'>        and unit-consistency is strictly enforced (although it can be turned off in daetools.cfg config file,</span>
+<span style='color:#017a31;'>        or for particular equations by setting the equation's boolean 'CheckUnitsConsistency' property to false.</span>
+<span style='color:#017a31;'>        The config files are searched for in the following directories:</span>
+<span style='color:#017a31;'>          - %{HOME}/.daetools directory</span>
+<span style='color:#017a31;'>          - .../site-packages/daetools directory</span>
+<span style='color:#017a31;'>          - the directory where the executable is located</span>
+<span style='color:#017a31;'>        All values and constants must be declared with the information about their units (unless dimensionless).</span>
+<span style='color:#017a31;'>        Units of variables, parameters and domains are specified in their constructor while constants</span>
+<span style='color:#017a31;'>        and arrays of constants are instantiated with the built-in Constant() and Array() functions.</span>
+<span style='color:#017a31;'>        Obviously, the very strict unit-consistency requires an extra effort during the model development phase</span>
+<span style='color:#017a31;'>        and makes models more verbose. However, it helps to eliminate some very hard to find errors.</span>
+<span style='color:#017a31;'>        'quantity' objects have two properties: the 'value' and the 'units'.</span>
+<span style='color:#017a31;'>        The pyDAE.pyUnits module offers the following predefined set of units:</span>
+<span style='color:#017a31;'>            - All base SI units: m, kg, s, A, K, cd, mol</span>
+<span style='color:#017a31;'>            - Some of the most commonly used derived SI units for time, volume, energy, electromagnetism etc</span>
+<span style='color:#017a31;'>            (see units_pool.h file in trunk/Units folder)</span>
+<span style='color:#017a31;'>            - Base SI units with the multiplies: deca-, hecto-, kilo-, mega-, giga-, tera-, peta-, exa-, zetta- and yotta-</span>
+<span style='color:#017a31;'>            using the symbols: da, h, k, M, G, T, P, E, Z, Y</span>
+<span style='color:#017a31;'>            - Base SI units with the fractions: deci-, centi-, milli-, micro-, nano-, pico-, femto-, atto-, zepto- and yocto-</span>
+<span style='color:#017a31;'>            using the symbols: d, c, m, u, n, p, f, a, z, y</span>
 
-<span style='color:#008000;'>        ACHTUNG, ACHTUNG!!</span>
-<span style='color:#008000;'>        Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!</span>
+<span style='color:#017a31;'>        ACHTUNG, ACHTUNG!!</span>
+<span style='color:#017a31;'>        Never import all symbols from the pyUnits module (it will polute the namespace with thousands of unit symbols)!!</span>
 
-<span style='color:#008000;'>        Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.</span>
+<span style='color:#017a31;'>        Custom derived units can be constructed using the mathematical operations *, / and ** on unit objects.</span>
 
-<span style='color:#008000;'>        In the equation below we can write:</span>
-<span style='color:#008000;'>           self.tau.dt() - 1.0</span>
-<span style='color:#008000;'>        since the dtau/dt term is dimensionless. However, in a general case, we must use Constant(1.0 * units).</span>
-<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Time&quot;</span>, <span style='color:#c00000;'>&quot;Differential equation to calculate the time elapsed in the process.&quot;</span>)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.tau()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>1.0</span>
+<span style='color:#017a31;'>        In the equation below we can write:</span>
+<span style='color:#017a31;'>           self.tau.dt() - 1.0</span>
+<span style='color:#017a31;'>        since the dtau/dt term is dimensionless. However, in a general case, we must use Constant(1.0 * units).</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Time&quot;</span>, <span style='color:#cc0000;'>&quot;Differential equation to calculate the time elapsed in the process.&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.tau()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1.0</span>
 
-<span style='color:#008000;'># 4. Declare a simulation by deriving a class from the base daeSimulation class</span>
+<span style='color:#017a31;'># 4. Declare a simulation by deriving a class from the base daeSimulation class</span>
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        4.1 First, the base class constructor has to be called, and then the model for simulation instantiated.</span>
-<span style='color:#008000;'>            daeSimulation class has three properties used to store the model: 'Model', 'model' and 'm'.</span>
-<span style='color:#008000;'>            They are absolutely equivalent, and user can choose which one to use.</span>
-<span style='color:#008000;'>            For clarity, here the shortest one will be used: m.</span>
-<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        4.1 First, the base class constructor has to be called, and then the model for simulation instantiated.</span>
+<span style='color:#017a31;'>            daeSimulation class has three properties used to store the model: 'Model', 'model' and 'm'.</span>
+<span style='color:#017a31;'>            They are absolutely equivalent, and user can choose which one to use.</span>
+<span style='color:#017a31;'>            For clarity, here the shortest one will be used: m.</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#c00000;'>&quot;wtt&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;wtt&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
         
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        4.2 Initialize domains and parameters</span>
-<span style='color:#008000;'>            Every simulation class must implement SetUpParametersAndDomains method, even if it is empty.</span>
-<span style='color:#008000;'>            It is used to set the values of the parameters, initialize domains etc.</span>
-<span style='color:#008000;'>            In this example nothing has to be done.</span>
-<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        4.2 Initialize domains and parameters</span>
+<span style='color:#017a31;'>            Every simulation class must implement SetUpParametersAndDomains method, even if it is empty.</span>
+<span style='color:#017a31;'>            It is used to set the values of the parameters, initialize domains etc.</span>
+<span style='color:#017a31;'>            In this example nothing has to be done.</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
         <b>pass</b>
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>        4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.</span>
-<span style='color:#008000;'>            Every simulation class must implement SetUpVariables method, even if it is empty.</span>
-<span style='color:#008000;'>            In this example the only thing needed to be done is to set the initial condition for the variable tau.</span>
-<span style='color:#008000;'>            That can be done using the SetInitialCondition function.</span>
-<span style='color:#008000;'>        </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-        <span style='color:#0000ff;'>self</span>.m.tau.SetInitialCondition(<span style='color:#c000c0;'>0.0</span>)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        4.3 Set initial conditions, initial guesses, fix degreees of freedom, etc.</span>
+<span style='color:#017a31;'>            Every simulation class must implement SetUpVariables method, even if it is empty.</span>
+<span style='color:#017a31;'>            In this example the only thing needed to be done is to set the initial condition for the variable tau.</span>
+<span style='color:#017a31;'>            That can be done using the SetInitialCondition function.</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+        <span style='color:#3605fb;'>self</span>.m.tau.SetInitialCondition(<span style='color:#cc047c;'>0.0</span>)
 
-<span style='color:#008000;'># Use daeSimulator class (pyQt GUI)</span>
+<span style='color:#017a31;'># Use daeSimulator class (pyQt GUI)</span>
 <b>def</b> guiRun(app):
     sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
     simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
     simulator.exec_()
 
-<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    5. Create Log, Solver, DataReporter and Simulation object</span>
-<span style='color:#008000;'>       Every simulation requires the following three additional objects:</span>
-<span style='color:#008000;'>        - log is used to send the messages from the framework, set the simulation progress or to report errors</span>
-<span style='color:#008000;'>        - solver is DAE solver used to solve the underlying system of differential and algebraic equations</span>
-<span style='color:#008000;'>        - datareporter is used to send the data from the solver to daePlotter (or any other data receiver).</span>
-<span style='color:#008000;'>          Often, it is required to save the results in a specified file format; for more information see Tutorial 8.</span>
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    5. Create Log, Solver, DataReporter and Simulation object</span>
+<span style='color:#017a31;'>       Every simulation requires the following three additional objects:</span>
+<span style='color:#017a31;'>        - log is used to send the messages from the framework, set the simulation progress or to report errors</span>
+<span style='color:#017a31;'>        - solver is DAE solver used to solve the underlying system of differential and algebraic equations</span>
+<span style='color:#017a31;'>        - datareporter is used to send the data from the solver to daePlotter (or any other data receiver).</span>
+<span style='color:#017a31;'>          Often, it is required to save the results in a specified file format; for more information see Tutorial 8.</span>
 
-<span style='color:#008000;'>       Various options used by daetools objects are located in the daetools/daetools.cfg config file (in JSON format).</span>
-<span style='color:#008000;'>       The config file can be obtained using the global function daeGetConfig:</span>
-<span style='color:#008000;'>           cfg  = daeGetConfig()</span>
-<span style='color:#008000;'>       The config file is first searched in the HOME directory, the application folder and finally in the default location.</span>
-<span style='color:#008000;'>       It also can be specified manually using the function daeSetConfigFile('path_to_daetools.cfg').</span>
-<span style='color:#008000;'>       However, this has to be done before the daetools objects are created.</span>
-<span style='color:#008000;'>       The options can also be programmatically changed using the Get/Set functions i.e. GetBoolean/SetBoolean:</span>
-<span style='color:#008000;'>           checkUnitsConsistency = cfg.GetBoolean(&quot;daetools.core.checkUnitsConsistency&quot;)</span>
-<span style='color:#008000;'>           cfg.SetBoolean(&quot;daetools.core.checkUnitsConsistency&quot;, True)</span>
-<span style='color:#008000;'>       Supported data types are: Bool, Integer, Float and String.</span>
-<span style='color:#008000;'>       The whole config file with all options can be printed using:</span>
-<span style='color:#008000;'>           print(cfg)</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>       Various options used by daetools objects are located in the daetools/daetools.cfg config file (in JSON format).</span>
+<span style='color:#017a31;'>       The config file can be obtained using the global function daeGetConfig:</span>
+<span style='color:#017a31;'>           cfg  = daeGetConfig()</span>
+<span style='color:#017a31;'>       The config file is first searched in the HOME directory, the application folder and finally in the default location.</span>
+<span style='color:#017a31;'>       It also can be specified manually using the function daeSetConfigFile('path_to_daetools.cfg').</span>
+<span style='color:#017a31;'>       However, this has to be done before the daetools objects are created.</span>
+<span style='color:#017a31;'>       The options can also be programmatically changed using the Get/Set functions i.e. GetBoolean/SetBoolean:</span>
+<span style='color:#017a31;'>           checkUnitsConsistency = cfg.GetBoolean(&quot;daetools.core.checkUnitsConsistency&quot;)</span>
+<span style='color:#017a31;'>           cfg.SetBoolean(&quot;daetools.core.checkUnitsConsistency&quot;, True)</span>
+<span style='color:#017a31;'>       Supported data types are: Bool, Integer, Float and String.</span>
+<span style='color:#017a31;'>       The whole config file with all options can be printed using:</span>
+<span style='color:#017a31;'>           print(cfg)</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    6. Additional settings</span>
-<span style='color:#008000;'>       - TimeHorizon: the duration of the simulation, in seconds (required)</span>
-<span style='color:#008000;'>       - ReportingInterval: the time interval after which the results are reported, in seconds (required)</span>
-<span style='color:#008000;'>       - Selection of the variables whose values will be reported.</span>
-<span style='color:#008000;'>         It can be set individually for each variable by using the property variable.ReportingOn = True/False,</span>
-<span style='color:#008000;'>         or by using the function daeModel.SetReportingOn() which enables/disables all variables in the model.</span>
-<span style='color:#008000;'>         The default is that no variable is reported.</span>
-<span style='color:#008000;'>         Here, we enable reporting of all variables in the model.</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>100</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    6. Additional settings</span>
+<span style='color:#017a31;'>       - TimeHorizon: the duration of the simulation, in seconds (required)</span>
+<span style='color:#017a31;'>       - ReportingInterval: the time interval after which the results are reported, in seconds (required)</span>
+<span style='color:#017a31;'>       - Selection of the variables whose values will be reported.</span>
+<span style='color:#017a31;'>         It can be set individually for each variable by using the property variable.ReportingOn = True/False,</span>
+<span style='color:#017a31;'>         or by using the function daeModel.SetReportingOn() which enables/disables all variables in the model.</span>
+<span style='color:#017a31;'>         The default is that no variable is reported.</span>
+<span style='color:#017a31;'>         Here, we enable reporting of all variables in the model.</span>
+<span style='color:#017a31;'>       - The time derivatives of all variables will be reported</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
 
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    7. Connect the data reporter</span>
-<span style='color:#008000;'>       daeTCPIPDataReporter data reporter uses TCP/IP protocol to send the results to the data receiver (daePlotter).</span>
-<span style='color:#008000;'>       It contains the function Connect which accepts two arguments:</span>
-<span style='color:#008000;'>         - TCP/IP address and port as a string in the following form: '127.0.0.1:50000'.</span>
-<span style='color:#008000;'>           The default is an empty string which allows the data reporter to connect to the local</span>
-<span style='color:#008000;'>           (on this machine) daePlotter listening on the port 50000.</span>
-<span style='color:#008000;'>         - Process name; in this example we use the combination of the simulation name and the current date and time</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;whats_the_time&quot;</span> <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    7. Connect the data reporter</span>
+<span style='color:#017a31;'>       daeTCPIPDataReporter data reporter uses TCP/IP protocol to send the results to the data receiver (daePlotter).</span>
+<span style='color:#017a31;'>       It contains the function Connect which accepts two arguments:</span>
+<span style='color:#017a31;'>         - TCP/IP address and port as a string in the following form: '127.0.0.1:50000'.</span>
+<span style='color:#017a31;'>           The default is an empty string which allows the data reporter to connect to the local</span>
+<span style='color:#017a31;'>           (on this machine) daePlotter listening on the port 50000.</span>
+<span style='color:#017a31;'>         - Process name; in this example we use the combination of the simulation name and the current date and time</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;whats_the_time&quot;</span> <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    8. Run the simulation</span>
-<span style='color:#008000;'>     8.1 The simulation initialization</span>
-<span style='color:#008000;'>         The first task is to initialise the simulation by calling the function Initialize.</span>
-<span style='color:#008000;'>         As the fourth argument, it accepts an optional CalculateSensitivities (bool; default is False) which can</span>
-<span style='color:#008000;'>         enable calculation of sensitivities for given opt. variables (more details in the optimisation tutorials).</span>
-<span style='color:#008000;'>         After the successful initialisation the model reports can be generated.</span>
-<span style='color:#008000;'>         The function SaveModelReport exports the model report in the XML format.</span>
-<span style='color:#008000;'>         The function SaveRuntimeModelReport creates a runtime version of the model report</span>
-<span style='color:#008000;'>         (with all run-time information and all equations fully expanded)</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    8. Run the simulation</span>
+<span style='color:#017a31;'>     8.1 The simulation initialization</span>
+<span style='color:#017a31;'>         The first task is to initialise the simulation by calling the function Initialize.</span>
+<span style='color:#017a31;'>         As the fourth argument, it accepts an optional CalculateSensitivities (bool; default is False) which can</span>
+<span style='color:#017a31;'>         enable calculation of sensitivities for given opt. variables (more details in the optimisation tutorials).</span>
+<span style='color:#017a31;'>         After the successful initialisation the model reports can be generated.</span>
+<span style='color:#017a31;'>         The function SaveModelReport exports the model report in the XML format.</span>
+<span style='color:#017a31;'>         The function SaveRuntimeModelReport creates a runtime version of the model report</span>
+<span style='color:#017a31;'>         (with all run-time information and all equations fully expanded)</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(<span style='color:#c00000;'>&quot;whats_the_time.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(<span style='color:#c00000;'>&quot;whats_the_time-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(<span style='color:#cc0000;'>&quot;whats_the_time.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(<span style='color:#cc0000;'>&quot;whats_the_time-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    8.2 Solve at time = 0 (initialisation)</span>
-<span style='color:#008000;'>        The DAE system must be solved at the t = 0 where the specified initial conditions</span>
-<span style='color:#008000;'>        are used to calculate all other model variables.</span>
-<span style='color:#008000;'>        The function SolveInitial is used for that purpose.</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    8.2 Solve at time = 0 (initialisation)</span>
+<span style='color:#017a31;'>        The DAE system must be solved at the t = 0 where the specified initial conditions</span>
+<span style='color:#017a31;'>        are used to calculate all other model variables.</span>
+<span style='color:#017a31;'>        The function SolveInitial is used for that purpose.</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
     simulation.SolveInitial()
 
-    <span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>    8.3 Start the simulation using function daeSimulation.Run().</span>
-<span style='color:#008000;'>        The simulation will be run until the time reaches the specified TimeHorizon (in seconds).</span>
-<span style='color:#008000;'>        During the simulation the results will be reported after every ReportingInterval (in seconds).</span>
-<span style='color:#008000;'>    </span><span style='color:#008000;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    8.3 Start the simulation using function daeSimulation.Run().</span>
+<span style='color:#017a31;'>        The simulation will be run until the time reaches the specified TimeHorizon (in seconds).</span>
+<span style='color:#017a31;'>        During the simulation the results will be reported after every ReportingInterval (in seconds).</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
     simulation.Run()
 
-    <span style='color:#008000;'># 8.4 Finally, call the function Finalize to clean-up.</span>
+    <span style='color:#017a31;'># 8.4 Finally, call the function Finalize to clean-up.</span>
     simulation.Finalize()
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>This part of the code executes if the python script is executed from a shell</span>
-<span style='color:#008000;'>1) If called as: &quot;python whats_the_time.py console&quot; the simulation will be launched in the console</span>
-<span style='color:#008000;'>2) If called as: &quot;python whats_the_time.py gui&quot; the simulation will be launched with a GUI</span>
-<span style='color:#008000;'>   The default is &quot;gui&quot; and can be omitted.</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>This part of the code executes if the python script is executed from a shell</span>
+<span style='color:#017a31;'>1) If called as: &quot;python whats_the_time.py console&quot; the simulation will be launched in the console</span>
+<span style='color:#017a31;'>2) If called as: &quot;python whats_the_time.py gui&quot; the simulation will be launched with a GUI</span>
+<span style='color:#017a31;'>   The default is &quot;gui&quot; and can be omitted.</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

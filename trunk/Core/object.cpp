@@ -138,6 +138,14 @@ string daeObject::GetCanonicalName(void) const
 		return m_strShortName;
 }
 
+string daeObject::GetCanonicalNameAndPrepend(const std::string& prependToName) const
+{
+    if(m_pModel)
+        return m_pModel->GetCanonicalName() + '.' + prependToName + m_strShortName;
+    else
+        return prependToName + m_strShortName;
+}
+
 string daeObject::GetDescription(void) const
 {
 	return m_strDescription;

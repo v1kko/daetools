@@ -206,6 +206,7 @@ const char* DOCSTR_daeVariable = "";
     const char* DOCSTR_daeVariable_npyTimeDerivatives = "";
     const char* DOCSTR_daeVariable_npyIDs = "";
     const char* DOCSTR_daeVariable_npyGatheredIDs = "";
+    const char* DOCSTR_daeVariable_BlockIndexes = "";
     const char* DOCSTR_daeVariable_DistributeOnDomain = "";  
     const char* DOCSTR_daeVariable_GetDomainIndexesMap = "";  
 

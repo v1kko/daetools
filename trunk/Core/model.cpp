@@ -2694,6 +2694,51 @@ void daeModel::InitializePortAndModelArrays()
     }
 }
 
+void daeModel::InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex)
+{
+    size_t i;
+    daePort* pPort;
+    daeModel* pModel;
+    daeVariable* pVariable;
+    daeModelArray* pModelArray;
+    daePortArray* pPortArray;
+
+// First, initialize indexes in all variables in the model
+    for(i = 0; i < m_ptrarrVariables.size(); i++)
+    {
+        pVariable = m_ptrarrVariables[i];
+        pVariable->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+
+// Then, initialize all indexes in the contained ports
+    for(i = 0; i < m_ptrarrPorts.size(); i++)
+    {
+        pPort = m_ptrarrPorts[i];
+        pPort->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+
+// Then, initialize all indexes in the child-models
+    for(i = 0; i < m_ptrarrComponents.size(); i++)
+    {
+        pModel = m_ptrarrComponents[i];
+        pModel->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+
+// Next, initialize all indexes in the portarrays
+    for(i = 0; i < m_ptrarrPortArrays.size(); i++)
+    {
+        pPortArray = m_ptrarrPortArrays[i];
+        pPortArray->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+
+// Finally, initialize all indexes in the modelarrays
+    for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
+    {
+        pModelArray = m_ptrarrComponentArrays[i];
+        pModelArray->InitializeBlockIndexes(mapOverallIndex_BlockIndex);
+    }
+}
+
 void daeModel::InitializeVariables()
 {
     size_t i;
@@ -4098,6 +4143,11 @@ void daeModel::InitializeStage6(daeBlock_t* ptrBlock)
 {
     daeBlock* pBlock = dynamic_cast<daeBlock*>(ptrBlock);
     PopulateBlockIndexes(pBlock);
+
+    // Now add block indexes for every variable in the simulation
+    // They can be accessed using daeVariable::GetBlockIndexes() which returns const std::vector<size_t>&
+    const std::map<size_t, size_t>& mapOverallIndex_BlockIndex = pBlock->m_mapVariableIndexes;
+    InitializeBlockIndexes(mapOverallIndex_BlockIndex);
 }
 
 void daeModel::StoreInitializationValues(const std::string& strFileName) const

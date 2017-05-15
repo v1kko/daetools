@@ -90,6 +90,12 @@ def run():
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
+    # Enable reporting of time derivatives for all reported variables
+    simulation.ReportTimeDerivatives = True
+
+    # Enable reporting of sensitivities for all reported variables
+    simulation.ReportSensitivities = True
+
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 10
     simulation.TimeHorizon = 500

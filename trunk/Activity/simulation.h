@@ -7,6 +7,7 @@
 #include "../Core/optimization.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include "../IDAS_DAESolver/dae_array_matrix.h"
 
 #if defined(DAE_MPI)
 #include <boost/mpi.hpp>
@@ -138,6 +139,12 @@ public:
     bool GetIsInitialized(void) const;
     bool GetIsSolveInitial(void) const;
 
+    bool GetReportTimeDerivatives(void) const;
+    void SetReportTimeDerivatives(bool bReportTimeDerivatives);
+
+    bool GetReportSensitivities(void) const;
+    void SetReportSensitivities(bool bReportSensitivities);
+
     std::string GetSensitivityDataDirectory(void) const;
     void        SetSensitivityDataDirectory(const std::string strSensitivityDataDirectory);
 
@@ -179,6 +186,9 @@ protected:
     std::string                 m_strJSONRuntimeSettings;
     boost::property_tree::ptree m_ptreeRuntimeSettings;
 
+    bool                        m_bReportTimeDerivatives;
+    bool                        m_bReportSensitivities;
+    daeDenseMatrix*             m_pCurrentSensitivityMatrix;
     std::vector<daeVariable*>	m_ptrarrReportVariables;
     std::vector<daeParameter*>	m_ptrarrReportParameters;
 

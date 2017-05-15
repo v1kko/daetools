@@ -235,6 +235,7 @@ class simTutorial(daeSimulation):
 def guiRun(app):
     sim = simTutorial()
     sim.m.SetReportingOn(True)
+    sim.ReportTimeDerivatives = True
     sim.ReportingInterval = 5
     sim.TimeHorizon       = 100
     simulator  = daeSimulator(app, simulation=sim)
@@ -277,10 +278,17 @@ def consoleRun():
          or by using the function daeModel.SetReportingOn() which enables/disables all variables in the model.
          The default is that no variable is reported.
          Here, we enable reporting of all variables in the model.
+       - The time derivatives of all variables will be reported
     """
     simulation.TimeHorizon = 100
     simulation.ReportingInterval = 5
+    
     simulation.m.SetReportingOn(True)
+    
+    simulation.ReportTimeDerivatives = True
+    # The same could be achieved using the following (if set before initialisation of the simulation):
+    #cfg = daeGetConfig()
+    #cfg.SetBoolean("daetools.activity.reportTimeDerivatives", True)
 
     """
     7. Connect the data reporter

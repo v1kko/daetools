@@ -159,6 +159,9 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("IsInitialized",                  &daeSimulation::GetIsInitialized)
         .add_property("IsSolveInitial",                 &daeSimulation::GetIsSolveInitial)
 
+        .add_property("ReportTimeDerivatives",          &daeSimulation::GetReportTimeDerivatives, &daeSimulation::SetReportTimeDerivatives)
+        .add_property("ReportSensitivities",            &daeSimulation::GetReportSensitivities,   &daeSimulation::SetReportSensitivities)
+
         .def("SetUpParametersAndDomains",   &daeSimulation::SetUpParametersAndDomains, &daepython::daeDefaultSimulationWrapper::def_SetUpParametersAndDomains,
                                             ( arg("self") ), DOCSTR_daeSimulation_SetUpParametersAndDomains)
         .def("SetUpVariables",              &daeSimulation::SetUpVariables,            &daepython::daeDefaultSimulationWrapper::def_SetUpVariables,
