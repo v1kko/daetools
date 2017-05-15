@@ -317,14 +317,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
-Sensitivities can be obtained in two additional ways:
- - Using the DAESolver.SensitivityMatrix after every call to simulation.Integrate... functions
- - From the data reporter if reporting of the sensitivities is enabled with simulation.ReportSensitivities=True. For instance, in this case the sensitivity of the variable with the canonical name "m1.m2.variable" per sensitivity parameter "p1" is reported as "m1.m2.sensitivities.d(variable)/d(p1)".
-The time derivatives for variables can be reported in the same fashion. Here, the time derivative of the variable with the canonical name "m1.m2.variable" is reported as "m1.m2.time_derivatives.d(variable)/dt". Derivative reporting can be enabled with simulation.ReportTimeDerivatives=True.
-Also, two new boolean options are added to the daetools.cfg file to control reporting of time derivatives and sensitivities: daetools.activity.reportTimeDerivatives and daetools.activity.reportSensitivities.
-
-Two new tutorials are added:
- - tutorial21.py where the usage of DAESolver.SensitivityMatrix is illustrated and where numerical sensitivities are compared to analytical ones for the constant coefficient first order differential equations
- - tutorial_che_9.py where numerical sensitivities are compared to the literature data for the Dow Chemicals reaction network described in Caracotsios & Stewart (1985)
-Both tutorials also report the sensitivities to the data reporter.
