@@ -25,6 +25,12 @@ inline daeDomainIndex CreateDomainIndex(daeDEDI* arg)
 	return daeDomainIndex(arg);
 }
 
+inline daeDomainIndex CreateDomainIndex(daeDomain* arg)
+{
+    // Last point in the given domain
+    return daeDomainIndex(arg, -1);
+}
+
 inline daeDomainIndex CreateDomainIndex(size_t arg)
 {
 	return daeDomainIndex(arg);

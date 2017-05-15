@@ -244,6 +244,7 @@ enum daeeDomainIndexType
 {
     eDITUnknown = 0,
     eConstantIndex,
+    eLastPointInDomain,
     eDomainIterator,
     eIncrementedDomainIterator
 };

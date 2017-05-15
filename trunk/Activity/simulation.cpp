@@ -31,11 +31,13 @@ daeSimulation::daeSimulation(void)
     m_bIsInitialized				= false;
     m_bIsSolveInitial				= false;
     m_bCalculateSensitivities		= false;
-    m_bReportTimeDerivatives        = false;
-    m_bReportSensitivities          = false;
     m_iNoSensitivityFiles           = 0;
     m_nNumberOfObjectiveFunctions	= 1;
     m_pCurrentSensitivityMatrix     = NULL;
+
+    daeConfig& cfg = daeConfig::GetConfig();
+    m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
+    m_bReportSensitivities   = cfg.GetBoolean("daetools.activity.reportSensitivities",   false);
 }
 
 daeSimulation::~daeSimulation(void)
@@ -145,9 +147,6 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     daeConfig& cfg = daeConfig::GetConfig();
     bool bPrintHeader = cfg.GetBoolean("daetools.activity.printHeader", true);
     bool bPrintInfo   = cfg.GetBoolean("daetools.core.printInfo",       false);
-
-    m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
-    m_bReportSensitivities   = cfg.GetBoolean("daetools.activity.reportSensitivities",   false);
 
     if(bPrintHeader)
     {

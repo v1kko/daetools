@@ -60,7 +60,7 @@ class modTutorial(daeModel):
         self.k   = daeParameter("&lambda;_p",   W/(m*K), self, "Thermal conductivity of the plate")
 
         # Here we define two new variables to hold the average temperature and the sum of heat fluxes
-        self.Tave   = daeVariable("T_ave",  temperature_t, self, "The average temperature")
+        self.Tave   = daeVariable("T_ave",  temperature_t, self, "The average temperature of the top edge")
         self.Qsum   = daeVariable("Q_sum",  heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate")
         self.Qsum1  = daeVariable("Q_sum1", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate (more complicated way, as an illustration)")
         self.Qsum2  = daeVariable("Q_sum2", heat_flux_t,   self, "The sum of heat fluxes at the bottom edge of the plate (numpy version)")
@@ -105,6 +105,7 @@ class modTutorial(daeModel):
         # or variable is distributed on. Functions that return array of values accept the following arguments:
         #  - daeIndexRange objects
         #  - plain integers (to select a single index from a domain)
+        #    Special case: -1 returns the last point in the domain
         #  - python lists (to select a list of indexes from a domain),
         #  - python slices (to select a range of indexes from a domain: start_index, end_index, step)
         #  - character '*' (to select all points from a domain)
@@ -123,23 +124,21 @@ class modTutorial(daeModel):
         #     we can write: xr = daeDomainIndex(self.x, 0, -1, 2)
         #
         # In this example we calculate:
-        #  a) the average temperature of the plate
-        #  b) the sum of heat fluxes at the bottom edge of the plate (at y = 0)
+        #  a) the average temperature of the top edge of the plate
+        #  b) the sum of heat fluxes at the bottom edge of top plate (at y = 0)
         #
         # To calculate the average and the sum of heat fluxes we can use functions 'Average' and 'Sum'.
         # Available functions are: Sum, Product, Average, Integral, Min, Max.
 
-        eq = self.CreateEquation("T_ave", "The average temperature of the plate")
-        eq.Residual = self.Tave() - Average( self.T.array( '*', '*' ) )
+        eq = self.CreateEquation("T_ave", "The average temperature of the top edge of plate")
+        eq.Residual = self.Tave() - Average( self.T.array( '*', -1 ) )
 
         # An equivalent to the equation above is:
         #   a) xr = daeIndexRange(self.x)
-        #      yr = daeIndexRange(self.y)
-        #      eq.Residual = self.Tave() - Average( self.T.array( xr, yr ) )
-        #   b) eq.Residual = self.Tave() - Average( self.T.array( '*', '*' ) )
-        #   c) eq.Residual = self.Tave() - Average( self.T.array( [], '*' ) )
-        #   d) eq.Residual = self.Tave() - Average( self.T.array( '*', slice(0,-1) ) )
-        #   e) eq.Residual = self.Tave() - Average( self.T.array( [],  slice(0,-1) ) )
+        #      eq.Residual = self.Tave() - Average( self.T.array( xr,  -1 ) )
+        #   b) eq.Residual = self.Tave() - Average( self.T.array( '*', -1 ) )
+        #   c) eq.Residual = self.Tave() - Average( self.T.array( [],  -1 ) )
+        #   d) eq.Residual = self.Tave() - Average( self.T.array( slice(0,-1), -1 ) )
         #
         # To select only certain points from a domain we can use a list or a slice:
         #   - self.T.array( '*', [1, 3, 7] )  returns all points from domain x and points 1,3,7 from domain y
@@ -198,9 +197,9 @@ class modTutorial(daeModel):
         #   a) static function adouble_array.FromList(python-list)
         #   b) static function adouble_array.FromNumpyArray(numpy-array)
         # Both return an adouble_array object.
-        ad_arr_Qbottom = adouble_array.FromNumpyArray(Qbottom)
-        print('ad_arr_Qbottom:')
-        print(ad_arr_Qbottom)
+        #ad_arr_Qbottom = adouble_array.FromNumpyArray(Qbottom)
+        #print('ad_arr_Qbottom:')
+        #print(ad_arr_Qbottom)
         
 class simTutorial(daeSimulation):
     def __init__(self):

@@ -476,8 +476,9 @@ class DAE_CORE_API daeDomainIndex
 {
 public:
 	daeDomainIndex(void);
-	daeDomainIndex(size_t nIndex);
-	daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI);
+    daeDomainIndex(size_t nIndex);
+    daeDomainIndex(daeDomain* pLastPointInDomain, int i);
+    daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI);
 	daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI, int iIncrement);
 
 public:
@@ -488,10 +489,11 @@ public:
 	string GetIndexAsString(void) const;
 	
 public:
-	daeeDomainIndexType					m_eType;
-	size_t								m_nIndex;
-	daeDistributedEquationDomainInfo*	m_pDEDI;
-	int									m_iIncrement;
+    daeeDomainIndexType					m_eType;
+    size_t								m_nIndex;
+    daeDistributedEquationDomainInfo*	m_pDEDI;
+    int									m_iIncrement;
+    daeDomain*                          m_pLastPointInDomain;
 };
 
 /******************************************************************

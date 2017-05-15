@@ -278,7 +278,9 @@ void SaveEnum(xmlTag_t* pTag, const std::string& strEnumName, const daeeDomainIn
 {
 	if(eValue == eConstantIndex)
 		pTag->AddTag(strEnumName, string("eConstantIndex"));
-	else if(eValue == eDomainIterator)
+    else if(eValue == eLastPointInDomain)
+        pTag->AddTag(strEnumName, string("eLastPointInDomain"));
+    else if(eValue == eDomainIterator)
 		pTag->AddTag(strEnumName, string("eDomainIterator"));
 	else if(eValue == eIncrementedDomainIterator)
 		pTag->AddTag(strEnumName, string("eIncrementedDomainIterator"));
@@ -599,9 +601,11 @@ void OpenEnum(xmlTag_t* pTag, const std::string& strEnumName, daeeDomainIndexTyp
 
 	if(strValue == "eConstantIndex")
 		eValue = eConstantIndex;
-	else if(strValue == "eDomainIterator")
-		eValue = eDomainIterator;
-	else if(strValue == "eIncrementedDomainIterator")
+    else if(strValue == "eLastPointInDomain")
+        eValue = eLastPointInDomain;
+    else if(strValue == "eDomainIterator")
+        eValue = eDomainIterator;
+    else if(strValue == "eIncrementedDomainIterator")
 		eValue = eIncrementedDomainIterator;
 	else
 		eValue = eDITUnknown;

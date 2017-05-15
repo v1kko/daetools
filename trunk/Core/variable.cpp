@@ -2359,7 +2359,8 @@ daeDomain* daeVariable::GetDomain(size_t nIndex) const
 	if(nIndex >= m_ptrDomains.size())
 	{
 		daeDeclareException(exInvalidCall);
-		e << "Invalid domain index [" << nIndex << "] in variable [" << GetCanonicalName() << "]";
+        e << "Invalid domain index [" << nIndex << "] in variable [" << GetCanonicalName() << "]"
+          << " (the number of domains is " << m_ptrDomains.size() << ")";
 		throw e;
 	}
 	

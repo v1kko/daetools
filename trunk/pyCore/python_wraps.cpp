@@ -52,7 +52,10 @@ adouble_array create_adouble_array_from_object(boost::python::object value)
 /*******************************************************
     Common
 *******************************************************/
-daeDomainIndex CreateDomainIndex(object& o)
+#define parINDEX(I) CreateDomainIndex(o##I, param.GetDomain(I-1))
+#define varINDEX(I) CreateDomainIndex(o##I, var.GetDomain(I-1))
+
+daeDomainIndex CreateDomainIndex(object& o, daeDomain* pDomain)
 {
     extract<int>             integer(o);
     extract<daeDEDI*>        DEDI(o);
@@ -61,7 +64,12 @@ daeDomainIndex CreateDomainIndex(object& o)
     if(integer.check())
     {
         int iIndex = integer();
-        if(iIndex < 0)
+        if(iIndex == -1)
+        {
+            // Last point in the domain
+            return daeDomainIndex(pDomain, -1);
+        }
+        else if(iIndex < 0)
         {
             daeDeclareException(exInvalidCall);
             e << "Invalid argument (must be a positive integer)" ;
@@ -107,10 +115,14 @@ daeArrayRange CreateArrayRange(object& o, daeDomain* pDomain)
     else if(get_int.check())
     {
         int iIndex = get_int();
-        if(iIndex < 0 || iIndex > pDomain->GetNumberOfPoints()-1)
+        if(iIndex == -1)
+        {
+            return daeArrayRange(daeDomainIndex(pDomain, -1));
+        }
+        else if(iIndex < -1 || iIndex > pDomain->GetNumberOfPoints()-1)
         {
             daeDeclareException(exInvalidCall);
-            e << "Invalid argument of the array_xxx function (must be a positive integer and within the domain bounds)" ;
+            e << "Invalid argument of the array_xxx function (must be -1 or a positive integer and within the domain bounds)" ;
             throw e;
         }
         return daeArrayRange(size_t(iIndex));
@@ -1498,7 +1510,7 @@ const adouble adarr_integral(const adouble_array& a)
 
 adouble adouble_array__call__(adouble_array& a, boost::python::object index)
 {
-    daeDomainIndex domainIndex = CreateDomainIndex(index);
+    daeDomainIndex domainIndex = CreateDomainIndex(index, NULL);
 
     if(!a.node)
     {
@@ -1998,42 +2010,42 @@ adouble FunctionCallParameter0(daeParameter& param)
 
 adouble FunctionCallParameter1(daeParameter& param, object o1)
 {
-    return param(CreateDomainIndex(o1));
+    return param(parINDEX(1));
 }
 
 adouble FunctionCallParameter2(daeParameter& param, object o1, object o2)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2));
+    return param(parINDEX(1), parINDEX(2));
 }
 
 adouble FunctionCallParameter3(daeParameter& param, object o1, object o2, object o3)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
+    return param(parINDEX(1), parINDEX(2), parINDEX(3));
 }
 
 adouble FunctionCallParameter4(daeParameter& param, object o1, object o2, object o3, object o4)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
+    return param(parINDEX(1), parINDEX(2), parINDEX(3), parINDEX(4));
 }
 
 adouble FunctionCallParameter5(daeParameter& param, object o1, object o2, object o3, object o4, object o5)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
+    return param(parINDEX(1), parINDEX(2), parINDEX(3), parINDEX(4), parINDEX(5));
 }
 
 adouble FunctionCallParameter6(daeParameter& param, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
+    return param(parINDEX(1), parINDEX(2), parINDEX(3), parINDEX(4), parINDEX(5), parINDEX(6));
 }
 
 adouble FunctionCallParameter7(daeParameter& param, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
+    return param(parINDEX(1), parINDEX(2), parINDEX(3), parINDEX(4), parINDEX(5), parINDEX(6), parINDEX(7));
 }
 
 adouble FunctionCallParameter8(daeParameter& param, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-    return param(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
+    return param(parINDEX(1), parINDEX(2), parINDEX(3), parINDEX(4), parINDEX(5), parINDEX(6), parINDEX(7), parINDEX(8));
 }
 
 void lSetParameterValue(daeParameter& param, boost::python::list indexes, real_t value)
@@ -2828,42 +2840,42 @@ adouble VariableFunctionCall0(daeVariable& var)
 
 adouble VariableFunctionCall1(daeVariable& var, object o1)
 {
-    return var(CreateDomainIndex(o1));
+    return var(varINDEX(1));
 }
 
 adouble VariableFunctionCall2(daeVariable& var, object o1, object o2)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2));
+    return var(varINDEX(1), varINDEX(2));
 }
 
 adouble VariableFunctionCall3(daeVariable& var, object o1, object o2, object o3)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
+    return var(varINDEX(1), varINDEX(2), varINDEX(3));
 }
 
 adouble VariableFunctionCall4(daeVariable& var, object o1, object o2, object o3, object o4)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
+    return var(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4));
 }
 
 adouble VariableFunctionCall5(daeVariable& var, object o1, object o2, object o3, object o4, object o5)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
+    return var(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5));
 }
 
 adouble VariableFunctionCall6(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
+    return var(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6));
 }
 
 adouble VariableFunctionCall7(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
+    return var(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7));
 }
 
 adouble VariableFunctionCall8(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-    return var(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
+    return var(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7), varINDEX(8));
 }
 
 void lAssignValue1(daeVariable& var, boost::python::list indexes, real_t value)
@@ -3111,154 +3123,154 @@ adouble Get_dt0(daeVariable& var)
 
 adouble Get_dt1(daeVariable& var, object o1)
 {
-    return var.dt(CreateDomainIndex(o1));
+    return var.dt(varINDEX(1));
 }
 
 adouble Get_dt2(daeVariable& var, object o1, object o2)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2));
+    return var.dt(varINDEX(1), varINDEX(2));
 }
 
 adouble Get_dt3(daeVariable& var, object o1, object o2, object o3)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
+    return var.dt(varINDEX(1), varINDEX(2), varINDEX(3));
 }
 
 adouble Get_dt4(daeVariable& var, object o1, object o2, object o3, object o4)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
+    return var.dt(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4));
 }
 
 adouble Get_dt5(daeVariable& var, object o1, object o2, object o3, object o4, object o5)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
+    return var.dt(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5));
 }
 
 adouble Get_dt6(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
+    return var.dt(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6));
 }
 
 adouble Get_dt7(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
+    return var.dt(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7));
 }
 
 adouble Get_dt8(daeVariable& var, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
-    return var.dt(CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
+    return var.dt(varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7), varINDEX(8));
 }
 
 adouble Get_d1(daeVariable& var, daeDomain& d, object o1)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1));
+    return var.d(d, varINDEX(1));
 }
 
 adouble Get_d2(daeVariable& var, daeDomain& d, object o1, object o2)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2));
+    return var.d(d, varINDEX(1), varINDEX(2));
 }
 
 adouble Get_d3(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
+    return var.d(d, varINDEX(1), varINDEX(2), varINDEX(3));
 }
 
 adouble Get_d4(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
+    return var.d(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4));
 }
 
 adouble Get_d5(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
+    return var.d(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5));
 }
 
 adouble Get_d6(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
+    return var.d(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6));
 }
 
 adouble Get_d7(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
+    return var.d(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7));
 }
 
 adouble Get_d8(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
     var.GetModel()->LogMessage("The function daeVariable.d(domain, indexes) is deprecated. Use the global function d(expression, domain, method, options) instead", 0);
 
-    return var.d(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
+    return var.d(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7), varINDEX(8));
 }
 
 adouble Get_d21(daeVariable& var, daeDomain& d, object o1)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1));
+    return var.d2(d, varINDEX(1));
 }
 
 adouble Get_d22(daeVariable& var, daeDomain& d, object o1, object o2)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2));
+    return var.d2(d, varINDEX(1), varINDEX(2));
 }
 
 adouble Get_d23(daeVariable& var, daeDomain& d, object o1, object o2, object o3)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3));
+    return var.d2(d, varINDEX(1), varINDEX(2), varINDEX(3));
 }
 
 adouble Get_d24(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4));
+    return var.d2(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4));
 }
 
 adouble Get_d25(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5));
+    return var.d2(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5));
 }
 
 adouble Get_d26(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6));
+    return var.d2(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6));
 }
 
 adouble Get_d27(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7));
+    return var.d2(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7));
 }
 
 adouble Get_d28(daeVariable& var, daeDomain& d, object o1, object o2, object o3, object o4, object o5, object o6, object o7, object o8)
 {
     var.GetModel()->LogMessage("The function daeVariable.d2(domain, indexes) is deprecated. Use the global function d2(expression, domain, method, options) instead", 0);
 
-    return var.d2(d, CreateDomainIndex(o1), CreateDomainIndex(o2), CreateDomainIndex(o3), CreateDomainIndex(o4), CreateDomainIndex(o5), CreateDomainIndex(o6), CreateDomainIndex(o7), CreateDomainIndex(o8));
+    return var.d2(d, varINDEX(1), varINDEX(2), varINDEX(3), varINDEX(4), varINDEX(5), varINDEX(6), varINDEX(7), varINDEX(8));
 }
 
 adouble_array VariableArray1(daeVariable& var, object o1)

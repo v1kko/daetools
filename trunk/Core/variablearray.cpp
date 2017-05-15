@@ -304,22 +304,27 @@ string daeIndexRange::ToString(void) const
 	daeDomainIndex
 *******************************************************************/
 daeDomainIndex::daeDomainIndex(void) 
-		: m_eType(eDITUnknown), m_nIndex(ULONG_MAX), m_pDEDI(NULL), m_iIncrement(0)
+        : m_eType(eDITUnknown), m_nIndex(ULONG_MAX), m_pDEDI(NULL), m_iIncrement(0), m_pLastPointInDomain(NULL)
 {
 }
 
-daeDomainIndex::daeDomainIndex(size_t nIndex) 
-		: m_eType(eConstantIndex), m_nIndex(nIndex), m_pDEDI(NULL), m_iIncrement(0)
+daeDomainIndex::daeDomainIndex(size_t nIndex)
+        : m_eType(eConstantIndex), m_nIndex(nIndex), m_pDEDI(NULL), m_iIncrement(0), m_pLastPointInDomain(NULL)
+{
+}
+
+daeDomainIndex::daeDomainIndex(daeDomain* pLastPointInDomain, int /*dummy*/) // i is here to distinguish from daeIndexRange constructor
+        : m_eType(eLastPointInDomain), m_nIndex(ULONG_MAX), m_pDEDI(NULL), m_iIncrement(0), m_pLastPointInDomain(pLastPointInDomain)
 {
 }
 
 daeDomainIndex::daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI) 
-		: m_eType(eDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI), m_iIncrement(0)
+        : m_eType(eDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI), m_iIncrement(0), m_pLastPointInDomain(NULL)
 {
 }
 
 daeDomainIndex::daeDomainIndex(daeDistributedEquationDomainInfo* pDEDI, int iIncrement)
-		: m_eType(eIncrementedDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI), m_iIncrement(iIncrement)
+        : m_eType(eIncrementedDomainIterator), m_nIndex(ULONG_MAX), m_pDEDI(pDEDI), m_iIncrement(iIncrement), m_pLastPointInDomain(NULL)
 {
 }
 
@@ -328,10 +333,16 @@ size_t daeDomainIndex::GetCurrentIndex(void) const
 	if(m_eType == eConstantIndex)
 	{
 		if(m_nIndex == ULONG_MAX)
-			daeDeclareAndThrowException(exInvalidCall);
+            daeDeclareAndThrowException(exInvalidCall);
 		return m_nIndex;
 	}
-	else if(m_eType == eDomainIterator)
+    else if(m_eType == eLastPointInDomain)
+    {
+        if(!m_pLastPointInDomain)
+            daeDeclareAndThrowException(exInvalidPointer);
+        return m_pLastPointInDomain->GetNumberOfPoints() - 1;
+    }
+    else if(m_eType == eDomainIterator)
 	{
 		if(!m_pDEDI)
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -357,7 +368,13 @@ string daeDomainIndex::GetIndexAsString(void) const
 	{
 		return toString<size_t>(m_nIndex);
 	}
-	else if(m_eType == eDomainIterator)
+    else if(m_eType == eLastPointInDomain)
+    {
+        if(!m_pLastPointInDomain)
+            daeDeclareAndThrowException(exInvalidPointer);
+        return toString<int>(-1);
+    }
+    else if(m_eType == eDomainIterator)
 	{
 		if(!m_pDEDI)
 			daeDeclareAndThrowException(exInvalidPointer);
@@ -374,7 +391,7 @@ string daeDomainIndex::GetIndexAsString(void) const
 		daeDeclareAndThrowException(exNotImplemented);
 	}
 	
-	return string("?");
+    return string("");
 }
 
 void daeDomainIndex::Open(io::xmlTag_t* pTag)
@@ -391,7 +408,11 @@ void daeDomainIndex::Open(io::xmlTag_t* pTag)
 		strName = "Index";
 		pTag->Open(strName, m_nIndex);
 	}
-	else if(m_eType == eDomainIterator)
+    else if(m_eType == eLastPointInDomain)
+    {
+
+    }
+    else if(m_eType == eDomainIterator)
 	{
 		//strName = "DEDI";
 		//m_pDEDI = pTag->OpenObjectRef(strName);
@@ -417,7 +438,12 @@ void daeDomainIndex::Save(io::xmlTag_t* pTag) const
 		strName = "Index";
 		pTag->Save(strName, m_nIndex);
 	}
-	else if(m_eType == eDomainIterator)
+    else if(m_eType == eLastPointInDomain)
+    {
+        strName = "LastPointInDomain";
+        pTag->SaveObjectRef(strName, m_pLastPointInDomain);
+    }
+    else if(m_eType == eDomainIterator)
 	{
 		strName = "DEDI";
 		pTag->SaveObjectRef(strName, m_pDEDI);

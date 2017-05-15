@@ -182,7 +182,8 @@ class simTutorial(daeSimulation):
         self.SetSensitivityParameter(self.m.k2)
         self.SetSensitivityParameter(self.m.k3)
         self.SetSensitivityParameter(self.m.k3n)
-        
+     
+    """
     def Run(self):
         oi_bi_map = self.m.OverallIndex_BlockIndex_VariableNameMap
         #print('Dictionary OverallIndex_BlockIndex_VariableNameMap:')
@@ -278,12 +279,17 @@ class simTutorial(daeSimulation):
         
         plt.tight_layout()
         plt.show()
-
+    """
+    
 def run():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()
-    datareporter = daeTCPIPDataReporter()
+    datareporter = daeDelegateDataReporter()
+    dr_tcpip     = daeTCPIPDataReporter()
+    dr_data      = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -297,8 +303,8 @@ def run():
     simulation.ReportingInterval =  1*60   #  1 min
     simulation.TimeHorizon       = 10*3600 # 10 hr
 
-    simName = simulation.m.Name + strftime(" [ %d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("",simName)==False):
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if not dr_tcpip.Connect("",simName):
         sys.exit()
 
     # Initialize the simulation
@@ -314,6 +320,52 @@ def run():
     # Run
     simulation.Run()
     simulation.Finalize()
+
+    # Plot the Figure 6. from the Stewart's article (sensitivities of u1, u2, u3, u4 and u5 per k2)
+    # Get a dictionary with the reported variables
+    variables = dr_data.Process.dictVariables
+
+    # An auxiliary function to format a name of a sensitivity variable
+    def sensitivity_variable_name(variable, parameter): 
+        return 'tutorial_che_9.sensitivities.d(%s)_d(%s)' % (variable, parameter)
+    k2_name = 'tutorial_che_9.k2'
+
+    # Get the daeDataReceiverVariable objects from the dictionary.
+    # This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)
+    k2_var      = variables[k2_name]
+    du1_dk2_var = variables[sensitivity_variable_name('u1', 'k2')]
+    du2_dk2_var = variables[sensitivity_variable_name('u2', 'k2')]
+    du3_dk2_var = variables[sensitivity_variable_name('u3', 'k2')]
+    du4_dk2_var = variables[sensitivity_variable_name('u4', 'k2')]
+    du5_dk2_var = variables[sensitivity_variable_name('u5', 'k2')]
+    
+    # Transform time points into hours (x axis)
+    times = k2_var.TimeValues / 3600
+    
+    # Get sensitivities du/dk2 and multiply them with k2 (y axis)
+    k2      = k2_var.Values[0]
+    du1_dk2 = k2 * du1_dk2_var.Values
+    du2_dk2 = k2 * du2_dk2_var.Values
+    du3_dk2 = k2 * du3_dk2_var.Values
+    du4_dk2 = k2 * du4_dk2_var.Values
+    du5_dk2 = k2 * du5_dk2_var.Values
+
+    fontsize = 14
+    fontsize_legend = 11
+    
+    plt.figure(figsize=(8,6), facecolor='white')
+    plt.plot(times, du1_dk2, label=r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$')
+    plt.plot(times, du2_dk2, label=r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$')
+    plt.plot(times, du3_dk2, label=r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$')
+    plt.plot(times, du4_dk2, label=r'$k_2 \frac{\partial u_4(t)}{\partial k_2}$')
+    plt.plot(times, du5_dk2, label=r'$k_2 \frac{\partial u_5(t)}{\partial k_2}$')
+    plt.xlabel('Time (hr)', fontsize=fontsize)
+    plt.ylabel('k2*du/dk', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65',linestyle='-')
+    
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     run()
