@@ -28,18 +28,25 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>The problem is described in the following article:</span>
+<span style='color:#cc0000;'>Chemical reaction network from the Dow Chemical Company described in the following article:</span>
 
 <span style='color:#cc0000;'>- Caracotsios M., Stewart W.E. (1985) Sensitivity analysis of initial value problems </span>
 <span style='color:#cc0000;'>  with mixed odes and algebraic equations. Computers &amp; Chemical Engineering 9(4):359-365.</span>
 <span style='color:#cc0000;'>  `doi:10.1016/0098-1354(85)85014-6 &lt;https://doi.org/10.1016/0098-1354(85)85014-6&gt;`_</span>
 <span style='color:#cc0000;'>  </span>
-<span style='color:#cc0000;'>The concentration plot (u1, u3, u4):</span>
+<span style='color:#cc0000;'>The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.</span>
+<span style='color:#cc0000;'>The sensitivity data can be obtained in two ways:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Directly from the DAE solver in the user-defined Run function using the</span>
+<span style='color:#cc0000;'>  DAESolver.SensitivityMatrix property.</span>
+<span style='color:#cc0000;'>- From the data reporter as any ordinary variable.</span>
+
+<span style='color:#cc0000;'>The concentrations plot (u1, u3, u4):</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_che_9-results1.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
 <span style='color:#cc0000;'>  </span>
-<span style='color:#cc0000;'>The concentration plot (u6, u8):</span>
+<span style='color:#cc0000;'>The concentrations plot (u6, u8):</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_che_9-results2.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
@@ -193,23 +200,21 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
         <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.k2)
         <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.k3)
         <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.k3n)
-        
+     
+    
     <b>def</b> Run(<span style='color:#3605fb;'>self</span>):
-        oi_bi_map <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.OverallIndex_BlockIndex_VariableNameMap
-        <span style='color:#017a31;'>#print('Dictionary OverallIndex_BlockIndex_VariableNameMap:')</span>
-        <span style='color:#017a31;'>#print(str(oi_bi_map))</span>
+        <span style='color:#017a31;'># The user-defined Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix</span>
+        <span style='color:#017a31;'># The default Run() function is re-implemented here (just the very basic version)</span>
+        <span style='color:#017a31;'># to be able to obtain the sensitivity matrix at every reporting interval.</span>
         
-        <span style='color:#017a31;'># Concentrations block indexes</span>
-        u1_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u1.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u2_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u2.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u3_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u3.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u4_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u4.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u5_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u5.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u6_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u6.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u7_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u7.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u8_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u8.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u9_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u9.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        u10_bi <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.u10.OverallIndex][<span style='color:#cc047c;'>0</span>]
+        <span style='color:#017a31;'># Concentrations block indexes required to access the data in the sensitivity matrix.</span>
+        <span style='color:#017a31;'># The property variable.BlockIndexes is ndarray with block indexes for all points in the variable.</span>
+        <span style='color:#017a31;'># If the variable is not distributed on domains then the BlockIndexes returns an integer.</span>
+        u1_bi  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.u1.BlockIndexes
+        u2_bi  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.u2.BlockIndexes
+        u3_bi  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.u3.BlockIndexes
+        u4_bi  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.u4.BlockIndexes
+        u5_bi  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.u5.BlockIndexes
         <span style='color:#017a31;'>#print('Variable %s: overallIndex = %d, blockIndex = %d' % ('u1', self.m.u1.OverallIndex, u1_bi))</span>
         <span style='color:#017a31;'>#print('Variable %s: overallIndex = %d, blockIndex = %d' % ('u2', self.m.u2.OverallIndex, u2_bi))</span>
         <span style='color:#017a31;'>#print('Variable %s: overallIndex = %d, blockIndex = %d' % ('u3', self.m.u3.OverallIndex, u3_bi))</span>
@@ -230,8 +235,6 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
         du4_dk2 <b><span style='color:#0000ff;'>=</span></b> []
         du5_dk2 <b><span style='color:#0000ff;'>=</span></b> []
         
-        <span style='color:#017a31;'># The default Run() function is re-implemented here (just the very basic version)</span>
-        <span style='color:#017a31;'># to be able to obtain the sensitivity matrix (faster than saving it to .mmx files and re-loading it)</span>
         <b>while</b> <span style='color:#3605fb;'>self</span>.CurrentTime <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#3605fb;'>self</span>.TimeHorizon:
             dt <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ReportingInterval
             <b>if</b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>+</span></b>dt <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#3605fb;'>self</span>.TimeHorizon:
@@ -274,9 +277,11 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
         du5_dk2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> numpy.array(du5_dk2)
 
         fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+        fontsize_suptitle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>16</span>
         fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
         
         plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>6</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+        plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from the DAESolver.SensitivityMatrix'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
         plt.plot(times, du1_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$'</span>)
         plt.plot(times, du2_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$'</span>)
         plt.plot(times, du3_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$'</span>)
@@ -288,21 +293,34 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
         plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
         
         plt.tight_layout()
+        plt.subplots_adjust(top<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.9</span>)
         plt.show()
-
+    
+    
 <b>def</b> run():
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+
+    <span style='color:#017a31;'># Enable reporting of sensitivities for all reported variables</span>
+    simulation.ReportSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
 
     simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b>  <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span>   <span style='color:#017a31;'>#  1 min</span>
     simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>3600</span> <span style='color:#017a31;'># 10 hr</span>
 
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [ </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,simName)<b><span style='color:#0000ff;'>==</span></b><span style='color:#3605fb;'>False</span>):
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b> <b>not</b> dr_tcpip.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,simName):
         sys.exit()
 
     <span style='color:#017a31;'># Initialize the simulation</span>
@@ -318,6 +336,57 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
     <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
+
+    <span style='color:#017a31;'>############################################################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># Plot the Figure 6. from the article using the data reporter (sensitivities of u1, u2, u3, u4 and u5 per k2) #</span>
+    <span style='color:#017a31;'>############################################################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
+    variables <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
+
+    <span style='color:#017a31;'># An auxiliary function to format a name of a sensitivity variable</span>
+    <b>def</b> sensitivity_variable_name(variable, parameter): 
+        <b>return</b> <span style='color:#cc0000;'>'tutorial_che_9.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variable, parameter)
+    k2_name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_che_9.k2'</span>
+
+    <span style='color:#017a31;'># Get the daeDataReceiverVariable objects from the dictionary.</span>
+    <span style='color:#017a31;'># This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)</span>
+    k2_var      <b><span style='color:#0000ff;'>=</span></b> variables[k2_name]
+    du1_dk2_var <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'u1'</span>, <span style='color:#cc0000;'>'k2'</span>)]
+    du2_dk2_var <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'u2'</span>, <span style='color:#cc0000;'>'k2'</span>)]
+    du3_dk2_var <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'u3'</span>, <span style='color:#cc0000;'>'k2'</span>)]
+    du4_dk2_var <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'u4'</span>, <span style='color:#cc0000;'>'k2'</span>)]
+    du5_dk2_var <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'u5'</span>, <span style='color:#cc0000;'>'k2'</span>)]
+    
+    <span style='color:#017a31;'># Transform time points into hours (x axis)</span>
+    times <b><span style='color:#0000ff;'>=</span></b> k2_var.TimeValues <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>3600</span>
+    
+    <span style='color:#017a31;'># Get sensitivities du/dk2 and multiply them with k2 (y axis)</span>
+    k2      <b><span style='color:#0000ff;'>=</span></b> k2_var.Values[<span style='color:#cc047c;'>0</span>]
+    du1_dk2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> du1_dk2_var.Values
+    du2_dk2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> du2_dk2_var.Values
+    du3_dk2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> du3_dk2_var.Values
+    du4_dk2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> du4_dk2_var.Values
+    du5_dk2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> du5_dk2_var.Values
+
+    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+    fontsize_suptitle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>16</span>
+    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+    
+    plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>6</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from the DataReporter'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
+    plt.plot(times, du1_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$'</span>)
+    plt.plot(times, du2_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$'</span>)
+    plt.plot(times, du3_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$'</span>)
+    plt.plot(times, du4_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_4(t)}{\partial k_2}$'</span>)
+    plt.plot(times, du5_dk2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$k_2 \frac{\partial u_5(t)}{\partial k_2}$'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'Time (hr)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'k2*du/dk'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
+    
+    plt.tight_layout()
+    plt.subplots_adjust(top<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.9</span>)
+    plt.show()
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     run()

@@ -29,10 +29,17 @@
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 <span style='color:#cc0000;'>This tutorial illustrates the additional sensitivity analysis features.</span>
-<span style='color:#cc0000;'>Here, the sensitivity matrix for the Constant coefficient first order equations </span>
-<span style='color:#cc0000;'>is obtained directly from the DAE solver and compared to the analytical solution.</span>
+<span style='color:#cc0000;'>Here, the numerical sensitivities for the Constant coefficient first order equations </span>
+<span style='color:#cc0000;'>are compared to the available analytical solution.</span>
 
-<span style='color:#cc0000;'>The plot of numerical and analytical sensitivities:</span>
+<span style='color:#cc0000;'>The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.</span>
+<span style='color:#cc0000;'>The sensitivity data can be obtained in two ways:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Directly from the DAE solver in the user-defined Run function using the</span>
+<span style='color:#cc0000;'>  DAESolver.SensitivityMatrix property.</span>
+<span style='color:#cc0000;'>- From the data reporter as any ordinary variable.</span>
+
+<span style='color:#cc0000;'>The comparison between the numerical and the analytical sensitivities:</span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>.. image:: _static/tutorial21-results.png</span>
 <span style='color:#cc0000;'>   :width: 800px</span>
@@ -46,16 +53,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>,Name,Parent<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>None</span>,Description<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>,Name,Parent,Description)
 
-        <span style='color:#3605fb;'>self</span>.p1     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;p1&quot;</span>,     no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;parameter1&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.p2     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;p2&quot;</span>,     no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;parameter2&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.y1     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y1&quot;</span>,     no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable1&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.y2     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y2&quot;</span>,     no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable2&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.y1a    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y1a&quot;</span>,    no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable1 analytical&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.y2a    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y2a&quot;</span>,    no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable2 analytical&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.dy1_p1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy1_p1&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy1_p1 analytical&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.dy1_p2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy1_p2&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy1_p2 analytical&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.dy2_p1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy2_p1&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy2_p1 analytical&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.dy2_p2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy2_p2&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy2_p2 analytical&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.p1      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;p1&quot;</span>,      no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;parameter1&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.p2      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;p2&quot;</span>,      no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;parameter2&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y1      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y1&quot;</span>,      no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable1&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y2      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y2&quot;</span>,      no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable2&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y1a     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y1a&quot;</span>,     no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable1 analytical&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y2a     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y2a&quot;</span>,     no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;variable2 analytical&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dy1_dp1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy1_dp1&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy1_dp1 analytical&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dy1_dp2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy1_dp2&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy1_dp2 analytical&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dy2_dp1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy2_dp1&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy2_dp1 analytical&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dy2_dp2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dy2_dp2&quot;</span>, no_t,   <span style='color:#3605fb;'>self</span>,   <span style='color:#cc0000;'>&quot;dy2_dp2 analytical&quot;</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
@@ -85,21 +92,21 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y2a() <b><span style='color:#0000ff;'>+</span></b> c2 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy1_p1&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy1_dp1&quot;</span>)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy1_p1() <b><span style='color:#0000ff;'>+</span></b> a1 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy1_dp1() <b><span style='color:#0000ff;'>+</span></b> a1 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy1_p2&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy1_dp2&quot;</span>)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy1_p2() <b><span style='color:#0000ff;'>+</span></b> a2 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy1_dp2() <b><span style='color:#0000ff;'>+</span></b> a2 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy2_p1&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy2_dp1&quot;</span>)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy2_p1() <b><span style='color:#0000ff;'>+</span></b> a3 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy2_dp1() <b><span style='color:#0000ff;'>+</span></b> a3 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy2_p2&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;dy2_dp2&quot;</span>)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy2_p2() <b><span style='color:#0000ff;'>+</span></b> a4 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dy2_dp2() <b><span style='color:#0000ff;'>+</span></b> a4 <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> exp_t)
 
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
@@ -122,13 +129,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.p2)
         
     <b>def</b> Run(<span style='color:#3605fb;'>self</span>):
-        oi_bi_map <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.OverallIndex_BlockIndex_VariableNameMap
-        <span style='color:#017a31;'>#print('Dictionary OverallIndex_BlockIndex_VariableNameMap:')</span>
-        <span style='color:#017a31;'>#print(str(oi_bi_map))</span>
+        <span style='color:#017a31;'># The user-defind Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix</span>
         
-        <span style='color:#017a31;'># Concentrations block indexes</span>
-        y1_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.y1.OverallIndex][<span style='color:#cc047c;'>0</span>]
-        y2_bi  <b><span style='color:#0000ff;'>=</span></b> oi_bi_map[<span style='color:#3605fb;'>self</span>.m.y2.OverallIndex][<span style='color:#cc047c;'>0</span>]
+        <span style='color:#017a31;'># Concentrations block indexes required to access the data in the sensitivity matrix.</span>
+        <span style='color:#017a31;'># The property variable.BlockIndexes is ndarray with block indexes for all points in the variable.</span>
+        <span style='color:#017a31;'># If the variable is not distributed on domains then the BlockIndexes returns an integer.</span>
+        y1_bi <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.y1.BlockIndexes
+        y2_bi <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.y2.BlockIndexes
         <span style='color:#017a31;'>#print('Variable %s: overallIndex = %d, blockIndex = %d' % ('y1', self.m.y1.OverallIndex, y1_bi))</span>
         <span style='color:#017a31;'>#print('Variable %s: overallIndex = %d, blockIndex = %d' % ('y2', self.m.y2.OverallIndex, y2_bi))</span>
         
@@ -148,7 +155,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         dy2_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> []
         
         <b>def</b> addSensitivityData():
-            <span style='color:#017a31;'># Sensitivity matix as numpy array, which is 2D numpy array [Nparams, Nvariables]</span>
+            <span style='color:#017a31;'># Sensitivity matrix as numpy array, which is 2D numpy array [Nparams, Nvariables]</span>
             <span style='color:#017a31;'># Also the __call__ function from the sensitivity matrix could be used </span>
             <span style='color:#017a31;'># which is faster since it avoids copying the matrix data (i.e. see du1_dk2 below).</span>
             sm   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.DAESolver.SensitivityMatrix
@@ -163,10 +170,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
             dy2_dp1.append(sm(p1_i, y2_bi))
             dy2_dp2.append(sm(p2_i, y2_bi))
             
-            dy1_dp1_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy1_p1.GetValue())
-            dy1_dp2_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy1_p2.GetValue())
-            dy2_dp1_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy2_p1.GetValue())
-            dy2_dp2_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy2_p2.GetValue())
+            dy1_dp1_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy1_dp1.GetValue())
+            dy1_dp2_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy1_dp2.GetValue())
+            dy2_dp1_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy2_dp1.GetValue())
+            dy2_dp2_analytical.append(<span style='color:#3605fb;'>self</span>.m.dy2_dp2.GetValue())
 
         <span style='color:#017a31;'># Add sensitivities for time = 0</span>
         addSensitivityData()
@@ -188,9 +195,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>'The simulation has finished succesfully!'</span>, <span style='color:#cc047c;'>0</span>)
         
         fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+        fontsize_suptitle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>16</span>
         fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
         
         plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+        plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from the DAESolver.SensitivityMatrix'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
         ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
         ax.set_title(<span style='color:#cc0000;'>'Numerical sensitivities'</span>)
         plt.plot(times, dy1_dp1, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_1}$'</span>)
@@ -214,6 +223,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
 
         plt.tight_layout()
+        plt.subplots_adjust(top<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.85</span>)
         plt.show()
 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
@@ -221,21 +231,32 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
     <span style='color:#017a31;'># Do no print progress</span>
     log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
+    <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    
+    <span style='color:#017a31;'># Enable reporting of sensitivities for all reported variables</span>
+    simulation.ReportSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    
     simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.25</span>
     simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
 
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [ </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,simName)<b><span style='color:#0000ff;'>==</span></b><span style='color:#3605fb;'>False</span>):
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b> <b>not</b> dr_tcpip.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
         sys.exit()
 
-    <span style='color:#017a31;'># The .mmx files with the sensitivity matrices will not be saved in this example</span>
+    <span style='color:#017a31;'># The .mmx files with the sensitivity matrices will not be saved in this example.</span>
     <span style='color:#017a31;'>#simulation.SensitivityDataDirectory = os.path.join(os.path.dirname(os.path.abspath(__file__)),'sensitivities')</span>
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
 
@@ -247,6 +268,65 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
     simulation.Run()
     simulation.Finalize()
+    
+    <span style='color:#017a31;'>###########################################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># Plot the comparison between numerical and analytical sensitivities using the data reporter #</span>
+    <span style='color:#017a31;'>###########################################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
+    variables <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
+
+    <span style='color:#017a31;'># Auxiliary functions to format a name of a variable or a sensitivity variable</span>
+    <b>def</b> variable_name(variable): 
+        <b>return</b> <span style='color:#cc0000;'>'tutorial21.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variable
+    <b>def</b> sensitivity_variable_name(variable, parameter): 
+        <b>return</b> <span style='color:#cc0000;'>'tutorial21.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variable, parameter)
+
+    <span style='color:#017a31;'># Time points can be taken from any variable (x axis)</span>
+    times <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>)].TimeValues
+
+    <span style='color:#017a31;'># Get the daeDataReceiverVariable objects from the dictionary.</span>
+    <span style='color:#017a31;'># This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)</span>
+    dy1_dp1 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>)].Values
+    dy1_dp2 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p2'</span>)].Values
+    dy2_dp1 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'p1'</span>)].Values
+    dy2_dp2 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'p2'</span>)].Values
+
+    dy1_dp1_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy1_dp1'</span>)].Values
+    dy1_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy1_dp2'</span>)].Values
+    dy2_dp1_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy2_dp1'</span>)].Values
+    dy2_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy2_dp2'</span>)].Values
+    
+    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+    fontsize_suptitle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>16</span>
+    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+    
+    plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from the DataReporter'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
+    ax.set_title(<span style='color:#cc0000;'>'Numerical sensitivities'</span>)
+    plt.plot(times, dy1_dp1, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_1}$'</span>)
+    plt.plot(times, dy1_dp2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_2}$'</span>)
+    plt.plot(times, dy2_dp1, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_2(t)}{\partial p_1}$'</span>)
+    plt.plot(times, dy2_dp2, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_2(t)}{\partial p_2}$'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'Time (s)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'dy/dp (-)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(loc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
+
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>122</span>)
+    ax.set_title(<span style='color:#cc0000;'>'Analytical sensitivities'</span>)
+    plt.plot(times, dy1_dp1_analytical, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_1}$'</span>)
+    plt.plot(times, dy1_dp2_analytical, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_2}$'</span>)
+    plt.plot(times, dy2_dp1_analytical, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_2(t)}{\partial p_1}$'</span>)
+    plt.plot(times, dy2_dp2_analytical, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_2(t)}{\partial p_2}$'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'Time (s)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'dy/dp (-)'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(loc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
+
+    plt.tight_layout()
+    plt.subplots_adjust(top<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.85</span>)
+    plt.show()
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     run()

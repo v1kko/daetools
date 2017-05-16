@@ -18,10 +18,17 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 """
 __doc__ = """
 This tutorial illustrates the additional sensitivity analysis features.
-Here, the sensitivity matrix for the Constant coefficient first order equations 
-is obtained directly from the DAE solver and compared to the analytical solution.
+Here, the numerical sensitivities for the Constant coefficient first order equations 
+are compared to the available analytical solution.
 
-The plot of numerical and analytical sensitivities:
+The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.
+The sensitivity data can be obtained in two ways:
+    
+- Directly from the DAE solver in the user-defined Run function using the
+  DAESolver.SensitivityMatrix property.
+- From the data reporter as any ordinary variable.
+
+The comparison between the numerical and the analytical sensitivities:
     
 .. image:: _static/tutorial21-results.png
    :width: 800px
@@ -35,16 +42,16 @@ class modTutorial(daeModel):
     def __init__(self,Name,Parent=None,Description=""):
         daeModel.__init__(self,Name,Parent,Description)
 
-        self.p1     = daeVariable("p1",     no_t,   self,   "parameter1")
-        self.p2     = daeVariable("p2",     no_t,   self,   "parameter2")
-        self.y1     = daeVariable("y1",     no_t,   self,   "variable1")
-        self.y2     = daeVariable("y2",     no_t,   self,   "variable2")
-        self.y1a    = daeVariable("y1a",    no_t,   self,   "variable1 analytical")
-        self.y2a    = daeVariable("y2a",    no_t,   self,   "variable2 analytical")
-        self.dy1_p1 = daeVariable("dy1_p1", no_t,   self,   "dy1_p1 analytical")
-        self.dy1_p2 = daeVariable("dy1_p2", no_t,   self,   "dy1_p2 analytical")
-        self.dy2_p1 = daeVariable("dy2_p1", no_t,   self,   "dy2_p1 analytical")
-        self.dy2_p2 = daeVariable("dy2_p2", no_t,   self,   "dy2_p2 analytical")
+        self.p1      = daeVariable("p1",      no_t,   self,   "parameter1")
+        self.p2      = daeVariable("p2",      no_t,   self,   "parameter2")
+        self.y1      = daeVariable("y1",      no_t,   self,   "variable1")
+        self.y2      = daeVariable("y2",      no_t,   self,   "variable2")
+        self.y1a     = daeVariable("y1a",     no_t,   self,   "variable1 analytical")
+        self.y2a     = daeVariable("y2a",     no_t,   self,   "variable2 analytical")
+        self.dy1_dp1 = daeVariable("dy1_dp1", no_t,   self,   "dy1_dp1 analytical")
+        self.dy1_dp2 = daeVariable("dy1_dp2", no_t,   self,   "dy1_dp2 analytical")
+        self.dy2_dp1 = daeVariable("dy2_dp1", no_t,   self,   "dy2_dp1 analytical")
+        self.dy2_dp2 = daeVariable("dy2_dp2", no_t,   self,   "dy2_dp2 analytical")
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -74,21 +81,21 @@ class modTutorial(daeModel):
         eq.CheckUnitsConsistency = False
         eq.Residual = self.y2a() + c2 * (1 - exp_t)
 
-        eq = self.CreateEquation("dy1_p1")
+        eq = self.CreateEquation("dy1_dp1")
         eq.CheckUnitsConsistency = False
-        eq.Residual = self.dy1_p1() + a1 * (1 - exp_t)
+        eq.Residual = self.dy1_dp1() + a1 * (1 - exp_t)
 
-        eq = self.CreateEquation("dy1_p2")
+        eq = self.CreateEquation("dy1_dp2")
         eq.CheckUnitsConsistency = False
-        eq.Residual = self.dy1_p2() + a2 * (1 - exp_t)
+        eq.Residual = self.dy1_dp2() + a2 * (1 - exp_t)
 
-        eq = self.CreateEquation("dy2_p1")
+        eq = self.CreateEquation("dy2_dp1")
         eq.CheckUnitsConsistency = False
-        eq.Residual = self.dy2_p1() + a3 * (1 - exp_t)
+        eq.Residual = self.dy2_dp1() + a3 * (1 - exp_t)
 
-        eq = self.CreateEquation("dy2_p2")
+        eq = self.CreateEquation("dy2_dp2")
         eq.CheckUnitsConsistency = False
-        eq.Residual = self.dy2_p2() + a4 * (1 - exp_t)
+        eq.Residual = self.dy2_dp2() + a4 * (1 - exp_t)
 
 class simTutorial(daeSimulation):
     def __init__(self):
@@ -111,13 +118,13 @@ class simTutorial(daeSimulation):
         self.SetSensitivityParameter(self.m.p2)
         
     def Run(self):
-        oi_bi_map = self.m.OverallIndex_BlockIndex_VariableNameMap
-        #print('Dictionary OverallIndex_BlockIndex_VariableNameMap:')
-        #print(str(oi_bi_map))
+        # The user-defind Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix
         
-        # Concentrations block indexes
-        y1_bi  = oi_bi_map[self.m.y1.OverallIndex][0]
-        y2_bi  = oi_bi_map[self.m.y2.OverallIndex][0]
+        # Concentrations block indexes required to access the data in the sensitivity matrix.
+        # The property variable.BlockIndexes is ndarray with block indexes for all points in the variable.
+        # If the variable is not distributed on domains then the BlockIndexes returns an integer.
+        y1_bi = self.m.y1.BlockIndexes
+        y2_bi = self.m.y2.BlockIndexes
         #print('Variable %s: overallIndex = %d, blockIndex = %d' % ('y1', self.m.y1.OverallIndex, y1_bi))
         #print('Variable %s: overallIndex = %d, blockIndex = %d' % ('y2', self.m.y2.OverallIndex, y2_bi))
         
@@ -137,7 +144,7 @@ class simTutorial(daeSimulation):
         dy2_dp2_analytical = []
         
         def addSensitivityData():
-            # Sensitivity matix as numpy array, which is 2D numpy array [Nparams, Nvariables]
+            # Sensitivity matrix as numpy array, which is 2D numpy array [Nparams, Nvariables]
             # Also the __call__ function from the sensitivity matrix could be used 
             # which is faster since it avoids copying the matrix data (i.e. see du1_dk2 below).
             sm   = self.DAESolver.SensitivityMatrix
@@ -152,10 +159,10 @@ class simTutorial(daeSimulation):
             dy2_dp1.append(sm(p1_i, y2_bi))
             dy2_dp2.append(sm(p2_i, y2_bi))
             
-            dy1_dp1_analytical.append(self.m.dy1_p1.GetValue())
-            dy1_dp2_analytical.append(self.m.dy1_p2.GetValue())
-            dy2_dp1_analytical.append(self.m.dy2_p1.GetValue())
-            dy2_dp2_analytical.append(self.m.dy2_p2.GetValue())
+            dy1_dp1_analytical.append(self.m.dy1_dp1.GetValue())
+            dy1_dp2_analytical.append(self.m.dy1_dp2.GetValue())
+            dy2_dp1_analytical.append(self.m.dy2_dp1.GetValue())
+            dy2_dp2_analytical.append(self.m.dy2_dp2.GetValue())
 
         # Add sensitivities for time = 0
         addSensitivityData()
@@ -177,9 +184,11 @@ class simTutorial(daeSimulation):
         self.Log.Message('The simulation has finished succesfully!', 0)
         
         fontsize = 14
+        fontsize_suptitle = 16
         fontsize_legend = 11
         
         plt.figure(figsize=(8,4), facecolor='white')
+        plt.suptitle('Sensitivities from the DAESolver.SensitivityMatrix', fontsize=fontsize_suptitle)
         ax = plt.subplot(121)
         ax.set_title('Numerical sensitivities')
         plt.plot(times, dy1_dp1, label=r'$\frac{\partial y_1(t)}{\partial p_1}$')
@@ -203,6 +212,7 @@ class simTutorial(daeSimulation):
         plt.grid(b=True, which='both', color='0.65',linestyle='-')
 
         plt.tight_layout()
+        plt.subplots_adjust(top=0.85)
         plt.show()
 
 # Setup everything manually and run in a console
@@ -210,7 +220,11 @@ def run():
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()
-    datareporter = daeTCPIPDataReporter()
+    datareporter = daeDelegateDataReporter()
+    dr_tcpip     = daeTCPIPDataReporter()
+    dr_data      = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
 
     # Do no print progress
     log.PrintProgress = False
@@ -228,7 +242,7 @@ def run():
     simulation.TimeHorizon = 10
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("",simName)==False):
+    if not dr_tcpip.Connect("", simName):
         sys.exit()
 
     # The .mmx files with the sensitivity matrices will not be saved in this example.
@@ -243,6 +257,65 @@ def run():
 
     simulation.Run()
     simulation.Finalize()
+    
+    ##############################################################################################
+    # Plot the comparison between numerical and analytical sensitivities using the data reporter #
+    ##############################################################################################
+    # Get a dictionary with the reported variables
+    variables = dr_data.Process.dictVariables
+
+    # Auxiliary functions to format a name of a variable or a sensitivity variable
+    def variable_name(variable): 
+        return 'tutorial21.%s' % variable
+    def sensitivity_variable_name(variable, parameter): 
+        return 'tutorial21.sensitivities.d(%s)_d(%s)' % (variable, parameter)
+
+    # Time points can be taken from any variable (x axis)
+    times = variables[sensitivity_variable_name('y1', 'p1')].TimeValues
+
+    # Get the daeDataReceiverVariable objects from the dictionary.
+    # This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)
+    dy1_dp1 = variables[sensitivity_variable_name('y1', 'p1')].Values
+    dy1_dp2 = variables[sensitivity_variable_name('y1', 'p2')].Values
+    dy2_dp1 = variables[sensitivity_variable_name('y2', 'p1')].Values
+    dy2_dp2 = variables[sensitivity_variable_name('y2', 'p2')].Values
+
+    dy1_dp1_analytical = variables[variable_name('dy1_dp1')].Values
+    dy1_dp2_analytical = variables[variable_name('dy1_dp2')].Values
+    dy2_dp1_analytical = variables[variable_name('dy2_dp1')].Values
+    dy2_dp2_analytical = variables[variable_name('dy2_dp2')].Values
+    
+    fontsize = 14
+    fontsize_suptitle = 16
+    fontsize_legend = 11
+    
+    plt.figure(figsize=(8,4), facecolor='white')
+    plt.suptitle('Sensitivities from the DataReporter', fontsize=fontsize_suptitle)
+    ax = plt.subplot(121)
+    ax.set_title('Numerical sensitivities')
+    plt.plot(times, dy1_dp1, label=r'$\frac{\partial y_1(t)}{\partial p_1}$')
+    plt.plot(times, dy1_dp2, label=r'$\frac{\partial y_1(t)}{\partial p_2}$')
+    plt.plot(times, dy2_dp1, label=r'$\frac{\partial y_2(t)}{\partial p_1}$')
+    plt.plot(times, dy2_dp2, label=r'$\frac{\partial y_2(t)}{\partial p_2}$')
+    plt.xlabel('Time (s)', fontsize=fontsize)
+    plt.ylabel('dy/dp (-)', fontsize=fontsize)
+    plt.legend(loc = 0, fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65',linestyle='-')
+
+    ax = plt.subplot(122)
+    ax.set_title('Analytical sensitivities')
+    plt.plot(times, dy1_dp1_analytical, label=r'$\frac{\partial y_1(t)}{\partial p_1}$')
+    plt.plot(times, dy1_dp2_analytical, label=r'$\frac{\partial y_1(t)}{\partial p_2}$')
+    plt.plot(times, dy2_dp1_analytical, label=r'$\frac{\partial y_2(t)}{\partial p_1}$')
+    plt.plot(times, dy2_dp2_analytical, label=r'$\frac{\partial y_2(t)}{\partial p_2}$')
+    plt.xlabel('Time (s)', fontsize=fontsize)
+    plt.ylabel('dy/dp (-)', fontsize=fontsize)
+    plt.legend(loc = 0, fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65',linestyle='-')
+
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.85)
+    plt.show()
 
 if __name__ == "__main__":
     run()

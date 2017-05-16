@@ -17,18 +17,25 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-The problem is described in the following article:
+Chemical reaction network from the Dow Chemical Company described in the following article:
 
 - Caracotsios M., Stewart W.E. (1985) Sensitivity analysis of initial value problems 
   with mixed odes and algebraic equations. Computers & Chemical Engineering 9(4):359-365.
   `doi:10.1016/0098-1354(85)85014-6 <https://doi.org/10.1016/0098-1354(85)85014-6>`_
   
-The concentration plot (u1, u3, u4):
+The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.
+The sensitivity data can be obtained in two ways:
+    
+- Directly from the DAE solver in the user-defined Run function using the
+  DAESolver.SensitivityMatrix property.
+- From the data reporter as any ordinary variable.
+
+The concentrations plot (u1, u3, u4):
 
 .. image:: _static/tutorial_che_9-results1.png
    :width: 500px
   
-The concentration plot (u6, u8):
+The concentrations plot (u6, u8):
 
 .. image:: _static/tutorial_che_9-results2.png
    :width: 500px
@@ -183,23 +190,20 @@ class simTutorial(daeSimulation):
         self.SetSensitivityParameter(self.m.k3)
         self.SetSensitivityParameter(self.m.k3n)
      
-    """
+    
     def Run(self):
-        oi_bi_map = self.m.OverallIndex_BlockIndex_VariableNameMap
-        #print('Dictionary OverallIndex_BlockIndex_VariableNameMap:')
-        #print(str(oi_bi_map))
+        # The user-defined Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix
+        # The default Run() function is re-implemented here (just the very basic version)
+        # to be able to obtain the sensitivity matrix at every reporting interval.
         
-        # Concentrations block indexes
-        u1_bi  = oi_bi_map[self.m.u1.OverallIndex][0]
-        u2_bi  = oi_bi_map[self.m.u2.OverallIndex][0]
-        u3_bi  = oi_bi_map[self.m.u3.OverallIndex][0]
-        u4_bi  = oi_bi_map[self.m.u4.OverallIndex][0]
-        u5_bi  = oi_bi_map[self.m.u5.OverallIndex][0]
-        u6_bi  = oi_bi_map[self.m.u6.OverallIndex][0]
-        u7_bi  = oi_bi_map[self.m.u7.OverallIndex][0]
-        u8_bi  = oi_bi_map[self.m.u8.OverallIndex][0]
-        u9_bi  = oi_bi_map[self.m.u9.OverallIndex][0]
-        u10_bi = oi_bi_map[self.m.u10.OverallIndex][0]
+        # Concentrations block indexes required to access the data in the sensitivity matrix.
+        # The property variable.BlockIndexes is ndarray with block indexes for all points in the variable.
+        # If the variable is not distributed on domains then the BlockIndexes returns an integer.
+        u1_bi  = self.m.u1.BlockIndexes
+        u2_bi  = self.m.u2.BlockIndexes
+        u3_bi  = self.m.u3.BlockIndexes
+        u4_bi  = self.m.u4.BlockIndexes
+        u5_bi  = self.m.u5.BlockIndexes
         #print('Variable %s: overallIndex = %d, blockIndex = %d' % ('u1', self.m.u1.OverallIndex, u1_bi))
         #print('Variable %s: overallIndex = %d, blockIndex = %d' % ('u2', self.m.u2.OverallIndex, u2_bi))
         #print('Variable %s: overallIndex = %d, blockIndex = %d' % ('u3', self.m.u3.OverallIndex, u3_bi))
@@ -220,8 +224,6 @@ class simTutorial(daeSimulation):
         du4_dk2 = []
         du5_dk2 = []
         
-        # The default Run() function is re-implemented here (just the very basic version)
-        # to be able to obtain the sensitivity matrix (faster than saving it to .mmx files and re-loading it)
         while self.CurrentTime < self.TimeHorizon:
             dt = self.ReportingInterval
             if self.CurrentTime+dt > self.TimeHorizon:
@@ -264,9 +266,11 @@ class simTutorial(daeSimulation):
         du5_dk2 = k2 * numpy.array(du5_dk2)
 
         fontsize = 14
+        fontsize_suptitle = 16
         fontsize_legend = 11
         
         plt.figure(figsize=(8,6), facecolor='white')
+        plt.suptitle('Sensitivities from the DAESolver.SensitivityMatrix', fontsize=fontsize_suptitle)
         plt.plot(times, du1_dk2, label=r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$')
         plt.plot(times, du2_dk2, label=r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$')
         plt.plot(times, du3_dk2, label=r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$')
@@ -278,8 +282,9 @@ class simTutorial(daeSimulation):
         plt.grid(b=True, which='both', color='0.65',linestyle='-')
         
         plt.tight_layout()
+        plt.subplots_adjust(top=0.9)
         plt.show()
-    """
+    
     
 def run():
     log          = daePythonStdOutLog()
@@ -321,7 +326,9 @@ def run():
     simulation.Run()
     simulation.Finalize()
 
-    # Plot the Figure 6. from the Stewart's article (sensitivities of u1, u2, u3, u4 and u5 per k2)
+    ###############################################################################################################
+    # Plot the Figure 6. from the article using the data reporter (sensitivities of u1, u2, u3, u4 and u5 per k2) #
+    ###############################################################################################################
     # Get a dictionary with the reported variables
     variables = dr_data.Process.dictVariables
 
@@ -351,9 +358,11 @@ def run():
     du5_dk2 = k2 * du5_dk2_var.Values
 
     fontsize = 14
+    fontsize_suptitle = 16
     fontsize_legend = 11
     
     plt.figure(figsize=(8,6), facecolor='white')
+    plt.suptitle('Sensitivities from the DataReporter', fontsize=fontsize_suptitle)
     plt.plot(times, du1_dk2, label=r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$')
     plt.plot(times, du2_dk2, label=r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$')
     plt.plot(times, du3_dk2, label=r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$')
@@ -365,6 +374,7 @@ def run():
     plt.grid(b=True, which='both', color='0.65',linestyle='-')
     
     plt.tight_layout()
+    plt.subplots_adjust(top=0.9)
     plt.show()
 
 if __name__ == "__main__":
