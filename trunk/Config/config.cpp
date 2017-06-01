@@ -16,6 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/detail/file_parser_error.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include "../Core/definitions.h"
@@ -250,15 +251,21 @@ std::string daeConfig::GetConfigFolder()
     //printf("module %s loaded\n", dl_info.dli_fname);
     if(dl_info.dli_fname != NULL)
     {
-        cfg_app_folder = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
+        boost::filesystem::path canonical_app_folder = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
+        canonical_app_folder = boost::filesystem::canonical(canonical_app_folder);
+
+        cfg_app_folder = canonical_app_folder;
         cfg_app_folder = cfg_app_folder.parent_path();   // i.e. app_folder
 
-        cfg_python_daetools_folder = std::string(dl_info.dli_fname);           // i.e. daetools/pyDAE/Linux_x86_64_py27/pyCore.so
-        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE/Linux_x86_64_py27
-        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/pyDAE
+        cfg_python_daetools_folder = canonical_app_folder;                     // i.e. daetools/solibs/Linux_x86_64/libcdaeConfig-py27.so
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Linux_x86_64_py27
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
     }
 #endif
+    //printf("HOME folder %s\n", cfg_home_folder.string().c_str());
+    //printf("APP folder %s\n", cfg_app_folder.string().c_str());
+    //printf("daetools folder %s\n", cfg_python_daetools_folder.string().c_str());
 
     if(boost::filesystem::exists(cfg_home_folder / std::string("daetools.cfg")))
         return cfg_home_folder.string();

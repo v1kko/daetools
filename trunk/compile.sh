@@ -166,11 +166,15 @@ if [[ ${PLATFORM} == *"MSYS_"* ]]; then
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
-  Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
+  #Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   # If there are problems with memory and speed of compilation set:
-  # Ncpu=1
+  Ncpu=2
   QMAKE="qmake"
   QMAKE_SPEC=macx-g++
+  export CC=/usr/local/bin/gcc
+  export CXX=/usr/local/bin/g++
+  export FC=/usr/local/bin/gfortran
+  export F77=/usr/local/bin/gfortran
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
   QMAKE_SPEC=linux-g++

@@ -24,12 +24,10 @@ QMAKE_CXXFLAGS += -DDAE_BUILD=$${DAE_TOOLS_BUILD}
 # daetools always use the current system python version and custom compiled boost libs
 # located in ../boost with the libraries in ../boost/stage/lib
 
-# Build universal binaries for MAC OS-X
-# There is a problem with ppc64 under OSX 10.6 so it is excluded
-# Otherwise ppc64 should be added as well
-macx-g++::CONFIG    += x86 x86_64
-macx-g++::QMAKE_CC   = llvm-gcc
-macx-g++::QMAKE_CXX  = llvm-g++
+# Build only for x86_64 for MAC OS-X
+macx-g++::CONFIG    += x86_64
+macx-g++::QMAKE_CC   = /usr/local/bin/gcc
+macx-g++::QMAKE_CXX  = /usr/local/bin/g++
 
 win32-msvc2015::SHARED_LIB_EXT  = dll
 win32-g++-*::SHARED_LIB_EXT     = dll
@@ -131,7 +129,7 @@ crossCompile{
     win32-msvc2015 {
       MACHINE_COMMAND = "import platform; p={'x86':'win32', 'i386':'win32', 'i686':'win32', 'x64':'win64', 'AMD64':'win64'}; machine = p[platform.machine()]; print(machine)"
     } else {
-      MACHINE_COMMAND  = "import platform; p={'Linux':platform.machine(), 'Darwin':'universal', 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
+      MACHINE_COMMAND  = "import platform; p = {'Linux':platform.machine(), 'Darwin':platform.machine(), 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
     }
     DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
 
@@ -171,14 +169,14 @@ win32-msvc2015::SOLIBS_RPATH =
 win32-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 win64-g++-*::SOLIBS_RPATH    = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 linux-g++::SOLIBS_RPATH      = -Wl,-rpath,\'\$$ORIGIN/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
-macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@executable_path/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\',-z,origin
+macx-g++::SOLIBS_RPATH       = -Wl,-rpath,\'@loader_path/../../solibs/$${DAE_SYSTEM}_$${DAE_MACHINE}\'
 
 # RPATH for the simulation_loader
 win32-msvc2015::SOLIBS_RPATH_SL =
 win32-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\'
 win64-g++-*::SOLIBS_RPATH_SL    = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
 linux-g++::SOLIBS_RPATH_SL      = -Wl,-rpath,\'\$$ORIGIN\',-z,origin
-macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'@executable_path\'
+macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'@loader_path\'
 
 ####################################################################################
 # Remove all symbol table and relocation information from the executable.
@@ -210,7 +208,7 @@ QMAKE_CFLAGS_DEBUG   += -DDAE_DEBUG
 # Unresolved _gethostname problem in MinGW
 #win32-g++-*::QMAKE_LFLAGS += -Wl,--enable-stdcall-fixup
 
-macx-g++::QMAKE_LFLAGS += -mmacosx-version-min=10.5
+macx-g++::QMAKE_LFLAGS += -mmacosx-version-min=10.6
 
 QMAKE_CXXFLAGS += -DDAE_PYTHON_MAJOR=$${PYTHON_MAJOR} -DDAE_PYTHON_MINOR=$${PYTHON_MINOR}
 
@@ -612,13 +610,13 @@ linux-g++::TRILINOS_LIBS = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                             $${UMFPACK_LIBS} \
                             $${SUPERLU_LIBS}
 
-macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib -L/opt/local/lib \
+macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
                            -laztecoo -lml -lifpack \
-                           -lamesos -lepetraext -ltriutils -lepetra -lteuchoskokkoscomm \
-                           -lteuchoskokkoscompat -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
-                           -lteuchosparameterlist -lteuchoscore -lkokkoscore \
-                           $${UMFPACK_LIBS} \
-                           $${SUPERLU_LIBS}
+                           -lamesos -lepetraext -ltriutils -lepetra \
+                           -lteuchosremainder -lteuchosnumerics -lteuchoscomm \
+                           -lteuchosparameterlist -lteuchoscore \
+                            $${UMFPACK_LIBS} \
+                            $${SUPERLU_LIBS}
 
 ######################################################################################
 #                                INTEL Pardiso
@@ -712,7 +710,7 @@ win32-msvc2015::COOLPROP_LIBS = $${COOLPROP_LIB_DIR}/Windows/CoolProp.lib
 unix::COOLPROP_LIBS           = -L$${COOLPROP_LIB_DIR}/Linux   -lCoolProp
 win32-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
 win64-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
-macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/???     -lCoolProp
+macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/Darwin  -lCoolProp
 
 
 cdaeCoolPropThermoPackage

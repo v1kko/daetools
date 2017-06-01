@@ -30,7 +30,7 @@ daetools_system = str(platform.system())
 
 # Machine := {'i386', ..., 'i686', 'x86_64'}
 if platform.system() == 'Darwin':
-    daetools_machine = 'universal'
+    daetools_machine = str(platform.machine())
 elif platform.system() == 'Windows':
     daetools_machine = 'win32'
     # So far there is no win63 port
@@ -60,9 +60,9 @@ solvers_sodir = os.path.join(daetools_dir, 'solvers', '{0}_{1}_py{2}{3}'.format(
                                                                                 python_version_minor))
 sys.path.append(solvers_sodir)
 
-# fmi platform-dependant extension modules directory
-fmi_sodir = os.path.join(daetools_dir, 'solibs', '{0}_{1}'.format(daetools_system,
-                                                                  daetools_machine))
-sys.path.append(fmi_sodir)
+# solibs platform-dependant extension modules directory
+solibs_sodir = os.path.join(daetools_dir, 'solibs', '{0}_{1}'.format(daetools_system,
+                                                                     daetools_machine))
+sys.path.append(solibs_sodir)
 
 #print sys.path

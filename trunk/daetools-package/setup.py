@@ -44,7 +44,7 @@ daetools_system   = str(platform.system())
 
 # Machine := {'i386', ..., 'i686', 'x86_64'}
 if platform.system() == 'Darwin':
-    daetools_machine = 'universal'
+    daetools_machine = str(platform.machine())
 elif platform.system() == 'Windows':
     daetools_machine = 'win32'
     # So far there is no win64 port
@@ -59,8 +59,14 @@ else:
 # Now with removed compile-time dependency on numpy
 platform_solib_dir = '{0}_{1}_py{2}{3}'.format(daetools_system, daetools_machine, python_major, python_minor)
 
-shared_libs_dir = os.path.realpath('daetools/solibs')
-shared_libs_dir = os.path.join(shared_libs_dir, '%s_%s' % (daetools_system, daetools_machine))
+shared_libs_dir  = os.path.realpath('daetools/solibs')
+shared_libs_dir  = os.path.join(shared_libs_dir, '%s_%s' % (daetools_system, daetools_machine))
+
+pydae_libs_dir = os.path.realpath('daetools/pyDAE')
+pydae_libs_dir = os.path.join(pydae_libs_dir, '%s' % platform_solib_dir)
+
+solvers_libs_dir  = os.path.realpath('daetools/solvers')
+solvers_libs_dir = os.path.join(solvers_libs_dir, '%s' % platform_solib_dir)
 
 """
 if daetools_machine == 'x86_64':
@@ -87,6 +93,38 @@ if _is_in_venv():
 else:
     inside_venv = False
 
+boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_thread2    = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
+boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
+dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
+cape_open_thermo = 'cdaeCapeOpenThermoPackage'
+deal_II          = 'deal_II-daetools'
+sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
+fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
+mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
+
+shared_libs = []
+
+print('shared_libs_dir = ', shared_libs_dir)
+if os.path.isdir(shared_libs_dir):
+    shared_libs_files = os.listdir(shared_libs_dir)
+
+    for f in shared_libs_files:
+        if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_thread2 in f) or (boost_filesystem in f) or (boost_chrono in f):
+            shared_libs.append(os.path.join(shared_libs_dir, f))
+
+        if dae_config in f:
+            shared_libs.append(os.path.join(shared_libs_dir, f))
+
+        if cape_open_thermo in f:
+            shared_libs.append(os.path.join(shared_libs_dir, f))
+
+print('shared_libs = ', shared_libs)
+
 if platform.system() == 'Linux':
     if not inside_venv:
         data_files = [
@@ -108,44 +146,14 @@ if platform.system() == 'Linux':
     fmi_solibs = 'fmi/{0}/*.so'.format(platform_solib_dir)
 
 elif platform.system() == 'Windows':
-    boost_python     = 'boost_python-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_python3    = 'boost_python3-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_system     = 'boost_system-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_thread     = 'boost_thread_win32-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_thread2    = 'boost_thread-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, python_minor)
-    boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
-    dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
-    cape_open_thermo = 'cdaeCapeOpenThermoPackage'
-    #deal_II          = 'deal_II-daetools'
-    #sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
-    #fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
-    mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
-
-    shared_libs = []
-
-    print('shared_libs_dir = ', shared_libs_dir)
+    # Add mingw dlls
     if os.path.isdir(shared_libs_dir):
         shared_libs_files = os.listdir(shared_libs_dir)
 
         for f in shared_libs_files:
-            if (boost_python in f) or (boost_python3 in f) or (boost_system in f) or (boost_thread in f) or (boost_thread2 in f) or (boost_filesystem in f) or (boost_chrono in f):
-                shared_libs.append(os.path.join(shared_libs_dir, f))
-
-            if dae_config in f:
-                shared_libs.append(os.path.join(shared_libs_dir, f))
-
-            if cape_open_thermo in f:
-                shared_libs.append(os.path.join(shared_libs_dir, f))
-
-            #if (sim_loader in f) or (fmu_so in f):
-            #    shared_libs.append(os.path.join(shared_libs_dir, f))
-
             for dll in mingw_dlls:
                 if dll in f:
                     shared_libs.append(os.path.join(shared_libs_dir, f))
-    #print('shared_libs = ', shared_libs)
-    #raise RuntimeError('')
 
     for f in shared_libs:
         shutil.copy(f, 'daetools/pyDAE/{0}'.format(platform_solib_dir))
@@ -160,20 +168,56 @@ elif platform.system() == 'Windows':
     fmi_solibs = 'fmi/{0}/*.dll'.format(platform_solib_dir)
 
 elif platform.system() == 'Darwin':
+    if os.path.isdir(shared_libs_dir):
+        shared_libs_files = os.listdir(shared_libs_dir)
+
+        for f in shared_libs_files:
+            if (sim_loader in f) or (fmu_so in f) or (deal_II in f):
+                shared_libs.append(os.path.join(shared_libs_dir, f))
+
+    for lib_path in shared_libs:
+        dummy, filename = os.path.split(lib_path)
+        cmd = 'install_name_tool -id @rpath/%s %s' % (filename, lib_path)
+        ret = os.system(cmd)
+        print('%s returned [%s]' %(cmd,ret))
+
+    # Python extension modules link solibs so update their LC_LOAD_DYLIB sections
+    ext_modules = []
+    if os.path.isdir(pydae_libs_dir):
+        shared_libs_files = os.listdir(pydae_libs_dir)
+        for f in shared_libs_files:
+            ext_modules.append( os.path.join(pydae_libs_dir, f) )
+
+    if os.path.isdir(solvers_libs_dir):
+        shared_libs_files = os.listdir(solvers_libs_dir)
+        for f in shared_libs_files:
+            ext_modules.append( os.path.join(solvers_libs_dir, f) )
+
+    # cdaeConfig links boost libs so update its LC_LOAD_DYLIB sections
+    cfgs = [f for f in shared_libs if dae_config in f]
+    for cfg in cfgs:
+        ext_modules.append( os.path.join(shared_libs_dir, cfg) )
+
+    # Boost libs link other boost libs so update their LC_LOAD_DYLIB sections
+    blibs = [f for f in shared_libs if 'libboost' in f]
+    for blib in blibs:
+        ext_modules.append( os.path.join(shared_libs_dir, blib) )
+
+    # Do the actual update on all reuired shared libraries
+    for ext_mod_path in ext_modules:
+        dummy, ext_mod_name = os.path.split(ext_mod_path)
+        print('Start install_name_tool -change for: %s' % ext_mod_name)
+        for so_path in shared_libs:
+            dummy, so_name = os.path.split(so_path)
+            new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, so_name)
+            cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, ext_mod_path)
+            ret = os.system(cmd)
+            print('    %s returned [%s]' %(cmd,ret))
+
     if not inside_venv:
         data_files = [
-                        #('/etc/daetools',           ['etc/daetools/daetools.cfg', 'etc/daetools/bonmin.cfg']),
-                        ('/usr/share/applications', [
-                                                    'usr/share/applications/daetools-daeExamples.desktop',
-                                                    'usr/share/applications/daetools-daePlotter.desktop'
-                                                    ] ),
-                        ('/usr/share/man/man1',     ['usr/share/man/man1/daetools.1.gz']),
-                        ('/usr/share/menu',         [
-                                                    'usr/share/menu/daetools-plotter',
-                                                    'usr/share/menu/daetools-examples'
-                                                    ] ),
-                        ('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png'])
-                    ]
+                        #('/usr/share/pixmaps',      ['usr/share/pixmaps/daetools-48x48.png']),
+                     ]
     else:
         data_files = []
 
@@ -246,4 +290,3 @@ if platform.system() == 'Windows':
     cmd = 'cscript %s\create_shortcuts.js %s %s %s' % (script_folder, pythonw_path, python_version, daetools_version)
     print('Creating shortcuts: %s ...' % cmd)
     os.system(cmd)
-

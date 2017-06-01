@@ -242,8 +242,9 @@ done
 
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
+  echo $Ncpu
   # If there are problems with memory and speed of compilation set:
-  # Ncpu=1
+  Ncpu=1
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
 else
@@ -274,8 +275,12 @@ if [ ! -e ${SOLIBS_DIR} ]; then
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
-  DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch i386 -arch x86_64"
-  BOOST_MACOSX_FLAGS="macosx-version-min=10.5 architecture=x86 address-model=32_64"
+  DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -arch x86_64"
+  BOOST_MACOSX_FLAGS="architecture=x86"
+  export CC=/usr/local/bin/gcc
+  export CXX=/usr/local/bin/g++
+  export FC=/usr/local/bin/gfortran
+  export F77=/usr/local/bin/gfortran
 
   if type "wget" > /dev/null ; then
     echo "wget found"
@@ -342,7 +347,7 @@ LAPACK_HTTP=http://www.netlib.org/lapack
 CLAPACK_HTTP=${DAETOOLS_HTTP}
 MUMPS_HTTP=${DAETOOLS_HTTP}
 IDAS_HTTP=${DAETOOLS_HTTP}
-BONMIN_HTTP=http://www.coin-or.org/download/source/Bonmin
+BONMIN_HTTP=${DAETOOLS_HTTP}
 #Old: SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
 SUPERLU_HTTP=${DAETOOLS_HTTP}
 #Old: TRILINOS_HTTP=http://trilinos.csbsju.edu/download/files
