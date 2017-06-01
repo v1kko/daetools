@@ -214,26 +214,26 @@ for i; do
                 exit 1
                 ;;
                   
-       --with-python-binary)  PYTHON=`$2 -c "import sys; print(sys.executable)"`
-                              shift ; shift 
-                              ;;
-                            
-       --with-python-version )  PYTHON=`python$2 -c "import sys; print(sys.executable)"`
-                                shift ; shift 
-                                ;;
+    --with-python-binary)  PYTHON=`$2 -c "import sys; print(sys.executable)"`
+                            shift ; shift 
+                            ;;
+                        
+    --with-python-version )  PYTHON=`python$2 -c "import sys; print(sys.executable)"`
+                            shift ; shift 
+                            ;;
 
-       --host) DAE_IF_CROSS_COMPILING=1
-               QMAKE="qmake"
-               if [ "$2" = "i686-w64-mingw32" ]; then
-                  QMAKE_SPEC="win32-g++-i686-w64-mingw32"
-               elif [ "$2" = "x86_64-w64-mingw32" ]; then
-                  QMAKE_SPEC="win64-g++-x86_64-w64-mingw32"
-               else
-                  QMAKE_SPEC=
-               fi
-               PYTHON=""
-               shift ; shift
-               ;;
+    --host) DAE_IF_CROSS_COMPILING=1
+            QMAKE="qmake"
+            if [ "$2" = "i686-w64-mingw32" ]; then
+                QMAKE_SPEC="win32-g++-i686-w64-mingw32"
+            elif [ "$2" = "x86_64-w64-mingw32" ]; then
+                QMAKE_SPEC="win64-g++-x86_64-w64-mingw32"
+            else
+                QMAKE_SPEC=
+            fi
+            PYTHON=""
+            shift ; shift
+            ;;
                                     
     --) shift; break 
         ;;

@@ -43,11 +43,13 @@ except ImportError as e:
     print('Cannot import daeSimulator module. Error: {0}'.format(str(e)))
 
 def daeCreateQtApplication(sys_argv):
+    # An auxiliary function to create a qt application with no reference to the qt version
     from PyQt5 import QtWidgets
     app = QtWidgets.QApplication(sys_argv)
     return app
 
 def daeQtMessage(windowTitle, message):
+    # An auxiliary function to show a message box with no reference to the qt version
     try:
         from PyQt5 import QtCore, QtWidgets
         if QtCore.QCoreApplication.instance():

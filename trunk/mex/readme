@@ -1,12 +1,12 @@
 MEX function
 ------------
-GNU Octave compile:
-  cd mex
-  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader-py27 daetools_mex.c
-
 Matlab compile:
   cd mex
-  mex -v -I../simulation_loader -lcdaeSimulationLoader daetools_mex.c
+  mex -v -I../simulation_loader -L"path to daetools/solibs directory" -lcdaeSimulationLoader daetools_mex.c
+
+GNU Octave compile:
+  cd mex
+  mkoctfile -v --mex -I../simulation_loader -L"path to daetools/solibs directory" -lcdaeSimulationLoader-py27 daetools_mex.c
 
 Scilab compile:
   cd mex
@@ -15,23 +15,23 @@ Scilab compile:
   exec('loader.sce')  
   
 Running daetools_mex simulation:
-  res = daetools_mex('.../daetools/examples/tutorial20.py', 'create_simulation', ' ', 100.0, 10.0)
+  res = daetools_mex('.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 100.0, 10.0)
   
 MEX-function arguments:
   1. Path to the python file with daetools simulation (char array)
   2. The name of python callable object that returns *initialized* daeSimulation object (char array)
   3. Arguments for the above callable object; can be anything that python accepts (char array)
-  4. TimeHorizon (double scalar),
-  5. ReportingInterval (double scalar),
+  4. Time horizon (double scalar)
+  5. Reporting interval (double scalar)
 Outputs:
-  1. Cell array (pairs: {'variable_name', double matrix})
+  1. Cell array (pairs: {'variable_name', double matrix}).
   Variables are put into the caller's workspace as well.
 
 Simulink S-function
 -------------------
 Simulink compile:
   cd mex
-  mex -v -I../simulation_loader -lcdaeSimulationLoader-py27 daetools_s.c 
+  mex -v -I../simulation_loader -L"path to daetools/solibs directory" -lcdaeSimulationLoader-py27 daetools_s.c 
 
 Running S-function:
   Add a new S-Function ('system') from the User-Defined Functions palette.
@@ -39,7 +39,7 @@ Running S-function:
     - S-Function name: daetools_s
       (this is a compiled daetools_s.c file, resulting in, for instance, deatools_s.mexa64 binary)
     - S-Function parameters: see the description below
-      example: '.../daetools/examples/tutorial20.py', 'create_simulation', ' ', 2, 2
+      example: '.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 2, 2
     - S-Function modules: leave blank
   As a working example, the file 'test_s_function.mdl' in 'daetools/trunk/mex' directory can be used.
 

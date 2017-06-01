@@ -37,7 +37,7 @@ Classes
                       Run, ReRun, Pause, Resume, Integrate, IntegrateForTimeInterval, IntegrateUntilTime, Reinitialize, Reset,
                       CurrentTime, TimeHorizon, ReportingInterval, NextReportingTime, ReportingTimes,
                       RegisterData, ReportData,
-                      NumberOfObjectiveFunctions, ObjectiveFunctions, NumberOfObjectiveFunctions,
+                      NumberOfObjectiveFunctions, ObjectiveFunctions, 
                       ActivityAction, IndexMappings, InitialConditionMode, SimulationMode, VariableTypes
 
                 
@@ -85,6 +85,7 @@ Classes
     .. automethod:: SetBinaryOptimizationVariable
     .. autoattribute:: OptimizationVariables
     .. autoattribute:: Constraints
+    .. autoattribute:: NumberOfObjectiveFunctions
     .. autoattribute:: ObjectiveFunction
 
 
@@ -126,8 +127,9 @@ Classes
 
     .. rubric:: Data reporting methods
 
-    .. automethod:: RegisterData
     .. automethod:: ReportData
+    .. autoattribute:: ReportTimeDerivatives
+    .. autoattribute:: ReportSensitivities
 
     .. rubric:: Various information
 

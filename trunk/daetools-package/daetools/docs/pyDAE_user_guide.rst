@@ -11,6 +11,12 @@ pyDAE User Guide
     You should have received a copy of the GNU General Public License along with the
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
+    
+.. contents:: 
+    :local:
+    :depth: 3
+    :backlinks: none
+    
 Importing DAE Tools modules
 ===========================
 
@@ -74,7 +80,7 @@ The complete list of units and variable types can be found in
 Developing models
 =================
 
-In **DAE Tools** models are developed by deriving a new class from the base :py:class:`pyCore.daeModel` class.
+In **DAE Tools** models are developed by deriving a new class from the base :py:class:`~pyCore.daeModel` class.
 An empty model definition is presented below:
 
 .. code-block:: python
@@ -99,21 +105,21 @@ The process consists of the following steps:
       daeModel.__init__(self, name, parent, description)
       
 2. Declaring the model structure (domains, parameters, variables, ports, components etc.) in the
-   :py:meth:`pyCore.daeModel.__init__` function:
+   :py:meth:`~pyCore.daeModel.__init__` function:
 
    One of the fundamental ideas in **DAE Tools** is separation of the model specification
    from the activities that can be carried out on that model: this way several simulation scenarios
    can be developed based on a single model definition. Thus, all objects are defined in two stages:
          
-   * Declaration in the :py:meth:`pyCore.daeModel.__init__` function
-   * Initialisation in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` or
-     :py:meth:`pyActivity.daeSimulation.SetUpVariables` functions.
+   * Declaration in the :py:meth:`~pyCore.daeModel.__init__` function
+   * Initialisation in the :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains` or
+     :py:meth:`~pyActivity.daeSimulation.SetUpVariables` functions.
 
    Therefore, parameters, domains and variables are only declared here, while their initialisation
    (setting the parameter value, setting up the domain, assigning or setting an initial condition etc.) is
-   postponed and will be done in the simulation class
+   postponed and will be done in the simulation class.
    
-   All objects must be declared as data members of the model since the base :py:class:`pyCore.daeModel`
+   All objects must be declared as data members of the model since the base :py:class:`~pyCore.daeModel`
    class keeps only week references and does not own them:
 
    .. code-block:: python
@@ -134,33 +140,28 @@ The process consists of the following steps:
           variable  = daeVariable(...)
           ... etc.
          
-   because at the exit from the :py:meth:`pyCore.daeModel.__init__` function the objects
+   because at the exit from the :py:meth:`~pyCore.daeModel.__init__` function the objects
    will go out of scope and get destroyed. However, the underlying c++ model object still holds
    references to them which will eventually result in the segmentation fault.
     
 3. Specification of the model functionality (equations, state transition networks,
    and ``OnEvent`` and ``OnCondition`` actions)
-   in the :py:meth:`pyCore.daeModel.DeclareEquations` function.
+   in the :py:meth:`~pyCore.daeModel.DeclareEquations` function.
 
-   .. topic:: Nota bene
-
-              This function is never called directly by the user and will be called automatically
-              by the framework.
+   **Nota bene**: This function is never called directly by the user and will be called automatically
+   by the framework.
      
    Initialisation of the simulation object is done in several phases. At the point when this function
    is called by the framework the model parameters, domains, variables etc. are fully initialised.
    Therefore, it is safe to obtain the values of parameters or domain points and use them to
    create equations at the run-time.
 
-   .. topic:: Nota bene
-
-              However, the **variable values** are obviously **not available** at this moment (they get
-              initialised at the later stage) and using the variable values during the model specification
-              phase is not allowed.
+   **Nota bene**: However, the **variable values** are obviously **not available** at this moment 
+   (they get initialised at the later stage) and using the variable values during the model specification
+   phase is not allowed.
 
 A simplest **DAE Tools** model with a description of all steps/tasks necessary to develop a model
-can be found in the :ref:`whats_the_time` tutorial
-(`whats_the_time.py <../../examples/whats_the_time.html>`_).
+can be found in the :ref:`whats_the_time` tutorial (`whats_the_time.py <../../examples/whats_the_time.html>`_).
 
 
 Parameters
@@ -177,12 +178,12 @@ There are two types of parameters in **DAE Tools**:
 
 The process of defining parameters is again carried out in two phases:
     
-* Declaration in the :py:meth:`pyCore.daeModel.__init__` function
-* Initialisation (by setting its value) in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` function
+* Declaration in the :py:meth:`~pyCore.daeModel.__init__` function
+* Initialisation (by setting its value) in the :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains` function
 
 Declaring parameters
 ~~~~~~~~~~~~~~~~~~~~
-Parameters are declared in the :py:meth:`pyCore.daeModel.__init__` function.
+Parameters are declared in the :py:meth:`~pyCore.daeModel.__init__` function.
 An ordinary parameter can be declared in the following way:
 
 .. code-block:: python
@@ -202,7 +203,7 @@ declared in the following way:
 
 Initialising parameters
 ~~~~~~~~~~~~~~~~~~~~~~~
-Parameters are initialised in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains`
+Parameters are initialised in the :py:meth:`~pyActivity.daeSimulation.SetUpParametersAndDomains`
 function. To set a value of an ordinary parameter the following can be used:
 
 .. code-block:: python
@@ -217,14 +218,14 @@ while to set a value of distributed parameters (one-dimensional for example):
    for i in range(myDomain.NumberOfPoints):
        myParam.SetValue(i, value)
 
-where the ``value`` can be either a ``float`` (i.e. ``1.34``) or the :py:class:`pyUnits.quantity` object
+where the ``value`` can be either a ``float`` (i.e. ``1.34``) or the :py:class:`~pyUnits.quantity` object
 (i.e. ``1.34 * W/(m*K)``). If the simple floats are used it is assumed that they
 represent values with the same units as in the parameter definition.
 
 .. topic:: Nota bene
 
-           ``DAE Tools`` (as it is the case in C/C++ and Python) use ``zero-based arrays``
-           in which the ``initial element of a sequence is assigned the index 0``, rather than 1.
+    ``DAE Tools`` (as it is the case in C/C++ and Python) use ``zero-based arrays``
+    in which the ``initial element of a sequence is assigned the index 0``, rather than 1.
 
 In addition, all values can be set at once using:
 
@@ -238,29 +239,29 @@ Using parameters
 ~~~~~~~~~~~~~~~~
 The most commonly used functions are:
 
-* The function call operator :py:meth:`pyCore.daeParameter.__call__` (``operator ()``)
-  which returns the :py:class:`pyCore.adouble` object that holds the parameter value 
-* The :py:meth:`pyCore.daeParameter.array` function which returns the :py:class:`pyCore.adouble_array`
+* The function call operator :py:meth:`~pyCore.daeParameter.__call__` (``operator ()``)
+  which returns the :py:class:`~pyCore.adouble` object that holds the parameter value 
+* The :py:meth:`~pyCore.daeParameter.array` function which returns the :py:class:`~pyCore.adouble_array`
   object that holds an array of parameter values
-* Distributed parameters have the :py:attr:`pyCore.daeParameter.npyValues` property which
+* Distributed parameters have the :py:attr:`~pyCore.daeParameter.npyValues` property which
   returns the parameter values as a numpy multi-dimensional array (with ``numpy.float`` data type)
-* The functions :py:class:`pyCore.daeParameter.SetValue`, :py:class:`pyCore.daeParameter.GetValue`,
-  and :py:class:`pyCore.daeParameter.SetValues`
-  which get/set the parameter value(s) using the ``float`` or the :py:class:`pyUnits.quantity` object(s)
+* The functions :py:class:`~pyCore.daeParameter.SetValue`, :py:class:`~pyCore.daeParameter.GetValue`,
+  and :py:class:`~pyCore.daeParameter.SetValues`
+  which get/set the parameter value(s) using the ``float`` or the :py:class:`~pyUnits.quantity` object(s)
 
 .. topic:: Notate bene
 
-           The functions :py:meth:`pyCore.daeParameter.__call__` and :py:meth:`pyCore.daeParameter.array`
-           return :py:class:`pyCore.adouble` and :py:class:`pyCore.adouble_array` objects, respectively
-           and does not contain values. They are only used to specify equations' residual expressions
-           which are stored in the :py:meth:`pyCore.adouble.Node` / :py:meth:`pyCore.adouble_array.Node` attributes.
+    The functions :py:meth:`~pyCore.daeParameter.__call__` and :py:meth:`~pyCore.daeParameter.array`
+    return :py:class:`~pyCore.adouble` and :py:class:`~pyCore.adouble_array` objects, respectively
+    and does not contain values. They are only used to specify equations' residual expressions
+    which are stored in their :py:attr:`~pyCore.adouble.Node` / :py:attr:`~pyCore.adouble_array.Node` properties.
 
-           Other functions (such as :py:attr:`pyCore.daeParameter.npyValues` and :py:attr:`pyCore.daeParameter.GetValue`)
-           can be used to access the values data during the simulation.
+    Other functions (such as :py:attr:`~pyCore.daeParameter.npyValues` and :py:meth:`~pyCore.daeParameter.GetValue`)
+    can be used to access the values data during the simulation.
 
-           All above stands for similar functions in :py:class:`pyCore.daeDomain` and :py:class:`pyCore.daeVariable` classes.
+    All above stands for similar functions in :py:class:`~pyCore.daeDomain` and :py:class:`~pyCore.daeVariable` classes.
 
-1. To get a value of the ordinary parameter the :py:meth:`pyCore.daeParameter.__call__`
+1. To get a value of the ordinary parameter the :py:meth:`~pyCore.daeParameter.__call__`
    function (``operator ()``) can be used. For instance, if the variable ``myVar`` has to be
    equal to the sum of the parameter ``myParam`` and ``15``:
 
@@ -278,7 +279,7 @@ The most commonly used functions are:
 
      eq.Residual = myVar() - (myParam() + 15)
 
-2. To get a value of a distributed parameter the :py:meth:`pyCore.daeParameter.__call__`
+2. To get a value of a distributed parameter the :py:meth:`~pyCore.daeParameter.__call__`
    function (``operator ()``) can be used again. For instance, if the distributed
    variable ``myVar`` has to be equal to the sum of the parameter ``myParam`` and ``15`` at each
    point of the domain ``myDomain``:
@@ -320,43 +321,43 @@ The most commonly used functions are:
      i2 = eq.DistributeOnDomain(myDomain2, eClosedClosed)
      eq.Residual = myVar(i1,i2) - (myParam(i1,i2) + 15)
 
-3. To get an array of parameter values the function :py:meth:`pyCore.daeParameter.array`
-   can be used, which returns the :py:class:`pyCore.adouble_array` object.
-   The ordinary mathematical functions can be used with the :py:class:`pyCore.adouble_array` objects:
-   :py:meth:`pyCore.Sqrt`, :py:meth:`pyCore.Sin`, :py:meth:`pyCore.Cos`, :py:meth:`pyCore.Min`, :py:meth:`pyCore.Max`,
-   :py:meth:`pyCore.Log`, :py:meth:`pyCore.Log10`, etc. In addition, some additional functions are available such as
-   :py:meth:`pyCore.Sum` and :py:meth:`pyCore.Product`.
+3. To get an array of parameter values the function :py:meth:`~pyCore.daeParameter.array`
+   can be used, which returns the :py:class:`~pyCore.adouble_array` object.
+   The ordinary mathematical functions can be used with the :py:class:`~pyCore.adouble_array` objects:
+   :py:meth:`~pyCore.Sqrt`, :py:meth:`~pyCore.Sin`, :py:meth:`~pyCore.Cos`, :py:meth:`~pyCore.Min`, :py:meth:`~pyCore.Max`,
+   :py:meth:`~pyCore.Log`, :py:meth:`~pyCore.Log10`, etc. In addition, some additional functions are available such as
+   :py:meth:`~pyCore.Sum` and :py:meth:`~pyCore.Product`.
 
    For instance, if the variable ``myVar`` has to be equal to the sum of values of the parameter
-   ``myParam`` for all points in the domain ``myDomain``, the function :py:meth:`pyCore.Sum` can be used.
+   ``myParam`` for all points in the domain ``myDomain``, the function :py:meth:`~pyCore.Sum` can be used.
 
-   The :py:meth:`pyCore.daeParameter.array` function accepts the following arguments:
+   The :py:meth:`~pyCore.daeParameter.array` function accepts the arguments of the following type:
 
-   * plain integer (to select a single index from a domain)
+   * plain integer (to select a single index from a domain; special case: -1 returns the last point in the domain)
    * python list (to select a list of indexes from a domain)
    * python slice (to select a portion of indexes from a domain: startIndex, endIindex, step)
    * character ``*`` (to select all points from a domain)
    * empty python list ``[]`` (to select all points from a domain)
 
    Basically all arguments listed above are internally used to create the
-   :py:class:`pyCore.daeIndexRange` object. :py:class:`pyCore.daeIndexRange` constructor has
+   :py:class:`~pyCore.daeIndexRange` object. :py:class:`~pyCore.daeIndexRange` constructor has
    three variants:
        
-   1. The first one accepts a single argument: :py:class:`pyCore.daeDomain` object.
-      In this case the returned :py:class:`pyCore.adouble_array` object will contain the
+   1. The first one accepts a single argument: :py:class:`~pyCore.daeDomain` object.
+      In this case the returned :py:class:`~pyCore.adouble_array` object will contain the
       parameter values at all points in the specified domain.
 
-   2. The second one accepts two arguments: :py:class:`pyCore.daeDomain` object and a list
+   2. The second one accepts two arguments: :py:class:`~pyCore.daeDomain` object and a list
       of integer that represent indexes within the specified domain.
-      In this case the returned :py:class:`pyCore.adouble_array` object will contain the
+      In this case the returned :py:class:`~pyCore.adouble_array` object will contain the
       parameter values at the selected points in the specified domain.
 
-   3. The third one accepts four arguments: :py:class:`pyCore.daeDomain` object, and three
+   3. The third one accepts four arguments: :py:class:`~pyCore.daeDomain` object, and three
       integers: ``startIndex``, ``endIndex`` and ``step`` (which is basically a slice, that is
       a portion of a list of indexes: ``start`` through ``end-1``, by the increment ``step``).
       More info about slices can be found in the
       `Python documentation <http://docs.python.org/2/library/functions.html?highlight=slice#slice>`_.
-      In this case the returned :py:class:`pyCore.adouble_array` object will contain the
+      In this case the returned :py:class:`~pyCore.adouble_array` object will contain the
       parameter values at the points in the specified domain defined by the slice object.
 
    Suppose that the variable ``myVar`` has to be equal to the sum of values in
@@ -409,7 +410,7 @@ The most commonly used functions are:
               & myParam(1,0) + myParam(1,2) + myParam(1,4) + ... + myParam(1, n_2 - 1) + \\
               & myParam(2,0) + myParam(2,2) + myParam(2,4) + ... + myParam(2, n_2 - 1)
 
-More information about parameters can be found in the API reference :py:class:`pyCore.daeParameter`
+More information about parameters can be found in the API reference :py:class:`~pyCore.daeParameter`
 and in :doc:`tutorials`.
 
 Variable types
@@ -418,7 +419,7 @@ Variable types
 Variable types are used in **DAE Tools** to describe variables and they contain the following information:
 
 * Name: string
-* Units: :py:class:`pyUnits.unit` object
+* Units: :py:class:`~pyUnits.unit` object
 * LowerBound: float
 * UpperBound: float
 * InitialGuess: float
@@ -516,7 +517,7 @@ can be manipulated by the user:
     myDomain.Points = [0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.60, 1.00]
 
 The effect of uniform and non-uniform grids is given
-in :numref:`Figure-non_uniform_grid` (a simple heat conduction problem from the :ref:`tutorial_3`
+in :numref:`Figure-non_uniform_grid` (a simple heat conduction problem from the :ref:`tutorial3`
 has been served as a basis for comparison). Here, there are three cases:
 
 * Black line: the analytic solution
@@ -1061,8 +1062,14 @@ the following can be used:
 Supported mathematical operations and functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **DAE Tools** support five basic mathematical operations (``+, -, *, /, **``) and the following
-standard mathematical functions: ``sqrt, pow, log, log10, exp, min, max, floor, ceil, abs,
-sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2, erf``).
+standard mathematical functions: :py:meth:`~pyCore.Sqrt`, :py:meth:`~pyCore.Pow`, :py:meth:`~pyCore.Log`, 
+:py:meth:`~pyCore.Log10`, :py:meth:`~pyCore.Exp`, :py:meth:`~pyCore.Min`, :py:meth:`~pyCore.Max`, 
+:py:meth:`~pyCore.Floor`, :py:meth:`~pyCore.Ceil`, :py:meth:`~pyCore.Abs`, :py:meth:`~pyCore.Sin`, 
+:py:meth:`~pyCore.Cos`, :py:meth:`~pyCore.Tan`, :py:meth:`~pyCore.ASin`, :py:meth:`~pyCore.ACos`, 
+:py:meth:`~pyCore.ATan`, :py:meth:`~pyCore.Sinh`, :py:meth:`~pyCore.Cosh`, :py:meth:`~pyCore.Tanh`, 
+:py:meth:`~pyCore.ASinh`, :py:meth:`~pyCore.ACosh`, :py:meth:`~pyCore.ATanh`, :py:meth:`~pyCore.ATan2`, 
+:py:meth:`~pyCore.Erf`. All mathematical functions operate on :py:class:`~pyCore.adouble` and 
+:py:class:`~pyCore.adouble_array` objects.
 
 To define conditions the following comparison operators:
 ``<`` (less than),
@@ -1105,12 +1112,19 @@ Interoperability with NumPy
     since the numpy function ``exp`` is redefined for :py:class:`~pyCore.adouble` arguments
     and calls the **DAE Tools** :py:meth:`~pyCore.Exp` function. The same stands for all other mathematical functions.
 
-The :py:class:`~pyCore.adouble` class is designed with ``numpy`` library in mind.
-It redefines all standard mathematical functions available in ``numpy``
-(i.e. ``sqrt``, ``exp``, ``log``, ``log10``, ``sin``, ``cos`` etc.) so that the ``numpy`` functions also operate on the
-:py:class:`~pyCore.adouble` objects. Therefore, the :py:class:`~pyCore.adouble` class can be used as an ordinary
-data type in ``numpy``.
-In addition, ``numpy`` and **DAE Tools** mathematical functions are interchangeable.
+The :py:class:`~pyCore.adouble` and :py:class:`~pyCore.adouble_array` classes are designed with 
+the support for :py:class:`numpy` library in mind.
+They implement most of the standard mathematical functions available in :py:meth:`numpy`
+(i.e. :py:meth:`numpy.sqrt`, :py:meth:`numpy.pow`, :py:meth:`numpy.log`, 
+:py:meth:`numpy.log10`, :py:meth:`numpy.exp`, :py:meth:`numpy.min`, :py:meth:`numpy.max`, 
+:py:meth:`numpy.floor`, :py:meth:`numpy.ceil`, :py:meth:`numpy.abs`, :py:meth:`numpy.sin`, 
+:py:meth:`numpy.cos`, :py:meth:`numpy.tan`, :py:meth:`numpy.asin`, :py:meth:`numpy.acos`, 
+:py:meth:`numpy.atan`, :py:meth:`numpy.sinh`, :py:meth:`numpy.cosh`, :py:meth:`numpy.tanh`, 
+:py:meth:`numpy.asinh`, :py:meth:`numpy.acosh`, :py:meth:`numpy.atanh`, :py:meth:`numpy.atan2`, 
+and :py:meth:`numpy.erf`) so that the :py:class:`numpy` functions also operate on the
+:py:class:`~pyCore.adouble` and :py:class:`~pyCore.adouble_array` objects. 
+Therefore, these classes can be used as native data types in :py:class:`numpy`.
+In addition, :py:class:`numpy` and **DAE Tools** mathematical functions are interchangeable.
 In the example given below, the :py:meth:`~pyCore.Exp` and :py:meth:`numpy.exp` function calls produce identical results:
 
 .. code-block:: python
@@ -1124,12 +1138,12 @@ In the example given below, the :py:meth:`~pyCore.Exp` and :py:meth:`numpy.exp` 
     # The above is identical to:
     eq.Residual = result() - Exp( Var() )
 
-Often, it is desired to apply ``numpy``/``scipy`` numerical functions on arrays of :py:class:`~pyCore.adouble` objects.
+Often, it is desired to apply :py:class:`numpy`/:py:class:`scipy` numerical functions on arrays of :py:class:`~pyCore.adouble` objects.
 In those cases the functions such as :py:meth:`~daeVariable.pyCore.array`, :py:meth:`~pyCore.d_array`,
 :py:meth:`~pyCore.dt_array`, :py:meth:`~pyCore.Array` etc.
 are NOT applicable since they return :py:class:`~pyCore.adouble_array` objects.
-However, ``numpy`` arrays can be created and populated with :py:class:`~pyCore.adouble` objects and ``numpy`` functions
-applied on them. In addition, an :py:class:`~pyCore.adouble_array` object can be created from resulting ``numpy`` arrays
+However, :py:class:`numpy` arrays can be created and populated with :py:class:`~pyCore.adouble` objects and :py:class:`numpy` functions
+applied on them. In addition, an :py:class:`~pyCore.adouble_array` object can be created from resulting :py:class:`numpy` arrays
 of :py:class:`~pyCore.adouble` objects, if necessary.
 
 For instance, to define the equation below:
@@ -1167,7 +1181,7 @@ the following code can be used:
     eq = self.CreateEquation("sum")
     eq.Residual = sum() - numpy.sum(ndarr_V1 + 2*ndarr_V2**2)
 
-    # If adouble_aray is needed after operations on a numpy array, the following two functions can be used:
+    # If adouble_array is needed after operations on a numpy array, the following two functions can be used:
     #   a) static function adouble_array.FromList(python_list)
     #   b) static function adouble_array.FromNumpyArray(numpy_array)
     # Both return an adouble_array object.
@@ -1193,12 +1207,12 @@ and mathematical operators/functions work in two modes; they can either **build-
 or **calculate a value/derivative of an expression**.
 Once built, the evaluation trees can be used to calculate equation residuals or derivatives to fill
 a Jacobian matrix necessary for a Newton-type iteration.
-A typical evaluation tree is presented in the :numref:`Figure-EvaluationTree` below.
+A typical evaluation tree is presented in the :numref:`Figure-EvaluationTree` below. 
 
 .. _Figure-EvaluationTree:
 .. figure:: _static/EvaluationTree.png
-    :width: 250 pt
-    :figwidth: 300 pt
+    :width: 220 pt
+    :figwidth: 260 pt
     :align: center
 
     Equation evaluation tree in DAE Tools
@@ -1208,7 +1222,7 @@ The equation ``F`` in :numref:`Figure-EvaluationTree` is a result of the followi
 .. code-block:: python
 
     eq = model.CreateEquation("F", "F description")
-    eq.Residal = dt(V14()) + V1() / (V14() + 2.5) + Sin(3.14 * V3())
+    eq.Residal = dt(x1()) + x2() / (x3() + 2.5) + Sin(x4())
 
 As it has been described in the previous sections, domains, parameters, and variables contain functions
 that return :py:class:`~pyCore.adouble`/:py:class:`~pyCore.adouble_array` objects used to construct the
@@ -1454,7 +1468,7 @@ using :py:meth:`~pyCore.daeModel.STN`, :py:meth:`~pyCore.daeModel.STATE`, :py:me
 
 The function :py:meth:`pyCore.daeModel.ON_CONDITION` is used to define actions to be performed
 when the specified condition is satisfied. In addition, the function :py:meth:`pyCore.daeModel.ON_EVENT`
-can be used to define actions to be performed when an event is trigerred on a specified event port.
+can be used to define actions to be performed when an event is triggered on a specified event port.
 Details on how to use :py:meth:`pyCore.daeModel.ON_CONDITION` and :py:meth:`pyCore.daeModel.ON_EVENT`
 functions can be found in the `OnCondition actions`_ and `OnEvent actions`_ sections, respectively.
 
@@ -1509,7 +1523,7 @@ specifying when the actions will be executed and:
 * ``userDefinedActions`` is a list of user defined objects derived from the base :py:class:`~pyCore.daeAction` class
 
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_CONDITION` function have a look
-on :ref:`tutorial_13`.
+on :ref:`tutorial13`.
 
 OnEvent actions
 ---------------
@@ -1547,12 +1561,240 @@ where the first argument of the :py:meth:`~pyCore.daeModel.ON_EVENT` function is
 is the same as in the :py:meth:`~pyCore.daeModel.ON_CONDITION` function.
 
 For more details on how to use :py:meth:`~pyCore.daeModel.ON_EVENT` function have a look
-on :ref:`tutorial_13`.
+on :ref:`tutorial13`.
 
+User-defined actions
+--------------------
+User-defined actions can be executed in a response to specified conditions in ``OnCondition`` handlers 
+or in a response to triggered events in ``OnEvent`` handlers.
+
+User-defined actions are created by deriving a class from the :py:class:`~pyCore.daeAction` base
+and implementing the :py:meth:`~pyCore.daeScalarExternalFunction.Execute` function.
+The :py:meth:`~pyCore.daeScalarExternalFunction.Execute` function takes no arguments. If some
+information from the model is required they should be specified in the constructor.
+
+Normally, user-defined actions do not return a value nor change the values of variables 
+(other types of actions can be used for that purpose), but perform some user-defined operations. 
+The source code for a simple action that prints a message with the data sent to a specified event port is given below:
+
+.. code-block:: python
+
+    # User-defined action executed when an event is triggered on a specified event port.
+    class simpleUserAction(daeAction):
+        def __init__(self, eventPort):
+            daeAction.__init__(self)
+            
+            # Store the daeEventPort object for later use.
+            self.eventPort = eventPort
+
+        def Execute(self):
+            # The floating point value of the data sent when the event is triggered
+            # can be retrieved using the daeEventPort.EventData property.
+            msg = 'simpleUserAction executed; input data = %f' % self.eventPort.EventData
+            
+            print('********************************************************')
+            print(msg)
+            print('********************************************************')
+
+.. topic:: Notate bene
+    
+    User-defined action objects **should** be instantiated in the :py:meth:`~pyCore.daeModel.DeclareEquations`
+    function if they access parameters' and variables' symbolic representations (available only there).
+    
+    User-defined action objects **must** be stored in the model, otherwise they will get destroyed when 
+    they go out of scope. 
+
+.. code-block:: python
+
+    def DeclareEquations(self):
+        ...
+
+        # User-defined action objects should be stored in the model, otherwise
+        # they will get destroyed when they go out of scope. 
+        self.action = simpleUserAction(self.eventPort)
+
+        # The actions executed when the event on the inlet 'eventPort' event port is received.
+        # daeEventPort defines the operator() which returns adouble object that can be used
+        # at the moment when the action is executed to get the value of the event data.
+        self.ON_EVENT(self.eventPort, userDefinedActions = [self.action])
+
+For more details on user-defined actions have a look on the :ref:`tutorial13`.
+
+External functions
+------------------
+The external functions concept in **DAE Tools** is used to handle and calculate user-defined functions or 
+to call functions from external libraries. External functions can return scalar 
+(:py:class:`~pyCore.daeScalarExternalFunction`) or vector (:py:class:`~pyCore.daeVectorExternalFunction`) values. 
+The vector external functions are not implemented at the moment.
+
+External functions are created by deriving a class from the :py:class:`~pyCore.daeScalarExternalFunction` base,
+specifying its arguments in the constructor and implementing the :py:meth:`~pyCore.daeScalarExternalFunction.Calculate` function. 
+The source code for a simple :math:`F(x) = x ^ 2` external function is given below:
+
+.. code-block:: python
+
+    class F(daeScalarExternalFunction):
+        def __init__(self, Name, parentModel, units, x):
+            # Instantiate the scalar external function by specifying
+            # the arguments dictionary {'name' : adouble-object}
+            arguments = {}
+            arguments["x"]  = x
+
+            daeScalarExternalFunction.__init__(self, Name, parentModel, units, arguments)
+        
+        def Calculate(self, values):
+            # Calculate function is used to calculate a value and a derivative of the external 
+            # function per given argument (if requested). Here, a simple function is given by:
+            #    F(x) = x**2
+
+            # Procedure:
+            # 1. Get the arguments from the dictionary values: {'arg-name' : adouble-object}.
+            #    Every adouble object has two properties: Value and Derivative that can be
+            #    used to evaluate function or its partial derivatives per arguments
+            #    (partial derivatives are used to fill in a Jacobian matrix necessary to solve
+            #    a system of non-linear equations using the Newton method).
+            x = values["x"]
+            
+            # 2. Always calculate the value of a function (derivative part is zero by default).
+            res = adouble(x.Value ** 2)
+            
+            # 3. If a function derivative per one of its arguments is requested,
+            #    the derivative part of that argument will be non-zero.
+            #    In that case, investigate which derivative is requested and calculate it
+            #    using the chain rule: f'(x) = x' * df(x)/dx
+            if x.Derivative != 0:
+                # A derivative per 'x' was requested; its value is: x' * 2x
+                res.Derivative = x.Derivative * (2 * x.Value)
+
+            # 4. Return the result as a adouble object (contains both a value and a derivative)
+            return res
+
+.. topic:: Notate bene
+    
+    External function objects **must** be instantiated in the :py:meth:`~pyCore.daeModel.DeclareEquations`
+    function since they access parameters' and variables' symbolic representations (available only there).
+    
+    External function objects **must** be stored in the model, otherwise they will get destroyed when 
+    they go out of scope. 
+
+.. code-block:: python
+
+    def DeclareEquations(self):
+        ...
+
+        # Create external function (it has to be created in DeclareEquations!),
+        # specify its units (here for simplicity dimensionless) and 
+        # arguments (here only a single argument: x)
+        # External function objects should be stored in the model, otherwise
+        # they will get destroyed when they go out of scope. 
+        self.F = F("F", self, unit(), self.x())
+        
+        # External function can now be used in daetools equations.
+        # Its value can be obtained using the operator() (python special function __call__)
+        eq = self.CreateEquation("...", "...")
+        eq.Residual = ... self.F() ...
+        
+A more complex example is given in the :ref:`tutorial14` example. There, the external function concept is used to interpolate
+a set of values using the :py:class:`scipy.interpolate.interp1d` object. 
+
+.. code-block:: python
+
+    class extfn_interp1d(daeScalarExternalFunction):
+        def __init__(self, Name, parentModel, units, times, values, Time):
+            arguments = {}
+            arguments["t"] = Time
+
+            # Instantiate interp1d object and initialise interpolation using supplied (time,y) values.
+            self.interp = scipy.interpolate.interp1d(times, values)
+
+            # During the solver iterations, the function is called very often with the same arguments.
+            # Therefore, cache the last interpolated value to speed up a simulation.
+            self.cache = None
+
+            daeScalarExternalFunction.__init__(self, Name, parentModel, units, arguments)
+
+        def Calculate(self, values):
+            # Get the argument from the dictionary of arguments' values.
+            time = values["t"].Value
+
+            # Here we do not need to return a derivative for it is not a function of variables.
+
+            # First check if an interpolated value was already calculated during the previous call.
+            # If it was, return the cached value (the derivative part is always equal to zero in this case).
+            if self.cache:
+                if self.cache[0] == time:
+                    return adouble(self.cache[1])
+                    
+            # The time received is not in the cache and has to be interpolated.
+            # Convert the result to float datatype since daetools can't accept
+            # numpy.float64 types as arguments at the moment.
+            interp_value = float(self.interp(time))
+            res = adouble(interp_value, 0)
+
+            # Save it in the cache for later use.
+            self.cache = (time, res.Value)
+
+            return res
+            
+The ``extfn_interp1d`` class is used here to approximate some function *f*: 
+
+.. math::    
+    y = f(t) = 2t 
+
+using its ``t`` ad ``y`` values:
+
+.. code-block:: python
+
+    def DeclareEquations(self):
+        ...
+
+        # Create scipy.interp1d interpolation external function.
+        # Create 'times' and 'values' arrays to be used for interpolation:
+        times  = numpy.arange(0.0, 1000.0)
+        values = 2*times
+        # The external function accepts only a single argument: the current time in the simulation
+        # that can be obtained using the Time() daetools function.
+        # The external function units are seconds.
+        self.interp1d = extfn_interp1d("interp1d", self, s, times, values, Time())
+
+        
+Configuration
+=============
+Various options related to **DAE Tools** simulation can be set using the API or in the ``daetools.cfg`` configuration file (in JSON format).
+
+Configuration API
+-----------------
+Relative and absolute tolerances are used by a DAE solver to control the integration process. In **DAE Tools**, scalar relative and 
+a vector of absolute tolerances are used. Every variable has the default absolute tolerances set in the associated variable type. 
+These default values can be changed using the :py:meth:`pyCore.daeVariable.SetAbsoluteTolerances` function. 
+On the other hand, the scalar relative tolerance can be set using the :py:attr:`pyIDAS.daeIDAS.RelativeTolerance` attribute. 
+The default value is :math:`10^{-5}`.
+
+All parameters and variables from all models are by default reported to a data reporter. 
+Individual parameters/variables can be selected/deselected using the :py:attr:`pyCore.daeVariable.ReportingOn` boolean property, 
+while all variables from a model can be reported using the :py:meth:`pyCore.daeModel.SetReportingOn` function.
+In addition, time derivatives and sensitivities can be also reported by setting :py:attr:`pyActivity.daeSimulation.ReportTimeDerivatives` 
+and :py:attr:`pyActivity.daeSimulation.ReportSensitivities` boolean properties.
+
+Units consistency for all equations is checked by default. This can be changed for individual equations using the 
+:py:attr:`pyCore.daeEquation.CheckUnitsConsistency` boolean property. 
+
+Scaling of equations' residuals could be very important for the convergence of the numerical integration. 
+Large condition numbers produce ill-conditioned Jacobian matrices and a solution of a linear system of equations is 
+prone to large numerical errors. The equation scaling is 1 by default and can be changed using the 
+:py:attr:`pyCore.daeEquation.Scaling` property.
+
+Evaluation of derivatives of very large equations can be very costly since they contain a large number of variables. 
+For instance, taking an average value of all points
+in a large 2D or 3D domain can produce an equation residual with tens of thousands of terms. To determine all Jacobian items
+for such equations a calculation of tens of thousands of terms per every Jacobian item is required while in reality only a single term 
+has to be calculated. Building of Jacobian expressions ahead of time can significantly improve the 
+numerical performance (at the cost of somewhat larger memory requirements). Pre-building of Jacobian expressions can be set
+using the :py:attr:`pyCore.daeEquation.BuildJacobianExpressions` boolean property (default is off).
 
 Configuration files
-===================
-Various options used by **DAE Tools** objects are located in the ``daetools/daetools.cfg`` config file (in JSON format).
+-------------------
+The default options used by **DAE Tools** objects are located in the ``daetools/daetools.cfg`` config file.
 The configuration file can be obtained using the global function :py:meth:`~pyCore.daeGetConfig`:
 
 .. code-block:: python
@@ -1604,6 +1846,8 @@ The sample configuration file is given below:
                 "timeHorizon": 100.0,
                 "reportingInterval": 1.0,
                 "printHeader": true,
+                "reportTimeDerivatives": false,
+                "reportSensitivities": false,
                 "objFunctionAbsoluteTolerance": 1E-8,
                 "constraintsAbsoluteTolerance": 1E-8,
                 "measuredVariableAbsoluteTolerance": 1E-8
@@ -1669,7 +1913,7 @@ The sample configuration file is given below:
             },
             "NLOPT":
             {
-                "printInfo": true,
+                "printInfo": false,
                 "xtol_rel": 1E-6,
                 "xtol_abs": 1E-6,
                 "ftol_rel": 1E-6,
@@ -1781,7 +2025,7 @@ Thus, the density unit can be also defined in the following way:
    volume = unit({"dm" : 3})
    rho = mass / volume
 
-Quantities are created by multiplying a value with desired units:
+Quantities are created by multiplying a value with unit objects:
 
 .. code-block:: python
 
@@ -1805,7 +2049,7 @@ For instance, the operation below is not allowed:
 since their units are not consistent (``J + s``).
 
 
-Data Reporters
+Data Reporting
 ==============
 There is a large number of available data reporters in **DAE Tools**:
 
@@ -1920,52 +2164,556 @@ The example below shows how to save the results to the Matlab .mat file:
 The filename is provided as the first argument (``connectString``) of the
 :py:meth:`~pyDataReporting.daeDataReporterLocal.Connect` function.
 
-..
-    Code generators
-    ===============
-
-    Modelica
-    --------
-
-    gPROMS
-    ------
-
-    c99
-    ---
 
 
-    Co-Simulation
-    =============
+.. py:currentmodule:: daetools.pyDAE.pyActivity
 
-    FMI
-    ---
+Executing simulations
+=====================
 
-    Matlab MEX-functions
-    --------------------
+Initialising domains and parameters
+-----------------------------------
+Domains and parameters are initialised in the :py:meth:`pyActivity.daeSimulation.SetUpParametersAndDomains` function.
+In the case of deep model hierarchies domains and parameters having identical names can be initialised using the propagation technique and
+:py:meth:`pyCore.daeModel.PropagateDomain` and :py:meth:`pyCore.daeModel.PropagateParameter` functions. These functions traverse down all 
+models in the hierarchy (starting with the calling model) and copy the properties of the given domain/parameter to all domains/properties 
+with the same name.
 
-    Simulink S-functions
-    --------------------
+Initialising variables (initial conditions, degrees of freedom)
+---------------------------------------------------------------
+All information related to variables are set in the :py:meth:`pyActivity.daeSimulation.SetUpVariables` function.
+Here, operations such as setting initial conditions, initial guesses, absolute tolerances and fixing degrees of freedom can be performed.
 
-    Simulation
-    ==========
+Developing schedules (operating procedures)
+-------------------------------------------
+The model specified in the simulation constructor is integrated in time in the :py:meth:`pyActivity.daeSimulation.Run` function.
+The default implementation iterates over the specified time horizon (:py:attr:`pyActivity.daeSimulation.TimeHorizon` property),
+integrates for time intervals specified using the :py:attr:`pyActivity.daeSimulation.ReportingInterval` property and reports the data.
+If a discontinuity occurs during the current integration interval, the precise discontinuity time is determined,
+model integrated until the discontinuity time point, data reported, the DAE system reinitialised and integration resumed.
 
-    Setting up a simulation
-    -----------------------
+The user-defined schedule can be implemented by overloading the :py:meth:`pyActivity.daeSimulation.Run` function. Here, a custom 
+schedule (operating procedure) can be specified using the following functions from the :py:class:`pyActivity.daeSimulation` class:
 
-    Setting up a data reporter
-    --------------------------
+- :py:meth:`pyActivity.daeSimulation.Integrate` integrates the system until the given time horizon is reached and reports the data
+  after every reporting interval. If the ``stopCriterion`` argument is set to ``eStopAtModelDiscontinuity`` the simulation will be stopped 
+  at every discontinuity occurrence and if the ``reportDataAroundDiscontinuities`` argument is set to ``True`` the data data reported
+  at the discontinuity and after the system is reinitialised. The default value for ``reportDataAroundDiscontinuities`` is ``True``.
+  The condition that triggered the discontinuity can be retrieved using the :py:attr:`pyActivity.daeSimulation.LastSatisfiedCondition` 
+  property which returns the :py:class:`pyCore.daeCondition` object.
 
-    Setting up a DAE solver
-    -----------------------
+- :py:meth:`pyActivity.daeSimulation.IntegrateForTimeInterval` integrates the system for the given time interval (in seconds). 
+  Its behaviour can be controlled using the ``stopCriterion`` and ``reportDataAroundDiscontinuities`` arguments in the same way as in the 
+  :py:meth:`~pyActivity.daeSimulation.Integrate` function.
 
-    Setting up a log
-    ----------------
+- :py:meth:`pyActivity.daeSimulation.IntegrateUntilTime` integrates the system until the specified time is reached (in seconds).
+  Its behaviour can be controlled using the ``stopCriterion`` and ``reportDataAroundDiscontinuities`` arguments in the same way as in the 
+  :py:meth:`~pyActivity.daeSimulation.Integrate` function.
+
+- :py:meth:`pyActivity.daeSimulation.ReportData` reports the data at the current time in simulation.
+
+- The functions :py:meth:`pyActivity.daeSimulation.ReSetInitialCondition` and :py:meth:`pyActivity.daeSimulation.ReAssignValue`
+  can be used to re-set the initial conditions and re-assign the values of degrees of freedom. These calls **must** be followed 
+  by a call to the :py:meth:`pyActivity.daeSimulation.ReInitialize` function to reinitialise the system after the variable values 
+  have been modified.
+
+A simple schedule can be found in the :ref:`tutorial7` where the following operating procedure has been specified:
+
+.. code-block:: python
+
+    # The schedule:
+    #  1. Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
+    #     and report the data using the function daeSimulation.ReportData().
+    #  2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions
+    #     the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.
+    #     Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s
+    #     and report the data.
+    #  3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K
+    #     re-initialise the system, run the simulation until the TimeHorizon is reached using the function
+    #     daeSimulation.Integrate() and report the data.
+    def Run(self):
+        # 1. Integrate for 100s
+        self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
+        time = self.IntegrateForTimeInterval(100, eDoNotStopAtDiscontinuity)
+        self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+
+        # 2. Set Qin=2000W and integrate until t=200s
+        self.m.Qin.ReAssignValue(750 * W)
+        self.Reinitialize()
+        self.ReportData(self.CurrentTime)
+        self.Log.Message("OP: Integrating until time = 200 seconds ... ", 0)
+        time = self.IntegrateUntilTime(200, eDoNotStopAtDiscontinuity)
+        self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+
+        # 3. Set Qin=1.5E6 and integrate until the specified TimeHorizon
+        self.m.Qin.ReAssignValue(1000 * W)
+        self.m.T.ReSetInitialCondition(300 * K)
+        self.Reinitialize()
+        self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon))  
+        self.Log.Message("OP: Integrating from " + str(time) + " to the time horizon (" + str(self.TimeHorizon) + ") ... ", 0)
+        time = self.Integrate(eDoNotStopAtDiscontinuity)
+        self.ReportData(self.CurrentTime)
+        self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
+        self.Log.Message("OP: Finished", 0)
+
+In addition, the :ref:`tutorial_adv_1` illustrates interactive schedules where the ``pyQt`` graphical user interface (GUI) 
+is utilised to manipulate the model variables and integrate the system in time:
+
+.. figure:: _static/tutorial_adv_1-screenshot.png
+    :width: 400 pt
+    :align: center
+
+Exploring models using the GUI (Simulation Explorer)
+----------------------------------------------------
+The model structure and the domains/parameters/variables data can be interactively explored and updated using the ``Simulation Explorer`` GUI.
+The ``Simulation Explorer`` can be started using the following code:
+
+.. code-block:: python
+
+    ...
+    # Create and initialize the simulation and the auxiliary objects and
+    # determine the consistent initial conditions using the SolveInitial function.
+    ...
+    simulation.SolveInitial()
+    
+    # Show the simulation explorer GUI
+    app = daeCreateQtApplication(sys.argv)
+    se = daeSimulationExplorer(app, simulation)
+    se.exec_()
+
+or from the ``DAE Toools Simulator`` **Start/Show simulation explorer ad run...** button:
+
+.. figure:: _static/Simulator-StartSimulationExplorer.png
+    :width: 400 pt
+    :align: center
+
+Screenshots of the running ``Simulation Explorer``:
+
+.. figure:: _static/SimulationExplorer1.png
+    :width: 400 pt
+    :align: center
+    
+    Runtime simulation options
+
+.. figure:: _static/SimulationExplorer2.png
+    :width: 400 pt
+    :align: center
+    
+    Parameters values
+    
+.. figure:: _static/SimulationExplorer3.png
+    :width: 400 pt
+    :align: center
+    
+    Initial conditions
+    
+.. figure:: _static/SimulationExplorer4.png
+    :width: 400 pt
+    :align: center
+    
+    Degrees of freedom
+
+    
+Generating code for other modelling languages
+=============================================
+**DAE Tools** can generate code for several modelling or programming languages (Modelica, gPROMS, c99, c++ with MPI).
+The code generation should be performed after the simulation is initialised (ideally after a call to 
+:py:meth:`pyActivity.daeSimulation.SolveInitial` so that the consistent initial conditions are determined and available).
+
+.. code-block:: python
+
+    # Generate Modelica source code:
+    from daetools.code_generators.modelica import daeCodeGenerator_Modelica
+    cg = daeCodeGenerator_Modelica()
+    cg.generateSimulation(simulation, tmp_folder)
+
+    # Generate gPROMS source code:
+    from daetools.code_generators.gproms import daeCodeGenerator_gPROMS
+    cg = daeCodeGenerator_gPROMS()
+    cg.generateSimulation(simulation, tmp_folder)
+
+    # Generate c++ MPI code for 4 nodes:
+    from daetools.code_generators.cxx_mpi import daeCodeGenerator_cxx_mpi
+    cg = daeCodeGenerator_cxx_mpi()
+    cg.generateSimulation(simulation, tmp_folder, 4)
+
+The :py:meth:`~daetools.code_generators.daeCodeGenerator.generateSimulation` function requires an initialised simulation object
+and the directory where the code will be generated.
+
+The code can be also generated from the `Generate code...`` option in the Simulation Explorer GUI:
+
+.. figure:: _static/CodeGeneration.png
+    :width: 400 pt
+    :align: center
+    
+    Code generation from the Simulation Explorer GUI
+    
+For more details on how to use code-generation have a look on :ref:`tutorial_adv_3` and :ref:`tutorial_adv_4`.
+    
+Simulating models in other simulators (co-simulation)
+=====================================================
+**DAE Tools** can also wrap the models developed in python for use in other software/simulators: 
+``FMI`` (Functional Mock-up Interface for co-simulation), ``Matlab``, ``Scilab`` and ``GNU Octave`` *MEX functions*,
+and ``Simulink`` *S-functions*.
+
+Functional Mock-up Interface for co-simulation (FMI)
+----------------------------------------------------
+**DAE Tools** models can be used to generate .fmu files for ``FMI for co-simulation``. 
+
+.. topic:: Nota bene
+    
+        The model inputs are defined by the inlet ports while the model outputs by the outlet ports. 
+        If there are no ports defined in the top-level model the ``FMI`` object 
+        will not have inputs nor outputs.
+
+Generating ``FMU`` files for use in FMI capable simulators is similar to the code-generation procedure:
+
+.. code-block:: python
+
+    # Generate Functional Mock-up Interface for co-simulation file (.fmu)
+    from daetools.code_generators.fmi import daeCodeGenerator_FMI
+    cg = daeCodeGenerator_FMI()
+    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation', '', [])
+
+The :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimulation` function generates a ``simulation name.fmu`` file
+which is basically a zip file with the files required by the ``FMI standard``.
+Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimulation` function requires the following arguments:
+
+- ``simulation``: initialised daeSimulation object
+- ``directory``: directory where the .fmu file will be generated
+- ``py_simulation_file``: a path to the python file with the simulation source code
+- ``callable_object_name``: the name of python callable object that returns an *initialized* :py:class:`~pyActivity.daeSimulation` object
+- ``arguments``: arguments for the above callable object; can be anything that python accepts
+- ``py_additional_files``: paths to the additional files to pack into a .fmu file (empty list by default)
+    
+A sample function that can be used as the ``callable_object_name`` argument (from the :ref:`tutorial_adv_3` example):
+
+.. code-block:: python
+
+    # This function is used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
+    # It can have any number of arguments, but must return an initialized daeSimulation object.
+    def create_simulation():
+        # Create Log, Solver, DataReporter and Simulation object
+        log          = daePythonStdOutLog()
+        daesolver    = daeIDAS()
+        datareporter = daeTCPIPDataReporter()
+        simulation   = simTutorial()
+
+        # Enable reporting of all variables
+        simulation.m.SetReportingOn(True)
+
+        # Set the time horizon and the reporting interval
+        simulation.ReportingInterval = 10
+        simulation.TimeHorizon = 100
+
+        # Connect data reporter
+        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+        if(datareporter.Connect("", simName) == False):
+            sys.exit()
+
+        # Initialize the simulation
+        simulation.Initialize(daesolver, datareporter, log)
+
+        # Nota bene: store the objects since they will be destroyed when they go out of scope
+        simulation.__rt_objects__ = [daesolver, datareporter, log]
+
+        return simulation
+   
+.. _MEX_functions:
+
+MEX functions
+-------------
+In order to simulate **DAE Tools** models from Matlab/Scilab/GNU Octave the wrapper code first needs to be compiled
+from source. The wrapper code is located in the ``daetools/trunk/mex`` directory. The compilation procedure requires
+a compiled ``cdaeSimulationLoader-py[Major][(Minor]`` library (which is a part of **DAE Tools** installation) located in the 
+``daetools/solibs/Platform_Architecture`` directory (i.e. ``daetools/solibs/Windows_win32``). That directory has to be
+made available to the mex compiler and Matlab during runtime:
+
+1. Set environmental variable ``LD_LIBRARY_PATH`` in Matlab (using the ``setenv`` and ``getenv`` commands)
+2. Set ``RPATH`` in the mex file during the linking procedure
+
+For instance, setting the ``LD_LIBRARY_PATH`` environmental variable can be done with the following code:
+
+.. code-block:: bash
+
+    % Note the path separator (; or :)
+    % Windows
+    setenv('LD_LIBRARY_PATH', [getenv('LD_LIBRARY_PATH') ';path to daetools/solibs directory']);
+    % GNU/Linux
+    setenv('LD_LIBRARY_PATH', [getenv('LD_LIBRARY_PATH') ':path to daetools/solibs directory']);
+
+Compilation from ``Matlab`` (for python 2.7):
+
+.. code-block:: bash
+
+  cd mex
+  mex -v -I../simulation_loader -lcdaeSimulationLoader-py27 daetools_mex.c
+
+Compilation from ``GNU Octave`` (for python 2.7):
+
+.. code-block:: bash
+
+  cd mex
+  mkoctfile -v --mex -I../simulation_loader -lcdaeSimulationLoader-py27 daetools_mex.c
+
+Compilation from ``Scilab`` (for python 2.7):
+
+.. code-block:: bash
+
+  cd mex
+  # check the include flag: cflags = -I... and set the correct full path for simulation loader
+  exec('builder.sce')
+  exec('loader.sce')  
+  
+Now the compiled ``daetools_mex`` executable can be used to run **DAE Tools** simulations from ``Matlab``:
+
+.. code-block:: bash
+
+  res = daetools_mex('.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 100.0, 10.0)
+  
+``daetools_mex`` accepts the following arguments:
+
+1. Path to the python file with daetools simulation (char array)
+2. The name of python callable object that returns an *initialized* daeSimulation object (char array)
+3. Arguments for the above callable object; can be anything that python accepts (char array)
+4. Time horizon (double scalar)
+5. Reporting interval (double scalar)
+
+The outputs from the ``daetools_mex`` MEX-function are:
+
+1. Cell array (pairs: {'variable_name', double matrix}).
+   The variables values are put into the caller's workspace as well.
+
+Simulink S-functions
+--------------------
+again. in order to simulate **DAE Tools** models from Simulink the wrapper code first needs to be compiled
+from source. The wrapper code is located in the ``daetools/trunk/mex`` directory. The compilation procedure requires
+a compiled ``cdaeSimulationLoader-py[Major][(Minor]`` library (which is a part of **DAE Tools** installation) located in the 
+``daetools/solibs/Platform_Architecture`` directory (i.e. ``daetools/solibs/Windows_win32``). That directory has to be
+made available to the mex compiler and Matlab during runtime as explained in the :ref:`MEX_functions` section.
+
+Compilation from Simulink (for python 2.7):
+
+.. code-block:: bash
+ 
+  cd mex
+  mex -v -I../simulation_loader  -lcdaeSimulationLoader-py27 daetools_s.c 
+
+Running ``deatools_s`` S-functions:
+
+- Add a new S-Function ('system') from the User-Defined Functions palette.
+- Set its dialog box parameters:
+
+  - S-Function name: daetools_s   
+    (this is a compiled daetools_s.c file, resulting in, for instance, deatools_s.mexa64 binary)
+    
+  - S-Function parameters: see the description below
+  
+    example: '.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 2, 2
+  
+  - S-Function modules: leave blank
+
+As a working example, the file ``test_s_function.mdl`` in ``daetools/trunk/mex`` directory can be used.
+
+``deatools_s`` S-function parameters:
+
+1. Path to the python file with daetools simulation (char array)
+2. The name of python callable object that returns *initialized* daeSimulation object (char array)
+3. Arguments for the above callable object; can be anything that python accepts (char array)
+4. Number of input ports (integer, must match the number of inlet ports in daetools simulation)
+5. Number of output ports (integer, must match the number of outlet ports in daetools simulation)
 
 
-    Optimisation
-    ============
+For more details on how to use co-simulation capabilities have a look on :ref:`tutorial_adv_3`.
 
-    Parameter estimation
-    ====================
+Performing sensitivity analysis
+===============================
+**DAE Tools** can perform the sensitivity analysis to determine the sensitivity of the results
+with respect to the model parameters. At the moment, only the forward sensitivity method from 
+the Sundials IDAS solver is available. To enable integration of sensitivity equations the function
+:py:meth:`pyActivity.daeSimulation.Initialize` must be called with the ``calculateSensitivities`` 
+argument set to true:
 
+.. code-block:: python
+
+    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = True)
+
+and the model parameters specified in the :py:meth:`pyActivity.daeSimulation.SetUpSensitivityAnalysis`
+function using the :py:meth:`pyActivity.daeSimulation.SetSensitivityParameter` method:
+
+.. code-block:: python
+
+    def SetUpSensitivityAnalysis(self):
+        self.SetSensitivityParameter(variable_1)
+        ...
+        self.SetSensitivityParameter(variable_n)
+
+        
+.. topic:: Nota bene
+    
+    The model parameters must be variables with the assigned value (that is to be degrees of freedom)!
+
+Sensitivities can be obtained from a simulation in three different ways:
+
+1. Sensitivities can be reported to a data reporter like any ordinary variable by setting the boolean property 
+   :py:attr:`pyActivity.daeSimulation.ReportSensitivities` to True. In this case, the sensitivities for the 
+   variable ``var`` per parameter ``param`` are reported as ``sensitivities.d(var)_d(param)``.
+   
+   .. figure:: _static/SensitivitiesInDataReporter.png
+       :width: 400 pt
+       :align: center
+    
+2. Raw sensitivity matrices can be saved into a specified directory using the 
+   :py:attr:`pyActivity.daeSimulation.SensitivityDataDirectory` property (before a call to Initialize).
+   The sensitivity matrices are saved in .mmx coordinate format where the first
+   dimensions is ``Nparameters`` and second ``Nvariables``: SensitivityMatrix[Np, Nvars]. 
+   A sample .mmx file is presented below:
+    
+   .. code-block:: none
+
+        %%MatrixMarket matrix coordinate real general
+        % 
+        % DAE Tools Project <www.daetools.com>
+        % Sensitivity Matrix
+        % Sensitivity[Nparams,Nvariables]
+        % 
+        5 10 50
+        1 1 -2.9004504737e+01
+        1 2 -8.3733679839e+01
+        1 3 -4.1538170596e-02
+        1 4  4.1537239313e-02
+        1 5  1.1287303430e-07
+        1 6 -2.5766207604e+01
+        1 7  5.4770712341e+01
+        1 8  2.8060914828e-08
+        1 9  5.4729175102e+01
+        1 10 -7.9034882807e-07
+        2 1  1.8771906965e-07
+        2 2  5.5290105267e-07
+        2 3  1.8378650738e-11
+        2 4 -1.8370419511e-11
+        2 5 -8.9108146146e-16
+        2 6  1.7748128379e-07
+        2 7 -3.6520035344e-07
+        2 8 -2.8498375927e-16
+        2 9 -3.6518198302e-07
+        2 10  7.0551614844e-15
+        3 1 -3.8640265870e+01
+        3 2 -5.8838251520e+01
+        3 3 -2.0952553613e-01
+        3 4  2.0952566550e-01
+        3 5  8.1238992172e-09
+        3 6  1.8232754556e+01
+        3 7  2.0407511315e+01
+        3 8  3.9246875906e-09
+        3 9  2.0197985649e+01
+        3 10  1.4141989734e-07
+        4 1 -2.7922601720e+00
+        4 2  4.3466671902e+00
+        4 3  5.8853009743e-03
+        4 4 -5.8854739133e-03
+        4 5  5.0772388957e-09
+        4 6  9.9370730082e+00
+        4 7 -7.1448128361e+00
+        4 8  1.5213404660e-08
+        4 9 -7.1389273622e+00
+        4 10 -1.5264832301e-07
+        5 1  4.7167859822e-07
+        5 2 -1.1523606862e-07
+        5 3  1.1109868622e-09
+        5 4 -1.1109759689e-09
+        5 5 -1.7971835620e-16
+        5 6 -1.0574822891e-06
+        5 7  5.8580369087e-07
+        5 8 -1.2339627389e-15
+        5 9  5.8691466683e-07
+        5 10  9.4796213703e-15
+   
+3. Directly from the DAE solver after every call to :py:meth:`~pyActivity.daeSimulation.Integrate` functions 
+   using the :py:attr:`pyIDAS.daeIDAS.SensitivityMatrix` property. This property returns a dense matrix as a 
+   :py:class:`~pyIDAS.daeIDAS.daeDenseMatrix` object. The numpy array object can be obtained from the 
+   :py:class:`~pyIDAS.daeIDAS.daeDenseMatrix` using the :py:attr:`~pyIDAS.daeIDAS.daeDenseMatrix.npyValues` property.
+
+For more details on sensitivity analysis have a look on the :ref:`tutorial20`, :ref:`tutorial21` and 
+:ref:`tutorial_che_9` examples.
+
+
+Executing optimisations
+======================
+In general, the optimisation activities use the same model specification and the same simulation setup
+as in the simulation activities.
+However, some additional information are required:
+
+1. The objective function
+2. Optimisation variables
+3. Optimisation constraints
+
+These information are specified in the :py:meth:`pyActivity.daeSimulation.SetUpOptimization` function.
+
+Specifying the objective function
+---------------------------------
+By default, for optimisation runs a single objective function object is declared.
+If more than one objective function is required they can be added using the 
+:py:attr:`pyActivity.daeSimulation.NumberOfObjectiveFunctions` integer property.
+It is assumed that the optimisation solver tries to perform a minimisation.
+The objective function can be accessed by using the :py:attr:`pyActivity.daeSimulation.ObjectiveFunction` property
+and its residual set as in ordinary equations.
+
+.. code-block:: python
+
+    def SetUpOptimization(self):
+        # x1, x2 and x3 are optimisation variables (assigned variables, that is degrees of freedom).
+        
+        # The ObjectiveFunction object is automatically created by the framework
+        # and only its residual needs to be specified.
+        self.ObjectiveFunction.Residual = self.m.x1() + self.m.x2() + self.m.x3()
+
+Specifying optimisation variables
+---------------------------------
+There are three types of optimisation variables in **DAE Tools**:
+
+1. Continuous (the function :py:meth:`pyActivity.daeSimulation.SetContinuousOptimizationVariable`)
+2. Integer (the function :py:meth:`pyActivity.daeSimulation.SetIntegerOptimizationVariable`)
+3. Binary (value 0 or 1) (the function :py:meth:`pyActivity.daeSimulation.SetBinaryOptimizationVariable`)
+
+.. code-block:: python
+
+    def SetUpOptimization(self):
+        # x1, x2 and x3 are optimisation variables (assigned variables, that is degrees of freedom).
+        
+        # Continuous optimisation variable: (lower bound, upper bound and the starting point as floats)
+        self.ov1 = self.SetContinuousOptimizationVariable(self.m.x1, 0.0, 10.0, 1.5);
+
+        # Integer optimisation variable: (lower bound, upper bound and the starting point as integers)
+        self.ov2 = self.SetIntegerOptimizationVariable(self.m.x2, 1, 5, 2)
+        
+        # Binary optimisation variable: (the starting point)
+        self.ov3 = self.SetBinaryOptimizationVariable(self.m.x3, 0)
+
+Specifying optimisation constraints
+-----------------------------------
+There are three types of optimisation constraints in **DAE Tools**:
+
+1. Inequality (the function :py:meth:`pyActivity.daeSimulation.CreateInequalityConstraint`)
+2. Equality (the function :py:meth:`pyActivity.daeSimulation.CreateEqualityConstraint`)
+
+Constraints in **DAE Tools** are similar to ordinary equations.
+
+.. code-block:: python
+
+    def SetUpOptimization(self):
+        # x1, x2 and x3 are optimisation variables (assigned variables, that is degrees of freedom).
+
+        # Inequality constraint: g(i) <= 0)
+        # The constraint: x1 >= 25 in daetools becomes: 25 - x1 <= 0
+        self.c1 = self.CreateInequalityConstraint("Constraint 1")
+        self.c1.Residual = 25 - self.m.x1()
+
+        # Equality constraint: h(i) = 0
+        # The constraint: x2 + x3 == 10 in daetools becomes: x2 + x3 - 10 <= 0
+        self.c2 = self.CreateEqualityConstraint("Constraint 2")
+        self.c2.Residual = self.m.x1() + self.m.x2() - 10
     

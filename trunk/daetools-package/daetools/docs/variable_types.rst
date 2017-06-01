@@ -40,7 +40,7 @@ Overview
 
 .. autoattribute:: daetools.pyDAE.variable_types.specific_heat_capacity_t
 .. autoattribute:: daetools.pyDAE.variable_types.density_t
-.. autoattribute:: daetools.pyDAE.variable_types.specific_heat_conductivity_t
+.. autoattribute:: daetools.pyDAE.variable_types.thermal_conductivity_t
 .. autoattribute:: daetools.pyDAE.variable_types.dynamic_viscosity_t
 .. autoattribute:: daetools.pyDAE.variable_types.diffusivity_t
 

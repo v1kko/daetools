@@ -15,6 +15,7 @@ Tutorials
 .. _tutorials_basic:
 
 .. rubric:: Basic Tutorials
+
 The `Basic Tutorials <tutorials-basic.html>`_ illustrate the fundamental modelling concepts in **DAE Tools**,
 simulation options, use of data reporter, data receiver and log objects, DAE and LA solvers, interoperability
 with NumPy, support for discrete systems and external functions.
@@ -23,6 +24,7 @@ with NumPy, support for discrete systems and external functions.
 .. _tutorials_advanced:
 
 .. rubric:: Advanced Tutorials
+
 The `Advanced Tutorials <tutorials-advanced.html>`_ illustrate the advanced **DAE Tools**
 features such as solution of the discretized population balance equations using high resolution
 upwind schemes with flux limiter, modelling of lithium-ion battery based on porous electrode theory,
@@ -32,6 +34,7 @@ interactive operating procedures, code-generation/co-simulation/model-exchange c
 .. _tutorials_fe:
 
 .. rubric:: Finite Element Tutorials
+
 The `Finite Element Tutorials <tutorials-fe.html>`_ illustrate the support for finite element
 method in **DAE Tools** through the deal.II library.
 
@@ -39,6 +42,7 @@ method in **DAE Tools** through the deal.II library.
 .. _tutorials_optimisation:
 
 .. rubric:: Optimisation Tutorials
+
 The `Optimisation Tutorials <tutorials-optimisation.html>`_ illustrate **DAE Tools** capabilities
 to solve NLP/MINLP optimisation and parameter estimation problems.
 
@@ -46,6 +50,7 @@ to solve NLP/MINLP optimisation and parameter estimation problems.
 .. _tutorials_chemeng:
 
 .. rubric:: Chemical Engineering Examples
+
 The `Chemical Engineering Examples <tutorials-chemeng.html>`_ illustrate various chemical engineering
 problems solved by **DAE Tools**.
 
@@ -53,6 +58,7 @@ problems solved by **DAE Tools**.
 .. _tutorials_chemeng_optimisation:
 
 .. rubric:: Chemical Engineering Optimisation Examples
+
 The `Chemical Engineering Optimisation Examples <tutorials-chemeng-optimisation.html>`_ illustrate various
 chemical engineering optimisation problems solved by **DAE Tools**. This section contains 5
 `Constrained Optimization Problem Set (COPS) <http://www.mcs.anl.gov/~more/cops>`_ optimisation,

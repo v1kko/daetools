@@ -43,9 +43,9 @@ The concentrations plot (u6, u8):
 The sensitivities plot (k2*du1/dk2, k2*du2/dk2, k2*du3/dk2, k2*du4/dk2, k2*du5/dk2):
 
 .. image:: _static/tutorial_che_9-results3.png
-   :width: 700px
+   :width: 800px
 """
-import os, sys, math, numpy, scipy, scipy.io
+import os, sys, tempfile, math, numpy, scipy, scipy.io
 from time import localtime, strftime
 from daetools.pyDAE import *
 import matplotlib.pyplot as plt
@@ -55,7 +55,7 @@ import matplotlib.pyplot as plt
 u_t   = daeVariableType("u_t",      mol/kg,    -1.0e+20, 1.0e+20,  0.0, 1e-10)
 k_t   = daeVariableType("k_t",  kg/(mol*s),    -1.0e+20, 1.0e+20,  0.0, 1e-5)
 kn_t  = daeVariableType("kn_t",    s**(-1),    -1.0e+20, 1.0e+20,  0.0, 1e-5)
-Keq_t = daeVariableType("u_t",      mol/kg,    -1.0e+20, 1.0e+20,  0.0, 1e-5)
+Keq_t = daeVariableType("Keq_t",    mol/kg,    -1.0e+20, 1.0e+20,  0.0, 1e-5)
 
 class modTutorial(daeModel):
     def __init__(self,Name,Parent=None,Description=""):
@@ -189,8 +189,8 @@ class simTutorial(daeSimulation):
         self.SetSensitivityParameter(self.m.k2)
         self.SetSensitivityParameter(self.m.k3)
         self.SetSensitivityParameter(self.m.k3n)
-     
     
+    """
     def Run(self):
         # The user-defined Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix
         # The default Run() function is re-implemented here (just the very basic version)
@@ -218,11 +218,29 @@ class simTutorial(daeSimulation):
         k3n_i = 4
         
         times = []
+        du1_dk1 = []
+        du2_dk1 = []
+        du3_dk1 = []
+        du4_dk1 = []
+        du5_dk1 = []
+        
         du1_dk2 = []
         du2_dk2 = []
         du3_dk2 = []
         du4_dk2 = []
         du5_dk2 = []
+        
+        du1_dk3 = []
+        du2_dk3 = []
+        du3_dk3 = []
+        du4_dk3 = []
+        du5_dk3 = []
+        
+        du1_dk3n = []
+        du2_dk3n = []
+        du3_dk3n = []
+        du4_dk3n = []
+        du5_dk3n = []
         
         while self.CurrentTime < self.TimeHorizon:
             dt = self.ReportingInterval
@@ -246,45 +264,90 @@ class simTutorial(daeSimulation):
             # using the __call__ function from the daeDenseMatrix class or from the numpy array.
             # Nota bene:
             #   Using daeDenseMatrix is faster since it does not copy the matrix data into the numpy array.
-            du1_dk2.append(sm(k2_i, u1_bi))   # use daeDenseMatrix.__call__ function
-            du2_dk2.append(ndsm[k2_i, u2_bi]) # use numpy array
+            du1_dk1.append(  sm(k1_i, u1_bi)) # use daeDenseMatrix.__call__ function
+            du2_dk1.append(ndsm[k1_i, u2_bi]) # use numpy array
+            du3_dk1.append(ndsm[k1_i, u3_bi])
+            du4_dk1.append(ndsm[k1_i, u4_bi])
+            du5_dk1.append(ndsm[k1_i, u5_bi])
+            
+            du1_dk2.append(ndsm[k2_i, u1_bi])
+            du2_dk2.append(ndsm[k2_i, u2_bi])
             du3_dk2.append(ndsm[k2_i, u3_bi])
             du4_dk2.append(ndsm[k2_i, u4_bi])
             du5_dk2.append(ndsm[k2_i, u5_bi])
+            
+            du1_dk3.append(ndsm[k3_i, u1_bi])
+            du2_dk3.append(ndsm[k3_i, u2_bi])
+            du3_dk3.append(ndsm[k3_i, u3_bi])
+            du4_dk3.append(ndsm[k3_i, u4_bi])
+            du5_dk3.append(ndsm[k3_i, u5_bi])
+            
+            du1_dk3n.append(ndsm[k3n_i, u1_bi])
+            du2_dk3n.append(ndsm[k3n_i, u2_bi])
+            du3_dk3n.append(ndsm[k3n_i, u3_bi])
+            du4_dk3n.append(ndsm[k3n_i, u4_bi])
+            du5_dk3n.append(ndsm[k3n_i, u5_bi])
 
-        self.Log.Message('The simulation has finished succesfully!', 0)
+        self.Log.Message('The simulation has finished successfully!', 0)
         
         # Transform time into hours
         times = numpy.array(times) / 3600
         
         # Multiply all results with k2
-        k2 = self.m.k2.GetValue()
-        du1_dk2 = k2 * numpy.array(du1_dk2)
-        du2_dk2 = k2 * numpy.array(du2_dk2)
-        du3_dk2 = k2 * numpy.array(du3_dk2)
-        du4_dk2 = k2 * numpy.array(du4_dk2)
-        du5_dk2 = k2 * numpy.array(du5_dk2)
+        k1  = self.m.k1.GetValue()
+        k1n = self.m.k1n.GetValue()
+        k2  = self.m.k2.GetValue()
+        k3  = self.m.k3.GetValue()
+        k3n = -self.m.k3n.GetValue() # Why all sensitivities per k3n are inverted??
 
-        fontsize = 14
-        fontsize_suptitle = 16
-        fontsize_legend = 11
-        
-        plt.figure(figsize=(8,6), facecolor='white')
-        plt.suptitle('Sensitivities from the DAESolver.SensitivityMatrix', fontsize=fontsize_suptitle)
-        plt.plot(times, du1_dk2, label=r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$')
-        plt.plot(times, du2_dk2, label=r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$')
-        plt.plot(times, du3_dk2, label=r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$')
-        plt.plot(times, du4_dk2, label=r'$k_2 \frac{\partial u_4(t)}{\partial k_2}$')
-        plt.plot(times, du5_dk2, label=r'$k_2 \frac{\partial u_5(t)}{\partial k_2}$')
-        plt.xlabel('Time (hr)', fontsize=fontsize)
-        plt.ylabel('k2*du/dk', fontsize=fontsize)
-        plt.legend(fontsize=fontsize_legend)
-        plt.grid(b=True, which='both', color='0.65',linestyle='-')
-        
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.9)
-        plt.show()
-    
+        k1_du1_dk1 = k1 * numpy.array(du1_dk1)
+        k1_du2_dk1 = k1 * numpy.array(du2_dk1)
+        k1_du3_dk1 = k1 * numpy.array(du3_dk1)
+        k1_du4_dk1 = k1 * numpy.array(du4_dk1)
+        k1_du5_dk1 = k1 * numpy.array(du5_dk1)
+
+        k2_du1_dk2 = k2 * numpy.array(du1_dk2)
+        k2_du2_dk2 = k2 * numpy.array(du2_dk2)
+        k2_du3_dk2 = k2 * numpy.array(du3_dk2)
+        k2_du4_dk2 = k2 * numpy.array(du4_dk2)
+        k2_du5_dk2 = k2 * numpy.array(du5_dk2)
+
+        k3_du1_dk3 = k3 * numpy.array(du1_dk3)
+        k3_du2_dk3 = k3 * numpy.array(du2_dk3)
+        k3_du3_dk3 = k3 * numpy.array(du3_dk3)
+        k3_du4_dk3 = k3 * numpy.array(du4_dk3)
+        k3_du5_dk3 = k3 * numpy.array(du5_dk3)
+
+        k3n_du1_dk3n = k3n * numpy.array(du1_dk3n)
+        k3n_du2_dk3n = k3n * numpy.array(du2_dk3n)
+        k3n_du3_dk3n = k3n * numpy.array(du3_dk3n)
+        k3n_du4_dk3n = k3n * numpy.array(du4_dk3n)
+        k3n_du5_dk3n = k3n * numpy.array(du5_dk3n)
+
+        plot(times,
+             k1, k2, k3, k3n,
+             k1_du1_dk1,
+             k1_du2_dk1,
+             k1_du3_dk1,
+             k1_du4_dk1,
+             k1_du5_dk1,
+             k2_du1_dk2,
+             k2_du2_dk2,
+             k2_du3_dk2,
+             k2_du4_dk2,
+             k2_du5_dk2,    
+             k3_du1_dk3,
+             k3_du2_dk3,
+             k3_du3_dk3,
+             k3_du4_dk3,
+             k3_du5_dk3,    
+             k3n_du1_dk3n,
+             k3n_du2_dk3n,
+             k3n_du3_dk3n,
+             k3n_du4_dk3n,
+             k3n_du5_dk3n,
+             'Sensitivities from DAESolver.SensitivityMatrix')
+    """
     
 def run():
     log          = daePythonStdOutLog()
@@ -295,6 +358,9 @@ def run():
     dr_data      = daeNoOpDataReporter()
     datareporter.AddDataReporter(dr_tcpip)
     datareporter.AddDataReporter(dr_data)
+
+    # Do no print progress
+    log.PrintProgress = False
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -313,6 +379,8 @@ def run():
         sys.exit()
 
     # Initialize the simulation
+    # The .mmx files with the sensitivity matrices will not be saved in this example.
+    #simulation.SensitivityDataDirectory = tempfile.mkdtemp(suffix = '-sensitivities', prefix = 'tutorial_che_9-')
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = True)
 
     # Save the model report and the runtime model report
@@ -326,52 +394,191 @@ def run():
     simulation.Run()
     simulation.Finalize()
 
-    ###############################################################################################################
-    # Plot the Figure 6. from the article using the data reporter (sensitivities of u1, u2, u3, u4 and u5 per k2) #
-    ###############################################################################################################
+    ###########################################################################
+    # Plot the Figures 4, 6, 7 and 8 from the article using the data reporter #
+    ###########################################################################
     # Get a dictionary with the reported variables
     variables = dr_data.Process.dictVariables
 
-    # An auxiliary function to format a name of a sensitivity variable
-    def sensitivity_variable_name(variable, parameter): 
-        return 'tutorial_che_9.sensitivities.d(%s)_d(%s)' % (variable, parameter)
-    k2_name = 'tutorial_che_9.k2'
+    # Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).
+    # daeDataReceiverVariable class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).
+    def sensitivity(variableName, parameterName): 
+        return variables['tutorial_che_9.sensitivities.d(%s)_d(%s)' % (variableName, parameterName)]
+    def variable(variableName):
+        return variables['tutorial_che_9.%s' % variableName]
 
     # Get the daeDataReceiverVariable objects from the dictionary.
-    # This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)
-    k2_var      = variables[k2_name]
-    du1_dk2_var = variables[sensitivity_variable_name('u1', 'k2')]
-    du2_dk2_var = variables[sensitivity_variable_name('u2', 'k2')]
-    du3_dk2_var = variables[sensitivity_variable_name('u3', 'k2')]
-    du4_dk2_var = variables[sensitivity_variable_name('u4', 'k2')]
-    du5_dk2_var = variables[sensitivity_variable_name('u5', 'k2')]
+    k1_var      =    variable('k1')
+    k1n_var     =    variable('k1n')
+    k2_var      =    variable('k2')
+    k3_var      =    variable('k3')
+    k3n_var     =    variable('k3n')
     
+    du1_dk1_var = sensitivity('u1', 'k1')
+    du2_dk1_var = sensitivity('u2', 'k1')
+    du3_dk1_var = sensitivity('u3', 'k1')
+    du4_dk1_var = sensitivity('u4', 'k1')
+    du5_dk1_var = sensitivity('u5', 'k1')
+    
+    du1_dk2_var = sensitivity('u1', 'k2')
+    du2_dk2_var = sensitivity('u2', 'k2')
+    du3_dk2_var = sensitivity('u3', 'k2')
+    du4_dk2_var = sensitivity('u4', 'k2')
+    du5_dk2_var = sensitivity('u5', 'k2')
+    
+    du1_dk3_var = sensitivity('u1', 'k3')
+    du2_dk3_var = sensitivity('u2', 'k3')
+    du3_dk3_var = sensitivity('u3', 'k3')
+    du4_dk3_var = sensitivity('u4', 'k3')
+    du5_dk3_var = sensitivity('u5', 'k3')
+
+    du1_dk3n_var = sensitivity('u1', 'k3n')
+    du2_dk3n_var = sensitivity('u2', 'k3n')
+    du3_dk3n_var = sensitivity('u3', 'k3n')
+    du4_dk3n_var = sensitivity('u4', 'k3n')
+    du5_dk3n_var = sensitivity('u5', 'k3n')
+
     # Transform time points into hours (x axis)
     times = k2_var.TimeValues / 3600
     
     # Get sensitivities du/dk2 and multiply them with k2 (y axis)
-    k2      = k2_var.Values[0]
-    du1_dk2 = k2 * du1_dk2_var.Values
-    du2_dk2 = k2 * du2_dk2_var.Values
-    du3_dk2 = k2 * du3_dk2_var.Values
-    du4_dk2 = k2 * du4_dk2_var.Values
-    du5_dk2 = k2 * du5_dk2_var.Values
-
+    k1      = k1_var.Values
+    k1n     = k1n_var.Values
+    k2      = k2_var.Values
+    k3      = k3_var.Values
+    k3n     = -k3n_var.Values # Why all sensitivities per k3n are inverted??
+    
+    k1_du1_dk1 = k1 * du1_dk1_var.Values
+    k1_du2_dk1 = k1 * du2_dk1_var.Values
+    k1_du3_dk1 = k1 * du3_dk1_var.Values
+    k1_du4_dk1 = k1 * du4_dk1_var.Values
+    k1_du5_dk1 = k1 * du5_dk1_var.Values
+    
+    k2_du1_dk2 = k2 * du1_dk2_var.Values
+    k2_du2_dk2 = k2 * du2_dk2_var.Values
+    k2_du3_dk2 = k2 * du3_dk2_var.Values
+    k2_du4_dk2 = k2 * du4_dk2_var.Values
+    k2_du5_dk2 = k2 * du5_dk2_var.Values
+    
+    k3_du1_dk3 = k3 * du1_dk3_var.Values
+    k3_du2_dk3 = k3 * du2_dk3_var.Values
+    k3_du3_dk3 = k3 * du3_dk3_var.Values
+    k3_du4_dk3 = k3 * du4_dk3_var.Values
+    k3_du5_dk3 = k3 * du5_dk3_var.Values
+    
+    k3n_du1_dk3n = k3n * du1_dk3n_var.Values
+    k3n_du2_dk3n = k3n * du2_dk3n_var.Values
+    k3n_du3_dk3n = k3n * du3_dk3n_var.Values
+    k3n_du4_dk3n = k3n * du4_dk3n_var.Values
+    k3n_du5_dk3n = k3n * du5_dk3n_var.Values
+    
+    plot(times,
+         k1, k2, k3, k3n,
+         k1_du1_dk1,
+         k1_du2_dk1,
+         k1_du3_dk1,
+         k1_du4_dk1,
+         k1_du5_dk1,
+         k2_du1_dk2,
+         k2_du2_dk2,
+         k2_du3_dk2,
+         k2_du4_dk2,
+         k2_du5_dk2,    
+         k3_du1_dk3,
+         k3_du2_dk3,
+         k3_du3_dk3,
+         k3_du4_dk3,
+         k3_du5_dk3,    
+         k3n_du1_dk3n,
+         k3n_du2_dk3n,
+         k3n_du3_dk3n,
+         k3n_du4_dk3n,
+         k3n_du5_dk3n,
+         'Sensitivities from DataReporter')
+    
+def plot(times,
+         k1, k2, k3, k3n,
+         k1_du1_dk1,
+         k1_du2_dk1,
+         k1_du3_dk1,
+         k1_du4_dk1,
+         k1_du5_dk1,
+         k2_du1_dk2,
+         k2_du2_dk2,
+         k2_du3_dk2,
+         k2_du4_dk2,
+         k2_du5_dk2,    
+         k3_du1_dk3,
+         k3_du2_dk3,
+         k3_du3_dk3,
+         k3_du4_dk3,
+         k3_du5_dk3,    
+         k3n_du1_dk3n,
+         k3n_du2_dk3n,
+         k3n_du3_dk3n,
+         k3n_du4_dk3n,
+         k3n_du5_dk3n,
+         title):
+    # Plots Figures 4, 6,  and 8 from the Stewart's article
+    
     fontsize = 14
     fontsize_suptitle = 16
     fontsize_legend = 11
     
-    plt.figure(figsize=(8,6), facecolor='white')
-    plt.suptitle('Sensitivities from the DataReporter', fontsize=fontsize_suptitle)
-    plt.plot(times, du1_dk2, label=r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$')
-    plt.plot(times, du2_dk2, label=r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$')
-    plt.plot(times, du3_dk2, label=r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$')
-    plt.plot(times, du4_dk2, label=r'$k_2 \frac{\partial u_4(t)}{\partial k_2}$')
-    plt.plot(times, du5_dk2, label=r'$k_2 \frac{\partial u_5(t)}{\partial k_2}$')
+    plt.figure(figsize=(10,7), facecolor='white')
+    plt.suptitle(title, fontsize=fontsize_suptitle)
+    
+    # Figure 4.
+    ax = plt.subplot(221)
+    ax.set_title('Figure 4.', fontsize=fontsize)
+    plt.plot(times, k1_du1_dk1, label=r'$k_1 \frac{\partial u_1(t)}{\partial k_1}$')
+    plt.plot(times, k1_du2_dk1, label=r'$k_1 \frac{\partial u_2(t)}{\partial k_1}$')
+    plt.plot(times, k1_du3_dk1, label=r'$k_1 \frac{\partial u_3(t)}{\partial k_1}$')
+    plt.plot(times, k1_du4_dk1, label=r'$k_1 \frac{\partial u_4(t)}{\partial k_1}$')
+    plt.plot(times, k1_du5_dk1, label=r'$k_1 \frac{\partial u_5(t)}{\partial k_1}$')
     plt.xlabel('Time (hr)', fontsize=fontsize)
-    plt.ylabel('k2*du/dk', fontsize=fontsize)
-    plt.legend(fontsize=fontsize_legend)
-    plt.grid(b=True, which='both', color='0.65',linestyle='-')
+    plt.ylabel('k1*du/dk1', fontsize=fontsize)
+    plt.legend(loc=7, fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65', linestyle='-')
+    
+    # Figure 6.
+    ax = plt.subplot(222)
+    ax.set_title('Figure 6.', fontsize=fontsize)
+    plt.plot(times, k2_du1_dk2, label=r'$k_2 \frac{\partial u_1(t)}{\partial k_2}$')
+    plt.plot(times, k2_du2_dk2, label=r'$k_2 \frac{\partial u_2(t)}{\partial k_2}$')
+    plt.plot(times, k2_du3_dk2, label=r'$k_2 \frac{\partial u_3(t)}{\partial k_2}$')
+    plt.plot(times, k2_du4_dk2, label=r'$k_2 \frac{\partial u_4(t)}{\partial k_2}$')
+    plt.plot(times, k2_du5_dk2, label=r'$k_2 \frac{\partial u_5(t)}{\partial k_2}$')
+    plt.xlabel('Time (hr)', fontsize=fontsize)
+    plt.ylabel('k2*du/dk2', fontsize=fontsize)
+    plt.legend(loc=7, fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65', linestyle='-')
+    
+    # Figure 7.
+    ax = plt.subplot(223)
+    ax.set_title('Figure 7.', fontsize=fontsize)
+    plt.plot(times, k3_du1_dk3, label=r'$k_3 \frac{\partial u_1(t)}{\partial k_3}$')
+    plt.plot(times, k3_du2_dk3, label=r'$k_3 \frac{\partial u_2(t)}{\partial k_3}$')
+    plt.plot(times, k3_du3_dk3, label=r'$k_3 \frac{\partial u_3(t)}{\partial k_3}$')
+    plt.plot(times, k3_du4_dk3, label=r'$k_3 \frac{\partial u_4(t)}{\partial k_3}$')
+    plt.plot(times, k3_du5_dk3, label=r'$k_3 \frac{\partial u_5(t)}{\partial k_3}$')
+    plt.xlabel('Time (hr)', fontsize=fontsize)
+    plt.ylabel('k3*du/dk3', fontsize=fontsize)
+    plt.legend(loc=7, fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65', linestyle='-')
+    
+    # Figure 8.
+    ax = plt.subplot(224)
+    ax.set_title('Figure 8.', fontsize=fontsize)
+    plt.plot(times, k3n_du1_dk3n, label=r'$k_{-3} \frac{\partial u_1(t)}{\partial k_{-3}}$')
+    plt.plot(times, k3n_du2_dk3n, label=r'$k_{-3} \frac{\partial u_2(t)}{\partial k_{-3}}$')
+    plt.plot(times, k3n_du3_dk3n, label=r'$k_{-3} \frac{\partial u_3(t)}{\partial k_{-3}}$')
+    plt.plot(times, k3n_du4_dk3n, label=r'$k_{-3} \frac{\partial u_4(t)}{\partial k_{-3}}$')
+    plt.plot(times, k3n_du5_dk3n, label=r'$k_{-3} \frac{\partial u_5(t)}{\partial k_{-3}}$')
+    plt.xlabel('Time (hr)', fontsize=fontsize)
+    plt.ylabel('k_3*du/dk_3', fontsize=fontsize)
+    plt.legend(loc=7, fontsize=fontsize_legend)
+    plt.grid(b=True, which='both', color='0.65', linestyle='-')
     
     plt.tight_layout()
     plt.subplots_adjust(top=0.9)

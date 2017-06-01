@@ -646,6 +646,13 @@ BOOST_PYTHON_MODULE(pyCore)
         .def(real_t() >= self)
         .def(real_t() != self)
 
+        // Functions __bool__ and __nonzero__ are also used by operators __and__, __or__ and __not__
+        // For instance, the expression 'a1 and a2' is evaluated as:
+        //  - in python3: 'bool(a1) and bool(a2)'
+        //  - in python2: 'nonzero(a1) and nonzero(a2)'
+        .def("__bool__",    &daepython::ad_bool)     // bool(adouble) used in python 3.x
+        .def("__nonzero__", &daepython::ad_nonzero)  // nonzero(adouble) used in python 2.x
+
         // True division operator (/), mostly used by numpy
         .def("__truediv__",  &daepython::ad_true_divide1)   // adouble / adouble
         .def("__truediv__",  &daepython::ad_true_divide2)   // adouble / real_t
@@ -715,7 +722,6 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Pow",   &daepython::ad_pow2);
     def("Pow",   &daepython::ad_pow3);
 
-// Python built-in functions
     def("Abs",   &daepython::ad_abs);
     def("Min",   &daepython::ad_min1);
     def("Min",   &daepython::ad_min2);
@@ -723,6 +729,7 @@ BOOST_PYTHON_MODULE(pyCore)
     def("Max",   &daepython::ad_max1);
     def("Max",   &daepython::ad_max2);
     def("Max",   &daepython::ad_max3);
+
     def("dt",	 &daepython::ad_dt, (arg("ad")), DOCSTR_dt);
     def("d",	 &daepython::ad_d,  (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d);
     def("d2",    &daepython::ad_d2, (arg("ad"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2);
@@ -784,6 +791,48 @@ BOOST_PYTHON_MODULE(pyCore)
         .def(adouble() - self)
         .def(adouble() * self)
         .def(adouble() / self)
+
+        // Functions __bool__ and __nonzero__ are also used by operators __and__, __or__ and __not__
+        // For instance, the expression 'a1 and a2' is evaluated as:
+        //  - in python3: 'bool(a1) and bool(a2)'
+        //  - in python2: 'nonzero(a1) and nonzero(a2)'
+        .def("__bool__",    &daepython::adarr_bool)     // bool(adouble_array) used in python 3.x
+        .def("__nonzero__", &daepython::adarr_nonzero)  // nonzero(adouble_array) used in python 2.x
+
+        // True division operator (/), mostly used by numpy
+        .def("__truediv__",  &daepython::adarr_true_divide1)   // adouble_array / adouble_array
+        .def("__truediv__",  &daepython::adarr_true_divide2)   // adouble_array / real_t
+        .def("__truediv__",  &daepython::adarr_true_divide3)   // real_t  / adouble_array
+
+        // Floor division operator (//), mostly used by numpy
+        .def("__floordiv__", &daepython::adarr_floor_divide1)  // adouble_array // adouble
+        .def("__floordiv__", &daepython::adarr_floor_divide2)  // adouble_array // real_t
+        .def("__floordiv__", &daepython::adarr_floor_divide3)  // real_t  // adouble_array
+
+        .def("exp",     &daepython::adarr_exp)
+        .def("log",     &daepython::adarr_log)
+        .def("log10",   &daepython::adarr_log10)
+        .def("sqrt",    &daepython::adarr_sqrt)
+        .def("sin",     &daepython::adarr_sin)
+        .def("cos",     &daepython::adarr_cos)
+        .def("tan",     &daepython::adarr_tan)
+        .def("arcsin",  &daepython::adarr_asin)
+        .def("arccos",  &daepython::adarr_acos)
+        .def("arctan",  &daepython::adarr_atan)
+
+        .def("sinh",    &daepython::adarr_sinh)
+        .def("cosh",    &daepython::adarr_cosh)
+        .def("tanh",    &daepython::adarr_tanh)
+        .def("arcsinh", &daepython::adarr_asinh)
+        .def("arccosh", &daepython::adarr_acosh)
+        .def("arctanh", &daepython::adarr_atanh)
+        .def("arctan2", &daepython::adarr_atan2)
+        .def("erf",     &daepython::adarr_erf)
+
+        .def("abs",    &daepython::adarr_abs)
+        .def("fabs",   &daepython::adarr_abs)
+        .def("ceil",   &daepython::adarr_ceil)
+        .def("floor",  &daepython::adarr_floor)
     ;
 
     def("Exp",		&daepython::adarr_exp);

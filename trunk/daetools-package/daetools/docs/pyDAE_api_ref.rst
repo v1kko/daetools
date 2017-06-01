@@ -12,7 +12,7 @@ pyDAE API Reference
     DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 3 
 
    core
    finite_element

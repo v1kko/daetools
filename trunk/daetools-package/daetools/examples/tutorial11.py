@@ -105,7 +105,7 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        # For readibility, get the adouble objects from parameters/variables
+        # For readability, get the adouble objects from parameters/variables
         # and create numpy arrays for T and its derivatives in tim and space
         # This will also save a lot of memory (no duplicate adouble objects in equations)
         Nx  = self.x.NumberOfPoints

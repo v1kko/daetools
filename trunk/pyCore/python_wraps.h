@@ -312,6 +312,10 @@ const adouble ad_min1(const adouble &a, const adouble &b);
 const adouble ad_min2(real_t v, const adouble &a);
 const adouble ad_min3(const adouble &a, real_t v);
 
+bool ad_not(const adouble &a);
+bool ad_nonzero(const adouble &a);
+bool ad_bool(const adouble &a);
+
 const adouble ad_dt(const adouble& a);
 
 const adouble ad_d(const adouble&           a,
@@ -342,6 +346,17 @@ const adouble_array adarr_FromList(boost::python::list lValues);
 /*******************************************************
     adouble_array
 *******************************************************/
+bool adarr_not(const adouble_array &a);
+bool adarr_nonzero(const adouble_array &a);
+bool adarr_bool(const adouble_array &a);
+
+const adouble_array adarr_true_divide1(const adouble_array &a, const adouble_array &b);
+const adouble_array adarr_true_divide2(const adouble_array &a, const real_t v);
+const adouble_array adarr_true_divide3(const real_t v, const adouble_array &a);
+const adouble_array adarr_floor_divide1(const adouble_array &a, const adouble_array &b);
+const adouble_array adarr_floor_divide2(const adouble_array &a, const real_t v);
+const adouble_array adarr_floor_divide3(const real_t v, const adouble_array &a);
+
 const adouble_array adarr_exp(const adouble_array& a);
 const adouble_array adarr_sqrt(const adouble_array& a);
 const adouble_array adarr_log(const adouble_array& a);

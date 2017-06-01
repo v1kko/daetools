@@ -1,7 +1,7 @@
 #include "math.h"
 #include "simulation_loader_c.h"
 
-/* In c90 bool is not a native type, and true/false are not defined
+/* In c99 bool is not a native type, and true/false are not defined
 #ifndef false
 #define false 0
 #define true  1

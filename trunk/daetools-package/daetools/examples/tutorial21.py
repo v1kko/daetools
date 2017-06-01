@@ -118,7 +118,7 @@ class simTutorial(daeSimulation):
         self.SetSensitivityParameter(self.m.p2)
         
     def Run(self):
-        # The user-defind Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix
+        # The user-defined Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix
         
         # Concentrations block indexes required to access the data in the sensitivity matrix.
         # The property variable.BlockIndexes is ndarray with block indexes for all points in the variable.
@@ -188,7 +188,7 @@ class simTutorial(daeSimulation):
         fontsize_legend = 11
         
         plt.figure(figsize=(8,4), facecolor='white')
-        plt.suptitle('Sensitivities from the DAESolver.SensitivityMatrix', fontsize=fontsize_suptitle)
+        plt.suptitle('Sensitivities from DAESolver.SensitivityMatrix', fontsize=fontsize_suptitle)
         ax = plt.subplot(121)
         ax.set_title('Numerical sensitivities')
         plt.plot(times, dy1_dp1, label=r'$\frac{\partial y_1(t)}{\partial p_1}$')
@@ -264,33 +264,34 @@ def run():
     # Get a dictionary with the reported variables
     variables = dr_data.Process.dictVariables
 
-    # Auxiliary functions to format a name of a variable or a sensitivity variable
-    def variable_name(variable): 
-        return 'tutorial21.%s' % variable
-    def sensitivity_variable_name(variable, parameter): 
-        return 'tutorial21.sensitivities.d(%s)_d(%s)' % (variable, parameter)
+    # Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).
+    # daeDataReceiverVariable class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).
+    def sensitivity(variableName, parameterName): 
+        return variables['tutorial21.sensitivities.d(%s)_d(%s)' % (variableName, parameterName)]
+    def variable(variableName):
+        return variables['tutorial21.%s' % variableName]
 
     # Time points can be taken from any variable (x axis)
-    times = variables[sensitivity_variable_name('y1', 'p1')].TimeValues
+    times = sensitivity('y1', 'p1').TimeValues
 
     # Get the daeDataReceiverVariable objects from the dictionary.
     # This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)
-    dy1_dp1 = variables[sensitivity_variable_name('y1', 'p1')].Values
-    dy1_dp2 = variables[sensitivity_variable_name('y1', 'p2')].Values
-    dy2_dp1 = variables[sensitivity_variable_name('y2', 'p1')].Values
-    dy2_dp2 = variables[sensitivity_variable_name('y2', 'p2')].Values
+    dy1_dp1 = sensitivity('y1', 'p1').Values
+    dy1_dp2 = sensitivity('y1', 'p2').Values
+    dy2_dp1 = sensitivity('y2', 'p1').Values
+    dy2_dp2 = sensitivity('y2', 'p2').Values
 
-    dy1_dp1_analytical = variables[variable_name('dy1_dp1')].Values
-    dy1_dp2_analytical = variables[variable_name('dy1_dp2')].Values
-    dy2_dp1_analytical = variables[variable_name('dy2_dp1')].Values
-    dy2_dp2_analytical = variables[variable_name('dy2_dp2')].Values
+    dy1_dp1_analytical = variable('dy1_dp1').Values
+    dy1_dp2_analytical = variable('dy1_dp2').Values
+    dy2_dp1_analytical = variable('dy2_dp1').Values
+    dy2_dp2_analytical = variable('dy2_dp2').Values
     
     fontsize = 14
     fontsize_suptitle = 16
     fontsize_legend = 11
     
     plt.figure(figsize=(8,4), facecolor='white')
-    plt.suptitle('Sensitivities from the DataReporter', fontsize=fontsize_suptitle)
+    plt.suptitle('Sensitivities from DataReporter', fontsize=fontsize_suptitle)
     ax = plt.subplot(121)
     ax.set_title('Numerical sensitivities')
     plt.plot(times, dy1_dp1, label=r'$\frac{\partial y_1(t)}{\partial p_1}$')

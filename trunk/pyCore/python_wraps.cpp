@@ -1193,6 +1193,30 @@ const adouble_array adarr_FromList(boost::python::list lValues)
     return Array(ptrarrValues);
 }
 
+bool ad_not(const adouble &a)
+{
+    daeDeclareException(exInvalidCall);
+    e << "Operators 'not', 'and' and 'or' are not implemented for adouble objects";
+    throw e;
+    return false;
+}
+
+bool ad_nonzero(const adouble &a)
+{
+    daeDeclareException(exInvalidCall);
+    e << "Function __nonzero__ and operators 'and', 'or', 'not' are not implemented for adouble objects";
+    throw e;
+    return false;
+}
+
+bool ad_bool(const adouble &a)
+{
+    daeDeclareException(exInvalidCall);
+    e << "Operators 'bool', 'and', 'or' and 'not' are not implemented for adouble objects";
+    throw e;
+    return false;
+}
+
 const adouble ad_true_divide1(const adouble &a, const adouble &b)
 {
     return a/b;
@@ -1399,6 +1423,60 @@ const adouble_array ad_d2_array(adouble_array&           adarr,
 /*******************************************************
     adouble_array
 *******************************************************/
+bool adarr_not(const adouble_array &a)
+{
+    daeDeclareException(exInvalidCall);
+    e << "Operators 'not', 'and' and 'or' are not implemented for adouble_array objects";
+    throw e;
+    return false;
+}
+
+bool adarr_nonzero(const adouble_array &a)
+{
+    daeDeclareException(exInvalidCall);
+    e << "Function __nonzero__ and operators 'and', 'or', 'not' are not implemented for adouble_array objects";
+    throw e;
+    return false;
+}
+
+bool adarr_bool(const adouble_array &a)
+{
+    daeDeclareException(exInvalidCall);
+    e << "Operators 'bool', 'and', 'or' and 'not' are not implemented for adouble_array objects";
+    throw e;
+    return false;
+}
+
+const adouble_array adarr_true_divide1(const adouble_array &a, const adouble_array &b)
+{
+    return a/b;
+}
+
+const adouble_array adarr_true_divide2(const adouble_array &a, const real_t v)
+{
+    return a/v;
+}
+
+const adouble_array adarr_true_divide3(const real_t v, const adouble_array &a)
+{
+    return v/a;
+}
+
+const adouble_array adarr_floor_divide1(const adouble_array &a, const adouble_array &b)
+{
+    return a/b;
+}
+
+const adouble_array adarr_floor_divide2(const adouble_array &a, const real_t v)
+{
+    return a/v;
+}
+
+const adouble_array adarr_floor_divide3(const real_t v, const adouble_array &a)
+{
+    return v/a;
+}
+
 const adouble_array adarr_exp(const adouble_array& a)
 {
     return exp(a);
