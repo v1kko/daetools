@@ -146,6 +146,7 @@ class modTutorial(daeModel):
 
         eq = self.CreateEquation("Q_sum", "The sum of heat fluxes at the bottom edge of the plate")
         Tarray = self.T.array('*', 0) # array of T values along x axis and for y = 0 (adouble_array object)
+
         eq.Residual = self.Qsum() + self.k() * Sum( d_array(Tarray, self.y) )
         
         Nx = self.x.NumberOfPoints

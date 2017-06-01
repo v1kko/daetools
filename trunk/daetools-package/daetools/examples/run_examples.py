@@ -19,7 +19,7 @@ import os, platform, sys, subprocess, webbrowser, traceback, numpy
 from os.path import join, realpath, dirname
 from time import localtime, strftime
 from os.path import join, realpath, dirname
-from PyQt5 import QtCore, QtGui, QtWidgets, QtWebKit
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -30,8 +30,13 @@ elif python_major == 3:
     from io import StringIO
     
 from daetools.pyDAE import *
-from .RunExamples_ui import Ui_RunExamplesDialog
-
+try:
+    # Uses WebKit
+    from .RunExamples_ui import Ui_RunExamplesDialog
+except:
+    # Uses WebEngine (for MacOS, no webkit there)
+    from .RunExamples_ui_webengine import Ui_RunExamplesDialog
+    
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
 for i in range(1, 22):
@@ -113,24 +118,28 @@ class RunExamples(QtWidgets.QDialog):
             self.formHeight = 900
         self.resize(self.formWidth, self.formHeight)
         
-        settings = QtWebKit.QWebSettings.globalSettings()
-        font = QtGui.QFont()
-        if platform.system() == 'Linux':
-            font.setFamily("Monospace")
-            font.setPointSize(9)
-            settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Monospace')
-            settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 9)
-        elif platform.system() == 'Darwin':
-            font.setFamily("Monaco")
-            font.setPointSize(10)
-            settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Monaco')
-            settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 10)
-        else:
-            font.setFamily("Courier New")
-            font.setPointSize(9)
-            settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Courier New')
-            settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 10)
-        #self.ui.docstringWeb.setFont(font)
+        try:
+            from PyQt5 import QtWebKit
+            settings = QtWebKit.QWebSettings.globalSettings()
+            font = QtGui.QFont()
+            if platform.system() == 'Linux':
+                font.setFamily("Monospace")
+                font.setPointSize(9)
+                settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Monospace')
+                settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 9)
+            elif platform.system() == 'Darwin':
+                font.setFamily("Monaco")
+                font.setPointSize(10)
+                settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Monaco')
+                settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 10)
+            else:
+                font.setFamily("Courier New")
+                font.setPointSize(9)
+                settings.setFontFamily(QtWebKit.QWebSettings.FixedFont, 'Courier New')
+                settings.setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 10)
+            #self.ui.docstringWeb.setFont(font)
+        except:
+            pass
         
         self.setWindowTitle("DAE Tools Examples v%s [py%d.%d]" % (daeVersion(True), python_major, python_minor))
         self.setWindowIcon(QtGui.QIcon(join(images_dir, 'daetools-48x48.png')))

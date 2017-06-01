@@ -19,7 +19,7 @@ Installation instructions
   python setup.py install
 
 - Windows (.exe):
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.6.0" --bitmap wininst.bmp
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.7.0" --bitmap wininst.bmp
 
 Create .tar.gz under GNU/Linux:
   python setup.py sdist --formats=gztar
@@ -68,22 +68,6 @@ pydae_libs_dir = os.path.join(pydae_libs_dir, '%s' % platform_solib_dir)
 solvers_libs_dir  = os.path.realpath('daetools/solvers')
 solvers_libs_dir = os.path.join(solvers_libs_dir, '%s' % platform_solib_dir)
 
-"""
-if daetools_machine == 'x86_64':
-    if os.path.exists('/usr/lib') and os.path.exists('/usr/lib64'):
-        # There are both /usr/lib and /usr/lib64
-        usrlib = '/usr/lib64'
-    elif os.path.exists('/usr/lib'):
-        # There is only /usr/lib
-        usrlib = '/usr/lib'
-    elif os.path.exists('/usr/lib64'):
-        # There is only /usr/lib64
-        usrlib = '/usr/lib64'
-    else:
-        usrlib = '/usr/lib'
-else:
-    usrlib = '/usr/lib'
-"""
 def _is_in_venv():
     return (getattr(sys, 'base_prefix', sys.prefix) != sys.prefix or
             hasattr(sys, 'real_prefix'))
@@ -275,7 +259,11 @@ setup(name = 'daetools',
                  'scripts/daeplotter',
                  'scripts/daeexamples',
                  'scripts/daeplotter.bat',
-                 'scripts/daeexamples.bat'],
+                 'scripts/daeexamples.bat',
+                 'scripts/daeplotter3',
+                 'scripts/daeexamples3',
+                 'scripts/daeplotter3.bat',
+                 'scripts/daeexamples3.bat'],
       requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5']
      )
 
