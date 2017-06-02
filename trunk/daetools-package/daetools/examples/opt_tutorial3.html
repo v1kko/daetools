@@ -9,159 +9,159 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            opt_tutorial3.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial introduces NLOPT NLP solver, its setup and options.</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            opt_tutorial3.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial introduces NLOPT NLP solver, its setup and options.</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
-<span style='color:#ff5500;'>from</span> daetools.solvers.nlopt <span style='color:#ff5500;'>import</span> pyNLOPT
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.nlopt <span style='color:#3605fb;'>import</span> pyNLOPT
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.x1 = daeVariable(<span style='color:#bf0303;'>&quot;x1&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.x2 = daeVariable(<span style='color:#bf0303;'>&quot;x2&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.x3 = daeVariable(<span style='color:#bf0303;'>&quot;x3&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.x4 = daeVariable(<span style='color:#bf0303;'>&quot;x4&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.x1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x1&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.x2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x2&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.x3 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x3&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.x4 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x4&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#0057ae;'>self</span>.dummy = daeVariable(<span style='color:#bf0303;'>&quot;dummy&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dummy <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dummy&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Dummy&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.dummy()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Dummy&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dummy()
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;opt_tutorial3&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;opt_tutorial3&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
         <b>pass</b>
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.x1.AssignValue(<span style='color:#b08000;'>1</span>)
-        <span style='color:#0057ae;'>self</span>.m.x2.AssignValue(<span style='color:#b08000;'>5</span>)
-        <span style='color:#0057ae;'>self</span>.m.x3.AssignValue(<span style='color:#b08000;'>5</span>)
-        <span style='color:#0057ae;'>self</span>.m.x4.AssignValue(<span style='color:#b08000;'>1</span>)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x1.AssignValue(<span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x2.AssignValue(<span style='color:#cc047c;'>5</span>)
+        <span style='color:#3605fb;'>self</span>.m.x3.AssignValue(<span style='color:#cc047c;'>5</span>)
+        <span style='color:#3605fb;'>self</span>.m.x4.AssignValue(<span style='color:#cc047c;'>1</span>)
 
-    <b>def</b> SetUpOptimization(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#898887;'># Set the objective function (min)</span>
-        <span style='color:#0057ae;'>self</span>.ObjectiveFunction.Residual = <span style='color:#0057ae;'>self</span>.m.x1() * <span style='color:#0057ae;'>self</span>.m.x4() * (<span style='color:#0057ae;'>self</span>.m.x1() + <span style='color:#0057ae;'>self</span>.m.x2() + <span style='color:#0057ae;'>self</span>.m.x3()) + <span style='color:#0057ae;'>self</span>.m.x3()
+    <b>def</b> SetUpOptimization(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Set the objective function (min)</span>
+        <span style='color:#3605fb;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.x1() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x4() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.m.x1() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.x2() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.x3()) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.x3()
 
-        <span style='color:#898887;'># Set the constraints (inequality, equality)</span>
-        <span style='color:#898887;'># Constraints are in the following form:</span>
-        <span style='color:#898887;'>#  - Inequality: g(i) &lt;= 0</span>
-        <span style='color:#898887;'>#  - Equality: h(i) = 0</span>
-        c1 = <span style='color:#0057ae;'>self</span>.CreateInequalityConstraint(<span style='color:#bf0303;'>&quot;Constraint 1&quot;</span>) <span style='color:#898887;'># g(x) &gt;= 25:  25 - x1*x2*x3*x4 &lt;= 0</span>
-        c1.Residual = <span style='color:#b08000;'>25</span> - <span style='color:#0057ae;'>self</span>.m.x1() * <span style='color:#0057ae;'>self</span>.m.x2() * <span style='color:#0057ae;'>self</span>.m.x3() * <span style='color:#0057ae;'>self</span>.m.x4()
+        <span style='color:#017a31;'># Set the constraints (inequality, equality)</span>
+        <span style='color:#017a31;'># Constraints are in the following form:</span>
+        <span style='color:#017a31;'>#  - Inequality: g(i) &lt;= 0</span>
+        <span style='color:#017a31;'>#  - Equality: h(i) = 0</span>
+        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateInequalityConstraint(<span style='color:#cc0000;'>&quot;Constraint 1&quot;</span>) <span style='color:#017a31;'># g(x) &gt;= 25:  25 - x1*x2*x3*x4 &lt;= 0</span>
+        c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>25</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.m.x1() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x2() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x3() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x4()
 
-        c2 = <span style='color:#0057ae;'>self</span>.CreateEqualityConstraint(<span style='color:#bf0303;'>&quot;Constraint 2&quot;</span>) <span style='color:#898887;'># h(x) == 40</span>
-        c2.Residual = <span style='color:#0057ae;'>self</span>.m.x1() * <span style='color:#0057ae;'>self</span>.m.x1() + <span style='color:#0057ae;'>self</span>.m.x2() * <span style='color:#0057ae;'>self</span>.m.x2() + <span style='color:#0057ae;'>self</span>.m.x3() * <span style='color:#0057ae;'>self</span>.m.x3() + <span style='color:#0057ae;'>self</span>.m.x4() * <span style='color:#0057ae;'>self</span>.m.x4() - <span style='color:#b08000;'>40</span>
+        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEqualityConstraint(<span style='color:#cc0000;'>&quot;Constraint 2&quot;</span>) <span style='color:#017a31;'># h(x) == 40</span>
+        c2.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.x1() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x1() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.x2() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x2() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.x3() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x3() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.x4() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.x4() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>40</span>
 
-        <span style='color:#898887;'># Set the optimization variables, their lower/upper bounds and the starting point</span>
-        <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.x1, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>5</span>, <span style='color:#b08000;'>2</span>);
-        <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.x2, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>5</span>, <span style='color:#b08000;'>2</span>);
-        <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.x3, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>5</span>, <span style='color:#b08000;'>2</span>);
-        <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.x4, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>5</span>, <span style='color:#b08000;'>2</span>);
+        <span style='color:#017a31;'># Set the optimization variables, their lower/upper bounds and the starting point</span>
+        <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.x1, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>;</span></b>
+        <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.x2, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>;</span></b>
+        <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.x3, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>;</span></b>
+        <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.x4, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>;</span></b>
 
 <b>def</b> chooseAlgorithm():
-    <span style='color:#ff5500;'>from</span> PyQt5 <span style='color:#ff5500;'>import</span> QtCore, QtGui, QtWidgets
-    algorithms = [<span style='color:#bf0303;'>'NLOPT_GN_DIRECT'</span>,<span style='color:#bf0303;'>'NLOPT_GN_DIRECT_L'</span>,<span style='color:#bf0303;'>'NLOPT_GN_DIRECT_L_RAND'</span>,<span style='color:#bf0303;'>'NLOPT_GN_DIRECT_NOSCAL'</span>,<span style='color:#bf0303;'>'NLOPT_GN_DIRECT_L_NOSCAL'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_GN_DIRECT_L_RAND_NOSCAL'</span>,<span style='color:#bf0303;'>'NLOPT_GN_ORIG_DIRECT'</span>,<span style='color:#bf0303;'>'NLOPT_GN_ORIG_DIRECT_L'</span>,<span style='color:#bf0303;'>'NLOPT_GD_STOGO'</span>,<span style='color:#bf0303;'>'NLOPT_GD_STOGO_RAND'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_LD_LBFGS_NOCEDAL'</span>,<span style='color:#bf0303;'>'NLOPT_LD_LBFGS'</span>,<span style='color:#bf0303;'>'NLOPT_LN_PRAXIS'</span>,<span style='color:#bf0303;'>'NLOPT_LD_VAR1'</span>,<span style='color:#bf0303;'>'NLOPT_LD_VAR2'</span>,<span style='color:#bf0303;'>'NLOPT_LD_TNEWTON'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_LD_TNEWTON_RESTART'</span>,<span style='color:#bf0303;'>'NLOPT_LD_TNEWTON_PRECOND'</span>,<span style='color:#bf0303;'>'NLOPT_LD_TNEWTON_PRECOND_RESTART'</span>,<span style='color:#bf0303;'>'NLOPT_GN_CRS2_LM'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_GN_MLSL'</span>,<span style='color:#bf0303;'>'NLOPT_GD_MLSL'</span>,<span style='color:#bf0303;'>'NLOPT_GN_MLSL_LDS'</span>,<span style='color:#bf0303;'>'NLOPT_GD_MLSL_LDS'</span>,<span style='color:#bf0303;'>'NLOPT_LD_MMA'</span>,<span style='color:#bf0303;'>'NLOPT_LN_COBYLA'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_LN_NEWUOA'</span>,<span style='color:#bf0303;'>'NLOPT_LN_NEWUOA_BOUND'</span>,<span style='color:#bf0303;'>'NLOPT_LN_NELDERMEAD'</span>,<span style='color:#bf0303;'>'NLOPT_LN_SBPLX'</span>,<span style='color:#bf0303;'>'NLOPT_LN_AUGLAG'</span>,<span style='color:#bf0303;'>'NLOPT_LD_AUGLAG'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_LN_AUGLAG_EQ'</span>,<span style='color:#bf0303;'>'NLOPT_LD_AUGLAG_EQ'</span>,<span style='color:#bf0303;'>'NLOPT_LN_BOBYQA'</span>,<span style='color:#bf0303;'>'NLOPT_GN_ISRES'</span>,
-                  <span style='color:#bf0303;'>'NLOPT_AUGLAG'</span>,<span style='color:#bf0303;'>'NLOPT_AUGLAG_EQ'</span>,<span style='color:#bf0303;'>'NLOPT_G_MLSL'</span>,<span style='color:#bf0303;'>'NLOPT_G_MLSL_LDS'</span>,<span style='color:#bf0303;'>'NLOPT_LD_SLSQP'</span>]
-    <span style='color:#898887;'># Show the input box to choose the algorithm (the default is len(algorithms)-1 that is: NLOPT_LD_SLSQP)</span>
-    algorithm, ok = QtWidgets.QInputDialog.getItem(<span style='color:#0057ae;'>None</span>, <span style='color:#bf0303;'>&quot;NLOPT Algorithm&quot;</span>, <span style='color:#bf0303;'>&quot;Choose the NLOPT algorithm:&quot;</span>, algorithms, <b><span style='color:#644a9b;'>len</span></b>(algorithms)-<span style='color:#b08000;'>1</span>, <span style='color:#0057ae;'>False</span>)
+    <span style='color:#3605fb;'>from</span> PyQt5 <span style='color:#3605fb;'>import</span> QtCore, QtGui, QtWidgets
+    algorithms <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'NLOPT_GN_DIRECT'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L_RAND'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_NOSCAL'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L_NOSCAL'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L_RAND_NOSCAL'</span>,<span style='color:#cc0000;'>'NLOPT_GN_ORIG_DIRECT'</span>,<span style='color:#cc0000;'>'NLOPT_GN_ORIG_DIRECT_L'</span>,<span style='color:#cc0000;'>'NLOPT_GD_STOGO'</span>,<span style='color:#cc0000;'>'NLOPT_GD_STOGO_RAND'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_LD_LBFGS_NOCEDAL'</span>,<span style='color:#cc0000;'>'NLOPT_LD_LBFGS'</span>,<span style='color:#cc0000;'>'NLOPT_LN_PRAXIS'</span>,<span style='color:#cc0000;'>'NLOPT_LD_VAR1'</span>,<span style='color:#cc0000;'>'NLOPT_LD_VAR2'</span>,<span style='color:#cc0000;'>'NLOPT_LD_TNEWTON'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_LD_TNEWTON_RESTART'</span>,<span style='color:#cc0000;'>'NLOPT_LD_TNEWTON_PRECOND'</span>,<span style='color:#cc0000;'>'NLOPT_LD_TNEWTON_PRECOND_RESTART'</span>,<span style='color:#cc0000;'>'NLOPT_GN_CRS2_LM'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_GN_MLSL'</span>,<span style='color:#cc0000;'>'NLOPT_GD_MLSL'</span>,<span style='color:#cc0000;'>'NLOPT_GN_MLSL_LDS'</span>,<span style='color:#cc0000;'>'NLOPT_GD_MLSL_LDS'</span>,<span style='color:#cc0000;'>'NLOPT_LD_MMA'</span>,<span style='color:#cc0000;'>'NLOPT_LN_COBYLA'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_LN_NEWUOA'</span>,<span style='color:#cc0000;'>'NLOPT_LN_NEWUOA_BOUND'</span>,<span style='color:#cc0000;'>'NLOPT_LN_NELDERMEAD'</span>,<span style='color:#cc0000;'>'NLOPT_LN_SBPLX'</span>,<span style='color:#cc0000;'>'NLOPT_LN_AUGLAG'</span>,<span style='color:#cc0000;'>'NLOPT_LD_AUGLAG'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_LN_AUGLAG_EQ'</span>,<span style='color:#cc0000;'>'NLOPT_LD_AUGLAG_EQ'</span>,<span style='color:#cc0000;'>'NLOPT_LN_BOBYQA'</span>,<span style='color:#cc0000;'>'NLOPT_GN_ISRES'</span>,
+                  <span style='color:#cc0000;'>'NLOPT_AUGLAG'</span>,<span style='color:#cc0000;'>'NLOPT_AUGLAG_EQ'</span>,<span style='color:#cc0000;'>'NLOPT_G_MLSL'</span>,<span style='color:#cc0000;'>'NLOPT_G_MLSL_LDS'</span>,<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>]
+    <span style='color:#017a31;'># Show the input box to choose the algorithm (the default is len(algorithms)-1 that is: NLOPT_LD_SLSQP)</span>
+    algorithm, ok <b><span style='color:#0000ff;'>=</span></b> QtWidgets.QInputDialog.getItem(<span style='color:#3605fb;'>None</span>, <span style='color:#cc0000;'>&quot;NLOPT Algorithm&quot;</span>, <span style='color:#cc0000;'>&quot;Choose the NLOPT algorithm:&quot;</span>, algorithms, <span style='color:#2a00d6;'>len</span>(algorithms)<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>False</span>)
     <b>if</b> ok:
-        <b>return</b> <b><span style='color:#644a9b;'>str</span></b>(algorithm)
+        <b>return</b> <span style='color:#2a00d6;'>str</span>(algorithm)
     <b>else</b>:
-        <b>return</b> <span style='color:#bf0303;'>'NLOPT_LD_SLSQP'</span>
+        <b>return</b> <span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = simTutorial()
-    opt = daeOptimization()
-    algorithm = chooseAlgorithm()
-    nlp = pyNLOPT.daeNLOPT(algorithm)
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>1</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>5</span>
-    simulator = daeSimulator(app, simulation = sim,
-                                  optimization = opt,
-                                  nlpsolver = nlp)
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
+    algorithm <b><span style='color:#0000ff;'>=</span></b> chooseAlgorithm()
+    nlp <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(algorithm)
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
+                                  optimization <b><span style='color:#0000ff;'>=</span></b> opt,
+                                  nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-    optimization = daeOptimization()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
 
-    <span style='color:#898887;'># NLOPT algorithm must be set in its constructor</span>
-    nlpsolver = pyNLOPT.daeNLOPT(<span style='color:#bf0303;'>'NLOPT_LD_SLSQP'</span>)
+    <span style='color:#017a31;'># NLOPT algorithm must be set in its constructor</span>
+    nlpsolver <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
 
-    <span style='color:#898887;'># Do no print progress</span>
-    log.PrintProgress = <span style='color:#0057ae;'>False</span>
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
     
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = <span style='color:#b08000;'>1</span>
-    simulation.TimeHorizon = <span style='color:#b08000;'>5</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     optimization.Run()
     optimization.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

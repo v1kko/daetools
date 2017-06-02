@@ -1277,6 +1277,74 @@ To do so, the following equations can be used:
     bceq.Residal = - k() * d(T(dx,dy), y) - Constant(1E6 * W/m**2)  # Constant flux (1E6 W/m2)
 
     
+Making equations more readable
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Equations residuals can be made more readable by defining some auxiliary functions 
+(as illustrated in :ref:`tutorial2`):
+    
+.. code-block:: python
+
+    def DeclareEquations(self):
+        daeModel.DeclareEquations(self)
+
+        # Create some auxiliary functions to make equations more readable 
+        rho     = self.rho()
+        Q       = lambda i:      self.Q(i)
+        cp      = lambda x,y:    self.cp(x,y)
+        k       = lambda x,y:    self.k(x,y)
+        T       = lambda x,y:    self.T(x,y)
+        dT_dt   = lambda x,y: dt(self.T(x,y))
+        dT_dx   = lambda x,y:  d(self.T(x,y), self.x, eCFDM)
+        dT_dy   = lambda x,y:  d(self.T(x,y), self.y, eCFDM)
+        d2T_dx2 = lambda x,y: d2(self.T(x,y), self.x, eCFDM)
+        d2T_dy2 = lambda x,y: d2(self.T(x,y), self.y, eCFDM)
+
+        # Now the equations expressions are more readable
+        eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        eq.Residual = rho * cp(x,y) * dT_dt(x,y) - k(x,y) * (d2T_dx2(x,y) + d2T_dy2(x,y))
+
+        eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eLowerBound)
+        # Now we use Q(0) as the heat flux into the bottom edge
+        eq.Residual = -k(x,y) * dT_dy(x,y) - Q(0)
+
+        eq = self.CreateEquation("BC_top", "Neumann boundary conditions at the top edge (constant flux)")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eUpperBound)
+        # Now we use Q(1) as the heat flux at the top edge
+        eq.Residual = -k(x,y) * dT_dy(x,y) - Q(1)
+
+        eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
+        x = eq.DistributeOnDomain(self.x, eLowerBound)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = dT_dx(x,y)
+
+        eq = self.CreateEquation("BC_right", " Neumann boundary conditions at the right edge (insulated)")
+        x = eq.DistributeOnDomain(self.x, eUpperBound)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = dT_dx(x,y)
+
+Obviously, the heat conduction equation from :ref:`tutorial2`:
+
+.. code-block:: python
+
+    ...
+    
+    eq.Residual = rho * cp(x,y) * dT_dt(x,y) - k(x,y) * (d2T_dx2(x,y) + d2T_dy2(x,y))
+    
+is much more readable than the same equation from :ref:`tutorial1`:
+
+.. code-block:: python
+   
+    ...
+    
+    eq.Residual = self.rho() * self.cp() * dt(self.T(x,y)) - \
+                  self.k() * (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
+    
+        
 PDE on unstructured grids using the Finite Elements Method
 -----------------------------------------------------------
 DAE Tools support numerical simulation of partial differential equations on
@@ -2193,7 +2261,7 @@ If a discontinuity occurs during the current integration interval, the precise d
 model integrated until the discontinuity time point, data reported, the DAE system reinitialised and integration resumed.
 
 The user-defined schedule can be implemented by overloading the :py:meth:`pyActivity.daeSimulation.Run` function. Here, a custom 
-schedule (operating procedure) can be specified using the following functions from the :py:class:`pyActivity.daeSimulation` class:
+schedule can be specified using the following functions from the :py:class:`pyActivity.daeSimulation` class:
 
 - :py:meth:`pyActivity.daeSimulation.Integrate` integrates the system until the given time horizon is reached and reports the data
   after every reporting interval. If the ``stopCriterion`` argument is set to ``eStopAtModelDiscontinuity`` the simulation will be stopped 
@@ -2217,7 +2285,7 @@ schedule (operating procedure) can be specified using the following functions fr
   by a call to the :py:meth:`pyActivity.daeSimulation.ReInitialize` function to reinitialise the system after the variable values 
   have been modified.
 
-A simple schedule can be found in the :ref:`tutorial7` where the following operating procedure has been specified:
+A very simple schedule can be found in the :ref:`tutorial7`:
 
 .. code-block:: python
 
@@ -2713,7 +2781,7 @@ Constraints in **DAE Tools** are similar to ordinary equations.
         self.c1.Residual = 25 - self.m.x1()
 
         # Equality constraint: h(i) = 0
-        # The constraint: x2 + x3 == 10 in daetools becomes: x2 + x3 - 10 <= 0
+        # The constraint: x2 + x3 = 10 in daetools becomes: x2 + x3 - 10 = 0
         self.c2 = self.CreateEqualityConstraint("Constraint 2")
         self.c2.Residual = self.m.x1() + self.m.x2() - 10
     

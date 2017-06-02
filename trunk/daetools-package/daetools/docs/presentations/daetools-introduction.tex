@@ -152,7 +152,7 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{4 May 2017} 
+\date{1 June 2017} 
 
 \hypersetup{
 pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -239,6 +239,7 @@ pdfcreator = {Dragan Nikolić}
       \item Steady-State 
       \item Transient
     \end{itemize}
+  \item \alert{Sensitivity analysis}
   \item \alert{Optimisation}
     \begin{itemize}
       \item Non-Linear Programming (NLP) problems
@@ -324,7 +325,7 @@ Current approaches to mathematical modelling:
     \begin{enumerate}
         \item Support for the \alert{runtime model generation}
         \item Support for the \alert{runtime simulation set-up}
-        \item Support for \alert{complex runtime operating procedures}
+        \item Support for \alert{complex schedules} (operating procedures)
         \item \alert{Interoperability} with the \alert{third-party software}
         \item Suitability for \alert{embedding} and use as a \alert{web application} or \alert{software as a service}
         \item \alert{Code-generation}, \alert{model exchange} and \alert{co-simulation} capabilities  
@@ -426,7 +427,7 @@ Current approaches to mathematical modelling:
                   as much as possible
             \item \alert{Takes advantage of the higher level languages} for:
                 \begin{itemize}
-                    \item Model specification, simulation setup, operating procedures
+                    \item Model specification, simulation setup and schedules
                     \item Access to the operating system 
                     \item Access to the standard/third-party libraries
                 \end{itemize}
@@ -547,12 +548,9 @@ Current approaches to mathematical modelling:
   \item Everything is an \alert{object} (variables, equations, models ...)
   \item All objects can be \alert{manipulated} in \alert{the runtime}
   \item \alert{All} C++/Python \alert{object-oriented concepts supported}
-      \begin{itemize}
-          \item \alert{Exception}: all declared DAE Tools objects \alert{remain public}
-      \end{itemize}
   \item Models, simulations, optimisations:
      \begin{itemize}
-        \item Classes \alert{derived from} the corresponding \alert{base classes}
+        \item \alert{Derived from} the corresponding \alert{base classes}
         \item \alert{Inherit} the \alert{common functionality} from the base classes
         \item Perform the \alert{functionality} in \alert{overloaded functions}
      \end{itemize}
@@ -600,7 +598,7 @@ Current approaches to mathematical modelling:
   \item \alert{Single model definition}, but \alert{one or more}:
   \begin{itemize}
     \item Different \alert{simulation scenarios}
-    \item Different \alert{optimization scenarios}
+    \item Different \alert{optimisation scenarios}
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -655,7 +653,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key modelling concepts in the \alert{core} package.}
+  \caption*{The key modelling concepts in the \alert{core} package.}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -677,7 +675,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key modelling concepts in the \alert{core} package (cont'd).}
+  \caption*{The key modelling concepts in the \alert{core} package (cont'd).}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -709,7 +707,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key concepts in the \alert{activity} package.}
+  \caption*{The key concepts in the \alert{activity} package.}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -726,7 +724,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key concepts in the \alert{solvers} package.}
+  \caption*{The key concepts in the \alert{solvers} package.}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -756,7 +754,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key concepts in the \alert{datareporting} package.}
+  \caption*{The key concepts in the \alert{datareporting} package.}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -779,7 +777,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key concepts in the \alert{log} package.}
+  \caption*{The key concepts in the \alert{log} package.}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -798,7 +796,7 @@ Current approaches to mathematical modelling:
 \scriptsize
 {
 \begin{table}
-  \caption{The key concepts in the \alert{units} package.}
+  \caption*{The key concepts in the \alert{units} package.}
   \begin{tabularx}{\linewidth}{l>{\raggedright}X}
     \toprule
     \textcolor{sthlmRed}{\textbf{Concept}} & \textcolor{sthlmRed}{\textbf{Description}} \tabularnewline
@@ -860,6 +858,11 @@ Current approaches to mathematical modelling:
                 \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-6}{[code]}
       }
     \end{itemize}
+    \begin{center}
+        \includegraphics[align=c, height=0.35\textheight]{cahn-hilliard.png}
+        \;
+        \includegraphics[align=c, height=0.35\textheight]{heat_convection.png}
+    \end{center}
 \end{frame}
 
 \begin{frame}[plain]{Use Case 3 - Parameter Estimation \& Optimal Control}
@@ -892,7 +895,7 @@ Current approaches to mathematical modelling:
                     from particle-by-particle to concurrent intercalation in phase-separating battery electrodes}.
                     Nature Materials 13(12):1149–1156. \href{https://doi.org/10.1038/nmat4084}{doi:10.1038/nmat4084.}}
                 }
-    \end{center}  
+     \end{center}  
     \begin{columns}[c]
       \begin{column}{0.6\textwidth}
         {\small
@@ -906,6 +909,7 @@ Current approaches to mathematical modelling:
             \item Two phases are coupled via a volume-averaged approach
             \item Particles act as volumetric source/sink terms as they interact with the
                   electrolyte via reactions
+            \item The code available at \alert{\href{https://bitbucket.org/bazantgroup/mpet}{Bitbucket}}
         \end{itemize}
         }
       \end{column}

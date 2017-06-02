@@ -9,246 +9,246 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            tutorial_adv_4.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial illustrates the C++ MPI code generator.</span>
-<span style='color:#bf0303;'>The model is identical to the model in the tutorial 11.</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial_adv_4.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial illustrates the C++ MPI code generator.</span>
+<span style='color:#cc0000;'>The model is identical to the model in the tutorial 11.</span>
 
-<span style='color:#bf0303;'>The temperature plot (at t=100s, x=0.5128, y=*):</span>
+<span style='color:#cc0000;'>The temperature plot (at t=100s, x=0.5128, y=*):</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial_adv_4-results.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_adv_4-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys, numpy, itertools
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
+<span style='color:#3605fb;'>import</span> sys, numpy, itertools
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
-<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
 
-<span style='color:#898887;'>#from daetools.solvers.superlu import pySuperLU</span>
-<span style='color:#ff5500;'>from</span> daetools.solvers.trilinos <span style='color:#ff5500;'>import</span> pyTrilinos
-<span style='color:#ff5500;'>from</span> daetools.solvers.aztecoo_options <span style='color:#ff5500;'>import</span> daeAztecOptions
+<span style='color:#017a31;'>#from daetools.solvers.superlu import pySuperLU</span>
+<span style='color:#3605fb;'>from</span> daetools.solvers.trilinos <span style='color:#3605fb;'>import</span> pyTrilinos
+<span style='color:#3605fb;'>from</span> daetools.solvers.aztecoo_options <span style='color:#3605fb;'>import</span> daeAztecOptions
 
-<span style='color:#898887;'># The linear solver used is iterative (GMRES); therefore decrease the abs.tol.</span>
-temperature_t.AbsoluteTolerance = <span style='color:#b08000;'>1e-2</span>
+<span style='color:#017a31;'># The linear solver used is iterative (GMRES); therefore decrease the abs.tol.</span>
+temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-2</span>
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.x = daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.y = daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X axis domain&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;y&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;Y axis domain&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.Qb  = daeParameter(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>,         W/(m**<span style='color:#b08000;'>2</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Qt  = daeParameter(<span style='color:#bf0303;'>&quot;Q_t&quot;</span>,         W/(m**<span style='color:#b08000;'>2</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.rho = daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>,      kg/(m**<span style='color:#b08000;'>3</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.cp  = daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,         J/(kg*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.k   = daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;_p&quot;</span>,   W/(m*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qb  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qt  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Q_t&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat flux at the top edge of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.rho <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Thermal conductivity of the plate&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.T = daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.T.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x)
-        <span style='color:#0057ae;'>self</span>.T.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y)
-        <span style='color:#0057ae;'>self</span>.T.Description = <span style='color:#bf0303;'>&quot;Temperature of the plate&quot;</span>
+        <span style='color:#3605fb;'>self</span>.T <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>, temperature_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.T.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x)
+        <span style='color:#3605fb;'>self</span>.T.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y)
+        <span style='color:#3605fb;'>self</span>.T.Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#898887;'># For readibility, get the adouble objects from parameters/variables</span>
-        <span style='color:#898887;'># and create numpy arrays for T and its derivatives in tim and space</span>
-        <span style='color:#898887;'># This will also save a lot of memory (no duplicate adouble objects in equations)</span>
-        Nx  = <span style='color:#0057ae;'>self</span>.x.NumberOfPoints
-        Ny  = <span style='color:#0057ae;'>self</span>.y.NumberOfPoints
-        rho = <span style='color:#0057ae;'>self</span>.rho()
-        cp  = <span style='color:#0057ae;'>self</span>.cp()
-        k   = <span style='color:#0057ae;'>self</span>.k()
-        Qb  = <span style='color:#0057ae;'>self</span>.Qb()
-        Qt  = <span style='color:#0057ae;'>self</span>.Qt()
+        <span style='color:#017a31;'># For readibility, get the adouble objects from parameters/variables</span>
+        <span style='color:#017a31;'># and create numpy arrays for T and its derivatives in tim and space</span>
+        <span style='color:#017a31;'># This will also save a lot of memory (no duplicate adouble objects in equations)</span>
+        Nx  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x.NumberOfPoints
+        Ny  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y.NumberOfPoints
+        rho <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.rho()
+        cp  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.cp()
+        k   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k()
+        Qb  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Qb()
+        Qt  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Qt()
 
-        T      = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        dTdt   = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        dTdx   = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        dTdy   = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        d2Tdx2 = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        d2Tdy2 = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        <b>for</b> x <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Nx):
-            <b>for</b> y <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(Ny):
-                T[x,y]      = <span style='color:#0057ae;'>self</span>.T(x,y)
-                dTdt[x,y]   = dt(<span style='color:#0057ae;'>self</span>.T(x,y))
-                dTdx[x,y]   = d (<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.x, eCFDM)
-                dTdy[x,y]   = d (<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.y, eCFDM)
-                d2Tdx2[x,y] = d2(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.x, eCFDM)
-                d2Tdy2[x,y] = d2(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.y, eCFDM)
+        T      <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        dTdt   <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        dTdx   <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        dTdy   <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        d2Tdx2 <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        d2Tdy2 <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(Nx):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(Ny):
+                T[x,y]      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T(x,y)
+                dTdt[x,y]   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.T(x,y))
+                dTdx[x,y]   <b><span style='color:#0000ff;'>=</span></b> d (<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+                dTdy[x,y]   <b><span style='color:#0000ff;'>=</span></b> d (<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.y, eCFDM)
+                d2Tdx2[x,y] <b><span style='color:#0000ff;'>=</span></b> d2(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+                d2Tdy2[x,y] <b><span style='color:#0000ff;'>=</span></b> d2(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.y, eCFDM)
 
-        <span style='color:#898887;'># Get the flat list of indexes</span>
-        indexes = [(x,y) <b>for</b> x,y <b>in</b> itertools.product(<b><span style='color:#644a9b;'>range</span></b>(Nx), <b><span style='color:#644a9b;'>range</span></b>(Ny))]
-        eq_types = numpy.empty((Nx,Ny), dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        eq_types[ : , : ] = <span style='color:#bf0303;'>'i'</span> <span style='color:#898887;'># inner region</span>
-        eq_types[ : ,  <span style='color:#b08000;'>0</span>] = <span style='color:#bf0303;'>'B'</span> <span style='color:#898887;'># bottom boundary</span>
-        eq_types[ : , -<span style='color:#b08000;'>1</span>] = <span style='color:#bf0303;'>'T'</span> <span style='color:#898887;'># top boundary</span>
-        eq_types[  <span style='color:#b08000;'>0</span>, : ] = <span style='color:#bf0303;'>'L'</span> <span style='color:#898887;'># left boundary</span>
-        eq_types[ -<span style='color:#b08000;'>1</span>, : ] = <span style='color:#bf0303;'>'R'</span> <span style='color:#898887;'># right boundary</span>
-        <b><span style='color:#644a9b;'>print</span></b>(eq_types.T) <span style='color:#898887;'># print it transposed to visalise it more easily</span>
+        <span style='color:#017a31;'># Get the flat list of indexes</span>
+        indexes <b><span style='color:#0000ff;'>=</span></b> [(x,y) <b>for</b> x,y <b>in</b> itertools.product(<span style='color:#2a00d6;'>range</span>(Nx), <span style='color:#2a00d6;'>range</span>(Ny))]
+        eq_types <b><span style='color:#0000ff;'>=</span></b> numpy.empty((Nx,Ny), dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        eq_types[ : , : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'i'</span> <span style='color:#017a31;'># inner region</span>
+        eq_types[ : ,  <span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'B'</span> <span style='color:#017a31;'># bottom boundary</span>
+        eq_types[ : , <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'T'</span> <span style='color:#017a31;'># top boundary</span>
+        eq_types[  <span style='color:#cc047c;'>0</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'L'</span> <span style='color:#017a31;'># left boundary</span>
+        eq_types[ <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, : ] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'R'</span> <span style='color:#017a31;'># right boundary</span>
+        <span style='color:#2a00d6;'>print</span>(eq_types.T) <span style='color:#017a31;'># print it transposed to visalise it more easily</span>
         <b>for</b> x,y <b>in</b> indexes:
-            eq_type = eq_types[x,y]
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-            <b>if</b> eq_type == <span style='color:#bf0303;'>'i'</span>:
-                eq.Residual = rho*cp*dTdt[x,y] - k*(d2Tdx2[x,y] + d2Tdy2[x,y])
+            eq_type <b><span style='color:#0000ff;'>=</span></b> eq_types[x,y]
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+            <b>if</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'i'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> rho<b><span style='color:#0000ff;'>*</span></b>cp<b><span style='color:#0000ff;'>*</span></b>dTdt[x,y] <b><span style='color:#0000ff;'>-</span></b> k<b><span style='color:#0000ff;'>*</span></b>(d2Tdx2[x,y] <b><span style='color:#0000ff;'>+</span></b> d2Tdy2[x,y])
 
-            <b>elif</b> eq_type == <span style='color:#bf0303;'>'L'</span>:
-                eq.Residual = dTdx[x,y]
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'L'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> dTdx[x,y]
 
-            <b>elif</b> eq_type == <span style='color:#bf0303;'>'R'</span>:
-                eq.Residual = dTdx[x,y]
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'R'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> dTdx[x,y]
 
-            <b>elif</b> eq_type == <span style='color:#bf0303;'>'T'</span>:
-                eq.Residual = -k*dTdy[x,y] - Qt
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'T'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>k<b><span style='color:#0000ff;'>*</span></b>dTdy[x,y] <b><span style='color:#0000ff;'>-</span></b> Qt
 
-            <b>elif</b> eq_type == <span style='color:#bf0303;'>'B'</span>:
-                eq.Residual = -k*dTdy[x,y] - Qb
+            <b>elif</b> eq_type <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'B'</span>:
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>k<b><span style='color:#0000ff;'>*</span></b>dTdy[x,y] <b><span style='color:#0000ff;'>-</span></b> Qb
 
             <b>else</b>:
-                <b>raise</b> <span style='color:#006e28;'>RuntimeError</span>(<span style='color:#bf0303;'>'Invalid equation type: </span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % eq_type)
+                <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>'Invalid equation type: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> eq_type)
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial_adv_4&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_adv_4&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#b08000;'>39</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.1</span>)
-        <span style='color:#0057ae;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#b08000;'>39</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.1</span>)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>39</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
+        <span style='color:#3605fb;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#cc047c;'>39</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
 
-        <span style='color:#0057ae;'>self</span>.m.k.SetValue(<span style='color:#b08000;'>401</span> * W/(m*K))
-        <span style='color:#0057ae;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span> * J/(kg*K))
-        <span style='color:#0057ae;'>self</span>.m.rho.SetValue(<span style='color:#b08000;'>8960</span> * kg/(m**<span style='color:#b08000;'>3</span>))
-        <span style='color:#0057ae;'>self</span>.m.Qb.SetValue(<span style='color:#b08000;'>1e6</span> * W/(m**<span style='color:#b08000;'>2</span>))
-        <span style='color:#0057ae;'>self</span>.m.Qt.SetValue(<span style='color:#b08000;'>0</span> * W/(m**<span style='color:#b08000;'>2</span>))
+        <span style='color:#3605fb;'>self</span>.m.k.SetValue(<span style='color:#cc047c;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.rho.SetValue(<span style='color:#cc047c;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>))
+        <span style='color:#3605fb;'>self</span>.m.Qb.SetValue(<span style='color:#cc047c;'>1e6</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+        <span style='color:#3605fb;'>self</span>.m.Qt.SetValue(<span style='color:#cc047c;'>0</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <b>for</b> x <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, <span style='color:#0057ae;'>self</span>.m.x.NumberOfPoints - <span style='color:#b08000;'>1</span>):
-            <b>for</b> y <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, <span style='color:#0057ae;'>self</span>.m.y.NumberOfPoints - <span style='color:#b08000;'>1</span>):
-                <span style='color:#0057ae;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#b08000;'>300</span> * K)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>self</span>.m.x.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>self</span>.m.y.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>):
+                <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
 <b>def</b> run_code_generators(simulation, log):
-    <span style='color:#898887;'># Demonstration of daetools c++/MPI code-generator:</span>
-    <span style='color:#ff5500;'>import</span> tempfile
-    tmp_folder = tempfile.mkdtemp(prefix = <span style='color:#bf0303;'>'daetools-code_generator-cxx-'</span>)
-    msg = <span style='color:#bf0303;'>'Generated c++/MPI code will be located in: </span><span style='color:#924c9d;'>\n</span><span style='color:#3daee9;'>%s</span><span style='color:#bf0303;'>'</span> % tmp_folder
-    log.Message(msg, <span style='color:#b08000;'>0</span>)
+    <span style='color:#017a31;'># Demonstration of daetools c++/MPI code-generator:</span>
+    <span style='color:#3605fb;'>import</span> tempfile
+    tmp_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'daetools-code_generator-cxx-'</span>)
+    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Generated c++/MPI code will be located in: </span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> tmp_folder
+    log.Message(msg, <span style='color:#cc047c;'>0</span>)
 
     <b>try</b>:
-        daeQtMessage(<span style='color:#bf0303;'>&quot;tutorial_adv_4&quot;</span>, msg)
-    <b>except</b> <span style='color:#006e28;'>Exception</span> <span style='color:#ff5500;'>as</span> e:
-        log.Message(<b><span style='color:#644a9b;'>str</span></b>(e), <span style='color:#b08000;'>0</span>)
+        daeQtMessage(<span style='color:#cc0000;'>&quot;tutorial_adv_4&quot;</span>, msg)
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        log.Message(<span style='color:#2a00d6;'>str</span>(e), <span style='color:#cc047c;'>0</span>)
 
-    <span style='color:#898887;'># Generate c++ MPI code for 4 nodes</span>
-    <span style='color:#ff5500;'>from</span> daetools.code_generators.cxx_mpi <span style='color:#ff5500;'>import</span> daeCodeGenerator_cxx_mpi
-    cg = daeCodeGenerator_cxx_mpi()
-    cg.generateSimulation(simulation, tmp_folder, <span style='color:#b08000;'>4</span>)
+    <span style='color:#017a31;'># Generate c++ MPI code for 4 nodes</span>
+    <span style='color:#3605fb;'>from</span> daetools.code_generators.cxx_mpi <span style='color:#3605fb;'>import</span> daeCodeGenerator_cxx_mpi
+    cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_cxx_mpi()
+    cg.generateSimulation(simulation, tmp_folder, <span style='color:#cc047c;'>4</span>)
 
 <b>def</b> setupLASolver():
-    lasolver = pyTrilinos.daeCreateTrilinosSolver(<span style='color:#bf0303;'>&quot;AztecOO&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;AztecOO&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
 
-    paramListAztec = lasolver.AztecOOOptions
-    lasolver.NumIters  = <span style='color:#b08000;'>1000</span>
-    lasolver.Tolerance = <span style='color:#b08000;'>1e-3</span>
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#b08000;'>500</span>)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#b08000;'>0</span>)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#b08000;'>1</span>)
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_none) <span style='color:#898887;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
+    paramListAztec <b><span style='color:#0000ff;'>=</span></b> lasolver.AztecOOOptions
+    lasolver.NumIters  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>
+    lasolver.Tolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_solver&quot;</span>,    daeAztecOptions.AZ_gmres)
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_kspace&quot;</span>,    <span style='color:#cc047c;'>500</span>)
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_scaling&quot;</span>,   daeAztecOptions.AZ_none)
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_reorder&quot;</span>,   <span style='color:#cc047c;'>0</span>)
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_conv&quot;</span>,      daeAztecOptions.AZ_r0)
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_keep_info&quot;</span>, <span style='color:#cc047c;'>1</span>)
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_output&quot;</span>,    daeAztecOptions.AZ_none) <span style='color:#017a31;'># {AZ_all, AZ_none, AZ_last, AZ_summary, AZ_warnings}</span>
 
-    paramListAztec.set_int(<span style='color:#bf0303;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_Jacobi)
-    <span style='color:#898887;'>#paramListAztec.set_int(&quot;AZ_subdomain_solve&quot;, daeAztecOptions.AZ_ilut)</span>
-    <span style='color:#898887;'>#paramListAztec.set_int(&quot;AZ_overlap&quot;,         daeAztecOptions.AZ_none)</span>
-    <span style='color:#898887;'>#paramListAztec.set_int(&quot;AZ_graph_fill&quot;,      1)</span>
+    paramListAztec.set_int(<span style='color:#cc0000;'>&quot;AZ_precond&quot;</span>,         daeAztecOptions.AZ_Jacobi)
+    <span style='color:#017a31;'>#paramListAztec.set_int(&quot;AZ_subdomain_solve&quot;, daeAztecOptions.AZ_ilut)</span>
+    <span style='color:#017a31;'>#paramListAztec.set_int(&quot;AZ_overlap&quot;,         daeAztecOptions.AZ_none)</span>
+    <span style='color:#017a31;'>#paramListAztec.set_int(&quot;AZ_graph_fill&quot;,      1)</span>
 
     paramListAztec.Print()
 
     <b>return</b> lasolver
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = simTutorial()
-    lasolver = setupLASolver()
-    daesolver = daeIDAS()
-    daesolver.RelativeTolerance = <span style='color:#b08000;'>1e-3</span>
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    lasolver <b><span style='color:#0000ff;'>=</span></b> setupLASolver()
+    daesolver <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>
 
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>10</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>1000</span>
-    simulator  = daeSimulator(app, simulation=sim, lasolver = lasolver, run_before_simulation_begin_fn = run_code_generators)
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, lasolver <b><span style='color:#0000ff;'>=</span></b> lasolver, run_before_simulation_begin_fn <b><span style='color:#0000ff;'>=</span></b> run_code_generators)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    lasolver = setupLASolver()
+    lasolver <b><span style='color:#0000ff;'>=</span></b> setupLASolver()
     daesolver.SetLASolver(lasolver)
-    daesolver.RelativeTolerance = <span style='color:#b08000;'>1e-3</span>
+    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>
 
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
-    simulation.TimeHorizon = <span style='color:#b08000;'>1000</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#898887;'># Run code-generator</span>
+    <span style='color:#017a31;'># Run code-generator</span>
     run_code_generators(simulation, log)
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
 
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

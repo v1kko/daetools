@@ -4,128 +4,129 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>flux_limiters.py (3)</title>
+<title>flux_limiters.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                           flux_limiters.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#0000ff;'>import</span> sys, numpy, math
-<span style='color:#0000ff;'>import</span> matplotlib.pyplot
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           flux_limiters.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#3605fb;'>import</span> sys, numpy, math
+<span style='color:#3605fb;'>import</span> matplotlib.pyplot
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
 MIN     <b><span style='color:#0000ff;'>=</span></b> Min
 MAX     <b><span style='color:#0000ff;'>=</span></b> Max
 FABS    <b><span style='color:#0000ff;'>=</span></b> Abs
-beta    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.5</span> <span style='color:#008000;'># For Sweby and Osher (1 &lt;= beta  &lt;= 2)</span>
-theta   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.5</span> <span style='color:#008000;'># For van Leer minmod (1 &lt;= theta &lt;= 2)</span>
+beta    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.5</span> <span style='color:#017a31;'># For Sweby and Osher (1 &lt;= beta  &lt;= 2)</span>
+theta   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.5</span> <span style='color:#017a31;'># For van Leer minmod (1 &lt;= theta &lt;= 2)</span>
 
-<b>class</b> HRFluxLimiter(<span style='color:#0000ff;'>object</span>):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, phi_callable, r_epsilon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1e-10</span>):
-        <b>if</b> <b><span style='color:#0000ff;'>not</span></b> phi_callable:
-            <b>raise</b> <b><span style='color:#054d00;'>RuntimeError</span></b>(<span style='color:#c00000;'>'Invalid flux limiter function specified'</span>)
+<b>class</b> HRFluxLimiter(<span style='color:#2a00d6;'>object</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, phi_callable, r_epsilon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-10</span>):
+        <b>if</b> <b>not</b> phi_callable:
+            <b>raise</b> <b><span style='color:#4e9a06;'>RuntimeError</span></b>(<span style='color:#cc0000;'>'Invalid flux limiter function specified'</span>)
 
-        <span style='color:#0000ff;'>self</span>.Phi     <b><span style='color:#0000ff;'>=</span></b> phi_callable
-        <span style='color:#0000ff;'>self</span>.epsilon <b><span style='color:#0000ff;'>=</span></b> r_epsilon
+        <span style='color:#3605fb;'>self</span>.Phi     <b><span style='color:#0000ff;'>=</span></b> phi_callable
+        <span style='color:#3605fb;'>self</span>.epsilon <b><span style='color:#0000ff;'>=</span></b> r_epsilon
 
-    <b>def</b> r(<span style='color:#0000ff;'>self</span>, i, ni):
-        <b>if</b> <span style='color:#0000ff;'>hasattr</span>(ni, <span style='color:#c00000;'>'__call__'</span>): <span style='color:#008000;'># Should be daetools daeVariable</span>
-            <b>return</b> (ni(i<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.epsilon) <b><span style='color:#0000ff;'>/</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.epsilon)
+    <b>def</b> r(<span style='color:#3605fb;'>self</span>, i, ni):
+        <b>if</b> <span style='color:#2a00d6;'>hasattr</span>(ni, <span style='color:#cc0000;'>'__call__'</span>): <span style='color:#017a31;'># Should be daetools daeVariable</span>
+            <b>return</b> (ni(i<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.epsilon) <b><span style='color:#0000ff;'>/</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.epsilon)
 
-        <b>else</b>: <span style='color:#008000;'># Python list or nd_array</span>
-            <b>return</b> (ni[i<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>-</span></b> ni[i] <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.epsilon) <b><span style='color:#0000ff;'>/</span></b> (ni[i] <b><span style='color:#0000ff;'>-</span></b> ni[i<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>+</span></b> <span style='color:#0000ff;'>self</span>.epsilon)
+        <b>else</b>: <span style='color:#017a31;'># Python list or nd_array</span>
+            <b>return</b> (ni[i<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>-</span></b> ni[i] <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.epsilon) <b><span style='color:#0000ff;'>/</span></b> (ni[i] <b><span style='color:#0000ff;'>-</span></b> ni[i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.epsilon)
 
-    <b>def</b> ni_edge_plus(<span style='color:#0000ff;'>self</span>, i, ni, nL):
-        <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c000c0;'>0</span>:      <span style='color:#008000;'># Right face of the first cell: central interpolation (k=1)</span>
-            <b>return</b> <span style='color:#c000c0;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> (ni(<span style='color:#c000c0;'>0</span>) <b><span style='color:#0000ff;'>+</span></b> ni(<span style='color:#c000c0;'>1</span>))
-        <b>elif</b> i <b><span style='color:#0000ff;'>==</span></b> nL<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>: <span style='color:#008000;'># Right face of the last cell: one-sided upwind scheme (k=-1)</span>
-            <b>return</b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>))
-        <b>else</b>:           <span style='color:#008000;'># Other cells: k=1/3</span>
-            <b>return</b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Phi(<span style='color:#0000ff;'>self</span>.r(i, ni)) <b><span style='color:#0000ff;'>*</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>))
+    <b>def</b> ni_edge_plus(<span style='color:#3605fb;'>self</span>, i, ni, nL):
+        <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>:      <span style='color:#017a31;'># Right face of the first cell: central interpolation (k=1)</span>
+            <b>return</b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> (ni(<span style='color:#cc047c;'>0</span>) <b><span style='color:#0000ff;'>+</span></b> ni(<span style='color:#cc047c;'>1</span>))
+        <b>elif</b> i <b><span style='color:#0000ff;'>==</span></b> nL<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>: <span style='color:#017a31;'># Right face of the last cell: one-sided upwind scheme (k=-1)</span>
+            <b>return</b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
+        <b>else</b>:           <span style='color:#017a31;'># Other cells: k=1/3</span>
+            <b>return</b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Phi(<span style='color:#3605fb;'>self</span>.r(i, ni)) <b><span style='color:#0000ff;'>*</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
 
 <b>def</b> Phi_CHARM(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>CHARM</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> r <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#c000c0;'>3</span><b><span style='color:#0000ff;'>*</span></b>r<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>) <b><span style='color:#0000ff;'>/</span></b> ((r<b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>1</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>CHARM</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> r <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b>r<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>/</span></b> ((r<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
 
 <b>def</b> Phi_HCUS(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>HCUS</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> <span style='color:#c000c0;'>1.5</span> <b><span style='color:#0000ff;'>*</span></b> (r <b><span style='color:#0000ff;'>+</span></b> FABS(r)) <b><span style='color:#0000ff;'>/</span></b> (r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>2</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>HCUS</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> <span style='color:#cc047c;'>1.5</span> <b><span style='color:#0000ff;'>*</span></b> (r <b><span style='color:#0000ff;'>+</span></b> FABS(r)) <b><span style='color:#0000ff;'>/</span></b> (r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>2</span>)
 
 <b>def</b> Phi_HQUICK(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>HQUICK</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> <span style='color:#c000c0;'>2.0</span> <b><span style='color:#0000ff;'>*</span></b> (r <b><span style='color:#0000ff;'>+</span></b> FABS(r)) <b><span style='color:#0000ff;'>/</span></b> (r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>3</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>HQUICK</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> <span style='color:#cc047c;'>2.0</span> <b><span style='color:#0000ff;'>*</span></b> (r <b><span style='color:#0000ff;'>+</span></b> FABS(r)) <b><span style='color:#0000ff;'>/</span></b> (r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>3</span>)
 
 <b>def</b> Phi_Koren(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>Koren</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <span style='color:#008000;'>#r = 1.0/r</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(<span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#c000c0;'>1.0</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>3.0</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r<b><span style='color:#0000ff;'>/</span></b><span style='color:#c000c0;'>3</span>, <span style='color:#c000c0;'>2.0</span>)))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Koren</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'>#r = 1.0/r</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(<span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#cc047c;'>3.0</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r<b><span style='color:#0000ff;'>/</span></b><span style='color:#cc047c;'>3</span>, <span style='color:#cc047c;'>2.0</span>)))
 
 <b>def</b> Phi_minmod(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>minmod</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(<span style='color:#c000c0;'>1.0</span>, r))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>minmod</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(<span style='color:#cc047c;'>1.0</span>, r))
 
 <b>def</b> Phi_monotinized_central(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>MC</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(<span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#c000c0;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>(<span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>+</span></b>r), <span style='color:#c000c0;'>2.0</span>)))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>MC</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(<span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#cc047c;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>+</span></b>r), <span style='color:#cc047c;'>2.0</span>)))
 
 <b>def</b> Phi_Osher(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>Osher</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <span style='color:#008000;'># 1 &lt;= beta &lt;= 2</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(r, beta))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Osher</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'># 1 &lt;= beta &lt;= 2</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(r, beta))
 
 <b>def</b> Phi_ospre(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>ospre</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> <span style='color:#c000c0;'>1.5</span> <b><span style='color:#0000ff;'>*</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> r) <b><span style='color:#0000ff;'>/</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>1.0</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>ospre</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> <span style='color:#cc047c;'>1.5</span> <b><span style='color:#0000ff;'>*</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> r) <b><span style='color:#0000ff;'>/</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>1.0</span>)
 
 <b>def</b> Phi_smart(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>smart</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(<span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#c000c0;'>0.25</span><b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>0.75</span><b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#c000c0;'>4.0</span>)))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>smart</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(<span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#cc047c;'>0.25</span><b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>0.75</span><b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#cc047c;'>4.0</span>)))
 
 <b>def</b> Phi_superbee(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>superbee</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MAX(MIN(<span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#c000c0;'>1.0</span>), MIN(r, <span style='color:#c000c0;'>2.0</span>)))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>superbee</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MAX(MIN(<span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#cc047c;'>1.0</span>), MIN(r, <span style='color:#cc047c;'>2.0</span>)))
 
 <b>def</b> Phi_Sweby(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>Sweby</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <span style='color:#008000;'># 1 &lt;= beta &lt;= 2</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MAX(MIN(beta<b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#c000c0;'>1.0</span>), MIN(r, beta)))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Sweby</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'># 1 &lt;= beta &lt;= 2</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MAX(MIN(beta<b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#cc047c;'>1.0</span>), MIN(r, beta)))
 
 <b>def</b> Phi_UMIST(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>UMIST</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(<span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#c000c0;'>0.25</span><b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>0.75</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#c000c0;'>0.75</span><b><span style='color:#0000ff;'>+</span></b><span style='color:#c000c0;'>0.25</span><b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#c000c0;'>2.0</span>))))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>UMIST</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(<span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#cc047c;'>0.25</span><b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>0.75</span><b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#cc047c;'>0.75</span><b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>0.25</span><b><span style='color:#0000ff;'>*</span></b>r, <span style='color:#cc047c;'>2.0</span>))))
 
 <b>def</b> Phi_vanAlbada1(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>vanAlbada1</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> r) <b><span style='color:#0000ff;'>/</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>1.0</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>vanAlbada1</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> r) <b><span style='color:#0000ff;'>/</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>1.0</span>)
 
 <b>def</b> Phi_vanAlbada2(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>vanAlbada2</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> (<span style='color:#c000c0;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r) <b><span style='color:#0000ff;'>/</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>1.0</span>)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>vanAlbada2</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> (<span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r) <b><span style='color:#0000ff;'>/</span></b> (r<b><span style='color:#0000ff;'>*</span></b>r <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>1.0</span>)
 
 <b>def</b> Phi_vanLeer(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>vanLeer</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <b>return</b> (r <b><span style='color:#0000ff;'>+</span></b> FABS(r)) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#c000c0;'>1.0</span> <b><span style='color:#0000ff;'>+</span></b> FABS(r))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>vanLeer</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <b>return</b> (r <b><span style='color:#0000ff;'>+</span></b> FABS(r)) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>1.0</span> <b><span style='color:#0000ff;'>+</span></b> FABS(r))
 
 <b>def</b> Phi_vanLeer_minmod(r):
-    <span style='color:#008000;'>&quot;&quot;&quot;</span><span style='color:#008000;'>vanLeerMinmod</span><span style='color:#008000;'>&quot;&quot;&quot;</span>
-    <span style='color:#008000;'># 1 &lt;= theta &lt;= 2</span>
-    <b>return</b> MAX(<span style='color:#c000c0;'>0.0</span>, MIN(theta<b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#c000c0;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>(<span style='color:#c000c0;'>1.0</span><b><span style='color:#0000ff;'>+</span></b>r), theta)))
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>vanLeerMinmod</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'># 1 &lt;= theta &lt;= 2</span>
+    <b>return</b> MAX(<span style='color:#cc047c;'>0.0</span>, MIN(theta<b><span style='color:#0000ff;'>*</span></b>r, MIN(<span style='color:#cc047c;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>+</span></b>r), theta)))
 
 supported_schemes <b><span style='color:#0000ff;'>=</span></b> [Phi_HCUS, Phi_HQUICK, Phi_Koren, Phi_monotinized_central,
                      Phi_minmod, Phi_Osher, Phi_ospre, Phi_smart, Phi_superbee,
@@ -133,67 +134,67 @@ supported_schemes <b><span style='color:#0000ff;'>=</span></b> [Phi_HCUS, Phi_HQ
                      Phi_vanLeer_minmod]
 
 <b>def</b> plot_flux_limiters():
-    n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>30</span>
-    figure <b><span style='color:#0000ff;'>=</span></b> matplotlib.pyplot.figure(figsize <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#c000c0;'>9</span>,<span style='color:#c000c0;'>9</span>), dpi<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>100</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'white'</span>)
-    figure.canvas.set_window_title(<span style='color:#c00000;'>'Flux Limiters'</span>)
+    n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>30</span>
+    figure <b><span style='color:#0000ff;'>=</span></b> matplotlib.pyplot.figure(figsize <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#cc047c;'>9</span>,<span style='color:#cc047c;'>9</span>), dpi<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>100</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    figure.canvas.set_window_title(<span style='color:#cc0000;'>'Flux Limiters'</span>)
 
     tvdx  <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
     tvdy1 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
     tvdy2 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
-    tvdx[<span style='color:#c000c0;'>0</span>:<span style='color:#c000c0;'>5</span>]   <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1e-10</span>, <span style='color:#c000c0;'>0.5</span>,  <span style='color:#c000c0;'>5</span>)
-    tvdx[<span style='color:#c000c0;'>5</span>:<span style='color:#c000c0;'>10</span>]  <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>0.5</span>,   <span style='color:#c000c0;'>1.0</span>,  <span style='color:#c000c0;'>5</span>)
-    tvdx[<span style='color:#c000c0;'>10</span>:<span style='color:#c000c0;'>20</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1.0</span>,   <span style='color:#c000c0;'>2.0</span>, <span style='color:#c000c0;'>10</span>)
-    tvdx[<span style='color:#c000c0;'>20</span>:<span style='color:#c000c0;'>30</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>2.0</span>,   <span style='color:#c000c0;'>3.0</span>, <span style='color:#c000c0;'>10</span>)
+    tvdx[<span style='color:#cc047c;'>0</span>:<span style='color:#cc047c;'>5</span>]   <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1e-10</span>, <span style='color:#cc047c;'>0.5</span>,  <span style='color:#cc047c;'>5</span>)
+    tvdx[<span style='color:#cc047c;'>5</span>:<span style='color:#cc047c;'>10</span>]  <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>0.5</span>,   <span style='color:#cc047c;'>1.0</span>,  <span style='color:#cc047c;'>5</span>)
+    tvdx[<span style='color:#cc047c;'>10</span>:<span style='color:#cc047c;'>20</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1.0</span>,   <span style='color:#cc047c;'>2.0</span>, <span style='color:#cc047c;'>10</span>)
+    tvdx[<span style='color:#cc047c;'>20</span>:<span style='color:#cc047c;'>30</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>2.0</span>,   <span style='color:#cc047c;'>3.0</span>, <span style='color:#cc047c;'>10</span>)
 
-    tvdy1[<span style='color:#c000c0;'>0</span>:<span style='color:#c000c0;'>5</span>]   <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>1.0</span>,  <span style='color:#c000c0;'>5</span>)
-    tvdy1[<span style='color:#c000c0;'>5</span>:<span style='color:#c000c0;'>10</span>]  <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>1.0</span>,  <span style='color:#c000c0;'>5</span>)
-    tvdy1[<span style='color:#c000c0;'>10</span>:<span style='color:#c000c0;'>20</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>2.0</span>, <span style='color:#c000c0;'>10</span>)
-    tvdy1[<span style='color:#c000c0;'>20</span>:<span style='color:#c000c0;'>30</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>2.0</span>, <span style='color:#c000c0;'>2.0</span>, <span style='color:#c000c0;'>10</span>)
+    tvdy1[<span style='color:#cc047c;'>0</span>:<span style='color:#cc047c;'>5</span>]   <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1.0</span>,  <span style='color:#cc047c;'>5</span>)
+    tvdy1[<span style='color:#cc047c;'>5</span>:<span style='color:#cc047c;'>10</span>]  <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>1.0</span>,  <span style='color:#cc047c;'>5</span>)
+    tvdy1[<span style='color:#cc047c;'>10</span>:<span style='color:#cc047c;'>20</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>2.0</span>, <span style='color:#cc047c;'>10</span>)
+    tvdy1[<span style='color:#cc047c;'>20</span>:<span style='color:#cc047c;'>30</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>2.0</span>, <span style='color:#cc047c;'>2.0</span>, <span style='color:#cc047c;'>10</span>)
 
-    tvdy2[<span style='color:#c000c0;'>0</span>:<span style='color:#c000c0;'>5</span>]   <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>0.5</span>,  <span style='color:#c000c0;'>5</span>)
-    tvdy2[<span style='color:#c000c0;'>5</span>:<span style='color:#c000c0;'>10</span>]  <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>0.5</span>, <span style='color:#c000c0;'>1.0</span>,  <span style='color:#c000c0;'>5</span>)
-    tvdy2[<span style='color:#c000c0;'>10</span>:<span style='color:#c000c0;'>20</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>10</span>)
-    tvdy2[<span style='color:#c000c0;'>20</span>:<span style='color:#c000c0;'>30</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>1.0</span>, <span style='color:#c000c0;'>10</span>)
+    tvdy2[<span style='color:#cc047c;'>0</span>:<span style='color:#cc047c;'>5</span>]   <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>0.5</span>,  <span style='color:#cc047c;'>5</span>)
+    tvdy2[<span style='color:#cc047c;'>5</span>:<span style='color:#cc047c;'>10</span>]  <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>0.5</span>, <span style='color:#cc047c;'>1.0</span>,  <span style='color:#cc047c;'>5</span>)
+    tvdy2[<span style='color:#cc047c;'>10</span>:<span style='color:#cc047c;'>20</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>10</span>)
+    tvdy2[<span style='color:#cc047c;'>20</span>:<span style='color:#cc047c;'>30</span>] <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>10</span>)
 
-    rs       <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#c000c0;'>1e-10</span>, <span style='color:#c000c0;'>3.0</span>, n)
+    rs       <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>1e-10</span>, <span style='color:#cc047c;'>3.0</span>, n)
     rs_koren <b><span style='color:#0000ff;'>=</span></b> rs
     phis     <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
 
-    counter <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1</span>
-    <b>for</b> scheme <b><span style='color:#0000ff;'>in</span></b> supported_schemes:
+    counter <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    <b>for</b> scheme <b>in</b> supported_schemes:
         <b>if</b> scheme <b><span style='color:#0000ff;'>==</span></b> Phi_Koren:
-            phis[:] <b><span style='color:#0000ff;'>=</span></b> [scheme(r) <b>for</b> r <b><span style='color:#0000ff;'>in</span></b> rs_koren]
+            phis[:] <b><span style='color:#0000ff;'>=</span></b> [scheme(r) <b>for</b> r <b>in</b> rs_koren]
         <b>else</b>:
-            phis[:] <b><span style='color:#0000ff;'>=</span></b> [scheme(r) <b>for</b> r <b><span style='color:#0000ff;'>in</span></b> rs]
+            phis[:] <b><span style='color:#0000ff;'>=</span></b> [scheme(r) <b>for</b> r <b>in</b> rs]
 
-        axes <b><span style='color:#0000ff;'>=</span></b> matplotlib.pyplot.subplot(<span style='color:#c000c0;'>4</span>, <span style='color:#c000c0;'>4</span>, counter)
-        fp9  <b><span style='color:#0000ff;'>=</span></b> matplotlib.font_manager.FontProperties(family<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'Cantarell'</span>, style<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, variant<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, weight<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, size<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>9</span>)
-        fp11 <b><span style='color:#0000ff;'>=</span></b> matplotlib.font_manager.FontProperties(family<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'Cantarell'</span>, style<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, variant<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, weight<b><span style='color:#0000ff;'>=</span></b><span style='color:#c00000;'>'normal'</span>, size<b><span style='color:#0000ff;'>=</span></b><span style='color:#c000c0;'>12</span>)
-        axes.plot(rs, phis, <span style='color:#c00000;'>'r-'</span>)
-        axes.fill_between(tvdx, tvdy1, tvdy2, alpha <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>0.3</span>)
+        axes <b><span style='color:#0000ff;'>=</span></b> matplotlib.pyplot.subplot(<span style='color:#cc047c;'>4</span>, <span style='color:#cc047c;'>4</span>, counter)
+        fp9  <b><span style='color:#0000ff;'>=</span></b> matplotlib.font_manager.FontProperties(family<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Cantarell'</span>, style<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'normal'</span>, variant<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'normal'</span>, weight<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'normal'</span>, size<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>9</span>)
+        fp11 <b><span style='color:#0000ff;'>=</span></b> matplotlib.font_manager.FontProperties(family<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Cantarell'</span>, style<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'normal'</span>, variant<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'normal'</span>, weight<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'normal'</span>, size<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>12</span>)
+        axes.plot(rs, phis, <span style='color:#cc0000;'>'r-'</span>)
+        axes.fill_between(tvdx, tvdy1, tvdy2, alpha <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.3</span>)
         axes.set_title(scheme.__doc__, fontproperties<b><span style='color:#0000ff;'>=</span></b>fp11)
-        axes.set_xlim((<span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>3.0</span>))
-        axes.set_ylim((<span style='color:#c000c0;'>0.0</span>, <span style='color:#c000c0;'>3.0</span>))
-        axes.set_xticks([<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>3</span>])
-        axes.set_yticks([<span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1</span>, <span style='color:#c000c0;'>2</span>, <span style='color:#c000c0;'>3</span>])
-        axes.set_ylabel(<span style='color:#c00000;'>'$\phi( r )$'</span>, fontproperties<b><span style='color:#0000ff;'>=</span></b>fp11)
-        axes.set_xlabel(<span style='color:#c00000;'>'$r$'</span>, fontproperties<b><span style='color:#0000ff;'>=</span></b>fp11)
-        axes.grid(<span style='color:#0000ff;'>True</span>)
-        counter <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#c000c0;'>1</span>
-        <b>for</b> xlabel <b><span style='color:#0000ff;'>in</span></b> axes.get_xticklabels():
+        axes.set_xlim((<span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>3.0</span>))
+        axes.set_ylim((<span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>3.0</span>))
+        axes.set_xticks([<span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>2</span>, <span style='color:#cc047c;'>3</span>])
+        axes.set_yticks([<span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>2</span>, <span style='color:#cc047c;'>3</span>])
+        axes.set_ylabel(<span style='color:#cc0000;'>'$\phi( r )$'</span>, fontproperties<b><span style='color:#0000ff;'>=</span></b>fp11)
+        axes.set_xlabel(<span style='color:#cc0000;'>'$r$'</span>, fontproperties<b><span style='color:#0000ff;'>=</span></b>fp11)
+        axes.grid(<span style='color:#3605fb;'>True</span>)
+        counter <b><span style='color:#0000ff;'>+=</span></b> <span style='color:#cc047c;'>1</span>
+        <b>for</b> xlabel <b>in</b> axes.get_xticklabels():
             xlabel.set_fontproperties(fp9)
-        <b>for</b> ylabel <b><span style='color:#0000ff;'>in</span></b> axes.get_yticklabels():
+        <b>for</b> ylabel <b>in</b> axes.get_yticklabels():
             ylabel.set_fontproperties(fp9)
 
     matplotlib.pyplot.tight_layout()
     matplotlib.pyplot.show()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    MIN     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>min</span>
-    MAX     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>max</span>
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    MIN     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>min</span>
+    MAX     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>max</span>
     FABS    <b><span style='color:#0000ff;'>=</span></b> math.fabs
-    beta    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.5</span> <span style='color:#008000;'># For Sweby and Osher (1 &lt;= beta  &lt;= 2)</span>
-    theta   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>1.5</span> <span style='color:#008000;'># For van Leer minmod (1 &lt;= theta &lt;= 2)</span>
+    beta    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.5</span> <span style='color:#017a31;'># For Sweby and Osher (1 &lt;= beta  &lt;= 2)</span>
+    theta   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.5</span> <span style='color:#017a31;'># For van Leer minmod (1 &lt;= theta &lt;= 2)</span>
 
     plot_flux_limiters()
     sys.exit()

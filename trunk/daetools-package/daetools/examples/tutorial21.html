@@ -129,7 +129,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.p2)
         
     <b>def</b> Run(<span style='color:#3605fb;'>self</span>):
-        <span style='color:#017a31;'># The user-defind Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix</span>
+        <span style='color:#017a31;'># The user-defined Run function can be used to access the sensitivites from the DAESolver.SensitivityMatrix</span>
         
         <span style='color:#017a31;'># Concentrations block indexes required to access the data in the sensitivity matrix.</span>
         <span style='color:#017a31;'># The property variable.BlockIndexes is ndarray with block indexes for all points in the variable.</span>
@@ -199,7 +199,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
         
         plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
-        plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from the DAESolver.SensitivityMatrix'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
+        plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from DAESolver.SensitivityMatrix'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
         ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
         ax.set_title(<span style='color:#cc0000;'>'Numerical sensitivities'</span>)
         plt.plot(times, dy1_dp1, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_1}$'</span>)
@@ -275,33 +275,34 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
     variables <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
 
-    <span style='color:#017a31;'># Auxiliary functions to format a name of a variable or a sensitivity variable</span>
-    <b>def</b> variable_name(variable): 
-        <b>return</b> <span style='color:#cc0000;'>'tutorial21.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variable
-    <b>def</b> sensitivity_variable_name(variable, parameter): 
-        <b>return</b> <span style='color:#cc0000;'>'tutorial21.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variable, parameter)
+    <span style='color:#017a31;'># Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).</span>
+    <span style='color:#017a31;'># daeDataReceiverVariable class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).</span>
+    <b>def</b> sensitivity(variableName, parameterName): 
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial21.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variableName, parameterName)]
+    <b>def</b> variable(variableName):
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial21.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variableName]
 
     <span style='color:#017a31;'># Time points can be taken from any variable (x axis)</span>
-    times <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>)].TimeValues
+    times <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>).TimeValues
 
     <span style='color:#017a31;'># Get the daeDataReceiverVariable objects from the dictionary.</span>
     <span style='color:#017a31;'># This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)</span>
-    dy1_dp1 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>)].Values
-    dy1_dp2 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p2'</span>)].Values
-    dy2_dp1 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'p1'</span>)].Values
-    dy2_dp2 <b><span style='color:#0000ff;'>=</span></b> variables[sensitivity_variable_name(<span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'p2'</span>)].Values
+    dy1_dp1 <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>).Values
+    dy1_dp2 <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p2'</span>).Values
+    dy2_dp1 <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'p1'</span>).Values
+    dy2_dp2 <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'y2'</span>, <span style='color:#cc0000;'>'p2'</span>).Values
 
-    dy1_dp1_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy1_dp1'</span>)].Values
-    dy1_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy1_dp2'</span>)].Values
-    dy2_dp1_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy2_dp1'</span>)].Values
-    dy2_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> variables[variable_name(<span style='color:#cc0000;'>'dy2_dp2'</span>)].Values
+    dy1_dp1_analytical <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'dy1_dp1'</span>).Values
+    dy1_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'dy1_dp2'</span>).Values
+    dy2_dp1_analytical <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'dy2_dp1'</span>).Values
+    dy2_dp2_analytical <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'dy2_dp2'</span>).Values
     
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_suptitle <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>16</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
     
     plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>8</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
-    plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from the DataReporter'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
+    plt.suptitle(<span style='color:#cc0000;'>'Sensitivities from DataReporter'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_suptitle)
     ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
     ax.set_title(<span style='color:#cc0000;'>'Numerical sensitivities'</span>)
     plt.plot(times, dy1_dp1, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>r'$\frac{\partial y_1(t)}{\partial p_1}$'</span>)

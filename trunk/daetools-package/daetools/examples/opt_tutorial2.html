@@ -9,166 +9,166 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            opt_tutorial2.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial introduces Bonmin MINLP solver, its setup and options.</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            opt_tutorial2.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial introduces Bonmin MINLP solver, its setup and options.</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
-<span style='color:#ff5500;'>from</span> daetools.solvers.bonmin <span style='color:#ff5500;'>import</span> pyBONMIN
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.bonmin <span style='color:#3605fb;'>import</span> pyBONMIN
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.x  = daeVariable(<span style='color:#bf0303;'>&quot;x&quot;</span>,  no_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.y1 = daeVariable(<span style='color:#bf0303;'>&quot;y1&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.y2 = daeVariable(<span style='color:#bf0303;'>&quot;y2&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.z  = daeVariable(<span style='color:#bf0303;'>&quot;z&quot;</span>,  no_t, <span style='color:#0057ae;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x&quot;</span>,  no_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.y1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y1&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.y2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y2&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.z  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;z&quot;</span>,  no_t, <span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#0057ae;'>self</span>.dummy = daeVariable(<span style='color:#bf0303;'>&quot;dummy&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dummy <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;dummy&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;A dummy variable to satisfy the condition that there should be at least one-state variable and one equation in a model&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Dummy&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.dummy()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Dummy&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dummy()
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;opt_tutorial2&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;opt_tutorial2&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
         <b>pass</b>
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.x.AssignValue(<span style='color:#b08000;'>0</span>)
-        <span style='color:#0057ae;'>self</span>.m.y1.AssignValue(<span style='color:#b08000;'>0</span>)
-        <span style='color:#0057ae;'>self</span>.m.y2.AssignValue(<span style='color:#b08000;'>0</span>)
-        <span style='color:#0057ae;'>self</span>.m.z.AssignValue(<span style='color:#b08000;'>0</span>)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x.AssignValue(<span style='color:#cc047c;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.m.y1.AssignValue(<span style='color:#cc047c;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.m.y2.AssignValue(<span style='color:#cc047c;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.m.z.AssignValue(<span style='color:#cc047c;'>0</span>)
 
-    <b>def</b> SetUpOptimization(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#898887;'># Set the objective function (min)</span>
-        <span style='color:#0057ae;'>self</span>.ObjectiveFunction.Residual = -<span style='color:#0057ae;'>self</span>.m.x() - <span style='color:#0057ae;'>self</span>.m.y1() - <span style='color:#0057ae;'>self</span>.m.y2()
+    <b>def</b> SetUpOptimization(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Set the objective function (min)</span>
+        <span style='color:#3605fb;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.m.x() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.m.y1() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.m.y2()
 
-        <span style='color:#898887;'># Set the constraints (inequality, equality)</span>
-        <span style='color:#898887;'># Constraints are in the following form:</span>
-        <span style='color:#898887;'>#  - Inequality: g(i) &lt;= 0</span>
-        <span style='color:#898887;'>#  - Equality: h(i) = 0</span>
-        c1 = <span style='color:#0057ae;'>self</span>.CreateInequalityConstraint(<span style='color:#bf0303;'>&quot;Constraint 1&quot;</span>)
-        c1.Residual = (<span style='color:#0057ae;'>self</span>.m.y1() - <span style='color:#b08000;'>0.5</span>) ** <span style='color:#b08000;'>2</span> + (<span style='color:#0057ae;'>self</span>.m.y2() - <span style='color:#b08000;'>0.5</span>) ** <span style='color:#b08000;'>2</span> - <span style='color:#b08000;'>0.25</span>
-        <span style='color:#898887;'># Or by using daetools Pow() function:</span>
-        <span style='color:#898887;'>#c1.Residual = Pow(self.m.y1() - 0.5, 2) + Pow(self.m.y2() - 0.5, 2) - 0.25</span>
+        <span style='color:#017a31;'># Set the constraints (inequality, equality)</span>
+        <span style='color:#017a31;'># Constraints are in the following form:</span>
+        <span style='color:#017a31;'>#  - Inequality: g(i) &lt;= 0</span>
+        <span style='color:#017a31;'>#  - Equality: h(i) = 0</span>
+        c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateInequalityConstraint(<span style='color:#cc0000;'>&quot;Constraint 1&quot;</span>)
+        c1.Residual <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.m.y1() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.5</span>) <b><span style='color:#0000ff;'>**</span></b> <span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#3605fb;'>self</span>.m.y2() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.5</span>) <b><span style='color:#0000ff;'>**</span></b> <span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.25</span>
+        <span style='color:#017a31;'># Or by using daetools Pow() function:</span>
+        <span style='color:#017a31;'>#c1.Residual = Pow(self.m.y1() - 0.5, 2) + Pow(self.m.y2() - 0.5, 2) - 0.25</span>
 
-        c2 = <span style='color:#0057ae;'>self</span>.CreateInequalityConstraint(<span style='color:#bf0303;'>&quot;Constraint 2&quot;</span>)
-        c2.Residual = <span style='color:#0057ae;'>self</span>.m.x() - <span style='color:#0057ae;'>self</span>.m.y1()
+        c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateInequalityConstraint(<span style='color:#cc0000;'>&quot;Constraint 2&quot;</span>)
+        c2.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.x() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.m.y1()
 
-        c3 = <span style='color:#0057ae;'>self</span>.CreateInequalityConstraint(<span style='color:#bf0303;'>&quot;Constraint 3&quot;</span>)
-        c3.Residual = <span style='color:#0057ae;'>self</span>.m.x() + <span style='color:#0057ae;'>self</span>.m.y2() + <span style='color:#0057ae;'>self</span>.m.z() - <span style='color:#b08000;'>2</span>
+        c3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateInequalityConstraint(<span style='color:#cc0000;'>&quot;Constraint 3&quot;</span>)
+        c3.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.x() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.y2() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.m.z() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span>
 
-        <span style='color:#898887;'># Set the optimization variables, their lower/upper bounds and the starting point</span>
-        <span style='color:#0057ae;'>self</span>.SetBinaryOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.x, <span style='color:#b08000;'>0</span>)
-        <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.y1, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>2e19</span>, <span style='color:#b08000;'>0</span>)
-        <span style='color:#0057ae;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.y2, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>2e19</span>, <span style='color:#b08000;'>0</span>)
-        <span style='color:#0057ae;'>self</span>.SetIntegerOptimizationVariable(<span style='color:#0057ae;'>self</span>.m.z, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>5</span>, <span style='color:#b08000;'>0</span>)
+        <span style='color:#017a31;'># Set the optimization variables, their lower/upper bounds and the starting point</span>
+        <span style='color:#3605fb;'>self</span>.SetBinaryOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.x, <span style='color:#cc047c;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.y1, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>2e19</span>, <span style='color:#cc047c;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.y2, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>2e19</span>, <span style='color:#cc047c;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.SetIntegerOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.z, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>0</span>)
 
 <b>def</b> setOptions(nlpsolver):
-    <span style='color:#898887;'># 1) Set the options manually</span>
-    nlpsolver.SetOption(<span style='color:#bf0303;'>'bonmin.algorithm'</span>, <span style='color:#bf0303;'>'B-Hyb'</span>)
+    <span style='color:#017a31;'># 1) Set the options manually</span>
+    nlpsolver.SetOption(<span style='color:#cc0000;'>'bonmin.algorithm'</span>, <span style='color:#cc0000;'>'B-Hyb'</span>)
 
-    <span style='color:#898887;'># 2) Load the options file (if file name is empty load the default: daetools/bonmin.cfg)</span>
-    <span style='color:#898887;'>#nlpsolver.LoadOptionsFile(&quot;&quot;)</span>
+    <span style='color:#017a31;'># 2) Load the options file (if file name is empty load the default: daetools/bonmin.cfg)</span>
+    <span style='color:#017a31;'>#nlpsolver.LoadOptionsFile(&quot;&quot;)</span>
 
-    <span style='color:#898887;'># Print options loaded at pyBonmin startup and the user set options:</span>
+    <span style='color:#017a31;'># Print options loaded at pyBonmin startup and the user set options:</span>
     nlpsolver.PrintOptions()
     nlpsolver.PrintUserOptions()
 
-    <span style='color:#898887;'># ClearOptions can clear all options:</span>
-    <span style='color:#898887;'>#nlpsolver.ClearOptions()</span>
+    <span style='color:#017a31;'># ClearOptions can clear all options:</span>
+    <span style='color:#017a31;'>#nlpsolver.ClearOptions()</span>
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = simTutorial()
-    opt = daeOptimization()
-    nlp = pyBONMIN.daeBONMIN()
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>1</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>5</span>
-    <span style='color:#898887;'># Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()</span>
-    <span style='color:#898887;'># Otherwise seg. fault occurs for some reasons.</span>
-    <span style='color:#898887;'># That is why we send a callback function to set the options after Initialize()</span>
-    simulator = daeSimulator(app, simulation = sim,
-                                  optimization = opt,
-                                  nlpsolver = nlp,
-                                  nlpsolver_setoptions_fn = setOptions)
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
+    nlp <b><span style='color:#0000ff;'>=</span></b> pyBONMIN.daeBONMIN()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()</span>
+    <span style='color:#017a31;'># Otherwise seg. fault occurs for some reasons.</span>
+    <span style='color:#017a31;'># That is why we send a callback function to set the options after Initialize()</span>
+    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
+                                  optimization <b><span style='color:#0000ff;'>=</span></b> opt,
+                                  nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
+                                  nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    nlpsolver    = pyBONMIN.daeBONMIN()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-    optimization = daeOptimization()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyBONMIN.daeBONMIN()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
 
-    <span style='color:#898887;'># Do no print progress</span>
-    log.PrintProgress = <span style='color:#0057ae;'>False</span>
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
     
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = <span style='color:#b08000;'>1</span>
-    simulation.TimeHorizon = <span style='color:#b08000;'>5</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()</span>
-    <span style='color:#898887;'># Otherwise seg. fault occurs for some reasons.</span>
+    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()</span>
+    <span style='color:#017a31;'># Otherwise seg. fault occurs for some reasons.</span>
     setOptions(nlpsolver)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     optimization.Run()
     optimization.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

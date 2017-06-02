@@ -2269,6 +2269,8 @@ void daeSimulation::Register(daeVariable* pVariable)
     daeDomain_t* pDomain;
     vector<daeDomain_t*> arrDomains;
 
+    boost::shared_ptr<daeDataProxy_t> pDataProxy = m_pModel->GetDataProxy();
+
     daeDataReporterVariable var;
     var.m_strName  = m_strIteration + pVariable->GetCanonicalName();
     var.m_strUnits = pVariable->GetVariableType()->GetUnits().toString();
@@ -2307,19 +2309,31 @@ void daeSimulation::Register(daeVariable* pVariable)
     // Reuse the daeDataReporterVariable!!
     if(m_bReportSensitivities && m_bCalculateSensitivities)
     {
-        for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
+        const std::vector<size_t>& bis = pVariable->GetBlockIndexes();
+
+        bool isAssigned = false;
+        if(bis.size() == 1)
         {
-            boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+            if(pDataProxy->GetVariableType(pVariable->GetOverallIndex()) == cnAssigned || bis[0] == ULONG_MAX)
+                isAssigned = true;
+        }
 
-            var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
-            var.m_strName += ")_d(" + optVar->GetName() + ")";
-
-            if(!m_pDataReporter->RegisterVariable(&var))
+        if(!isAssigned)
+        {
+            for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
             {
-                daeDeclareException(exDataReportingError);
-                e << "Simulation dastardly failed to register the sensitivity for the variable [" << var.m_strName << "]"
-                  << " per parameter [" << optVar->GetName() << "]";
-                throw e;
+                boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+
+                var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
+                var.m_strName += ")_d(" + optVar->GetName() + ")";
+
+                if(!m_pDataReporter->RegisterVariable(&var))
+                {
+                    daeDeclareException(exDataReportingError);
+                    e << "Simulation dastardly failed to register the sensitivity for the variable [" << var.m_strName << "]"
+                      << " per parameter [" << optVar->GetName() << "]";
+                    throw e;
+                }
             }
         }
     }
@@ -2520,28 +2534,38 @@ void daeSimulation::Report(daeVariable* pVariable, real_t time)
     {
         const std::vector<size_t>& bis = pVariable->GetBlockIndexes();
 
-        for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
+        bool isAssigned = false;
+        if(bis.size() == 1)
         {
-            boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
+            if(pDataProxy->GetVariableType(pVariable->GetOverallIndex()) == cnAssigned || bis[0] == ULONG_MAX)
+                isAssigned = true;
+        }
 
-            var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
-            var.m_strName += ")_d(" + optVar->GetName() + ")";
-
-            for(k = 0; k < bis.size(); k++)
+        if(!isAssigned)
+        {
+            for(size_t pi = 0; pi < m_arrOptimizationVariables.size(); pi++)
             {
-                bi = bis[k];
-                if(bi != ULONG_MAX)
-                    var.m_pValues[k] = m_pCurrentSensitivityMatrix->GetItem(pi, bi);
-                else
-                    var.m_pValues[k] = 0;
-            }
+                boost::shared_ptr<daeOptimizationVariable> optVar = m_arrOptimizationVariables[pi];
 
-            if(!m_pDataReporter->SendVariable(&var))
-            {
-                daeDeclareException(exDataReportingError);
-                e << "Simulation dastardly failed to report the sensitivity for the variable [" << var.m_strName << "]"
-                  << " per parameter [" << optVar->GetName() << "]";
-                throw e;
+                var.m_strName = m_strIteration + pVariable->GetCanonicalNameAndPrepend("sensitivities.d(");
+                var.m_strName += ")_d(" + optVar->GetName() + ")";
+
+                for(k = 0; k < bis.size(); k++)
+                {
+                    bi = bis[k];
+                    if(bi != ULONG_MAX)
+                        var.m_pValues[k] = m_pCurrentSensitivityMatrix->GetItem(pi, bi);
+                    else
+                        var.m_pValues[k] = 0;
+                }
+
+                if(!m_pDataReporter->SendVariable(&var))
+                {
+                    daeDeclareException(exDataReportingError);
+                    e << "Simulation dastardly failed to report the sensitivity for the variable [" << var.m_strName << "]"
+                      << " per parameter [" << optVar->GetName() << "]";
+                    throw e;
+                }
             }
         }
     }

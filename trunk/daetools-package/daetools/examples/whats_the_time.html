@@ -295,7 +295,11 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
     simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
     
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    
     simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    <span style='color:#017a31;'># The same could be achieved using the following (if set before initialisation of the simulation):</span>
+    <span style='color:#017a31;'>#cfg = daeGetConfig()</span>
+    <span style='color:#017a31;'>#cfg.SetBoolean(&quot;daetools.activity.reportTimeDerivatives&quot;, True)</span>
 
     <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>    7. Connect the data reporter</span>

@@ -19,7 +19,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 This tutorial introduces the following concepts:
 
-- Custom operating procedures
+- User-defined schedules (operating procedures)
 - Resetting of degrees of freedom
 - Resetting of initial conditions
 
@@ -31,7 +31,7 @@ one of the variable needs to be "fixed". However the choice of variables is not
 arbitrary and in this example the only variable that can be fixed is Qin. Thus,
 the Qin variable represents a degree of freedom (DOF). Its value will be fixed
 at the beginning of the simulation and later manipulated in the user-defined
-operating procedure in the overloaded function daeSimulation.Run().
+schedule in the overloaded function daeSimulation.Run().
 
 The plot of the inlet power:
 
@@ -95,7 +95,7 @@ class simTutorial(daeSimulation):
     # The functions Integrate(), IntegrateUntilTime(), and IntegrateForTimeInterval() from the
     # daeSimulation class can be used to advance in time, while functions ReAssignValue() and
     # ReSetInitialCondition() from daeVariable class can be used to alter the values of variables.
-    # In this example we specify the following runtime procedure:
+    # In this example we specify the following schedule:
     #  1. Run the simulation for 100s using the function daeSimulation.IntegrateForTimeInterval()
     #     and report the data using the function daeSimulation.ReportData().
     #  2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions

@@ -120,11 +120,11 @@ Side-by-side comparison between the DSL approach and the **DAE Tools** hybrid ap
       - Setting up a simulation is done programmaticaly and the initial values can be obtained from some other software
         in a natural way (chaining several software calls is easy since a large number of libraries make Python wrappers
         available)
-    * - Simulation operating procedures are not flexible; manipulation of model parameters, variables, equations,
+    * - Schedules (operating procedures) are not flexible; manipulation of model parameters, variables, equations,
         simulation results etc is limited to only those operations provided by the language
-      - Operating procedures are completely flexible (within the limits of a programming language itself) and a
+      - Schedules are completely flexible (within the limits of a programming language itself) and a
         manipulation of model parameters, variables, equations, simulation results etc can be done in any way which
-        a user cosiders suitable for his/her problem
+        a user considers suitable for his/her problem
     * - Only the type of results provided by the language/simulator is available; custom processing is usually not
         possible or if a simulator does provide a way to build extensions it is limited to the functionality made
         available to them

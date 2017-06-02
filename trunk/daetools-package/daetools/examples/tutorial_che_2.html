@@ -9,195 +9,195 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>********************************************************************************</span>
-<span style='color:#898887;'>                            tutorial_che_2.py</span>
-<span style='color:#898887;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                 Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>********************************************************************************</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>Binary distillation column model.</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial_che_2.py</span>
+<span style='color:#017a31;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                 Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>********************************************************************************</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Binary distillation column model.</span>
 
-<span style='color:#bf0303;'>Reference: J. Hahn, T.F. Edgar. An improved method for nonlinear model reduction using</span>
-<span style='color:#bf0303;'>balancing of empirical gramians. Computers and Chemical Engineering 2002; 26:1379-1397.</span>
-<span style='color:#bf0303;'>`doi:10.1016/S0098-1354(02)00120-5 &lt;http://dx.doi.org/10.1016/S0098-1354(02)00120-5&gt;`_</span>
+<span style='color:#cc0000;'>Reference: J. Hahn, T.F. Edgar. An improved method for nonlinear model reduction using</span>
+<span style='color:#cc0000;'>balancing of empirical gramians. Computers and Chemical Engineering 2002; 26:1379-1397.</span>
+<span style='color:#cc0000;'>`doi:10.1016/S0098-1354(02)00120-5 &lt;http://dx.doi.org/10.1016/S0098-1354(02)00120-5&gt;`_</span>
 
-<span style='color:#bf0303;'>The liquid fraction after 120 min (x(reboiler)=0.935420, x(condenser)=0.064581):</span>
+<span style='color:#cc0000;'>The liquid fraction after 120 min (x(reboiler)=0.935420, x(condenser)=0.064581):</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial_che_2-results.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_che_2-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
 
-<span style='color:#bf0303;'>The liquid fraction in the reboiler (tray 1) and in the condenser (tray 32):</span>
+<span style='color:#cc0000;'>The liquid fraction in the reboiler (tray 1) and in the condenser (tray 32):</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial_che_2-results2.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_che_2-results2.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l, <b><span style='color:#644a9b;'>min</span></b>
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l, <span style='color:#2a00d6;'>min</span>
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
-        <span style='color:#898887;'># Domains</span>
-        <span style='color:#0057ae;'>self</span>.Nt = daeDomain(<span style='color:#bf0303;'>&quot;N_t&quot;</span>, <span style='color:#0057ae;'>self</span>, unit(), <span style='color:#bf0303;'>&quot;Number of trays&quot;</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        <span style='color:#017a31;'># Domains</span>
+        <span style='color:#3605fb;'>self</span>.Nt <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;N_t&quot;</span>, <span style='color:#3605fb;'>self</span>, unit(), <span style='color:#cc0000;'>&quot;Number of trays&quot;</span>)
         
-        <span style='color:#898887;'># Parameters</span>
-        <span style='color:#0057ae;'>self</span>.Ntrays   = daeParameter(<span style='color:#bf0303;'>&quot;N_trays&quot;</span>,       unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Number of trays&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.FeedTray = daeParameter(<span style='color:#bf0303;'>&quot;FeedTray&quot;</span>,      unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Feed tray&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.RR       = daeParameter(<span style='color:#bf0303;'>&quot;RR&quot;</span>,            unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Reflux ratio&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.F        = daeParameter(<span style='color:#bf0303;'>&quot;F&quot;</span>,             mol/s,  <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Feed flowrate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.xf       = daeParameter(<span style='color:#bf0303;'>&quot;xf&quot;</span>,            unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Mole fraction of feed&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.alpha    = daeParameter(<span style='color:#bf0303;'>&quot;&amp;alpha;&quot;</span>,       unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Relative volatility&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Atray    = daeParameter(<span style='color:#bf0303;'>&quot;Atray&quot;</span>,         mol,    <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total molar holdup on each tray&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Acond    = daeParameter(<span style='color:#bf0303;'>&quot;Acond&quot;</span>,         mol,    <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total molar holdup in the condenser&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Areb     = daeParameter(<span style='color:#bf0303;'>&quot;Areb&quot;</span>,          mol,    <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total molar holdup in the reboiler&quot;</span>)
+        <span style='color:#017a31;'># Parameters</span>
+        <span style='color:#3605fb;'>self</span>.Ntrays   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;N_trays&quot;</span>,       unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Number of trays&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.FeedTray <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;FeedTray&quot;</span>,      unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Feed tray&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.RR       <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;RR&quot;</span>,            unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reflux ratio&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.F        <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;F&quot;</span>,             mol<b><span style='color:#0000ff;'>/</span></b>s,  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Feed flowrate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.xf       <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;xf&quot;</span>,            unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mole fraction of feed&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.alpha    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>,       unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Relative volatility&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Atray    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Atray&quot;</span>,         mol,    <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Total molar holdup on each tray&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Acond    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Acond&quot;</span>,         mol,    <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Total molar holdup in the condenser&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Areb     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Areb&quot;</span>,          mol,    <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Total molar holdup in the reboiler&quot;</span>)
 
-        <span style='color:#898887;'># Variables</span>
-        <span style='color:#0057ae;'>self</span>.x  = daeVariable(<span style='color:#bf0303;'>&quot;x&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Liquid fraction of component A&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.x.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.Nt)
+        <span style='color:#017a31;'># Variables</span>
+        <span style='color:#3605fb;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Liquid fraction of component A&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.Nt)
         
-        <span style='color:#0057ae;'>self</span>.y  = daeVariable(<span style='color:#bf0303;'>&quot;y&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Vapour fraction of component A&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.y.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.Nt)
+        <span style='color:#3605fb;'>self</span>.y  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Vapour fraction of component A&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.Nt)
         
-        <span style='color:#0057ae;'>self</span>.D  = daeVariable(<span style='color:#bf0303;'>&quot;D&quot;</span>,   molar_flowrate_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Distillate flowrate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.L1 = daeVariable(<span style='color:#bf0303;'>&quot;L1&quot;</span>,  molar_flowrate_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Liquid flowrate in the rectification section&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.V  = daeVariable(<span style='color:#bf0303;'>&quot;V&quot;</span>,   molar_flowrate_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Vapour flowrate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.L2 = daeVariable(<span style='color:#bf0303;'>&quot;L2&quot;</span>,  molar_flowrate_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Liquid flowrate in the stripping section&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.D  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;D&quot;</span>,   molar_flowrate_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Distillate flowrate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.L1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;L1&quot;</span>,  molar_flowrate_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Liquid flowrate in the rectification section&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.V  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;V&quot;</span>,   molar_flowrate_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Vapour flowrate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.L2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;L2&quot;</span>,  molar_flowrate_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Liquid flowrate in the stripping section&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        FeedTray = <b><span style='color:#644a9b;'>int</span></b>(<span style='color:#0057ae;'>self</span>.FeedTray.GetValue())
-        Ntrays   = <span style='color:#0057ae;'>self</span>.Nt.NumberOfPoints
-        <b><span style='color:#644a9b;'>print</span></b>(FeedTray, Ntrays)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        FeedTray <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(<span style='color:#3605fb;'>self</span>.FeedTray.GetValue())
+        Ntrays   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Nt.NumberOfPoints
+        <span style='color:#2a00d6;'>print</span>(FeedTray, Ntrays)
         
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Condenser&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.Acond() * <span style='color:#0057ae;'>self</span>.x.dt(<span style='color:#b08000;'>0</span>) - ( <span style='color:#0057ae;'>self</span>.V() * (<span style='color:#0057ae;'>self</span>.y(<span style='color:#b08000;'>1</span>) - <span style='color:#0057ae;'>self</span>.x(<span style='color:#b08000;'>0</span>)) )
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Condenser&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Acond() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x.dt(<span style='color:#cc047c;'>0</span>) <b><span style='color:#0000ff;'>-</span></b> ( <span style='color:#3605fb;'>self</span>.V() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.y(<span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.x(<span style='color:#cc047c;'>0</span>)) )
         
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;RectificationSection&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        tr = <b><span style='color:#644a9b;'>list</span></b>(<b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, FeedTray)) <span style='color:#898887;'># [1, 2, ..., FeedTray-1]</span>
-        t = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.Nt, tr)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.Atray() * <span style='color:#0057ae;'>self</span>.x.dt(t) - (  <span style='color:#0057ae;'>self</span>.L1() * (<span style='color:#0057ae;'>self</span>.x(t-<span style='color:#b08000;'>1</span>) - <span style='color:#0057ae;'>self</span>.x(t)) \
-                                                     - <span style='color:#0057ae;'>self</span>.V()  * (<span style='color:#0057ae;'>self</span>.y(t) - <span style='color:#0057ae;'>self</span>.y(t+<span style='color:#b08000;'>1</span>)) )
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;RectificationSection&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        tr <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>list</span>(<span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, FeedTray)) <span style='color:#017a31;'># [1, 2, ..., FeedTray-1]</span>
+        t <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.Nt, tr)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Atray() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x.dt(t) <b><span style='color:#0000ff;'>-</span></b> (  <span style='color:#3605fb;'>self</span>.L1() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.x(t<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.x(t)) <b><span style='color:#0000ff;'>\</span></b>
+                                                     <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.V()  <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.y(t) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.y(t<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)) )
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;FeedTray&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.Atray() * <span style='color:#0057ae;'>self</span>.x.dt(FeedTray) - ( \
-                                                            <span style='color:#0057ae;'>self</span>.F()  * <span style='color:#0057ae;'>self</span>.xf() + \
-                                                            <span style='color:#0057ae;'>self</span>.L1() * <span style='color:#0057ae;'>self</span>.x(FeedTray-<span style='color:#b08000;'>1</span>) - \
-                                                            <span style='color:#0057ae;'>self</span>.L2() * <span style='color:#0057ae;'>self</span>.x(FeedTray) - \
-                                                            <span style='color:#0057ae;'>self</span>.V()  * (<span style='color:#0057ae;'>self</span>.y(FeedTray) - <span style='color:#0057ae;'>self</span>.y(FeedTray+<span style='color:#b08000;'>1</span>)) \
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;FeedTray&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Atray() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x.dt(FeedTray) <b><span style='color:#0000ff;'>-</span></b> ( <b><span style='color:#0000ff;'>\</span></b>
+                                                            <span style='color:#3605fb;'>self</span>.F()  <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.xf() <b><span style='color:#0000ff;'>+</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                                            <span style='color:#3605fb;'>self</span>.L1() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x(FeedTray<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                                            <span style='color:#3605fb;'>self</span>.L2() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x(FeedTray) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                                            <span style='color:#3605fb;'>self</span>.V()  <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.y(FeedTray) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.y(FeedTray<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)) <b><span style='color:#0000ff;'>\</span></b>
                                                            )
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;StrippingSection&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        tr = <b><span style='color:#644a9b;'>list</span></b>(<b><span style='color:#644a9b;'>range</span></b>(FeedTray+<span style='color:#b08000;'>1</span>, Ntrays-<span style='color:#b08000;'>1</span>)) <span style='color:#898887;'># [FeedTray, FeedTray+1, ..., Ntrays]</span>
-        t = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.Nt, tr)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.Atray() * <span style='color:#0057ae;'>self</span>.x.dt(t) - ( <span style='color:#0057ae;'>self</span>.L2() * (<span style='color:#0057ae;'>self</span>.x(t-<span style='color:#b08000;'>1</span>) - <span style='color:#0057ae;'>self</span>.x(t)) - \
-                                                      <span style='color:#0057ae;'>self</span>.V()  * (<span style='color:#0057ae;'>self</span>.y(t)   - <span style='color:#0057ae;'>self</span>.y(t+<span style='color:#b08000;'>1</span>)) )
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;StrippingSection&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        tr <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>list</span>(<span style='color:#2a00d6;'>range</span>(FeedTray<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, Ntrays<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)) <span style='color:#017a31;'># [FeedTray, FeedTray+1, ..., Ntrays]</span>
+        t <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.Nt, tr)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Atray() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x.dt(t) <b><span style='color:#0000ff;'>-</span></b> ( <span style='color:#3605fb;'>self</span>.L2() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.x(t<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.x(t)) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                                      <span style='color:#3605fb;'>self</span>.V()  <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.y(t)   <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.y(t<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)) )
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Reboiler&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.Areb() * <span style='color:#0057ae;'>self</span>.x.dt(Ntrays-<span style='color:#b08000;'>1</span>) - ( <span style='color:#0057ae;'>self</span>.L2()            * <span style='color:#0057ae;'>self</span>.x(Ntrays-<span style='color:#b08000;'>2</span>) - \
-                                                           (<span style='color:#0057ae;'>self</span>.F() - <span style='color:#0057ae;'>self</span>.D()) * <span style='color:#0057ae;'>self</span>.x(Ntrays-<span style='color:#b08000;'>1</span>) - \
-                                                            <span style='color:#0057ae;'>self</span>.V()             * <span style='color:#0057ae;'>self</span>.y(Ntrays-<span style='color:#b08000;'>1</span>) )
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Reboiler&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Areb() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x.dt(Ntrays<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> ( <span style='color:#3605fb;'>self</span>.L2()            <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x(Ntrays<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                                           (<span style='color:#3605fb;'>self</span>.F() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.D()) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x(Ntrays<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                                                            <span style='color:#3605fb;'>self</span>.V()             <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.y(Ntrays<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) )
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;D&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.D() - <span style='color:#b08000;'>0.5</span> * <span style='color:#0057ae;'>self</span>.F()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;D&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.D() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.F()
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;L1&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.L1() - <span style='color:#0057ae;'>self</span>.RR() * <span style='color:#0057ae;'>self</span>.D()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;L1&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L1() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.RR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.D()
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;V&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.V() - (<span style='color:#0057ae;'>self</span>.L1() + <span style='color:#0057ae;'>self</span>.D())
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;V&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.V() <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#3605fb;'>self</span>.L1() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.D())
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;L2&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.L2() - (<span style='color:#0057ae;'>self</span>.F() + <span style='color:#0057ae;'>self</span>.L1())
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;L2&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L2() <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#3605fb;'>self</span>.F() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.L1())
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        t = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.Nt, eClosedClosed)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.y(t) - ( <span style='color:#0057ae;'>self</span>.x(t) * <span style='color:#0057ae;'>self</span>.alpha() / (<span style='color:#b08000;'>1</span> + (<span style='color:#0057ae;'>self</span>.alpha() - <span style='color:#b08000;'>1</span>) * <span style='color:#0057ae;'>self</span>.x(t)) )
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        t <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.Nt, eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y(t) <b><span style='color:#0000ff;'>-</span></b> ( <span style='color:#3605fb;'>self</span>.x(t) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.alpha() <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> (<span style='color:#3605fb;'>self</span>.alpha() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.x(t)) )
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial_che_2&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_che_2&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.FeedTray.SetValue(<span style='color:#b08000;'>16</span>)
-        <span style='color:#0057ae;'>self</span>.m.Ntrays.SetValue(<span style='color:#b08000;'>32</span>)
-        <span style='color:#0057ae;'>self</span>.m.Nt.CreateArray(<b><span style='color:#644a9b;'>int</span></b>(<span style='color:#0057ae;'>self</span>.m.Ntrays.GetValue()))
-        <span style='color:#0057ae;'>self</span>.m.RR.SetValue(<span style='color:#b08000;'>3.0</span>)
-        <span style='color:#0057ae;'>self</span>.m.F.SetValue(<span style='color:#b08000;'>2.0</span> * mol/<b><span style='color:#644a9b;'>min</span></b>)
-        <span style='color:#0057ae;'>self</span>.m.xf.SetValue(<span style='color:#b08000;'>0.5</span>)
-        <span style='color:#0057ae;'>self</span>.m.alpha.SetValue(<span style='color:#b08000;'>1.6</span>)
-        <span style='color:#0057ae;'>self</span>.m.Atray.SetValue(<span style='color:#b08000;'>0.25</span> * mol)
-        <span style='color:#0057ae;'>self</span>.m.Acond.SetValue(<span style='color:#b08000;'>0.5</span> * mol)
-        <span style='color:#0057ae;'>self</span>.m.Areb.SetValue(<span style='color:#b08000;'>0.1</span> * mol)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.FeedTray.SetValue(<span style='color:#cc047c;'>16</span>)
+        <span style='color:#3605fb;'>self</span>.m.Ntrays.SetValue(<span style='color:#cc047c;'>32</span>)
+        <span style='color:#3605fb;'>self</span>.m.Nt.CreateArray(<span style='color:#2a00d6;'>int</span>(<span style='color:#3605fb;'>self</span>.m.Ntrays.GetValue()))
+        <span style='color:#3605fb;'>self</span>.m.RR.SetValue(<span style='color:#cc047c;'>3.0</span>)
+        <span style='color:#3605fb;'>self</span>.m.F.SetValue(<span style='color:#cc047c;'>2.0</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b><span style='color:#2a00d6;'>min</span>)
+        <span style='color:#3605fb;'>self</span>.m.xf.SetValue(<span style='color:#cc047c;'>0.5</span>)
+        <span style='color:#3605fb;'>self</span>.m.alpha.SetValue(<span style='color:#cc047c;'>1.6</span>)
+        <span style='color:#3605fb;'>self</span>.m.Atray.SetValue(<span style='color:#cc047c;'>0.25</span> <b><span style='color:#0000ff;'>*</span></b> mol)
+        <span style='color:#3605fb;'>self</span>.m.Acond.SetValue(<span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> mol)
+        <span style='color:#3605fb;'>self</span>.m.Areb.SetValue(<span style='color:#cc047c;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> mol)
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <b>for</b> t <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.m.Nt.NumberOfPoints):
-            <span style='color:#0057ae;'>self</span>.m.x.SetInitialCondition(t, <span style='color:#b08000;'>0.3</span>)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <b>for</b> t <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, <span style='color:#3605fb;'>self</span>.m.Nt.NumberOfPoints):
+            <span style='color:#3605fb;'>self</span>.m.x.SetInitialCondition(t, <span style='color:#cc047c;'>0.3</span>)
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    simulation = simTutorial()
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    simulation.ReportingInterval =   <span style='color:#b08000;'>2</span>*<span style='color:#b08000;'>60</span> <span style='color:#898887;'>#   1 min</span>
-    simulation.TimeHorizon       = <span style='color:#b08000;'>120</span>*<span style='color:#b08000;'>60</span> <span style='color:#898887;'># 120 min</span>
-    simulator = daeSimulator(app, simulation = simulation)
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span> <span style='color:#017a31;'>#   1 min</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>120</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span> <span style='color:#017a31;'># 120 min</span>
+    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> simulation)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
     
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    <span style='color:#898887;'># Here the time is given in HOURS!</span>
-    simulation.ReportingInterval =   <span style='color:#b08000;'>2</span>*<span style='color:#b08000;'>60</span> <span style='color:#898887;'>#  1 min</span>
-    simulation.TimeHorizon       = <span style='color:#b08000;'>120</span>*<span style='color:#b08000;'>60</span> <span style='color:#898887;'># 30 min</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    <span style='color:#017a31;'># Here the time is given in HOURS!</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b>   <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span> <span style='color:#017a31;'>#  1 min</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>120</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span> <span style='color:#017a31;'># 30 min</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
         
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

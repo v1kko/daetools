@@ -9,232 +9,232 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            tutorial17.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial introduces the following concepts:</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial17.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial introduces the following concepts:</span>
 
-<span style='color:#bf0303;'>- TCPIP Log and TCPIPLogServer</span>
+<span style='color:#cc0000;'>- TCPIP Log and TCPIPLogServer</span>
 
-<span style='color:#bf0303;'>In this example we use the same heat transfer problem as in the tutorial 7.</span>
+<span style='color:#cc0000;'>In this example we use the same heat transfer problem as in the tutorial 7.</span>
 
-<span style='color:#bf0303;'>The screenshot of the TCP/IP log server:</span>
+<span style='color:#cc0000;'>The screenshot of the TCP/IP log server:</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial17-screenshot.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial17-screenshot.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
 
-<span style='color:#bf0303;'>The temperature plot:</span>
+<span style='color:#cc0000;'>The temperature plot:</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial17-results.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial17-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> os, sys, threading
-<span style='color:#ff5500;'>from</span> PyQt5 <span style='color:#ff5500;'>import</span> QtCore, QtGui, QtWidgets
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime, sleep
-<span style='color:#ff5500;'>from</span> os.path <span style='color:#ff5500;'>import</span> join, realpath, dirname
-<span style='color:#ff5500;'>from</span> subprocess <span style='color:#ff5500;'>import</span> Popen, call
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
+<span style='color:#3605fb;'>import</span> os, sys, threading
+<span style='color:#3605fb;'>from</span> PyQt5 <span style='color:#3605fb;'>import</span> QtCore, QtGui, QtWidgets
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime, sleep
+<span style='color:#3605fb;'>from</span> os.path <span style='color:#3605fb;'>import</span> join, realpath, dirname
+<span style='color:#3605fb;'>from</span> subprocess <span style='color:#3605fb;'>import</span> Popen, call
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <b>try</b>:
-    <span style='color:#ff5500;'>from</span> .tutorial17_ui <span style='color:#ff5500;'>import</span> Ui_tcpipLogServerMainWindow
-<b>except</b> <span style='color:#006e28;'>Exception</span> <span style='color:#ff5500;'>as</span> e:
-    <span style='color:#ff5500;'>from</span> tutorial17_ui <span style='color:#ff5500;'>import</span> Ui_tcpipLogServerMainWindow
+    <span style='color:#3605fb;'>from</span> .tutorial17_ui <span style='color:#3605fb;'>import</span> Ui_tcpipLogServerMainWindow
+<b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+    <span style='color:#3605fb;'>from</span> tutorial17_ui <span style='color:#3605fb;'>import</span> Ui_tcpipLogServerMainWindow
 
-<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W, kW
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W, kW
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.m     = daeParameter(<span style='color:#bf0303;'>&quot;m&quot;</span>,       kg,           <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Mass of the copper plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.cp    = daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,     J/(kg*K),     <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.alpha = daeParameter(<span style='color:#bf0303;'>&quot;&amp;alpha;&quot;</span>, W/((m**<span style='color:#b08000;'>2</span>)*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Heat transfer coefficient&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.A     = daeParameter(<span style='color:#bf0303;'>&quot;A&quot;</span>,       m**<span style='color:#b08000;'>2</span>,         <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Area of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Tsurr = daeParameter(<span style='color:#bf0303;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the surroundings&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>,       kg,           <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>,         <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the surroundings&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.Qin  = daeVariable(<span style='color:#bf0303;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Power of the heater&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.T    = daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qin  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Integral heat balance equation&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.m() * <span style='color:#0057ae;'>self</span>.cp() * dt(<span style='color:#0057ae;'>self</span>.T()) - <span style='color:#0057ae;'>self</span>.Qin() + <span style='color:#0057ae;'>self</span>.alpha() * <span style='color:#0057ae;'>self</span>.A() * (<span style='color:#0057ae;'>self</span>.T() - <span style='color:#0057ae;'>self</span>.Tsurr())
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;Integral heat balance equation&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#3605fb;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Tsurr())
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial17&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial17&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span> * J/(kg*K))
-        <span style='color:#0057ae;'>self</span>.m.m.SetValue(<span style='color:#b08000;'>1</span> * kg)
-        <span style='color:#0057ae;'>self</span>.m.alpha.SetValue(<span style='color:#b08000;'>200</span> * W/((m**<span style='color:#b08000;'>2</span>)*K))
-        <span style='color:#0057ae;'>self</span>.m.A.SetValue(<span style='color:#b08000;'>0.1</span> * m**<span style='color:#b08000;'>2</span>)
-        <span style='color:#0057ae;'>self</span>.m.Tsurr.SetValue(<span style='color:#b08000;'>283</span> * K)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.m.SetValue(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> kg)
+        <span style='color:#3605fb;'>self</span>.m.alpha.SetValue(<span style='color:#cc047c;'>200</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.A.SetValue(<span style='color:#cc047c;'>0.1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
+        <span style='color:#3605fb;'>self</span>.m.Tsurr.SetValue(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.Qin.AssignValue(<span style='color:#b08000;'>1500</span> * W)
-        <span style='color:#0057ae;'>self</span>.m.T.SetInitialCondition(<span style='color:#b08000;'>283</span> * K)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.Qin.AssignValue(<span style='color:#cc047c;'>1500</span> <b><span style='color:#0000ff;'>*</span></b> W)
+        <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
-    <b>def</b> Run(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#898887;'># The default Run() function is re-implemented here (just the basic version)</span>
-        <span style='color:#898887;'># to allow simulation to wait for certain period between time intervals</span>
-        <b>while</b> <span style='color:#0057ae;'>self</span>.CurrentTime &lt; <span style='color:#0057ae;'>self</span>.TimeHorizon:
-            <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'Integrating from </span><span style='color:#3daee9;'>%f</span><span style='color:#bf0303;'> to </span><span style='color:#3daee9;'>%f</span><span style='color:#bf0303;'> ...'</span> % (<span style='color:#0057ae;'>self</span>.CurrentTime, <span style='color:#0057ae;'>self</span>.CurrentTime+<span style='color:#0057ae;'>self</span>.ReportingInterval), <span style='color:#b08000;'>0</span>)
-            <span style='color:#0057ae;'>self</span>.IntegrateForTimeInterval(<span style='color:#0057ae;'>self</span>.ReportingInterval, eDoNotStopAtDiscontinuity)
-            <span style='color:#0057ae;'>self</span>.ReportData(<span style='color:#0057ae;'>self</span>.CurrentTime)
-            <span style='color:#0057ae;'>self</span>.Log.SetProgress(<b><span style='color:#644a9b;'>int</span></b>(<span style='color:#b08000;'>100.0</span> * <span style='color:#0057ae;'>self</span>.CurrentTime/<span style='color:#0057ae;'>self</span>.TimeHorizon))
-            sleep(<span style='color:#b08000;'>0.2</span>)
+    <b>def</b> Run(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># The default Run() function is re-implemented here (just the basic version)</span>
+        <span style='color:#017a31;'># to allow simulation to wait for certain period between time intervals</span>
+        <b>while</b> <span style='color:#3605fb;'>self</span>.CurrentTime <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#3605fb;'>self</span>.TimeHorizon:
+            <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>'Integrating from </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> to </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> ...'</span> <b><span style='color:#0000ff;'>%</span></b> (<span style='color:#3605fb;'>self</span>.CurrentTime, <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>+</span></b><span style='color:#3605fb;'>self</span>.ReportingInterval), <span style='color:#cc047c;'>0</span>)
+            <span style='color:#3605fb;'>self</span>.IntegrateForTimeInterval(<span style='color:#3605fb;'>self</span>.ReportingInterval, eDoNotStopAtDiscontinuity)
+            <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
+            <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))
+            sleep(<span style='color:#cc047c;'>0.2</span>)
 
-        <span style='color:#0057ae;'>self</span>.Log.Message(<span style='color:#bf0303;'>'The simulation has finished succesfully!'</span>, <span style='color:#b08000;'>0</span>)
+        <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>'The simulation has finished succesfully!'</span>, <span style='color:#cc047c;'>0</span>)
 
 <b>class</b> tcpipLogServer(daeTCPIPLogServer):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, port, app, textEdit):
-        <b>if</b> port &lt;= <span style='color:#b08000;'>0</span>:
-            cfg  = daeGetConfig()
-            port = cfg.GetInteger(<span style='color:#bf0303;'>&quot;daetools.logging.tcpipLogPort&quot;</span>, <span style='color:#b08000;'>51000</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, port, app, textEdit):
+        <b>if</b> port <b><span style='color:#0000ff;'>&lt;=</span></b> <span style='color:#cc047c;'>0</span>:
+            cfg  <b><span style='color:#0000ff;'>=</span></b> daeGetConfig()
+            port <b><span style='color:#0000ff;'>=</span></b> cfg.GetInteger(<span style='color:#cc0000;'>&quot;daetools.logging.tcpipLogPort&quot;</span>, <span style='color:#cc047c;'>51000</span>)
 
-        daeTCPIPLogServer.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, port)
+        daeTCPIPLogServer.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, port)
 
-        <span style='color:#0057ae;'>self</span>.app      = app
-        <span style='color:#0057ae;'>self</span>.textEdit = textEdit
+        <span style='color:#3605fb;'>self</span>.app      <b><span style='color:#0000ff;'>=</span></b> app
+        <span style='color:#3605fb;'>self</span>.textEdit <b><span style='color:#0000ff;'>=</span></b> textEdit
 
-    <b>def</b> MessageReceived(<span style='color:#0057ae;'>self</span>, message):
-        <span style='color:#0057ae;'>self</span>.textEdit.append(message)
-        <b>if</b> <span style='color:#0057ae;'>self</span>.textEdit.isVisible() == <span style='color:#0057ae;'>True</span>:
-            <span style='color:#0057ae;'>self</span>.textEdit.update()
-        <span style='color:#0057ae;'>self</span>.textEdit.verticalScrollBar().setSliderPosition(<span style='color:#0057ae;'>self</span>.textEdit.verticalScrollBar().maximum())
-        <span style='color:#0057ae;'>self</span>.app.processEvents()
+    <b>def</b> MessageReceived(<span style='color:#3605fb;'>self</span>, message):
+        <span style='color:#3605fb;'>self</span>.textEdit.append(message)
+        <b>if</b> <span style='color:#3605fb;'>self</span>.textEdit.isVisible() <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>True</span>:
+            <span style='color:#3605fb;'>self</span>.textEdit.update()
+        <span style='color:#3605fb;'>self</span>.textEdit.verticalScrollBar().setSliderPosition(<span style='color:#3605fb;'>self</span>.textEdit.verticalScrollBar().maximum())
+        <span style='color:#3605fb;'>self</span>.app.processEvents()
 
 <b>class</b> tcpipLogServerMainWindow(QtWidgets.QMainWindow):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, app):
-        QtWidgets.QMainWindow.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, app):
+        QtWidgets.QMainWindow.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#0057ae;'>self</span>.ui = Ui_tcpipLogServerMainWindow()
-        <span style='color:#0057ae;'>self</span>.ui.setupUi(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#898887;'>#self.setAttribute(QtCore.Qt.WA_DeleteOnClose)</span>
-        <span style='color:#0057ae;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#0057ae;'>__file__</span>), <span style='color:#bf0303;'>'daetools-48x48.png'</span>)))
-        <span style='color:#0057ae;'>self</span>.setGeometry(<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>100</span>, <span style='color:#b08000;'>600</span>, <span style='color:#b08000;'>200</span>) <span style='color:#898887;'># Position window</span>
-        <span style='color:#0057ae;'>self</span>.resize(<span style='color:#b08000;'>600</span>, <span style='color:#b08000;'>300</span>)  <span style='color:#898887;'># Resize window</span>
+        <span style='color:#3605fb;'>self</span>.ui <b><span style='color:#0000ff;'>=</span></b> Ui_tcpipLogServerMainWindow()
+        <span style='color:#3605fb;'>self</span>.ui.setupUi(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#017a31;'>#self.setAttribute(QtCore.Qt.WA_DeleteOnClose)</span>
+        <span style='color:#3605fb;'>self</span>.setWindowIcon(QtGui.QIcon(join(dirname(<span style='color:#3605fb;'>__file__</span>), <span style='color:#cc0000;'>'daetools-48x48.png'</span>)))
+        <span style='color:#3605fb;'>self</span>.setGeometry(<span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>100</span>, <span style='color:#cc047c;'>600</span>, <span style='color:#cc047c;'>200</span>) <span style='color:#017a31;'># Position window</span>
+        <span style='color:#3605fb;'>self</span>.resize(<span style='color:#cc047c;'>600</span>, <span style='color:#cc047c;'>300</span>)  <span style='color:#017a31;'># Resize window</span>
 
-        <span style='color:#898887;'># Create TCPIP log server</span>
-        <span style='color:#0057ae;'>self</span>.logServer = tcpipLogServer(<span style='color:#b08000;'>0</span>, app, <span style='color:#0057ae;'>self</span>.ui.messagesEdit)
-        <span style='color:#898887;'># Start TCPIP log server</span>
-        <span style='color:#0057ae;'>self</span>.logServer.Start()
+        <span style='color:#017a31;'># Create TCPIP log server</span>
+        <span style='color:#3605fb;'>self</span>.logServer <b><span style='color:#0000ff;'>=</span></b> tcpipLogServer(<span style='color:#cc047c;'>0</span>, app, <span style='color:#3605fb;'>self</span>.ui.messagesEdit)
+        <span style='color:#017a31;'># Start TCPIP log server</span>
+        <span style='color:#3605fb;'>self</span>.logServer.Start()
 
 <b>class</b> simulationThread(threading.Thread):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, saveReports):
-        threading.Thread.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, saveReports):
+        threading.Thread.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#0057ae;'>self</span>.saveReports = saveReports
+        <span style='color:#3605fb;'>self</span>.saveReports <b><span style='color:#0000ff;'>=</span></b> saveReports
 
-    <b>def</b> run(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#898887;'># Create a delegate log and add two logs: stdout and tcpip logs</span>
-        log, log1, log2  = setupLog()
+    <b>def</b> run(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Create a delegate log and add two logs: stdout and tcpip logs</span>
+        log, log1, log2  <b><span style='color:#0000ff;'>=</span></b> setupLog()
 
-        <span style='color:#898887;'># Create Solver, DataReporter and Simulation object</span>
-        daesolver    = daeIDAS()
-        datareporter = daeTCPIPDataReporter()
-        simulation   = simTutorial()
+        <span style='color:#017a31;'># Create Solver, DataReporter and Simulation object</span>
+        daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+        datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+        simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-        <span style='color:#898887;'># Enable reporting of all variables</span>
-        simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+        <span style='color:#017a31;'># Enable reporting of all variables</span>
+        simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-        <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-        simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
-        simulation.TimeHorizon = <span style='color:#b08000;'>500</span>
+        <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+        simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+        simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
 
-        <span style='color:#898887;'># Connect data reporter</span>
-        simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-        <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+        <span style='color:#017a31;'># Connect data reporter</span>
+        simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+        <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
             sys.exit()
 
-        <span style='color:#898887;'># Initialize the simulation</span>
+        <span style='color:#017a31;'># Initialize the simulation</span>
         simulation.Initialize(daesolver, datareporter, log)
         
-        <span style='color:#898887;'># Save the model report and the runtime model report</span>
-        <b>if</b> <span style='color:#0057ae;'>self</span>.saveReports:
-            simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-            simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+        <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+        <b>if</b> <span style='color:#3605fb;'>self</span>.saveReports:
+            simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+            simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-        <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+        <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
         simulation.SolveInitial()
 
         simulation.Run()
         simulation.Finalize()
 
 <b>def</b> setupLog():
-    log  = daeDelegateLog()
-    log1 = daePythonStdOutLog()
-    log2 = daeTCPIPLog()
+    log  <b><span style='color:#0000ff;'>=</span></b> daeDelegateLog()
+    log1 <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    log2 <b><span style='color:#0000ff;'>=</span></b> daeTCPIPLog()
 
-    <span style='color:#898887;'># Connect TCPIP log</span>
-    <b>if</b>(log2.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, <span style='color:#b08000;'>0</span>) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect TCPIP log</span>
+    <b>if</b>(log2.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, <span style='color:#cc047c;'>0</span>) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
     log.AddLog(log1)
     log.AddLog(log2)
 
-    <span style='color:#898887;'># Return all of them for we have to keep referencem to them</span>
-    <span style='color:#898887;'># and prevent them going out of scope</span>
+    <span style='color:#017a31;'># Return all of them for we have to keep referencem to them</span>
+    <span style='color:#017a31;'># and prevent them going out of scope</span>
     <b>return</b> log, log1, log2
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    <span style='color:#898887;'># Start TCP/IP log server</span>
-    log_server = tcpipLogServerMainWindow(app)
+    <span style='color:#017a31;'># Start TCP/IP log server</span>
+    log_server <b><span style='color:#0000ff;'>=</span></b> tcpipLogServerMainWindow(app)
     log_server.show()
-    <span style='color:#898887;'># Give it some time to start the TCP/IP server</span>
-    sleep(<span style='color:#b08000;'>1</span>)
+    <span style='color:#017a31;'># Give it some time to start the TCP/IP server</span>
+    sleep(<span style='color:#cc047c;'>1</span>)
 
-    <span style='color:#898887;'># Create a delegate log and add two logs: stdout and tcpip logs</span>
-    log, log1, log2  = setupLog()
+    <span style='color:#017a31;'># Create a delegate log and add two logs: stdout and tcpip logs</span>
+    log, log1, log2  <b><span style='color:#0000ff;'>=</span></b> setupLog()
 
-    sim = simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>10</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>500</span>
-    simulator  = daeSimulator(app, simulation=sim, log = log)
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, log <b><span style='color:#0000ff;'>=</span></b> log)
     simulator.exec_()
     app.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun(app):
-    <span style='color:#898887;'># Start TCP/IP log server</span>
-    log_server = tcpipLogServerMainWindow(app)
+    <span style='color:#017a31;'># Start TCP/IP log server</span>
+    log_server <b><span style='color:#0000ff;'>=</span></b> tcpipLogServerMainWindow(app)
     log_server.show()
-    <span style='color:#898887;'># Give it some time to start the TCP/IP server</span>
-    sleep(<span style='color:#b08000;'>1</span>)
+    <span style='color:#017a31;'># Give it some time to start the TCP/IP server</span>
+    sleep(<span style='color:#cc047c;'>1</span>)
 
-    <span style='color:#898887;'># Create and start a thread with the simulation</span>
-    st = simulationThread(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Create and start a thread with the simulation</span>
+    st <b><span style='color:#0000ff;'>=</span></b> simulationThread(<span style='color:#3605fb;'>True</span>)
     st.start()
 
     app.exec_()
     st.join()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    app = QtWidgets.QApplication(sys.argv)
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    app <b><span style='color:#0000ff;'>=</span></b> QtWidgets.QApplication(sys.argv)
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun(app)
     <b>else</b>:
         guiRun(app)

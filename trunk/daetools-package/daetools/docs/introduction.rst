@@ -39,7 +39,7 @@ The following class of problems can be solved by **DAE Tools**:
 
 Type of activities that can be performed on models developed in **DAE Tools**:
 
-* Simulation (steady-state or dynamic, with simple or complex operating procedures)
+* Simulation (steady-state or dynamic, with simple or complex schedules)
 
 * Optimisation (NLP and MINLP problems)
 

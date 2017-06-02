@@ -69,7 +69,7 @@ parameter estimation and optimal control tests.
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 2 
 
    tutorials-basic
    tutorials-advanced

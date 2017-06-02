@@ -9,628 +9,628 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                          tutorial_che_6.py</span>
-<span style='color:#898887;'>                Copyright (C) Raymond B. Smith, 2016</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>This program is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. This program is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
-<span style='color:#ff5500;'>import</span> numpy <span style='color:#ff5500;'>as</span> np
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                          tutorial_che_6.py</span>
+<span style='color:#017a31;'>                Copyright (C) Raymond B. Smith, 2016</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>This program is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. This program is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>import</span> numpy <span style='color:#3605fb;'>as</span> np
 
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, s, K, mol, J, A, V, S
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, s, K, mol, J, A, V, S
 
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>Model of a lithium-ion battery based on porous electrode theory as developed</span>
-<span style='color:#bf0303;'>by John Newman and coworkers. In particular, the equations here are based on a summary</span>
-<span style='color:#bf0303;'>of the methodology by Karen E. Thomas, John Newman, and Robert M. Darling,</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Model of a lithium-ion battery based on porous electrode theory as developed</span>
+<span style='color:#cc0000;'>by John Newman and coworkers. In particular, the equations here are based on a summary</span>
+<span style='color:#cc0000;'>of the methodology by Karen E. Thomas, John Newman, and Robert M. Darling,</span>
 
-<span style='color:#bf0303;'>Thomas K., Newman J., Darling R. (2002). Mathematical Modeling of Lithium Batteries</span>
-<span style='color:#bf0303;'>in Advances in Lithium-ion Batteries. Springer US. 345-392.</span>
-<span style='color:#bf0303;'>`doi:10.1007/0-306-47508-1_13 &lt;http://dx.doi.org/10.1007/0-306-47508-1_13&gt;`_</span>
+<span style='color:#cc0000;'>Thomas K., Newman J., Darling R. (2002). Mathematical Modeling of Lithium Batteries</span>
+<span style='color:#cc0000;'>in Advances in Lithium-ion Batteries. Springer US. 345-392.</span>
+<span style='color:#cc0000;'>`doi:10.1007/0-306-47508-1_13 &lt;http://dx.doi.org/10.1007/0-306-47508-1_13&gt;`_</span>
 
-<span style='color:#bf0303;'>A few simplifications have been made rather than implementing the more complete model described there.</span>
-<span style='color:#bf0303;'>For example, the following assumptions have (currently) been made:</span>
+<span style='color:#cc0000;'>A few simplifications have been made rather than implementing the more complete model described there.</span>
+<span style='color:#cc0000;'>For example, the following assumptions have (currently) been made:</span>
 
-<span style='color:#bf0303;'>- two porous electrodes are used rather than providing the option for a &quot;half cell&quot; in which</span>
-<span style='color:#bf0303;'>  one electrode is lithium foil.</span>
-<span style='color:#bf0303;'>- conductivity in the electron-conducting phase is infinite</span>
-<span style='color:#bf0303;'>- constant exchange current density in Butler-Volmer reaction expression</span>
-<span style='color:#bf0303;'>- no electrolyte convection</span>
-<span style='color:#bf0303;'>- constant and uniform solvent concentration (ions vary according to concentrated solution theory)</span>
-<span style='color:#bf0303;'>- monodisperse particles in electrode</span>
-<span style='color:#bf0303;'>- no volume occupied by binder, filler, etc. in the electrode</span>
+<span style='color:#cc0000;'>- two porous electrodes are used rather than providing the option for a &quot;half cell&quot; in which</span>
+<span style='color:#cc0000;'>  one electrode is lithium foil.</span>
+<span style='color:#cc0000;'>- conductivity in the electron-conducting phase is infinite</span>
+<span style='color:#cc0000;'>- constant exchange current density in Butler-Volmer reaction expression</span>
+<span style='color:#cc0000;'>- no electrolyte convection</span>
+<span style='color:#cc0000;'>- constant and uniform solvent concentration (ions vary according to concentrated solution theory)</span>
+<span style='color:#cc0000;'>- monodisperse particles in electrode</span>
+<span style='color:#cc0000;'>- no volume occupied by binder, filler, etc. in the electrode</span>
 
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#898887;'># Define some variable types</span>
-conc_t = daeVariableType(
-    name=<span style='color:#bf0303;'>&quot;conc_t&quot;</span>, units=mol/(m**<span style='color:#b08000;'>3</span>), lowerBound=<span style='color:#b08000;'>0</span>,
-    upperBound=<span style='color:#b08000;'>1e20</span>, initialGuess=<span style='color:#b08000;'>1.00</span>, absTolerance=<span style='color:#b08000;'>1e-6</span>)
-elec_pot_t = daeVariableType(
-    name=<span style='color:#bf0303;'>&quot;elec_pot_t&quot;</span>, units=V, lowerBound=-<span style='color:#b08000;'>1e20</span>,
-    upperBound=<span style='color:#b08000;'>1e20</span>, initialGuess=<span style='color:#b08000;'>0</span>, absTolerance=<span style='color:#b08000;'>1e-5</span>)
-current_dens_t = daeVariableType(
-    name=<span style='color:#bf0303;'>&quot;current_dens_t&quot;</span>, units=A/m**<span style='color:#b08000;'>2</span>, lowerBound=-<span style='color:#b08000;'>1e20</span>,
-    upperBound=<span style='color:#b08000;'>1e20</span>, initialGuess=<span style='color:#b08000;'>0</span>, absTolerance=<span style='color:#b08000;'>1e-5</span>)
-rxn_t = daeVariableType(
-    name=<span style='color:#bf0303;'>&quot;rxn_t&quot;</span>, units=mol/(m**<span style='color:#b08000;'>2</span> * s), lowerBound=-<span style='color:#b08000;'>1e20</span>,
-    upperBound=<span style='color:#b08000;'>1e20</span>, initialGuess=<span style='color:#b08000;'>0</span>, absTolerance=<span style='color:#b08000;'>1e-5</span>)
+<span style='color:#017a31;'># Define some variable types</span>
+conc_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
+    name<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;conc_t&quot;</span>, units<b><span style='color:#0000ff;'>=</span></b>mol<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>), lowerBound<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0</span>,
+    upperBound<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e20</span>, initialGuess<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1.00</span>, absTolerance<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e-6</span>)
+elec_pot_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
+    name<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;elec_pot_t&quot;</span>, units<b><span style='color:#0000ff;'>=</span></b>V, lowerBound<b><span style='color:#0000ff;'>=-</span></b><span style='color:#cc047c;'>1e20</span>,
+    upperBound<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e20</span>, initialGuess<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0</span>, absTolerance<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e-5</span>)
+current_dens_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
+    name<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;current_dens_t&quot;</span>, units<b><span style='color:#0000ff;'>=</span></b>A<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>, lowerBound<b><span style='color:#0000ff;'>=-</span></b><span style='color:#cc047c;'>1e20</span>,
+    upperBound<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e20</span>, initialGuess<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0</span>, absTolerance<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e-5</span>)
+rxn_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
+    name<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;rxn_t&quot;</span>, units<b><span style='color:#0000ff;'>=</span></b>mol<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> s), lowerBound<b><span style='color:#0000ff;'>=-</span></b><span style='color:#cc047c;'>1e20</span>,
+    upperBound<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e20</span>, initialGuess<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0</span>, absTolerance<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1e-5</span>)
 
 <b>def</b> kappa(c):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return the conductivity of the electrolyte in S/m as a function of concentration in M.</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    out = <span style='color:#b08000;'>0.1</span>  <span style='color:#898887;'># S/m</span>
-    <b>return</b> out * Constant(<span style='color:#b08000;'>1</span> * S/m)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return the conductivity of the electrolyte in S/m as a function of concentration in M.</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.1</span>  <span style='color:#017a31;'># S/m</span>
+    <b>return</b> out <b><span style='color:#0000ff;'>*</span></b> Constant(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> S<b><span style='color:#0000ff;'>/</span></b>m)
 
 <b>def</b> D(c):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return electrolyte diffusivity (in m^2/s) as a function of concentration in M.</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    out = <span style='color:#b08000;'>1e-10</span>  <span style='color:#898887;'># m**2/s</span>
-    <b>return</b> out * Constant(<span style='color:#b08000;'>1</span> * m**<span style='color:#b08000;'>2</span>/s)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return electrolyte diffusivity (in m^2/s) as a function of concentration in M.</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-10</span>  <span style='color:#017a31;'># m**2/s</span>
+    <b>return</b> out <b><span style='color:#0000ff;'>*</span></b> Constant(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>/</span></b>s)
 
 <b>def</b> thermodynamic_factor(c):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return the electrolyte thermodynamic factor as a function of concentration in M.</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    out = <span style='color:#b08000;'>1</span>
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return the electrolyte thermodynamic factor as a function of concentration in M.</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
     <b>return</b> out
 
 <b>def</b> t_p(c):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return the electrolyte cation transference number as a function of concentration in M.</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    out = <span style='color:#b08000;'>0.3</span> * c/c
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return the electrolyte cation transference number as a function of concentration in M.</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.3</span> <b><span style='color:#0000ff;'>*</span></b> c<b><span style='color:#0000ff;'>/</span></b>c
     <b>return</b> out
 
 <b>def</b> Ds_n(y):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return diffusivity (in m^2/s) as a function of solid filling fraction, y.</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    out = <span style='color:#b08000;'>5e-9</span> * y/y  <span style='color:#898887;'># m**2/s</span>
-    <b>return</b> out * Constant(<span style='color:#b08000;'>1</span> * m**<span style='color:#b08000;'>2</span>/s)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return diffusivity (in m^2/s) as a function of solid filling fraction, y.</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5e-9</span> <b><span style='color:#0000ff;'>*</span></b> y<b><span style='color:#0000ff;'>/</span></b>y  <span style='color:#017a31;'># m**2/s</span>
+    <b>return</b> out <b><span style='color:#0000ff;'>*</span></b> Constant(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>/</span></b>s)
 
 <b>def</b> Ds_p(y):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return diffusivity (in m^2/s) as a function of solid filling fraction, y.</span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    out = <span style='color:#b08000;'>1e-9</span> * y/y  <span style='color:#898887;'># m**2/s</span>
-    <b>return</b> out * Constant(<span style='color:#b08000;'>1</span> * m**<span style='color:#b08000;'>2</span>/s)
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return diffusivity (in m^2/s) as a function of solid filling fraction, y.</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-9</span> <b><span style='color:#0000ff;'>*</span></b> y<b><span style='color:#0000ff;'>/</span></b>y  <span style='color:#017a31;'># m**2/s</span>
+    <b>return</b> out <b><span style='color:#0000ff;'>*</span></b> Constant(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>/</span></b>s)
 
 <b>def</b> U_n(y):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return the equilibrium potential (V vs Li) of the negative electrode active material</span>
-<span style='color:#898887;'>    as a function of solid filling fraction, y.</span>
-<span style='color:#898887;'>    </span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    material = <span style='color:#bf0303;'>&quot;coke&quot;</span>
-    <b>if</b> material == <span style='color:#bf0303;'>&quot;coke&quot;</span>:
-        <span style='color:#898887;'># Carbon (coke) -- Fuller, Doyle, Newman, J. Electrochem. Soc., 1994</span>
-        out = -<span style='color:#b08000;'>0.132</span> + <span style='color:#b08000;'>1.42</span>*np.exp(-<span style='color:#b08000;'>2.52</span>*(<span style='color:#b08000;'>0.5</span>*y))
-    <b>elif</b> material == <span style='color:#bf0303;'>&quot;Li metal&quot;</span>:
-        <span style='color:#898887;'># Lithium metal</span>
-        out = <span style='color:#b08000;'>0.</span>
-    units = Constant(<span style='color:#b08000;'>1</span> * V) <b>if</b> <b><span style='color:#644a9b;'>isinstance</span></b>(y, adouble) <b>else</b> V
-    <b>return</b> out * units
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return the equilibrium potential (V vs Li) of the negative electrode active material</span>
+<span style='color:#017a31;'>    as a function of solid filling fraction, y.</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    material <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;coke&quot;</span>
+    <b>if</b> material <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;coke&quot;</span>:
+        <span style='color:#017a31;'># Carbon (coke) -- Fuller, Doyle, Newman, J. Electrochem. Soc., 1994</span>
+        out <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.132</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>1.42</span><b><span style='color:#0000ff;'>*</span></b>np.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2.52</span><b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>0.5</span><b><span style='color:#0000ff;'>*</span></b>y))
+    <b>elif</b> material <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;Li metal&quot;</span>:
+        <span style='color:#017a31;'># Lithium metal</span>
+        out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.</span>
+    units <b><span style='color:#0000ff;'>=</span></b> Constant(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> V) <b>if</b> <span style='color:#2a00d6;'>isinstance</span>(y, adouble) <b>else</b> V
+    <b>return</b> out <b><span style='color:#0000ff;'>*</span></b> units
 
 <b>def</b> U_p(y):
-    <span style='color:#898887;'>&quot;&quot;&quot;</span><span style='color:#898887;'>Return the equilibrium potential (V vs Li) of the positive electrode active material</span>
-<span style='color:#898887;'>    as a function of solid filling fraction, y.</span>
-<span style='color:#898887;'>    </span><span style='color:#898887;'>&quot;&quot;&quot;</span>
-    material = <span style='color:#bf0303;'>&quot;Mn2O4&quot;</span>
-    <b>if</b> material == <span style='color:#bf0303;'>&quot;Mn2O4&quot;</span>:
-        <span style='color:#898887;'># Mn2O4 -- Fuller, Doyle, Newman, J. Electrochem. Soc., 1994</span>
-        out = (<span style='color:#b08000;'>4.06279</span> + <span style='color:#b08000;'>0.0677504</span>*np.tanh(-<span style='color:#b08000;'>21.8502</span>*y + <span style='color:#b08000;'>12.8268</span>) -
-               <span style='color:#b08000;'>0.105734</span>*(<span style='color:#b08000;'>1</span>/((<span style='color:#b08000;'>1.00167</span> - y)**(<span style='color:#b08000;'>0.379571</span>)) - <span style='color:#b08000;'>1.575994</span>) -
-               <span style='color:#b08000;'>0.045</span>*np.exp(-<span style='color:#b08000;'>71.69</span>*y**<span style='color:#b08000;'>8</span>) +
-               <span style='color:#b08000;'>0.01</span>*np.exp(-<span style='color:#b08000;'>200</span>*(y - <span style='color:#b08000;'>0.19</span>)))
-    <b>elif</b> material == <span style='color:#bf0303;'>&quot;Li metal&quot;</span>:
-        <span style='color:#898887;'># Lithium metal</span>
-        out = <span style='color:#b08000;'>0.</span>
-    units = Constant(<span style='color:#b08000;'>1</span> * V) <b>if</b> <b><span style='color:#644a9b;'>isinstance</span></b>(y, adouble) <b>else</b> V
-    <b>return</b> out * units
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>Return the equilibrium potential (V vs Li) of the positive electrode active material</span>
+<span style='color:#017a31;'>    as a function of solid filling fraction, y.</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+    material <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;Mn2O4&quot;</span>
+    <b>if</b> material <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;Mn2O4&quot;</span>:
+        <span style='color:#017a31;'># Mn2O4 -- Fuller, Doyle, Newman, J. Electrochem. Soc., 1994</span>
+        out <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#cc047c;'>4.06279</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.0677504</span><b><span style='color:#0000ff;'>*</span></b>np.tanh(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>21.8502</span><b><span style='color:#0000ff;'>*</span></b>y <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>12.8268</span>) <b><span style='color:#0000ff;'>-</span></b>
+               <span style='color:#cc047c;'>0.105734</span><b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>/</span></b>((<span style='color:#cc047c;'>1.00167</span> <b><span style='color:#0000ff;'>-</span></b> y)<b><span style='color:#0000ff;'>**</span></b>(<span style='color:#cc047c;'>0.379571</span>)) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1.575994</span>) <b><span style='color:#0000ff;'>-</span></b>
+               <span style='color:#cc047c;'>0.045</span><b><span style='color:#0000ff;'>*</span></b>np.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>71.69</span><b><span style='color:#0000ff;'>*</span></b>y<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>8</span>) <b><span style='color:#0000ff;'>+</span></b>
+               <span style='color:#cc047c;'>0.01</span><b><span style='color:#0000ff;'>*</span></b>np.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>200</span><b><span style='color:#0000ff;'>*</span></b>(y <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.19</span>)))
+    <b>elif</b> material <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;Li metal&quot;</span>:
+        <span style='color:#017a31;'># Lithium metal</span>
+        out <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.</span>
+    units <b><span style='color:#0000ff;'>=</span></b> Constant(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> V) <b>if</b> <span style='color:#2a00d6;'>isinstance</span>(y, adouble) <b>else</b> V
+    <b>return</b> out <b><span style='color:#0000ff;'>*</span></b> units
 
 <b>class</b> ModParticle(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, pindx1, pindx2, c2, y_avg, phi2, phi1, Ds, U, Parent=<span style='color:#0057ae;'>None</span>, Description=<span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
-        <span style='color:#0057ae;'>self</span>.Ds = Ds
-        <span style='color:#0057ae;'>self</span>.U = U
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, pindx1, pindx2, c2, y_avg, phi2, phi1, Ds, U, Parent<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>None</span>, Description<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        <span style='color:#3605fb;'>self</span>.Ds <b><span style='color:#0000ff;'>=</span></b> Ds
+        <span style='color:#3605fb;'>self</span>.U <b><span style='color:#0000ff;'>=</span></b> U
 
-        <span style='color:#898887;'># Domain where variables are distributed</span>
-        <span style='color:#0057ae;'>self</span>.r = daeDomain(<span style='color:#bf0303;'>&quot;r&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;radial domain in particle&quot;</span>)
+        <span style='color:#017a31;'># Domain where variables are distributed</span>
+        <span style='color:#3605fb;'>self</span>.r <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;r&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;radial domain in particle&quot;</span>)
 
-        <span style='color:#898887;'># Variables</span>
-        <span style='color:#0057ae;'>self</span>.c = daeVariable(<span style='color:#bf0303;'>&quot;c&quot;</span>, conc_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Concentration in the solid&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.c.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.r)
-        <span style='color:#0057ae;'>self</span>.j_p = daeVariable(<span style='color:#bf0303;'>&quot;j_p&quot;</span>, rxn_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Rate of reaction into the solid&quot;</span>)
+        <span style='color:#017a31;'># Variables</span>
+        <span style='color:#3605fb;'>self</span>.c <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;c&quot;</span>, conc_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration in the solid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.c.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.r)
+        <span style='color:#3605fb;'>self</span>.j_p <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;j_p&quot;</span>, rxn_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Rate of reaction into the solid&quot;</span>)
 
-        <span style='color:#898887;'># Parameter</span>
-        <span style='color:#0057ae;'>self</span>.j_0 = daeParameter(<span style='color:#bf0303;'>&quot;j_0&quot;</span>, mol/(m**<span style='color:#b08000;'>2</span> * s), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Exchange current density / F&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.alpha = daeParameter(<span style='color:#bf0303;'>&quot;alpha&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Reaction symmetry factor&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.c_ref = daeParameter(<span style='color:#bf0303;'>&quot;c_ref&quot;</span>, mol/m**<span style='color:#b08000;'>3</span>, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Max conc of species in the solid&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.V_thermal = daeParameter(<span style='color:#bf0303;'>&quot;V_thermal&quot;</span>, V, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal voltage&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.R = daeParameter(<span style='color:#bf0303;'>&quot;R&quot;</span>, m, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Radius of particle&quot;</span>)
+        <span style='color:#017a31;'># Parameter</span>
+        <span style='color:#3605fb;'>self</span>.j_0 <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;j_0&quot;</span>, mol<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> s), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Exchange current density / F&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;alpha&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reaction symmetry factor&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.c_ref <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_ref&quot;</span>, mol<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Max conc of species in the solid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.V_thermal <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;V_thermal&quot;</span>, V, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Thermal voltage&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.R <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;R&quot;</span>, m, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Radius of particle&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.pindx1 = pindx1
-        <span style='color:#0057ae;'>self</span>.pindx2 = pindx2
-        <span style='color:#0057ae;'>self</span>.phi2 = phi2
-        <span style='color:#0057ae;'>self</span>.c2 = c2
-        <span style='color:#0057ae;'>self</span>.phi1 = phi1
-        <span style='color:#0057ae;'>self</span>.y_avg = y_avg
+        <span style='color:#3605fb;'>self</span>.pindx1 <b><span style='color:#0000ff;'>=</span></b> pindx1
+        <span style='color:#3605fb;'>self</span>.pindx2 <b><span style='color:#0000ff;'>=</span></b> pindx2
+        <span style='color:#3605fb;'>self</span>.phi2 <b><span style='color:#0000ff;'>=</span></b> phi2
+        <span style='color:#3605fb;'>self</span>.c2 <b><span style='color:#0000ff;'>=</span></b> c2
+        <span style='color:#3605fb;'>self</span>.phi1 <b><span style='color:#0000ff;'>=</span></b> phi1
+        <span style='color:#3605fb;'>self</span>.y_avg <b><span style='color:#0000ff;'>=</span></b> y_avg
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#898887;'># Mass conservation in the solid particles governed by (possibly non-linear) Ficks Law diffusion</span>
-        <span style='color:#898887;'># Thomas et al., Eq 17</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;mass_cons&quot;</span>)
-        r = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.r, eOpenOpen)
-        c = <span style='color:#0057ae;'>self</span>.c(r)
-        dc = d(c, <span style='color:#0057ae;'>self</span>.r, eCFDM)
-        D = <span style='color:#0057ae;'>self</span>.Ds(c/<span style='color:#0057ae;'>self</span>.c_ref())
-        eq.Residual = dt(c) - <span style='color:#b08000;'>1</span>/r()**<span style='color:#b08000;'>2</span>*d(r()**<span style='color:#b08000;'>2</span>*D*dc, <span style='color:#0057ae;'>self</span>.r, eCFDM)
+        <span style='color:#017a31;'># Mass conservation in the solid particles governed by (possibly non-linear) Ficks Law diffusion</span>
+        <span style='color:#017a31;'># Thomas et al., Eq 17</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;mass_cons&quot;</span>)
+        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.r, eOpenOpen)
+        c <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.c(r)
+        dc <b><span style='color:#0000ff;'>=</span></b> d(c, <span style='color:#3605fb;'>self</span>.r, eCFDM)
+        D <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ds(c<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.c_ref())
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(c) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>/</span></b>r()<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>d(r()<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>D<b><span style='color:#0000ff;'>*</span></b>dc, <span style='color:#3605fb;'>self</span>.r, eCFDM)
 
-        <span style='color:#898887;'># Symmetry at the center from particles with spherical geometry and symmetry</span>
-        <span style='color:#898887;'># Thomas et al., Eq 18</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;CenterSymmetry&quot;</span>, <span style='color:#bf0303;'>&quot;dc/dr = 0 at r=0&quot;</span>)
-        r = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.r, eLowerBound)
-        c = <span style='color:#0057ae;'>self</span>.c(r)
-        eq.Residual = d(c, <span style='color:#0057ae;'>self</span>.r, eCFDM)
+        <span style='color:#017a31;'># Symmetry at the center from particles with spherical geometry and symmetry</span>
+        <span style='color:#017a31;'># Thomas et al., Eq 18</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;CenterSymmetry&quot;</span>, <span style='color:#cc0000;'>&quot;dc/dr = 0 at r=0&quot;</span>)
+        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.r, eLowerBound)
+        c <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.c(r)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(c, <span style='color:#3605fb;'>self</span>.r, eCFDM)
 
-        <span style='color:#898887;'># Flux at the particle surface given by the electrochemical reaction rate of (di)intercalation</span>
-        <span style='color:#898887;'># Thomas et al., Eq 18</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;SurfaceGradient&quot;</span>, <span style='color:#bf0303;'>&quot;D_s*dc/dr = j_+ at r=R_p&quot;</span>)
-        r = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.r, eUpperBound)
-        c = <span style='color:#0057ae;'>self</span>.c(r)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.Ds(c/<span style='color:#0057ae;'>self</span>.c_ref()) * d(c, <span style='color:#0057ae;'>self</span>.r, eCFDM) - <span style='color:#0057ae;'>self</span>.j_p()
+        <span style='color:#017a31;'># Flux at the particle surface given by the electrochemical reaction rate of (di)intercalation</span>
+        <span style='color:#017a31;'># Thomas et al., Eq 18</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;SurfaceGradient&quot;</span>, <span style='color:#cc0000;'>&quot;D_s*dc/dr = j_+ at r=R_p&quot;</span>)
+        r <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.r, eUpperBound)
+        c <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.c(r)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ds(c<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.c_ref()) <b><span style='color:#0000ff;'>*</span></b> d(c, <span style='color:#3605fb;'>self</span>.r, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.j_p()
 
-        <span style='color:#898887;'># The rate of electrochemical reaction calculated via the Butler-Volmer equation</span>
-        <span style='color:#898887;'># Here, we use a constant exchange current density, but other forms depending on</span>
-        <span style='color:#898887;'># solid and electrolyte concentrations are commonly used.</span>
-        <span style='color:#898887;'># Thomas et al., Eq 19 and 27</span>
-        c_surf = <span style='color:#0057ae;'>self</span>.c(<span style='color:#0057ae;'>self</span>.r.NumberOfPoints - <span style='color:#b08000;'>1</span>)
-        eta = <span style='color:#0057ae;'>self</span>.phi1(<span style='color:#0057ae;'>self</span>.pindx1) - <span style='color:#0057ae;'>self</span>.phi2(<span style='color:#0057ae;'>self</span>.pindx2) - <span style='color:#0057ae;'>self</span>.U(c_surf/<span style='color:#0057ae;'>self</span>.c_ref())
-        eta_ndim = eta / <span style='color:#0057ae;'>self</span>.V_thermal()
-        <span style='color:#898887;'># At time t=0, to aid in initialization, we use a linearized form of the reaction equation</span>
-        <span style='color:#0057ae;'>self</span>.IF(Time() == Constant(<span style='color:#b08000;'>0</span>*s))
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#bf0303;'>&quot;Reaction rate&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.j_p() + <span style='color:#0057ae;'>self</span>.j_0() * eta_ndim
-        <span style='color:#898887;'># For the rest of the simulation, we use the full Butler-Volmer equation</span>
-        <span style='color:#0057ae;'>self</span>.ELSE()
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#bf0303;'>&quot;Reaction rate&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.j_p() - <span style='color:#0057ae;'>self</span>.j_0() * (np.exp(-<span style='color:#0057ae;'>self</span>.alpha()*eta_ndim) - np.exp((<span style='color:#b08000;'>1</span> - <span style='color:#0057ae;'>self</span>.alpha())*eta_ndim))
-        <span style='color:#0057ae;'>self</span>.END_IF()
+        <span style='color:#017a31;'># The rate of electrochemical reaction calculated via the Butler-Volmer equation</span>
+        <span style='color:#017a31;'># Here, we use a constant exchange current density, but other forms depending on</span>
+        <span style='color:#017a31;'># solid and electrolyte concentrations are commonly used.</span>
+        <span style='color:#017a31;'># Thomas et al., Eq 19 and 27</span>
+        c_surf <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.c(<span style='color:#3605fb;'>self</span>.r.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>)
+        eta <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.phi1(<span style='color:#3605fb;'>self</span>.pindx1) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.phi2(<span style='color:#3605fb;'>self</span>.pindx2) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.U(c_surf<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.c_ref())
+        eta_ndim <b><span style='color:#0000ff;'>=</span></b> eta <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.V_thermal()
+        <span style='color:#017a31;'># At time t=0, to aid in initialization, we use a linearized form of the reaction equation</span>
+        <span style='color:#3605fb;'>self</span>.IF(Time() <b><span style='color:#0000ff;'>==</span></b> Constant(<span style='color:#cc047c;'>0</span><b><span style='color:#0000ff;'>*</span></b>s))
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#cc0000;'>&quot;Reaction rate&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.j_p() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.j_0() <b><span style='color:#0000ff;'>*</span></b> eta_ndim
+        <span style='color:#017a31;'># For the rest of the simulation, we use the full Butler-Volmer equation</span>
+        <span style='color:#3605fb;'>self</span>.ELSE()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;SurfaceRxn&quot;</span>, <span style='color:#cc0000;'>&quot;Reaction rate&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.j_p() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.j_0() <b><span style='color:#0000ff;'>*</span></b> (np.exp(<b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.alpha()<b><span style='color:#0000ff;'>*</span></b>eta_ndim) <b><span style='color:#0000ff;'>-</span></b> np.exp((<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.alpha())<b><span style='color:#0000ff;'>*</span></b>eta_ndim))
+        <span style='color:#3605fb;'>self</span>.END_IF()
 
-        <span style='color:#898887;'># For convenience, we also keep track of the average filling fraction in this particle.</span>
-        <span style='color:#898887;'># This is obtained from integrating the conservation equation over the spherical</span>
-        <span style='color:#898887;'># particle and applying the divergence theorem.</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;y_avg&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.y_avg.dt(<span style='color:#0057ae;'>self</span>.pindx2) - <span style='color:#b08000;'>3</span>*<span style='color:#0057ae;'>self</span>.j_p()/(<span style='color:#0057ae;'>self</span>.c_ref()*<span style='color:#0057ae;'>self</span>.R())
+        <span style='color:#017a31;'># For convenience, we also keep track of the average filling fraction in this particle.</span>
+        <span style='color:#017a31;'># This is obtained from integrating the conservation equation over the spherical</span>
+        <span style='color:#017a31;'># particle and applying the divergence theorem.</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y_avg&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y_avg.dt(<span style='color:#3605fb;'>self</span>.pindx2) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.j_p()<b><span style='color:#0000ff;'>/</span></b>(<span style='color:#3605fb;'>self</span>.c_ref()<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.R())
 
 <b>class</b> ModCell(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent=<span style='color:#0057ae;'>None</span>, Description=<span style='color:#bf0303;'>&quot;&quot;</span>, process_info=<span style='color:#0057ae;'>None</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
-        <span style='color:#0057ae;'>self</span>.process_info = process_info
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>None</span>, Description<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>&quot;&quot;</span>, process_info<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>None</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        <span style='color:#3605fb;'>self</span>.process_info <b><span style='color:#0000ff;'>=</span></b> process_info
 
-        <span style='color:#898887;'># Domains where variables are distributed</span>
-        <span style='color:#0057ae;'>self</span>.x_centers_n = daeDomain(<span style='color:#bf0303;'>&quot;x_centers_n&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;X cell-centers domain in negative electrode&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.x_centers_p = daeDomain(<span style='color:#bf0303;'>&quot;x_centers_p&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;X cell-centers domain in positive electrode&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.x_centers_full = daeDomain(<span style='color:#bf0303;'>&quot;x_centers_full&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;X cell-centers domain over full cell&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.x_faces_full = daeDomain(<span style='color:#bf0303;'>&quot;x_faces_full&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;X cell-faces domain over full cell&quot;</span>)
+        <span style='color:#017a31;'># Domains where variables are distributed</span>
+        <span style='color:#3605fb;'>self</span>.x_centers_n <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x_centers_n&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X cell-centers domain in negative electrode&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x_centers_p <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x_centers_p&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X cell-centers domain in positive electrode&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x_centers_full <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x_centers_full&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X cell-centers domain over full cell&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x_faces_full <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x_faces_full&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X cell-faces domain over full cell&quot;</span>)
 
-        <span style='color:#898887;'># Variables</span>
-        <span style='color:#898887;'># Concentration/potential in different regions of electrolyte and electrode</span>
-        <span style='color:#0057ae;'>self</span>.c = daeVariable(<span style='color:#bf0303;'>&quot;c&quot;</span>, conc_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Concentration in the elyte&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.phi2 = daeVariable(<span style='color:#bf0303;'>&quot;phi2&quot;</span>, elec_pot_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Electric potential in the elyte&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.i2 = daeVariable(<span style='color:#bf0303;'>&quot;i2&quot;</span>, current_dens_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Electrolyte current density&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.c.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_centers_full)
-        <span style='color:#0057ae;'>self</span>.phi2.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_centers_full)
-        <span style='color:#0057ae;'>self</span>.i2.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_faces_full)
-        <span style='color:#0057ae;'>self</span>.phi1_n = daeVariable(<span style='color:#bf0303;'>&quot;phi1_n&quot;</span>, elec_pot_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Electric potential in bulk sld, negative&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.phi1_p = daeVariable(<span style='color:#bf0303;'>&quot;phi1_p&quot;</span>, elec_pot_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Electric potential in bulk sld, positive&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.phi1_n.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_centers_n)
-        <span style='color:#0057ae;'>self</span>.phi1_p.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_centers_p)
-        <span style='color:#0057ae;'>self</span>.phiCC_n = daeVariable(<span style='color:#bf0303;'>&quot;phiCC_n&quot;</span>, elec_pot_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;phi at negative current collector&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.phiCC_p = daeVariable(<span style='color:#bf0303;'>&quot;phiCC_p&quot;</span>, elec_pot_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;phi at positive current collector&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.y_avg = daeVariable(<span style='color:#bf0303;'>&quot;y_avg&quot;</span>, no_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Average filling fraction in the solid&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.y_avg.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_centers_full)
-        <span style='color:#0057ae;'>self</span>.V = daeVariable(<span style='color:#bf0303;'>&quot;V&quot;</span>, elec_pot_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Applied voltage&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.current = daeVariable(<span style='color:#bf0303;'>&quot;current&quot;</span>, current_dens_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Total current of the cell&quot;</span>)
+        <span style='color:#017a31;'># Variables</span>
+        <span style='color:#017a31;'># Concentration/potential in different regions of electrolyte and electrode</span>
+        <span style='color:#3605fb;'>self</span>.c <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;c&quot;</span>, conc_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration in the elyte&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.phi2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;phi2&quot;</span>, elec_pot_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Electric potential in the elyte&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.i2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;i2&quot;</span>, current_dens_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Electrolyte current density&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.c.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_centers_full)
+        <span style='color:#3605fb;'>self</span>.phi2.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_centers_full)
+        <span style='color:#3605fb;'>self</span>.i2.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_faces_full)
+        <span style='color:#3605fb;'>self</span>.phi1_n <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;phi1_n&quot;</span>, elec_pot_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Electric potential in bulk sld, negative&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.phi1_p <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;phi1_p&quot;</span>, elec_pot_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Electric potential in bulk sld, positive&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.phi1_n.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_centers_n)
+        <span style='color:#3605fb;'>self</span>.phi1_p.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_centers_p)
+        <span style='color:#3605fb;'>self</span>.phiCC_n <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;phiCC_n&quot;</span>, elec_pot_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;phi at negative current collector&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.phiCC_p <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;phiCC_p&quot;</span>, elec_pot_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;phi at positive current collector&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y_avg <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y_avg&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Average filling fraction in the solid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y_avg.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_centers_full)
+        <span style='color:#3605fb;'>self</span>.V <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;V&quot;</span>, elec_pot_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Applied voltage&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.current <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;current&quot;</span>, current_dens_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Total current of the cell&quot;</span>)
 
-        <span style='color:#898887;'># Parameters</span>
-        <span style='color:#0057ae;'>self</span>.F = daeParameter(<span style='color:#bf0303;'>&quot;F&quot;</span>, A*s/mol, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Faraday's constant&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.R = daeParameter(<span style='color:#bf0303;'>&quot;R&quot;</span>, J/(mol*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Gas constant&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.T = daeParameter(<span style='color:#bf0303;'>&quot;T&quot;</span>, K, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.a_n = daeParameter(<span style='color:#bf0303;'>&quot;a_n&quot;</span>, m**(-<span style='color:#b08000;'>1</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Reacting area per electrode volume, negative electrode&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.a_p = daeParameter(<span style='color:#bf0303;'>&quot;a_p&quot;</span>, m**(-<span style='color:#b08000;'>1</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Reacting area per electrode volume, positive electrode&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.L_n = daeParameter(<span style='color:#bf0303;'>&quot;L_n&quot;</span>, m, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Length of negative electrode&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.L_s = daeParameter(<span style='color:#bf0303;'>&quot;L_s&quot;</span>, m, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Length of separator&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.L_p = daeParameter(<span style='color:#bf0303;'>&quot;L_p&quot;</span>, m, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Length of positive electrode&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.BruggExp_n = daeParameter(<span style='color:#bf0303;'>&quot;BruggExp_n&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Bruggeman exponent in x_n&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.BruggExp_s = daeParameter(<span style='color:#bf0303;'>&quot;BruggExp_s&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Bruggeman exponent in x_s&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.BruggExp_p = daeParameter(<span style='color:#bf0303;'>&quot;BruggExp_p&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Bruggeman exponent in x_p&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.poros_n = daeParameter(<span style='color:#bf0303;'>&quot;poros_n&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;porosity in x_n&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.poros_s = daeParameter(<span style='color:#bf0303;'>&quot;poros_s&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;porosity in x_s&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.poros_p = daeParameter(<span style='color:#bf0303;'>&quot;poros_p&quot;</span>, unit(), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;porosity in x_p&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.c_ref = daeParameter(<span style='color:#bf0303;'>&quot;c_ref&quot;</span>, mol/m**<span style='color:#b08000;'>3</span>, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Reference electrolyte concentration&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.currset = daeParameter(<span style='color:#bf0303;'>&quot;currset&quot;</span>, A/m**<span style='color:#b08000;'>2</span>, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;current per electrode area&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Vset = daeParameter(<span style='color:#bf0303;'>&quot;Vset&quot;</span>, V, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;applied voltage set point&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.tau_ramp = daeParameter(<span style='color:#bf0303;'>&quot;tau_ramp&quot;</span>, s, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Time scale for ramping voltage or current&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.xval_cells = daeParameter(<span style='color:#bf0303;'>&quot;xval_cells&quot;</span>, m, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;coordinate of cell centers&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.xval_faces = daeParameter(<span style='color:#bf0303;'>&quot;xval_faces&quot;</span>, m, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;coordinate of cell faces&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.xval_cells.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_centers_full)
-        <span style='color:#0057ae;'>self</span>.xval_faces.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x_faces_full)
+        <span style='color:#017a31;'># Parameters</span>
+        <span style='color:#3605fb;'>self</span>.F <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;F&quot;</span>, A<b><span style='color:#0000ff;'>*</span></b>s<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Faraday's constant&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.R <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;R&quot;</span>, J<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Gas constant&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T&quot;</span>, K, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.a_n <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;a_n&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reacting area per electrode volume, negative electrode&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.a_p <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;a_p&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reacting area per electrode volume, positive electrode&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;L_n&quot;</span>, m, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Length of negative electrode&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.L_s <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;L_s&quot;</span>, m, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Length of separator&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.L_p <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;L_p&quot;</span>, m, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Length of positive electrode&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.BruggExp_n <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;BruggExp_n&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Bruggeman exponent in x_n&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.BruggExp_s <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;BruggExp_s&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Bruggeman exponent in x_s&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.BruggExp_p <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;BruggExp_p&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Bruggeman exponent in x_p&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.poros_n <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;poros_n&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;porosity in x_n&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.poros_s <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;poros_s&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;porosity in x_s&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.poros_p <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;poros_p&quot;</span>, unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;porosity in x_p&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.c_ref <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_ref&quot;</span>, mol<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reference electrolyte concentration&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.currset <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;currset&quot;</span>, A<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;current per electrode area&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Vset <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Vset&quot;</span>, V, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;applied voltage set point&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.tau_ramp <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;tau_ramp&quot;</span>, s, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Time scale for ramping voltage or current&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.xval_cells <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;xval_cells&quot;</span>, m, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;coordinate of cell centers&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.xval_faces <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;xval_faces&quot;</span>, m, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;coordinate of cell faces&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.xval_cells.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_centers_full)
+        <span style='color:#3605fb;'>self</span>.xval_faces.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x_faces_full)
 
-        <span style='color:#898887;'># Sub-models</span>
-        N_n = <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;N_n&quot;</span>]
-        N_s = <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;N_s&quot;</span>]
-        N_p = <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;N_p&quot;</span>]
-        <span style='color:#0057ae;'>self</span>.particles_n = np.empty(N_n, dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        <span style='color:#0057ae;'>self</span>.particles_p = np.empty(N_p, dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_n):
-            indx1 = indx2 = indx
-            <span style='color:#0057ae;'>self</span>.particles_n[indx] = ModParticle(<span style='color:#bf0303;'>&quot;particle_n_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx), indx1, indx2, <span style='color:#0057ae;'>self</span>.c,
-                                                 <span style='color:#0057ae;'>self</span>.y_avg, <span style='color:#0057ae;'>self</span>.phi2, <span style='color:#0057ae;'>self</span>.phi1_n, Ds_n, U_n, Parent=<span style='color:#0057ae;'>self</span>)
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_p):
-            indx1 = indx
-            indx2 = N_n + N_s + indx
-            <span style='color:#0057ae;'>self</span>.particles_p[indx] = ModParticle(<span style='color:#bf0303;'>&quot;particle_p_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx), indx1, indx2, <span style='color:#0057ae;'>self</span>.c,
-                                                 <span style='color:#0057ae;'>self</span>.y_avg, <span style='color:#0057ae;'>self</span>.phi2, <span style='color:#0057ae;'>self</span>.phi1_p, Ds_p, U_p, Parent=<span style='color:#0057ae;'>self</span>)
+        <span style='color:#017a31;'># Sub-models</span>
+        N_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;N_n&quot;</span>]
+        N_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;N_s&quot;</span>]
+        N_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;N_p&quot;</span>]
+        <span style='color:#3605fb;'>self</span>.particles_n <b><span style='color:#0000ff;'>=</span></b> np.empty(N_n, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        <span style='color:#3605fb;'>self</span>.particles_p <b><span style='color:#0000ff;'>=</span></b> np.empty(N_p, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_n):
+            indx1 <b><span style='color:#0000ff;'>=</span></b> indx2 <b><span style='color:#0000ff;'>=</span></b> indx
+            <span style='color:#3605fb;'>self</span>.particles_n[indx] <b><span style='color:#0000ff;'>=</span></b> ModParticle(<span style='color:#cc0000;'>&quot;particle_n_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx), indx1, indx2, <span style='color:#3605fb;'>self</span>.c,
+                                                 <span style='color:#3605fb;'>self</span>.y_avg, <span style='color:#3605fb;'>self</span>.phi2, <span style='color:#3605fb;'>self</span>.phi1_n, Ds_n, U_n, Parent<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>self</span>)
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_p):
+            indx1 <b><span style='color:#0000ff;'>=</span></b> indx
+            indx2 <b><span style='color:#0000ff;'>=</span></b> N_n <b><span style='color:#0000ff;'>+</span></b> N_s <b><span style='color:#0000ff;'>+</span></b> indx
+            <span style='color:#3605fb;'>self</span>.particles_p[indx] <b><span style='color:#0000ff;'>=</span></b> ModParticle(<span style='color:#cc0000;'>&quot;particle_p_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx), indx1, indx2, <span style='color:#3605fb;'>self</span>.c,
+                                                 <span style='color:#3605fb;'>self</span>.y_avg, <span style='color:#3605fb;'>self</span>.phi2, <span style='color:#3605fb;'>self</span>.phi1_p, Ds_p, U_p, Parent<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>self</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        pinfo = <span style='color:#0057ae;'>self</span>.process_info
-        <span style='color:#898887;'># Thermal voltage = RT/F = kT/e = approximately 0.026 mV at room temp, 25 C</span>
-        V_thm = <span style='color:#0057ae;'>self</span>.R() * <span style='color:#0057ae;'>self</span>.T() / <span style='color:#0057ae;'>self</span>.F()
+        pinfo <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.process_info
+        <span style='color:#017a31;'># Thermal voltage = RT/F = kT/e = approximately 0.026 mV at room temp, 25 C</span>
+        V_thm <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.R() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.F()
 
-        <span style='color:#898887;'># We choose to use (cell centered) finite volume discretization for the electrolyte rather</span>
-        <span style='color:#898887;'># than the built-in finite difference method for a few reasons</span>
-        <span style='color:#898887;'># - It is a mass conservative method, which is important for quasi-neutral electrolyte models</span>
-        <span style='color:#898887;'># - It is more stable at high electrolyte depletion than finite difference methods</span>
-        <span style='color:#898887;'># As a result, we need some information about the domain on which we have discretized our</span>
-        <span style='color:#898887;'># field variables</span>
-        <span style='color:#898887;'># With the finite volume method, we store some information at cell centers</span>
-        <span style='color:#898887;'># (scalar field variables like concentration and electric potential)</span>
-        <span style='color:#898887;'># and store/calculate some information at the faces between cells</span>
-        <span style='color:#898887;'># (fluxes like current density and flux of anions)</span>
-        <span style='color:#898887;'># For more information, see, e.g.,</span>
-        <span style='color:#898887;'>#   http://www.ctcms.nist.gov/fipy/documentation/numerical/discret.html</span>
-        <span style='color:#898887;'>#   https://en.wikipedia.org/wiki/Finite_volume_method</span>
-        <span style='color:#898887;'># Number of grid cells centers in each of the negative and positive electrodes</span>
-        N_n, N_p = <span style='color:#0057ae;'>self</span>.x_centers_n.NumberOfPoints, <span style='color:#0057ae;'>self</span>.x_centers_p.NumberOfPoints
-        <span style='color:#898887;'># Number of grid cell centers and faces along the entire electrode</span>
-        N_centers, N_faces = <span style='color:#0057ae;'>self</span>.x_centers_full.NumberOfPoints, <span style='color:#0057ae;'>self</span>.x_faces_full.NumberOfPoints
-        <span style='color:#898887;'># Number of grid cell centers along the separator</span>
-        N_s = N_centers - N_n - N_p
-        <span style='color:#898887;'># Coordinates of the cell centers and cell faces</span>
-        center_coords = np.array([<span style='color:#0057ae;'>self</span>.xval_cells(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_centers)])
-        face_coords = np.array([<span style='color:#0057ae;'>self</span>.xval_faces(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_faces)])
-        <span style='color:#898887;'># Spacing between cell centers, which we will use for finite difference approximations for fluxes</span>
-        <span style='color:#898887;'># We add space for a &quot;ghost point&quot; on each end, which will be used for boundary conditions.</span>
-        h_centers = np.hstack((np.diff(center_coords)[<span style='color:#b08000;'>0</span>], np.diff(center_coords), np.diff(center_coords)[-<span style='color:#b08000;'>1</span>]))
-        <span style='color:#898887;'># Spacing between cell faces.</span>
-        h_faces = np.diff(face_coords)
+        <span style='color:#017a31;'># We choose to use (cell centered) finite volume discretization for the electrolyte rather</span>
+        <span style='color:#017a31;'># than the built-in finite difference method for a few reasons</span>
+        <span style='color:#017a31;'># - It is a mass conservative method, which is important for quasi-neutral electrolyte models</span>
+        <span style='color:#017a31;'># - It is more stable at high electrolyte depletion than finite difference methods</span>
+        <span style='color:#017a31;'># As a result, we need some information about the domain on which we have discretized our</span>
+        <span style='color:#017a31;'># field variables</span>
+        <span style='color:#017a31;'># With the finite volume method, we store some information at cell centers</span>
+        <span style='color:#017a31;'># (scalar field variables like concentration and electric potential)</span>
+        <span style='color:#017a31;'># and store/calculate some information at the faces between cells</span>
+        <span style='color:#017a31;'># (fluxes like current density and flux of anions)</span>
+        <span style='color:#017a31;'># For more information, see, e.g.,</span>
+        <span style='color:#017a31;'>#   http://www.ctcms.nist.gov/fipy/documentation/numerical/discret.html</span>
+        <span style='color:#017a31;'>#   https://en.wikipedia.org/wiki/Finite_volume_method</span>
+        <span style='color:#017a31;'># Number of grid cells centers in each of the negative and positive electrodes</span>
+        N_n, N_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x_centers_n.NumberOfPoints, <span style='color:#3605fb;'>self</span>.x_centers_p.NumberOfPoints
+        <span style='color:#017a31;'># Number of grid cell centers and faces along the entire electrode</span>
+        N_centers, N_faces <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x_centers_full.NumberOfPoints, <span style='color:#3605fb;'>self</span>.x_faces_full.NumberOfPoints
+        <span style='color:#017a31;'># Number of grid cell centers along the separator</span>
+        N_s <b><span style='color:#0000ff;'>=</span></b> N_centers <b><span style='color:#0000ff;'>-</span></b> N_n <b><span style='color:#0000ff;'>-</span></b> N_p
+        <span style='color:#017a31;'># Coordinates of the cell centers and cell faces</span>
+        center_coords <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.xval_cells(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_centers)])
+        face_coords <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.xval_faces(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_faces)])
+        <span style='color:#017a31;'># Spacing between cell centers, which we will use for finite difference approximations for fluxes</span>
+        <span style='color:#017a31;'># We add space for a &quot;ghost point&quot; on each end, which will be used for boundary conditions.</span>
+        h_centers <b><span style='color:#0000ff;'>=</span></b> np.hstack((np.diff(center_coords)[<span style='color:#cc047c;'>0</span>], np.diff(center_coords), np.diff(center_coords)[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>]))
+        <span style='color:#017a31;'># Spacing between cell faces.</span>
+        h_faces <b><span style='color:#0000ff;'>=</span></b> np.diff(face_coords)
 
-        <span style='color:#898887;'># For convenience, make numpy arrays of variables at cell centers</span>
-        phi2 = np.array([<span style='color:#0057ae;'>self</span>.phi2(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_centers)])
-        c = np.array([<span style='color:#0057ae;'>self</span>.c(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_centers)])
-        dcdt = np.array([<span style='color:#0057ae;'>self</span>.c.dt(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_centers)])
-        a = np.array([<span style='color:#0057ae;'>self</span>.a_n()]*N_n + [Constant(<span style='color:#b08000;'>0</span> * m**(-<span style='color:#b08000;'>1</span>))]*N_s + [<span style='color:#0057ae;'>self</span>.a_p()]*N_p)
-        j_p = np.array([<span style='color:#0057ae;'>self</span>.particles_n[indx].j_p() <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_n)]
-                       + [Constant(<span style='color:#b08000;'>0</span> * mol/(m**<span style='color:#b08000;'>2</span> * s))]*N_s
-                       + [<span style='color:#0057ae;'>self</span>.particles_p[indx].j_p() <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_p)])
-        poros = np.array([<span style='color:#0057ae;'>self</span>.poros_n()]*N_n + [<span style='color:#0057ae;'>self</span>.poros_s()]*N_s + [<span style='color:#0057ae;'>self</span>.poros_p()]*N_p)
-        eff_factor_tmp = np.array([<span style='color:#0057ae;'>self</span>.poros_n() / (<span style='color:#0057ae;'>self</span>.poros_n()**<span style='color:#0057ae;'>self</span>.BruggExp_n())]*(N_n+<span style='color:#b08000;'>1</span>)
-                                  + [<span style='color:#0057ae;'>self</span>.poros_s() / (<span style='color:#0057ae;'>self</span>.poros_s()**<span style='color:#0057ae;'>self</span>.BruggExp_s())]*N_s
-                                  + [<span style='color:#0057ae;'>self</span>.poros_p() / (<span style='color:#0057ae;'>self</span>.poros_p()**<span style='color:#0057ae;'>self</span>.BruggExp_p())]*(N_p+<span style='color:#b08000;'>1</span>))
-        <span style='color:#898887;'># The eff_factor is a prefactor for the transport in the porous medium compared to transport</span>
-        <span style='color:#898887;'># in a free solution. It is needed at the cell faces because it is used in calculation of fluxes,</span>
-        <span style='color:#898887;'># so we use a harmonic mean to approximate the value at the faces.</span>
-        eff_factor = (<span style='color:#b08000;'>2</span>*eff_factor_tmp[<span style='color:#b08000;'>1</span>:]*eff_factor_tmp[:-<span style='color:#b08000;'>1</span>]) / (eff_factor_tmp[<span style='color:#b08000;'>1</span>:] + eff_factor_tmp[:-<span style='color:#b08000;'>1</span>])
+        <span style='color:#017a31;'># For convenience, make numpy arrays of variables at cell centers</span>
+        phi2 <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.phi2(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_centers)])
+        c <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.c(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_centers)])
+        dcdt <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.c.dt(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_centers)])
+        a <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.a_n()]<b><span style='color:#0000ff;'>*</span></b>N_n <b><span style='color:#0000ff;'>+</span></b> [Constant(<span style='color:#cc047c;'>0</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))]<b><span style='color:#0000ff;'>*</span></b>N_s <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#3605fb;'>self</span>.a_p()]<b><span style='color:#0000ff;'>*</span></b>N_p)
+        j_p <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.particles_n[indx].j_p() <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_n)]
+                       <b><span style='color:#0000ff;'>+</span></b> [Constant(<span style='color:#cc047c;'>0</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> s))]<b><span style='color:#0000ff;'>*</span></b>N_s
+                       <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#3605fb;'>self</span>.particles_p[indx].j_p() <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_p)])
+        poros <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.poros_n()]<b><span style='color:#0000ff;'>*</span></b>N_n <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#3605fb;'>self</span>.poros_s()]<b><span style='color:#0000ff;'>*</span></b>N_s <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#3605fb;'>self</span>.poros_p()]<b><span style='color:#0000ff;'>*</span></b>N_p)
+        eff_factor_tmp <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.poros_n() <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#3605fb;'>self</span>.poros_n()<b><span style='color:#0000ff;'>**</span></b><span style='color:#3605fb;'>self</span>.BruggExp_n())]<b><span style='color:#0000ff;'>*</span></b>(N_n<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>)
+                                  <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#3605fb;'>self</span>.poros_s() <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#3605fb;'>self</span>.poros_s()<b><span style='color:#0000ff;'>**</span></b><span style='color:#3605fb;'>self</span>.BruggExp_s())]<b><span style='color:#0000ff;'>*</span></b>N_s
+                                  <b><span style='color:#0000ff;'>+</span></b> [<span style='color:#3605fb;'>self</span>.poros_p() <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#3605fb;'>self</span>.poros_p()<b><span style='color:#0000ff;'>**</span></b><span style='color:#3605fb;'>self</span>.BruggExp_p())]<b><span style='color:#0000ff;'>*</span></b>(N_p<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>))
+        <span style='color:#017a31;'># The eff_factor is a prefactor for the transport in the porous medium compared to transport</span>
+        <span style='color:#017a31;'># in a free solution. It is needed at the cell faces because it is used in calculation of fluxes,</span>
+        <span style='color:#017a31;'># so we use a harmonic mean to approximate the value at the faces.</span>
+        eff_factor <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>eff_factor_tmp[<span style='color:#cc047c;'>1</span>:]<b><span style='color:#0000ff;'>*</span></b>eff_factor_tmp[:<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>]) <b><span style='color:#0000ff;'>/</span></b> (eff_factor_tmp[<span style='color:#cc047c;'>1</span>:] <b><span style='color:#0000ff;'>+</span></b> eff_factor_tmp[:<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>])
 
-        <span style='color:#898887;'># Boundary conditions on c and phi2 at current collectors.</span>
-        <span style='color:#898887;'># For concentration, Thomas et al., Eq 15</span>
-        <span style='color:#898887;'># For phi at current collectors, grad(phi) = 0 is required such that i2 = 0 at the current collectors</span>
-        <span style='color:#898887;'># To do these, create &quot;ghost points&quot; on the end of cell-center vectors</span>
-        ctmp = np.empty(N_centers + <span style='color:#b08000;'>2</span>, dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        ctmp[<span style='color:#b08000;'>1</span>:-<span style='color:#b08000;'>1</span>] = c
-        phi2tmp = np.empty(N_centers + <span style='color:#b08000;'>2</span>, dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        phi2tmp[<span style='color:#b08000;'>1</span>:-<span style='color:#b08000;'>1</span>] = phi2
-        <span style='color:#898887;'># No ionic current passes into the current collectors, which requires</span>
-        <span style='color:#898887;'># grad(c) = grad(phi2) = 0</span>
-        <span style='color:#898887;'># at both current collectors. We apply this by using the ghost points.</span>
-        ctmp[<span style='color:#b08000;'>0</span>] = ctmp[<span style='color:#b08000;'>1</span>]
-        ctmp[-<span style='color:#b08000;'>1</span>] = ctmp[-<span style='color:#b08000;'>2</span>]
-        phi2tmp[<span style='color:#b08000;'>0</span>] = phi2tmp[<span style='color:#b08000;'>1</span>]
-        phi2tmp[-<span style='color:#b08000;'>1</span>] = phi2tmp[-<span style='color:#b08000;'>2</span>]
-        <span style='color:#898887;'># We'll need the value of c at the faces as well. We use a harmonic mean.</span>
-        c_faces = (<span style='color:#b08000;'>2</span>*ctmp[<span style='color:#b08000;'>1</span>:]*ctmp[:-<span style='color:#b08000;'>1</span>])/(ctmp[<span style='color:#b08000;'>1</span>:] + ctmp[:-<span style='color:#b08000;'>1</span>])
+        <span style='color:#017a31;'># Boundary conditions on c and phi2 at current collectors.</span>
+        <span style='color:#017a31;'># For concentration, Thomas et al., Eq 15</span>
+        <span style='color:#017a31;'># For phi at current collectors, grad(phi) = 0 is required such that i2 = 0 at the current collectors</span>
+        <span style='color:#017a31;'># To do these, create &quot;ghost points&quot; on the end of cell-center vectors</span>
+        ctmp <b><span style='color:#0000ff;'>=</span></b> np.empty(N_centers <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>2</span>, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        ctmp[<span style='color:#cc047c;'>1</span>:<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> c
+        phi2tmp <b><span style='color:#0000ff;'>=</span></b> np.empty(N_centers <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>2</span>, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        phi2tmp[<span style='color:#cc047c;'>1</span>:<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> phi2
+        <span style='color:#017a31;'># No ionic current passes into the current collectors, which requires</span>
+        <span style='color:#017a31;'># grad(c) = grad(phi2) = 0</span>
+        <span style='color:#017a31;'># at both current collectors. We apply this by using the ghost points.</span>
+        ctmp[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> ctmp[<span style='color:#cc047c;'>1</span>]
+        ctmp[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> ctmp[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>]
+        phi2tmp[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> phi2tmp[<span style='color:#cc047c;'>1</span>]
+        phi2tmp[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> phi2tmp[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>]
+        <span style='color:#017a31;'># We'll need the value of c at the faces as well. We use a harmonic mean.</span>
+        c_faces <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>ctmp[<span style='color:#cc047c;'>1</span>:]<b><span style='color:#0000ff;'>*</span></b>ctmp[:<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>])<b><span style='color:#0000ff;'>/</span></b>(ctmp[<span style='color:#cc047c;'>1</span>:] <b><span style='color:#0000ff;'>+</span></b> ctmp[:<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>])
 
-        <span style='color:#898887;'># Approximate the gradients of these field variables at the faces</span>
-        dc = np.diff(ctmp) / h_centers
-        dlogc = np.diff(np.log(ctmp / <span style='color:#0057ae;'>self</span>.c_ref())) / h_centers
-        dphi2 = np.diff(phi2tmp) / h_centers
+        <span style='color:#017a31;'># Approximate the gradients of these field variables at the faces</span>
+        dc <b><span style='color:#0000ff;'>=</span></b> np.diff(ctmp) <b><span style='color:#0000ff;'>/</span></b> h_centers
+        dlogc <b><span style='color:#0000ff;'>=</span></b> np.diff(np.log(ctmp <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.c_ref())) <b><span style='color:#0000ff;'>/</span></b> h_centers
+        dphi2 <b><span style='color:#0000ff;'>=</span></b> np.diff(phi2tmp) <b><span style='color:#0000ff;'>/</span></b> h_centers
 
-        <span style='color:#898887;'># Effective transport properties are required at faces between cells</span>
-        <span style='color:#898887;'># Thomas et al., below Eq 3</span>
-        D_eff = eff_factor * D(c_faces / <span style='color:#0057ae;'>self</span>.c_ref())
-        kappa_eff = eff_factor * kappa(c_faces / <span style='color:#0057ae;'>self</span>.c_ref())
+        <span style='color:#017a31;'># Effective transport properties are required at faces between cells</span>
+        <span style='color:#017a31;'># Thomas et al., below Eq 3</span>
+        D_eff <b><span style='color:#0000ff;'>=</span></b> eff_factor <b><span style='color:#0000ff;'>*</span></b> D(c_faces <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.c_ref())
+        kappa_eff <b><span style='color:#0000ff;'>=</span></b> eff_factor <b><span style='color:#0000ff;'>*</span></b> kappa(c_faces <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.c_ref())
 
-        <span style='color:#898887;'># Flux of charge (current density) at faces</span>
-        <span style='color:#898887;'># Thomas et al., Eq 3</span>
-        i = -kappa_eff * (dphi2 - <span style='color:#b08000;'>2</span>*V_thm*(<span style='color:#b08000;'>1</span> - t_p(c_faces))*thermodynamic_factor(c_faces)*dlogc)
+        <span style='color:#017a31;'># Flux of charge (current density) at faces</span>
+        <span style='color:#017a31;'># Thomas et al., Eq 3</span>
+        i <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>kappa_eff <b><span style='color:#0000ff;'>*</span></b> (dphi2 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>V_thm<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> t_p(c_faces))<b><span style='color:#0000ff;'>*</span></b>thermodynamic_factor(c_faces)<b><span style='color:#0000ff;'>*</span></b>dlogc)
 
-        <span style='color:#898887;'># Flux of anions at faces</span>
-        <span style='color:#898887;'># Based on Thomas et al., Eq 8</span>
-        <span style='color:#898887;'># Using Thomas et al. Eq 9 and 10, using z_m = -1 and the paragraph below Eq 12 with Eq 13</span>
-        N_m = -D_eff*dc - (<span style='color:#b08000;'>1</span> - t_p(c_faces)) * i / <span style='color:#0057ae;'>self</span>.F()
+        <span style='color:#017a31;'># Flux of anions at faces</span>
+        <span style='color:#017a31;'># Based on Thomas et al., Eq 8</span>
+        <span style='color:#017a31;'># Using Thomas et al. Eq 9 and 10, using z_m = -1 and the paragraph below Eq 12 with Eq 13</span>
+        N_m <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>D_eff<b><span style='color:#0000ff;'>*</span></b>dc <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> t_p(c_faces)) <b><span style='color:#0000ff;'>*</span></b> i <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.F()
 
-        <span style='color:#898887;'># Store values for the current density</span>
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_faces):
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;i2_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx))
-            eq.Residual = <span style='color:#0057ae;'>self</span>.i2(indx) - i[indx]
+        <span style='color:#017a31;'># Store values for the current density</span>
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_faces):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;i2_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx))
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.i2(indx) <b><span style='color:#0000ff;'>-</span></b> i[indx]
 
-        <span style='color:#898887;'># Divergence of fluxes</span>
-        di = np.diff(i) / h_faces
-        dN_m = np.diff(N_m) / h_faces
-        <span style='color:#898887;'># Electrolyte: mass and charge conservation</span>
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_centers):
-            <span style='color:#898887;'># Thomas et al., Eq 11</span>
-            <span style='color:#898887;'># Used instead of Eq 12, which is equivalent, noting that c_m = c for the electrolyte</span>
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;mass_cons_m_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx), <span style='color:#bf0303;'>&quot;anion mass conservation&quot;</span>)
-            eq.Residual = poros[indx]*dcdt[indx] + dN_m[indx]
-            <span style='color:#898887;'># Thomas et al., Eq 27 and 28</span>
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;charge_cons_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx), <span style='color:#bf0303;'>&quot;charge conservation&quot;</span>)
-            eq.Residual = -di[indx] - <span style='color:#0057ae;'>self</span>.F()*a[indx]*j_p[indx]
+        <span style='color:#017a31;'># Divergence of fluxes</span>
+        di <b><span style='color:#0000ff;'>=</span></b> np.diff(i) <b><span style='color:#0000ff;'>/</span></b> h_faces
+        dN_m <b><span style='color:#0000ff;'>=</span></b> np.diff(N_m) <b><span style='color:#0000ff;'>/</span></b> h_faces
+        <span style='color:#017a31;'># Electrolyte: mass and charge conservation</span>
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_centers):
+            <span style='color:#017a31;'># Thomas et al., Eq 11</span>
+            <span style='color:#017a31;'># Used instead of Eq 12, which is equivalent, noting that c_m = c for the electrolyte</span>
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;mass_cons_m_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx), <span style='color:#cc0000;'>&quot;anion mass conservation&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> poros[indx]<b><span style='color:#0000ff;'>*</span></b>dcdt[indx] <b><span style='color:#0000ff;'>+</span></b> dN_m[indx]
+            <span style='color:#017a31;'># Thomas et al., Eq 27 and 28</span>
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;charge_cons_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx), <span style='color:#cc0000;'>&quot;charge conservation&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>di[indx] <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.F()<b><span style='color:#0000ff;'>*</span></b>a[indx]<b><span style='color:#0000ff;'>*</span></b>j_p[indx]
 
-        <span style='color:#898887;'># Arbitrary datum for electric potential.</span>
-        <span style='color:#898887;'># Thomas et al., below Eq 3</span>
-        <span style='color:#898887;'># We apply this in the electrolyte at an arbitrary location, the negative current collector</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;phi2_datum&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.phiCC_n()
+        <span style='color:#017a31;'># Arbitrary datum for electric potential.</span>
+        <span style='color:#017a31;'># Thomas et al., below Eq 3</span>
+        <span style='color:#017a31;'># We apply this in the electrolyte at an arbitrary location, the negative current collector</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;phi2_datum&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.phiCC_n()
 
-        <span style='color:#898887;'># Electrode: charge conservation</span>
-        phi1_n = np.array([<span style='color:#0057ae;'>self</span>.phi1_n(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_n)])
-        phi1_p = np.array([<span style='color:#0057ae;'>self</span>.phi1_p(indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_p)])
-        <span style='color:#898887;'># We assume infinite conductivity in the electron conducting phase for simplicity</span>
-        <span style='color:#898887;'># negative</span>
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_n):
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;phi1_n_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx))
-            eq.Residual = phi1_n[indx] - <span style='color:#0057ae;'>self</span>.phiCC_n()
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_p):
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;phi1_p_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx))
-            eq.Residual = phi1_p[indx] - <span style='color:#0057ae;'>self</span>.phiCC_p()
+        <span style='color:#017a31;'># Electrode: charge conservation</span>
+        phi1_n <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.phi1_n(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_n)])
+        phi1_p <b><span style='color:#0000ff;'>=</span></b> np.array([<span style='color:#3605fb;'>self</span>.phi1_p(indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_p)])
+        <span style='color:#017a31;'># We assume infinite conductivity in the electron conducting phase for simplicity</span>
+        <span style='color:#017a31;'># negative</span>
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_n):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;phi1_n_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx))
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> phi1_n[indx] <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.phiCC_n()
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_p):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;phi1_p_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx))
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> phi1_p[indx] <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.phiCC_p()
 
-        <span style='color:#898887;'># Set the solid average filling fraction to non-changing in the separator region.</span>
-        <span style='color:#898887;'># The variable shouldn't actually be defined in the separator, but it's convenient</span>
-        <span style='color:#898887;'># for plotting purposes that it be defined over the full domain, so we simply fix its value</span>
-        <span style='color:#898887;'># in the separator.</span>
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(N_n, N_n + N_s):
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;y_avg_s_</span><span style='color:#3daee9;'>{}</span><span style='color:#bf0303;'>&quot;</span>.<b><span style='color:#644a9b;'>format</span></b>(indx))
-            eq.Residual = <span style='color:#0057ae;'>self</span>.y_avg.dt(indx)
+        <span style='color:#017a31;'># Set the solid average filling fraction to non-changing in the separator region.</span>
+        <span style='color:#017a31;'># The variable shouldn't actually be defined in the separator, but it's convenient</span>
+        <span style='color:#017a31;'># for plotting purposes that it be defined over the full domain, so we simply fix its value</span>
+        <span style='color:#017a31;'># in the separator.</span>
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(N_n, N_n <b><span style='color:#0000ff;'>+</span></b> N_s):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y_avg_s_</span><span style='color:#cc0000;'>{}</span><span style='color:#cc0000;'>&quot;</span>.<span style='color:#2a00d6;'>format</span>(indx))
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y_avg.dt(indx)
 
-        <span style='color:#898887;'># Define the total current.</span>
-        <span style='color:#898887;'># There are multiple ways to do this. Here, we set the current to be the (negative of the)</span>
-        <span style='color:#898887;'># integral of the reaction rate into all the particles in the negative electrode.</span>
-        <span style='color:#898887;'># This is equivalent to setting it equal to</span>
-        <span style='color:#898887;'># - the integral the reaction rate into all the particles in the positive electrode</span>
-        <span style='color:#898887;'># - the current density in the electrolyte in the separator (which must be uniform)</span>
-        <span style='color:#898887;'># - the current density in the solid bulk electrode at the current collector (if using</span>
-        <span style='color:#898887;'>#   finite conductivity in the electron-conducting phase)</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Total_Current&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.current() + np.<b><span style='color:#644a9b;'>sum</span></b>(<span style='color:#0057ae;'>self</span>.F()*a[:N_n]*j_p[:N_n]*h_centers[:N_n])
+        <span style='color:#017a31;'># Define the total current.</span>
+        <span style='color:#017a31;'># There are multiple ways to do this. Here, we set the current to be the (negative of the)</span>
+        <span style='color:#017a31;'># integral of the reaction rate into all the particles in the negative electrode.</span>
+        <span style='color:#017a31;'># This is equivalent to setting it equal to</span>
+        <span style='color:#017a31;'># - the integral the reaction rate into all the particles in the positive electrode</span>
+        <span style='color:#017a31;'># - the current density in the electrolyte in the separator (which must be uniform)</span>
+        <span style='color:#017a31;'># - the current density in the solid bulk electrode at the current collector (if using</span>
+        <span style='color:#017a31;'>#   finite conductivity in the electron-conducting phase)</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Total_Current&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.current() <b><span style='color:#0000ff;'>+</span></b> np.<span style='color:#2a00d6;'>sum</span>(<span style='color:#3605fb;'>self</span>.F()<b><span style='color:#0000ff;'>*</span></b>a[:N_n]<b><span style='color:#0000ff;'>*</span></b>j_p[:N_n]<b><span style='color:#0000ff;'>*</span></b>h_centers[:N_n])
 
-        <span style='color:#898887;'># Define the measured voltage</span>
-        <span style='color:#898887;'># Thomas et al., below Eq 4</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Voltage&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.V() - (<span style='color:#0057ae;'>self</span>.phiCC_p() - <span style='color:#0057ae;'>self</span>.phiCC_n())
+        <span style='color:#017a31;'># Define the measured voltage</span>
+        <span style='color:#017a31;'># Thomas et al., below Eq 4</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Voltage&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.V() <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#3605fb;'>self</span>.phiCC_p() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.phiCC_n())
 
-        <span style='color:#898887;'># For the simulation, we can either specify the voltage and let current be a calculated output,</span>
-        <span style='color:#898887;'># or we can specify the current and let voltage be a calculated output.</span>
-        <span style='color:#898887;'># These correspond to CV (constant voltage) and CC (constant current) operation respectively.</span>
-        <span style='color:#898887;'># We ramp quickly from an equilibrium to the set point to facilitate the numerical calculation</span>
-        <span style='color:#898887;'># of consistent initial conditions.</span>
-        <b>if</b> pinfo[<span style='color:#bf0303;'>&quot;profileType&quot;</span>] == <span style='color:#bf0303;'>&quot;CC&quot;</span>:
-            <span style='color:#898887;'># Total Current Constraint Equation</span>
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;Total_Current_Constraint&quot;</span>)
-            eq.Residual = <span style='color:#0057ae;'>self</span>.current() - <span style='color:#0057ae;'>self</span>.currset()*(<span style='color:#b08000;'>1</span> - np.exp(-Time()/<span style='color:#0057ae;'>self</span>.tau_ramp()))
-        <b>elif</b> pinfo[<span style='color:#bf0303;'>&quot;profileType&quot;</span>] == <span style='color:#bf0303;'>&quot;CV&quot;</span>:
-            <span style='color:#898887;'># Keep applied potential constant</span>
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;applied_potential&quot;</span>)
-            eq.Residual = <span style='color:#0057ae;'>self</span>.V() - <span style='color:#0057ae;'>self</span>.Vset()*(<span style='color:#b08000;'>1</span> - np.exp(-Time()/<span style='color:#0057ae;'>self</span>.tau_ramp()))
+        <span style='color:#017a31;'># For the simulation, we can either specify the voltage and let current be a calculated output,</span>
+        <span style='color:#017a31;'># or we can specify the current and let voltage be a calculated output.</span>
+        <span style='color:#017a31;'># These correspond to CV (constant voltage) and CC (constant current) operation respectively.</span>
+        <span style='color:#017a31;'># We ramp quickly from an equilibrium to the set point to facilitate the numerical calculation</span>
+        <span style='color:#017a31;'># of consistent initial conditions.</span>
+        <b>if</b> pinfo[<span style='color:#cc0000;'>&quot;profileType&quot;</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;CC&quot;</span>:
+            <span style='color:#017a31;'># Total Current Constraint Equation</span>
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Total_Current_Constraint&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.current() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.currset()<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> np.exp(<b><span style='color:#0000ff;'>-</span></b>Time()<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.tau_ramp()))
+        <b>elif</b> pinfo[<span style='color:#cc0000;'>&quot;profileType&quot;</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;CV&quot;</span>:
+            <span style='color:#017a31;'># Keep applied potential constant</span>
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;applied_potential&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.V() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Vset()<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> np.exp(<b><span style='color:#0000ff;'>-</span></b>Time()<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.tau_ramp()))
 
 <b>class</b> SimBattery(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.F = <span style='color:#b08000;'>96485.34</span> * A*s/mol
-        <span style='color:#898887;'># Define the model we're going to simulate</span>
-        <span style='color:#898887;'># Constant current (CC) or constant voltage (CV) simulation</span>
-        profileType = <span style='color:#bf0303;'>&quot;CC&quot;</span>
-        <span style='color:#898887;'># Time at which to stop the simulation (used for CV simulations)</span>
-        tend = <span style='color:#b08000;'>2</span>*<span style='color:#b08000;'>3200e0</span> * s
-        <span style='color:#898887;'># Fraction of battery capacity to (dis)charge (used for CC simulations)</span>
-        capfrac = <span style='color:#b08000;'>0.90</span>
-        <span style='color:#898887;'># Applied current or voltage (used in CC and CV simulations respectively)</span>
-        <span style='color:#0057ae;'>self</span>.currset = <span style='color:#b08000;'>3e+1</span> * A/m**<span style='color:#b08000;'>2</span>
-        <span style='color:#0057ae;'>self</span>.Vset = <span style='color:#b08000;'>3.5</span> * V
-        <span style='color:#898887;'># Lenghts of regions of battery, negative electrode, separator, positive electrode</span>
-        <span style='color:#0057ae;'>self</span>.L_n = <span style='color:#b08000;'>243e-6</span> * m
-        <span style='color:#0057ae;'>self</span>.L_s = <span style='color:#b08000;'>50e-6</span> * m
-        <span style='color:#0057ae;'>self</span>.L_p = <span style='color:#b08000;'>200e-6</span> * m
-        <span style='color:#898887;'># Porosies in each region</span>
-        <span style='color:#0057ae;'>self</span>.poros_n = <span style='color:#b08000;'>0.3</span>
-        <span style='color:#0057ae;'>self</span>.poros_s = <span style='color:#b08000;'>1.0</span>
-        <span style='color:#0057ae;'>self</span>.poros_p = <span style='color:#b08000;'>0.3</span>
-        <span style='color:#0057ae;'>self</span>.L_tot = <span style='color:#0057ae;'>self</span>.L_n + <span style='color:#0057ae;'>self</span>.L_s + <span style='color:#0057ae;'>self</span>.L_p
-        <span style='color:#898887;'># Number of grid points in each region</span>
-        <span style='color:#0057ae;'>self</span>.N_n = <span style='color:#b08000;'>20</span>
-        <span style='color:#0057ae;'>self</span>.N_s = <span style='color:#b08000;'>20</span>
-        <span style='color:#0057ae;'>self</span>.N_p = <span style='color:#b08000;'>20</span>
-        <span style='color:#898887;'># Number of radial grid points for active particles in each electrode</span>
-        <span style='color:#0057ae;'>self</span>.NR_n = <span style='color:#b08000;'>15</span>
-        <span style='color:#0057ae;'>self</span>.NR_p = <span style='color:#b08000;'>15</span>
-        <span style='color:#898887;'># Radius of active particles in each electrode</span>
-        <span style='color:#0057ae;'>self</span>.R_n = <span style='color:#b08000;'>18e-6</span> * m
-        <span style='color:#0057ae;'>self</span>.R_p = <span style='color:#b08000;'>1e-6</span> * m
-        <span style='color:#898887;'># Maximum concentration of Li in the active materials</span>
-        <span style='color:#0057ae;'>self</span>.csmax_n = <span style='color:#b08000;'>13.2e3</span> * mol/m**<span style='color:#b08000;'>3</span>
-        <span style='color:#0057ae;'>self</span>.csmax_p = <span style='color:#b08000;'>23.72e3</span> * mol/m**<span style='color:#b08000;'>3</span>
-        <span style='color:#898887;'># Initial filling fraction of each electrode.</span>
-        <span style='color:#898887;'># For discharge, negative starts full and positive empty, opposite for charge</span>
-        <span style='color:#0057ae;'>self</span>.ff0_n = <span style='color:#b08000;'>0.99</span>
-        <span style='color:#0057ae;'>self</span>.ff0_p = <span style='color:#b08000;'>0.21</span>
-        <span style='color:#898887;'># Capacity of each electrode</span>
-        capacity_n = <span style='color:#0057ae;'>self</span>.csmax_n*(<span style='color:#b08000;'>1</span> - <span style='color:#0057ae;'>self</span>.poros_n)*<span style='color:#0057ae;'>self</span>.L_n*<span style='color:#0057ae;'>self</span>.F
-        capacity_p = <span style='color:#0057ae;'>self</span>.csmax_p*(<span style='color:#b08000;'>1</span> - <span style='color:#0057ae;'>self</span>.poros_p)*<span style='color:#0057ae;'>self</span>.L_p*<span style='color:#0057ae;'>self</span>.F
-        <span style='color:#898887;'># Capacity of battery</span>
-        capacity = <b><span style='color:#644a9b;'>min</span></b>(capacity_n, capacity_p)
-        <b>if</b> profileType == <span style='color:#bf0303;'>&quot;CC&quot;</span>:
-            tend = capfrac * capacity / <span style='color:#0057ae;'>self</span>.currset
-        <span style='color:#0057ae;'>self</span>.process_info = {<span style='color:#bf0303;'>&quot;profileType&quot;</span>: profileType, <span style='color:#bf0303;'>&quot;tend&quot;</span>: tend}
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.F <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>96485.34</span> <b><span style='color:#0000ff;'>*</span></b> A<b><span style='color:#0000ff;'>*</span></b>s<b><span style='color:#0000ff;'>/</span></b>mol
+        <span style='color:#017a31;'># Define the model we're going to simulate</span>
+        <span style='color:#017a31;'># Constant current (CC) or constant voltage (CV) simulation</span>
+        profileType <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;CC&quot;</span>
+        <span style='color:#017a31;'># Time at which to stop the simulation (used for CV simulations)</span>
+        tend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>3200e0</span> <b><span style='color:#0000ff;'>*</span></b> s
+        <span style='color:#017a31;'># Fraction of battery capacity to (dis)charge (used for CC simulations)</span>
+        capfrac <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.90</span>
+        <span style='color:#017a31;'># Applied current or voltage (used in CC and CV simulations respectively)</span>
+        <span style='color:#3605fb;'>self</span>.currset <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3e+1</span> <b><span style='color:#0000ff;'>*</span></b> A<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>
+        <span style='color:#3605fb;'>self</span>.Vset <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3.5</span> <b><span style='color:#0000ff;'>*</span></b> V
+        <span style='color:#017a31;'># Lenghts of regions of battery, negative electrode, separator, positive electrode</span>
+        <span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>243e-6</span> <b><span style='color:#0000ff;'>*</span></b> m
+        <span style='color:#3605fb;'>self</span>.L_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>50e-6</span> <b><span style='color:#0000ff;'>*</span></b> m
+        <span style='color:#3605fb;'>self</span>.L_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>200e-6</span> <b><span style='color:#0000ff;'>*</span></b> m
+        <span style='color:#017a31;'># Porosies in each region</span>
+        <span style='color:#3605fb;'>self</span>.poros_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.3</span>
+        <span style='color:#3605fb;'>self</span>.poros_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+        <span style='color:#3605fb;'>self</span>.poros_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.3</span>
+        <span style='color:#3605fb;'>self</span>.L_tot <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.L_s <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.L_p
+        <span style='color:#017a31;'># Number of grid points in each region</span>
+        <span style='color:#3605fb;'>self</span>.N_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>20</span>
+        <span style='color:#3605fb;'>self</span>.N_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>20</span>
+        <span style='color:#3605fb;'>self</span>.N_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>20</span>
+        <span style='color:#017a31;'># Number of radial grid points for active particles in each electrode</span>
+        <span style='color:#3605fb;'>self</span>.NR_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>15</span>
+        <span style='color:#3605fb;'>self</span>.NR_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>15</span>
+        <span style='color:#017a31;'># Radius of active particles in each electrode</span>
+        <span style='color:#3605fb;'>self</span>.R_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>18e-6</span> <b><span style='color:#0000ff;'>*</span></b> m
+        <span style='color:#3605fb;'>self</span>.R_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span> <b><span style='color:#0000ff;'>*</span></b> m
+        <span style='color:#017a31;'># Maximum concentration of Li in the active materials</span>
+        <span style='color:#3605fb;'>self</span>.csmax_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>13.2e3</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>
+        <span style='color:#3605fb;'>self</span>.csmax_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>23.72e3</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>
+        <span style='color:#017a31;'># Initial filling fraction of each electrode.</span>
+        <span style='color:#017a31;'># For discharge, negative starts full and positive empty, opposite for charge</span>
+        <span style='color:#3605fb;'>self</span>.ff0_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.99</span>
+        <span style='color:#3605fb;'>self</span>.ff0_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.21</span>
+        <span style='color:#017a31;'># Capacity of each electrode</span>
+        capacity_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.csmax_n<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.poros_n)<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.L_n<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.F
+        capacity_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.csmax_p<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.poros_p)<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.L_p<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.F
+        <span style='color:#017a31;'># Capacity of battery</span>
+        capacity <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>min</span>(capacity_n, capacity_p)
+        <b>if</b> profileType <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;CC&quot;</span>:
+            tend <b><span style='color:#0000ff;'>=</span></b> capfrac <b><span style='color:#0000ff;'>*</span></b> capacity <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.currset
+        <span style='color:#3605fb;'>self</span>.process_info <b><span style='color:#0000ff;'>=</span></b> {<span style='color:#cc0000;'>&quot;profileType&quot;</span>: profileType, <span style='color:#cc0000;'>&quot;tend&quot;</span>: tend}
 
-        <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;N_n&quot;</span>] = <span style='color:#0057ae;'>self</span>.N_n
-        <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;N_s&quot;</span>] = <span style='color:#0057ae;'>self</span>.N_s
-        <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;N_p&quot;</span>] = <span style='color:#0057ae;'>self</span>.N_p
-        <span style='color:#0057ae;'>self</span>.m = ModCell(<span style='color:#bf0303;'>&quot;tutorial_che_6&quot;</span>, process_info=<span style='color:#0057ae;'>self</span>.process_info)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+        <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;N_n&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.N_n
+        <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;N_s&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.N_s
+        <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;N_p&quot;</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.N_p
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> ModCell(<span style='color:#cc0000;'>&quot;tutorial_che_6&quot;</span>, process_info<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>self</span>.process_info)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        h_n = <span style='color:#0057ae;'>self</span>.L_n / <span style='color:#0057ae;'>self</span>.N_n
-        h_s = <span style='color:#0057ae;'>self</span>.L_s / <span style='color:#0057ae;'>self</span>.N_s
-        h_p = <span style='color:#0057ae;'>self</span>.L_p / <span style='color:#0057ae;'>self</span>.N_p
-        xvec_centers_n = [h_n*(<span style='color:#b08000;'>0.5</span> + indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.N_n)]
-        xvec_centers_s = [<span style='color:#0057ae;'>self</span>.L_n + h_s*(<span style='color:#b08000;'>0.5</span> + indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.N_s)]
-        xvec_centers_p = [(<span style='color:#0057ae;'>self</span>.L_n + <span style='color:#0057ae;'>self</span>.L_s) + h_p*(<span style='color:#b08000;'>0.5</span> + indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.N_p)]
-        xvec_centers = xvec_centers_n + xvec_centers_s + xvec_centers_p
-        xvec_faces = [<span style='color:#b08000;'>0</span> * m] + [h_n*(<span style='color:#b08000;'>1</span> + indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.N_n)]
-        xvec_faces += [<span style='color:#0057ae;'>self</span>.L_n + h_s*(<span style='color:#b08000;'>1</span> + indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.N_s)]
-        xvec_faces += [(<span style='color:#0057ae;'>self</span>.L_n + <span style='color:#0057ae;'>self</span>.L_s) + h_p*(<span style='color:#b08000;'>1</span> + indx) <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.N_p)]
-        <span style='color:#898887;'># Domains in ModCell</span>
-        <span style='color:#0057ae;'>self</span>.m.x_centers_n.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.N_n - <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>)
-        <span style='color:#0057ae;'>self</span>.m.x_centers_p.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.N_p - <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>)
-        <span style='color:#0057ae;'>self</span>.m.x_centers_full.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.N_n + <span style='color:#0057ae;'>self</span>.N_s + <span style='color:#0057ae;'>self</span>.N_p - <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>)
-        <span style='color:#0057ae;'>self</span>.m.x_faces_full.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.N_n + <span style='color:#0057ae;'>self</span>.N_s + <span style='color:#0057ae;'>self</span>.N_p, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1</span>)
-        <span style='color:#0057ae;'>self</span>.m.x_centers_n.Points = [x.value <b>for</b> x <b>in</b> xvec_centers_n]
-        <span style='color:#0057ae;'>self</span>.m.x_centers_p.Points = [x.value <b>for</b> x <b>in</b> xvec_centers_p]
-        <span style='color:#0057ae;'>self</span>.m.x_centers_full.Points = [x.value <b>for</b> x <b>in</b> xvec_centers]
-        <span style='color:#0057ae;'>self</span>.m.x_faces_full.Points = [x.value <b>for</b> x <b>in</b> xvec_faces]
-        <span style='color:#898887;'># Domains in each particle</span>
-        <b>for</b> indx_n <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_n.NumberOfPoints):
-            <span style='color:#0057ae;'>self</span>.m.particles_n[indx_n].r.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.NR_n - <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.R_n.value)
-        <b>for</b> indx_p <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_p.NumberOfPoints):
-            <span style='color:#0057ae;'>self</span>.m.particles_p[indx_p].r.CreateStructuredGrid(<span style='color:#0057ae;'>self</span>.NR_p - <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>0</span>, <span style='color:#0057ae;'>self</span>.R_p.value)
-        <span style='color:#898887;'># Parameters in ModCell</span>
-        <span style='color:#0057ae;'>self</span>.m.F.SetValue(<span style='color:#0057ae;'>self</span>.F)
-        <span style='color:#0057ae;'>self</span>.m.R.SetValue(<span style='color:#b08000;'>8.31447</span> * J/(mol*K))
-        <span style='color:#0057ae;'>self</span>.m.T.SetValue(<span style='color:#b08000;'>298</span> * K)
-        <span style='color:#0057ae;'>self</span>.m.L_n.SetValue(<span style='color:#0057ae;'>self</span>.L_n)
-        <span style='color:#0057ae;'>self</span>.m.L_s.SetValue(<span style='color:#0057ae;'>self</span>.L_s)
-        <span style='color:#0057ae;'>self</span>.m.L_p.SetValue(<span style='color:#0057ae;'>self</span>.L_p)
-        <span style='color:#0057ae;'>self</span>.m.BruggExp_n.SetValue(-<span style='color:#b08000;'>0.5</span>)
-        <span style='color:#0057ae;'>self</span>.m.BruggExp_s.SetValue(-<span style='color:#b08000;'>0.5</span>)
-        <span style='color:#0057ae;'>self</span>.m.BruggExp_p.SetValue(-<span style='color:#b08000;'>0.5</span>)
-        <span style='color:#0057ae;'>self</span>.m.poros_n.SetValue(<span style='color:#0057ae;'>self</span>.poros_n)
-        <span style='color:#0057ae;'>self</span>.m.poros_s.SetValue(<span style='color:#0057ae;'>self</span>.poros_s)
-        <span style='color:#0057ae;'>self</span>.m.poros_p.SetValue(<span style='color:#0057ae;'>self</span>.poros_p)
-        <span style='color:#0057ae;'>self</span>.m.a_n.SetValue((<span style='color:#b08000;'>1</span>-<span style='color:#0057ae;'>self</span>.m.poros_n.GetQuantity())*<span style='color:#b08000;'>3</span>/<span style='color:#0057ae;'>self</span>.R_n)
-        <span style='color:#0057ae;'>self</span>.m.a_p.SetValue((<span style='color:#b08000;'>1</span>-<span style='color:#0057ae;'>self</span>.m.poros_p.GetQuantity())*<span style='color:#b08000;'>3</span>/<span style='color:#0057ae;'>self</span>.R_p)
-        <span style='color:#0057ae;'>self</span>.m.c_ref.SetValue(<span style='color:#b08000;'>1000</span> * mol/m**<span style='color:#b08000;'>3</span>)
-        <span style='color:#0057ae;'>self</span>.m.currset.SetValue(<span style='color:#0057ae;'>self</span>.currset)
-        <span style='color:#0057ae;'>self</span>.m.Vset.SetValue(<span style='color:#0057ae;'>self</span>.Vset)
-        <span style='color:#0057ae;'>self</span>.m.tau_ramp.SetValue(<span style='color:#b08000;'>1e-3</span> * <span style='color:#0057ae;'>self</span>.process_info[<span style='color:#bf0303;'>&quot;tend&quot;</span>])
-        <span style='color:#0057ae;'>self</span>.m.xval_cells.SetValues(np.array(xvec_centers))
-        <span style='color:#0057ae;'>self</span>.m.xval_faces.SetValues(np.array(xvec_faces))
-        <span style='color:#898887;'># Parameters in each particle</span>
-        <b>for</b> indx_n <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_n.NumberOfPoints):
-            p = <span style='color:#0057ae;'>self</span>.m.particles_n[indx_n]
-            p.j_0.SetValue(<span style='color:#b08000;'>1e-4</span> * mol/(m**<span style='color:#b08000;'>2</span> * s))
-            p.alpha.SetValue(<span style='color:#b08000;'>0.5</span>)
-            p.c_ref.SetValue(<span style='color:#0057ae;'>self</span>.csmax_n)
-            p.V_thermal.SetValue(<span style='color:#0057ae;'>self</span>.m.R.GetQuantity()*<span style='color:#0057ae;'>self</span>.m.T.GetQuantity()/<span style='color:#0057ae;'>self</span>.m.F.GetQuantity())
-            p.R.SetValue(<span style='color:#0057ae;'>self</span>.R_n)
-        <b>for</b> indx_p <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_p.NumberOfPoints):
-            p = <span style='color:#0057ae;'>self</span>.m.particles_p[indx_p]
-            p.j_0.SetValue(<span style='color:#b08000;'>1e-4</span> * mol/(m**<span style='color:#b08000;'>2</span> * s))
-            p.alpha.SetValue(<span style='color:#b08000;'>0.5</span>)
-            p.c_ref.SetValue(<span style='color:#0057ae;'>self</span>.csmax_p)
-            p.V_thermal.SetValue(<span style='color:#0057ae;'>self</span>.m.R.GetQuantity()*<span style='color:#0057ae;'>self</span>.m.T.GetQuantity()/<span style='color:#0057ae;'>self</span>.m.F.GetQuantity())
-            p.R.SetValue(<span style='color:#0057ae;'>self</span>.R_p)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        h_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.N_n
+        h_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L_s <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.N_s
+        h_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L_p <b><span style='color:#0000ff;'>/</span></b> <span style='color:#3605fb;'>self</span>.N_p
+        xvec_centers_n <b><span style='color:#0000ff;'>=</span></b> [h_n<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>+</span></b> indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.N_n)]
+        xvec_centers_s <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>+</span></b> h_s<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>+</span></b> indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.N_s)]
+        xvec_centers_p <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.L_s) <b><span style='color:#0000ff;'>+</span></b> h_p<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>+</span></b> indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.N_p)]
+        xvec_centers <b><span style='color:#0000ff;'>=</span></b> xvec_centers_n <b><span style='color:#0000ff;'>+</span></b> xvec_centers_s <b><span style='color:#0000ff;'>+</span></b> xvec_centers_p
+        xvec_faces <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc047c;'>0</span> <b><span style='color:#0000ff;'>*</span></b> m] <b><span style='color:#0000ff;'>+</span></b> [h_n<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.N_n)]
+        xvec_faces <b><span style='color:#0000ff;'>+=</span></b> [<span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>+</span></b> h_s<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.N_s)]
+        xvec_faces <b><span style='color:#0000ff;'>+=</span></b> [(<span style='color:#3605fb;'>self</span>.L_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.L_s) <b><span style='color:#0000ff;'>+</span></b> h_p<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> indx) <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.N_p)]
+        <span style='color:#017a31;'># Domains in ModCell</span>
+        <span style='color:#3605fb;'>self</span>.m.x_centers_n.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.N_n <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x_centers_p.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.N_p <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x_centers_full.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.N_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_s <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_p <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x_faces_full.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.N_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_s <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_p, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x_centers_n.Points <b><span style='color:#0000ff;'>=</span></b> [x.value <b>for</b> x <b>in</b> xvec_centers_n]
+        <span style='color:#3605fb;'>self</span>.m.x_centers_p.Points <b><span style='color:#0000ff;'>=</span></b> [x.value <b>for</b> x <b>in</b> xvec_centers_p]
+        <span style='color:#3605fb;'>self</span>.m.x_centers_full.Points <b><span style='color:#0000ff;'>=</span></b> [x.value <b>for</b> x <b>in</b> xvec_centers]
+        <span style='color:#3605fb;'>self</span>.m.x_faces_full.Points <b><span style='color:#0000ff;'>=</span></b> [x.value <b>for</b> x <b>in</b> xvec_faces]
+        <span style='color:#017a31;'># Domains in each particle</span>
+        <b>for</b> indx_n <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_n.NumberOfPoints):
+            <span style='color:#3605fb;'>self</span>.m.particles_n[indx_n].r.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.NR_n <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#3605fb;'>self</span>.R_n.value)
+        <b>for</b> indx_p <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_p.NumberOfPoints):
+            <span style='color:#3605fb;'>self</span>.m.particles_p[indx_p].r.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.NR_p <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#3605fb;'>self</span>.R_p.value)
+        <span style='color:#017a31;'># Parameters in ModCell</span>
+        <span style='color:#3605fb;'>self</span>.m.F.SetValue(<span style='color:#3605fb;'>self</span>.F)
+        <span style='color:#3605fb;'>self</span>.m.R.SetValue(<span style='color:#cc047c;'>8.31447</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.T.SetValue(<span style='color:#cc047c;'>298</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.L_n.SetValue(<span style='color:#3605fb;'>self</span>.L_n)
+        <span style='color:#3605fb;'>self</span>.m.L_s.SetValue(<span style='color:#3605fb;'>self</span>.L_s)
+        <span style='color:#3605fb;'>self</span>.m.L_p.SetValue(<span style='color:#3605fb;'>self</span>.L_p)
+        <span style='color:#3605fb;'>self</span>.m.BruggExp_n.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.5</span>)
+        <span style='color:#3605fb;'>self</span>.m.BruggExp_s.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.5</span>)
+        <span style='color:#3605fb;'>self</span>.m.BruggExp_p.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.5</span>)
+        <span style='color:#3605fb;'>self</span>.m.poros_n.SetValue(<span style='color:#3605fb;'>self</span>.poros_n)
+        <span style='color:#3605fb;'>self</span>.m.poros_s.SetValue(<span style='color:#3605fb;'>self</span>.poros_s)
+        <span style='color:#3605fb;'>self</span>.m.poros_p.SetValue(<span style='color:#3605fb;'>self</span>.poros_p)
+        <span style='color:#3605fb;'>self</span>.m.a_n.SetValue((<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.m.poros_n.GetQuantity())<b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.R_n)
+        <span style='color:#3605fb;'>self</span>.m.a_p.SetValue((<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.m.poros_p.GetQuantity())<b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.R_p)
+        <span style='color:#3605fb;'>self</span>.m.c_ref.SetValue(<span style='color:#cc047c;'>1000</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>)
+        <span style='color:#3605fb;'>self</span>.m.currset.SetValue(<span style='color:#3605fb;'>self</span>.currset)
+        <span style='color:#3605fb;'>self</span>.m.Vset.SetValue(<span style='color:#3605fb;'>self</span>.Vset)
+        <span style='color:#3605fb;'>self</span>.m.tau_ramp.SetValue(<span style='color:#cc047c;'>1e-3</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.process_info[<span style='color:#cc0000;'>&quot;tend&quot;</span>])
+        <span style='color:#3605fb;'>self</span>.m.xval_cells.SetValues(np.array(xvec_centers))
+        <span style='color:#3605fb;'>self</span>.m.xval_faces.SetValues(np.array(xvec_faces))
+        <span style='color:#017a31;'># Parameters in each particle</span>
+        <b>for</b> indx_n <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_n.NumberOfPoints):
+            p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.particles_n[indx_n]
+            p.j_0.SetValue(<span style='color:#cc047c;'>1e-4</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> s))
+            p.alpha.SetValue(<span style='color:#cc047c;'>0.5</span>)
+            p.c_ref.SetValue(<span style='color:#3605fb;'>self</span>.csmax_n)
+            p.V_thermal.SetValue(<span style='color:#3605fb;'>self</span>.m.R.GetQuantity()<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.m.T.GetQuantity()<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.m.F.GetQuantity())
+            p.R.SetValue(<span style='color:#3605fb;'>self</span>.R_n)
+        <b>for</b> indx_p <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_p.NumberOfPoints):
+            p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.particles_p[indx_p]
+            p.j_0.SetValue(<span style='color:#cc047c;'>1e-4</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> s))
+            p.alpha.SetValue(<span style='color:#cc047c;'>0.5</span>)
+            p.c_ref.SetValue(<span style='color:#3605fb;'>self</span>.csmax_p)
+            p.V_thermal.SetValue(<span style='color:#3605fb;'>self</span>.m.R.GetQuantity()<b><span style='color:#0000ff;'>*</span></b><span style='color:#3605fb;'>self</span>.m.T.GetQuantity()<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.m.F.GetQuantity())
+            p.R.SetValue(<span style='color:#3605fb;'>self</span>.R_p)
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        cs0_n = <span style='color:#0057ae;'>self</span>.ff0_n * <span style='color:#0057ae;'>self</span>.csmax_n
-        cs0_p = <span style='color:#0057ae;'>self</span>.ff0_p * <span style='color:#0057ae;'>self</span>.csmax_p
-        <span style='color:#898887;'># ModCell</span>
-        <b>for</b> indx <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_full.NumberOfPoints):
-            <span style='color:#0057ae;'>self</span>.m.c.SetInitialCondition(indx, <span style='color:#b08000;'>1e3</span> * mol/m**<span style='color:#b08000;'>3</span>)
-            <b>if</b> indx &lt; <span style='color:#0057ae;'>self</span>.N_n:
-                <span style='color:#0057ae;'>self</span>.m.y_avg.SetInitialCondition(indx, <span style='color:#0057ae;'>self</span>.ff0_n)
-            <b>elif</b> indx &lt; <span style='color:#0057ae;'>self</span>.N_n + <span style='color:#0057ae;'>self</span>.N_s:
-                <span style='color:#0057ae;'>self</span>.m.y_avg.SetInitialCondition(indx, <span style='color:#b08000;'>0.</span>)
-            <b>elif</b> indx &lt; <span style='color:#0057ae;'>self</span>.N_n + <span style='color:#0057ae;'>self</span>.N_s + <span style='color:#0057ae;'>self</span>.N_p:
-                <span style='color:#0057ae;'>self</span>.m.y_avg.SetInitialCondition(indx, <span style='color:#0057ae;'>self</span>.ff0_p)
-        <span style='color:#0057ae;'>self</span>.m.phi1_n.SetInitialGuesses(U_n(<span style='color:#0057ae;'>self</span>.ff0_n))
-        <span style='color:#0057ae;'>self</span>.m.phi1_p.SetInitialGuesses(U_p(<span style='color:#0057ae;'>self</span>.ff0_p))
-        <span style='color:#0057ae;'>self</span>.m.phiCC_n.SetInitialGuess(U_n(<span style='color:#0057ae;'>self</span>.ff0_n))
-        <span style='color:#0057ae;'>self</span>.m.phiCC_p.SetInitialGuess(U_p(<span style='color:#0057ae;'>self</span>.ff0_p))
-        <span style='color:#898887;'># particles</span>
-        <b>for</b> indx_n <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_n.NumberOfPoints):
-            p = <span style='color:#0057ae;'>self</span>.m.particles_n[indx_n]
-            <b>for</b> indx_r <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, p.r.NumberOfPoints-<span style='color:#b08000;'>1</span>):
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        cs0_n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ff0_n <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.csmax_n
+        cs0_p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ff0_p <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.csmax_p
+        <span style='color:#017a31;'># ModCell</span>
+        <b>for</b> indx <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_full.NumberOfPoints):
+            <span style='color:#3605fb;'>self</span>.m.c.SetInitialCondition(indx, <span style='color:#cc047c;'>1e3</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>)
+            <b>if</b> indx <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#3605fb;'>self</span>.N_n:
+                <span style='color:#3605fb;'>self</span>.m.y_avg.SetInitialCondition(indx, <span style='color:#3605fb;'>self</span>.ff0_n)
+            <b>elif</b> indx <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#3605fb;'>self</span>.N_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_s:
+                <span style='color:#3605fb;'>self</span>.m.y_avg.SetInitialCondition(indx, <span style='color:#cc047c;'>0.</span>)
+            <b>elif</b> indx <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#3605fb;'>self</span>.N_n <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_s <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.N_p:
+                <span style='color:#3605fb;'>self</span>.m.y_avg.SetInitialCondition(indx, <span style='color:#3605fb;'>self</span>.ff0_p)
+        <span style='color:#3605fb;'>self</span>.m.phi1_n.SetInitialGuesses(U_n(<span style='color:#3605fb;'>self</span>.ff0_n))
+        <span style='color:#3605fb;'>self</span>.m.phi1_p.SetInitialGuesses(U_p(<span style='color:#3605fb;'>self</span>.ff0_p))
+        <span style='color:#3605fb;'>self</span>.m.phiCC_n.SetInitialGuess(U_n(<span style='color:#3605fb;'>self</span>.ff0_n))
+        <span style='color:#3605fb;'>self</span>.m.phiCC_p.SetInitialGuess(U_p(<span style='color:#3605fb;'>self</span>.ff0_p))
+        <span style='color:#017a31;'># particles</span>
+        <b>for</b> indx_n <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_n.NumberOfPoints):
+            p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.particles_n[indx_n]
+            <b>for</b> indx_r <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, p.r.NumberOfPoints<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
                 p.c.SetInitialCondition(indx_r, cs0_n)
-        <b>for</b> indx_p <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#0057ae;'>self</span>.m.x_centers_p.NumberOfPoints):
-            p = <span style='color:#0057ae;'>self</span>.m.particles_p[indx_p]
-            <b>for</b> indx_r <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, p.r.NumberOfPoints-<span style='color:#b08000;'>1</span>):
+        <b>for</b> indx_p <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.m.x_centers_p.NumberOfPoints):
+            p <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.particles_p[indx_p]
+            <b>for</b> indx_r <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, p.r.NumberOfPoints<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
                 p.c.SetInitialCondition(indx_r, cs0_p)
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = SimBattery()
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = sim.process_info[<span style='color:#bf0303;'>&quot;tend&quot;</span>].value / <span style='color:#b08000;'>100</span>
-    sim.TimeHorizon       = sim.process_info[<span style='color:#bf0303;'>&quot;tend&quot;</span>].value
-    simulator  = daeSimulator(app, simulation=sim)
+    sim <b><span style='color:#0000ff;'>=</span></b> SimBattery()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> sim.process_info[<span style='color:#cc0000;'>&quot;tend&quot;</span>].value <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>100</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> sim.process_info[<span style='color:#cc0000;'>&quot;tend&quot;</span>].value
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = SimBattery()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> SimBattery()
 
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = simulation.process_info[<span style='color:#bf0303;'>&quot;tend&quot;</span>].value / <span style='color:#b08000;'>100</span>
-    simulation.TimeHorizon = simulation.process_info[<span style='color:#bf0303;'>&quot;tend&quot;</span>].value
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> simulation.process_info[<span style='color:#cc0000;'>&quot;tend&quot;</span>].value <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>100</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> simulation.process_info[<span style='color:#cc0000;'>&quot;tend&quot;</span>].value
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) <b>is</b> <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b>is</b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
 
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

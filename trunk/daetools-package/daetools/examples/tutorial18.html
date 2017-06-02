@@ -9,194 +9,194 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            tutorial18.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial shows one more problem solved using the NumPy arrays that operate on</span>
-<span style='color:#bf0303;'>DAE Tools variables. The model is taken from the Sundials ARKODE (ark_analytic_sys.cpp).</span>
-<span style='color:#bf0303;'>The ODE system is defined by the following system of equations:</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial18.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial shows one more problem solved using the NumPy arrays that operate on</span>
+<span style='color:#cc0000;'>DAE Tools variables. The model is taken from the Sundials ARKODE (ark_analytic_sys.cpp).</span>
+<span style='color:#cc0000;'>The ODE system is defined by the following system of equations:</span>
 
-<span style='color:#bf0303;'>.. code-block:: none</span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#bf0303;'>   dy/dt = A*y</span>
+<span style='color:#cc0000;'>   dy/dt = A*y</span>
 
-<span style='color:#bf0303;'>where:</span>
+<span style='color:#cc0000;'>where:</span>
 
-<span style='color:#bf0303;'>.. code-block:: none</span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#bf0303;'>    A = V * D * Vi</span>
-<span style='color:#bf0303;'>    V = [1 -1 1; -1 2 1; 0 -1 2];</span>
-<span style='color:#bf0303;'>    Vi = 0.25 * [5 1 -3; 2 2 -2; 1 1 1];</span>
-<span style='color:#bf0303;'>    D = [-0.5 0 0; 0 -0.1 0; 0 0 lam];</span>
+<span style='color:#cc0000;'>    A = V * D * Vi</span>
+<span style='color:#cc0000;'>    V = [1 -1 1; -1 2 1; 0 -1 2];</span>
+<span style='color:#cc0000;'>    Vi = 0.25 * [5 1 -3; 2 2 -2; 1 1 1];</span>
+<span style='color:#cc0000;'>    D = [-0.5 0 0; 0 -0.1 0; 0 0 lam];</span>
 
-<span style='color:#bf0303;'>lam is a large negative number.</span>
+<span style='color:#cc0000;'>lam is a large negative number.</span>
 
-<span style='color:#bf0303;'>The analytical solution to this problem is:</span>
+<span style='color:#cc0000;'>The analytical solution to this problem is:</span>
 
-<span style='color:#bf0303;'>.. code-block:: none</span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#bf0303;'>    Y(t) = V*exp(D*t)*Vi*Y0</span>
+<span style='color:#cc0000;'>    Y(t) = V*exp(D*t)*Vi*Y0</span>
 
-<span style='color:#bf0303;'>for t in the interval [0.0, 0.05], with initial condition y(0) = [1,1,1]'.</span>
+<span style='color:#cc0000;'>for t in the interval [0.0, 0.05], with initial condition y(0) = [1,1,1]'.</span>
 
-<span style='color:#bf0303;'>The stiffness of the problem is directly proportional to the value of &quot;lamda&quot;.</span>
-<span style='color:#bf0303;'>The value of lamda should be negative to result in a well-posed ODE;</span>
-<span style='color:#bf0303;'>for values with magnitude larger than 100 the problem becomes quite stiff.</span>
+<span style='color:#cc0000;'>The stiffness of the problem is directly proportional to the value of &quot;lamda&quot;.</span>
+<span style='color:#cc0000;'>The value of lamda should be negative to result in a well-posed ODE;</span>
+<span style='color:#cc0000;'>for values with magnitude larger than 100 the problem becomes quite stiff.</span>
 
-<span style='color:#bf0303;'>In this example, we choose lamda = -100.</span>
+<span style='color:#cc0000;'>In this example, we choose lamda = -100.</span>
 
-<span style='color:#bf0303;'>The solution:</span>
+<span style='color:#cc0000;'>The solution:</span>
 
-<span style='color:#bf0303;'>.. code-block:: none</span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#bf0303;'>   lamda = -100</span>
-<span style='color:#bf0303;'>   reltol = 1e-06</span>
-<span style='color:#bf0303;'>   abstol = 1e-10</span>
+<span style='color:#cc0000;'>   lamda = -100</span>
+<span style='color:#cc0000;'>   reltol = 1e-06</span>
+<span style='color:#cc0000;'>   abstol = 1e-10</span>
 
-<span style='color:#bf0303;'>   --------------------------------------</span>
-<span style='color:#bf0303;'>      t        y0        y1        y2</span>
-<span style='color:#bf0303;'>   --------------------------------------</span>
-<span style='color:#bf0303;'>    0.0050   0.70327   0.70627   0.41004</span>
-<span style='color:#bf0303;'>    0.0100   0.52267   0.52865   0.05231</span>
-<span style='color:#bf0303;'>    0.0150   0.41249   0.42145  -0.16456</span>
-<span style='color:#bf0303;'>    0.0200   0.34504   0.35696  -0.29600</span>
-<span style='color:#bf0303;'>    0.0250   0.30349   0.31838  -0.37563</span>
-<span style='color:#bf0303;'>    0.0300   0.27767   0.29551  -0.42383</span>
-<span style='color:#bf0303;'>    0.0350   0.26138   0.28216  -0.45296</span>
-<span style='color:#bf0303;'>    0.0400   0.25088   0.27459  -0.47053</span>
-<span style='color:#bf0303;'>    0.0450   0.24389   0.27053  -0.48109</span>
-<span style='color:#bf0303;'>    0.0500   0.23903   0.26858  -0.48740</span>
-<span style='color:#bf0303;'>   --------------------------------------</span>
+<span style='color:#cc0000;'>   --------------------------------------</span>
+<span style='color:#cc0000;'>      t        y0        y1        y2</span>
+<span style='color:#cc0000;'>   --------------------------------------</span>
+<span style='color:#cc0000;'>    0.0050   0.70327   0.70627   0.41004</span>
+<span style='color:#cc0000;'>    0.0100   0.52267   0.52865   0.05231</span>
+<span style='color:#cc0000;'>    0.0150   0.41249   0.42145  -0.16456</span>
+<span style='color:#cc0000;'>    0.0200   0.34504   0.35696  -0.29600</span>
+<span style='color:#cc0000;'>    0.0250   0.30349   0.31838  -0.37563</span>
+<span style='color:#cc0000;'>    0.0300   0.27767   0.29551  -0.42383</span>
+<span style='color:#cc0000;'>    0.0350   0.26138   0.28216  -0.45296</span>
+<span style='color:#cc0000;'>    0.0400   0.25088   0.27459  -0.47053</span>
+<span style='color:#cc0000;'>    0.0450   0.24389   0.27053  -0.48109</span>
+<span style='color:#cc0000;'>    0.0500   0.23903   0.26858  -0.48740</span>
+<span style='color:#cc0000;'>   --------------------------------------</span>
 
-<span style='color:#bf0303;'>The plot of the 'y0', 'y1', 'y2' variables:</span>
+<span style='color:#cc0000;'>The plot of the 'y0', 'y1', 'y2' variables:</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial18-results.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial18-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys, numpy, scipy.linalg
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
+<span style='color:#3605fb;'>import</span> sys, numpy, scipy.linalg
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 
-<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, Pa, mol, J, W
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
 
-typeNone = daeVariableType(<span style='color:#bf0303;'>&quot;typeNone&quot;</span>, unit(), <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1E10</span>,   <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>1e-10</span>)
+typeNone <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;typeNone&quot;</span>, unit(), <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E10</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-10</span>)
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.x = daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0057ae;'>self</span>, unit(), <span style='color:#bf0303;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#3605fb;'>self</span>, unit(), <span style='color:#cc0000;'>&quot;&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.y = daeVariable(<span style='color:#bf0303;'>&quot;y&quot;</span>, typeNone, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;&quot;</span>, [<span style='color:#0057ae;'>self</span>.x])
+        <span style='color:#3605fb;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y&quot;</span>, typeNone, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#898887;'># Input data:</span>
-        lamda = -<span style='color:#b08000;'>100</span>
-        V = numpy.array([[<span style='color:#b08000;'>1</span>, -<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>], [-<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>1</span>], [<span style='color:#b08000;'>0</span>, -<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>2</span>]])
-        Vi = <span style='color:#b08000;'>0.25</span> * numpy.array([[<span style='color:#b08000;'>5</span>, <span style='color:#b08000;'>1</span>, -<span style='color:#b08000;'>3</span>], [<span style='color:#b08000;'>2</span>, <span style='color:#b08000;'>2</span>, -<span style='color:#b08000;'>2</span>], [<span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>, <span style='color:#b08000;'>1</span>]])
-        D = numpy.array([[-<span style='color:#b08000;'>0.5</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0</span>], [<span style='color:#b08000;'>0</span>, -<span style='color:#b08000;'>0.1</span>, <span style='color:#b08000;'>0</span>], [<span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0</span>, lamda]])
-        <span style='color:#0057ae;'>self</span>.y0 = numpy.array([<span style='color:#b08000;'>1.0</span>, <span style='color:#b08000;'>1.0</span>, <span style='color:#b08000;'>1.0</span>])
+        <span style='color:#017a31;'># Input data:</span>
+        lamda <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>100</span>
+        V <b><span style='color:#0000ff;'>=</span></b> numpy.array([[<span style='color:#cc047c;'>1</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>1</span>], [<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>2</span>, <span style='color:#cc047c;'>1</span>], [<span style='color:#cc047c;'>0</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>2</span>]])
+        Vi <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.25</span> <b><span style='color:#0000ff;'>*</span></b> numpy.array([[<span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>1</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>3</span>], [<span style='color:#cc047c;'>2</span>, <span style='color:#cc047c;'>2</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>], [<span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>1</span>]])
+        D <b><span style='color:#0000ff;'>=</span></b> numpy.array([[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.5</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0</span>], [<span style='color:#cc047c;'>0</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.1</span>, <span style='color:#cc047c;'>0</span>], [<span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0</span>, lamda]])
+        <span style='color:#3605fb;'>self</span>.y0 <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>1.0</span>, <span style='color:#cc047c;'>1.0</span>])
 
-        <span style='color:#898887;'># Create a vector of y:</span>
-        y = numpy.empty(<span style='color:#b08000;'>3</span>, dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        y[:] = [<span style='color:#0057ae;'>self</span>.y(i) <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>3</span>)]
+        <span style='color:#017a31;'># Create a vector of y:</span>
+        y <b><span style='color:#0000ff;'>=</span></b> numpy.empty(<span style='color:#cc047c;'>3</span>, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        y[:] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>self</span>.y(i) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>3</span>)]
 
-        <span style='color:#898887;'># Create a vector of dy/dt:</span>
-        dydt = numpy.empty(<span style='color:#b08000;'>3</span>, dtype=<b><span style='color:#644a9b;'>object</span></b>)
-        dydt[:] = [dt(<span style='color:#0057ae;'>self</span>.y(i)) <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>3</span>)]
+        <span style='color:#017a31;'># Create a vector of dy/dt:</span>
+        dydt <b><span style='color:#0000ff;'>=</span></b> numpy.empty(<span style='color:#cc047c;'>3</span>, dtype<b><span style='color:#0000ff;'>=</span></b><span style='color:#2a00d6;'>object</span>)
+        dydt[:] <b><span style='color:#0000ff;'>=</span></b> [dt(<span style='color:#3605fb;'>self</span>.y(i)) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>3</span>)]
 
-        <span style='color:#898887;'># Create the ODE system: dy/dt = A*y</span>
-        <span style='color:#898887;'># Use dot product (numpy arrays don't behave as matrices)</span>
-        <span style='color:#898887;'># or use numpy.matrix where the operator * performs the dot product.</span>
-        Ay = V.dot(D).dot(Vi).dot(y)
-        <span style='color:#898887;'>#print(Ay)</span>
-        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>3</span>):
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;y(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
-            eq.Residual = dydt[i] - Ay[i]
-            eq.CheckUnitsConsistency = <span style='color:#0057ae;'>False</span>
+        <span style='color:#017a31;'># Create the ODE system: dy/dt = A*y</span>
+        <span style='color:#017a31;'># Use dot product (numpy arrays don't behave as matrices)</span>
+        <span style='color:#017a31;'># or use numpy.matrix where the operator * performs the dot product.</span>
+        Ay <b><span style='color:#0000ff;'>=</span></b> V.dot(D).dot(Vi).dot(y)
+        <span style='color:#017a31;'>#print(Ay)</span>
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>3</span>):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> dydt[i] <b><span style='color:#0000ff;'>-</span></b> Ay[i]
+            eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial18&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial18&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.x.CreateArray(<span style='color:#b08000;'>3</span>)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x.CreateArray(<span style='color:#cc047c;'>3</span>)
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.y.SetInitialConditions(<span style='color:#0057ae;'>self</span>.m.y0)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.y.SetInitialConditions(<span style='color:#3605fb;'>self</span>.m.y0)
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>0.005</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>0.05</span>
-    simulator  = daeSimulator(app, simulation=sim)
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.005</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.05</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    daesolver.RelativeTolerance = <span style='color:#b08000;'>1E-6</span>
+    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1E-6</span>
     
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = <span style='color:#b08000;'>0.005</span>
-    simulation.TimeHorizon = <span style='color:#b08000;'>0.05</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.005</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.05</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

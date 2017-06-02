@@ -420,7 +420,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#017a31;'># Test low-level calculation routines</span>
+    <span style='color:#017a31;'># Test low-level calculation routines.</span>
+    <span style='color:#017a31;'># CapeOpen thermo packages are available only on Windows.</span>
     <b>if</b> daetools.daetools_system <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Windows'</span>:
         test_single_phase()
         test_two_phase()

@@ -21,6 +21,7 @@ This tutorial introduces the following concepts:
 
 - Arrays (discrete distribution domains)
 - Distributed parameters
+- Making equations more readable
 - Degrees of freedom
 - Setting an initial guess for variables (used by a DAE solver during an initial phase)
 
@@ -84,39 +85,53 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        # Create some auxiliary functions to make equations more readable 
+        rho     = self.rho()
+        a       = self.a()
+        b       = self.b()
+        Q       = lambda i:      self.Q(i)
+        cp      = lambda x,y:    self.cp(x,y)
+        k       = lambda x,y:    self.k(x,y)
+        T       = lambda x,y:    self.T(x,y)
+        dT_dt   = lambda x,y: dt(self.T(x,y))
+        dT_dx   = lambda x,y:  d(self.T(x,y), self.x, eCFDM)
+        dT_dy   = lambda x,y:  d(self.T(x,y), self.y, eCFDM)
+        d2T_dx2 = lambda x,y: d2(self.T(x,y), self.x, eCFDM)
+        d2T_dy2 = lambda x,y: d2(self.T(x,y), self.y, eCFDM)
+
+        # Now the equations expressions are more readable
         eq = self.CreateEquation("HeatBalance", "Heat balance equation valid on the open x and y domains")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eOpenOpen)
-        eq.Residual = self.rho() * self.cp(x, y) * dt(self.T(x, y)) - self.k(x, y) * \
-                     (d2(self.T(x,y), self.x, eCFDM) + d2(self.T(x,y), self.y, eCFDM))
+        eq.Residual = rho * cp(x,y) * dT_dt(x,y) - k(x,y) * (d2T_dx2(x,y) + d2T_dy2(x,y))
 
         eq = self.CreateEquation("BC_bottom", "Neumann boundary conditions at the bottom edge (constant flux)")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eLowerBound)
         # Now we use Q(0) as the heat flux into the bottom edge
-        eq.Residual = - self.k(x, y) * d(self.T(x,y), self.y, eCFDM) - self.Q(0)
+        eq.Residual = -k(x,y) * dT_dy(x,y) - Q(0)
 
         eq = self.CreateEquation("BC_top", "Neumann boundary conditions at the top edge (constant flux)")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
         y = eq.DistributeOnDomain(self.y, eUpperBound)
         # Now we use Q(1) as the heat flux at the top edge
-        eq.Residual = - self.k(x, y) * d(self.T(x,y), self.y, eCFDM) - self.Q(1)
+        eq.Residual = -k(x,y) * dT_dy(x,y) - Q(1)
 
         eq = self.CreateEquation("BC_left", "Neumann boundary conditions at the left edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
-        eq.Residual = d(self.T(x,y), self.x, eCFDM)
+        eq.Residual = dT_dx(x,y)
 
         eq = self.CreateEquation("BC_right", " Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
-        eq.Residual = d(self.T(x,y), self.x, eCFDM)
+        eq.Residual = dT_dx(x,y)
 
         # Heat capacity as a function of the temperature
         eq = self.CreateEquation("C_p", "Equation to calculate the specific heat capacity of the plate as a function of the temperature.")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
-        eq.Residual = self.cp(x,y) - self.a() - self.b() * self.T(x, y)
+        eq.Residual = cp(x,y) - a - b * T(x,y)
 
 class simTutorial(daeSimulation):
     def __init__(self):

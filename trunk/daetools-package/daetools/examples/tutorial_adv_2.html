@@ -9,221 +9,221 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            tutorial_adv_2.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial demonstrates a solution of a discretized population balance using</span>
-<span style='color:#bf0303;'>high resolution upwind schemes with flux limiter.</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial_adv_2.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial demonstrates a solution of a discretized population balance using</span>
+<span style='color:#cc0000;'>high resolution upwind schemes with flux limiter.</span>
 
-<span style='color:#bf0303;'>Reference: Qamar S., Elsner M.P., Angelov I.A., Warnecke G., Seidel-Morgenstern A. (2006)</span>
-<span style='color:#bf0303;'>A comparative study of high resolution schemes for solving population balances in crystallization.</span>
-<span style='color:#bf0303;'>Computers and Chemical Engineering 30(6-7):1119-1131.</span>
-<span style='color:#bf0303;'>`doi:10.1016/j.compchemeng.2006.02.012 &lt;http://dx.doi.org/10.1016/j.compchemeng.2006.02.012&gt;`_</span>
+<span style='color:#cc0000;'>Reference: Qamar S., Elsner M.P., Angelov I.A., Warnecke G., Seidel-Morgenstern A. (2006)</span>
+<span style='color:#cc0000;'>A comparative study of high resolution schemes for solving population balances in crystallization.</span>
+<span style='color:#cc0000;'>Computers and Chemical Engineering 30(6-7):1119-1131.</span>
+<span style='color:#cc0000;'>`doi:10.1016/j.compchemeng.2006.02.012 &lt;http://dx.doi.org/10.1016/j.compchemeng.2006.02.012&gt;`_</span>
 
-<span style='color:#bf0303;'>It shows a comparison between the analytical results and various discretization schemes:</span>
+<span style='color:#cc0000;'>It shows a comparison between the analytical results and various discretization schemes:</span>
 
-<span style='color:#bf0303;'>- I order upwind scheme</span>
-<span style='color:#bf0303;'>- II order central scheme</span>
-<span style='color:#bf0303;'>- Cell centered finite volume method solved using the high resolution upwind scheme</span>
-<span style='color:#bf0303;'>  (Van Leer k-interpolation with k = 1/3 and Koren flux limiter)</span>
+<span style='color:#cc0000;'>- I order upwind scheme</span>
+<span style='color:#cc0000;'>- II order central scheme</span>
+<span style='color:#cc0000;'>- Cell centered finite volume method solved using the high resolution upwind scheme</span>
+<span style='color:#cc0000;'>  (Van Leer k-interpolation with k = 1/3 and Koren flux limiter)</span>
 
-<span style='color:#bf0303;'>The problem is from the section 3.1 Size-independent growth.</span>
+<span style='color:#cc0000;'>The problem is from the section 3.1 Size-independent growth.</span>
 
-<span style='color:#bf0303;'>Could be also found in: Motz S., Mitrović A., Gilles E.-D. (2002)</span>
-<span style='color:#bf0303;'>Comparison of numerical methods for the simulation of dispersed phase systems.</span>
-<span style='color:#bf0303;'>Chemical Engineering Science 57(20):4329-4344.</span>
-<span style='color:#bf0303;'>`doi:10.1016/S0009-2509(02)00349-4 &lt;http://dx.doi.org/10.1016/S0009-2509(02)00349-4&gt;`_</span>
+<span style='color:#cc0000;'>Could be also found in: Motz S., Mitrović A., Gilles E.-D. (2002)</span>
+<span style='color:#cc0000;'>Comparison of numerical methods for the simulation of dispersed phase systems.</span>
+<span style='color:#cc0000;'>Chemical Engineering Science 57(20):4329-4344.</span>
+<span style='color:#cc0000;'>`doi:10.1016/S0009-2509(02)00349-4 &lt;http://dx.doi.org/10.1016/S0009-2509(02)00349-4&gt;`_</span>
 
-<span style='color:#bf0303;'>The comparison of number density functions between the analytical solution and the</span>
-<span style='color:#bf0303;'>high-resolution scheme:</span>
+<span style='color:#cc0000;'>The comparison of number density functions between the analytical solution and the</span>
+<span style='color:#cc0000;'>high-resolution scheme:</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial_adv_2-results.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_adv_2-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
 
-<span style='color:#bf0303;'>The comparison of number density functions between the analytical solution and the</span>
-<span style='color:#bf0303;'>I order upwind, II order upwind and II order central difference schemes:</span>
+<span style='color:#cc0000;'>The comparison of number density functions between the analytical solution and the</span>
+<span style='color:#cc0000;'>I order upwind, II order upwind and II order central difference schemes:</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial_adv_2-results2.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_adv_2-results2.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys, numpy
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
-<span style='color:#ff5500;'>from</span> daetools.solvers.trilinos <span style='color:#ff5500;'>import</span> pyTrilinos
+<span style='color:#3605fb;'>import</span> sys, numpy
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.trilinos <span style='color:#3605fb;'>import</span> pyTrilinos
 
-<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, g, kg, s, K, mol, kmol, J, um
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, g, kg, s, K, mol, kmol, J, um
 
-pbm_number_density_t = daeVariableType(<span style='color:#bf0303;'>&quot;pbm_number_density_t&quot;</span>, m**(-<span style='color:#b08000;'>1</span>), <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1.0e+40</span>,  <span style='color:#b08000;'>0.0</span>, <span style='color:#b08000;'>1e-0</span>)
+pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;pbm_number_density_t&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1.0e+40</span>,  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1e-0</span>)
 
-<span style='color:#898887;'># Koren scheme (1993) using k = 1/3 for k-interpolation van Leer interpolation scheme</span>
-<span style='color:#898887;'># Achtung, Achtung!!</span>
-<span style='color:#898887;'># van Leer uses an inverse r in its scheme!!</span>
-<b>def</b> r(i, ni, epsilon = <span style='color:#b08000;'>1e-10</span>):
-    <b>return</b> (ni(i+<span style='color:#b08000;'>1</span>) - ni(i) + Constant(epsilon * m**(-<span style='color:#b08000;'>1</span>))) / (ni(i) - ni(i-<span style='color:#b08000;'>1</span>) + Constant(epsilon * m**(-<span style='color:#b08000;'>1</span>)))
+<span style='color:#017a31;'># Koren scheme (1993) using k = 1/3 for k-interpolation van Leer interpolation scheme</span>
+<span style='color:#017a31;'># Achtung, Achtung!!</span>
+<span style='color:#017a31;'># van Leer uses an inverse r in its scheme!!</span>
+<b>def</b> r(i, ni, epsilon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-10</span>):
+    <b>return</b> (ni(i<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>-</span></b> ni(i) <b><span style='color:#0000ff;'>+</span></b> Constant(epsilon <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))) <b><span style='color:#0000ff;'>/</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>) <b><span style='color:#0000ff;'>+</span></b> Constant(epsilon <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)))
 
 <b>def</b> Phi(r):
-    <b>return</b> Max(<span style='color:#b08000;'>0</span>, Min(<span style='color:#b08000;'>2</span>*r, Min(<span style='color:#b08000;'>1.0</span>/<span style='color:#b08000;'>3</span> + <span style='color:#b08000;'>2.0</span>*r/<span style='color:#b08000;'>3</span>, <span style='color:#b08000;'>2.0</span>)))
+    <b>return</b> Max(<span style='color:#cc047c;'>0</span>, Min(<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>r, Min(<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b><span style='color:#cc047c;'>3</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>2.0</span><b><span style='color:#0000ff;'>*</span></b>r<b><span style='color:#0000ff;'>/</span></b><span style='color:#cc047c;'>3</span>, <span style='color:#cc047c;'>2.0</span>)))
 
 <b>def</b> ni_edge_plus(i, ni, nL):
-    <b>if</b> i == <span style='color:#b08000;'>0</span>:      <span style='color:#898887;'># Right face of the first cell: central interpolation (k=1)</span>
-        <b>return</b> <span style='color:#b08000;'>0.5</span> * (ni(<span style='color:#b08000;'>0</span>) + ni(<span style='color:#b08000;'>1</span>))
-    <b>elif</b> i == nL-<span style='color:#b08000;'>1</span>: <span style='color:#898887;'># Right face of the last cell: one-sided upwind scheme (k=-1)</span>
-        <b>return</b> ni(i) + <span style='color:#b08000;'>0.5</span> * (ni(i) - ni(i-<span style='color:#b08000;'>1</span>))
-    <b>else</b>:           <span style='color:#898887;'># Other cells: k=1/3</span>
-        <b>return</b> ni(i) + <span style='color:#b08000;'>0.5</span> * Phi(r(i, ni)) * (ni(i) - ni(i-<span style='color:#b08000;'>1</span>))
+    <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>:      <span style='color:#017a31;'># Right face of the first cell: central interpolation (k=1)</span>
+        <b>return</b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> (ni(<span style='color:#cc047c;'>0</span>) <b><span style='color:#0000ff;'>+</span></b> ni(<span style='color:#cc047c;'>1</span>))
+    <b>elif</b> i <b><span style='color:#0000ff;'>==</span></b> nL<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>: <span style='color:#017a31;'># Right face of the last cell: one-sided upwind scheme (k=-1)</span>
+        <b>return</b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
+    <b>else</b>:           <span style='color:#017a31;'># Other cells: k=1/3</span>
+        <b>return</b> ni(i) <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>*</span></b> Phi(r(i, ni)) <b><span style='color:#0000ff;'>*</span></b> (ni(i) <b><span style='color:#0000ff;'>-</span></b> ni(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
 
 <b>class</b> modelMoC(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.L  = daeDomain(<span style='color:#bf0303;'>&quot;L&quot;</span>,  <span style='color:#0057ae;'>self</span>, um, <span style='color:#bf0303;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.L  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;L&quot;</span>,  <span style='color:#3605fb;'>self</span>, um, <span style='color:#cc0000;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.ni_an_60      = daeVariable(<span style='color:#bf0303;'>&quot;ni_analytical&quot;</span>,  pbm_number_density_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Analytical solution at t = 60s&quot;</span>,            [<span style='color:#0057ae;'>self</span>.L])
-        <span style='color:#0057ae;'>self</span>.ni_I          = daeVariable(<span style='color:#bf0303;'>&quot;ni_I_upwind&quot;</span>,    pbm_number_density_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;I order upwind scheme&quot;</span>,                     [<span style='color:#0057ae;'>self</span>.L])
-        <span style='color:#0057ae;'>self</span>.ni_II_central = daeVariable(<span style='color:#bf0303;'>&quot;ni_II_central&quot;</span>,  pbm_number_density_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;II order ceneter finite difference&quot;</span>,        [<span style='color:#0057ae;'>self</span>.L])
-        <span style='color:#0057ae;'>self</span>.ni_k_int      = daeVariable(<span style='color:#bf0303;'>&quot;ni_HR_fl&quot;</span>,       pbm_number_density_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#0057ae;'>self</span>.L])
+        <span style='color:#3605fb;'>self</span>.ni_an_60      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;ni_analytical&quot;</span>,  pbm_number_density_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Analytical solution at t = 60s&quot;</span>,            [<span style='color:#3605fb;'>self</span>.L])
+        <span style='color:#3605fb;'>self</span>.ni_I          <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;ni_I_upwind&quot;</span>,    pbm_number_density_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;I order upwind scheme&quot;</span>,                     [<span style='color:#3605fb;'>self</span>.L])
+        <span style='color:#3605fb;'>self</span>.ni_II_central <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;ni_II_central&quot;</span>,  pbm_number_density_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;II order ceneter finite difference&quot;</span>,        [<span style='color:#3605fb;'>self</span>.L])
+        <span style='color:#3605fb;'>self</span>.ni_k_int      <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;ni_HR_fl&quot;</span>,       pbm_number_density_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#3605fb;'>self</span>.L])
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        G  = <span style='color:#b08000;'>1</span> * um/s
-        L  = <span style='color:#0057ae;'>self</span>.L.Points
-        nL = <span style='color:#0057ae;'>self</span>.L.NumberOfPoints
+        G  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>*</span></b> um<b><span style='color:#0000ff;'>/</span></b>s
+        L  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L.Points
+        nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L.NumberOfPoints
 
-        <span style='color:#898887;'># Create an intial CSD array</span>
-        <span style='color:#0057ae;'>self</span>.ni_0 = numpy.zeros(nL)
-        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, nL):
-            <b>if</b> L[i] &gt; <span style='color:#b08000;'>10</span> <b>and</b> L[i] &lt; <span style='color:#b08000;'>20</span>:
-                <span style='color:#0057ae;'>self</span>.ni_0[i] = <span style='color:#b08000;'>1e10</span>
+        <span style='color:#017a31;'># Create an intial CSD array</span>
+        <span style='color:#3605fb;'>self</span>.ni_0 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(nL)
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, nL):
+            <b>if</b> L[i] <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>10</span> <b>and</b> L[i] <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#cc047c;'>20</span>:
+                <span style='color:#3605fb;'>self</span>.ni_0[i] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e10</span>
 
-        <span style='color:#898887;'># Analytical solution is ni(L,t) = ni_0(L-Gt) so we need to shift an initial CSD for Gt (in this case for 60 seconds)</span>
-        <span style='color:#898887;'># Create shifted CSD array</span>
-        ni_60 = numpy.zeros(nL)
-        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, nL):
-            <b>if</b> L[i] &gt; (<span style='color:#b08000;'>10</span> + G.value*<span style='color:#b08000;'>60</span>) <b>and</b> L[i] &lt; (<span style='color:#b08000;'>20</span> + G.value*<span style='color:#b08000;'>60</span>):
-                ni_60[i] = <span style='color:#b08000;'>1e10</span>
-        <span style='color:#898887;'># Actual equations</span>
-        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, nL):
-            eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_an_60(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
-            eq.Residual = <span style='color:#0057ae;'>self</span>.ni_an_60(i) - Constant(ni_60[i] * (<span style='color:#b08000;'>1</span>/m))
+        <span style='color:#017a31;'># Analytical solution is ni(L,t) = ni_0(L-Gt) so we need to shift an initial CSD for Gt (in this case for 60 seconds)</span>
+        <span style='color:#017a31;'># Create shifted CSD array</span>
+        ni_60 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(nL)
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, nL):
+            <b>if</b> L[i] <b><span style='color:#0000ff;'>&gt;</span></b> (<span style='color:#cc047c;'>10</span> <b><span style='color:#0000ff;'>+</span></b> G.value<b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span>) <b>and</b> L[i] <b><span style='color:#0000ff;'>&lt;</span></b> (<span style='color:#cc047c;'>20</span> <b><span style='color:#0000ff;'>+</span></b> G.value<b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span>):
+                ni_60[i] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e10</span>
+        <span style='color:#017a31;'># Actual equations</span>
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, nL):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_an_60(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni_an_60(i) <b><span style='color:#0000ff;'>-</span></b> Constant(ni_60[i] <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>/</span></b>m))
 
-        <span style='color:#898887;'># I order upwind scheme</span>
-        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, nL):
-            <b>if</b> i == <span style='color:#b08000;'>0</span>:
-                eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_I(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
-                eq.Residual = <span style='color:#0057ae;'>self</span>.ni_I(<span style='color:#b08000;'>0</span>) <span style='color:#898887;'># Boundary conditions: here G*ni = 0</span>
+        <span style='color:#017a31;'># I order upwind scheme</span>
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, nL):
+            <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>:
+                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_I(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni_I(<span style='color:#cc047c;'>0</span>) <span style='color:#017a31;'># Boundary conditions: here G*ni = 0</span>
             <b>else</b>:
-                eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_I(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
-                eq.Residual = dt(<span style='color:#0057ae;'>self</span>.ni_I(i)) + Constant(G) * (<span style='color:#0057ae;'>self</span>.ni_I(i) - <span style='color:#0057ae;'>self</span>.ni_I(i-<span style='color:#b08000;'>1</span>)) / (<span style='color:#0057ae;'>self</span>.L(i) - <span style='color:#0057ae;'>self</span>.L(i-<span style='color:#b08000;'>1</span>))
+                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_I(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.ni_I(i)) <b><span style='color:#0000ff;'>+</span></b> Constant(G) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.ni_I(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.ni_I(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>)) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#3605fb;'>self</span>.L(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.L(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
 
-        <span style='color:#898887;'># II order central scheme</span>
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_II_central(0)&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.ni_II_central(<span style='color:#b08000;'>0</span>)
+        <span style='color:#017a31;'># II order central scheme</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_II_central(0)&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni_II_central(<span style='color:#cc047c;'>0</span>)
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_II_central(n)&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-        l = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.L, eOpenClosed)
-        eq.Residual = dt(<span style='color:#0057ae;'>self</span>.ni_II_central(l)) + Constant(G) * d(<span style='color:#0057ae;'>self</span>.ni_II_central(l), <span style='color:#0057ae;'>self</span>.L)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_II_central(n)&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        l <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.L, eOpenClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.ni_II_central(l)) <b><span style='color:#0000ff;'>+</span></b> Constant(G) <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#3605fb;'>self</span>.ni_II_central(l), <span style='color:#3605fb;'>self</span>.L)
 
-        <span style='color:#898887;'># k-interpolation (van Leer 1985)</span>
-        <b>for</b> i <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>0</span>, nL):
-            <b>if</b> i == <span style='color:#b08000;'>0</span>:
-                eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_k_int(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
-                eq.Residual = <span style='color:#0057ae;'>self</span>.ni_k_int(<span style='color:#b08000;'>0</span>) <span style='color:#898887;'># Boundary condition: here G*ni = 0</span>
+        <span style='color:#017a31;'># k-interpolation (van Leer 1985)</span>
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, nL):
+            <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>:
+                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_k_int(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni_k_int(<span style='color:#cc047c;'>0</span>) <span style='color:#017a31;'># Boundary condition: here G*ni = 0</span>
             <b>else</b>:
-                eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;ni_k_int(</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>)&quot;</span> % i, <span style='color:#bf0303;'>&quot;&quot;</span>)
-                eq.Residual = dt(<span style='color:#0057ae;'>self</span>.ni_k_int(i)) + Constant(G) * (ni_edge_plus(i,<span style='color:#0057ae;'>self</span>.ni_k_int,nL) - ni_edge_plus(i-<span style='color:#b08000;'>1</span>,<span style='color:#0057ae;'>self</span>.ni_k_int,nL)) / (<span style='color:#0057ae;'>self</span>.L(i) - <span style='color:#0057ae;'>self</span>.L(i-<span style='color:#b08000;'>1</span>))
+                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni_k_int(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+                eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.ni_k_int(i)) <b><span style='color:#0000ff;'>+</span></b> Constant(G) <b><span style='color:#0000ff;'>*</span></b> (ni_edge_plus(i,<span style='color:#3605fb;'>self</span>.ni_k_int,nL) <b><span style='color:#0000ff;'>-</span></b> ni_edge_plus(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,<span style='color:#3605fb;'>self</span>.ni_k_int,nL)) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#3605fb;'>self</span>.L(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.L(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modelMoC(<span style='color:#bf0303;'>&quot;tutorial_adv_2&quot;</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modelMoC(<span style='color:#cc0000;'>&quot;tutorial_adv_2&quot;</span>)
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.L.CreateStructuredGrid(<span style='color:#b08000;'>200</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>100</span>)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.L.CreateStructuredGrid(<span style='color:#cc047c;'>200</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>100</span>)
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#898887;'># Initial conditions</span>
-        L = <span style='color:#0057ae;'>self</span>.m.L.Points
-        nL = <span style='color:#0057ae;'>self</span>.m.L.NumberOfPoints
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Initial conditions</span>
+        L <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.L.Points
+        nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.L.NumberOfPoints
 
-        <span style='color:#898887;'># Initial conditions (the first item is not differential)</span>
-        ni_0 = <span style='color:#0057ae;'>self</span>.m.ni_0.copy()
-        ni_0[<span style='color:#b08000;'>0</span>] = <span style='color:#0057ae;'>None</span> <span style='color:#898887;'># unset</span>
+        <span style='color:#017a31;'># Initial conditions (the first item is not differential)</span>
+        ni_0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.ni_0.copy()
+        ni_0[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span> <span style='color:#017a31;'># unset</span>
 
-        <span style='color:#0057ae;'>self</span>.m.ni_I.SetInitialConditions(ni_0)
-        <span style='color:#0057ae;'>self</span>.m.ni_II_central.SetInitialConditions(ni_0)
-        <span style='color:#0057ae;'>self</span>.m.ni_k_int.SetInitialConditions(ni_0)
+        <span style='color:#3605fb;'>self</span>.m.ni_I.SetInitialConditions(ni_0)
+        <span style='color:#3605fb;'>self</span>.m.ni_II_central.SetInitialConditions(ni_0)
+        <span style='color:#3605fb;'>self</span>.m.ni_k_int.SetInitialConditions(ni_0)
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = simTutorial()
-    lasolver = pyTrilinos.daeCreateTrilinosSolver(<span style='color:#bf0303;'>&quot;Amesos_Umfpack&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>5</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>60</span>
-    simulator  = daeSimulator(app, simulation=sim, lasolver = lasolver)
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;Amesos_Umfpack&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>60</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, lasolver <b><span style='color:#0000ff;'>=</span></b> lasolver)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    lasolver = pyTrilinos.daeCreateTrilinosSolver(<span style='color:#bf0303;'>&quot;Amesos_Umfpack&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;Amesos_Umfpack&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
     daesolver.SetLASolver(lasolver)
 
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = <span style='color:#b08000;'>5</span>
-    simulation.TimeHorizon = <span style='color:#b08000;'>60</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>60</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>

@@ -151,14 +151,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'>##########################################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'># Plot the sensitivity of T per Qin using the data reporter #</span>
     <span style='color:#017a31;'>##########################################################</span><span style='color:#81ca2d;'>###</span>
-    <span style='color:#017a31;'># Alias for log.Message</span>
-    printf <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> msg: log.Message(msg, <span style='color:#cc047c;'>0</span>)
-    
     <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
     variables <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
 
     <span style='color:#017a31;'># Get the daeDataReceiverVariable objects from the dictionary.</span>
-    <span style='color:#017a31;'># This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values)</span>
+    <span style='color:#017a31;'># This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).</span>
     dT_dQin_var <b><span style='color:#0000ff;'>=</span></b> variables[<span style='color:#cc0000;'>'tutorial20.sensitivities.d(T)_d(Qin)'</span>]
 
     <span style='color:#017a31;'># Time points can be taken from any variable (x axis)</span>

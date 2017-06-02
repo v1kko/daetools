@@ -9,218 +9,217 @@
 <!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#898887;'>#!/usr/bin/env python</span>
-<span style='color:#898887;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>                            tutorial9.py</span>
-<span style='color:#898887;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#898887;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#898887;'>***********************************************************************************</span>
-<span style='color:#898887;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#898887;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#898887;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#898887;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#898887;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#898887;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#898887;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#898887;'>************************************************************************************</span>
-<span style='color:#898887;'>&quot;&quot;&quot;</span>
-__doc__ = <span style='color:#bf0303;'>&quot;&quot;&quot;</span>
-<span style='color:#bf0303;'>This tutorial introduces the following concepts:</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial9.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial introduces the following concepts:</span>
 
-<span style='color:#bf0303;'>- Third party **direct** linear equations solvers</span>
+<span style='color:#cc0000;'>- Third party **direct** linear equations solvers</span>
 
-<span style='color:#bf0303;'>Currently there are the following linear equations solvers available:</span>
+<span style='color:#cc0000;'>Currently there are the following linear equations solvers available:</span>
 
-<span style='color:#bf0303;'>- SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)</span>
-<span style='color:#bf0303;'>- SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)</span>
-<span style='color:#bf0303;'>- Trilinos Amesos: sequential sparse direct solver defined in pyTrilinos module (GNU Lesser GPL)</span>
-<span style='color:#bf0303;'>- IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span>
-<span style='color:#bf0303;'>- Pardiso: multi-threaded sparse direct solver defined in pyPardiso module (proprietary)</span>
+<span style='color:#cc0000;'>- SuperLU: sequential sparse direct solver defined in pySuperLU module (BSD licence)</span>
+<span style='color:#cc0000;'>- SuperLU_MT: multi-threaded sparse direct solver defined in pySuperLU_MT module (BSD licence)</span>
+<span style='color:#cc0000;'>- Trilinos Amesos: sequential sparse direct solver defined in pyTrilinos module (GNU Lesser GPL)</span>
+<span style='color:#cc0000;'>- IntelPardiso: multi-threaded sparse direct solver defined in pyIntelPardiso module (proprietary)</span>
+<span style='color:#cc0000;'>- Pardiso: multi-threaded sparse direct solver defined in pyPardiso module (proprietary)</span>
 
-<span style='color:#bf0303;'>In this example we use the same conduction problem as in the tutorial 1.</span>
+<span style='color:#cc0000;'>In this example we use the same conduction problem as in the tutorial 1.</span>
 
-<span style='color:#bf0303;'>The temperature plot (at t=100s, x=0.5, y=*):</span>
+<span style='color:#cc0000;'>The temperature plot (at t=100s, x=0.5, y=*):</span>
 
-<span style='color:#bf0303;'>.. image:: _static/tutorial9-results.png</span>
-<span style='color:#bf0303;'>   :width: 500px</span>
-<span style='color:#bf0303;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial9-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#ff5500;'>import</span> sys
-<span style='color:#ff5500;'>from</span> time <span style='color:#ff5500;'>import</span> localtime, strftime
-<span style='color:#ff5500;'>from</span> daetools.pyDAE <span style='color:#ff5500;'>import</span> *
-<span style='color:#898887;'># First import desired solver's module:</span>
-<span style='color:#ff5500;'>from</span> daetools.solvers.trilinos <span style='color:#ff5500;'>import</span> pyTrilinos
-<span style='color:#898887;'>#from daetools.solvers.superlu import pySuperLU</span>
-<span style='color:#898887;'>#from daetools.solvers.superlu_mt import pySuperLU_MT</span>
-<span style='color:#898887;'>#from daetools.solvers.intel_pardiso import pyIntelPardiso</span>
-<span style='color:#898887;'>#from daetools.solvers.pardiso import pyPardiso</span>
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#017a31;'># First import desired solver's module:</span>
+<span style='color:#3605fb;'>from</span> daetools.solvers.trilinos <span style='color:#3605fb;'>import</span> pyTrilinos
+<span style='color:#017a31;'>#from daetools.solvers.superlu import pySuperLU</span>
+<span style='color:#017a31;'>#from daetools.solvers.superlu_mt import pySuperLU_MT</span>
+<span style='color:#017a31;'>#from daetools.solvers.intel_pardiso import pyIntelPardiso</span>
+<span style='color:#017a31;'>#from daetools.solvers.pardiso import pyPardiso</span>
 
-<span style='color:#898887;'># Standard variable types are defined in variable_types.py</span>
-<span style='color:#ff5500;'>from</span> pyUnits <span style='color:#ff5500;'>import</span> m, kg, s, K, J, W
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, J, W
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent = <span style='color:#0057ae;'>None</span>, Description = <span style='color:#bf0303;'>&quot;&quot;</span>):
-        daeModel.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>, Name, Parent, Description)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#0057ae;'>self</span>.x  = daeDomain(<span style='color:#bf0303;'>&quot;x&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;X axis domain&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.y  = daeDomain(<span style='color:#bf0303;'>&quot;y&quot;</span>, <span style='color:#0057ae;'>self</span>, m, <span style='color:#bf0303;'>&quot;Y axis domain&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X axis domain&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.y  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;y&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;Y axis domain&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.Qb  = daeParameter(<span style='color:#bf0303;'>&quot;Q_b&quot;</span>,         W/(m**<span style='color:#b08000;'>2</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.Tt  = daeParameter(<span style='color:#bf0303;'>&quot;T_t&quot;</span>,                K, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature at the top edge of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.rho = daeParameter(<span style='color:#bf0303;'>&quot;&amp;rho;&quot;</span>,      kg/(m**<span style='color:#b08000;'>3</span>), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Density of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.cp  = daeParameter(<span style='color:#bf0303;'>&quot;c_p&quot;</span>,         J/(kg*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.k   = daeParameter(<span style='color:#bf0303;'>&quot;&amp;lambda;_p&quot;</span>,   W/(m*K), <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Thermal conductivity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qb  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;Q_b&quot;</span>,         W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat flux at the bottom edge of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tt  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_t&quot;</span>,                K, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature at the top edge of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.rho <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Density of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;lambda;_p&quot;</span>,   W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Thermal conductivity of the plate&quot;</span>)
 
-        <span style='color:#0057ae;'>self</span>.T = daeVariable(<span style='color:#bf0303;'>&quot;T&quot;</span>, temperature_t, <span style='color:#0057ae;'>self</span>, <span style='color:#bf0303;'>&quot;Temperature of the plate&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.T.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x)
-        <span style='color:#0057ae;'>self</span>.T.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y)
+        <span style='color:#3605fb;'>self</span>.T <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>, temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x)
+        <span style='color:#3605fb;'>self</span>.T.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y)
 
-    <b>def</b> DeclareEquations(<span style='color:#0057ae;'>self</span>):
-        daeModel.DeclareEquations(<span style='color:#0057ae;'>self</span>)
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;HeatBalance&quot;</span>, <span style='color:#bf0303;'>&quot;Heat balance equation valid on the open x and y domains&quot;</span>)
-        x = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x, eOpenOpen)
-        y = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y, eOpenOpen)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.rho() * <span style='color:#0057ae;'>self</span>.cp() * dt(<span style='color:#0057ae;'>self</span>.T(x,y)) - <span style='color:#0057ae;'>self</span>.k() * \
-                     (d2(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.x) + d2(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.y))
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;Heat balance equation valid on the open x and y domains&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eOpenOpen)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#3605fb;'>self</span>.T(x,y)) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> <b><span style='color:#0000ff;'>\</span></b>
+                     (d2(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x) <b><span style='color:#0000ff;'>+</span></b> d2(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.y))
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_bottom&quot;</span>, <span style='color:#bf0303;'>&quot;Neumann boundary conditions at the bottom edge (constant flux)&quot;</span>)
-        x = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x, eOpenOpen)
-        y = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y, eLowerBound)
-        eq.Residual = - <span style='color:#0057ae;'>self</span>.k() * d(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.y, eCFDM) - <span style='color:#0057ae;'>self</span>.Qb()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_bottom&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the bottom edge (constant flux)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eLowerBound)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.k() <b><span style='color:#0000ff;'>*</span></b> d(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.y, eCFDM) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Qb()
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_top&quot;</span>, <span style='color:#bf0303;'>&quot;Dirichlet boundary conditions at the top edge (constant temperature)&quot;</span>)
-        x = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x, eOpenOpen)
-        y = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y, eUpperBound)
-        eq.Residual = <span style='color:#0057ae;'>self</span>.T(x,y) - <span style='color:#0057ae;'>self</span>.Tt()
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_top&quot;</span>, <span style='color:#cc0000;'>&quot;Dirichlet boundary conditions at the top edge (constant temperature)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eUpperBound)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T(x,y) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Tt()
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_left&quot;</span>, <span style='color:#bf0303;'>&quot;Neumann boundary conditions at the left edge (insulated)&quot;</span>)
-        x = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x, eLowerBound)
-        y = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y, eClosedClosed)
-        eq.Residual = d(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.x, eCFDM)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_left&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the left edge (insulated)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eLowerBound)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM)
 
-        eq = <span style='color:#0057ae;'>self</span>.CreateEquation(<span style='color:#bf0303;'>&quot;BC_right&quot;</span>, <span style='color:#bf0303;'>&quot;Neumann boundary conditions at the right edge (insulated)&quot;</span>)
-        x = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.x, eUpperBound)
-        y = eq.DistributeOnDomain(<span style='color:#0057ae;'>self</span>.y, eClosedClosed)
-        eq.Residual = d(<span style='color:#0057ae;'>self</span>.T(x,y), <span style='color:#0057ae;'>self</span>.x, eCFDM)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;BC_right&quot;</span>, <span style='color:#cc0000;'>&quot;Neumann boundary conditions at the right edge (insulated)&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
+        y <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.y, eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d(<span style='color:#3605fb;'>self</span>.T(x,y), <span style='color:#3605fb;'>self</span>.x, eCFDM)
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>):
-        daeSimulation.<span style='color:#644a9b;'>__init__</span>(<span style='color:#0057ae;'>self</span>)
-        <span style='color:#0057ae;'>self</span>.m = modTutorial(<span style='color:#bf0303;'>&quot;tutorial9&quot;</span>)
-        <span style='color:#0057ae;'>self</span>.m.Description = __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial9&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0057ae;'>self</span>):
-        <span style='color:#0057ae;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#b08000;'>20</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.1</span>)
-        <span style='color:#0057ae;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#b08000;'>20</span>, <span style='color:#b08000;'>0</span>, <span style='color:#b08000;'>0.1</span>)
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
+        <span style='color:#3605fb;'>self</span>.m.y.CreateStructuredGrid(<span style='color:#cc047c;'>20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>0.1</span>)
 
-        <span style='color:#0057ae;'>self</span>.m.k.SetValue(<span style='color:#b08000;'>401</span> * W/(m*K))
-        <span style='color:#0057ae;'>self</span>.m.cp.SetValue(<span style='color:#b08000;'>385</span> * J/(kg*K))
-        <span style='color:#0057ae;'>self</span>.m.rho.SetValue(<span style='color:#b08000;'>8960</span> * kg/(m**<span style='color:#b08000;'>3</span>))
-        <span style='color:#0057ae;'>self</span>.m.Qb.SetValue(<span style='color:#b08000;'>1e6</span> * W/(m**<span style='color:#b08000;'>2</span>))
-        <span style='color:#0057ae;'>self</span>.m.Tt.SetValue(<span style='color:#b08000;'>300</span> * K)
+        <span style='color:#3605fb;'>self</span>.m.k.SetValue(<span style='color:#cc047c;'>401</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>385</span> <b><span style='color:#0000ff;'>*</span></b> J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.rho.SetValue(<span style='color:#cc047c;'>8960</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>))
+        <span style='color:#3605fb;'>self</span>.m.Qb.SetValue(<span style='color:#cc047c;'>1e6</span> <b><span style='color:#0000ff;'>*</span></b> W<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+        <span style='color:#3605fb;'>self</span>.m.Tt.SetValue(<span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
-    <b>def</b> SetUpVariables(<span style='color:#0057ae;'>self</span>):
-        <b>for</b> x <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, <span style='color:#0057ae;'>self</span>.m.x.NumberOfPoints - <span style='color:#b08000;'>1</span>):
-            <b>for</b> y <b>in</b> <b><span style='color:#644a9b;'>range</span></b>(<span style='color:#b08000;'>1</span>, <span style='color:#0057ae;'>self</span>.m.y.NumberOfPoints - <span style='color:#b08000;'>1</span>):
-                <span style='color:#0057ae;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#b08000;'>300</span> * K)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>self</span>.m.x.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>):
+            <b>for</b> y <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, <span style='color:#3605fb;'>self</span>.m.y.NumberOfPoints <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>):
+                <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(x, y, <span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
-<span style='color:#898887;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
-    sim.ReportingInterval = <span style='color:#b08000;'>10</span>
-    sim.TimeHorizon       = <span style='color:#b08000;'>1000</span>
-    simulator  = daeSimulator(app, simulation=sim)
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
     simulator.exec_()
 
-<span style='color:#898887;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#898887;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
 
-    <span style='color:#898887;'># The default linear solver is Sundials dense sequential solver (LU decomposition).</span>
-    <span style='color:#898887;'># The following 3rd party direct linear solvers are supported:</span>
-    <span style='color:#898887;'>#   - Pardiso (multi-threaded - OMP)</span>
-    <span style='color:#898887;'>#   - IntelPardiso (multi-threaded - OMP)</span>
-    <span style='color:#898887;'>#   - SuperLU (sequential)</span>
-    <span style='color:#898887;'>#   - SuperLU_MT (multi-threaded - pthreads, OMP)</span>
-    <span style='color:#898887;'>#   - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack</span>
-    <span style='color:#898887;'># If you are using Pardiso or IntelPardiso solvers you have to export their bin directories,</span>
-    <span style='color:#898887;'># using, for instance, LD_LIBRARY_PATH shell variable (for more details see their documentation).</span>
-    <span style='color:#898887;'># If you are using OpenMP capable solvers you should set the number of threads</span>
-    <span style='color:#898887;'># (typically to the number of cores), for instance:</span>
-    <span style='color:#898887;'>#    export OMP_NUM_THREADS=4</span>
-    <span style='color:#898887;'># or if using IntelPardiso solver:</span>
-    <span style='color:#898887;'>#    export MKL_NUM_THREADS=24</span>
-    <span style='color:#898887;'># You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).</span>
+    <span style='color:#017a31;'># The default linear solver is Sundials dense sequential solver (LU decomposition).</span>
+    <span style='color:#017a31;'># The following 3rd party direct linear solvers are supported:</span>
+    <span style='color:#017a31;'>#   - Pardiso (multi-threaded - OMP)</span>
+    <span style='color:#017a31;'>#   - IntelPardiso (multi-threaded - OMP)</span>
+    <span style='color:#017a31;'>#   - SuperLU (sequential)</span>
+    <span style='color:#017a31;'>#   - SuperLU_MT (multi-threaded - pthreads, OMP)</span>
+    <span style='color:#017a31;'>#   - Trilinos Amesos (sequential): Klu, SuperLU, Lapack, Umfpack</span>
+    <span style='color:#017a31;'># If you are using Pardiso or IntelPardiso solvers you have to export their bin directories,</span>
+    <span style='color:#017a31;'># using, for instance, LD_LIBRARY_PATH shell variable (for more details see their documentation).</span>
+    <span style='color:#017a31;'># If you are using OpenMP capable solvers you should set the number of threads</span>
+    <span style='color:#017a31;'># (typically to the number of cores), for instance:</span>
+    <span style='color:#017a31;'>#    export OMP_NUM_THREADS=4</span>
+    <span style='color:#017a31;'># or if using IntelPardiso solver:</span>
+    <span style='color:#017a31;'>#    export MKL_NUM_THREADS=24</span>
+    <span style='color:#017a31;'># You can place the above command at the end of $HOME/.bashrc (or type it in shell, before simulation).</span>
 
-    <span style='color:#898887;'># Import desired solver module (uncomment it from below) and set it using SetLASolver function:</span>
-    <span style='color:#898887;'>#print(&quot;Supported Trilinos 3rd party LA solvers:&quot;, str(pyTrilinos.daeTrilinosSupportedSolvers()))</span>
-    <span style='color:#898887;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Klu&quot;, &quot;&quot;)</span>
-    lasolver     = pyTrilinos.daeCreateTrilinosSolver(<span style='color:#bf0303;'>&quot;Amesos_Superlu&quot;</span>, <span style='color:#bf0303;'>&quot;&quot;</span>)
-    <span style='color:#898887;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Lapack&quot;, &quot;&quot;)</span>
-    <span style='color:#898887;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Umfpack&quot;, &quot;&quot;)</span>
-    <span style='color:#898887;'>#lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()</span>
-    <span style='color:#898887;'>#lasolver     = pyPardiso.daeCreatePardisoSolver()</span>
+    <span style='color:#017a31;'># Import desired solver module (uncomment it from below) and set it using SetLASolver function:</span>
+    <span style='color:#017a31;'>#print(&quot;Supported Trilinos 3rd party LA solvers:&quot;, str(pyTrilinos.daeTrilinosSupportedSolvers()))</span>
+    lasolver     <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+    <span style='color:#017a31;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Lapack&quot;, &quot;&quot;)</span>
+    <span style='color:#017a31;'>#lasolver     = pyTrilinos.daeCreateTrilinosSolver(&quot;Amesos_Umfpack&quot;, &quot;&quot;)</span>
+    <span style='color:#017a31;'>#lasolver     = pyIntelPardiso.daeCreateIntelPardisoSolver()</span>
+    <span style='color:#017a31;'>#lasolver     = pyPardiso.daeCreatePardisoSolver()</span>
     daesolver.SetLASolver(lasolver)
 
-    <span style='color:#898887;'>&quot;&quot;&quot;</span>
-<span style='color:#898887;'>    # Get Pardiso/IntelPardiso parameters (iparm[64] list of integers)</span>
-<span style='color:#898887;'>    iparm = lasolver.get_iparm()</span>
-<span style='color:#898887;'>    iparm_def = list(iparm) # Save it for comparison</span>
-<span style='color:#898887;'>    # Change some options</span>
-<span style='color:#898887;'>    # Achtung, Achtung!!</span>
-<span style='color:#898887;'>    # The meaning of items in iparm[64] is NOT identical in Pardiso and IntelPardiso solvers!!</span>
-<span style='color:#898887;'>    iparm[ 7] = 2 # Max. number of iterative refinement steps (common for both Pardiso and IntelPardiso)</span>
-<span style='color:#898887;'>    #iparm[27] = 1 # in Pardiso it means:      use METIS parallel reordering</span>
-<span style='color:#898887;'>                   # in IntelPardiso it means: use single precision (do not change it!)</span>
-<span style='color:#898887;'>    # Set them back</span>
-<span style='color:#898887;'>    lasolver.set_iparm(iparm)    </span>
-<span style='color:#898887;'>    iparm = lasolver.get_iparm()</span>
-<span style='color:#898887;'>    # Print the side by side comparison</span>
-<span style='color:#898887;'>    print('iparm     default new')</span>
-<span style='color:#898887;'>    for i in range(64):</span>
-<span style='color:#898887;'>        print 'iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i])</span>
-<span style='color:#898887;'>    </span><span style='color:#898887;'>&quot;&quot;&quot;</span>
+    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>    # Get Pardiso/IntelPardiso parameters (iparm[64] list of integers)</span>
+<span style='color:#017a31;'>    iparm = lasolver.get_iparm()</span>
+<span style='color:#017a31;'>    iparm_def = list(iparm) # Save it for comparison</span>
+<span style='color:#017a31;'>    # Change some options</span>
+<span style='color:#017a31;'>    # Achtung, Achtung!!</span>
+<span style='color:#017a31;'>    # The meaning of items in iparm[64] is NOT identical in Pardiso and IntelPardiso solvers!!</span>
+<span style='color:#017a31;'>    iparm[ 7] = 2 # Max. number of iterative refinement steps (common for both Pardiso and IntelPardiso)</span>
+<span style='color:#017a31;'>    #iparm[27] = 1 # in Pardiso it means:      use METIS parallel reordering</span>
+<span style='color:#017a31;'>                   # in IntelPardiso it means: use single precision (do not change it!)</span>
+<span style='color:#017a31;'>    # Set them back</span>
+<span style='color:#017a31;'>    lasolver.set_iparm(iparm)    </span>
+<span style='color:#017a31;'>    iparm = lasolver.get_iparm()</span>
+<span style='color:#017a31;'>    # Print the side by side comparison</span>
+<span style='color:#017a31;'>    print('iparm     default new')</span>
+<span style='color:#017a31;'>    for i in range(64):</span>
+<span style='color:#017a31;'>        print 'iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i])</span>
+<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
     
-    <span style='color:#898887;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0057ae;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#898887;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval = <span style='color:#b08000;'>10</span>
-    simulation.TimeHorizon = <span style='color:#b08000;'>1000</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>
 
-    <span style='color:#898887;'># Connect data reporter</span>
-    simName = simulation.m.Name + strftime(<span style='color:#bf0303;'>&quot; [</span><span style='color:#3daee9;'>%d</span><span style='color:#bf0303;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#bf0303;'>&quot;&quot;</span>, simName) == <span style='color:#0057ae;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#898887;'># Initialize the simulation</span>
+    <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
     
-    <span style='color:#898887;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + <span style='color:#bf0303;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#898887;'># Solve at time=0 (initialization)</span>
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 
-    <span style='color:#898887;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
 
-<b>if</b> <span style='color:#0057ae;'>__name__</span> == <span style='color:#bf0303;'>&quot;__main__&quot;</span>:
-    <b>if</b> <b><span style='color:#644a9b;'>len</span></b>(sys.argv) &gt; <span style='color:#b08000;'>1</span> <b>and</b> (sys.argv[<span style='color:#b08000;'>1</span>] == <span style='color:#bf0303;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app = daeCreateQtApplication(sys.argv)
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
         guiRun(app)
 </pre>
 </body>
