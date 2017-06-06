@@ -152,7 +152,7 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
     {
         m_pLog->Message(string("***********************************************************************"), 0);
         m_pLog->Message(string("                                 Version:   ") + daeVersion(true),         0);
-        m_pLog->Message(string("                                 Copyright: Dragan Nikolic, 2016       "), 0);
+        m_pLog->Message(string("                                 Copyright: Dragan Nikolic, 2017       "), 0);
         m_pLog->Message(string("                                 Homepage:  http://www.daetools.com    "), 0);
         m_pLog->Message(string("       @                       @                                       "), 0);
         m_pLog->Message(string("       @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@    "), 0);

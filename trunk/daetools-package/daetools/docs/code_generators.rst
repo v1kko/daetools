@@ -58,7 +58,7 @@ C99
     :members:
     :undoc-members:
 
-C++_MPI
+C++ MPI
 =======
 .. py:module:: daetools.code_generators.cxx_mpi
 

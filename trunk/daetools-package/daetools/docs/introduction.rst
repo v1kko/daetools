@@ -22,7 +22,7 @@ libraries but rather a higher level structure – an architectural design of int
 software components providing an API for:
    
 * Model development/specification
-* Activities on developed models, such as simulation, optimisation, and parameter estimation
+* Activities on developed models, such as simulation, sensitivity analysis, optimisation and parameter estimation
 * Processing of the results, such as plotting and exporting to various file formats
 * Report generation
 * Code generation, co-simulation and model exchange
@@ -40,13 +40,10 @@ The following class of problems can be solved by **DAE Tools**:
 Type of activities that can be performed on models developed in **DAE Tools**:
 
 * Simulation (steady-state or dynamic, with simple or complex schedules)
-
+* Sensitivity analysis
 * Optimisation (NLP and MINLP problems)
-
 * Parameter estimation
-
 * Generation of model reports (in XML + MathML format with XSL transformations for XHTML code generation)
-
 * Code generation for other modelling or general-purpose programming languages
 
   * `Modelica <http://www.modelica.org>`_

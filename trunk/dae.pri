@@ -261,8 +261,7 @@ unix::QMAKE_CXXFLAGS_RELEASE += -O3
 win32-g++-*::QMAKE_CXXFLAGS += -fno-var-tracking-assignments
 
 # Use SSE for x86 32 bit machines (not used by default)
-# When building for Mac-OS we build for all architectures and SSE flags should go away
-#QMAKE_CXXFLAGS_RELEASE += -mfpmath=sse -msse -msse2 -msse3
+#linux-g++::QMAKE_CXXFLAGS_RELEASE += -march=pentium4 -mfpmath=sse -msse -msse2
 
 ####################################################################################
 # Creating .vcproj under windows:

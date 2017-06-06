@@ -16,10 +16,7 @@ Compiling only specified projects:
     sh compile.sh trilinos superlu nlopt
 
 Achtung, Achtung!!
-On MACOS gcc does not work well. llvm-gcc and llvm-g++ should be used.
-Add the "llvm-gcc" compiler to the PATH variable if necessary. For instance:
-    export PATH=/Developer/usr/bin:$PATH
-Make sure there are: QMAKE_CC = llvm-gcc and QMAKE_CXX = llvm-g++ defined in dae.pri
+On MACOS gcc should be used (the XCode does not provide OpenMP).
 getopt command might be missing - that line should be commented out.
 
 OPTIONS:
@@ -177,6 +174,7 @@ if [ ${PLATFORM} = "Darwin" ]; then
   export F77=/usr/local/bin/gfortran
 elif [ ${PLATFORM} = "Linux" ]; then
   Ncpu=`cat /proc/cpuinfo | grep processor | wc -l`
+  QMAKE="/usr/bin/qmake"
   QMAKE_SPEC=linux-g++
 elif [ ${PLATFORM} = "Windows" ]; then
   Ncpu=4

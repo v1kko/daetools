@@ -33,6 +33,54 @@ the Qin variable represents a degree of freedom (DOF). Its value will be fixed
 at the beginning of the simulation and later manipulated in the user-defined
 schedule in the overloaded function daeSimulation.Run().
 
+The default daeSimulation.Run() function (re-implemented in Python) is:
+    
+.. code-block:: python
+
+    def Run(self):
+        # Python implementation of daeSimulation::Run() C++ function.
+        
+        import math
+        while self.CurrentTime < self.TimeHorizon:
+            # Get the time step (based on the TimeHorizon and the ReportingInterval).
+            # Do not allow to get past the TimeHorizon.
+            t = self.NextReportingTime
+            if t > self.TimeHorizon:
+                t = self.TimeHorizon
+
+            # If the flag is set - a user tries to pause the simulation, therefore return.
+            if self.ActivityAction == ePauseActivity:
+                self.Log.Message("Activity paused by the user", 0)
+                return
+
+            # If a discontinuity is found, loop until the end of the integration period.
+            # The data will be reported around discontinuities!
+            while t > self.CurrentTime:
+                self.Log.Message("Integrating from [%f] to [%f] ..." % (self.CurrentTime, t), 0)
+                self.IntegrateUntilTime(t, eStopAtModelDiscontinuity, True)
+            
+            # After the integration period, report the data. 
+            self.ReportData(self.CurrentTime)
+            
+            # Set the simulation progress.
+            newProgress = math.ceil(100.0 * self.CurrentTime / self.TimeHorizon)
+            if newProgress > self.Log.Progress:
+                self.Log.Progress = newProgress
+                
+In this example the following schedule is specified:
+
+1. Run the simulation for 100s using the daeSimulation.IntegrateForTimeInterval() function
+   and report the data using the daeSimulation.ReportData() function.
+
+2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions
+   the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.
+   Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s
+   and report the data.
+
+3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K
+   re-initialise the system, run the simulation until the TimeHorizon is reached using the function
+   daeSimulation.Integrate() and report the data.
+
 The plot of the inlet power:
 
 .. image:: _static/tutorial7-results.png

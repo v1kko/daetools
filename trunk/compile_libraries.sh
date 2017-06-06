@@ -18,10 +18,7 @@ Compiling only specified libraries:
     sh $0 superlu bonmin trilinos
 
 Achtung, Achtung!!
-On MACOS gcc does not work well. llvm-gcc and llvm-g++ should be used.
-Add the "llvm-gcc" compiler to the PATH variable if necessary. For instance:
-    export PATH=/Developer/usr/bin:$PATH
-Make sure there are: QMAKE_CC = llvm-gcc and QMAKE_CXX = llvm-g++ defined in dae.pri
+On MACOS gcc should be used (the XCode does not provide OpenMP).
 getopt command might be missing - that line should be commented out.
 
 OPTIONS:
@@ -44,7 +41,7 @@ OPTIONS:
 LIBRARY:
     all    All libraries and solvers.
            On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt trilinos deal.ii
-           On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt trilinos deal.ii
+           On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt coolprop trilinos deal.ii 
 
     Individual libraries/solvers:
     boost            Boost libraries (system, filesystem, thread, python)
@@ -296,12 +293,12 @@ if [ ${PLATFORM} = "Darwin" ]; then
 
 elif [ ${PLATFORM} = "Linux" ]; then
   if [ ${HOST_ARCH} != "x86_64" ]; then
-    DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -mfpmath=sse"
-    SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
-    for SSE_TAG in ${SSE_TAGS}
-    do
-      DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -m${SSE_TAG}"
-    done
+    DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -march=pentium4 -mfpmath=sse -msse -msse2"
+    #SSE_TAGS=`grep -m 1 flags /proc/cpuinfo | grep -o 'sse\|sse2\|sse3\|ssse3\|sse4a\|sse4.1\|sse4.2\|sse5'`
+    #for SSE_TAG in ${SSE_TAGS}
+    #do
+    #  DAE_COMPILER_FLAGS="${DAE_COMPILER_FLAGS} -m${SSE_TAG}"
+    #done
   fi
 fi
 
@@ -1749,6 +1746,7 @@ do
                           configure_mumps
                           configure_idas
                           configure_superlu
+                          configure_coolprop
                           configure_trilinos
                           configure_nlopt
                           configure_dealii
@@ -1759,6 +1757,7 @@ do
                           configure_idas
                           configure_superlu
                           configure_superlu_mt
+                          configure_coolprop
                           configure_trilinos
                           configure_bonmin
                           configure_nlopt
@@ -1773,6 +1772,7 @@ do
                           compile_mumps
                           compile_idas
                           compile_superlu
+                          compile_coolprop
                           compile_trilinos
                           compile_nlopt
                           compile_dealii
@@ -1783,6 +1783,7 @@ do
                           compile_idas
                           compile_superlu
                           compile_superlu_mt
+                          compile_coolprop
                           compile_trilinos
                           compile_bonmin
                           compile_nlopt
@@ -1797,6 +1798,7 @@ do
                           clean_mumps
                           clean_idas
                           clean_superlu
+                          clean_coolprop
                           clean_trilinos
                           clean_nlopt
                           clean_dealii
@@ -1807,6 +1809,7 @@ do
                           clean_idas
                           clean_superlu
                           clean_superlu_mt
+                          clean_coolprop
                           clean_trilinos
                           clean_bonmin
                           clean_nlopt
