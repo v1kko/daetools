@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial22.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial22.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial illustrates the code verification method using the Method of Manufactured </span>
+<span style='color:#cc0000;'>Solutions:</span>
+
+<span style='color:#cc0000;'>Reference: G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.</span>
+<span style='color:#cc0000;'>`PDF link &lt;http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf&gt;`_</span>
+
+<span style='color:#cc0000;'>The procedure for the sample problem:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
+
+<span style='color:#cc0000;'>   L(u) = d2u/dx2 = 0</span>
+
+<span style='color:#cc0000;'>is the following:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>1. Pick a function (q, the analytical solution): </span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>   .. code-block:: none</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>      q = 1 - x**2</span>
+
+<span style='color:#cc0000;'>2. Compute the new source term (g) for the original problem:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>   .. code-block:: none</span>
+<span style='color:#cc0000;'>      </span>
+<span style='color:#cc0000;'>      g = d2q/dx2</span>
+
+<span style='color:#cc0000;'>3. Solve the original problem with the new source term:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>   .. code-block:: none</span>
+
+<span style='color:#cc0000;'>      d2u/dx2 = g</span>
+
+<span style='color:#cc0000;'>Since L(u) = g and g = L(q), consequently we have: u = q.</span>
+<span style='color:#cc0000;'>Therefore, the computed numerical solution (f) should be equal to the analytical one (q).</span>
+
+<span style='color:#cc0000;'>The terms in the source g term are:</span>
+
+<span style='color:#cc0000;'>.. code-block:: none</span>
+
+<span style='color:#cc0000;'>   dq/dx   = -2x</span>
+<span style='color:#cc0000;'>   d2q/dx2 = -2</span>
+
+<span style='color:#cc0000;'>The model in this example is very similar to the model used in the tutorial 2.</span>
+
+<span style='color:#cc0000;'>The solution plot (t = 1.0 s):</span>
+
+<span style='color:#cc0000;'>.. image:: _static/tutorial22-results.png</span>
+<span style='color:#cc0000;'>   :width: 500px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> sys, numpy
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+
+no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;no_t&quot;</span>, dimless, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1.0e+20</span>, <span style='color:#cc047c;'>1.0e+20</span>, <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1e-6</span>)
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#3605fb;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X axis domain&quot;</span>)
+
+        <span style='color:#3605fb;'>self</span>.u <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;u&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
+        <span style='color:#3605fb;'>self</span>.q <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;q&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+
+        <span style='color:#017a31;'># Create some auxiliary functions to make equations more readable </span>
+        u       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#3605fb;'>self</span>.u(x)
+        d2u_dx2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: d2(<span style='color:#3605fb;'>self</span>.u(x), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+        q       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> x()<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>
+        d2q_dx2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>
+        g       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: d2q_dx2(x)
+
+        <span style='color:#017a31;'># Numerical solution</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;f&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d2u_dx2(x) <b><span style='color:#0000ff;'>-</span></b> g(x)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+        <span style='color:#017a31;'># BC at x = 0</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(0)&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>BC at x <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eLowerBound)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>
+
+        <span style='color:#017a31;'># BC at x = 1</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(1)&quot;</span>, <span style='color:#cc0000;'>&quot;BC at x = 01&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0</span>
+
+        <span style='color:#017a31;'># Analytical solution</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;q&quot;</span>, <span style='color:#cc0000;'>&quot;Analytical solution&quot;</span>)
+        x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eClosedClosed)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.q(x) <b><span style='color:#0000ff;'>-</span></b> q(x)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial22&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>50</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>)
+        
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <b>pass</b>
+                
+<span style='color:#017a31;'># Use daeSimulator class</span>
+<b>def</b> guiRun(app):
+    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
+    simulator.exec_()
+
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
+<b>def</b> consoleRun():
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
+        sys.exit()
+
+    <span style='color:#017a31;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
+
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#017a31;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
+        consoleRun()
+    <b>else</b>:
+        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
+        guiRun(app)
+</pre>
+</body>
+</html>

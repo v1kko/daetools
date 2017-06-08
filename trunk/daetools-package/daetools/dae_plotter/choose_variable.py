@@ -73,9 +73,10 @@ class daeChooseVariable(QtWidgets.QDialog):
                     break
             if not found:
                 self.addProcess(pnew)
-        self.processes = processes
 
-    def addProcess(self, process):
+        self.processes = processes
+       
+    def addProcess(self, process):      
         rootItem = QtWidgets.QTreeWidgetItem(self.ui.treeWidget)
         rootItem.setText(0, process.Name)
 
@@ -110,7 +111,7 @@ class daeChooseVariable(QtWidgets.QDialog):
                     currentItem = QtWidgets.QTreeWidgetItem(currentItem)
                     currentItem.setText(0, name)
 
-            # Now we have the parrent in the currentItem, so add the new item to it with the variable data
+            # Now we have the parent in the currentItem, so add the new item to it with the variable data
             varItem = QtWidgets.QTreeWidgetItem(currentItem)
             #varData = QtCore.QVariant(var)
             varItem.setText(0, var_name)

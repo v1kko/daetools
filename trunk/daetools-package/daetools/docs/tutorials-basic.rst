@@ -95,6 +95,16 @@ Basic Tutorials
 :ref:`tutorial21`         |t_21|
 =======================   =================================================================
 
+.. rubric:: Code verification
+
+=======================   =================================================================
+:ref:`tutorial21`         |t_21|
+:ref:`tutorial22`         |t_22|
+:ref:`tutorial23`         |t_23|
+:ref:`tutorial24`         |t_24|
+:ref:`tutorial25`         |t_25|
+=======================   =================================================================
+
 
 .. |witt| replace:: Importing DAE Tools pyDAE module(s), units and variable types
                     developing models, setting up a simulation, declaring auxiliary
@@ -146,10 +156,20 @@ Basic Tutorials
 
 .. |t_19| replace:: Using thermophysical property packages in DAE Tools.
 
-.. |t_20| replace:: Using the sensitivity analysis in DAE Tools.
+.. |t_20|  replace:: Using the sensitivity analysis in DAE Tools.
 
 .. |t_21| replace:: Benchmark for the first order differential equations with constant coefficients.
 
+.. |t_22| replace:: Code verification method using the Method of Manufactured Solutions (Laplace equation).
+
+.. |t_23| replace:: Code verification method using the Method of Manufactured Solutions
+                    (transient diffusion equation).
+
+.. |t_24| replace:: Code verification method using the Method of Manufactured Solutions
+                    (transient convection-diffusion equation).
+
+.. |t_25| replace:: Code verification method using the Method of Manufactured Solutions
+                    (transient conduction equation using the Finite Elements method with deal.II library).
 
 .. begin-command
 
@@ -545,6 +565,78 @@ Tutorial 21
 Model report            `tutorial21.xml <../examples/tutorial21.xml>`_
 Runtime model report    `tutorial21-rt.xml <../examples/tutorial21-rt.xml>`_
 Source code             `tutorial21.py <../examples/tutorial21.html>`_
+=====================   =================================================================
+
+
+.. _tutorial22:
+
+Tutorial 22
+===========
+
+.. automodule:: daetools.examples.tutorial22
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial22.xml <../examples/tutorial22.xml>`_
+Runtime model report    `tutorial22-rt.xml <../examples/tutorial22-rt.xml>`_
+Source code             `tutorial22.py <../examples/tutorial22.html>`_
+=====================   =================================================================
+
+
+.. _tutorial23:
+
+Tutorial 23
+===========
+
+.. automodule:: daetools.examples.tutorial23
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial23.xml <../examples/tutorial23.xml>`_
+Runtime model report    `tutorial23-rt.xml <../examples/tutorial23-rt.xml>`_
+Source code             `tutorial23.py <../examples/tutorial23.html>`_
+=====================   =================================================================
+
+
+.. _tutorial24:
+
+Tutorial 24
+===========
+
+.. automodule:: daetools.examples.tutorial24
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial24.xml <../examples/tutorial24.xml>`_
+Runtime model report    `tutorial24-rt.xml <../examples/tutorial24-rt.xml>`_
+Source code             `tutorial24.py <../examples/tutorial24.html>`_
+=====================   =================================================================
+
+
+.. _tutorial25:
+
+Tutorial 25
+===========
+
+.. automodule:: daetools.examples.tutorial25
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial25.xml <../examples/tutorial25.xml>`_
+Runtime model report    `tutorial25-rt.xml <../examples/tutorial25-rt.xml>`_
+Source code             `tutorial25.py <../examples/tutorial25.html>`_
 =====================   =================================================================
 
 

@@ -734,6 +734,9 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_<Quadrature<3>, boost::noncopyable>("Quadrature_3D", no_init)
     ;
 
+    class_<QGauss<0>, bases< Quadrature<0> >, boost::noncopyable>("QGauss_0D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
     class_<QGauss<1>, bases< Quadrature<1> >, boost::noncopyable>("QGauss_1D", no_init)
         .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
     ;
@@ -744,6 +747,9 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
     ;
 
+    class_<QGaussLobatto<0>, bases< Quadrature<0> >, boost::noncopyable>("QGaussLobatto_0D", no_init)
+        .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
+    ;
     class_<QGaussLobatto<1>, bases< Quadrature<1> >, boost::noncopyable>("QGaussLobatto_1D", no_init)
         .def(init<const unsigned int>((arg("self"), arg("n_quadrature_points"))))
     ;

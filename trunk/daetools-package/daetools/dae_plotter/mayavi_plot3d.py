@@ -35,13 +35,12 @@ def animateVTKFiles(figure, vtkSource, vtkFiles):
         yield
 
 class daeMayavi3DPlot:
-    def __init__(self, tcpipServer):
-        self.tcpipServer = tcpipServer
-        self._cv_dlg     = None
+    def __init__(self, plotter):
+        self.plotter = plotter
+        self._cv_dlg = None
                 
     def newSurface(self):
-        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
-        processes.sort(key=lambda process: process.Name)
+        processes = self.plotter.getProcesses()
 
         if not self._cv_dlg:
             self._cv_dlg = daeChooseVariable(daeChooseVariable.plot3D)

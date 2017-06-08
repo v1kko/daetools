@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'animation_params.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_AnimationParameters(object):
     def setupUi(self, AnimationParameters):
         AnimationParameters.setObjectName("AnimationParameters")
-        AnimationParameters.resize(370, 238)
+        AnimationParameters.resize(394, 238)
         AnimationParameters.setSizeGripEnabled(True)
         AnimationParameters.setModal(True)
         self.verticalLayout = QtWidgets.QVBoxLayout(AnimationParameters)
@@ -42,9 +42,11 @@ class Ui_AnimationParameters(object):
         self.comboXmin.addItem("")
         self.comboXmin.addItem("")
         self.comboXmin.addItem("")
+        self.comboXmin.addItem("")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.comboXmin)
         self.comboXmax = QtWidgets.QComboBox(AnimationParameters)
         self.comboXmax.setObjectName("comboXmax")
+        self.comboXmax.addItem("")
         self.comboXmax.addItem("")
         self.comboXmax.addItem("")
         self.comboXmax.addItem("")
@@ -54,9 +56,11 @@ class Ui_AnimationParameters(object):
         self.comboYmin.addItem("")
         self.comboYmin.addItem("")
         self.comboYmin.addItem("")
+        self.comboYmin.addItem("")
         self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.comboYmin)
         self.comboYmax = QtWidgets.QComboBox(AnimationParameters)
         self.comboYmax.setObjectName("comboYmax")
+        self.comboYmax.addItem("")
         self.comboYmax.addItem("")
         self.comboYmax.addItem("")
         self.comboYmax.addItem("")
@@ -86,14 +90,18 @@ class Ui_AnimationParameters(object):
         self.comboXmin.setItemText(0, _translate("AnimationParameters", "From 1st frame"))
         self.comboXmin.setItemText(1, _translate("AnimationParameters", "Overall x minimum value"))
         self.comboXmin.setItemText(2, _translate("AnimationParameters", "Adaptive"))
+        self.comboXmin.setItemText(3, _translate("AnimationParameters", "Do not change"))
         self.comboXmax.setItemText(0, _translate("AnimationParameters", "From 1st frame"))
         self.comboXmax.setItemText(1, _translate("AnimationParameters", "Overall x maximum value"))
         self.comboXmax.setItemText(2, _translate("AnimationParameters", "Adaptive"))
+        self.comboXmax.setItemText(3, _translate("AnimationParameters", "Do not change"))
         self.comboYmin.setItemText(0, _translate("AnimationParameters", "From 1st frame"))
         self.comboYmin.setItemText(1, _translate("AnimationParameters", "Overall y minimum value"))
         self.comboYmin.setItemText(2, _translate("AnimationParameters", "Adaptive"))
+        self.comboYmin.setItemText(3, _translate("AnimationParameters", "Do not change"))
         self.comboYmax.setItemText(0, _translate("AnimationParameters", "From 1st frame"))
         self.comboYmax.setItemText(1, _translate("AnimationParameters", "Overall y maximum value"))
         self.comboYmax.setItemText(2, _translate("AnimationParameters", "Adaptive"))
+        self.comboYmax.setItemText(3, _translate("AnimationParameters", "Do not change"))
         self.label.setText(_translate("AnimationParameters", "y max"))
 

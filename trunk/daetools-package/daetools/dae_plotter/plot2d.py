@@ -95,11 +95,11 @@ class dae2DPlot(QtWidgets.QDialog):
                     daePlot2dDefaults('k',     0.5, 'dotted', 'd', 6, 'k',     'black'),
                     daePlot2dDefaults('y',     0.5, 'dotted', 'x', 6, 'y',     'black') ]
 
-    def __init__(self, parent, tcpipServer, updateInterval = 0, animated = False):
+    def __init__(self, parent, updateInterval = 0, animated = False):
         QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.Window)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        self.tcpipServer = tcpipServer
+        self.plotter = parent
 
         self.legendOn = True
         self.gridOn   = True
@@ -254,7 +254,7 @@ class dae2DPlot(QtWidgets.QDialog):
             self._timer = QtCore.QTimer()
             self._timer.timeout.connect(self.updateCurves)
             self._timer.start(self.updateInterval)
-
+        
     def closeEvent(self, event):
         #print("dae2DPlot.closeEvent")
         if self.funcAnimation:
@@ -289,7 +289,7 @@ class dae2DPlot(QtWidgets.QDialog):
                     t = 'Time = {0} s'.format(currentTime)
                     self.textTime.set_text(t)
 
-            self.reformatPlot()
+            #self.reformatPlot()
 
         except Exception as e:
             print((str(e)))
@@ -347,12 +347,25 @@ class dae2DPlot(QtWidgets.QDialog):
     #@QtCore.pyqtSlot()
     def slotToggleLegend(self):
         self.legendOn = not self.legendOn
-        self.reformatPlot()
-
+        self.updateLegend()
+        
     #@QtCore.pyqtSlot()
     def slotToggleGrid(self):
         self.gridOn = not self.gridOn
-        self.reformatPlot()
+        self.updateGrid()
+        
+    def updateLegend(self):
+        if self.legendOn:
+            self.canvas.axes.legend(loc = 0, prop=self.fp9, numpoints = 1, fancybox=True)
+        else:
+            self.canvas.axes.legend_ = None
+        self.canvas.draw()
+        #self.reformatPlot()
+
+    def updateGrid(self):
+        self.canvas.axes.grid(self.gridOn)
+        self.canvas.draw()
+        #self.reformatPlot()
 
     #@QtCore.pyqtSlot()
     def slotExportCSV(self):
@@ -428,7 +441,9 @@ class dae2DPlot(QtWidgets.QDialog):
                 label = line.get_label()
                 if label == str(nameToRemove):
                     self.canvas.axes.lines.pop(i)
-                    self.reformatPlot()
+                    #self.reformatPlot()
+                    # updateLegend will also call canvas.draw()
+                    self.updateLegend()
                     return
 
     def newFromTemplate(self, template):
@@ -460,12 +475,12 @@ class dae2DPlot(QtWidgets.QDialog):
                'ymax_policy': int
            }
         """
-        if len(self.tcpipServer.DataReceivers) == 0:
-            return
-
         processes = {}
-        for dataReceiver in self.tcpipServer.DataReceivers:
-            processes[dataReceiver.Process.Name] = dataReceiver.Process
+        for process in self.plotter.getProcesses():
+            processes[process.Name] = process
+
+        if len(processes) == 0:
+            return
 
         if len(template) == 0:
             return False
@@ -592,36 +607,49 @@ class dae2DPlot(QtWidgets.QDialog):
         line.set_ydata(yData)
         time = times[frame]
 
-        if self.xmin_policy == 0: # From 1st frame
+        if self.xmin_policy == 0:   # From 1st frame
             xmin = numpy.min(xPoints)
         elif self.xmin_policy == 1: # Overall min value
             xmin = numpy.min(xPoints)
-        else: # Adaptive
+        elif self.xmin_policy == 2: # Adaptive
             xmin = numpy.min(xPoints)
+        else:                       # Do not change it
+            xmin = self.canvas.axes.get_xlim()[0]
 
-        if self.xmax_policy == 0: # From 1st frame
+        if self.xmax_policy == 0:   # From 1st frame
             xmax = numpy.max(xPoints)
+            dx = 0.5 * (xmax-xmin)*0.05
         elif self.xmax_policy == 1: # Overall max value
             xmax = numpy.max(xPoints)
-        else: # Adaptive
+            dx = 0.5 * (xmax-xmin)*0.05
+        elif self.xmax_policy == 2: # Adaptive
             xmax = numpy.max(xPoints)
+            dx = 0.5 * (xmax-xmin)*0.05
+        else:                       # Do not change it
+            xmax = self.canvas.axes.get_xlim()[1]
+            dx = 0.0
 
-        if self.ymin_policy == 0: # From 1st frame
+        if self.ymin_policy == 0:   # From 1st frame
             ymin = numpy.min(yPoints[0])
         elif self.ymin_policy == 1: # Overall min value
             ymin = numpy.min(yPoints)
-        else: # Adaptive
+        elif self.ymin_policy == 2: # Adaptive
             ymin = numpy.min(yPoints[frame])
+        else:                       # Do not change it
+            ymin = self.canvas.axes.get_ylim()[0]
 
-        if self.ymax_policy == 0: # From 1st frame
+        if self.ymax_policy == 0:   # From 1st frame
             ymax = numpy.max(yPoints[0])
+            dy = 0.5 * (ymax-ymin)*0.05
         elif self.ymax_policy == 1: # Overall max value
             ymax = numpy.max(yPoints)
-        else: # Adaptive
+            dy = 0.5 * (ymax-ymin)*0.05
+        elif self.ymax_policy == 2: # Adaptive
             ymax = numpy.max(yPoints[frame])
-
-        dx = 0.5 * (xmax-xmin)*0.05
-        dy = 0.5 * (ymax-ymin)*0.05
+            dy = 0.5 * (ymax-ymin)*0.05
+        else:                       # Do not change it
+            ymax = self.canvas.axes.get_ylim()[1]
+            dy = 0.0
 
         self.canvas.axes.set_xlim(xmin-dx, xmax+dx)
         self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
@@ -769,8 +797,7 @@ class dae2DPlot(QtWidgets.QDialog):
 
     #@QtCore.pyqtSlot()
     def newCurve(self):
-        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
-        processes.sort(key=lambda process: process.Name)
+        processes = self.plotter.getProcesses()
         
         if not self._cv_dlg:
             self._cv_dlg = daeChooseVariable(self.plotType)
@@ -786,8 +813,7 @@ class dae2DPlot(QtWidgets.QDialog):
 
     #@QtCore.pyqtSlot()
     def newAnimatedCurve(self):
-        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
-        processes.sort(key=lambda process: process.Name)
+        processes = self.plotter.getProcesses()
 
         if not self._cv_dlg:
             self._cv_dlg = daeChooseVariable(self.plotType)
@@ -857,15 +883,20 @@ class dae2DPlot(QtWidgets.QDialog):
                                       linestyle=pd.linestyle, marker=pd.marker, markersize=pd.markersize, \
                                       markerfacecolor=pd.markerfacecolor, markeredgecolor=pd.markeredgecolor)
 
-        if no_lines == 0: # why this?
+        if no_lines == 0: 
+            # Set labels, fonts, gridlines and limits only when adding the first line
             self.canvas.axes.set_xlabel(xAxisLabel, fontproperties=self.fp12)
             self.canvas.axes.set_ylabel(yAxisLabel, fontproperties=self.fp12)
             t = self.canvas.axes.xaxis.get_offset_text()
             t.set_fontproperties(self.fp10)
             t = self.canvas.axes.yaxis.get_offset_text()
             t.set_fontproperties(self.fp10)
-
+            self.updateGrid()
+            
+        # Update the legend and (x,y) limits after every addition
+        self.updateLegend()
         self.reformatPlot()
+
         return line
 
     def reformatPlot(self):
@@ -895,12 +926,12 @@ class dae2DPlot(QtWidgets.QDialog):
         self.canvas.axes.set_xlim(xmin, xmax)
         self.canvas.axes.set_ylim(ymin, ymax)
 
-        self.canvas.axes.grid(self.gridOn)
+        #self.canvas.axes.grid(self.gridOn)
 
-        if self.legendOn:
-            self.canvas.axes.legend(loc = 0, prop=self.fp9, numpoints = 1, fancybox=True)
-        else:
-            self.canvas.axes.legend_ = None
+        #if self.legendOn:
+        #    self.canvas.axes.legend(loc = 0, prop=self.fp9, numpoints = 1, fancybox=True)
+        #else:
+        #    self.canvas.axes.legend_ = None
 
         self.figure.tight_layout()
         self.canvas.draw()

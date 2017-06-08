@@ -21,6 +21,7 @@ from .custom_plots import daeCustomPlots
 from .about import daeAboutDialog
 from .plot2d import dae2DPlot
 from .user_data import daeUserData
+from .data_receiver_io import pickleProcess, unpickleProcess
 
 python_major = sys.version_info[0]
 python_minor = sys.version_info[1]
@@ -37,6 +38,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
 
         self.tcpipServer = tcpipServer
+        self.loadedProcesses = []
 
         self.move(0, 0)
         self.resize(400, 200)
@@ -47,6 +49,16 @@ class daeMainWindow(QtWidgets.QMainWindow):
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
         exit.triggered.connect(self.close)
+
+        saveProcess = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'filesave.png')), 'Save simulation data...', self)
+        saveProcess.setShortcut('Ctrl+S')
+        saveProcess.setStatusTip('Save simulation data to a file')
+        saveProcess.triggered.connect(self.slotSaveProcess)
+
+        openProcess = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'fileopen.png')), 'Open simulation data...', self)
+        openProcess.setShortcut('Ctrl+O')
+        openProcess.setStatusTip('Open simulation data from a file')
+        openProcess.triggered.connect(self.slotOpenProcess)
 
         plot2D = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'add-2d.png')), 'New 2D plot...', self)
         plot2D.setShortcut('Ctrl+2')
@@ -115,6 +127,9 @@ class daeMainWindow(QtWidgets.QMainWindow):
 
         menubar = self.menuBar()
         file = menubar.addMenu('&File')
+        file.addAction(openProcess)
+        file.addAction(saveProcess)
+        file.addSeparator()
         file.addAction(exit)
 
         plot = menubar.addMenu('&Plot')
@@ -146,11 +161,51 @@ class daeMainWindow(QtWidgets.QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(plotVTK_2D)
 
+    def getProcesses(self):
+        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
+        processes.extend(self.loadedProcesses)
+        processes.sort(key=lambda process: process.Name)
+        return processes
+        
+    #@QtCore.pyqtSlot()
+    def slotOpenProcess(self):
+        filename, ok = QtWidgets.QFileDialog.getOpenFileName(self, "Choose simulation data file", '', "DAE Tools Simulation Files (*.simulation);;All Files (*.*)")
+        if not ok:
+            return
+        
+        try:
+            process = unpickleProcess(str(filename))
+            self.loadedProcesses.append(process)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "daePlotter", "Cannot open simulation data file.\nError: " + str(e))
+        
+    #@QtCore.pyqtSlot()
+    def slotSaveProcess(self):
+        processes = {}
+        for process in self.getProcesses():
+            processes[process.Name] = process
+        
+        if not processes:
+            return
+        
+        process_name, ok = QtWidgets.QInputDialog.getItem(self, "Save simulation data", "Choose the simulation:", processes.keys(), 0, False)
+        if not ok:
+            return
+
+        filename, ok = QtWidgets.QFileDialog.getSaveFileName(self, "Choose simulation data file", '%s.simulation' % process_name, "DAE Tools Simulation Files (*.simulation);;All Files (*.*)")
+        if not ok:
+            return
+        
+        try:
+            process = processes[str(process_name)]
+            pickleProcess(process, str(filename))
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "daePlotter", "Cannot open simulation data file.\nError: " + str(e))
+
     #@QtCore.pyqtSlot()
     def slotCustomPlots(self):
-        processes = [dataReceiver.Process for dataReceiver in self.tcpipServer.DataReceivers]
-        processes.sort(key=lambda process: process.Name)
-
+        processes = self.getProcesses()
+        
         dlg = daeCustomPlots()
         if dlg.exec_() != QtWidgets.QDialog.Accepted:
             return
@@ -164,7 +219,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
         if dlg.exec_() != QtWidgets.QDialog.Accepted:
             return
 
-        plot2D = dae2DPlot(self, self.tcpipServer, 0.0)
+        plot2D = dae2DPlot(self, 0.0)
 
         if plot2D.newCurveFromUserData(dlg.xLabel, dlg.yLabel, dlg.lineLabel, dlg.xPoints, dlg.yPoints) == False:
             plot2D.close()
@@ -184,7 +239,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
             self.plot2D(msecs) # 1000 ms
 
     def plot2D(self, updateInterval = 0):
-        plot2D = dae2DPlot(self, self.tcpipServer, updateInterval)
+        plot2D = dae2DPlot(self, updateInterval)
         if plot2D.newCurve() == False:
             plot2D.close()
             del plot2D
@@ -193,7 +248,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
         plot2D.show()
 
     def plot2DAnimated(self):
-        plot2D = dae2DPlot(self, self.tcpipServer, 100, True) # 100 is some default, just to mark as animated plot
+        plot2D = dae2DPlot(self, 100, True) # 100 is some default, just to mark as animated plot
         if plot2D.newAnimatedCurve() == False:
             plot2D.close()
             del plot2D
@@ -209,7 +264,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "daePlotter", "Cannot load mayavi_plot3d module.\nDid you forget to install Mayavi2?\nError: " + str(e))
             return
 
-        plot3D = daeMayavi3DPlot(self.tcpipServer)
+        plot3D = daeMayavi3DPlot(self)
         if plot3D.newSurface() == False:
             del plot3D
 
@@ -221,7 +276,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(None, "daePlotter", "Cannot load mpl_plot3d module.\nError: " + str(e))
             return
 
-        plot3D = dae3DPlot(self, self.tcpipServer, updateInterval)
+        plot3D = dae3DPlot(self, updateInterval)
         if plot3D.newSurface() == False:
             del plot3D
             return
@@ -288,9 +343,9 @@ class daeMainWindow(QtWidgets.QMainWindow):
             updateInterval = float(template['updateInterval'])
 
             if plotType == daeChooseVariable.plot2D or plotType == daeChooseVariable.plot2DAutoUpdated:
-                plot2D = dae2DPlot(self, self.tcpipServer, updateInterval, False)
+                plot2D = dae2DPlot(self, updateInterval, False)
             elif plotType == daeChooseVariable.plot2DAnimated:
-                plot2D = dae2DPlot(self, self.tcpipServer, updateInterval, True)
+                plot2D = dae2DPlot(self, updateInterval, True)
             else:
                 raise RuntimeError('Invalid plot type')
 
