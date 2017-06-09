@@ -24,7 +24,10 @@ References:
 
 1. G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.
    `PDF link <http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf>`_
-2. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.
+2. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. 
+   SAND2000 – 1444 (2000).
+   `doi:10.2172/759450 <https://doi.org/10.2172/759450>`_
+3. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.
    `ISBN-10:0913478121 <http://www.isbnsearch.org/isbn/0913478121>`_
 
 The procedure for the *transient convection-diffusion equation*:
@@ -111,8 +114,18 @@ class modTutorial(daeModel):
 
         # Numerical solution
         eq = self.CreateEquation("f", "Numerical solution")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
         eq.Residual = df_dt(x) + f(x) * df_dx(x) - D * d2f_dx2(x) - g(x)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("f(0)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eLowerBound)
+        eq.Residual = f(x) - q(x)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("f(2pi)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eUpperBound)
+        eq.Residual = f(x) - q(x)
         eq.CheckUnitsConsistency = False
 
         # Analytical solution
@@ -122,37 +135,29 @@ class modTutorial(daeModel):
         eq.CheckUnitsConsistency = False
 
 class simTutorial(daeSimulation):
-    def __init__(self):
+    def __init__(self, Nx):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial24")
         self.m.Description = __doc__
+        
+        self.Nx = Nx
 
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(60, 0, 2*numpy.pi)
+        self.m.x.CreateStructuredGrid(self.Nx, 0, 2*numpy.pi)
         
     def SetUpVariables(self):
         Nx = self.m.x.NumberOfPoints
         xp = self.m.x.Points
-        for x in range(0, Nx):
+        for x in range(1, Nx-1):
             self.m.f.SetInitialCondition(x, self.m.A + numpy.sin(xp[x]))
                 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportTimeDerivatives = True
-    sim.ReportingInterval = 0.05
-    sim.TimeHorizon       = 1
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
 # Setup everything manually and run in a console
-def consoleRun():
+def run(Nx):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simTutorial(Nx)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -166,8 +171,16 @@ def consoleRun():
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+
+    # 1. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
         sys.exit()
+
+    # 2. Data
+    dr = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr)
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
@@ -182,10 +195,39 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
+    
+    ###########################################
+    #  Data                                   #
+    ###########################################
+    results = dr.Process.dictVariables
+    fvar = results[simulation.m.Name + '.f']
+    qvar = results[simulation.m.Name + '.q']
+    times = fvar.TimeValues
+    q = qvar.Values[-1, :] # 2D array [t,x]
+    f = fvar.Values[-1, :] # 2D array [t,x]
+    #print(times,f,q)
+    
+    return times,f,q
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    Nx1 = 60
+    Nx2 = 120
+    L = 2*numpy.pi
+    h1 = L / Nx1
+    h2 = L / Nx2
+    times1, f1, q1 = run(Nx1)
+    times2, f2, q2 = run(Nx2)
+    
+    # The normalized global errors
+    E1 = numpy.sqrt((1.0/Nx1) * numpy.sum((f1-q1)**2))
+    E2 = numpy.sqrt((1.0/Nx2) * numpy.sum((f2-q2)**2))
+
+    # Order of accuracy
+    p = numpy.log(E1/E2) / numpy.log(h1/h2)
+    C = E1 / h1**p
+    
+    print('\n\nOrder of Accuracy:')
+    print('||E(h)|| is proportional to: C * (h**p)')
+    print('||E(h1)|| = %e, ||E(h2)|| = %e' % (E1, E2))
+    print('C = %e' % C)
+    print('Order of accuracy (p) = %.2f' % p)

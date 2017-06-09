@@ -20,18 +20,23 @@ __doc__ = """
 This tutorial illustrates the code verification method using the Method of Manufactured 
 Solutions:
 
-Reference: G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.
-`PDF link <http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf>`_
+References: 
 
-The procedure for the sample problem:
+1. G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.
+   `PDF link <http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf>`_
+2. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. 
+   SAND2000 – 1444 (2000).
+   `doi:10.2172/759450 <https://doi.org/10.2172/759450>`_
+
+Consider a very simple problem (Laplace equation):
     
 .. code-block:: none
 
    L(u) = d2u/dx2 = 0
 
-is the following:
+The procedure is the following:
     
-1. Pick a function (q, the analytical solution): 
+1. Pick a function (q, an exact solution): 
     
    .. code-block:: none
     
@@ -59,9 +64,7 @@ The terms in the source g term are:
    dq/dx   = -2x
    d2q/dx2 = -2
 
-The model in this example is very similar to the model used in the tutorial 2.
-
-The solution plot (t = 1.0 s):
+The comparison plot (at t = 1.0 s):
 
 .. image:: _static/tutorial22-results.png
    :width: 500px
@@ -115,34 +118,26 @@ class modTutorial(daeModel):
         eq.CheckUnitsConsistency = False
 
 class simTutorial(daeSimulation):
-    def __init__(self):
+    def __init__(self, Nx):
         daeSimulation.__init__(self)
         self.m = modTutorial("tutorial22")
         self.m.Description = __doc__
-
+        
+        self.Nx = Nx
+        
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(50, 0, 1)
+        self.m.x.CreateStructuredGrid(self.Nx, 0, 1)
         
     def SetUpVariables(self):
         pass
                 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportTimeDerivatives = True
-    sim.ReportingInterval = 1
-    sim.TimeHorizon       = 1
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
 # Setup everything manually and run in a console
-def consoleRun():
+def run(Nx):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
+    datareporter = daeDelegateDataReporter()
+    simulation   = simTutorial(Nx)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -156,8 +151,16 @@ def consoleRun():
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
+
+    # 1. TCP/IP
+    tcpipDataReporter = daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    if not tcpipDataReporter.Connect("", simName):
         sys.exit()
+
+    # 2. Data
+    dr = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr)
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
@@ -172,10 +175,39 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
+    
+    ###########################################
+    #  Data                                   #
+    ###########################################
+    results = dr.Process.dictVariables
+    uvar = results[simulation.m.Name + '.u']
+    qvar = results[simulation.m.Name + '.q']
+    times = uvar.TimeValues
+    q = qvar.Values[-1, :] # 2D array [t,x]
+    u = uvar.Values[-1, :] # 2D array [t,x]
+    #print(times,u,q)
+    
+    return times,u,q
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    Nx1 = 30
+    Nx2 = 60
+    L = 1.0
+    h1 = L / Nx1
+    h2 = L / Nx2
+    times1, u1, q1 = run(Nx1)
+    times2, u2, q2 = run(Nx2)
+    
+    # The normalized global errors
+    E1 = numpy.sqrt((1.0/Nx1) * numpy.sum((u1-q1)**2))
+    E2 = numpy.sqrt((1.0/Nx2) * numpy.sum((u2-q2)**2))
+    
+    # Order of accuracy
+    p = numpy.log(E1/E2) / numpy.log(h1/h2)
+    C = E1 / h1**p
+    
+    print('\n\nOrder of Accuracy:')
+    print('||E(h)|| is proportional to: C * (h**p)')
+    print('||E(h1)|| = %e, ||E(h2)|| = %e' % (E1, E2))
+    print('C = %e' % C)
+    print('Order of accuracy (p) = %.2f' % p)

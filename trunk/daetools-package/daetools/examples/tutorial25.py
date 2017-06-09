@@ -130,7 +130,7 @@ class TemperatureSource_1D(adoubleFunction_1D):
         return [self.value(point, c) for c in range(self.n_components)]
 
 class modTutorial(daeModel):
-    def __init__(self, Name, Parent = None, Description = ""):
+    def __init__(self, Name, mesh, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
         dofs = [dealiiFiniteElementDOF_1D(name='T',
@@ -140,7 +140,7 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'bar(0,100)-20.msh')
+        mesh_file  = os.path.join(meshes_dir, mesh)
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_1D(meshFilename    = mesh_file,     # path to mesh
@@ -218,9 +218,9 @@ class modTutorial(daeModel):
         eq.CheckUnitsConsistency = False
 
 class simTutorial(daeSimulation):
-    def __init__(self):
+    def __init__(self, mesh):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial25")
+        self.m = modTutorial("tutorial25", mesh)
         self.m.Description = __doc__
         self.m.fe_model.Description = __doc__
 
@@ -232,12 +232,12 @@ class simTutorial(daeSimulation):
         setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 500.0)
 
 # Setup everything manually and run in a console
-def run():
+def run(mesh):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial()
+    simulation   = simTutorial(mesh)
 
     lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
@@ -283,26 +283,51 @@ def run():
     simulation.Run()
     simulation.Finalize()
     
+    ###########################################
+    #  Plots and data                         #
+    ###########################################
     results = dr.Process.dictVariables
     Tvar = results[simulation.m.Name + '.HeatConduction.T']
     uvar = results[simulation.m.Name + '.u']
     Nx = simulation.m.x.NumberOfPoints
     L  = simulation.m.L
     times = numpy.linspace(0, L, Nx)
-    T = Tvar.Values # 2D array [t,x]
-    u = uvar.Values # 2D array [t,x]
+    T = Tvar.Values[-1,:] # 2D array [t,x]
+    u = uvar.Values[-1,:] # 2D array [t,x]
     
     fontsize = 14
     fontsize_legend = 11
     plt.figure(1, facecolor='white')
-    plt.plot(times, T[-1,:], 'rs', label='T (FE)')
-    plt.plot(times, u[-1,:], 'b-', label='u (analytical)')
+    plt.plot(times, T, 'rs', label='T (FE)')
+    plt.plot(times, u, 'b-', label='u (analytical)')
     plt.xlabel('x, m', fontsize=fontsize)
     plt.ylabel('Temperature, K', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)
     plt.xlim((0, 100))
     plt.tight_layout()
     plt.show()
+   
+    return times,T,u
 
 if __name__ == "__main__":
-    run()
+    Nx1 = 5
+    Nx2 = 20
+    L = 100.0
+    h1 = L / Nx1
+    h2 = L / Nx2
+    times1, T1, u1 = run('bar(0,100)-5.msh')
+    times2, T2, u2 = run('bar(0,100)-20.msh')
+    
+    # The normalized global errors
+    E1 = numpy.sqrt((1.0/Nx1) * numpy.sum((T1-u1)**2))
+    E2 = numpy.sqrt((1.0/Nx2) * numpy.sum((T2-u2)**2))
+
+    # Order of accuracy
+    p = numpy.log(E1/E2) / numpy.log(h1/h2)
+    C = E1 / h1**p
+    
+    print('\n\nOrder of Accuracy:')
+    print('||E(h)|| is proportional to: C * (h**p)')
+    print('||E(h1)|| = %e, ||E(h2)|| = %e' % (E1, E2))
+    print('C = %e' % C)
+    print('Order of accuracy (p) = %.2f' % p)
