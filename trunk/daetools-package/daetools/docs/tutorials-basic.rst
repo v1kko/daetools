@@ -158,18 +158,20 @@ Basic Tutorials
 
 .. |t_20|  replace:: Using the sensitivity analysis in DAE Tools.
 
-.. |t_21| replace:: Benchmark for the first order differential equations with constant coefficients.
+.. |t_21| replace:: Code verification method using the Method of Exact Solutions 
+                    (sensitivity analysis; first order differential equations with constant coefficients).
 
-.. |t_22| replace:: Code verification method using the Method of Manufactured Solutions (Laplace equation).
+.. |t_22| replace:: Code verification method using the Method of Manufactured Solutions
+                    (1D transient convection-diffusion equation with Dirichlet boundary conditions).
 
 .. |t_23| replace:: Code verification method using the Method of Manufactured Solutions
-                    (transient diffusion equation).
+                    (1D transient convection-diffusion equation with Neumann boundary conditions).
 
 .. |t_24| replace:: Code verification method using the Method of Manufactured Solutions
-                    (transient convection-diffusion equation).
-
+                    (2D transient convection-diffusion equation with Dirichlet boundary conditions).
+                    
 .. |t_25| replace:: Code verification method using the Method of Manufactured Solutions
-                    (transient conduction equation using the Finite Elements method with deal.II library).
+                    (1D transient conduction equation using the Finite Elements method).
 
 .. begin-command
 

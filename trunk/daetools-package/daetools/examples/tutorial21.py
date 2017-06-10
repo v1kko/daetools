@@ -17,7 +17,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial illustrates the additional sensitivity analysis features.
+Code verification of the sensitivity calculations using the Method of Exact Solutions.
+
 Here, the numerical sensitivities for the Constant coefficient first order equations 
 are compared to the available analytical solution.
 

@@ -17,67 +17,63 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial illustrates the code verification method using the Method of Manufactured 
-Solutions:
+Code verification using the Method of Manufactured Solutions.
 
 References: 
 
-1. G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.
-   `PDF link <http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf>`_
-2. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. 
+1. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. 
    SAND2000 – 1444 (2000).
    `doi:10.2172/759450 <https://doi.org/10.2172/759450>`_
-3. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.
-   `ISBN-10:0913478121 <http://www.isbnsearch.org/isbn/0913478121>`_
 
-The procedure for the *transient convection-diffusion equation*:
+The problem in this tutorial is the *transient convection-diffusion* equation 
+distributed on a rectangular 2D domain with u and v components of velocity:
     
 .. code-block:: none
 
-   L(f) = df/dt + f*df/dx - D*d2f/dx2 = 0
+   L(u) = du/dt + (d(uu)/dx + d(uv)/dy) - ni * (d2u/dx2 + d2u/dy2) = 0
+   L(v) = dv/dt + (d(vu)/dx + d(vv)/dy) - ni * (d2v/dx2 + d2v/dy2) = 0
 
-is the following:
+The manufactured solutions are: 
     
-1. Pick a function (q, the analytical solution): 
-    
-   .. code-block:: none
-    
-      q = A + sin(x + Ct)
-
-2. Compute the new source term (g) for the original problem:
-    
-   .. code-block:: none
-      
-      g = dq/dt + q*dq/dx - D*d2q/dx2
-
-3. Solve the original problem with the new source term:
-    
-   .. code-block:: none
-
-      df/dt + f*df/dx - D*d2f/dx2 = g
-
-Since L(f) = g and g = L(q), consequently we have: f = q.
-Therefore, the computed numerical solution (f) should be equal to the analytical one (q).
-
-The terms in the source g term are:
-
 .. code-block:: none
 
-   dq/dt   = C * cos(x + C*t)
-   dq/dx   = cos(x + C*t)
-   d2q/dx2 = -sin(x + C*t)
+   um = u0 * (sin(x**2 + y**2 + w0*t) + eps)
+   vm = v0 * (cos(x**2 + y**2 + w0*t) + eps)
 
-The model in this example is very similar to the model used in the tutorial 2.
+The terms in the new sources Su and Sv are computed using the daetools derivative 
+functions (dt, d and d2).
 
-The solution plot (t = 1.0 s):
+Again, the Dirichlet boundary conditions are used:
+    
+.. code-block:: none
+
+   u(LB, y)  = um(LB, y)
+   u(UB, y)  = um(UB, y)
+   u(x,  LB) = um(x,  LB)
+   u(x,  UB) = um(x,  UB)
+
+   v(LB, y)  = vm(LB, y)
+   v(UB, y)  = vm(UB, y)
+   v(x,  LB) = vm(x,  LB)
+   v(x,  UB) = vm(x,  UB)
+
+Numerical vs. manufactured solution plot (u velocity component, 40x32 grid):
 
 .. image:: _static/tutorial24-results.png
    :width: 500px
+
+The normalised global errors and the order of accuracy plots 
+(grids 10x8, 20x16, 40x32, 80x64):
+
+.. image:: _static/tutorial24-results2.png
+   :width: 800px
 """
 
 import sys, numpy
 from time import localtime, strftime
+import matplotlib.pyplot as plt
 from daetools.pyDAE import *
+from daetools.solvers.superlu import pySuperLU
 
 no_t = daeVariableType("no_t", dimless, -1.0e+20, 1.0e+20, 0.0, 1e-6)
 
@@ -86,78 +82,182 @@ class modTutorial(daeModel):
         daeModel.__init__(self, Name, Parent, Description)
 
         self.x  = daeDomain("x", self, m, "X axis domain")
+        self.y  = daeDomain("y", self, m, "Y axis domain")
 
-        self.A = 1.0
-        self.C = 1.0
-        self.D = 0.05
+        self.u0  = 1.0
+        self.v0  = 1.0
+        self.w0  = 0.1
+        self.ni  = 0.7
+        self.eps = 0.001
 
-        self.f = daeVariable("f", no_t, self, "", [self.x])
-        self.q = daeVariable("q", no_t, self, "", [self.x])
+        self.u  = daeVariable("u",  no_t, self, "", [self.x, self.y])
+        self.v  = daeVariable("v",  no_t, self, "", [self.x, self.y])
+        self.um = daeVariable("um", no_t, self, "", [self.x, self.y])
+        self.vm = daeVariable("vm", no_t, self, "", [self.x, self.y])
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
         # Create some auxiliary functions to make equations more readable 
-        A       = self.A
-        C       = self.C
-        D       = self.D
+        u0       = self.u0
+        v0       = self.v0
+        ni       = self.ni
+        w0       = self.w0
+        eps      = self.eps
         t       = Time()
-        f       = lambda x:    self.f(x)
-        df_dt   = lambda x: dt(self.f(x))
-        df_dx   = lambda x:  d(self.f(x), self.x, eCFDM)
-        d2f_dx2 = lambda x: d2(self.f(x), self.x, eCFDM)
-        q       = lambda x: A + numpy.sin(x() + C*t)
-        dq_dt   = lambda x: C * numpy.cos(x() + C*t)
-        dq_dx   = lambda x: numpy.cos(x() + C*t)
-        d2q_dx2 = lambda x: -numpy.sin(x() + C*t)
-        g       = lambda x: dq_dt(x) + q(x) * dq_dx(x) - D * d2q_dx2(x)
+        
+        u       = lambda x,y: self.u(x,y)
+        v       = lambda x,y: self.v(x,y)
+        du_dt   = lambda x,y: dt(u(x,y))
+        duu_dx  = lambda x,y:  d(u(x,y)*u(x,y), self.x)
+        duv_dy  = lambda x,y:  d(u(x,y)*v(x,y), self.y)
+        d2u_dx2 = lambda x,y: d2(u(x,y), self.x)
+        d2u_dy2 = lambda x,y: d2(u(x,y), self.y)
+        
+        dv_dt   = lambda x,y: dt(v(x,y))
+        dvu_dx  = lambda x,y:  d(v(x,y)*u(x,y), self.x)
+        dvv_dy  = lambda x,y:  d(v(x,y)*v(x,y), self.y)
+        d2v_dx2 = lambda x,y: d2(v(x,y), self.x)
+        d2v_dy2 = lambda x,y: d2(v(x,y), self.y)
+
+        um       = lambda x,y: u0 * (numpy.sin(x()**2 + y()**2 + w0*t) + eps)
+        dum_dt   = lambda x,y: dt(um(x,y))
+        dumum_dx = lambda x,y:  d(um(x,y)*um(x,y), self.x)
+        dumvm_dy = lambda x,y:  d(um(x,y)*vm(x,y), self.y)
+        d2um_dx2 = lambda x,y: d2(um(x,y), self.x)
+        d2um_dy2 = lambda x,y: d2(um(x,y), self.y)
+        
+        vm       = lambda x,y: v0 * (numpy.cos(x()**2 + y()**2 + w0*t) + eps)
+        dvm_dt   = lambda x,y: dt(vm(x,y))
+        dvmum_dx = lambda x,y:  d(vm(x,y)*um(x,y), self.x)
+        dvmvm_dy = lambda x,y:  d(vm(x,y)*vm(x,y), self.y)
+        d2vm_dx2 = lambda x,y: d2(vm(x,y), self.x)
+        d2vm_dy2 = lambda x,y: d2(vm(x,y), self.y)
+        
+        Su       = lambda x,y: dum_dt(x,y) + (dumum_dx(x,y) + dumvm_dy(x,y)) - ni * (d2um_dx2(x,y) + d2um_dy2(x,y))
+        Sv       = lambda x,y: dvm_dt(x,y) + (dvmum_dx(x,y) + dvmvm_dy(x,y)) - ni * (d2vm_dx2(x,y) + d2vm_dy2(x,y))
 
         # Numerical solution
-        eq = self.CreateEquation("f", "Numerical solution")
+        eq = self.CreateEquation("u", "Numerical solution")
         x = eq.DistributeOnDomain(self.x, eOpenOpen)
-        eq.Residual = df_dt(x) + f(x) * df_dx(x) - D * d2f_dx2(x) - g(x)
+        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        eq.Residual = du_dt(x,y) + (duu_dx(x,y) + duv_dy(x,y)) - ni * (d2u_dx2(x,y) + d2u_dy2(x,y)) - Su(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("f(0)", "Numerical solution")
+        eq = self.CreateEquation("u(,0)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eLowerBound)
+        eq.Residual = u(x,y) - um(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("u(,1)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eUpperBound)
+        eq.Residual = u(x,y) - um(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("u(0,)", "Numerical solution")
         x = eq.DistributeOnDomain(self.x, eLowerBound)
-        eq.Residual = f(x) - q(x)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = u(x,y) - um(x,y)
         eq.CheckUnitsConsistency = False
 
-        eq = self.CreateEquation("f(2pi)", "Numerical solution")
+        eq = self.CreateEquation("u(1,)", "Numerical solution")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
-        eq.Residual = f(x) - q(x)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = u(x,y) - um(x,y)
         eq.CheckUnitsConsistency = False
 
-        # Analytical solution
-        eq = self.CreateEquation("q", "Analytical solution")
+
+        # v component
+        eq = self.CreateEquation("v", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eOpenOpen)
+        eq.Residual = dv_dt(x,y) + (dvu_dx(x,y) + dvv_dy(x,y)) - ni * (d2v_dx2(x,y) + d2v_dy2(x,y)) - Sv(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("v(,0)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eLowerBound)
+        eq.Residual = v(x,y) - vm(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("v(,1)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        y = eq.DistributeOnDomain(self.y, eUpperBound)
+        eq.Residual = v(x,y) - vm(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("v(0,)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eLowerBound)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = v(x,y) - vm(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("v(1,)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eUpperBound)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = v(x,y) - vm(x,y)
+        eq.CheckUnitsConsistency = False
+
+        # Manufactured solution
+        eq = self.CreateEquation("um", "Manufactured solution")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        eq.Residual = self.q(x) - q(x)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = self.um(x,y) - um(x,y)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("vm", "Manufactured solution")
+        x = eq.DistributeOnDomain(self.x, eClosedClosed)
+        y = eq.DistributeOnDomain(self.y, eClosedClosed)
+        eq.Residual = self.vm(x,y) - vm(x,y)
         eq.CheckUnitsConsistency = False
 
 class simTutorial(daeSimulation):
-    def __init__(self, Nx):
+    def __init__(self, Nx, Ny):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial24")
+        self.m = modTutorial("tutorial24(%dx%d)" % (Nx,Ny))
         self.m.Description = __doc__
         
         self.Nx = Nx
+        self.Ny = Ny
 
     def SetUpParametersAndDomains(self):
-        self.m.x.CreateStructuredGrid(self.Nx, 0, 2*numpy.pi)
+        self.m.x.CreateStructuredGrid(self.Nx, -0.1, 0.7)
+        self.m.y.CreateStructuredGrid(self.Ny,  0.2, 0.8)
         
     def SetUpVariables(self):
         Nx = self.m.x.NumberOfPoints
+        Ny = self.m.y.NumberOfPoints
+        
         xp = self.m.x.Points
+        yp = self.m.y.Points
+        
+        u0       = self.m.u0
+        v0       = self.m.v0
+        eps      = self.m.eps
+        
+        um0 = lambda x,y: u0 * (numpy.sin(x**2 + y**2) + eps)
+        vm0 = lambda x,y: v0 * (numpy.cos(x**2 + y**2) + eps)
+        
         for x in range(1, Nx-1):
-            self.m.f.SetInitialCondition(x, self.m.A + numpy.sin(xp[x]))
+            for y in range(1, Ny-1):
+                self.m.u.SetInitialCondition(x,y, um0(xp[x], yp[y]))
+                self.m.v.SetInitialCondition(x,y, vm0(xp[x], yp[y]))
                 
 # Setup everything manually and run in a console
-def run(Nx):
+def simulate(Nx, Ny):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial(Nx)
+    simulation   = simTutorial(Nx, Ny)
+
+    # Do no print progress
+    log.PrintProgress = False
+
+    lasolver = pySuperLU.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -166,8 +266,8 @@ def run(Nx):
     simulation.ReportTimeDerivatives = True
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.05
-    simulation.TimeHorizon = 1
+    simulation.ReportingInterval = 2
+    simulation.TimeHorizon = 90
 
     # Connect data reporter
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
@@ -186,8 +286,8 @@ def run(Nx):
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
@@ -196,38 +296,108 @@ def run(Nx):
     simulation.Run()
     simulation.Finalize()
     
+    
     ###########################################
     #  Data                                   #
     ###########################################
     results = dr.Process.dictVariables
-    fvar = results[simulation.m.Name + '.f']
-    qvar = results[simulation.m.Name + '.q']
-    times = fvar.TimeValues
-    q = qvar.Values[-1, :] # 2D array [t,x]
-    f = fvar.Values[-1, :] # 2D array [t,x]
-    #print(times,f,q)
+    uvar = results[simulation.m.Name + '.u']
+    vvar = results[simulation.m.Name + '.v']
+    umvar = results[simulation.m.Name + '.um']
+    vmvar = results[simulation.m.Name + '.vm']
+    times = uvar.TimeValues
+    u  = uvar.Values[-1, :, :]  # 3D array [t,x,y]
+    v  = vvar.Values[-1, :, :]  # 3D array [t,x,y]
+    um = umvar.Values[-1, :, :] # 3D array [t,x,y]
+    vm = vmvar.Values[-1, :, :] # 3D array [t,x,y]
     
-    return times,f,q
+    return times,u,v,um,vm
 
-if __name__ == "__main__":
-    Nx1 = 60
-    Nx2 = 120
-    L = 2*numpy.pi
-    h1 = L / Nx1
-    h2 = L / Nx2
-    times1, f1, q1 = run(Nx1)
-    times2, f2, q2 = run(Nx2)
+def run():
+    Nxs = numpy.array([10, 20, 40, 80])
+    Nys = numpy.array([8, 16, 32, 64])
+    n = len(Nxs)
+    Lx = 0.8
+    hs = Lx / Nxs # It's similar in y direction
+    Eu = numpy.zeros(n)
+    Ev = numpy.zeros(n)
+    Cu = numpy.zeros(n)
+    Cv = numpy.zeros(n)
+    pu = numpy.zeros(n)
+    pv = numpy.zeros(n)
+    E2 = numpy.zeros(n)
     
-    # The normalized global errors
-    E1 = numpy.sqrt((1.0/Nx1) * numpy.sum((f1-q1)**2))
-    E2 = numpy.sqrt((1.0/Nx2) * numpy.sum((f2-q2)**2))
+    # The normalised global errors
+    for i in range(n):
+        Nx = int(Nxs[i])
+        Ny = int(Nys[i])
+        times, u, v, um, vm = simulate(Nx, Ny)
+        Eu[i] = numpy.sqrt((1.0/(Nx*Ny)) * numpy.sum((u-um)**2))
+        Ev[i] = numpy.sqrt((1.0/(Nx*Ny)) * numpy.sum((v-vm)**2))
 
     # Order of accuracy
-    p = numpy.log(E1/E2) / numpy.log(h1/h2)
-    C = E1 / h1**p
+    for i,Nx in enumerate(Nxs):
+        if i == 0:
+            pu[i] = 0
+            pv[i] = 0
+            Cu[i] = 0
+            Cv[i] = 0
+        else:
+            pu[i] = numpy.log(Eu[i]/Eu[i-1]) / numpy.log(hs[i]/hs[i-1])
+            pv[i] = numpy.log(Ev[i]/Ev[i-1]) / numpy.log(hs[i]/hs[i-1])
+            Cu[i] = Eu[i] / hs[i]**pu[i]
+            Cv[i] = Ev[i] / hs[i]**pv[i]
+        
+    C2u = 0.030 # constant for the second order slope line (to get close to the actual line)
+    C2v = 0.075 # constant for the second order slope line (to get close to the actual line)
+    Eu2 = C2u * hs**2 # Eu for the second order slope
+    Ev2 = C2v * hs**2 # Ev for the second order slope
     
-    print('\n\nOrder of Accuracy:')
-    print('||E(h)|| is proportional to: C * (h**p)')
-    print('||E(h1)|| = %e, ||E(h2)|| = %e' % (E1, E2))
-    print('C = %e' % C)
-    print('Order of accuracy (p) = %.2f' % p)
+    fontsize = 14
+    fontsize_legend = 11
+    fig = plt.figure(figsize=(10,8), facecolor='white')
+    grids = ['%dx%d' % (Nx,Ny) for (Nx,Ny) in zip(Nxs,Nys)]
+    grids = ','.join(grids)
+    fig.canvas.set_window_title('The Normalised global errors and the Orders of accuracy (grids: %s)' % grids)
+    
+    ax = plt.subplot(221)
+    plt.figure(1, facecolor='white')
+    plt.loglog(hs, Eu,  'ro', label='Eu(h)')
+    plt.loglog(hs, Eu2, 'b-', label='2nd order slope')
+    plt.xlabel('h', fontsize=fontsize)
+    plt.ylabel('||Eu||', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    #plt.xlim((0.0, 0.09))
+        
+    ax = plt.subplot(222)
+    plt.figure(1, facecolor='white')
+    plt.semilogx(hs[1:], pu[1:],  'rs-', label='Order of Accuracy (pu)')
+    plt.xlabel('h', fontsize=fontsize)
+    plt.ylabel('pu', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    #plt.xlim((0.0, 0.09))
+    plt.ylim((1.94, 2.02))
+    
+    ax = plt.subplot(223)
+    plt.figure(1, facecolor='white')
+    plt.loglog(hs, Ev,  'ro', label='Ev(h)')
+    plt.loglog(hs, Ev2, 'b-', label='2nd order slope')
+    plt.xlabel('h', fontsize=fontsize)
+    plt.ylabel('||Ev||', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    #plt.xlim((0.0, 0.09))
+        
+    ax = plt.subplot(224)
+    plt.figure(1, facecolor='white')
+    plt.semilogx(hs[1:], pv[1:],  'rs-', label='Order of Accuracy (pv)')
+    plt.xlabel('h', fontsize=fontsize)
+    plt.ylabel('pv', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    #plt.xlim((0.0, 0.09))
+    plt.ylim((1.94, 2.02))
+
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    run()

@@ -43,7 +43,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#cc0000;'>   T(0,t) = 500 Ks</span>
+<span style='color:#cc0000;'>   T(0,t) = 500 K</span>
 <span style='color:#cc0000;'>   T(L,t) = 500 K</span>
 
 <span style='color:#cc0000;'>and initial conditions:</span>
@@ -52,7 +52,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>   T(x,0) = 500 K</span>
 
-<span style='color:#cc0000;'>The analytical solution is given by function u(x):</span>
+<span style='color:#cc0000;'>The manufactured solution is given by function u(x):</span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
@@ -141,7 +141,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <b>return</b> [<span style='color:#3605fb;'>self</span>.value(point, c) <b>for</b> c <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.n_components)]
 
 <b>class</b> modTutorial(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, mesh, quadratureFormulaOrder, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
         dofs <b><span style='color:#0000ff;'>=</span></b> [dealiiFiniteElementDOF_1D(name<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'T'</span>,
@@ -151,13 +151,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(numpy.<span style='color:#2a00d6;'>sum</span>([dof.Multiplicity <b>for</b> dof <b>in</b> dofs]))
 
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'bar(0,100)-20.msh'</span>)
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, mesh)
 
         <span style='color:#017a31;'># Store the object so it does not go out of scope while still in use by daetools</span>
-        <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_1D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#017a31;'># path to mesh</span>
-                                                      quadrature      <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(<span style='color:#cc047c;'>2</span>),  <span style='color:#017a31;'># quadrature formula</span>
-                                                      faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_0D(<span style='color:#cc047c;'>2</span>),  <span style='color:#017a31;'># face quadrature formula</span>
-                                                      dofs            <b><span style='color:#0000ff;'>=</span></b> dofs)          <span style='color:#017a31;'># degrees of freedom</span>
+        <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_1D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,
+                                                      quadrature      <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(quadratureFormulaOrder),
+                                                      faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_0D(quadratureFormulaOrder),
+                                                      dofs            <b><span style='color:#0000ff;'>=</span></b> dofs)
 
         <span style='color:#3605fb;'>self</span>.fe_model <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#cc0000;'>'HeatConduction'</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>'Transient heat conduction'</span>, <span style='color:#3605fb;'>self</span>.fe_system)
 
@@ -229,9 +229,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, mesh, quadratureFormulaOrder):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial25&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial25&quot;</span>, mesh, quadratureFormulaOrder)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
         <span style='color:#3605fb;'>self</span>.m.fe_model.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
@@ -243,12 +243,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         setFEInitialConditions(<span style='color:#3605fb;'>self</span>.m.fe_model, <span style='color:#3605fb;'>self</span>.m.fe_system, <span style='color:#cc0000;'>'T'</span>, <span style='color:#cc047c;'>500.0</span>)
 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> run():
+<b>def</b> simulate(mesh, quadratureFormulaOrder):
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial(mesh, quadratureFormulaOrder)
+
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
     lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
@@ -294,28 +297,71 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     simulation.Run()
     simulation.Finalize()
     
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'>#  Plots and data                         #</span>
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
     results <b><span style='color:#0000ff;'>=</span></b> dr.Process.dictVariables
     Tvar <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'.HeatConduction.T'</span>]
     uvar <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'.u'</span>]
     Nx <b><span style='color:#0000ff;'>=</span></b> simulation.m.x.NumberOfPoints
     L  <b><span style='color:#0000ff;'>=</span></b> simulation.m.L
     times <b><span style='color:#0000ff;'>=</span></b> numpy.linspace(<span style='color:#cc047c;'>0</span>, L, Nx)
-    T <b><span style='color:#0000ff;'>=</span></b> Tvar.Values <span style='color:#017a31;'># 2D array [t,x]</span>
-    u <b><span style='color:#0000ff;'>=</span></b> uvar.Values <span style='color:#017a31;'># 2D array [t,x]</span>
+    T <b><span style='color:#0000ff;'>=</span></b> Tvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,:] <span style='color:#017a31;'># 2D array [t,x]</span>
+    u <b><span style='color:#0000ff;'>=</span></b> uvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,:] <span style='color:#017a31;'># 2D array [t,x]</span>
+   
+    <b>return</b> times,T,u
+
+<b>def</b> run():
+    Nx1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    Nx2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>20</span>
+    quadratureFormulaOrder <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>
+    L <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100.0</span>
+    h1 <b><span style='color:#0000ff;'>=</span></b> L <b><span style='color:#0000ff;'>/</span></b> Nx1
+    h2 <b><span style='color:#0000ff;'>=</span></b> L <b><span style='color:#0000ff;'>/</span></b> Nx2
+    times1, T1, u1 <b><span style='color:#0000ff;'>=</span></b> simulate(<span style='color:#cc0000;'>'bar(0,100)-5.msh'</span>, quadratureFormulaOrder)
+    times2, T2, u2 <b><span style='color:#0000ff;'>=</span></b> simulate(<span style='color:#cc0000;'>'bar(0,100)-20.msh'</span>, quadratureFormulaOrder)
+    
+    <span style='color:#017a31;'># The normalised global errors</span>
+    E1 <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt((<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>Nx1) <b><span style='color:#0000ff;'>*</span></b> numpy.<span style='color:#2a00d6;'>sum</span>((T1<b><span style='color:#0000ff;'>-</span></b>u1)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+    E2 <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt((<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>Nx2) <b><span style='color:#0000ff;'>*</span></b> numpy.<span style='color:#2a00d6;'>sum</span>((T2<b><span style='color:#0000ff;'>-</span></b>u2)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+
+    <span style='color:#017a31;'># Order of accuracy</span>
+    p <b><span style='color:#0000ff;'>=</span></b> numpy.log(E1<b><span style='color:#0000ff;'>/</span></b>E2) <b><span style='color:#0000ff;'>/</span></b> numpy.log(h1<b><span style='color:#0000ff;'>/</span></b>h2)
+    C <b><span style='color:#0000ff;'>=</span></b> E1 <b><span style='color:#0000ff;'>/</span></b> h1<b><span style='color:#0000ff;'>**</span></b>p
+    
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>\n\n</span><span style='color:#cc0000;'>Order of Accuracy:'</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'||E(h)|| is proportional to: C * (h**p)'</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'||E(h1)|| = </span><span style='color:#cc0000;'>%e</span><span style='color:#cc0000;'>, ||E(h2)|| = </span><span style='color:#cc0000;'>%e</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (E1, E2))
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'C = </span><span style='color:#cc0000;'>%e</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> C)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Order of accuracy (p) = </span><span style='color:#cc0000;'>%.2f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> p)
     
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
-    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
-    plt.plot(times, T[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,:], <span style='color:#cc0000;'>'rs'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'T (FE)'</span>)
-    plt.plot(times, u[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,:], <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'u (analytical)'</span>)
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    title <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Plots for coarse and fine grids (Order of accuracy = </span><span style='color:#cc0000;'>%.2f</span><span style='color:#cc0000;'>, quadrature order = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (p, quadratureFormulaOrder)
+    fig.canvas.set_window_title(title)
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
+    plt.plot(times1, T1, <span style='color:#cc0000;'>'rs'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'T (FE)'</span>)
+    plt.plot(times1, u1, <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'u (manufactured)'</span>)
     plt.xlabel(<span style='color:#cc0000;'>'x, m'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
     plt.ylabel(<span style='color:#cc0000;'>'Temperature, K'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
     plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
     plt.xlim((<span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>100</span>))
+
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>122</span>)
+    plt.plot(times2, T2, <span style='color:#cc0000;'>'rs'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'T (FE)'</span>)
+    plt.plot(times2, u2, <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'u (manufactured)'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'x, m'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'Temperature, K'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.xlim((<span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>100</span>))
+
     plt.tight_layout()
     plt.show()
-
+    
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    run()</pre>
+    run()
+    </pre>
 </body>
 </html>

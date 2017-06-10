@@ -17,67 +17,41 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial illustrates the code verification method using the Method of Manufactured 
-Solutions:
+Code verification using the Method of Manufactured Solutions.
 
 References: 
 
 1. G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.
-   `PDF link <http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf>`_
+   `PDF <http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf>`_
 2. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. 
    SAND2000 – 1444 (2000).
    `doi:10.2172/759450 <https://doi.org/10.2172/759450>`_
 3. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.
    `ISBN-10:0913478121 <http://www.isbnsearch.org/isbn/0913478121>`_
 
-The procedure for the *transient diffusion equation*:
+The problem in this tutorial is identical to tutorial23. The only difference is that 
+the Neumann boundary conditions are applied:
     
 .. code-block:: none
 
-   L(f) = df/dt - D*d2f/dx2 = 0
+   df(x=0)/dx   = dq(x=0)/dx   = cos(0 + Ct)
+   df(x=2pi)/dx = dq(x=2pi)/dx = cos(2pi + Ct)
 
-is the following:
-    
-1. Pick a function (q, the analytical solution): 
-    
-   .. code-block:: none
-    
-      q = A + sin(x + Ct)
-
-2. Compute the new source term (g) for the original problem:
-    
-   .. code-block:: none
-      
-      g = dq/dt - D*d2q/dx2
-
-3. Solve the original problem with the new source term:
-    
-   .. code-block:: none
-
-      df/dt - D*d2f/dx2 = g
-
-Since L(f) = g and g = L(q), consequently we have: f = q.
-Therefore, the computed numerical solution (f) should be equal to the analytical one (q).
-
-The terms in the source g term are:
-
-.. code-block:: none
-
-   dq/dt   = C * cos(x + C*t)
-   dq/dx   = cos(x + C*t)
-   d2q/dx2 = -sin(x + C*t)
-
-The model in this example is very similar to the model used in the tutorial 2.
-
-The solution plot (t = 1.0 s):
+Numerical vs. manufactured solution plot (no. elements = 60, t = 1.0s):
 
 .. image:: _static/tutorial23-results.png
    :width: 500px
+
+The normalised global errors and the order of accuracy plots (no. elements = [60, 90, 120, 150], t = 1.0s):
+
+.. image:: _static/tutorial23-results2.png
+   :width: 800px
 """
 
 import sys, numpy
 from time import localtime, strftime
 from daetools.pyDAE import *
+import matplotlib.pyplot as plt
 
 no_t = daeVariableType("no_t", dimless, -1.0e+20, 1.0e+20, 0.0, 1e-6)
 
@@ -110,16 +84,26 @@ class modTutorial(daeModel):
         dq_dt   = lambda x: C * numpy.cos(x() + C*t)
         dq_dx   = lambda x: numpy.cos(x() + C*t)
         d2q_dx2 = lambda x: -numpy.sin(x() + C*t)
-        g       = lambda x: dq_dt(x) - D * d2q_dx2(x)
+        g       = lambda x: dq_dt(x) + q(x) * dq_dx(x) - D * d2q_dx2(x)
 
         # Numerical solution
         eq = self.CreateEquation("f", "Numerical solution")
-        x = eq.DistributeOnDomain(self.x, eClosedClosed)
-        eq.Residual = df_dt(x) - D * d2f_dx2(x) - g(x)
+        x = eq.DistributeOnDomain(self.x, eOpenOpen)
+        eq.Residual = df_dt(x) + f(x) * df_dx(x) - D * d2f_dx2(x) - g(x)
         eq.CheckUnitsConsistency = False
 
-        # Analytical solution
-        eq = self.CreateEquation("q", "Analytical solution")
+        eq = self.CreateEquation("f(0)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eLowerBound)
+        eq.Residual = df_dx(x) - dq_dx(x)
+        eq.CheckUnitsConsistency = False
+
+        eq = self.CreateEquation("f(2pi)", "Numerical solution")
+        x = eq.DistributeOnDomain(self.x, eUpperBound)
+        eq.Residual = df_dx(x) - dq_dx(x)
+        eq.CheckUnitsConsistency = False
+
+        # Manufactured solution
+        eq = self.CreateEquation("q", "Manufactured solution")
         x = eq.DistributeOnDomain(self.x, eClosedClosed)
         eq.Residual = self.q(x) - q(x)
         eq.CheckUnitsConsistency = False
@@ -127,7 +111,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self, Nx):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial23")
+        self.m = modTutorial("tutorial23(%d)" % Nx)
         self.m.Description = __doc__
         
         self.Nx = Nx
@@ -138,16 +122,19 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         Nx = self.m.x.NumberOfPoints
         xp = self.m.x.Points
-        for x in range(0, Nx):
+        for x in range(1, Nx-1):
             self.m.f.SetInitialCondition(x, self.m.A + numpy.sin(xp[x]))
                 
 # Setup everything manually and run in a console
-def run(Nx):
+def simulate(Nx):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeDelegateDataReporter()
     simulation   = simTutorial(Nx)
+
+    # Do no print progress
+    log.PrintProgress = False
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -176,8 +163,8 @@ def run(Nx):
     simulation.Initialize(daesolver, datareporter, log)
 
     # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
+    #simulation.m.SaveModelReport(simulation.m.Name + ".xml")
+    #simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
@@ -199,25 +186,54 @@ def run(Nx):
     
     return times,f,q
 
-if __name__ == "__main__":
-    Nx1 = 30
-    Nx2 = 60
+def run():
+    Nxs = numpy.array([60, 90, 120, 150])
+    n = len(Nxs)
     L = 2*numpy.pi
-    h1 = L / Nx1
-    h2 = L / Nx2
-    times1, f1, q1 = run(Nx1)
-    times2, f2, q2 = run(Nx2)
+    hs = L / Nxs
+    E = numpy.zeros(n)
+    C = numpy.zeros(n)
+    p = numpy.zeros(n)
+    E2 = numpy.zeros(n)
     
-    # The normalized global errors
-    E1 = numpy.sqrt((1.0/Nx1) * numpy.sum((f1-q1)**2))
-    E2 = numpy.sqrt((1.0/Nx2) * numpy.sum((f2-q2)**2))
+    # The normalised global errors
+    for i,Nx in enumerate(Nxs):
+        times, numerical_sol, manufactured_sol = simulate(int(Nx))
+        E[i] = numpy.sqrt((1.0/Nx) * numpy.sum((numerical_sol-manufactured_sol)**2))
 
     # Order of accuracy
-    p = numpy.log(E1/E2) / numpy.log(h1/h2)
-    C = E1 / h1**p
+    for i,Nx in enumerate(Nxs):
+        p[i] = numpy.log(E[i]/E[i-1]) / numpy.log(hs[i]/hs[i-1])
+        C[i] = E[i] / hs[i]**p[i]
+        
+    C2 = 0.18 # constant for the second order slope line (to get close to the actual line)
+    E2 = C2 * hs**2 # E for the second order slope
     
-    print('\n\nOrder of Accuracy:')
-    print('||E(h)|| is proportional to: C * (h**p)')
-    print('||E(h1)|| = %e, ||E(h1)|| = %e' % (E1, E2))
-    print('C = %e' % C)
-    print('Order of accuracy (p) = %.2f' % p)
+    fontsize = 14
+    fontsize_legend = 11
+    fig = plt.figure(figsize=(10,4), facecolor='white')
+    fig.canvas.set_window_title('The Normalised global errors and the Orders of accuracy (Nelems = %s)' % Nxs.tolist())
+    
+    ax = plt.subplot(121)
+    plt.figure(1, facecolor='white')
+    plt.loglog(hs, E,  'ro', label='E(h)')
+    plt.loglog(hs, E2, 'b-', label='2nd order slope')
+    plt.xlabel('h', fontsize=fontsize)
+    plt.ylabel('||E||', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    plt.xlim((0.04, 0.11))
+        
+    ax = plt.subplot(122)
+    plt.figure(1, facecolor='white')
+    plt.semilogx(hs[1:], p[1:],  'rs-', label='Order of Accuracy (p)')
+    plt.xlabel('h', fontsize=fontsize)
+    plt.ylabel('p', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    plt.xlim((0.04, 0.075))
+    plt.ylim((2.0, 2.04))
+    
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    run()

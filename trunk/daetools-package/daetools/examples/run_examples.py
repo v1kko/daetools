@@ -39,7 +39,7 @@ except:
     
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
-for i in range(1, 22):
+for i in range(1, 26):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 5):
     tutorial_modules.append(('tutorial_adv_%d' % i, []))
@@ -224,7 +224,8 @@ class RunExamples(QtWidgets.QDialog):
             module, doc = data
         
         try:
-            if m_name in ["tutorial20", "tutorial21", "tutorial_che_9", "opt_tutorial4", "opt_tutorial5", "opt_tutorial6"]:
+            if m_name in ["tutorial20", "tutorial21", "tutorial_che_9", "opt_tutorial4", "opt_tutorial5", "opt_tutorial6",
+                          "tutorial22", "tutorial23", "tutorial24", "tutorial25"]:
                 self.consoleRunAndShowResults(module)
             else:
                 module.guiRun(self.app)

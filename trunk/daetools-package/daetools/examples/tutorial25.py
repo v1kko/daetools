@@ -17,6 +17,8 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
+Code verification using the Method of Manufactured Solutions.
+
 This problem and its solution in `COMSOL Multiphysics <https://www.comsol.com>`_ software 
 is described in the COMSOL blog:
 `Verify Simulations with the Method of Manufactured Solutions (2015)
@@ -32,7 +34,7 @@ with the following boundary:
     
 .. code-block:: none
 
-   T(0,t) = 500 Ks
+   T(0,t) = 500 K
    T(L,t) = 500 K
 
 and initial conditions:
@@ -41,7 +43,7 @@ and initial conditions:
 
    T(x,0) = 500 K
 
-The analytical solution is given by function u(x):
+The manufactured solution is given by function u(x):
     
 .. code-block:: none
 
@@ -130,7 +132,7 @@ class TemperatureSource_1D(adoubleFunction_1D):
         return [self.value(point, c) for c in range(self.n_components)]
 
 class modTutorial(daeModel):
-    def __init__(self, Name, mesh, Parent = None, Description = ""):
+    def __init__(self, Name, mesh, quadratureFormulaOrder, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
         dofs = [dealiiFiniteElementDOF_1D(name='T',
@@ -143,10 +145,10 @@ class modTutorial(daeModel):
         mesh_file  = os.path.join(meshes_dir, mesh)
 
         # Store the object so it does not go out of scope while still in use by daetools
-        self.fe_system = dealiiFiniteElementSystem_1D(meshFilename    = mesh_file,     # path to mesh
-                                                      quadrature      = QGauss_1D(2),  # quadrature formula
-                                                      faceQuadrature  = QGauss_0D(2),  # face quadrature formula
-                                                      dofs            = dofs)          # degrees of freedom
+        self.fe_system = dealiiFiniteElementSystem_1D(meshFilename    = mesh_file,
+                                                      quadrature      = QGauss_1D(quadratureFormulaOrder),
+                                                      faceQuadrature  = QGauss_0D(quadratureFormulaOrder),
+                                                      dofs            = dofs)
 
         self.fe_model = daeFiniteElementModel('HeatConduction', self, 'Transient heat conduction', self.fe_system)
 
@@ -218,9 +220,9 @@ class modTutorial(daeModel):
         eq.CheckUnitsConsistency = False
 
 class simTutorial(daeSimulation):
-    def __init__(self, mesh):
+    def __init__(self, mesh, quadratureFormulaOrder):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial25", mesh)
+        self.m = modTutorial("tutorial25", mesh, quadratureFormulaOrder)
         self.m.Description = __doc__
         self.m.fe_model.Description = __doc__
 
@@ -232,12 +234,15 @@ class simTutorial(daeSimulation):
         setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 500.0)
 
 # Setup everything manually and run in a console
-def run(mesh):
+def simulate(mesh, quadratureFormulaOrder):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial(mesh)
+    simulation   = simTutorial(mesh, quadratureFormulaOrder)
+
+    # Do no print progress
+    log.PrintProgress = False
 
     lasolver = pySuperLU.daeCreateSuperLUSolver()
     daesolver.SetLASolver(lasolver)
@@ -294,31 +299,20 @@ def run(mesh):
     times = numpy.linspace(0, L, Nx)
     T = Tvar.Values[-1,:] # 2D array [t,x]
     u = uvar.Values[-1,:] # 2D array [t,x]
-    
-    fontsize = 14
-    fontsize_legend = 11
-    plt.figure(1, facecolor='white')
-    plt.plot(times, T, 'rs', label='T (FE)')
-    plt.plot(times, u, 'b-', label='u (analytical)')
-    plt.xlabel('x, m', fontsize=fontsize)
-    plt.ylabel('Temperature, K', fontsize=fontsize)
-    plt.legend(fontsize=fontsize_legend)
-    plt.xlim((0, 100))
-    plt.tight_layout()
-    plt.show()
    
     return times,T,u
 
-if __name__ == "__main__":
+def run():
     Nx1 = 5
     Nx2 = 20
+    quadratureFormulaOrder = 2
     L = 100.0
     h1 = L / Nx1
     h2 = L / Nx2
-    times1, T1, u1 = run('bar(0,100)-5.msh')
-    times2, T2, u2 = run('bar(0,100)-20.msh')
+    times1, T1, u1 = simulate('bar(0,100)-5.msh', quadratureFormulaOrder)
+    times2, T2, u2 = simulate('bar(0,100)-20.msh', quadratureFormulaOrder)
     
-    # The normalized global errors
+    # The normalised global errors
     E1 = numpy.sqrt((1.0/Nx1) * numpy.sum((T1-u1)**2))
     E2 = numpy.sqrt((1.0/Nx2) * numpy.sum((T2-u2)**2))
 
@@ -331,3 +325,32 @@ if __name__ == "__main__":
     print('||E(h1)|| = %e, ||E(h2)|| = %e' % (E1, E2))
     print('C = %e' % C)
     print('Order of accuracy (p) = %.2f' % p)
+    
+    fontsize = 14
+    fontsize_legend = 11
+    fig = plt.figure(figsize=(10,4), facecolor='white')
+    title = 'Plots for coarse and fine grids (Order of accuracy = %.2f, quadrature order = %d)' % (p, quadratureFormulaOrder)
+    fig.canvas.set_window_title(title)
+    
+    ax = plt.subplot(121)
+    plt.plot(times1, T1, 'rs', label='T (FE)')
+    plt.plot(times1, u1, 'b-', label='u (manufactured)')
+    plt.xlabel('x, m', fontsize=fontsize)
+    plt.ylabel('Temperature, K', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    plt.xlim((0, 100))
+
+    ax = plt.subplot(122)
+    plt.plot(times2, T2, 'rs', label='T (FE)')
+    plt.plot(times2, u2, 'b-', label='u (manufactured)')
+    plt.xlabel('x, m', fontsize=fontsize)
+    plt.ylabel('Temperature, K', fontsize=fontsize)
+    plt.legend(fontsize=fontsize_legend)
+    plt.xlim((0, 100))
+
+    plt.tight_layout()
+    plt.show()
+    
+if __name__ == "__main__":
+    run()
+    

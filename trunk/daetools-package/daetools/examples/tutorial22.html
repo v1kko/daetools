@@ -28,59 +28,77 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>This tutorial illustrates the code verification method using the Method of Manufactured </span>
-<span style='color:#cc0000;'>Solutions:</span>
+<span style='color:#cc0000;'>Code verification using the Method of Manufactured Solutions.</span>
 
-<span style='color:#cc0000;'>Reference: G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.</span>
-<span style='color:#cc0000;'>`PDF link &lt;http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf&gt;`_</span>
+<span style='color:#cc0000;'>References: </span>
 
-<span style='color:#cc0000;'>The procedure for the sample problem:</span>
+<span style='color:#cc0000;'>1. G. Tryggvason. Method of Manufactured Solutions, Lecture 33: Predictivity-I, 2011.</span>
+<span style='color:#cc0000;'>   `PDF &lt;http://www3.nd.edu/~gtryggva/CFD-Course/2011-Lecture-33.pdf&gt;`_</span>
+<span style='color:#cc0000;'>2. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. </span>
+<span style='color:#cc0000;'>   SAND2000 – 1444 (2000).</span>
+<span style='color:#cc0000;'>   `doi:10.2172/759450 &lt;https://doi.org/10.2172/759450&gt;`_</span>
+<span style='color:#cc0000;'>3. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.</span>
+<span style='color:#cc0000;'>   `ISBN-10:0913478121 &lt;http://www.isbnsearch.org/isbn/0913478121&gt;`_</span>
+
+<span style='color:#cc0000;'>The procedure for the *transient convection-diffusion* (Burger's) equation:</span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#cc0000;'>   L(u) = d2u/dx2 = 0</span>
+<span style='color:#cc0000;'>   L(f) = df/dt + f*df/dx - D*d2f/dx2 = 0</span>
 
 <span style='color:#cc0000;'>is the following:</span>
 <span style='color:#cc0000;'>    </span>
-<span style='color:#cc0000;'>1. Pick a function (q, the analytical solution): </span>
+<span style='color:#cc0000;'>1. Pick a function (q, the manufactured solution): </span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>   .. code-block:: none</span>
 <span style='color:#cc0000;'>    </span>
-<span style='color:#cc0000;'>      q = 1 - x**2</span>
+<span style='color:#cc0000;'>      q = A + sin(x + Ct)</span>
 
 <span style='color:#cc0000;'>2. Compute the new source term (g) for the original problem:</span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>   .. code-block:: none</span>
 <span style='color:#cc0000;'>      </span>
-<span style='color:#cc0000;'>      g = d2q/dx2</span>
+<span style='color:#cc0000;'>      g = dq/dt + q*dq/dx - D*d2q/dx2</span>
 
 <span style='color:#cc0000;'>3. Solve the original problem with the new source term:</span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>   .. code-block:: none</span>
 
-<span style='color:#cc0000;'>      d2u/dx2 = g</span>
+<span style='color:#cc0000;'>      df/dt + f*df/dx - D*d2f/dx2 = g</span>
 
-<span style='color:#cc0000;'>Since L(u) = g and g = L(q), consequently we have: u = q.</span>
-<span style='color:#cc0000;'>Therefore, the computed numerical solution (f) should be equal to the analytical one (q).</span>
+<span style='color:#cc0000;'>Since L(f) = g and g = L(q), consequently we have: f = q.</span>
+<span style='color:#cc0000;'>Therefore, the computed numerical solution (f) should be equal to the manufactured one (q).</span>
 
 <span style='color:#cc0000;'>The terms in the source g term are:</span>
 
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#cc0000;'>   dq/dx   = -2x</span>
-<span style='color:#cc0000;'>   d2q/dx2 = -2</span>
+<span style='color:#cc0000;'>   dq/dt   = C * cos(x + C*t)</span>
+<span style='color:#cc0000;'>   dq/dx   = cos(x + C*t)</span>
+<span style='color:#cc0000;'>   d2q/dx2 = -sin(x + C*t)</span>
 
-<span style='color:#cc0000;'>The model in this example is very similar to the model used in the tutorial 2.</span>
+<span style='color:#cc0000;'>The equations are solved for Dirichlet boundary conditions:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#cc0000;'>The solution plot (t = 1.0 s):</span>
+<span style='color:#cc0000;'>   f(x=0)   = q(x=0)   = A + sin(0 + Ct)</span>
+<span style='color:#cc0000;'>   f(x=2pi) = q(x=2pi) = A + sin(2pi + Ct)</span>
+
+<span style='color:#cc0000;'>Numerical vs. manufactured solution plot (no. elements = 60, t = 1.0s):</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial22-results.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
+
+<span style='color:#cc0000;'>The normalised global errors and the order of accuracy plots (no. elements = [60, 90, 120, 150], t = 1.0s):</span>
+
+<span style='color:#cc0000;'>.. image:: _static/tutorial22-results2.png</span>
+<span style='color:#cc0000;'>   :width: 800px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> sys, numpy
 <span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
 <span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>import</span> matplotlib.pyplot <span style='color:#3605fb;'>as</span> plt
 
 no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;no_t&quot;</span>, dimless, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1.0e+20</span>, <span style='color:#cc047c;'>1.0e+20</span>, <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1e-6</span>)
 
@@ -90,70 +108,80 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 
         <span style='color:#3605fb;'>self</span>.x  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#3605fb;'>self</span>, m, <span style='color:#cc0000;'>&quot;X axis domain&quot;</span>)
 
-        <span style='color:#3605fb;'>self</span>.u <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;u&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
+        <span style='color:#3605fb;'>self</span>.A <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+        <span style='color:#3605fb;'>self</span>.C <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+        <span style='color:#3605fb;'>self</span>.D <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.05</span>
+
+        <span style='color:#3605fb;'>self</span>.f <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;f&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
         <span style='color:#3605fb;'>self</span>.q <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;q&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
 
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
         <span style='color:#017a31;'># Create some auxiliary functions to make equations more readable </span>
-        u       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#3605fb;'>self</span>.u(x)
-        d2u_dx2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: d2(<span style='color:#3605fb;'>self</span>.u(x), <span style='color:#3605fb;'>self</span>.x, eCFDM)
-        q       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> x()<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>
-        d2q_dx2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span>
-        g       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: d2q_dx2(x)
+        A       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.A
+        C       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.C
+        D       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.D
+        t       <b><span style='color:#0000ff;'>=</span></b> Time()
+        f       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x:    <span style='color:#3605fb;'>self</span>.f(x)
+        df_dt   <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: dt(<span style='color:#3605fb;'>self</span>.f(x))
+        df_dx   <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x:  d(<span style='color:#3605fb;'>self</span>.f(x), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+        d2f_dx2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: d2(<span style='color:#3605fb;'>self</span>.f(x), <span style='color:#3605fb;'>self</span>.x, eCFDM)
+        q       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: A <b><span style='color:#0000ff;'>+</span></b> numpy.sin(x() <b><span style='color:#0000ff;'>+</span></b> C<b><span style='color:#0000ff;'>*</span></b>t)
+        dq_dt   <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: C <b><span style='color:#0000ff;'>*</span></b> numpy.cos(x() <b><span style='color:#0000ff;'>+</span></b> C<b><span style='color:#0000ff;'>*</span></b>t)
+        dq_dx   <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: numpy.cos(x() <b><span style='color:#0000ff;'>+</span></b> C<b><span style='color:#0000ff;'>*</span></b>t)
+        d2q_dx2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <b><span style='color:#0000ff;'>-</span></b>numpy.sin(x() <b><span style='color:#0000ff;'>+</span></b> C<b><span style='color:#0000ff;'>*</span></b>t)
+        g       <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: dq_dt(x) <b><span style='color:#0000ff;'>+</span></b> q(x) <b><span style='color:#0000ff;'>*</span></b> dq_dx(x) <b><span style='color:#0000ff;'>-</span></b> D <b><span style='color:#0000ff;'>*</span></b> d2q_dx2(x)
 
         <span style='color:#017a31;'># Numerical solution</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;f&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eOpenOpen)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> d2u_dx2(x) <b><span style='color:#0000ff;'>-</span></b> g(x)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> df_dt(x) <b><span style='color:#0000ff;'>+</span></b> f(x) <b><span style='color:#0000ff;'>*</span></b> df_dx(x) <b><span style='color:#0000ff;'>-</span></b> D <b><span style='color:#0000ff;'>*</span></b> d2f_dx2(x) <b><span style='color:#0000ff;'>-</span></b> g(x)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        <span style='color:#017a31;'># BC at x = 0</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(0)&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>BC at x <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;f(0)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eLowerBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1</span>
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> f(x) <b><span style='color:#0000ff;'>-</span></b> q(x)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        <span style='color:#017a31;'># BC at x = 1</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;u(1)&quot;</span>, <span style='color:#cc0000;'>&quot;BC at x = 01&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;f(2pi)&quot;</span>, <span style='color:#cc0000;'>&quot;Numerical solution&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eUpperBound)
-        eq.Residual <b><span style='color:#0000ff;'>=</span></b> u(x) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0</span>
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> f(x) <b><span style='color:#0000ff;'>-</span></b> q(x)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-        <span style='color:#017a31;'># Analytical solution</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;q&quot;</span>, <span style='color:#cc0000;'>&quot;Analytical solution&quot;</span>)
+        <span style='color:#017a31;'># Manufactured solution</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;q&quot;</span>, <span style='color:#cc0000;'>&quot;Manufactured solution&quot;</span>)
         x <b><span style='color:#0000ff;'>=</span></b> eq.DistributeOnDomain(<span style='color:#3605fb;'>self</span>.x, eClosedClosed)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.q(x) <b><span style='color:#0000ff;'>-</span></b> q(x)
         eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Nx):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial22&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial22(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> Nx)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+        
+        <span style='color:#3605fb;'>self</span>.Nx <b><span style='color:#0000ff;'>=</span></b> Nx
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
-        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#cc047c;'>50</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1</span>)
+        <span style='color:#3605fb;'>self</span>.m.x.CreateStructuredGrid(<span style='color:#3605fb;'>self</span>.Nx, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>numpy.pi)
         
     <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
-        <b>pass</b>
+        Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.x.NumberOfPoints
+        xp <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.x.Points
+        <b>for</b> x <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, Nx<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>):
+            <span style='color:#3605fb;'>self</span>.m.f.SetInitialCondition(x, <span style='color:#3605fb;'>self</span>.m.A <b><span style='color:#0000ff;'>+</span></b> numpy.sin(xp[x]))
                 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
-    simulator.exec_()
-
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
+<b>def</b> simulate(Nx):
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial(Nx)
+
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
     <span style='color:#017a31;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
@@ -162,20 +190,28 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
 
     <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.05</span>
     simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
 
     <span style='color:#017a31;'># Connect data reporter</span>
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
+
+    <span style='color:#017a31;'># 1. TCP/IP</span>
+    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
         sys.exit()
+
+    <span style='color:#017a31;'># 2. Data</span>
+    dr <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr)
 
     <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
     <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
+    <span style='color:#017a31;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
 
     <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
@@ -183,13 +219,71 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
     <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
+    
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'>#  Data                                   #</span>
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    results <b><span style='color:#0000ff;'>=</span></b> dr.Process.dictVariables
+    fvar <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'.f'</span>]
+    qvar <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'.q'</span>]
+    times <b><span style='color:#0000ff;'>=</span></b> fvar.TimeValues
+    q <b><span style='color:#0000ff;'>=</span></b> qvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, :] <span style='color:#017a31;'># 2D array [t,x]</span>
+    f <b><span style='color:#0000ff;'>=</span></b> fvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>, :] <span style='color:#017a31;'># 2D array [t,x]</span>
+    <span style='color:#017a31;'>#print(times,f,q)</span>
+    
+    <b>return</b> times,f,q
+
+<b>def</b> run():
+    Nxs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#cc047c;'>60</span>, <span style='color:#cc047c;'>90</span>, <span style='color:#cc047c;'>120</span>, <span style='color:#cc047c;'>150</span>])
+    n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>len</span>(Nxs)
+    L <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>numpy.pi
+    hs <b><span style='color:#0000ff;'>=</span></b> L <b><span style='color:#0000ff;'>/</span></b> Nxs
+    E <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    C <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    p <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    E2 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    
+    <span style='color:#017a31;'># The normalised global errors</span>
+    <b>for</b> i,Nx <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(Nxs):
+        times, numerical_sol, manufactured_sol <b><span style='color:#0000ff;'>=</span></b> simulate(<span style='color:#2a00d6;'>int</span>(Nx))
+        E[i] <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt((<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>Nx) <b><span style='color:#0000ff;'>*</span></b> numpy.<span style='color:#2a00d6;'>sum</span>((numerical_sol<b><span style='color:#0000ff;'>-</span></b>manufactured_sol)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+
+    <span style='color:#017a31;'># Order of accuracy</span>
+    <b>for</b> i,Nx <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(Nxs):
+        p[i] <b><span style='color:#0000ff;'>=</span></b> numpy.log(E[i]<b><span style='color:#0000ff;'>/</span></b>E[i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>]) <b><span style='color:#0000ff;'>/</span></b> numpy.log(hs[i]<b><span style='color:#0000ff;'>/</span></b>hs[i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>])
+        C[i] <b><span style='color:#0000ff;'>=</span></b> E[i] <b><span style='color:#0000ff;'>/</span></b> hs[i]<b><span style='color:#0000ff;'>**</span></b>p[i]
+        
+    C2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.09</span> <span style='color:#017a31;'># constant for the second order slope line (to get close to the actual line)</span>
+    E2 <b><span style='color:#0000ff;'>=</span></b> C2 <b><span style='color:#0000ff;'>*</span></b> hs<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <span style='color:#017a31;'># E for the second order slope</span>
+    
+    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'The Normalised global errors and the Orders of accuracy (Nelems = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> Nxs.tolist())
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.loglog(hs, E,  <span style='color:#cc0000;'>'ro'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'E(h)'</span>)
+    plt.loglog(hs, E2, <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'2nd order slope'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'h'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'||E||'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.xlim((<span style='color:#cc047c;'>0.04</span>, <span style='color:#cc047c;'>0.11</span>))
+        
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>122</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.semilogx(hs[<span style='color:#cc047c;'>1</span>:], p[<span style='color:#cc047c;'>1</span>:],  <span style='color:#cc0000;'>'rs-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Order of Accuracy (p)'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'h'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'p'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.xlim((<span style='color:#cc047c;'>0.04</span>, <span style='color:#cc047c;'>0.075</span>))
+    plt.ylim((<span style='color:#cc047c;'>2.0</span>, <span style='color:#cc047c;'>2.1</span>))
+    
+    plt.tight_layout()
+    plt.show()
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    run()
 </pre>
 </body>
 </html>
