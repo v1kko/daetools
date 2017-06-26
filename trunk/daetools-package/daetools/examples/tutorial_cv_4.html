@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial24.py</title>
+<title>tutorial_cv_4.py</title>
 </head>
 <!-- Highlighting: "Python" -->
 <body>
@@ -14,7 +14,7 @@
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
-<span style='color:#017a31;'>                           tutorial24.py</span>
+<span style='color:#017a31;'>                           tutorial_cv_4.py</span>
 <span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
@@ -70,13 +70,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>Numerical vs. manufactured solution plot (u velocity component, 40x32 grid):</span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial24-results.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_4-results.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
 
 <span style='color:#cc0000;'>The normalised global errors and the order of accuracy plots </span>
 <span style='color:#cc0000;'>(grids 10x8, 20x16, 40x32, 80x64):</span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial24-results2.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_4-results2.png</span>
 <span style='color:#cc0000;'>   :width: 800px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
@@ -227,7 +227,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Nx, Ny):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial24(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>x</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> (Nx,Ny))
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_cv_4(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>x</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> (Nx,Ny))
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
         
         <span style='color:#3605fb;'>self</span>.Nx <b><span style='color:#0000ff;'>=</span></b> Nx

@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial25.py</title>
+<title>tutorial_cv_5.py</title>
 </head>
 <!-- Highlighting: "Python" -->
 <body>
@@ -14,7 +14,7 @@
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
-<span style='color:#017a31;'>                           tutorial25.py</span>
+<span style='color:#017a31;'>                           tutorial_cv_5.py</span>
 <span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
@@ -28,6 +28,8 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Code verification using the Method of Manufactured Solutions.</span>
+
 <span style='color:#cc0000;'>This problem and its solution in `COMSOL Multiphysics &lt;https://www.comsol.com&gt;`_ software </span>
 <span style='color:#cc0000;'>is described in the COMSOL blog:</span>
 <span style='color:#cc0000;'>`Verify Simulations with the Method of Manufactured Solutions (2015)</span>
@@ -84,22 +86,22 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>The comparison plots for the coarse mesh and linear elements: </span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial25-results-5_elements-I_order.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_5-results-5_elements-I_order.png</span>
 <span style='color:#cc0000;'>   :width: 400 px</span>
 
 <span style='color:#cc0000;'>The comparison plots for the coarse mesh and quadratic elements: </span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial25-results-5_elements-II_order.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_5-results-5_elements-II_order.png</span>
 <span style='color:#cc0000;'>   :width: 400 px</span>
 
 <span style='color:#cc0000;'>The comparison plots for the fine mesh and linear elements: </span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial25-results-20_elements-I_order.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_5-results-20_elements-I_order.png</span>
 <span style='color:#cc0000;'>   :width: 400 px</span>
 
 <span style='color:#cc0000;'>The comparison plots for the fine mesh and quadratic elements: </span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial25-results-20_elements-II_order.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_5-results-20_elements-II_order.png</span>
 <span style='color:#cc0000;'>   :width: 400 px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
@@ -231,7 +233,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, mesh, quadratureFormulaOrder):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial25&quot;</span>, mesh, quadratureFormulaOrder)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_cv_5&quot;</span>, mesh, quadratureFormulaOrder)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
         <span style='color:#3605fb;'>self</span>.m.fe_model.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
@@ -257,7 +259,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     daesolver.SetLASolver(lasolver)
 
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial25-results'</span>)
+    results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial_cv_5-results'</span>)
 
     <span style='color:#017a31;'># Create three data reporters:</span>
     <span style='color:#017a31;'># 1. DealII</span>
@@ -362,6 +364,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     run()
-    </pre>
+    
+</pre>
 </body>
 </html>

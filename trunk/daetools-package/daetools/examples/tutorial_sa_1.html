@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial20.py</title>
+<title>tutorial_sa_1.py</title>
 </head>
 <!-- Highlighting: "Python" -->
 <body>
@@ -14,7 +14,7 @@
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
-<span style='color:#017a31;'>                           tutorial20.py</span>
+<span style='color:#017a31;'>                           tutorial_sa_1.py</span>
 <span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
@@ -28,14 +28,15 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>This tutorial illustrates the sensitivity analysis features in DAE Tools.</span>
+<span style='color:#cc0000;'>This tutorial illustrates calculation of the sensitivity of the results with respect</span>
+<span style='color:#cc0000;'>to the model parameters using forward sensitivity analysis method in DAE Tools.</span>
 
 <span style='color:#cc0000;'>This model has one state variable (T) and one degree of freedom (Qin).</span>
 <span style='color:#cc0000;'>Qin is set as a parameter for sensitivity analysis.</span>
 
-<span style='color:#cc0000;'>The sensitivity analysis is enabled and the sensitivities can be reported to the </span>
-<span style='color:#cc0000;'>data reporter like any ordinary variable by setting the boolean property </span>
-<span style='color:#cc0000;'>simulation.ReportSensitivities to True.</span>
+<span style='color:#cc0000;'>The integration of sensitivities per specified parameters is enabled and the </span>
+<span style='color:#cc0000;'>sensitivities can be reported to the data reporter like any ordinary variable by </span>
+<span style='color:#cc0000;'>setting the boolean property simulation.ReportSensitivities to True.</span>
 
 <span style='color:#cc0000;'>Raw sensitivity matrices can be saved into a specified directory using the </span>
 <span style='color:#cc0000;'>simulation.SensitivityDataDirectory property (before a call to Initialize).</span>
@@ -44,7 +45,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>The plot of the sensitivity of T per Qin:</span>
 <span style='color:#cc0000;'>    </span>
-<span style='color:#cc0000;'>.. image:: _static/tutorial20-results.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_sa_1-results.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
@@ -60,14 +61,14 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#3605fb;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>,       kg,           <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the copper plate&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>,         <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of the plate&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the surroundings&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>,       kg,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),      <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K),  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>,          <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_surr&quot;</span>,  K,             <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the surroundings&quot;</span>)
 
-        <span style='color:#3605fb;'>self</span>.Qin  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Qin&quot;</span>,  power_t,       <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Power of the heater&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.T    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,    temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qin   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Qin&quot;</span>,      power_t,       <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Power of the heater&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,        temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
@@ -79,7 +80,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial20&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_sa_1&quot;</span>)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
@@ -133,7 +134,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
     <span style='color:#017a31;'># Initialize the simulation</span>
     <span style='color:#017a31;'># The .mmx files with the sensitivity matrices will be saved in the temporary folder</span>
-    sensitivity_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'-sensitivities'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial20-'</span>)
+    sensitivity_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'-sensitivities'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_sa_1-'</span>)
     simulation.SensitivityDataDirectory <b><span style='color:#0000ff;'>=</span></b> sensitivity_folder
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
 
@@ -154,9 +155,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
     variables <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
 
+    <span style='color:#017a31;'># Auxiliary functions</span>
+    <b>def</b> sensitivity(variableName, parameterName): 
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_sa_1.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variableName, parameterName)]
+    <b>def</b> variable(variableName):
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_sa_1.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variableName]
+
     <span style='color:#017a31;'># Get the daeDataReceiverVariable objects from the dictionary.</span>
     <span style='color:#017a31;'># This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).</span>
-    dT_dQin_var <b><span style='color:#0000ff;'>=</span></b> variables[<span style='color:#cc0000;'>'tutorial20.sensitivities.d(T)_d(Qin)'</span>]
+    dT_dQin_var <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'T'</span>, <span style='color:#cc0000;'>'Qin'</span>)
 
     <span style='color:#017a31;'># Time points can be taken from any variable (x axis)</span>
     times <b><span style='color:#0000ff;'>=</span></b> dT_dQin_var.TimeValues

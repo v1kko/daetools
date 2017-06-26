@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial21.py
+                           tutorial_cv_1.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -17,10 +17,10 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-Code verification of the sensitivity calculations using the Method of Exact Solutions.
+Code verification using the Method of Exact Solutions.
 
-Here, the numerical sensitivities for the Constant coefficient first order equations 
-are compared to the available analytical solution.
+Here, the numerical solution and numerical sensitivities for the Constant coefficient 
+first order equations are compared to the available analytical solution.
 
 The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.
 The sensitivity data can be obtained in two ways:
@@ -31,7 +31,7 @@ The sensitivity data can be obtained in two ways:
 
 The comparison between the numerical and the analytical sensitivities:
     
-.. image:: _static/tutorial21-results.png
+.. image:: _static/tutorial_cv_1-results.png
    :width: 800px
 """
 import os, sys, numpy, scipy, scipy.io
@@ -101,7 +101,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial21")
+        self.m = modTutorial("tutorial_cv_1")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -268,9 +268,9 @@ def run():
     # Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).
     # daeDataReceiverVariable class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).
     def sensitivity(variableName, parameterName): 
-        return variables['tutorial21.sensitivities.d(%s)_d(%s)' % (variableName, parameterName)]
+        return variables['tutorial_cv_1.sensitivities.d(%s)_d(%s)' % (variableName, parameterName)]
     def variable(variableName):
-        return variables['tutorial21.%s' % variableName]
+        return variables['tutorial_cv_1.%s' % variableName]
 
     # Time points can be taken from any variable (x axis)
     times = sensitivity('y1', 'p1').TimeValues

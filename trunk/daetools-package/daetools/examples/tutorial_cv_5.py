@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial25.py
+                           tutorial_cv_5.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -75,22 +75,22 @@ The mesh is linear (a bar) with a length of 100 m:
 
 The comparison plots for the coarse mesh and linear elements: 
 
-.. image:: _static/tutorial25-results-5_elements-I_order.png
+.. image:: _static/tutorial_cv_5-results-5_elements-I_order.png
    :width: 400 px
 
 The comparison plots for the coarse mesh and quadratic elements: 
 
-.. image:: _static/tutorial25-results-5_elements-II_order.png
+.. image:: _static/tutorial_cv_5-results-5_elements-II_order.png
    :width: 400 px
 
 The comparison plots for the fine mesh and linear elements: 
 
-.. image:: _static/tutorial25-results-20_elements-I_order.png
+.. image:: _static/tutorial_cv_5-results-20_elements-I_order.png
    :width: 400 px
 
 The comparison plots for the fine mesh and quadratic elements: 
 
-.. image:: _static/tutorial25-results-20_elements-II_order.png
+.. image:: _static/tutorial_cv_5-results-20_elements-II_order.png
    :width: 400 px
 """
 
@@ -222,7 +222,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self, mesh, quadratureFormulaOrder):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial25", mesh, quadratureFormulaOrder)
+        self.m = modTutorial("tutorial_cv_5", mesh, quadratureFormulaOrder)
         self.m.Description = __doc__
         self.m.fe_model.Description = __doc__
 
@@ -248,7 +248,7 @@ def simulate(mesh, quadratureFormulaOrder):
     daesolver.SetLASolver(lasolver)
 
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial25-results')
+    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_cv_5-results')
 
     # Create three data reporters:
     # 1. DealII

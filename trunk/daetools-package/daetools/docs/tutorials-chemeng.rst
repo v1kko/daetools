@@ -125,7 +125,6 @@ Chem. Eng. Example 4
 =====================   =================================================================
 Source code             `tutorial_che_4.py <../examples/tutorial_che_4.html>`_
 Analytical solution     `fl_analytical.py <../examples/fl_analytical.html>`_
-Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
 =====================   =================================================================
 
 
@@ -143,7 +142,6 @@ Chem. Eng. Example 5
 =====================   =================================================================
 Source code             `tutorial_che_5.py <../examples/tutorial_che_5.html>`_
 Analytical solution     `fl_analytical.py <../examples/fl_analytical.html>`_
-Flux limiters           `flux_limiters.py <../examples/flux_limiters.html>`_
 =====================   =================================================================
 
 

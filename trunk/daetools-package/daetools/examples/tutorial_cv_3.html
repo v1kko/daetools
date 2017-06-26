@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial23.py</title>
+<title>tutorial_cv_3.py</title>
 </head>
 <!-- Highlighting: "Python" -->
 <body>
@@ -14,7 +14,7 @@
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
-<span style='color:#017a31;'>                           tutorial23.py</span>
+<span style='color:#017a31;'>                           tutorial_cv_3.py</span>
 <span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
@@ -40,7 +40,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>3. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.</span>
 <span style='color:#cc0000;'>   `ISBN-10:0913478121 &lt;http://www.isbnsearch.org/isbn/0913478121&gt;`_</span>
 
-<span style='color:#cc0000;'>The problem in this tutorial is identical to tutorial23. The only difference is that </span>
+<span style='color:#cc0000;'>The problem in this tutorial is identical to tutorial_cv_3. The only difference is that </span>
 <span style='color:#cc0000;'>the Neumann boundary conditions are applied:</span>
 <span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>.. code-block:: none</span>
@@ -50,12 +50,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>Numerical vs. manufactured solution plot (no. elements = 60, t = 1.0s):</span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial23-results.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_3-results.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
 
 <span style='color:#cc0000;'>The normalised global errors and the order of accuracy plots (no. elements = [60, 90, 120, 150], t = 1.0s):</span>
 
-<span style='color:#cc0000;'>.. image:: _static/tutorial23-results2.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_3-results2.png</span>
 <span style='color:#cc0000;'>   :width: 800px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
@@ -122,7 +122,7 @@ no_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Nx):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial23(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> Nx)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_cv_3(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> Nx)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
         
         <span style='color:#3605fb;'>self</span>.Nx <b><span style='color:#0000ff;'>=</span></b> Nx

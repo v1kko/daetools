@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>tutorial21.py</title>
+<title>tutorial_cv_1.py</title>
 </head>
 <!-- Highlighting: "Python" -->
 <body>
@@ -14,7 +14,7 @@
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
-<span style='color:#017a31;'>                           tutorial21.py</span>
+<span style='color:#017a31;'>                           tutorial_cv_1.py</span>
 <span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
 <span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
 <span style='color:#017a31;'>***********************************************************************************</span>
@@ -28,9 +28,10 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>This tutorial illustrates the additional sensitivity analysis features.</span>
-<span style='color:#cc0000;'>Here, the numerical sensitivities for the Constant coefficient first order equations </span>
-<span style='color:#cc0000;'>are compared to the available analytical solution.</span>
+<span style='color:#cc0000;'>Code verification using the Method of Exact Solutions.</span>
+
+<span style='color:#cc0000;'>Here, the numerical solution and numerical sensitivities for the Constant coefficient </span>
+<span style='color:#cc0000;'>first order equations are compared to the available analytical solution.</span>
 
 <span style='color:#cc0000;'>The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.</span>
 <span style='color:#cc0000;'>The sensitivity data can be obtained in two ways:</span>
@@ -41,7 +42,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>The comparison between the numerical and the analytical sensitivities:</span>
 <span style='color:#cc0000;'>    </span>
-<span style='color:#cc0000;'>.. image:: _static/tutorial21-results.png</span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_1-results.png</span>
 <span style='color:#cc0000;'>   :width: 800px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 <span style='color:#3605fb;'>import</span> os, sys, numpy, scipy, scipy.io
@@ -111,7 +112,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <b>class</b> simTutorial(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial21&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_cv_1&quot;</span>)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
     <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
@@ -278,9 +279,9 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).</span>
     <span style='color:#017a31;'># daeDataReceiverVariable class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).</span>
     <b>def</b> sensitivity(variableName, parameterName): 
-        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial21.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variableName, parameterName)]
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_cv_1.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variableName, parameterName)]
     <b>def</b> variable(variableName):
-        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial21.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variableName]
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_cv_1.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variableName]
 
     <span style='color:#017a31;'># Time points can be taken from any variable (x axis)</span>
     times <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'y1'</span>, <span style='color:#cc0000;'>'p1'</span>).TimeValues

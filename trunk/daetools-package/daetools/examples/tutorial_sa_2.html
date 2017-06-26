@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_sa_2.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial_sa_2.py</span>
+<span style='color:#017a31;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                 Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>********************************************************************************</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial illustrates the local derivative-based sensitivity analysis method </span>
+<span style='color:#cc0000;'>available in DAE Tools.</span>
+
+<span style='color:#cc0000;'>The problem is adopted from the section 2.1 of the following article:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- A. Saltelli, M. Ratto, S. Tarantola, F. Campolongo.</span>
+<span style='color:#cc0000;'>  Sensitivity Analysis for Chemical Models. Chem. Rev. (2005), 105(7):2811-2828.</span>
+<span style='color:#cc0000;'>  `doi:10.1021/cr040659d &lt;http://dx.doi.org/10.1021/cr040659d&gt;`_</span>
+<span style='color:#cc0000;'>  </span>
+<span style='color:#cc0000;'>The model is very simple and describes a simple reversible chemical reaction A &lt;-&gt; B, </span>
+<span style='color:#cc0000;'>with reaction rates k1 and k_1 for the direct and inverse reactions, respectively.</span>
+<span style='color:#cc0000;'>The reaction rates are uncertain and are described by continuous random variables </span>
+<span style='color:#cc0000;'>with known probability density functions. The standard deviation is 0.3 for k1 and</span>
+<span style='color:#cc0000;'>1 for k_1. The standard deviation of the concentration of the species A is</span>
+<span style='color:#cc0000;'>approximated using the following expression defined in the article:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: none  </span>
+
+<span style='color:#cc0000;'>   stddev(Ca)**2 = stddev(k1)**2 * (dCa/dk1)**2 + stddev(k_1)**2 * (dCa/dk_1)**2</span>
+
+<span style='color:#cc0000;'>The following derivative-based measures are used in the article:</span>
+
+<span style='color:#cc0000;'>- Derivatives dCa/dk1 and dCa/dk_1 calculated using the forward sensitivity method</span>
+<span style='color:#cc0000;'>- Sigma normalised derivatives:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>  .. code-block:: none  </span>
+<span style='color:#cc0000;'>  </span>
+<span style='color:#cc0000;'>     S(k1)  = stddev(k1) / stddev(Ca) * dCa/dk1</span>
+<span style='color:#cc0000;'>     S(k_1) = stddev(k_1)/ stddev(Ca) * dCa/dk_1</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>The plot of the concentrations, derivatives and sigma normalised derivatives:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_sa_2-results.png</span>
+<span style='color:#cc0000;'>   :width: 800px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> sys, numpy
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
+<span style='color:#3605fb;'>import</span> matplotlib.pyplot <span style='color:#3605fb;'>as</span> plt
+
+k_t                  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;k_t&quot;</span>,                    s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>),  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1E20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-05</span>)
+mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;mass_concentration_t&quot;</span>, kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>),  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1E20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-05</span>)
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        
+        <span style='color:#3605fb;'>self</span>.stddev_k1  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.3</span>
+        <span style='color:#3605fb;'>self</span>.stddev_k_1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>
+
+        <span style='color:#3605fb;'>self</span>.Ca0 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Ca0&quot;</span>, mass_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Initial concentration of the reactant A&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Cb0 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Cb0&quot;</span>, mass_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Initial concentration of the reactant B&quot;</span>)
+
+        <span style='color:#3605fb;'>self</span>.Ca <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Ca&quot;</span>, mass_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration of the reactant A&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Cb <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Cb&quot;</span>, mass_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration of the reactant B&quot;</span>)
+
+        <span style='color:#3605fb;'>self</span>.k1  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;k1&quot;</span>,  k_t,  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reaction rate constant&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k_1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;k_1&quot;</span>, k_t,  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reverse reaction rate constant&quot;</span>)
+        
+        <span style='color:#017a31;'># Dummy variable to make the model dynamic</span>
+        <span style='color:#3605fb;'>self</span>.tau <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;&amp;tau;&quot;</span>, time_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Time elapsed in the process&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Create adouble objects to make equations more readable</span>
+        k1  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k1()
+        k_1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k_1()
+        Ca  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ca()
+        Ca0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ca0()
+        Cb  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Cb()
+        t   <b><span style='color:#0000ff;'>=</span></b> Time()
+        
+        <span style='color:#017a31;'># Reaction rate constants</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Ca&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> Ca <b><span style='color:#0000ff;'>-</span></b> (Ca0 <b><span style='color:#0000ff;'>/</span></b> (k1 <b><span style='color:#0000ff;'>+</span></b> k_1) <b><span style='color:#0000ff;'>*</span></b> (k1 <b><span style='color:#0000ff;'>*</span></b> Exp(<b><span style='color:#0000ff;'>-</span></b>(k1 <b><span style='color:#0000ff;'>+</span></b> k_1)<b><span style='color:#0000ff;'>*</span></b>t) <b><span style='color:#0000ff;'>+</span></b> k_1))
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Cb&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> Cb <b><span style='color:#0000ff;'>-</span></b> (Ca0 <b><span style='color:#0000ff;'>-</span></b> Ca)
+        
+        <span style='color:#017a31;'># Dummy equation to make the model dynamic</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Time&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.tau()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>1.0</span>
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_sa_2&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <b>pass</b>
+    
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.k1.AssignValue(<span style='color:#cc047c;'>3.0</span>)
+        <span style='color:#3605fb;'>self</span>.m.k_1.AssignValue(<span style='color:#cc047c;'>3.0</span>)
+        <span style='color:#3605fb;'>self</span>.m.Ca0.AssignValue(<span style='color:#cc047c;'>1.0</span>)
+        <span style='color:#3605fb;'>self</span>.m.Cb0.AssignValue(<span style='color:#cc047c;'>0.0</span>)
+        <span style='color:#3605fb;'>self</span>.m.tau.SetInitialCondition(<span style='color:#cc047c;'>0.0</span>)
+
+    <b>def</b> SetUpSensitivityAnalysis(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># order matters</span>
+        <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.k1)
+        <span style='color:#3605fb;'>self</span>.SetSensitivityParameter(<span style='color:#3605fb;'>self</span>.m.k_1)
+
+<b>def</b> run():
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    
+    <span style='color:#017a31;'># Enable reporting of sensitivities for all reported variables</span>
+    simulation.ReportSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.025</span> <span style='color:#017a31;'># 1.5 min</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span>   <span style='color:#017a31;'># 0.5 hour</span>
+
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+
+    <span style='color:#017a31;'># 1. TCP/IP</span>
+    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
+        sys.exit()
+
+    <span style='color:#017a31;'># 2. Data</span>
+    dr <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr)
+
+    <span style='color:#017a31;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
+
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#017a31;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+    
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'>#  Data                                   #</span>
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
+    variables <b><span style='color:#0000ff;'>=</span></b> dr.Process.dictVariables
+    
+    <span style='color:#017a31;'># Auxiliary functions</span>
+    <b>def</b> sensitivity(variableName, parameterName): 
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_sa_2.sensitivities.d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)_d(</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (variableName, parameterName)]
+    <b>def</b> variable(variableName):
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_sa_2.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variableName]
+
+    Ca_var       <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'Ca'</span>)
+    Cb_var       <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'Cb'</span>)
+    dCa_dk1_var  <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'Ca'</span>, <span style='color:#cc0000;'>'k1'</span>)
+    dCa_dk_1_var <b><span style='color:#0000ff;'>=</span></b> sensitivity(<span style='color:#cc0000;'>'Ca'</span>, <span style='color:#cc0000;'>'k_1'</span>)
+
+    times      <b><span style='color:#0000ff;'>=</span></b> Ca_var.TimeValues
+    Ca         <b><span style='color:#0000ff;'>=</span></b> Ca_var.Values[:]
+    Cb         <b><span style='color:#0000ff;'>=</span></b> Cb_var.Values[:]
+    
+    <span style='color:#017a31;'># Absolute values of the derivative based sensitivities:</span>
+    dCa_dk1    <b><span style='color:#0000ff;'>=</span></b> numpy.<span style='color:#2a00d6;'>abs</span>(dCa_dk1_var.Values[:])
+    dCa_dk_1   <b><span style='color:#0000ff;'>=</span></b> numpy.<span style='color:#2a00d6;'>abs</span>(dCa_dk_1_var.Values[:])
+    
+    <span style='color:#017a31;'># Standard deviations of k1, k_1 and Ca:</span>
+    stddev_k1  <b><span style='color:#0000ff;'>=</span></b> simulation.m.stddev_k1
+    stddev_k_1 <b><span style='color:#0000ff;'>=</span></b> simulation.m.stddev_k_1
+    stddev_Ca  <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt(stddev_k1<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> dCa_dk1<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>+</span></b> stddev_k_1<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> dCa_dk_1<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
+    stddev_Ca[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-20</span> <span style='color:#017a31;'># to avoid division by zero</span>
+    
+    <span style='color:#017a31;'># A dimensionless version of the derivative based sensitivities (sigma normalised):</span>
+    Sk1  <b><span style='color:#0000ff;'>=</span></b> (stddev_k1 <b><span style='color:#0000ff;'>/</span></b>stddev_Ca) <b><span style='color:#0000ff;'>*</span></b> dCa_dk1
+    Sk_1 <b><span style='color:#0000ff;'>=</span></b> (stddev_k_1<b><span style='color:#0000ff;'>/</span></b>stddev_Ca) <b><span style='color:#0000ff;'>*</span></b> dCa_dk_1
+    
+    <span style='color:#017a31;'># Plot Ca, Cb and sensitivities</span>
+    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>6</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>221</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.plot(times, Ca, <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Ca'</span>)
+    plt.plot(times, Cb, <span style='color:#cc0000;'>'r-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Cb'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'time'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'C'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
+        
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>223</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.plot(times[<span style='color:#cc047c;'>1</span>:], dCa_dk1[<span style='color:#cc047c;'>1</span>:],  <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'d(Ca)/d(k1)'</span>)
+    plt.plot(times[<span style='color:#cc047c;'>1</span>:], dCa_dk_1[<span style='color:#cc047c;'>1</span>:], <span style='color:#cc0000;'>'b:'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'d(Ca)/d(k-1)'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'time'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'dC/dk'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
+        
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>224</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.plot(times[<span style='color:#cc047c;'>1</span>:], Sk1[<span style='color:#cc047c;'>1</span>:],  <span style='color:#cc0000;'>'g-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Sk1'</span>)
+    plt.plot(times[<span style='color:#cc047c;'>1</span>:], Sk_1[<span style='color:#cc047c;'>1</span>:], <span style='color:#cc0000;'>'g:'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Sk-1'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'time'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'Sk'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    plt.grid(b<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, which<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'both'</span>, color<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'0.65'</span>,linestyle<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'-'</span>)
+    
+    plt.tight_layout()
+    plt.show()
+
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    run()
+</pre>
+</body>
+</html>

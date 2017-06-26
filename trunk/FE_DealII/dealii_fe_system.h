@@ -25,6 +25,31 @@ adouble getValueFromNumber(const feRuntimeNumber<dim>& fe_number)
     return adouble();
 }
 
+inline bool hasNonzeroValue(adouble& a)
+{
+    if(a.node)
+    {
+        adConstantNode* cn = dynamic_cast<adConstantNode*>(a.node.get());
+        if(cn)
+        {
+            if(cn->m_quantity.getValue() == 0)
+                return false;
+             else
+                return true;
+        }
+        else
+            return true;
+    }
+    else if(a.getValue() != 0.0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 /******************************************************************
     dealiiFiniteElementDOF<dim>
 *******************************************************************/
@@ -412,7 +437,8 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
                     if(res.node)
                         res.node = adNode::SimplifyNode(res.node);
 
-                    cell_matrix(i,j) += res;
+                    if(hasNonzeroValue(res))
+                        cell_matrix(i,j) += res;
                 }
 
                 /* Mass matrix (Mij) */
@@ -426,7 +452,8 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
                     if(res.node)
                         res.node = adNode::SimplifyNode(res.node);
 
-                    cell_matrix_dt(i,j) += res;
+                    if(hasNonzeroValue(res))
+                        cell_matrix_dt(i,j) += res;
                 }
             }
 
@@ -443,7 +470,8 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
                 if(res.node)
                     res.node = adNode::SimplifyNode(res.node);
 
-                cell_rhs[i] += res;
+                if(hasNonzeroValue(res))
+                    cell_rhs[i] += res;
             }
         }
     }
@@ -487,7 +515,8 @@ void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int
                     if(res.node)
                         res.node = adNode::SimplifyNode(res.node);
 
-                    cell_matrix(i,j) += res;
+                    if(hasNonzeroValue(res))
+                        cell_matrix(i,j) += res;
                 }
             }
 
@@ -507,7 +536,8 @@ void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int
                 if(res.node)
                     res.node = adNode::SimplifyNode(res.node);
 
-                cell_rhs[i] += res;
+                if(hasNonzeroValue(res))
+                    cell_rhs[i] += res;
             }
         }
     }
@@ -558,7 +588,8 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
                         if(res.node)
                             res.node = adNode::SimplifyNode(res.node);
 
-                        cell_matrix(i,j) += res;
+                        if(hasNonzeroValue(res))
+                            cell_matrix(i,j) += res;
                     }
                 }
 
@@ -578,7 +609,8 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
                     if(res.node)
                         res.node = adNode::SimplifyNode(res.node);
 
-                    cell_rhs[i] += res;
+                    if(hasNonzeroValue(res))
+                        cell_rhs[i] += res;
                 }
             }
         }
@@ -624,7 +656,8 @@ void dealiiFiniteElementSystem<dim>::integrate_volume_integrals(const unsigned i
                     if(res.node)
                         res.node = adNode::SimplifyNode(res.node);
 
-                    adIntegral += res;
+                    if(hasNonzeroValue(res))
+                        adIntegral += res;
                 }
             }
         }
@@ -685,7 +718,8 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
                     if(res.node)
                         res.node = adNode::SimplifyNode(res.node);
 
-                    adIntegral += res;
+                    if(hasNonzeroValue(res))
+                        adIntegral += res;
                 }
             }
 
@@ -964,10 +998,13 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         {
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
             {
-                system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
-                system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
+                if(hasNonzeroValue( cell_matrix(i,j) ))
+                    system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
+
+                if(hasNonzeroValue( cell_matrix_dt(i,j) ))
+                    system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
             }
-            if(cell_rhs[i].node || cell_rhs[i].getValue() != 0.0)
+            if(hasNonzeroValue( cell_rhs[i] ))
                 system_rhs(local_dof_indices[i]) += cell_rhs[i];
         }
         

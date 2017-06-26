@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_sa_3.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span><span style='color:#017a31;'>********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial_sa_3.py</span>
+<span style='color:#017a31;'>                 DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                 Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>********************************************************************************</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial illustrates the global variance-based sensitivity analysis methods</span>
+<span style='color:#cc0000;'>available in the SALib python library.</span>
+
+<span style='color:#cc0000;'>The problem is adopted from the section 2.6 of the following article:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- A. Saltelli, M. Ratto, S. Tarantola, F. Campolongo.</span>
+<span style='color:#cc0000;'>  Sensitivity Analysis for Chemical Models. Chem. Rev. (2005), 105(7):2811-2828.</span>
+<span style='color:#cc0000;'>  `doi:10.1021/cr040659d &lt;http://dx.doi.org/10.1021/cr040659d&gt;`_</span>
+<span style='color:#cc0000;'>  </span>
+<span style='color:#cc0000;'>The model describes a thermal analysis of a batch reactor, with exothermic </span>
+<span style='color:#cc0000;'>reaction A -&gt; B. The model equations are written in dimensionless form.</span>
+
+<span style='color:#cc0000;'>Three global sensitivity analysis methods available in SALib are applied:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- Morris (Elementary Effect/Screening method)</span>
+<span style='color:#cc0000;'>- Sobol (Variance-based methods)</span>
+<span style='color:#cc0000;'>- FAST (Variance-based methods)</span>
+
+<span style='color:#cc0000;'>Results from the sensitivity analysis:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: none  </span>
+
+<span style='color:#cc0000;'> -------------------------------------------------------</span>
+<span style='color:#cc0000;'>        Morris (N = 510)</span>
+<span style='color:#cc0000;'> -------------------------------------------------------</span>
+<span style='color:#cc0000;'>     Param          mu        mu*   mu*_conf      Sigma</span>
+<span style='color:#cc0000;'>         B    0.311943   0.311943   0.115717   0.540381</span>
+<span style='color:#cc0000;'>     gamma   -0.046577   0.052157   0.022149   0.107576</span>
+<span style='color:#cc0000;'>       psi    0.295973   0.295973   0.116256   0.528287</span>
+<span style='color:#cc0000;'>   theta_a    0.215855   0.215855   0.083293   0.411367</span>
+<span style='color:#cc0000;'>   theta_0    0.011023   0.011312   0.006351   0.031471</span>
+<span style='color:#cc0000;'> -------------------------------------------------------</span>
+
+<span style='color:#cc0000;'> -------------------------------------------------------</span>
+<span style='color:#cc0000;'>        Sobol (N = 6144)</span>
+<span style='color:#cc0000;'> -------------------------------------------------------</span>
+<span style='color:#cc0000;'>     Param          S1    S1_conf         ST    ST_conf</span>
+<span style='color:#cc0000;'>         B    0.094110   0.089475   0.581946   0.150334</span>
+<span style='color:#cc0000;'>     gamma   -0.002416   0.011938   0.044354   0.028461</span>
+<span style='color:#cc0000;'>       psi    0.171040   0.097859   0.524576   0.140252</span>
+<span style='color:#cc0000;'>   theta_a    0.072511   0.043878   0.523382   0.177241</span>
+<span style='color:#cc0000;'>   theta_0    0.002343   0.004746   0.008174   0.007650</span>
+
+<span style='color:#cc0000;'> Parameter pairs          S2    S2_conf</span>
+<span style='color:#cc0000;'>         B/gamma    0.180434   0.153318</span>
+<span style='color:#cc0000;'>           B/psi    0.260698   0.172012</span>
+<span style='color:#cc0000;'>       B/theta_a    0.143292   0.145452</span>
+<span style='color:#cc0000;'>       B/theta_0    0.177137   0.150218</span>
+<span style='color:#cc0000;'>       gamma/psi    0.000981   0.024855</span>
+<span style='color:#cc0000;'>   gamma/theta_a    0.004953   0.040380</span>
+<span style='color:#cc0000;'>   gamma/theta_0   -0.009390   0.027726</span>
+<span style='color:#cc0000;'>     psi/theta_a    0.166102   0.173568</span>
+<span style='color:#cc0000;'>     psi/theta_0   -0.016474   0.132210</span>
+<span style='color:#cc0000;'> theta_a/theta_0    0.109086   0.112104</span>
+<span style='color:#cc0000;'> -------------------------------------------------------</span>
+
+<span style='color:#cc0000;'> ---------------------------------</span>
+<span style='color:#cc0000;'>        FAST (N = 6150)</span>
+<span style='color:#cc0000;'> ---------------------------------</span>
+<span style='color:#cc0000;'>     Param          S1         ST</span>
+<span style='color:#cc0000;'>         B    0.131657   0.555142</span>
+<span style='color:#cc0000;'>     gamma    0.000741   0.029047</span>
+<span style='color:#cc0000;'>       psi    0.174270   0.600936</span>
+<span style='color:#cc0000;'>   theta_a    0.142095   0.518529</span>
+<span style='color:#cc0000;'>   theta_0    0.001094   0.039504</span>
+<span style='color:#cc0000;'> ---------------------------------</span>
+
+
+<span style='color:#cc0000;'>The scatter plot for the Morris method:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_sa_3-scatter_morris.png</span>
+<span style='color:#cc0000;'>   :width: 800px</span>
+
+<span style='color:#cc0000;'>The scatter plot for the Sobol method:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_sa_3-scatter_sobol.png</span>
+<span style='color:#cc0000;'>   :width: 800px</span>
+
+<span style='color:#cc0000;'>The scatter plot for the FAST method:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_sa_3-scatter_fast.png</span>
+<span style='color:#cc0000;'>   :width: 800px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> sys, numpy
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
+<span style='color:#3605fb;'>import</span> matplotlib.pyplot <span style='color:#3605fb;'>as</span> plt
+
+k_t                  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;k_t&quot;</span>,                    s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>),  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1E20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-05</span>)
+mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;mass_concentration_t&quot;</span>, kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>),  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1E20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-05</span>)
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        
+        <span style='color:#3605fb;'>self</span>.n       <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;n&quot;</span>,    unit(), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        
+        <span style='color:#3605fb;'>self</span>.B       <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;B&quot;</span>,       no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.theta_a <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;theta_a&quot;</span>, no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.psi     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;psi&quot;</span>,     no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.gamma   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;gamma&quot;</span>,   no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.x       <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;x&quot;</span>,       no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.theta   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;theta&quot;</span>,   no_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Create adouble objects to make equations more readable</span>
+        B         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.B()
+        theta     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.theta()
+        theta_a   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.theta_a()
+        gamma     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.gamma()
+        x         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x()
+        psi       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.psi()
+        n         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.n()
+        t         <b><span style='color:#0000ff;'>=</span></b> Time()
+        dx_dt     <b><span style='color:#0000ff;'>=</span></b> dt(x)
+        dtheta_dt <b><span style='color:#0000ff;'>=</span></b> dt(theta)
+        
+        <span style='color:#017a31;'># Reaction rate constants</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;x&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dx_dt <b><span style='color:#0000ff;'>-</span></b> Exp(theta <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> theta<b><span style='color:#0000ff;'>/</span></b>gamma)) <b><span style='color:#0000ff;'>*</span></b> ((<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> x) <b><span style='color:#0000ff;'>**</span></b> n)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;theta&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dtheta_dt <b><span style='color:#0000ff;'>-</span></b> ( B <b><span style='color:#0000ff;'>*</span></b> Exp(theta <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> theta<b><span style='color:#0000ff;'>/</span></b>gamma)) <b><span style='color:#0000ff;'>*</span></b> ((<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> x) <b><span style='color:#0000ff;'>**</span></b> n) <b><span style='color:#0000ff;'>-</span></b> B<b><span style='color:#0000ff;'>/</span></b>psi <b><span style='color:#0000ff;'>*</span></b> (theta <b><span style='color:#0000ff;'>-</span></b> theta_a) )
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, n, B, gamma, psi, theta_a, x_0, theta_0):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_sa_3&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+        
+        <span style='color:#3605fb;'>self</span>.n       <b><span style='color:#0000ff;'>=</span></b> n
+        <span style='color:#3605fb;'>self</span>.B       <b><span style='color:#0000ff;'>=</span></b> B
+        <span style='color:#3605fb;'>self</span>.gamma   <b><span style='color:#0000ff;'>=</span></b> gamma
+        <span style='color:#3605fb;'>self</span>.psi     <b><span style='color:#0000ff;'>=</span></b> psi
+        <span style='color:#3605fb;'>self</span>.theta_a <b><span style='color:#0000ff;'>=</span></b> theta_a
+        <span style='color:#3605fb;'>self</span>.x_0     <b><span style='color:#0000ff;'>=</span></b> x_0
+        <span style='color:#3605fb;'>self</span>.theta_0 <b><span style='color:#0000ff;'>=</span></b> theta_0
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.n.SetValue(<span style='color:#3605fb;'>self</span>.n)
+    
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.B.AssignValue(<span style='color:#3605fb;'>self</span>.B)
+        <span style='color:#3605fb;'>self</span>.m.gamma.AssignValue(<span style='color:#3605fb;'>self</span>.gamma)
+        <span style='color:#3605fb;'>self</span>.m.psi.AssignValue(<span style='color:#3605fb;'>self</span>.psi)
+        <span style='color:#3605fb;'>self</span>.m.theta_a.AssignValue(<span style='color:#3605fb;'>self</span>.theta_a)
+        
+        <span style='color:#3605fb;'>self</span>.m.x.SetInitialCondition(<span style='color:#3605fb;'>self</span>.x_0)
+        <span style='color:#3605fb;'>self</span>.m.theta.SetInitialCondition(<span style='color:#3605fb;'>self</span>.theta_0)
+
+<b>def</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial(n, B, gamma, psi, theta_a, x_0, theta_0)
+
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.002</span> <span style='color:#017a31;'># </span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.2</span>  <span style='color:#017a31;'># 0.5 hour</span>
+
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>]-</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.m.Name, run_no, strftime(<span style='color:#cc0000;'>&quot;[</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime()))
+
+    <span style='color:#017a31;'># 1. TCP/IP</span>
+    <span style='color:#017a31;'>#tcpipDataReporter = daeTCPIPDataReporter()</span>
+    <span style='color:#017a31;'>#datareporter.AddDataReporter(tcpipDataReporter)</span>
+    <span style='color:#017a31;'>#if not tcpipDataReporter.Connect(&quot;&quot;, simName):</span>
+    <span style='color:#017a31;'>#    sys.exit()</span>
+
+    <span style='color:#017a31;'># 2. Data</span>
+    dr <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr)
+
+    <span style='color:#017a31;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    <span style='color:#017a31;'>#simulation.m.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
+    <span style='color:#017a31;'>#simulation.m.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#017a31;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+    
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'>#  Data                                   #</span>
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
+    variables <b><span style='color:#0000ff;'>=</span></b> dr.Process.dictVariables
+    
+    <span style='color:#017a31;'># Auxiliary functions</span>
+    <b>def</b> variable(variableName):
+        <b>return</b> variables[<span style='color:#cc0000;'>'tutorial_sa_3.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> variableName]
+
+    theta_var <b><span style='color:#0000ff;'>=</span></b> variable(<span style='color:#cc0000;'>'theta'</span>)
+    theta <b><span style='color:#0000ff;'>=</span></b> theta_var.Values[:]
+    
+    <b>return</b> numpy.<span style='color:#2a00d6;'>max</span>(theta)
+
+<b>def</b> run():
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># 1. Selection of the global sensitivity method.</span>
+    <span style='color:#017a31;'>#    Available methods:</span>
+    <span style='color:#017a31;'>#     - Morris (Elementary Effect/Screening method)</span>
+    <span style='color:#017a31;'>#     - Sobol  (Variance based method)</span>
+    <span style='color:#017a31;'>#     - FAST   (Variance based method)</span>
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    SA_method <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Morris'</span>
+    
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># 2. Definition of the model inputs (used by all methods).</span>
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    problem <b><span style='color:#0000ff;'>=</span></b> {
+        <span style='color:#cc0000;'>'num_vars'</span>: <span style='color:#cc047c;'>5</span>,
+        <span style='color:#cc0000;'>'names'</span>: [<span style='color:#cc0000;'>'B'</span>, <span style='color:#cc0000;'>'gamma'</span>, <span style='color:#cc0000;'>'psi'</span>, <span style='color:#cc0000;'>'theta_a'</span>, <span style='color:#cc0000;'>'theta_0'</span>],
+        <span style='color:#cc0000;'>'bounds'</span>: [[<span style='color:#cc047c;'>10</span>, <span style='color:#cc047c;'>30</span>],    <span style='color:#017a31;'># B</span>
+                   [<span style='color:#cc047c;'>15</span>, <span style='color:#cc047c;'>25</span>],    <span style='color:#017a31;'># gamma</span>
+                   [<span style='color:#cc047c;'>0.4</span>, <span style='color:#cc047c;'>0.6</span>],  <span style='color:#017a31;'># psi</span>
+                   [<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.2</span>, <span style='color:#cc047c;'>0.2</span>], <span style='color:#017a31;'># theta_a</span>
+                   [<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.2</span>, <span style='color:#cc047c;'>0.2</span>]  <span style='color:#017a31;'># theta_0</span>
+                  ]
+              }
+    
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># 3. Generation of samples (Morris, FAST or Sobol sampling).</span>
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
+        <span style='color:#3605fb;'>from</span> SALib.sample.morris <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> SALib.analyze.morris <span style='color:#3605fb;'>import</span> analyze
+        
+        <span style='color:#017a31;'># Generate samples using the Morris method.</span>
+        <span style='color:#017a31;'># Sample size n=85, no. params k=5 =&gt; N=(k+1)*n=510 (512 in the referenced article).</span>
+        param_values <b><span style='color:#0000ff;'>=</span></b> sample(problem, <span style='color:#cc047c;'>85</span>, num_levels<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>, grid_jump<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>2</span>)
+        
+        N <b><span style='color:#0000ff;'>=</span></b> param_values.shape[<span style='color:#cc047c;'>0</span>]
+
+        B       <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>0</span>] 
+        gamma   <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>1</span>] 
+        psi     <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>2</span>]
+        theta_a <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>3</span>] 
+        theta_0 <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>4</span>]
+    
+    <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Sobol'</span>:
+        <span style='color:#3605fb;'>from</span> SALib.sample.saltelli <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> SALib.analyze.sobol <span style='color:#3605fb;'>import</span> analyze
+        
+        <span style='color:#017a31;'># Generate samples using a Saltelli's extension of the Sobol sequence.</span>
+        <span style='color:#017a31;'># Sample size n=512, no. params k=5 =&gt; N=(2k+2)*n=6144 (as in the referenced article).</span>
+        param_values <b><span style='color:#0000ff;'>=</span></b> sample(problem, <span style='color:#cc047c;'>512</span>, calc_second_order<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>)
+        
+        N <b><span style='color:#0000ff;'>=</span></b> param_values.shape[<span style='color:#cc047c;'>0</span>]
+        
+        B       <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>0</span>] 
+        gamma   <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>1</span>] 
+        psi     <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>2</span>]
+        theta_a <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>3</span>] 
+        theta_0 <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>4</span>]
+    
+    <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'FAST'</span>:
+        <span style='color:#3605fb;'>from</span> SALib.sample.fast_sampler <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> SALib.analyze.fast <span style='color:#3605fb;'>import</span> analyze
+        
+        <span style='color:#017a31;'># Generate samples using a FAST method.</span>
+        <span style='color:#017a31;'># Sample size n=1230, no. params k=5 =&gt; N=k*n=6150.</span>
+        param_values <b><span style='color:#0000ff;'>=</span></b> sample(problem, <span style='color:#cc047c;'>1230</span>, M<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>)
+        
+        N <b><span style='color:#0000ff;'>=</span></b> param_values.shape[<span style='color:#cc047c;'>0</span>]
+        
+        B       <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>0</span>] 
+        gamma   <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>1</span>] 
+        psi     <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>2</span>]
+        theta_a <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>3</span>] 
+        theta_0 <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>4</span>]
+           
+    <b>else</b>: 
+        <span style='color:#017a31;'># Generate sample manually using numpy.random functions.</span>
+        <span style='color:#017a31;'># Only scatter plots will be generated (no Sensitivity Analysis).</span>
+        N <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>6144</span>
+        
+        B       <b><span style='color:#0000ff;'>=</span></b> numpy.random.normal (loc<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>20.0</span>, scale<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4.0</span>, size<b><span style='color:#0000ff;'>=</span></b>N)
+        gamma   <b><span style='color:#0000ff;'>=</span></b> numpy.random.normal (loc<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>20.0</span>, scale<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>2.0</span>, size<b><span style='color:#0000ff;'>=</span></b>N)
+        psi     <b><span style='color:#0000ff;'>=</span></b> numpy.random.uniform(low<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.4</span>,  high<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.6</span>,  size<b><span style='color:#0000ff;'>=</span></b>N)
+        theta_a <b><span style='color:#0000ff;'>=</span></b> numpy.random.normal (loc<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.0</span>,  scale<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.2</span>, size<b><span style='color:#0000ff;'>=</span></b>N)
+        theta_0 <b><span style='color:#0000ff;'>=</span></b> numpy.random.normal (loc<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.0</span>,  scale<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.2</span>, size<b><span style='color:#0000ff;'>=</span></b>N)
+
+    <span style='color:#017a31;'>#print(N)</span>
+
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># 4. Generation of outputs for a given input matrix (daetools).</span>
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    theta_max  <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N)
+    <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N): 
+        theta_max[i] <b><span style='color:#0000ff;'>=</span></b> simulate(run_no  <b><span style='color:#0000ff;'>=</span></b> i,
+                                n       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                B       <b><span style='color:#0000ff;'>=</span></b> B[i], 
+                                gamma   <b><span style='color:#0000ff;'>=</span></b> gamma[i], 
+                                psi     <b><span style='color:#0000ff;'>=</span></b> psi[i], 
+                                theta_a <b><span style='color:#0000ff;'>=</span></b> theta_a[i], 
+                                x_0     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>, 
+                                theta_0 <b><span style='color:#0000ff;'>=</span></b> theta_0[i])
+        
+    <span style='color:#017a31;'># Transform theta_max: (T0-T)*gamma/T0 into the Max. rise in temperature: (Tmax-T0)/T0</span>
+    max_rise_T <b><span style='color:#0000ff;'>=</span></b> theta_max <b><span style='color:#0000ff;'>/</span></b> gamma
+    
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># 5. Perform Sensitivity Analysis (Morris, FAST or Sobol methods).</span>
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    num_vars <b><span style='color:#0000ff;'>=</span></b> problem[<span style='color:#cc0000;'>'num_vars'</span>]
+    names <b><span style='color:#0000ff;'>=</span></b> problem[<span style='color:#cc0000;'>'names'</span>]
+    
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>'</span>)
+    <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
+        res <b><span style='color:#0000ff;'>=</span></b> analyze(problem, param_values, max_rise_T, conf_level<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.95</span>, print_to_console<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, num_levels<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>, grid_jump<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>2</span>)
+        
+        mu           <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'mu'</span>]
+        mu_star      <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'mu_star'</span>]
+        mu_star_conf <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'mu_star_conf'</span>]
+        S            <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'sigma'</span>]
+        
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'-------------------------------------------------------'</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'       </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> (N = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (SA_method, N))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'-------------------------------------------------------'</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (<span style='color:#cc0000;'>'Param'</span>, <span style='color:#cc0000;'>'mu'</span>, <span style='color:#cc0000;'>'mu*'</span>, <span style='color:#cc0000;'>'mu*_conf'</span>, <span style='color:#cc0000;'>'Sigma'</span>))
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(num_vars):
+            <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (names[i], mu[i], mu_star[i], mu_star_conf[i], S[i]))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'-------------------------------------------------------'</span>)
+    
+    <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Sobol'</span>:
+        res <b><span style='color:#0000ff;'>=</span></b> analyze(problem, max_rise_T, print_to_console<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>False</span>)
+        
+        S1      <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'S1'</span>]
+        S1_conf <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'S1_conf'</span>]
+        ST      <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'ST'</span>]
+        ST_conf <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'ST_conf'</span>]
+        S2      <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'S2'</span>]
+        S2_conf <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'S2_conf'</span>]
+        
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'-------------------------------------------------------'</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'       </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> (N = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (SA_method, N))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'-------------------------------------------------------'</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (<span style='color:#cc0000;'>'Param'</span>, <span style='color:#cc0000;'>'S1'</span>, <span style='color:#cc0000;'>'S1_conf'</span>, <span style='color:#cc0000;'>'ST'</span>, <span style='color:#cc0000;'>'ST_conf'</span>))
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(num_vars):
+            <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (names[i], S1[i], S1_conf[i], ST[i], ST_conf[i]))
+
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>''</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%16s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (<span style='color:#cc0000;'>'Parameter pairs'</span>, <span style='color:#cc0000;'>'S2'</span>, <span style='color:#cc0000;'>'S2_conf'</span>))
+        <span style='color:#017a31;'># S2 matrix is symmetric so take care of its symmetry while printing interactions</span>
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(num_vars):
+            <b>for</b> j <b>in</b> <span style='color:#2a00d6;'>range</span>(i<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc047c;'>1</span>, num_vars):
+                <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%16s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (names[i]<b><span style='color:#0000ff;'>+</span></b><span style='color:#cc0000;'>'/'</span><b><span style='color:#0000ff;'>+</span></b>names[j], S2[i,j], S2_conf[i,j]))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'-------------------------------------------------------'</span>)
+    
+    <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'FAST'</span>:
+        res <b><span style='color:#0000ff;'>=</span></b> analyze(problem, max_rise_T, M<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>, print_to_console<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>)
+        
+        S1 <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'S1'</span>]
+        ST <b><span style='color:#0000ff;'>=</span></b> res[<span style='color:#cc0000;'>'ST'</span>]
+        
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'---------------------------------'</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'       </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> (N = </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> (SA_method, N))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'---------------------------------'</span>)
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (<span style='color:#cc0000;'>'Param'</span>, <span style='color:#cc0000;'>'S1'</span>, <span style='color:#cc0000;'>'ST'</span>))
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(num_vars):
+            <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%10s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'> </span><span style='color:#cc0000;'>%10f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (names[i], S1[i], ST[i]))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'---------------------------------'</span>)
+    
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'># 6. Generate scatter plots.</span>
+    <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
+    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>8</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>231</span>)
+    plt.scatter(B, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'b'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'B'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'max rise in T'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.xlim((<span style='color:#cc047c;'>10</span>, <span style='color:#cc047c;'>30</span>))
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>232</span>)
+    plt.scatter(gamma, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'r'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'gamma'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'max rise in T'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.xlim((<span style='color:#cc047c;'>15</span>, <span style='color:#cc047c;'>25</span>))
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>233</span>)
+    plt.scatter(theta_a, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'g'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'theta_a'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'max rise in T'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.xlim((<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.2</span>, <span style='color:#cc047c;'>0.2</span>))
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>234</span>)
+    plt.scatter(theta_0, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'k'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'theta_0'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'max rise in T'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.xlim((<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>0.2</span>, <span style='color:#cc047c;'>0.2</span>))
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>235</span>)
+    plt.scatter(psi, max_rise_T, c<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'m'</span>, s<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>6</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'psi'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'max rise in T'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.xlim((<span style='color:#cc047c;'>0.4</span>, <span style='color:#cc047c;'>0.6</span>))
+    
+    plt.tight_layout()
+    plt.show()
+    
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    run()
+</pre>
+</body>
+</html>

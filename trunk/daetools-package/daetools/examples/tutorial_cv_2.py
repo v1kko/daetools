@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial22.py
+                           tutorial_cv_2.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -75,12 +75,12 @@ The equations are solved for Dirichlet boundary conditions:
 
 Numerical vs. manufactured solution plot (no. elements = 60, t = 1.0s):
 
-.. image:: _static/tutorial22-results.png
+.. image:: _static/tutorial_cv_2-results.png
    :width: 500px
 
 The normalised global errors and the order of accuracy plots (no. elements = [60, 90, 120, 150], t = 1.0s):
 
-.. image:: _static/tutorial22-results2.png
+.. image:: _static/tutorial_cv_2-results2.png
    :width: 800px
 """
 
@@ -147,7 +147,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self, Nx):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial22(%d)" % Nx)
+        self.m = modTutorial("tutorial_cv_2(%d)" % Nx)
         self.m.Description = __doc__
         
         self.Nx = Nx

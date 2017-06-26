@@ -810,6 +810,33 @@ class dae2DPlot(QtWidgets.QDialog):
         self._addNewCurve(variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, xPoints, yPoints, currentTime, None, None)
 
         return True
+    
+    def newVar1_vs_Var2Curve(self):
+        processes = self.plotter.getProcesses()
+        
+        if not self._cv_dlg:
+            self._cv_dlg = daeChooseVariable(self.plotType)
+        self._cv_dlg.updateProcessesList(processes)
+        
+        self._cv_dlg.setWindowTitle('Choose the 1st variable (x axis) for 2D plot')
+        if self._cv_dlg.exec_() != QtWidgets.QDialog.Accepted:
+            return False
+
+        variable1, domainIndexes1, domainPoints1, xAxisLabel1, yAxisLabel1, xPoints1, yPoints1, currentTime1 = self._cv_dlg.getPlot2DData()
+        
+        self._cv_dlg.setWindowTitle('Choose the 2nd variable (y axis) for 2D plot')
+        if self._cv_dlg.exec_() != QtWidgets.QDialog.Accepted:
+            return False
+
+        variable2, domainIndexes2, domainPoints2, xAxisLabel2, yAxisLabel2, xPoints2, yPoints2, currentTime2 = self._cv_dlg.getPlot2DData()
+        
+        if len(yPoints1) != len(yPoints2):
+            QtWidgets.QMessageBox.warning(None, 'Variable1 vs. variable2 2D plot', 'The number of points in variables do not match')
+            return False
+        
+        self._addNewCurve(variable2, domainIndexes2, domainPoints2, yAxisLabel1, yAxisLabel2, yPoints1, yPoints2, currentTime2, None, None)
+
+        return True
 
     #@QtCore.pyqtSlot()
     def newAnimatedCurve(self):

@@ -20,11 +20,19 @@ All Tutorials
    :start-after: begin-command
    :end-before: end-command
 
+.. include:: tutorials-cv.rst
+   :start-after: begin-command
+   :end-before: end-command
+
 .. include:: tutorials-fe.rst
    :start-after: begin-command
    :end-before: end-command
    
 .. include:: tutorials-chemeng.rst
+   :start-after: begin-command
+   :end-before: end-command
+
+.. include:: tutorials-sa.rst
    :start-after: begin-command
    :end-before: end-command
 

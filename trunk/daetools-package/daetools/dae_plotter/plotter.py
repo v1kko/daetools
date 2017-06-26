@@ -75,6 +75,11 @@ class daeMainWindow(QtWidgets.QMainWindow):
         animatedPlot2D.setStatusTip('New animated 2D plot')
         animatedPlot2D.triggered.connect(self.plot2DAnimated)
 
+        var1VSvar2Plot2D = QtWidgets.QAction('New variable1 vs. variable2 2D plot...', self)
+        var1VSvar2Plot2D.setShortcut('Ctrl+B')
+        var1VSvar2Plot2D.setStatusTip('New variable1 vs. variable2 2D plot')
+        var1VSvar2Plot2D.triggered.connect(self.plot2D_Var1_v_var2)
+
         customPlots = QtWidgets.QAction('New user-defined plot...', self)
         customPlots.setShortcut('Ctrl+C')
         customPlots.setStatusTip('New user-defined plot')
@@ -136,6 +141,7 @@ class daeMainWindow(QtWidgets.QMainWindow):
         plot.addAction(plot2D)
         plot.addAction(autoupdatePlot2D)
         plot.addAction(animatedPlot2D)
+        plot.addAction(var1VSvar2Plot2D)
         plot.addAction(plot3D)
         #plot.addAction(matplotlibSurfacePlot)
         plot.addAction(customPlots)
@@ -256,6 +262,15 @@ class daeMainWindow(QtWidgets.QMainWindow):
 
         plot2D.show()
 
+    def plot2D_Var1_v_var2(self):
+        plot2D = dae2DPlot(self, 0)
+        if plot2D.newVar1_vs_Var2Curve() == False:
+            plot2D.close()
+            del plot2D
+            return
+
+        plot2D.show()
+    
     #@QtCore.pyqtSlot()
     def slotPlot3D(self):
         try:

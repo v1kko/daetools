@@ -34,6 +34,7 @@ from .logs import daePythonStdOutLog
 from .variable_types import *
 from .simulation_loader_aux import *
 from .thermo_packages import *
+from .hr_upwind_scheme import daeHRUpwindScheme
 
 try:
     from daetools.dae_simulator.simulator import daeSimulator

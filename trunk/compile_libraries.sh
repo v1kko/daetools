@@ -40,7 +40,7 @@ OPTIONS:
 
 LIBRARY:
     all    All libraries and solvers.
-           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt trilinos deal.ii
+           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt coolprop trilinos deal.ii
            On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt coolprop trilinos deal.ii 
 
     Individual libraries/solvers:
@@ -334,6 +334,7 @@ vOPENBLAS=0.2.8
 vDEALII=8.4.1
 vSUPERLU=5.2.1
 vSUPERLU_MT=3.1
+vCOOLPROP=6.1.0
 
 BOOST_BUILD_ID=daetools-py${PYTHON_MAJOR}${PYTHON_MINOR}
 BOOST_PYTHON_BUILD_ID=
@@ -361,6 +362,7 @@ CCOLAMD_HTTP=http://www.cise.ufl.edu/research/sparse/ccolamd
 SUITESPARSE_CONFIG_HTTP=http://www.cise.ufl.edu/research/sparse/UFconfig
 LIBMESH_HTTP=http://sourceforge.net/projects/libmesh/files/libmesh
 DEALII_HTTP=https://github.com/dealii/dealii/releases/download
+COOLPROP_HTTP=https://sourceforge.net/projects/coolprop/files/CoolProp/${vCOOLPROP}/source
 
 # If no option is set use defaults
 if [ "${DO_CONFIGURE}" = "no" -a "${DO_BUILD}" = "no" -a "${DO_CLEAN}" = "no" ]; then
@@ -805,14 +807,17 @@ configure_coolprop()
   echo ""
   echo "[*] Setting-up coolprop..."
   echo ""
-  vCOOLPROP=6.1.0
-  COOLPROP_HTTP=https://sourceforge.net/projects/coolprop/files/CoolProp/${vCOOLPROP}/source
   if [ ! -e CoolProp_sources.zip ]; then
     wget ${COOLPROP_HTTP}/CoolProp_sources.zip
   fi
   unzip CoolProp_sources.zip
   mv CoolProp.sources coolprop
 
+  # Patch for the expected unqualified-id before numeric constant error (line 1890 and gcc 7.1):
+  # const unsigned CHAR_WIDTH = 1;
+  # CHAR_WIDTH is already defined in <limits.h> as a macro.
+  sed -i -e 's/CHAR_WIDTH/CHAR_WIDTH_1/g' coolprop/externals/cppformat/fmt/format.h
+  
   cd coolprop
   mkdir -p build
   cd build
@@ -1746,9 +1751,9 @@ do
                           configure_mumps
                           configure_idas
                           configure_superlu
+                          configure_nlopt
                           configure_coolprop
                           configure_trilinos
-                          configure_nlopt
                           configure_dealii
                         else
                           configure_boost
@@ -1757,10 +1762,10 @@ do
                           configure_idas
                           configure_superlu
                           configure_superlu_mt
+                          configure_nlopt
                           configure_coolprop
                           configure_trilinos
                           configure_bonmin
-                          configure_nlopt
                           configure_dealii
                         fi
                       fi
@@ -1772,9 +1777,9 @@ do
                           compile_mumps
                           compile_idas
                           compile_superlu
+                          compile_nlopt
                           compile_coolprop
                           compile_trilinos
-                          compile_nlopt
                           compile_dealii
                         else
                           compile_boost
@@ -1783,10 +1788,10 @@ do
                           compile_idas
                           compile_superlu
                           compile_superlu_mt
+                          compile_nlopt
                           compile_coolprop
                           compile_trilinos
                           compile_bonmin
-                          compile_nlopt
                           compile_dealii
                         fi
                       fi
@@ -1798,9 +1803,9 @@ do
                           clean_mumps
                           clean_idas
                           clean_superlu
+                          clean_nlopt
                           clean_coolprop
                           clean_trilinos
-                          clean_nlopt
                           clean_dealii
                         else
                           clean_boost
@@ -1809,10 +1814,10 @@ do
                           clean_idas
                           clean_superlu
                           clean_superlu_mt
+                          clean_nlopt
                           clean_coolprop
                           clean_trilinos
                           clean_bonmin
-                          clean_nlopt
                           clean_dealii
                         fi
                       fi

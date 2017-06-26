@@ -31,6 +31,7 @@ temperature_t                = daeVariableType("temperature_t",                K
 mass_t                       = daeVariableType("mass_t",                       kg,              0.0, 1.0e+20,     0.0, 1e-05)
 mass_flowrate_t              = daeVariableType("mass_flowrate_t",              kg/s,       -1.0e+10, 1.0e+10,     0.0, 1e-05)
 molar_mass_t                 = daeVariableType("molar_mass_t",                 kg/mol,          0.0, 1.0e+20,     0.0, 1e-05)
+mass_concentration_t         = daeVariableType("mass_concentration_t",         kg/(m**3),       0.0, 1.0e+20,     0.0, 1e-05)
 
 fraction_t                   = daeVariableType("fraction_t",                   dimless,        -0.1,       2,    0.25, 1e-06)
 no_t                         = daeVariableType("no_t",                         dimless,    -1.0e+20, 1.0e+20,     0.0, 1e-05)

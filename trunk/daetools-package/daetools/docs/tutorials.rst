@@ -30,6 +30,11 @@ features such as solution of the discretized population balance equations using 
 upwind schemes with flux limiter, modelling of lithium-ion battery based on porous electrode theory,
 interactive operating procedures, code-generation/co-simulation/model-exchange capabilities.
 
+.. _tutorials_code_verification:
+
+.. rubric:: Code Verification Examples
+
+`Code Verification Examples <tutorials-cv.html>`_ using the Method of Exact Solutions and the Method of Manufactured Solutions.
 
 .. _tutorials_fe:
 
@@ -39,20 +44,31 @@ The `Finite Element Tutorials <tutorials-fe.html>`_ illustrate the support for f
 method in **DAE Tools** through the deal.II library.
 
 
-.. _tutorials_optimisation:
-
-.. rubric:: Optimisation Tutorials
-
-The `Optimisation Tutorials <tutorials-optimisation.html>`_ illustrate **DAE Tools** capabilities
-to solve NLP/MINLP optimisation and parameter estimation problems.
-
-
 .. _tutorials_chemeng:
 
 .. rubric:: Chemical Engineering Examples
 
 The `Chemical Engineering Examples <tutorials-chemeng.html>`_ illustrate various chemical engineering
 problems solved by **DAE Tools**.
+
+
+.. _tutorials_sensitivity_analysis:
+
+.. rubric:: Sensitivity Analysis Examples
+
+`Sensitivity Analysis Examples <tutorials-sa.html>`_ using the local and global sensitivity analysis methods: 
+
+- Derivative-based method (local)
+- Elementary Effects method (Moris)
+- Variance based methods (FAST and Sobol)
+
+
+.. _tutorials_optimisation:
+
+.. rubric:: Optimisation Tutorials
+
+The `Optimisation Tutorials <tutorials-optimisation.html>`_ illustrate **DAE Tools** capabilities
+to solve NLP/MINLP optimisation and parameter estimation problems.
 
 
 .. _tutorials_chemeng_optimisation:
@@ -73,9 +89,11 @@ parameter estimation and optimal control tests.
 
    tutorials-basic
    tutorials-advanced
+   tutorials-cv
    tutorials-fe
-   tutorials-optimisation
    tutorials-chemeng
+   tutorials-sa
+   tutorials-optimisation
    tutorials-chemeng-optimisation
    #tutorials-all
 

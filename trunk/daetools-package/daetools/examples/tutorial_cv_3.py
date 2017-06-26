@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial23.py
+                           tutorial_cv_3.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -29,7 +29,7 @@ References:
 3. P.J. Roache. Fundamentals of Verification and Validation. Hermosa, 2009.
    `ISBN-10:0913478121 <http://www.isbnsearch.org/isbn/0913478121>`_
 
-The problem in this tutorial is identical to tutorial23. The only difference is that 
+The problem in this tutorial is identical to tutorial_cv_3. The only difference is that 
 the Neumann boundary conditions are applied:
     
 .. code-block:: none
@@ -39,12 +39,12 @@ the Neumann boundary conditions are applied:
 
 Numerical vs. manufactured solution plot (no. elements = 60, t = 1.0s):
 
-.. image:: _static/tutorial23-results.png
+.. image:: _static/tutorial_cv_3-results.png
    :width: 500px
 
 The normalised global errors and the order of accuracy plots (no. elements = [60, 90, 120, 150], t = 1.0s):
 
-.. image:: _static/tutorial23-results2.png
+.. image:: _static/tutorial_cv_3-results2.png
    :width: 800px
 """
 
@@ -111,7 +111,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self, Nx):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial23(%d)" % Nx)
+        self.m = modTutorial("tutorial_cv_3(%d)" % Nx)
         self.m.Description = __doc__
         
         self.Nx = Nx

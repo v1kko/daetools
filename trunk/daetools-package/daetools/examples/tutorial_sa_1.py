@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial20.py
+                           tutorial_sa_1.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -17,14 +17,15 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-This tutorial illustrates the sensitivity analysis features in DAE Tools.
+This tutorial illustrates calculation of the sensitivity of the results with respect
+to the model parameters using forward sensitivity analysis method in DAE Tools.
 
 This model has one state variable (T) and one degree of freedom (Qin).
 Qin is set as a parameter for sensitivity analysis.
 
-The sensitivity analysis is enabled and the sensitivities can be reported to the 
-data reporter like any ordinary variable by setting the boolean property 
-simulation.ReportSensitivities to True.
+The integration of sensitivities per specified parameters is enabled and the 
+sensitivities can be reported to the data reporter like any ordinary variable by 
+setting the boolean property simulation.ReportSensitivities to True.
 
 Raw sensitivity matrices can be saved into a specified directory using the 
 simulation.SensitivityDataDirectory property (before a call to Initialize).
@@ -33,7 +34,7 @@ dimensions is Nparameters and second Nvariables: S[Np, Nvars].
 
 The plot of the sensitivity of T per Qin:
     
-.. image:: _static/tutorial20-results.png
+.. image:: _static/tutorial_sa_1-results.png
    :width: 500px
 """
 
@@ -49,14 +50,14 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
-        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
-        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
-        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
-        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
+        self.m     = daeParameter("m",       kg,            self, "Mass of the copper plate")
+        self.cp    = daeParameter("c_p",     J/(kg*K),      self, "Specific heat capacity of the plate")
+        self.alpha = daeParameter("&alpha;", W/((m**2)*K),  self, "Heat transfer coefficient")
+        self.A     = daeParameter("A",       m**2,          self, "Area of the plate")
+        self.Tsurr = daeParameter("T_surr",  K,             self, "Temperature of the surroundings")
 
-        self.Qin  = daeVariable("Qin",  power_t,       self, "Power of the heater")
-        self.T    = daeVariable("T",    temperature_t, self, "Temperature of the plate")
+        self.Qin   = daeVariable("Qin",      power_t,       self, "Power of the heater")
+        self.T     = daeVariable("T",        temperature_t, self, "Temperature of the plate")
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
@@ -68,7 +69,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial20")
+        self.m = modTutorial("tutorial_sa_1")
         self.m.Description = __doc__
 
     def SetUpParametersAndDomains(self):
@@ -122,7 +123,7 @@ def run():
 
     # Initialize the simulation
     # The .mmx files with the sensitivity matrices will be saved in the temporary folder
-    sensitivity_folder = tempfile.mkdtemp(suffix = '-sensitivities', prefix = 'tutorial20-')
+    sensitivity_folder = tempfile.mkdtemp(suffix = '-sensitivities', prefix = 'tutorial_sa_1-')
     simulation.SensitivityDataDirectory = sensitivity_folder
     simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = True)
 
@@ -143,9 +144,15 @@ def run():
     # Get a dictionary with the reported variables
     variables = dr_data.Process.dictVariables
 
+    # Auxiliary functions
+    def sensitivity(variableName, parameterName): 
+        return variables['tutorial_sa_1.sensitivities.d(%s)_d(%s)' % (variableName, parameterName)]
+    def variable(variableName):
+        return variables['tutorial_sa_1.%s' % variableName]
+
     # Get the daeDataReceiverVariable objects from the dictionary.
     # This class has properties such as TimeValues (ndarray with times) and Values (ndarray with values).
-    dT_dQin_var = variables['tutorial20.sensitivities.d(T)_d(Qin)']
+    dT_dQin_var = sensitivity('T', 'Qin')
 
     # Time points can be taken from any variable (x axis)
     times = dT_dQin_var.TimeValues

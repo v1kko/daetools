@@ -1,2 +1,3 @@
 #!/bin/sh
+# python -m daetools.dae_plotter.plotter
 python -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"

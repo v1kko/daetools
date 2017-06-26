@@ -23,8 +23,7 @@ Chemical reaction network from the Dow Chemical Company described in the followi
   with mixed odes and algebraic equations. Computers & Chemical Engineering 9(4):359-365.
   `doi:10.1016/0098-1354(85)85014-6 <https://doi.org/10.1016/0098-1354(85)85014-6>`_
   
-The sensitivity analysis is enabled and the sensitivities are reported to the data reporter.
-The sensitivity data can be obtained in two ways:
+The sensitivity analysis is enabled and the sensitivity data can be obtained in two ways:
     
 - Directly from the DAE solver in the user-defined Run function using the
   DAESolver.SensitivityMatrix property.

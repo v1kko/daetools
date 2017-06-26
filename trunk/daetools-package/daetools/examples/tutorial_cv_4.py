@@ -3,7 +3,7 @@
 
 """
 ***********************************************************************************
-                           tutorial24.py
+                           tutorial_cv_4.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
 ***********************************************************************************
@@ -59,13 +59,13 @@ Again, the Dirichlet boundary conditions are used:
 
 Numerical vs. manufactured solution plot (u velocity component, 40x32 grid):
 
-.. image:: _static/tutorial24-results.png
+.. image:: _static/tutorial_cv_4-results.png
    :width: 500px
 
 The normalised global errors and the order of accuracy plots 
 (grids 10x8, 20x16, 40x32, 80x64):
 
-.. image:: _static/tutorial24-results2.png
+.. image:: _static/tutorial_cv_4-results2.png
    :width: 800px
 """
 
@@ -216,7 +216,7 @@ class modTutorial(daeModel):
 class simTutorial(daeSimulation):
     def __init__(self, Nx, Ny):
         daeSimulation.__init__(self)
-        self.m = modTutorial("tutorial24(%dx%d)" % (Nx,Ny))
+        self.m = modTutorial("tutorial_cv_4(%dx%d)" % (Nx,Ny))
         self.m.Description = __doc__
         
         self.Nx = Nx

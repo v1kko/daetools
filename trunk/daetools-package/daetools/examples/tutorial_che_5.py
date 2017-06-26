@@ -100,10 +100,8 @@ from daetools.pyDAE.data_reporters import *
 from time import localtime, strftime
 try:
     from .fl_analytical import run_analytical
-    from .flux_limiters import HRFluxLimiter, supported_schemes
 except:
     from fl_analytical import run_analytical
-    from flux_limiters import HRFluxLimiter, supported_schemes
 
 # Standard variable types are defined in variable_types.py
 from pyUnits import m, g, kg, s, K, mol, kmol, J, um
@@ -114,27 +112,34 @@ class modelMoC(daeModel):
     def __init__(self, Name, G, Phi_callable, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.G  = G
-        self.fl = HRFluxLimiter(Phi_callable, Constant(1e-10 * pbm_number_density_t.Units))
+        self.G  = Constant(G)
 
         self.L = daeDomain("L",  self, um, "Characteristic dimension (size) of crystals")
 
         self.ni = daeVariable("ni", pbm_number_density_t, self, "Van Leer k-interpolation scheme (k = 1/3)", [self.L])
 
+        self.hr = daeHRUpwindScheme(self.ni, self.L, Phi_callable, Constant(1e-10 * pbm_number_density_t.Units))
+
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        L     = self.L.Points
-        nL    = self.L.NumberOfPoints
+        G  = self.G 
+        hr = self.hr
+        L  = self.L.Points
+        nL = self.L.NumberOfPoints
 
-        # k-interpolation (van Leer 1985)
-        for i in range(0, nL):
-            if i == 0:
-                eq = self.CreateEquation("ni(%d)" % i, "")
-                eq.Residual = self.ni(0) # Boundary condition: here G*ni = 0
-            else:
-                eq = self.CreateEquation("ni(%d)" % i, "")
-                eq.Residual = self.ni.dt(i) + Constant(G) * (self.fl.ni_edge_plus(i,self.ni,nL) - self.fl.ni_edge_plus(i-1,self.ni,nL)) / (self.L(i) - self.L(i-1))
+        # High-resolution cell-centered finite-volume upwind scheme.
+        # Available functions:
+        #  - dc_dt:   accumulation term (cell-average quantity assumed)
+        #  - dc_dx:   convection term (can include the source term integral too)
+        #  - d2c_dx2: diffusion term
+        for i in range(1, nL):
+            eq = self.CreateEquation("ni(%d)" % i, "")
+            eq.Residual = hr.dc_dt(i) + G * hr.dc_dx(i, S = None)
+                
+        # Boundary condition: here G*ni = 0
+        eq = self.CreateEquation("ni(0)")
+        eq.Residual = self.ni(0) 
 
 class simBatchReactor(daeSimulation):
     def __init__(self, modelName, N, L, G, ni_0, Phi):
@@ -241,10 +246,10 @@ if __name__ == "__main__":
 
     L_report = []
     try:
-        for scheme in supported_schemes:
-            scheme_name = scheme.__doc__
-            process_dpb = run_simulation(scheme_name, scheme_name, N, L, G, ni_0, reportingInterval, timeHorizon, scheme)
-            ni_dpb      = process_dpb.dictVariables['%s.ni' % scheme_name]
+        for flux_limiter in daeHRUpwindScheme.supported_flux_limiters:
+            flux_limiter_name = flux_limiter.__doc__
+            process_dpb = run_simulation(flux_limiter_name, flux_limiter_name, N, L, G, ni_0, reportingInterval, timeHorizon, flux_limiter)
+            ni_dpb      = process_dpb.dictVariables['%s.ni' % flux_limiter_name]
 
             ni_anal = ni_analytical.Values[timeIndex]
             ni_dpb  = ni_dpb.Values[timeIndex]
@@ -253,7 +258,7 @@ if __name__ == "__main__":
             L2 = numpy.linalg.norm(ni_dpb-ni_anal, ord = 2)
             print('L1 = %e, L2 = %e' % (L1, L2))
 
-            L_report.append((scheme_name, L1, L2))
+            L_report.append((flux_limiter_name, L1, L2))
 
     finally:
         # Sort by L2
@@ -261,6 +266,6 @@ if __name__ == "__main__":
         print('   -------------------------------------')
         print('           Scheme  L1         L2        ')
         print('   -------------------------------------')
-        for scheme, L1, L2 in L_report:
-            print('  %15s  %.3e  %.3e' % (scheme, L1, L2))
+        for flux_limiter, L1, L2 in L_report:
+            print('  %15s  %.3e  %.3e' % (flux_limiter, L1, L2))
         print('   -------------------------------------')

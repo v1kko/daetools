@@ -120,15 +120,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#3605fb;'>from</span> daetools.pyDAE.data_reporters <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
-<b>try</b>:
-    <span style='color:#3605fb;'>from</span> .fl_analytical <span style='color:#3605fb;'>import</span> run_analytical
-    <span style='color:#3605fb;'>from</span> .flux_limiters <span style='color:#3605fb;'>import</span> HRFluxLimiter, supported_schemes
-<b>except</b>:
-    <span style='color:#3605fb;'>from</span> fl_analytical <span style='color:#3605fb;'>import</span> run_analytical
-    <span style='color:#3605fb;'>from</span> flux_limiters <span style='color:#3605fb;'>import</span> HRFluxLimiter, supported_schemes
-
 <span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
 <span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, g, kg, s, K, mol, kmol, J, um
+<b>try</b>:
+    <span style='color:#3605fb;'>from</span> .fl_analytical <span style='color:#3605fb;'>import</span> run_analytical
+<b>except</b>:
+    <span style='color:#3605fb;'>from</span> fl_analytical <span style='color:#3605fb;'>import</span> run_analytical
 
 pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;pbm_number_density_t&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1.0e+40</span>,  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1e-0</span>)
 
@@ -136,29 +133,34 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, G, Phi_callable, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#3605fb;'>self</span>.G  <b><span style='color:#0000ff;'>=</span></b> G
-        <span style='color:#3605fb;'>self</span>.fl <b><span style='color:#0000ff;'>=</span></b> HRFluxLimiter(Phi_callable, Constant(<span style='color:#cc047c;'>1e-10</span> <b><span style='color:#0000ff;'>*</span></b> pbm_number_density_t.Units))
+        <span style='color:#3605fb;'>self</span>.G  <b><span style='color:#0000ff;'>=</span></b> Constant(G)
 
         <span style='color:#3605fb;'>self</span>.L  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;L&quot;</span>,  <span style='color:#3605fb;'>self</span>, um, <span style='color:#cc0000;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
 
         <span style='color:#3605fb;'>self</span>.ni <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;ni&quot;</span>, pbm_number_density_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#3605fb;'>self</span>.L])
+        
+        <span style='color:#3605fb;'>self</span>.hr <b><span style='color:#0000ff;'>=</span></b> daeHRUpwindScheme(<span style='color:#3605fb;'>self</span>.ni, <span style='color:#3605fb;'>self</span>.L, Phi_callable, Constant(<span style='color:#cc047c;'>1e-10</span> <b><span style='color:#0000ff;'>*</span></b> pbm_number_density_t.Units))
 
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
+        G  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.G 
         L  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L.Points
         nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L.NumberOfPoints
+        hr <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.hr
 
-        <span style='color:#017a31;'># k-interpolation (van Leer 1985)</span>
-        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, nL):
-            <b>if</b> i <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc047c;'>0</span>:
-                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
-                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni(<span style='color:#cc047c;'>0</span>) <span style='color:#017a31;'># Boundary condition: here G*ni = 0</span>
-
-            <b>else</b>:
-                eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
-                eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni.dt(i) <b><span style='color:#0000ff;'>+</span></b> Constant(G) <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.fl.ni_edge_plus(i,<span style='color:#3605fb;'>self</span>.ni,nL) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.fl.ni_edge_plus(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,<span style='color:#3605fb;'>self</span>.ni,nL)) <b><span style='color:#0000ff;'>/</span></b> (<span style='color:#3605fb;'>self</span>.L(i) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.L(i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>))
-
+        <span style='color:#017a31;'># High-resolution cell-centered finite-volume upwind scheme.</span>
+        <span style='color:#017a31;'># Available functions:</span>
+        <span style='color:#017a31;'>#  - dc_dt:   accumulation term (cell-average quantity assumed)</span>
+        <span style='color:#017a31;'>#  - dc_dx:   convection term (can include the source term integral too)</span>
+        <span style='color:#017a31;'>#  - d2c_dx2: diffusion term</span>
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, nL):
+            eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> hr.dc_dt(i) <b><span style='color:#0000ff;'>+</span></b> G <b><span style='color:#0000ff;'>*</span></b> hr.dc_dx(i, S <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>)
+                
+        <span style='color:#017a31;'># Boundary condition: here G*ni = 0</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;ni(0)&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.ni(<span style='color:#cc047c;'>0</span>) 
 
 <b>class</b> simBatchReactor(daeSimulation):
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, modelName, N, L, G, ni_0, Phi):
@@ -249,10 +251,10 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
 
     L_report <b><span style='color:#0000ff;'>=</span></b> []
     <b>try</b>:
-        <b>for</b> scheme <b>in</b> supported_schemes:
-            scheme_name <b><span style='color:#0000ff;'>=</span></b> scheme.__doc__
-            process_dpb <b><span style='color:#0000ff;'>=</span></b> run_simulation(scheme_name, scheme_name, N, L, G, ni_0, reportingInterval, timeHorizon, scheme)
-            ni_dpb      <b><span style='color:#0000ff;'>=</span></b> process_dpb.dictVariables[<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.ni'</span> <b><span style='color:#0000ff;'>%</span></b> scheme_name]
+        <b>for</b> flux_limiter <b>in</b> daeHRUpwindScheme.supported_flux_limiters:
+            flux_limiter_name <b><span style='color:#0000ff;'>=</span></b> flux_limiter.__doc__
+            process_dpb <b><span style='color:#0000ff;'>=</span></b> run_simulation(flux_limiter_name, flux_limiter_name, N, L, G, ni_0, reportingInterval, timeHorizon, flux_limiter)
+            ni_dpb      <b><span style='color:#0000ff;'>=</span></b> process_dpb.dictVariables[<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.ni'</span> <b><span style='color:#0000ff;'>%</span></b> flux_limiter_name]
 
             ni_anal <b><span style='color:#0000ff;'>=</span></b> ni_analytical.Values[timeIndex]
             ni_dpb  <b><span style='color:#0000ff;'>=</span></b> ni_dpb.Values[timeIndex]
@@ -261,7 +263,7 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
             L2 <b><span style='color:#0000ff;'>=</span></b> numpy.linalg.norm(ni_dpb<b><span style='color:#0000ff;'>-</span></b>ni_anal, <span style='color:#2a00d6;'>ord</span> <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>)
             <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'L1 = </span><span style='color:#cc0000;'>%e</span><span style='color:#cc0000;'>, L2 = </span><span style='color:#cc0000;'>%e</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (L1, L2))
 
-            L_report.append((scheme_name, L1, L2))
+            L_report.append((flux_limiter_name, L1, L2))
 
     <b>finally</b>:
         <span style='color:#017a31;'># Sort by L2</span>
@@ -269,8 +271,8 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'   ---------------------------------------'</span>)
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'           Scheme  L1         L2          '</span>)
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'   ---------------------------------------'</span>)
-        <b>for</b> scheme, L1, L2 <b>in</b> L_report:
-            <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'  </span><span style='color:#cc0000;'>%15s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%.3e</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%.3e</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (scheme, L1, L2))
+        <b>for</b> flux_limiter, L1, L2 <b>in</b> L_report:
+            <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'  </span><span style='color:#cc0000;'>%15s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%.3e</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%.3e</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (flux_limiter, L1, L2))
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'   --------------------------------------'</span>)
 </pre>
 </body>
