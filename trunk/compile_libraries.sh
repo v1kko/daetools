@@ -1244,6 +1244,7 @@ configure_superlu()
     -DCMAKE_BUILD_TYPE:STRING=RELEASE \
     -DBUILD_SHARED_LIBS:BOOL=OFF \
     -DCMAKE_INSTALL_PREFIX:PATH=. \
+    -DCMAKE_INSTALL_LIBDIR:PATH=lib \
     -Denable_blaslib:BOOL=ON \
     -Denable_complex:BOOL=OFF \
     -Denable_single:BOOL=OFF \
