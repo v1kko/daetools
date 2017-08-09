@@ -187,6 +187,7 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
+Ncpu=3
 
 MAKE="make"
 if [ ${PLATFORM} = "Windows" ]; then

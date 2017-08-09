@@ -9,10 +9,10 @@ Line(2) = {2, 3};
 Line(3) = {3, 4};
 Line(4) = {4, 1};
 
-Transfinite Line{1} = 50;
-Transfinite Line{2} = 100 Using Bump 0.1;
-Transfinite Line{3} = 50;
-Transfinite Line{4} = 100 Using Bump 0.1;
+Transfinite Line{1} = 100;
+Transfinite Line{2} = 200 Using Bump 0.1;
+Transfinite Line{3} = 100;
+Transfinite Line{4} = 200 Using Bump 0.1;
 
 // these define the boundary indicators in deal.II:
 Physical Line(0) = {1};

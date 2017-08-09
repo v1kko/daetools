@@ -80,20 +80,29 @@ class modTutorial(daeModel):
         kr  = 1.0 # First-order reaction rate constant
         Cab = 1.0 # Boundary concentration
 
+        # Create some auxiliary objects for readability
+        phi_i  =  phi_2D('Ca', fe_i, fe_q)
+        phi_j  =  phi_2D('Ca', fe_j, fe_q)
+        dphi_i = dphi_2D('Ca', fe_i, fe_q)
+        dphi_j = dphi_2D('Ca', fe_j, fe_q)
+        normal = normal_2D(fe_q)
+        xyz    = xyz_2D(fe_q)
+        JxW    = JxW_2D(fe_q)
+
         dirichletBC = {}
         dirichletBC[1] = [('Ca', adoubleConstantFunction_2D(adouble(Cab)))]
 
         # FE weak form terms
-        diffusion    = -(dphi_2D('Ca', fe_i, fe_q) * dphi_2D('Ca', fe_j, fe_q)) * De * JxW_2D(fe_q)
-        reaction     = -kr * phi_2D('Ca', fe_i, fe_q) * phi_2D('Ca', fe_j, fe_q) * JxW_2D(fe_q)
-        accumulation = 0.0 * JxW_2D(fe_q)
-        rhs          = 0.0 * JxW_2D(fe_q)
+        diffusion    = -(dphi_i * dphi_j) * De * JxW
+        reaction     = -kr * phi_i * phi_j * JxW
+        accumulation = 0.0 * JxW
+        rhs          = 0.0 * JxW
         # Robin type BC's:
         faceAij = {
-                    2: km * phi_2D('Ca', fe_i, fe_q) * phi_2D('Ca', fe_j, fe_q) * JxW_2D(fe_q)
+                    2: km * phi_i * phi_j * JxW
                   }
         faceFi  = {
-                    2: km * Cab * phi_2D('Ca', fe_i, fe_q) * JxW_2D(fe_q)
+                    2: km * Cab * phi_i * JxW
                   }
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + reaction,
@@ -102,16 +111,6 @@ class modTutorial(daeModel):
                                                   boundaryFaceAij = faceAij,
                                                   boundaryFaceFi  = faceFi,
                                                   functionsDirichletBC = dirichletBC)
-
-        print('Diffusion-reaction in a catalyst equations:')
-        print('    Aij = %s' % str(weakForm.Aij))
-        print('    Mij = %s' % str(weakForm.Mij))
-        print('    Fi  = %s' % str(weakForm.Fi))
-        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
-        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
-        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
-        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals = %s' % str([item for item in weakForm.surfaceIntegrals]))
 
         self.fe_system.WeakForm = weakForm
 
@@ -177,7 +176,7 @@ def consoleRun():
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_6-results')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):

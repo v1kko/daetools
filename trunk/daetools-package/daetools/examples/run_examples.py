@@ -43,7 +43,7 @@ for i in range(1, 20):
     tutorial_modules.append(('tutorial%d' % i, []))
 for i in range(1, 5):
     tutorial_modules.append(('tutorial_adv_%d' % i, []))
-for i in range(1, 8):
+for i in range(1, 11):
     tutorial_modules.append(('tutorial_cv_%d' % i, []))
 for i in range(1, 10):
     tutorial_modules.append(('tutorial_che_%d' % i, []))
@@ -51,7 +51,7 @@ for i in range(1, 4):
     tutorial_modules.append(('tutorial_sa_%d' % i, []))
 for i in range(1, 7):
     tutorial_modules.append(('tutorial_che_opt_%d' % i, []))
-for i in range(1, 7):
+for i in range(1, 9):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))
 for i in range(1, 8):
     tutorial_modules.append(('opt_tutorial%d' % i, []))
@@ -230,7 +230,8 @@ class RunExamples(QtWidgets.QDialog):
         try:
             if m_name in ["tutorial_che_9", "opt_tutorial4", "opt_tutorial5", "opt_tutorial6",
                           "tutorial_cv_1", "tutorial_cv_2", "tutorial_cv_3", "tutorial_cv_4", 
-                          "tutorial_cv_5", "tutorial_cv_6", "tutorial_cv_6",
+                          "tutorial_cv_5", "tutorial_cv_6", "tutorial_cv_6", "tutorial_cv_7",
+                          "tutorial_cv_8", "tutorial_cv_9", "tutorial_cv_10"
                           "tutorial_sa_1", "tutorial_sa_2", "tutorial_sa_3"]:
                 self.consoleRunAndShowResults(module)
             else:

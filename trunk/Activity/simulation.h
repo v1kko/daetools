@@ -80,6 +80,7 @@ public:
     virtual void				SetUpParameterEstimation(void);
     virtual void				SetUpSensitivityAnalysis(void);
     virtual void                DoDataPartitioning(daeEquationsIndexes& equationsIndexes, std::map<size_t,size_t>& mapVariableIndexes);
+    virtual void				DoPostProcessing(void);
 
     virtual void GetOptimizationConstraints(std::vector<daeOptimizationConstraint_t*>& ptrarrConstraints) const;
     virtual void GetOptimizationVariables(std::vector<daeOptimizationVariable_t*>& ptrarrOptVariables) const;

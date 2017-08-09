@@ -328,9 +328,11 @@ deal.II Quadrature Rules
     Quadrature_1D
     Quadrature_2D
     Quadrature_3D
+    QGauss_0D
     QGauss_1D
     QGauss_2D
     QGauss_3D
+    QGaussLobatto_0D
     QGaussLobatto_1D
     QGaussLobatto_2D
     QGaussLobatto_3D

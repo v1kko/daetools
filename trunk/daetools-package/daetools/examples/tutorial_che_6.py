@@ -611,8 +611,12 @@ def consoleRun():
     simulation.SolveInitial()
 
     # Run
-    simulation.Run()
-
+    try:
+        # An exception will be raised at some point when the log function is called for a negative value
+        simulation.Run()
+    except Exception as e:
+        print(str(e))
+    
     simulation.Finalize()
 
 if __name__ == "__main__":

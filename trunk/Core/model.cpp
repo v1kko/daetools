@@ -4472,6 +4472,18 @@ bool daeModel::CheckObject(vector<string>& strarrErrors) const
     return bCheck;
 }
 
+boost::shared_ptr<daeAllowThreads_t> daeModel::CreateAllowThreads()
+{
+    boost::shared_ptr<daeAllowThreads_t> allowThreads(new daeAllowThreads_t);
+    return allowThreads;
+}
+
+boost::shared_ptr<daeGILState_t> daeModel::CreateGILState()
+{
+    boost::shared_ptr<daeGILState_t> GIL(new daeGILState_t);
+    return GIL;
+}
+
 size_t daeModel::GetTotalNumberOfVariables(void) const
 {
     return m_nTotalNumberOfVariables;

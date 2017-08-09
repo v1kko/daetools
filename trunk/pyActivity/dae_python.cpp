@@ -71,6 +71,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("SetUpParameterEstimation",    pure_virtual(&daeSimulation_t::SetUpParameterEstimation))
         .def("SetUpSensitivityAnalysis",    pure_virtual(&daeSimulation_t::SetUpSensitivityAnalysis))
         .def("DoDataPartitioning",          pure_virtual(&daeSimulation_t::DoDataPartitioning))
+        .def("DoPostProcessing",            pure_virtual(&daeSimulation_t::DoPostProcessing))
         .def("Run",                         pure_virtual(&daeSimulation_t::Run))
         .def("CleanUpSetupData",            pure_virtual(&daeSimulation_t::CleanUpSetupData))
         .def("Finalize",                    pure_virtual(&daeSimulation_t::Finalize))
@@ -174,6 +175,8 @@ BOOST_PYTHON_MODULE(pyActivity)
                                             ( arg("self") ), DOCSTR_daeSimulation_SetUpSensitivityAnalysis)
         .def("DoDataPartitioning",          &daeSimulation::DoDataPartitioning,  &daepython::daeDefaultSimulationWrapper::def_DoDataPartitioning,
                                             ( arg("self"), arg("equationsOverallIndexes"), arg("mapOverallBlockIndexes") ), DOCSTR_daeSimulation_DoDataPartitioning)
+        .def("DoPostProcessing",            &daeSimulation::DoPostProcessing,  &daepython::daeDefaultSimulationWrapper::def_DoPostProcessing,
+                                            ( arg("self") ), DOCSTR_daeSimulation_DoPostProcessing)
 
         .def("Run",                         &daeSimulation::Run,                       &daepython::daeDefaultSimulationWrapper::def_Run,
                                             ( arg("self") ), DOCSTR_daeSimulation_Run)

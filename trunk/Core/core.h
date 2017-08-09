@@ -79,7 +79,7 @@ enum daeeInitialConditionMode
 {
     eICTUnknown = 0,
     eAlgebraicValuesProvided,
-    eQuasySteadyState
+    eQuasiSteadyState
 };
 
 enum daeeEquationCalculationMode

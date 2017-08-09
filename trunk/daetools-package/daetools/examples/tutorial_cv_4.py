@@ -19,7 +19,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 Code verification using the Method of Manufactured Solutions.
 
-References: 
+Reference: 
 
 1. K. Salari and P. Knupp. Code Verification by the Method of Manufactured Solutions. 
    SAND2000 – 1444 (2000).

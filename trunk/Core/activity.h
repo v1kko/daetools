@@ -48,7 +48,7 @@ class daeSimulation_t
 {
 public:
     virtual ~daeSimulation_t(void){}
-    
+
 public:
     virtual daeModel_t*			GetModel(void) const                                                = 0;
     virtual void				SetModel(daeModel_t* pModel)        								= 0;
@@ -62,6 +62,7 @@ public:
     virtual void				SetUpSensitivityAnalysis(void)                                  	= 0;
     virtual void                DoDataPartitioning(daeEquationsIndexes& equationsIndexes,
                                                    std::map<size_t,size_t>& mapVariableIndexes)     = 0;
+    virtual void				DoPostProcessing(void)                                  	        = 0;
 
     virtual void				Run(void)                                                           = 0;
     virtual void				Finalize(void)                                          			= 0;

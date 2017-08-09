@@ -30,7 +30,7 @@ The mesh is a simple square:
 .. image:: _static/square(-1,1)x(-1,1)-50x50.png
    :width: 300 px
 
-The velocity plot at t = 500s:
+The velocity magnitude plot:
 
 .. image:: _static/tutorial_dealii_5-results.png
    :width: 500 px
@@ -120,42 +120,47 @@ class modTutorial(daeModel):
         right_edge  = 2
         bottom_edge = 3
 
-        dirichletBC = {}
+        # Create some auxiliary objects for readability
+        phi_p_i         =  phi_2D('p', fe_i, fe_q)
+        phi_p_j         =  phi_2D('p', fe_j, fe_q)
+        dphi_p_i        = dphi_2D('p', fe_i, fe_q)
+        dphi_p_j        = dphi_2D('p', fe_j, fe_q)
+        phi_vector_u_i  =  phi_vector_2D('u', fe_i, fe_q)
+        phi_vector_u_j  =  phi_vector_2D('u', fe_j, fe_q)
+        dphi_vector_u_i = dphi_vector_2D('u', fe_i, fe_q)
+        dphi_vector_u_j = dphi_vector_2D('u', fe_j, fe_q)
+        div_phi_u_i     =     div_phi_2D('u', fe_i, fe_q)
+        div_phi_u_j     =     div_phi_2D('u', fe_j, fe_q)
+        normal = normal_2D(fe_q)
+        xyz    = xyz_2D(fe_q)
+        JxW    = JxW_2D(fe_q)
 
+        dirichletBC = {}
+        
         # Function value wrapper
-        p_boundary = function_value_2D("p_boundary", self.fun_p_boundary, xyz_2D(fe_q))
+        p_boundary = function_value_2D("p_boundary", self.fun_p_boundary, xyz)
         faceFi = {
-                   left_edge:   -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q),
-                   top_edge:    -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q),
-                   right_edge:  -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q),
-                   bottom_edge: -(phi_vector_2D('u', fe_i, fe_q) * normal_2D(fe_q)) * p_boundary * JxW_2D(fe_q)
+                   left_edge:   -(phi_vector_u_i * normal) * p_boundary * JxW,
+                   top_edge:    -(phi_vector_u_i * normal) * p_boundary * JxW,
+                   right_edge:  -(phi_vector_u_i * normal) * p_boundary * JxW,
+                   bottom_edge: -(phi_vector_u_i * normal) * p_boundary * JxW
                  }
 
         # TensorFunction<2,dim>::value wrappers
-        k_inverse = tensor2_function_value_2D('k_inverse', self.fun_k_inverse, xyz_2D(fe_q))
+        k_inverse = tensor2_function_value_2D('k_inverse', self.fun_k_inverse, xyz)
 
         # FE weak form terms
-        accumulation = 0.0 * JxW_2D(fe_q)
-        velocity     = (phi_vector_2D('u', fe_i, fe_q) * k_inverse * phi_vector_2D('u', fe_j, fe_q)) * JxW_2D(fe_q)
-        p_gradient   = -(div_phi_2D('u', fe_i, fe_q) * phi_2D('p', fe_j, fe_q)) * JxW_2D(fe_q)
-        continuity   = -(phi_2D('p', fe_i, fe_q) * div_phi_2D('u', fe_j, fe_q)) * JxW_2D(fe_q)
-        source       = 0.0 * JxW_2D(fe_q)
+        accumulation = 0.0 * JxW
+        velocity     = (phi_vector_u_i * k_inverse * phi_vector_u_j) * JxW
+        p_gradient   = -(div_phi_u_i * phi_p_j) * JxW
+        continuity   = -(phi_p_i * div_phi_u_j) * JxW
+        source       = 0.0 * JxW
 
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = velocity + p_gradient + continuity,
                                                   Mij = accumulation,
                                                   Fi  = source,
                                                   boundaryFaceFi  = faceFi,
                                                   functionsDirichletBC = dirichletBC)
-
-        print('Darcy law equations:')
-        print('    Aij = %s' % str(weakForm.Aij))
-        print('    Mij = %s' % str(weakForm.Mij))
-        print('    Fi  = %s' % str(weakForm.Fi))
-        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
-        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
-        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
-        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals = %s' % str([item for item in weakForm.surfaceIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -219,7 +224,7 @@ def consoleRun():
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_5-results')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):

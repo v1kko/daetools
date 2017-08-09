@@ -265,8 +265,12 @@ boost::python::list adRuntimeSpecialFunctionForLargeArraysNode_RuntimeNodes(adRu
 daeScalarExternalFunction* adScalarExternalFunctionNode_ExternalFunction(adScalarExternalFunctionNode& node);
 daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVectorExternalFunctionNode& node);
 
-adouble adFEMatrixItemNode_Value(adFEMatrixItemNode& self);
-adouble adFEVectorItemNode_Value(adFEVectorItemNode& self);
+//adouble adFEMatrixItemNode_Value(adFEMatrixItemNode& self);
+//adouble adFEVectorItemNode_Value(adFEVectorItemNode& self);
+
+daeVariable* daeFloatCoefficientVariableProduct_variable(daeFloatCoefficientVariableProduct& self);
+
+boost::python::list map_Uint_daeFloatCoefficientVariableProduct_values(std::map<size_t, daeFloatCoefficientVariableProduct>& self);
 
 /*******************************************************
     adouble
@@ -1243,6 +1247,66 @@ void daeSTN_SetActiveState(daeSTN& self, const std::string& strActiveState);
 boost::python::list daeOnEventActions_Actions(const daeOnEventActions& self);
 boost::python::list daeOnEventActions_UserDefinedActions(const daeOnEventActions& self);
 
+/******************************************************************
+    Opaque support or Python threads and GIL support
+*******************************************************************/
+class pyAllowThreads : public daeAllowThreads_t
+{
+public:
+    pyAllowThreads(bool doNothing_ = true) : doNothing(doNothing_)
+    {
+        if(doNothing)
+            return;
+
+        // Initialise the python interpreter thread-state and implicitly acquire the GIL in the calling thread.
+        // If the threads are already initialised do nothing.
+        if(!PyEval_ThreadsInitialized())
+            PyEval_InitThreads();
+
+        // Now, having acquired the GIL in the calling thread, release it so that the spawned threads can acquire it when required.
+        save = PyEval_SaveThread();
+    }
+
+    virtual ~pyAllowThreads()
+    {
+        if(doNothing)
+            return;
+
+        // Re-acquire the GIL in the calling thread
+        PyEval_RestoreThread(save);
+    }
+
+protected:
+    const bool     doNothing;
+    PyThreadState* save;
+};
+
+class pyGILState : public daeGILState_t
+{
+public:
+    pyGILState(bool doNothing_ = true) : doNothing(doNothing_)
+    {
+        if(doNothing)
+            return;
+
+        // Acquire the GIL
+        gstate = PyGILState_Ensure();
+    }
+
+    virtual ~pyGILState()
+    {
+        if(doNothing)
+            return;
+
+        // Release the thread. No Python API allowed beyond this point
+        PyGILState_Release(gstate);
+    }
+
+protected:
+    const bool       doNothing;
+    PyGILState_STATE gstate;
+};
+
 /*******************************************************
     daeModel
 *******************************************************/
@@ -1293,6 +1357,18 @@ public:
             f(jsonInit);
         else
             this->daeModel::InitializeModel(jsonInit);
+    }
+
+    boost::shared_ptr<daeAllowThreads_t> CreateAllowThreads()
+    {
+        boost::shared_ptr<daeAllowThreads_t> allowThreads(new pyAllowThreads(false));
+        return allowThreads;
+    }
+
+    boost::shared_ptr<daeGILState_t> CreateGILState()
+    {
+        boost::shared_ptr<daeGILState_t> GIL(new pyGILState(false));
+        return GIL;
     }
 };
 
@@ -1781,7 +1857,10 @@ public:
 
     adouble Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const
     {
+        pyGILState GIL(false);
+
         boost::python::dict values;
+        adouble ad_res;
 
         if(boost::python::override f = this->get_override("Calculate"))
         {
@@ -1821,6 +1900,8 @@ public:
             daeDeclareAndThrowException(exInvalidCall);
             return adouble();
         }
+
+        return ad_res;
     }
 };
 

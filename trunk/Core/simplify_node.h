@@ -73,7 +73,7 @@ adNodePtr simplify(adNodePtr node)
                     return node;
             }
         }
-        return node;
+        return adNodePtr(new adUnaryNode(un->eFunction, n_s));
     }
     else if(dynamic_cast<adBinaryNode*>(node.get()))
     {
@@ -97,6 +97,149 @@ adNodePtr simplify(adNodePtr node)
                 return adNodePtr(new  adConstantNode(cleft->m_quantity * cright->m_quantity));
             else if(bn->eFunction == dae::core::eDivide)
                 return adNodePtr(new  adConstantNode(cleft->m_quantity / cright->m_quantity));
+        }
+        else if(dynamic_cast<adConstantNode*>(left) && dynamic_cast<adFloatCoefficientVariableSumNode*>(right)) // c1 OP base+sum(c*Var) => combine them
+        {
+            adConstantNode*                    cleft  = dynamic_cast<adConstantNode*>(left);
+            adFloatCoefficientVariableSumNode* cright = dynamic_cast<adFloatCoefficientVariableSumNode*>(right);
+
+            if(bn->eFunction == dae::core::eMulti) // c1 * (base+sum(c*Var)) => c1*base + sum(c1*c*Var)
+            {
+                if(cleft->m_quantity.getValue() == 0.0)
+                    return adNodePtr(new adConstantNode(0.0));
+
+                std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it;
+
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cright->m_sum;
+                fcvs->m_base = cright->m_base * cleft->m_quantity.getValue();
+
+                for(it = fcvs->m_sum.begin(); it != fcvs->m_sum.end(); it++)
+                {
+                    daeFloatCoefficientVariableProduct& fcvp = it->second;
+                    fcvp.coefficient *= cleft->m_quantity.getValue();
+                }
+                return adNodePtr(fcvs);
+            }
+            else if(bn->eFunction == dae::core::ePlus) // c1 + (base+sum(c*Var)) => c1+base + sum(c*Var)
+            {
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cright->m_sum;
+                fcvs->m_base = cright->m_base + cleft->m_quantity.getValue();
+
+                return adNodePtr(fcvs);
+            }
+        }
+        else if(dynamic_cast<adFloatCoefficientVariableSumNode*>(left) && dynamic_cast<adConstantNode*>(right)) // sum(c*Var) OP c1 => combine them
+        {
+            adFloatCoefficientVariableSumNode* cleft  = dynamic_cast<adFloatCoefficientVariableSumNode*>(left);
+            adConstantNode*                    cright = dynamic_cast<adConstantNode*>(right);
+
+            if(bn->eFunction == dae::core::eMulti) // (base+sum(c*Var)) * c1 => c1*base + sum(c1*c*Var)
+            {
+                if(cright->m_quantity.getValue() == 0.0)
+                    return adNodePtr(new adConstantNode(0.0));
+
+                std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it;
+
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cleft->m_sum;
+                fcvs->m_base = cleft->m_base * cright->m_quantity.getValue();
+
+                for(it = fcvs->m_sum.begin(); it != fcvs->m_sum.end(); it++)
+                {
+                    daeFloatCoefficientVariableProduct& fcvp = it->second;
+                    fcvp.coefficient *= cright->m_quantity.getValue();
+                }
+                return adNodePtr(fcvs);
+            }
+            else if(bn->eFunction == dae::core::eDivide) // (base+sum(c*Var)) / c1 => base/c1 + sum(c1/c*Var)
+            {
+                // Division by zero!!!
+                if(cright->m_quantity.getValue() == 0.0)
+                    return adNodePtr(new adConstantNode(0.0 / 0.0));
+
+                std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it;
+
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cleft->m_sum;
+                fcvs->m_base = cleft->m_base / cright->m_quantity.getValue();
+
+                for(it = fcvs->m_sum.begin(); it != fcvs->m_sum.end(); it++)
+                {
+                    daeFloatCoefficientVariableProduct& fcvp = it->second;
+                    fcvp.coefficient /= cright->m_quantity.getValue();
+                }
+                return adNodePtr(fcvs);
+            }
+            else if(bn->eFunction == dae::core::ePlus) // (base+sum(c*Var)) + c1 => c1+base + sum(c*Var)
+            {
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cleft->m_sum;
+                fcvs->m_base = cleft->m_base + cright->m_quantity.getValue();
+
+                return adNodePtr(fcvs);
+            }
+        }
+        else if(dynamic_cast<adFloatCoefficientVariableSumNode*>(left) && dynamic_cast<adFloatCoefficientVariableSumNode*>(right)) // sum(c*Var) OP sum(c*Var) => combine them
+        {
+            adFloatCoefficientVariableSumNode* cleft  = dynamic_cast<adFloatCoefficientVariableSumNode*>(left);
+            adFloatCoefficientVariableSumNode* cright = dynamic_cast<adFloatCoefficientVariableSumNode*>(right);
+
+            if(bn->eFunction == dae::core::ePlus) // (base1+sum(c1*Var)) + (base2+sum(c2*Var)) => base1+base2 + sum((c1+c2)*Var)
+            {
+                std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it, it_find;
+
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cleft->m_sum;
+                fcvs->m_base = cleft->m_base + cright->m_base;
+
+                for(it = cright->m_sum.begin(); it != cright->m_sum.end(); it++)
+                {
+                    size_t                              r_overallIndex = it->first;
+                    daeFloatCoefficientVariableProduct& r_fcvp         = it->second;
+
+                    it_find = fcvs->m_sum.find(r_overallIndex);
+                    if(it_find != fcvs->m_sum.end()) // it already exists - just add the coefficient
+                    {
+                        daeFloatCoefficientVariableProduct& fcvp = it_find->second;
+                        fcvp.coefficient += r_fcvp.coefficient;
+                    }
+                    else // it doesn't exist - add a new item
+                    {
+                        fcvs->m_sum[r_overallIndex] = r_fcvp;
+                    }
+                }
+                return adNodePtr(fcvs);
+            }
+            else if(bn->eFunction == dae::core::eMinus) // (base1+sum(c1*Var)) - (base2+sum(c2*Var)) => base1-base2 + sum((c1-c2)*Var)
+            {
+                std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it, it_find;
+
+                adFloatCoefficientVariableSumNode* fcvs = new adFloatCoefficientVariableSumNode();
+                fcvs->m_sum  = cleft->m_sum;
+                fcvs->m_base = cleft->m_base - cright->m_base;
+
+                for(it = cright->m_sum.begin(); it != cright->m_sum.end(); it++)
+                {
+                    size_t                              r_overallIndex = it->first;
+                    daeFloatCoefficientVariableProduct& r_fcvp         = it->second;
+
+                    it_find = fcvs->m_sum.find(r_overallIndex);
+                    if(it_find != fcvs->m_sum.end()) // it already exists - just subtract the coefficient
+                    {
+                        daeFloatCoefficientVariableProduct& fcvp = it_find->second;
+                        fcvp.coefficient -= r_fcvp.coefficient;
+                    }
+                    else // it doesn't exist - add a new item
+                    {
+                        daeFloatCoefficientVariableProduct new_fcvp = r_fcvp;
+                        new_fcvp.coefficient = -new_fcvp.coefficient;
+                        fcvs->m_sum[r_overallIndex] = new_fcvp;
+                    }
+                }
+                return adNodePtr(fcvs);
+            }
         }
         else if(dynamic_cast<adConstantNode*>(left)) // if left == 0
         {
@@ -125,7 +268,7 @@ adNodePtr simplify(adNodePtr node)
             }
         }
 
-        return node;
+        return adNodePtr(new adBinaryNode(bn->eFunction, left_s, right_s));
     }
     else
     {

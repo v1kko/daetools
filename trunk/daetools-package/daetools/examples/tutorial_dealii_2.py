@@ -41,7 +41,12 @@ The mesh is rectangular with the refined elements close to the left/right ends:
 The temperature plot at t = 500s:
 
 .. image:: _static/tutorial_dealii_2-results.png
-   :width: 600 px
+   :height: 400 px
+
+Animation:
+    
+.. image:: _static/tutorial_dealii_2-animation.gif
+   :height: 400 px
 """
 
 import os, sys, numpy, json, tempfile
@@ -126,6 +131,19 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        """
+        # Overall indexes of the DOFs at the boundaries:
+        # 0 (left edge), 1 (top edge), 2 (right edge) and 3 (bottom edge)
+        bdofs = self.fe_system.GetBoundaryDOFs('T', [0])
+        print(numpy.where(bdofs))
+        bdofs = self.fe_system.GetBoundaryDOFs('T', [1])
+        print(numpy.where(bdofs))
+        bdofs = self.fe_system.GetBoundaryDOFs('T', [2])
+        print(numpy.where(bdofs))
+        bdofs = self.fe_system.GetBoundaryDOFs('T', [3])
+        print(numpy.where(bdofs))
+        """
+
         # Thermo-physical properties of the liquid (water).
         # The specific heat conductivity is normally 0.6 W/mK,
         # however, here we used much larger value to amplify the effect of conduction
@@ -145,6 +163,14 @@ class modTutorial(daeModel):
         T_base   = 300 # Base temperature, K
         T_offset = 50  # Offset temperature, K
 
+        # Create some auxiliary objects for readability
+        phi_i  =  phi_2D('T', fe_i, fe_q)
+        phi_j  =  phi_2D('T', fe_j, fe_q)
+        dphi_i = dphi_2D('T', fe_i, fe_q)
+        dphi_j = dphi_2D('T', fe_j, fe_q)
+        xyz    = xyz_2D(fe_q)
+        JxW    = JxW_2D(fe_q)
+
         # Boundary IDs
         left_edge   = 0
         top_edge    = 1
@@ -158,29 +184,28 @@ class modTutorial(daeModel):
 
         # Function<dim> wrapper
         self.fun_u_grad = VelocityFunction_2D(velocity, direction)
-        # Function<dim>::value wrappers
-        u_grad = function_gradient_2D("u", self.fun_u_grad, xyz_2D(fe_q))
+        # Function<dim>::gradient wrapper
+        u_grad = function_gradient_2D("u", self.fun_u_grad, xyz)
 
         # FE weak form terms
-        accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * alpha * JxW_2D(fe_q)
-        convection   = phi_2D('T', fe_i, fe_q) * (u_grad * dphi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * 0.0 * JxW_2D(fe_q)
+        accumulation = (phi_i * phi_j) * JxW
+        diffusion    = (dphi_i * dphi_j) * alpha * JxW
+        convection   = phi_i * (u_grad * dphi_j) * JxW
+        source       = phi_i * 0.0 * JxW
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion + convection,
-                                                  Mij = accumulation,
-                                                  Fi  = source,
+        cell_Aij = diffusion + convection
+        cell_Mij = accumulation
+        cell_Fi  = source
+        
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = cell_Aij,
+                                                  Mij = cell_Mij,
+                                                  Fi  = cell_Fi,
                                                   functionsDirichletBC = dirichletBC)
 
         print('Transient heat convection equations:')
-        print('    Aij = %s' % str(weakForm.Aij))
-        print('    Mij = %s' % str(weakForm.Mij))
-        print('    Fi  = %s' % str(weakForm.Fi))
-        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
-        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
-        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
-        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals  = %s' % str([item for item in weakForm.surfaceIntegrals]))
+        print('    Aij = %s' % str(cell_Aij))
+        print('    Mij = %s' % str(cell_Mij))
+        print('    Fi  = %s' % str(cell_Fi))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -245,7 +270,7 @@ def consoleRun():
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):

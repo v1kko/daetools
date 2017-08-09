@@ -69,12 +69,6 @@ $PYTHON $ROOT/tutorial18.py console
 echo tutorial19.py
 $PYTHON $ROOT/tutorial19.py console
 
-echo tutorial20.py
-$PYTHON $ROOT/tutorial20.py console
-
-echo tutorial21.py
-$PYTHON $ROOT/tutorial21.py console
-
 
 echo tutorial_adv_1.py
 $PYTHON $ROOT/tutorial_adv_1.py console
@@ -118,23 +112,35 @@ echo tutorial_che_9.py
 $PYTHON $ROOT/tutorial_che_9.py console
 
 
-echo tutorial_che_opt_1.py
-$PYTHON $ROOT/tutorial_che_opt_1.py console
+echo tutorial_cv_1.py
+$PYTHON $ROOT/tutorial_cv_1.py console
 
-echo tutorial_che_opt_2.py
-$PYTHON $ROOT/tutorial_che_opt_2.py console
+echo tutorial_cv_2.py
+$PYTHON $ROOT/tutorial_cv_2.py console
 
-echo tutorial_che_opt_3.py
-$PYTHON $ROOT/tutorial_che_opt_3.py console
+echo tutorial_cv_3.py
+$PYTHON $ROOT/tutorial_cv_3.py console
 
-echo tutorial_che_opt_4.py
-$PYTHON $ROOT/tutorial_che_opt_4.py console
+echo tutorial_cv_4.py
+$PYTHON $ROOT/tutorial_cv_4.py console
 
-echo tutorial_che_opt_5.py
-$PYTHON $ROOT/tutorial_che_opt_5.py console
+echo tutorial_cv_5.py
+$PYTHON $ROOT/tutorial_cv_5.py console
 
-echo tutorial_che_opt_6.py
-$PYTHON $ROOT/tutorial_che_opt_6.py console
+echo tutorial_cv_6.py
+$PYTHON $ROOT/tutorial_cv_6.py console
+
+echo tutorial_cv_7.py
+$PYTHON $ROOT/tutorial_cv_7.py console
+
+echo tutorial_cv_8.py
+$PYTHON $ROOT/tutorial_cv_8.py console
+
+echo tutorial_cv_9.py
+$PYTHON $ROOT/tutorial_cv_9.py console
+
+echo tutorial_cv_10.py
+$PYTHON $ROOT/tutorial_cv_10.py console
 
 
 echo tutorial_dealii_1.py
@@ -158,6 +164,12 @@ $PYTHON $ROOT/tutorial_dealii_5.py console
 echo tutorial_dealii_6.py
 $PYTHON $ROOT/tutorial_dealii_6.py console
 
+echo tutorial_dealii_7.py
+$PYTHON $ROOT/tutorial_dealii_7.py console
+
+echo tutorial_dealii_8.py
+$PYTHON $ROOT/tutorial_dealii_8.py console
+
 
 echo opt_tutorial1.py
 $PYTHON $ROOT/opt_tutorial1.py console
@@ -179,3 +191,22 @@ $PYTHON $ROOT/opt_tutorial6.py console
 
 echo opt_tutorial7.py
 $PYTHON $ROOT/opt_tutorial7.py console
+
+
+echo tutorial_che_opt_1.py
+$PYTHON $ROOT/tutorial_che_opt_1.py console
+
+echo tutorial_che_opt_2.py
+$PYTHON $ROOT/tutorial_che_opt_2.py console
+
+echo tutorial_che_opt_3.py
+$PYTHON $ROOT/tutorial_che_opt_3.py console
+
+echo tutorial_che_opt_4.py
+$PYTHON $ROOT/tutorial_che_opt_4.py console
+
+echo tutorial_che_opt_5.py
+$PYTHON $ROOT/tutorial_che_opt_5.py console
+
+echo tutorial_che_opt_6.py
+$PYTHON $ROOT/tutorial_che_opt_6.py console

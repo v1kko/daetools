@@ -41,7 +41,12 @@ The pipe mesh is given below:
 The temperature plot at t = 3600s:
 
 .. image:: _static/tutorial_dealii_4-results.png
-   :width: 500 px
+   :height: 400 px
+
+Animation:
+    
+.. image:: _static/tutorial_dealii_4-animation.gif
+   :height: 400 px
 """
 
 import os, sys, numpy, json, math, tempfile
@@ -144,6 +149,16 @@ class modTutorial(daeModel):
         print('Beneath source flux = %f' % flux_beneath)
         print('Above source flux = %f x (1,-1)' % flux_above)
 
+        # Create some auxiliary objects for readability
+        phi_i  =  phi_2D('T', fe_i, fe_q)
+        phi_j  =  phi_2D('T', fe_j, fe_q)
+        dphi_i = dphi_2D('T', fe_i, fe_q)
+        dphi_j = dphi_2D('T', fe_j, fe_q)
+        dof_T  = dof_2D('T', fe_i)
+        normal = normal_2D(fe_q)
+        xyz    = xyz_2D(fe_q)
+        JxW    = JxW_2D(fe_q)
+
         # deal.II Function<dim,Number> wrappers.
         self.fun_Diffusivity = ConstantFunction_2D(alpha)
         self.fun_Generation  = ConstantFunction_2D(0.0)
@@ -159,41 +174,40 @@ class modTutorial(daeModel):
         dirichletBC[2] = [ ('T', adoubleConstantFunction_2D( adouble(300) )) ] # at boundary id=2 (inner tube)
 
         surfaceIntegrals = {}
-        surfaceIntegrals[0] = [(self.Q0_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        surfaceIntegrals[1] = [(self.Q1_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        surfaceIntegrals[2] = [(self.Q2_total(), (-kappa * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
+        surfaceIntegrals[0] = [(self.Q0_total(), (-kappa * (dphi_i * normal) * JxW) * dof_T)]
+        surfaceIntegrals[1] = [(self.Q1_total(), (-kappa * (dphi_i * normal) * JxW) * dof_T)]
+        surfaceIntegrals[2] = [(self.Q2_total(), (-kappa * (dphi_i * normal) * JxW) * dof_T)]
 
         # Function<dim>::value and Function<dim>::gradient wrappers
-        D      = function_value_2D        ('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))
-        G      = function_value_2D        ('Generation',  self.fun_Generation,  xyz_2D(fe_q))
-        Flux_a = function_gradient_2D     ('Flux_a',      self.fun_Flux_a,      xyz_2D(fe_q))
-        Flux_b = function_adouble_value_2D('Flux_b',      self.fun_Flux_b,      xyz_2D(fe_q))
+        D      = function_value_2D        ('Diffusivity', self.fun_Diffusivity, xyz)
+        G      = function_value_2D        ('Generation',  self.fun_Generation,  xyz)
+        Flux_a = function_gradient_2D     ('Flux_a',      self.fun_Flux_a,      xyz)
+        Flux_b = function_adouble_value_2D('Flux_b',      self.fun_Flux_b,      xyz)
 
         # FE weak form terms
-        accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * D * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * G * JxW_2D(fe_q)
+        accumulation = (phi_i * phi_j) * JxW
+        diffusion    = (dphi_i * dphi_j) * D * JxW
+        source       = phi_i * G * JxW
         faceFluxes   = {
-                         0: phi_2D('T', fe_i, fe_q) * (Flux_a * normal_2D(fe_q)) * JxW_2D(fe_q),
-                         1: phi_2D('T', fe_i, fe_q) * Flux_b * JxW_2D(fe_q)
+                         0: phi_i * (Flux_a * normal) * JxW,
+                         1: phi_i * Flux_b * JxW
                        }
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
-                                                  Mij = accumulation,
-                                                  Fi  = source,
+        cell_Aij = diffusion
+        cell_Mij = accumulation
+        cell_Fi  = source
+        
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = cell_Aij,
+                                                  Mij = cell_Mij,
+                                                  Fi  = cell_Fi,
                                                   boundaryFaceFi  = faceFluxes,
                                                   functionsDirichletBC = dirichletBC,
                                                   surfaceIntegrals = surfaceIntegrals)
 
         print('Transient heat conduction equation:')
-        print('    Aij = %s' % str(weakForm.Aij))
-        print('    Mij = %s' % str(weakForm.Mij))
-        print('    Fi  = %s' % str(weakForm.Fi))
-        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
-        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
-        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
-        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals = %s' % str([item for item in weakForm.surfaceIntegrals]))
+        print('    Aij = %s' % str(cell_Aij))
+        print('    Mij = %s' % str(cell_Mij))
+        print('    Fi  = %s' % str(cell_Fi))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -223,7 +237,7 @@ def guiRun(app):
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_4-')
 
     # Create two data reporters:
-    # 1. deal.II
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -257,7 +271,7 @@ def consoleRun():
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_4-results')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):

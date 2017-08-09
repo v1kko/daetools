@@ -19,6 +19,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 This tutorial introduces the following concepts:
 
+- Quasi steady state initial condition mode (eQuasiSteadyState flag)
 - User-defined schedules (operating procedures)
 - Resetting of degrees of freedom
 - Resetting of initial conditions
@@ -133,8 +134,13 @@ class simTutorial(daeSimulation):
         self.m.Tsurr.SetValue(283 * K)
 
     def SetUpVariables(self):
-        self.m.Qin.AssignValue(500 * W)
-        self.m.T.SetInitialCondition(283 * K)
+        self.m.Qin.AssignValue(0 * W)
+        
+        # Here we can manually set the initial temperature to the temperature of the surroundings (283 * K).
+        # However, here we use the eQuasiSteadyState initial condition mode available in the Sundials IDA solver
+        # It assumes all time derivatives are initially equal to zero and calculates the non-derivative parts.
+        # As a result, the initial temperature will be equal to the temperature of the surroundings (283 K).
+        self.InitialConditionMode = eQuasiSteadyState
 
     # daeSimulation class provides the function Run() which is called after successful initialisation
     # to run the simulation. By default, it runs for time period defined by the TimeHorizon property,
@@ -162,13 +168,16 @@ class simTutorial(daeSimulation):
     #      - eStopAtDiscontinuity (integrate and return if some conditions have been satisfied); in this case,
     #        the integration has to be performed in a loop until the required time is reached.
     def Run(self):
-        # 1. Integrate for 100s
+        # 1. Set Qin=500W and integrate for 100s
+        self.m.Qin.ReAssignValue(500 * W)
+        self.Reinitialize()
+        self.ReportData(self.CurrentTime)
         self.Log.Message("OP: Integrating for 100 seconds ... ", 0)
         time = self.IntegrateForTimeInterval(100, eDoNotStopAtDiscontinuity)
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
-        # 2. Set Qin=2000W and integrate until t=200s
+        # 2. Set Qin=750W and integrate until time = 200s
         self.m.Qin.ReAssignValue(750 * W)
         self.Reinitialize()
         self.ReportData(self.CurrentTime)
@@ -177,7 +186,7 @@ class simTutorial(daeSimulation):
         self.ReportData(self.CurrentTime)
         self.Log.SetProgress(int(100.0 * self.CurrentTime/self.TimeHorizon));   
 
-        # 3. Set Qin=1.5E6 and integrate until the specified TimeHorizon
+        # 3. Set Qin=1000W and integrate until the specified TimeHorizon is reached
         self.m.Qin.ReAssignValue(1000 * W)
         self.m.T.ReSetInitialCondition(300 * K)
         self.Reinitialize()

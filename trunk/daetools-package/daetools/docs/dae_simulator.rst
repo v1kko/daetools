@@ -17,10 +17,24 @@ Overview
 
 Classes
 =======
-
-
 .. py:module:: daetools.dae_simulator.simulator
+.. py:currentmodule:: daetools.dae_simulator.simulator
+
 .. autoclass:: daetools.dae_simulator.simulator.daeSimulator
     :members:
     :undoc-members:
  
+.. py:module:: daetools.dae_simulator.simulation_explorer
+.. py:currentmodule:: daetools.dae_simulator.simulation_explorer
+
+.. autoclass:: daetools.dae_simulator.simulation_explorer.daeSimulationExplorer
+    :members:
+    :undoc-members:
+
+.. py:module:: daetools.dae_simulator.simulation_inspector
+.. py:currentmodule:: daetools.dae_simulator.simulation_inspector
+
+.. autoclass:: daetools.dae_simulator.simulation_inspector.daeSimulationInspector
+    :members:
+    :undoc-members:
+

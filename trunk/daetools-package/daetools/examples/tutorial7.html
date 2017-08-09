@@ -30,6 +30,7 @@
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 <span style='color:#cc0000;'>This tutorial introduces the following concepts:</span>
 
+<span style='color:#cc0000;'>- Quasi steady state initial condition mode (eQuasiSteadyState flag)</span>
 <span style='color:#cc0000;'>- User-defined schedules (operating procedures)</span>
 <span style='color:#cc0000;'>- Resetting of degrees of freedom</span>
 <span style='color:#cc0000;'>- Resetting of initial conditions</span>
@@ -43,6 +44,54 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>the Qin variable represents a degree of freedom (DOF). Its value will be fixed</span>
 <span style='color:#cc0000;'>at the beginning of the simulation and later manipulated in the user-defined</span>
 <span style='color:#cc0000;'>schedule in the overloaded function daeSimulation.Run().</span>
+
+<span style='color:#cc0000;'>The default daeSimulation.Run() function (re-implemented in Python) is:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: python</span>
+
+<span style='color:#cc0000;'>    def Run(self):</span>
+<span style='color:#cc0000;'>        # Python implementation of daeSimulation::Run() C++ function.</span>
+<span style='color:#cc0000;'>        </span>
+<span style='color:#cc0000;'>        import math</span>
+<span style='color:#cc0000;'>        while self.CurrentTime &lt; self.TimeHorizon:</span>
+<span style='color:#cc0000;'>            # Get the time step (based on the TimeHorizon and the ReportingInterval).</span>
+<span style='color:#cc0000;'>            # Do not allow to get past the TimeHorizon.</span>
+<span style='color:#cc0000;'>            t = self.NextReportingTime</span>
+<span style='color:#cc0000;'>            if t &gt; self.TimeHorizon:</span>
+<span style='color:#cc0000;'>                t = self.TimeHorizon</span>
+
+<span style='color:#cc0000;'>            # If the flag is set - a user tries to pause the simulation, therefore return.</span>
+<span style='color:#cc0000;'>            if self.ActivityAction == ePauseActivity:</span>
+<span style='color:#cc0000;'>                self.Log.Message(&quot;Activity paused by the user&quot;, 0)</span>
+<span style='color:#cc0000;'>                return</span>
+
+<span style='color:#cc0000;'>            # If a discontinuity is found, loop until the end of the integration period.</span>
+<span style='color:#cc0000;'>            # The data will be reported around discontinuities!</span>
+<span style='color:#cc0000;'>            while t &gt; self.CurrentTime:</span>
+<span style='color:#cc0000;'>                self.Log.Message(&quot;Integrating from [</span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>] to [</span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>] ...&quot; % (self.CurrentTime, t), 0)</span>
+<span style='color:#cc0000;'>                self.IntegrateUntilTime(t, eStopAtModelDiscontinuity, True)</span>
+<span style='color:#cc0000;'>            </span>
+<span style='color:#cc0000;'>            # After the integration period, report the data. </span>
+<span style='color:#cc0000;'>            self.ReportData(self.CurrentTime)</span>
+<span style='color:#cc0000;'>            </span>
+<span style='color:#cc0000;'>            # Set the simulation progress.</span>
+<span style='color:#cc0000;'>            newProgress = math.ceil(100.0 * self.CurrentTime / self.TimeHorizon)</span>
+<span style='color:#cc0000;'>            if newProgress &gt; self.Log.Progress:</span>
+<span style='color:#cc0000;'>                self.Log.Progress = newProgress</span>
+<span style='color:#cc0000;'>                </span>
+<span style='color:#cc0000;'>In this example the following schedule is specified:</span>
+
+<span style='color:#cc0000;'>1. Run the simulation for 100s using the daeSimulation.IntegrateForTimeInterval() function</span>
+<span style='color:#cc0000;'>   and report the data using the daeSimulation.ReportData() function.</span>
+
+<span style='color:#cc0000;'>2. Re-assign the value of Qin to 2000W. After re-assigning DOFs or re-setting initial conditions</span>
+<span style='color:#cc0000;'>   the function daeSimulation.Reinitialize() has to be called to reinitialise the DAE system.</span>
+<span style='color:#cc0000;'>   Use the function daeSimulation.IntegrateUntilTime() to run until the time reaches 200s</span>
+<span style='color:#cc0000;'>   and report the data.</span>
+
+<span style='color:#cc0000;'>3. Re-assign the variable Qin to a new value 1500W, re-initialise the temperature again to 300K</span>
+<span style='color:#cc0000;'>   re-initialise the system, run the simulation until the TimeHorizon is reached using the function</span>
+<span style='color:#cc0000;'>   daeSimulation.Integrate() and report the data.</span>
 
 <span style='color:#cc0000;'>The plot of the inlet power:</span>
 
@@ -96,8 +145,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.m.Tsurr.SetValue(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
     <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
-        <span style='color:#3605fb;'>self</span>.m.Qin.AssignValue(<span style='color:#cc047c;'>500</span> <b><span style='color:#0000ff;'>*</span></b> W)
-        <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.Qin.AssignValue(<span style='color:#cc047c;'>0</span> <b><span style='color:#0000ff;'>*</span></b> W)
+        
+        <span style='color:#017a31;'># Here we can manually set the initial temperature to the temperature of the surroundings (283 * K).</span>
+        <span style='color:#017a31;'># However, here we use the eQuasiSteadyState initial condition mode available in the Sundials IDA solver</span>
+        <span style='color:#017a31;'># It assumes all time derivatives are initially equal to zero and calculates the non-derivative parts.</span>
+        <span style='color:#017a31;'># As a result, the initial temperature will be equal to the temperature of the surroundings (283 K).</span>
+        <span style='color:#3605fb;'>self</span>.InitialConditionMode <b><span style='color:#0000ff;'>=</span></b> eQuasiSteadyState
 
     <span style='color:#017a31;'># daeSimulation class provides the function Run() which is called after successful initialisation</span>
     <span style='color:#017a31;'># to run the simulation. By default, it runs for time period defined by the TimeHorizon property,</span>
@@ -125,13 +179,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'>#      - eStopAtDiscontinuity (integrate and return if some conditions have been satisfied); in this case,</span>
     <span style='color:#017a31;'>#        the integration has to be performed in a loop until the required time is reached.</span>
     <b>def</b> Run(<span style='color:#3605fb;'>self</span>):
-        <span style='color:#017a31;'># 1. Integrate for 100s</span>
+        <span style='color:#017a31;'># 1. Set Qin=500W and integrate for 100s</span>
+        <span style='color:#3605fb;'>self</span>.m.Qin.ReAssignValue(<span style='color:#cc047c;'>500</span> <b><span style='color:#0000ff;'>*</span></b> W)
+        <span style='color:#3605fb;'>self</span>.Reinitialize()
+        <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;OP: Integrating for 100 seconds ... &quot;</span>, <span style='color:#cc047c;'>0</span>)
         time <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.IntegrateForTimeInterval(<span style='color:#cc047c;'>100</span>, eDoNotStopAtDiscontinuity)
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
         <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))<b><span style='color:#0000ff;'>;</span></b>   
 
-        <span style='color:#017a31;'># 2. Set Qin=2000W and integrate until t=200s</span>
+        <span style='color:#017a31;'># 2. Set Qin=750W and integrate until time = 200s</span>
         <span style='color:#3605fb;'>self</span>.m.Qin.ReAssignValue(<span style='color:#cc047c;'>750</span> <b><span style='color:#0000ff;'>*</span></b> W)
         <span style='color:#3605fb;'>self</span>.Reinitialize()
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
@@ -140,7 +197,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)
         <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))<b><span style='color:#0000ff;'>;</span></b>   
 
-        <span style='color:#017a31;'># 3. Set Qin=1.5E6 and integrate until the specified TimeHorizon</span>
+        <span style='color:#017a31;'># 3. Set Qin=1000W and integrate until the specified TimeHorizon is reached</span>
         <span style='color:#3605fb;'>self</span>.m.Qin.ReAssignValue(<span style='color:#cc047c;'>1000</span> <b><span style='color:#0000ff;'>*</span></b> W)
         <span style='color:#3605fb;'>self</span>.m.T.ReSetInitialCondition(<span style='color:#cc047c;'>300</span> <b><span style='color:#0000ff;'>*</span></b> K)
         <span style='color:#3605fb;'>self</span>.Reinitialize()

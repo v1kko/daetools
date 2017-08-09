@@ -109,22 +109,20 @@ from pyUnits import m, g, kg, s, K, mol, kmol, J, um
 pbm_number_density_t = daeVariableType("pbm_number_density_t", m**(-1), 0.0, 1.0e+40,  0.0, 1e-0)
 
 class modelMoC(daeModel):
-    def __init__(self, Name, G, Phi_callable, Parent = None, Description = ""):
+    def __init__(self, Name, G, Phi, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.G  = Constant(G)
+        self.G   = Constant(G)
+        self.Phi = Phi
 
         self.L = daeDomain("L",  self, um, "Characteristic dimension (size) of crystals")
-
         self.ni = daeVariable("ni", pbm_number_density_t, self, "Van Leer k-interpolation scheme (k = 1/3)", [self.L])
-
-        self.hr = daeHRUpwindScheme(self.ni, self.L, Phi_callable, Constant(1e-10 * pbm_number_density_t.Units))
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
         G  = self.G 
-        hr = self.hr
+        hr = daeHRUpwindSchemeEquation(self.ni, self.L, self.Phi, Constant(1e-10 * pbm_number_density_t.Units))
         L  = self.L.Points
         nL = self.L.NumberOfPoints
 
@@ -246,7 +244,7 @@ if __name__ == "__main__":
 
     L_report = []
     try:
-        for flux_limiter in daeHRUpwindScheme.supported_flux_limiters:
+        for flux_limiter in daeHRUpwindSchemeEquation.supported_flux_limiters:
             flux_limiter_name = flux_limiter.__doc__
             process_dpb = run_simulation(flux_limiter_name, flux_limiter_name, N, L, G, ni_0, reportingInterval, timeHorizon, flux_limiter)
             ni_dpb      = process_dpb.dictVariables['%s.ni' % flux_limiter_name]

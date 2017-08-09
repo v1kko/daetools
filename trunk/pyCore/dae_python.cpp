@@ -107,7 +107,7 @@ BOOST_PYTHON_MODULE(pyCore)
     enum_<daeeInitialConditionMode>("daeeInitialConditionMode")
         .value("eICTUnknown",					dae::core::eICTUnknown)
         .value("eAlgebraicValuesProvided",		dae::core::eAlgebraicValuesProvided)
-        .value("eQuasySteadyState",				dae::core::eQuasySteadyState)
+        .value("eQuasiSteadyState",				dae::core::eQuasiSteadyState)
         .export_values()
     ;
 
@@ -471,6 +471,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("ExternalFunction",  make_function(&daepython::adVectorExternalFunctionNode_ExternalFunction, return_internal_reference<>()))
     ;
 
+    /*
     class_<adFEMatrixItemNode, bases<adNode>, boost::noncopyable>("adFEMatrixItemNode", no_init)
         .def_readonly("MatrixName",   &adFEMatrixItemNode::m_strMatrixName)
         .def_readonly("Row",          &adFEMatrixItemNode::m_row)
@@ -482,6 +483,23 @@ BOOST_PYTHON_MODULE(pyCore)
         .def_readonly("VectorName",   &adFEVectorItemNode::m_strVectorName)
         .def_readonly("Row",          &adFEVectorItemNode::m_row)
         .add_property("Value",        &daepython::adFEVectorItemNode_Value)
+    ;
+    */
+
+    class_<daeFloatCoefficientVariableProduct>("daeFloatCoefficientVariableProduct", no_init)
+        .def_readonly("coefficient", &daeFloatCoefficientVariableProduct::coefficient)
+        .def_readonly("blockIndex",  &daeFloatCoefficientVariableProduct::blockIndex)
+        .add_property("variable",    make_function(&daepython::daeFloatCoefficientVariableProduct_variable, return_internal_reference<>()))
+    ;
+
+    class_< std::map<size_t, daeFloatCoefficientVariableProduct> >("map_Uint_daeFloatCoefficientVariableProduct")
+        .def(map_indexing_suite< std::map<size_t, daeFloatCoefficientVariableProduct> >())
+        .def("values", &daepython::map_Uint_daeFloatCoefficientVariableProduct_values)
+    ;
+
+    class_<adFloatCoefficientVariableSumNode, bases<adNode>, boost::noncopyable>("adFloatCoefficientVariableSumNode", no_init)
+        .def_readonly("sum",   &adFloatCoefficientVariableSumNode::m_sum)
+        .def_readonly("base",  &adFloatCoefficientVariableSumNode::m_base)
     ;
 
     class_<adDomainIndexNode, bases<adNode>, boost::noncopyable>("adDomainIndexNode", no_init)
@@ -1831,6 +1849,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("Scaling",                        &daeEquation::GetScaling,  &daeEquation::SetScaling, DOCSTR_daeEquation_Scaling)
         .add_property("BuildJacobianExpressions",       &daeEquation::GetBuildJacobianExpressions,  &daeEquation::SetBuildJacobianExpressions, DOCSTR_daeEquation_BuildJacobianExpressions)
         .add_property("CheckUnitsConsistency",          &daeEquation::GetCheckUnitsConsistency,  &daeEquation::SetCheckUnitsConsistency, DOCSTR_daeEquation_CheckUnitConsistency)
+        .add_property("SimplifyExpressions",            &daeEquation::GetSimplifyExpressions,  &daeEquation::SetSimplifyExpressions, DOCSTR_daeEquation_SimplifyExpressions)
         .add_property("EquationExecutionInfos",	        &daepython::daeEquation_GetEquationExecutionInfos, DOCSTR_daeEquation_EquationExecutionInfos)
         .add_property("DistributedEquationDomainInfos",	&daepython::daeEquation_DistributedEquationDomainInfos, DOCSTR_daeEquation_DistributedEquationDomainInfos)
         .add_property("EquationType",	                &daeEquation::GetEquationType, DOCSTR_daeEquation_EquationType)

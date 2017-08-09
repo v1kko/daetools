@@ -58,9 +58,9 @@ POINTER_CONVERSION(adouble)
 
 BOOST_PYTHON_MODULE(pyDealII)
 {
-	//import_array();
-	//boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
-    
+    //import_array();
+    //boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
+
     docstring_options doc_options(true, true, false);
 
     class_< Tensor<1,1,double> >("Tensor_1_1D", no_init)
@@ -897,6 +897,9 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("atanh", &fe_solver::atanh<1>).staticmethod("atanh")
         .def("abs",   &fe_solver::abs<1>).staticmethod("abs")
         .def("erf",   &fe_solver::erf<1>).staticmethod("erf")
+
+        .def("scalar_product",   &fe_solver::scalar_product<1>).staticmethod("scalar_product")
+        .def("double_contract",  &fe_solver::double_contract<1>).staticmethod("double_contract")
     ;
 
     class_< feExpression<2> >("feExpression_2D", no_init)
@@ -942,6 +945,9 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("atanh", &fe_solver::atanh<2>).staticmethod("atanh")
         .def("abs",   &fe_solver::abs<2>).staticmethod("abs")
         .def("erf",   &fe_solver::erf<2>).staticmethod("erf")
+
+        .def("scalar_product",   &fe_solver::scalar_product<2>).staticmethod("scalar_product")
+        .def("double_contract",  &fe_solver::double_contract<2>).staticmethod("double_contract")
     ;
 
     class_< feExpression<3> >("feExpression_3D", no_init)
@@ -966,7 +972,6 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(double() - self)
         .def(double() * self)
         .def(double() / self)
-
         .def("__str__",  &feExpression<3>::ToString)
 
         .def("exp",   &fe_solver::exp<3>).staticmethod("exp")
@@ -987,6 +992,9 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def("atanh", &fe_solver::atanh<3>).staticmethod("atanh")
         .def("abs",   &fe_solver::abs<3>).staticmethod("abs")
         .def("erf",   &fe_solver::erf<3>).staticmethod("erf")
+
+        .def("scalar_product",   &fe_solver::scalar_product<3>).staticmethod("scalar_product")
+        .def("double_contract",  &fe_solver::double_contract<3>).staticmethod("double_contract")
     ;
 
     boost::python::scope().attr("fe_q") = fe_q;
@@ -1020,6 +1028,10 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("normal_1D", &normal<1>, ( arg("quadraturePoint") ));
     def("normal_2D", &normal<2>, ( arg("quadraturePoint") ));
     def("normal_3D", &normal<3>, ( arg("quadraturePoint") ));
+
+    def("symmetric_gradient_1D", &symmetric_gradient<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("symmetric_gradient_2D", &symmetric_gradient<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
+    def("symmetric_gradient_3D", &symmetric_gradient<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
 
 
     def("tensor1_function_value_1D", &tensor_function_value<1,1,double>, ( arg("functionName"), arg("tensorFunction"), arg("point") ));
@@ -1058,11 +1070,11 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("function_gradient_1D", &function_gradient<1,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
     def("function_gradient_2D", &function_gradient<2,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
     def("function_gradient_3D", &function_gradient<3,double>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
-    
+
     def("function_adouble_gradient_1D", &function_gradient<1,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
     def("function_adouble_gradient_2D", &function_gradient<2,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
     def("function_adouble_gradient_3D", &function_gradient<3,adouble>, ( arg("functionName"), arg("fun"), arg("point"), arg("component") = 0 ));
-    
+
     def("phi_vector_1D", &phi_vector<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_vector_2D", &phi_vector<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_vector_3D", &phi_vector<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
@@ -1136,6 +1148,7 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("curl_3D", &curl<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     */
 
+
     class_< std::map< unsigned int, feExpression<1> > >("map_Uint_Expression_1D")
         .def(map_indexing_suite< std::map< unsigned int, feExpression<1> > >())
     ;
@@ -1179,6 +1192,25 @@ BOOST_PYTHON_MODULE(pyDealII)
     class_< dealiiFiniteElementWeakForm<3>::map_Uint_vector_pair_Variable_Expression >("map_Uint_pair_Variable_Expression_3D")
         .def(map_indexing_suite< dealiiFiniteElementWeakForm<3>::map_Uint_vector_pair_Variable_Expression >())
     ;
+
+
+    class_<dealiiCellContribution<1>, boost::noncopyable>("dealiiCellContribution_1D")
+    ;
+    class_<dealiiCellContribution<2>, boost::noncopyable>("dealiiCellContribution_2D")
+    ;
+    class_<dealiiCellContribution<3>, boost::noncopyable>("dealiiCellContribution_3D")
+    ;
+
+    class_< std::vector< dealiiCellContribution<1> > >("vector_dealiiCellContribution_1D")
+        .def(vector_indexing_suite< std::vector< dealiiCellContribution<1> > >())
+    ;
+    class_< std::vector< dealiiCellContribution<2> > >("vector_dealiiCellContribution_2D")
+        .def(vector_indexing_suite< std::vector< dealiiCellContribution<2> > >())
+    ;
+    class_< std::vector< dealiiCellContribution<3> > >("vector_dealiiCellContribution_3D")
+        .def(vector_indexing_suite< std::vector< dealiiCellContribution<3> > >())
+    ;
+
 
     /* Scalar finite elements:
         FE_Q, FE_Bernstein
@@ -1319,11 +1351,13 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const std::string&,
                   const std::string&,
                   boost::shared_ptr< FiniteElement<1> >,
-                  unsigned int>((arg("name"),
-                                 arg("description"),
-                                 arg("fe"),
-                                 arg("multiplicity")
-                                )))
+                  unsigned int,
+                  daeVariableType>((arg("name"),
+                                     arg("description"),
+                                     arg("fe"),
+                                     arg("multiplicity"),
+                                     arg("variableType") = variable_types::no_t
+                                    )))
         .def_readonly("Name",          &dealiiFiniteElementDOF<1>::m_strName)
         .def_readonly("Description",   &dealiiFiniteElementDOF<1>::m_strDescription)
         .def_readonly("Multiplicity",  &dealiiFiniteElementDOF<1>::m_nMultiplicity)
@@ -1332,11 +1366,13 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const std::string&,
                   const std::string&,
                   boost::shared_ptr< FiniteElement<2> >,
-                  unsigned int>((arg("name"),
-                                 arg("description"),
-                                 arg("fe"),
-                                 arg("multiplicity")
-                                )))
+                  unsigned int,
+                  daeVariableType>((arg("name"),
+                                     arg("description"),
+                                     arg("fe"),
+                                     arg("multiplicity"),
+                                     arg("variableType") = variable_types::no_t
+                                    )))
         .def_readonly("Name",          &dealiiFiniteElementDOF<2>::m_strName)
         .def_readonly("Description",   &dealiiFiniteElementDOF<2>::m_strDescription)
         .def_readonly("Multiplicity",  &dealiiFiniteElementDOF<2>::m_nMultiplicity)
@@ -1345,20 +1381,22 @@ BOOST_PYTHON_MODULE(pyDealII)
         .def(init<const std::string&,
                   const std::string&,
                   boost::shared_ptr< FiniteElement<3> >,
-                  unsigned int>((arg("name"),
-                                 arg("description"),
-                                 arg("fe"),
-                                 arg("multiplicity")
-                                )))
+                  unsigned int,
+                  daeVariableType>((arg("name"),
+                                    arg("description"),
+                                    arg("fe"),
+                                    arg("multiplicity"),
+                                    arg("variableType") = variable_types::no_t
+                                   )))
         .def_readonly("Name",          &dealiiFiniteElementDOF<3>::m_strName)
         .def_readonly("Description",   &dealiiFiniteElementDOF<3>::m_strDescription)
         .def_readonly("Multiplicity",  &dealiiFiniteElementDOF<3>::m_nMultiplicity)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<1>, boost::noncopyable>("dealiiFiniteElementWeakForm_1D", no_init)
-        .def(init<const feExpression<1>&,
-                  const feExpression<1>&,
-                  const feExpression<1>&,
+        .def(init<boost::python::object&,
+                  boost::python::object&,
+                  boost::python::object&,
                   const feExpression<1>&,
                   const feExpression<1>&,
                   boost::python::dict,
@@ -1391,9 +1429,9 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<2>, boost::noncopyable>("dealiiFiniteElementWeakForm_2D", no_init)
-        .def(init<const feExpression<2>&,
-                  const feExpression<2>&,
-                  const feExpression<2>&,
+        .def(init<boost::python::object&,
+                  boost::python::object&,
+                  boost::python::object&,
                   const feExpression<2>&,
                   const feExpression<2>&,
                   boost::python::dict,
@@ -1426,9 +1464,9 @@ BOOST_PYTHON_MODULE(pyDealII)
     ;
 
     class_<daepython::dealiiFiniteElementWeakFormWrapper<3>, boost::noncopyable>("dealiiFiniteElementWeakForm_3D", no_init)
-        .def(init<const feExpression<3>&,
-                  const feExpression<3>&,
-                  const feExpression<3>&,
+        .def(init<boost::python::object&,
+                  boost::python::object&,
+                  boost::python::object&,
                   const feExpression<3>&,
                   const feExpression<3>&,
                   boost::python::dict,
@@ -1494,7 +1532,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                     &daepython::dealiiFiniteElementSystemWrapper<1>::def_NeedsReAssembling, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementSystem<1>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
         .def("RowIndices",          &daepython::dealiiFiniteElementSystemWrapper<1>::GetRowIndices, ( arg("self"), arg("row") ))
-        .def("GetDOFtoBoundaryMap", &dealiiFiniteElementSystem<1>::GetDOFtoBoundaryMap, ( arg("self") ))
+        .def("GetBoundaryDOFs",     &daepython::dealiiFiniteElementSystemWrapper<1>::GetBoundaryDOFs_, ( arg("self"), arg("variableName"), arg("boundaryIDs") ))
+        .def("GetDOFSupportPoints", &dealiiFiniteElementSystem<1>::GetDOFSupportPoints, ( arg("self") ))
     ;
 
 
@@ -1519,7 +1558,8 @@ BOOST_PYTHON_MODULE(pyDealII)
                                     &daepython::dealiiFiniteElementSystemWrapper<2>::def_NeedsReAssembling, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementSystem<2>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
         .def("RowIndices",          &daepython::dealiiFiniteElementSystemWrapper<2>::GetRowIndices, ( arg("self"), arg("row") ))
-        .def("GetDOFtoBoundaryMap", &dealiiFiniteElementSystem<2>::GetDOFtoBoundaryMap, ( arg("self") ))
+        .def("GetBoundaryDOFs",     &daepython::dealiiFiniteElementSystemWrapper<2>::GetBoundaryDOFs_, ( arg("self"), arg("variableName"), arg("boundaryIDs") ))
+        .def("GetDOFSupportPoints", &dealiiFiniteElementSystem<2>::GetDOFSupportPoints, ( arg("self") ))
     ;
 
     class_<daepython::dealiiFiniteElementSystemWrapper<3>, bases<daeFiniteElementObject_t>, boost::noncopyable>("dealiiFiniteElementSystem_3D", no_init)
@@ -1543,6 +1583,7 @@ BOOST_PYTHON_MODULE(pyDealII)
                                     &daepython::dealiiFiniteElementSystemWrapper<3>::def_NeedsReAssembling, ( arg("self") ))
         .def("CreateDataReporter",  &dealiiFiniteElementSystem<3>::CreateDataReporter, ( arg("self") ), return_value_policy<manage_new_object>())
         .def("RowIndices",          &daepython::dealiiFiniteElementSystemWrapper<3>::GetRowIndices, ( arg("self"), arg("row") ))
-        .def("GetDOFtoBoundaryMap", &dealiiFiniteElementSystem<3>::GetDOFtoBoundaryMap, ( arg("self") ))
+        .def("GetBoundaryDOFs",     &daepython::dealiiFiniteElementSystemWrapper<3>::GetBoundaryDOFs_, ( arg("self"), arg("variableName"), arg("boundaryIDs") ))
+        .def("GetDOFSupportPoints", &dealiiFiniteElementSystem<3>::GetDOFSupportPoints, ( arg("self") ))
     ;
 }

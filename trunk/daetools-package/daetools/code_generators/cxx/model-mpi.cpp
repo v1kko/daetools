@@ -179,7 +179,7 @@ void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* time
 void modSetInitialConditions(daeModel_t* _m_, real_t* values)
 {
     /* This function is redundant - all initial conditions are already set in std::map<int,runtimeInformationData> */
-    if(_m_->quasySteadyState)
+    if(_m_->quasiSteadyState)
         return;
 
     %(initialConditions)s

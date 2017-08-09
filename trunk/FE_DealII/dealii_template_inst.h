@@ -58,12 +58,15 @@ namespace numbers
 
 namespace internal
 {
+namespace VectorOperations
+{
     template <>
     void print (const adouble    &t,
                 const char *format)
     {
         printf("%f", t.getValue());
     }
+}
 }
 
 namespace MemoryConsumption
@@ -151,7 +154,7 @@ void
 SparseMatrix<adouble>::reinit (const SparsityPattern &sparsity)
 {
     cols = &sparsity;
-    
+
     if (cols->empty())
     {
         if (val != 0)
@@ -160,7 +163,7 @@ SparseMatrix<adouble>::reinit (const SparsityPattern &sparsity)
         max_len = 0;
         return;
     }
-    
+
     const std::size_t N = cols->n_nonzero_elements();
     if (N > max_len || max_len == 0)
     {
@@ -169,7 +172,7 @@ SparseMatrix<adouble>::reinit (const SparsityPattern &sparsity)
         val = new adouble[N];
         max_len = N;
     }
-    
+
     // Achtung, Achtung!!
     // This causes the seg. fault when std::memset is called on an aray of non-PODs
     // It is not needed for adouble, since it gets initialised to zeros in the constructor, anyway.
@@ -391,9 +394,10 @@ inline void local_apply_boundary_values (const typename std::map<types::global_d
               local_matrix(i,i) = abs(local_matrix(i,i));
           }
 
-          // and replace rhs entry by correct
-          // value
-          local_rhs[i] = local_matrix(i,i) * boundary_value->second;
+          // and replace rhs entry by correct value
+          Number ad = local_matrix(i,i) * boundary_value->second;
+          ad.node = adNode::SimplifyNode(ad.node);
+          local_rhs[i] = ad;
 
           // finally do the elimination step
           // if requested
@@ -402,11 +406,21 @@ inline void local_apply_boundary_values (const typename std::map<types::global_d
               for (unsigned int row=0; row<n_local_dofs; ++row)
                 if (row != i)
                   {
-                    local_rhs[row] -= local_matrix(row,i) * boundary_value->second;
+                    ad = local_matrix(row,i) * boundary_value->second;
+                    ad.node = adNode::SimplifyNode(ad.node);
+                    if(ad.node || ad.getValue() != 0)
+                        local_rhs[row] -= ad;
                     local_matrix(row,i) = 0;
                   }
             }
         }
+    }
+
+    for(unsigned int row=0; row<n_local_dofs; ++row)
+    {
+        local_rhs[row].node = adNode::SimplifyNode(local_rhs[row].node);
+        for(unsigned int col=0; col<n_local_dofs; ++col)
+            local_matrix(row,col).node = adNode::SimplifyNode(local_matrix(row,col).node);
     }
 }
 

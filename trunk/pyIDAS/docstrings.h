@@ -12,9 +12,9 @@ const char* DOCSTR_daeDAESolver_t = "";
     const char* DOCSTR_daeDAESolver_t_OnCalculateConditions = "";
     const char* DOCSTR_daeDAESolver_t_OnCalculateJacobian = "";
     const char* DOCSTR_daeDAESolver_t_OnCalculateSensitivityResiduals = "";
-    
-    
-    
+
+
+
 const char* DOCSTR_daeIDAS = "";
     const char* DOCSTR_daeIDAS_init = "";
     const char* DOCSTR_daeIDAS_SetLASolver1 = "";
@@ -23,6 +23,7 @@ const char* DOCSTR_daeIDAS = "";
     const char* DOCSTR_daeIDAS_LASolver = "";
     const char* DOCSTR_daeIDAS_EstLocalErrors = "";
     const char* DOCSTR_daeIDAS_ErrWeights = "";
+    const char* DOCSTR_daeIDAS_IntegratorStats = "";
     const char* DOCSTR_daeIDAS_OnCalculateResiduals = "";
     const char* DOCSTR_daeIDAS_OnCalculateConditions = "";
     const char* DOCSTR_daeIDAS_OnCalculateJacobian = "";

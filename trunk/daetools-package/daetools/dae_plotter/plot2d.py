@@ -174,8 +174,11 @@ class dae2DPlot(QtWidgets.QDialog):
         new_line = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'add.png')), 'Add line', self)
         new_line.setShortcut('Ctrl+A')
         new_line.setStatusTip('Add line')
-        new_line.triggered.connect(self.newCurve)
-
+        if animated == True:
+            new_line.triggered.connect(self.newAnimatedCurve)
+        else:
+            new_line.triggered.connect(self.newCurve)
+            
         play_animation = QtWidgets.QAction(QtGui.QIcon(join(images_dir, 'media-playback-start.png')), 'Start animation', self)
         play_animation.setShortcut('Ctrl+S')
         play_animation.setStatusTip('Start animation')
@@ -194,7 +197,7 @@ class dae2DPlot(QtWidgets.QDialog):
         export_video.triggered.connect(self.exportVideo)
 
         self.actions_to_disable = [export, viewdata, export_csv, grid, legend, properties]
-        self.actions_to_disable_permanently = [new_line, fromUserData, remove_line]
+        self.actions_to_disable_permanently = [fromUserData] #[new_line, fromUserData, remove_line]
 
         self.toolbar_widget = QtWidgets.QWidget(self)
         layoutToolbar = QtWidgets.QVBoxLayout(self.toolbar_widget)
@@ -598,58 +601,61 @@ class dae2DPlot(QtWidgets.QDialog):
             return '', False
 
     def _updateFrame(self, frame):
-        curve = self.curves[0]
-        line    = curve[0]
-        times   = curve[5]
-        xPoints = curve[6]
-        yPoints = curve[7]
-        yData = yPoints[frame]
-        line.set_ydata(yData)
-        time = times[frame]
+        lines = []
+        for curve in self.curves:
+            line = curve[0]
+            lines.append(line)
+            
+            times   = curve[5]
+            xPoints = curve[6]
+            yPoints = curve[7]
+            yData = yPoints[frame]
+            line.set_ydata(yData)
+            time = times[frame]
 
-        if self.xmin_policy == 0:   # From 1st frame
-            xmin = numpy.min(xPoints)
-        elif self.xmin_policy == 1: # Overall min value
-            xmin = numpy.min(xPoints)
-        elif self.xmin_policy == 2: # Adaptive
-            xmin = numpy.min(xPoints)
-        else:                       # Do not change it
-            xmin = self.canvas.axes.get_xlim()[0]
+            if self.xmin_policy == 0:   # From 1st frame
+                xmin = numpy.min(xPoints)
+            elif self.xmin_policy == 1: # Overall min value
+                xmin = numpy.min(xPoints)
+            elif self.xmin_policy == 2: # Adaptive
+                xmin = numpy.min(xPoints)
+            else:                       # Do not change it
+                xmin = self.canvas.axes.get_xlim()[0]
 
-        if self.xmax_policy == 0:   # From 1st frame
-            xmax = numpy.max(xPoints)
-            dx = 0.5 * (xmax-xmin)*0.05
-        elif self.xmax_policy == 1: # Overall max value
-            xmax = numpy.max(xPoints)
-            dx = 0.5 * (xmax-xmin)*0.05
-        elif self.xmax_policy == 2: # Adaptive
-            xmax = numpy.max(xPoints)
-            dx = 0.5 * (xmax-xmin)*0.05
-        else:                       # Do not change it
-            xmax = self.canvas.axes.get_xlim()[1]
-            dx = 0.0
+            if self.xmax_policy == 0:   # From 1st frame
+                xmax = numpy.max(xPoints)
+                dx = 0.5 * (xmax-xmin)*0.05
+            elif self.xmax_policy == 1: # Overall max value
+                xmax = numpy.max(xPoints)
+                dx = 0.5 * (xmax-xmin)*0.05
+            elif self.xmax_policy == 2: # Adaptive
+                xmax = numpy.max(xPoints)
+                dx = 0.5 * (xmax-xmin)*0.05
+            else:                       # Do not change it
+                xmax = self.canvas.axes.get_xlim()[1]
+                dx = 0.0
 
-        if self.ymin_policy == 0:   # From 1st frame
-            ymin = numpy.min(yPoints[0])
-        elif self.ymin_policy == 1: # Overall min value
-            ymin = numpy.min(yPoints)
-        elif self.ymin_policy == 2: # Adaptive
-            ymin = numpy.min(yPoints[frame])
-        else:                       # Do not change it
-            ymin = self.canvas.axes.get_ylim()[0]
+            if self.ymin_policy == 0:   # From 1st frame
+                ymin = numpy.min(yPoints[0])
+            elif self.ymin_policy == 1: # Overall min value
+                ymin = numpy.min(yPoints)
+            elif self.ymin_policy == 2: # Adaptive
+                ymin = numpy.min(yPoints[frame])
+            else:                       # Do not change it
+                ymin = self.canvas.axes.get_ylim()[0]
 
-        if self.ymax_policy == 0:   # From 1st frame
-            ymax = numpy.max(yPoints[0])
-            dy = 0.5 * (ymax-ymin)*0.05
-        elif self.ymax_policy == 1: # Overall max value
-            ymax = numpy.max(yPoints)
-            dy = 0.5 * (ymax-ymin)*0.05
-        elif self.ymax_policy == 2: # Adaptive
-            ymax = numpy.max(yPoints[frame])
-            dy = 0.5 * (ymax-ymin)*0.05
-        else:                       # Do not change it
-            ymax = self.canvas.axes.get_ylim()[1]
-            dy = 0.0
+            if self.ymax_policy == 0:   # From 1st frame
+                ymax = numpy.max(yPoints[0])
+                dy = 0.5 * (ymax-ymin)*0.05
+            elif self.ymax_policy == 1: # Overall max value
+                ymax = numpy.max(yPoints)
+                dy = 0.5 * (ymax-ymin)*0.05
+            elif self.ymax_policy == 2: # Adaptive
+                ymax = numpy.max(yPoints[frame])
+                dy = 0.5 * (ymax-ymin)*0.05
+            else:                       # Do not change it
+                ymax = self.canvas.axes.get_ylim()[1]
+                dy = 0.0
 
         self.canvas.axes.set_xlim(xmin-dx, xmax+dx)
         self.canvas.axes.set_ylim(ymin-dy, ymax+dy)
@@ -668,11 +674,11 @@ class dae2DPlot(QtWidgets.QDialog):
             self.play_animation.setText('Start animation')
             self._isAnimating = False
 
-        return line,
+        return lines
 
     def _startAnimation(self):
-        if len(self.curves) != 1:
-            return
+        #if len(self.curves) != 1:
+        #    return
 
         # Set properties for the frame 0
         curve = self.curves[0]

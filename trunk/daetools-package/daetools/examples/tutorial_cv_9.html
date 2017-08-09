@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial_cv_9.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial_cv_9.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Code verification using the Method of Exact Solutions (Solid Body Rotation problem).</span>
+
+<span style='color:#cc0000;'>Reference (section 4.4.6.1 Solid Body Rotation):</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>- D. Kuzmin (2010). A Guide to Numerical Methods for Transport Equations. </span>
+<span style='color:#cc0000;'>  `PDF &lt;http://www.mathematik.uni-dortmund.de/~kuzmin/Transport.pdf&gt;`_</span>
+
+<span style='color:#cc0000;'>Solid body rotation illustrates the ability of a numerical scheme to transport initial</span>
+<span style='color:#cc0000;'>data without distortion. Here, a 2D transient convection problem in a rectangular </span>
+<span style='color:#cc0000;'>(0,1)x(0,1) domain is solved using the FE method:</span>
+
+<span style='color:#cc0000;'>.. code-block:: none</span>
+
+<span style='color:#cc0000;'>   dc/dt + div(u*c) = 0, in Omega = (0,1)x(0,1)</span>
+
+<span style='color:#cc0000;'>The initial conditions define a conical body which is rotated counterclockwise around</span>
+<span style='color:#cc0000;'>the point (0.5, 0.5) using the velocity field u = (0.5 - y, x - 0.5). </span>
+<span style='color:#cc0000;'>The cone is defined by the following equation:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>   r0 = 0.15</span>
+<span style='color:#cc0000;'>   (x0, y0) = (0.5, 0.25)</span>
+<span style='color:#cc0000;'>   c(x,y,0) = 1 - (1/r0) * sqrt((x-x0)**2 + (y-y0)**2)</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>After t = 2pi the body should arrive at the starting position.</span>
+
+<span style='color:#cc0000;'>Homogeneous Dirichlet boundary conditions are prescribed at all four edges:</span>
+
+<span style='color:#cc0000;'>.. code-block:: none</span>
+
+<span style='color:#cc0000;'>   c(x,y,t) = 0.0</span>
+<span style='color:#cc0000;'>   </span>
+<span style='color:#cc0000;'>The mesh is a square (0,1)x(0,1):</span>
+
+<span style='color:#cc0000;'>.. image:: _static/square(0,1)x(0,1)-64x64.png</span>
+<span style='color:#cc0000;'>   :width: 300 px</span>
+
+<span style='color:#cc0000;'>The solution plot at t = 0: </span>
+
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_9-results1.png</span>
+<span style='color:#cc0000;'>   :width: 400 px</span>
+
+<span style='color:#cc0000;'>The solution plot at t = 2pi: </span>
+
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_9-results2.png</span>
+<span style='color:#cc0000;'>   :width: 400 px</span>
+
+<span style='color:#cc0000;'>It can be observed that the shape of the cone is preserved. Also, since the above</span>
+<span style='color:#cc0000;'>equation is hyperbolic some oscillations in the solution out of the cone appear.</span>
+<span style='color:#cc0000;'>This problem was resolved in the original example using the flux linearisation techniques.</span>
+
+<span style='color:#cc0000;'>The normalised global errors and the order of accuracy plots </span>
+<span style='color:#cc0000;'>(no. elements = [32x32, 64x64, 96x96, 128x128], t = 2pi):</span>
+
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_9-results3.png</span>
+<span style='color:#cc0000;'>   :width: 800 px</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> os, sys, numpy, json, tempfile
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>import</span> matplotlib.pyplot <span style='color:#3605fb;'>as</span> plt
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.deal_II <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.superlu <span style='color:#3605fb;'>import</span> pySuperLU
+
+<span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
+
+<b>class</b> VelocityFunction_2D(Function_2D):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>):
+        Function_2D.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, n_components)
+        <span style='color:#3605fb;'>self</span>.m_velocity <b><span style='color:#0000ff;'>=</span></b> Tensor_1_2D()
+
+    <b>def</b> gradient(<span style='color:#3605fb;'>self</span>, point, component <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>):
+        <span style='color:#3605fb;'>self</span>.m_velocity[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span> <b><span style='color:#0000ff;'>-</span></b> point.y
+        <span style='color:#3605fb;'>self</span>.m_velocity[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> point.x <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>0.5</span>
+        <b>return</b> <span style='color:#3605fb;'>self</span>.m_velocity
+
+    <b>def</b> vector_gradient(<span style='color:#3605fb;'>self</span>, point):
+        <b>return</b> [<span style='color:#3605fb;'>self</span>.value(point, c) <b>for</b> c <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#3605fb;'>self</span>.n_components)]
+
+c_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;c_t&quot;</span>, unit(),  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1E20</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-07</span>)
+
+<b>class</b> modTutorial(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Nx, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+
+        dofs <b><span style='color:#0000ff;'>=</span></b> [dealiiFiniteElementDOF_2D(name<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'c'</span>,
+                                          description<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Something'</span>,
+                                          fe <b><span style='color:#0000ff;'>=</span></b> FE_Q_2D(<span style='color:#cc047c;'>1</span>),
+                                          multiplicity<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1</span>,
+                                          variableType<b><span style='color:#0000ff;'>=</span></b>c_t)]
+        <span style='color:#3605fb;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(numpy.<span style='color:#2a00d6;'>sum</span>([dof.Multiplicity <b>for</b> dof <b>in</b> dofs]))
+
+        meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'meshes'</span>)
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>x</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.msh'</span> <b><span style='color:#0000ff;'>%</span></b> (Nx, Nx))
+
+        <span style='color:#017a31;'># Store the object so it does not go out of scope while still in use by daetools</span>
+        <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,
+                                                      quadrature      <b><span style='color:#0000ff;'>=</span></b> QGauss_2D(<span style='color:#cc047c;'>3</span>),
+                                                      faceQuadrature  <b><span style='color:#0000ff;'>=</span></b> QGauss_1D(<span style='color:#cc047c;'>3</span>),
+                                                      dofs            <b><span style='color:#0000ff;'>=</span></b> dofs)
+
+        <span style='color:#3605fb;'>self</span>.fe_model <b><span style='color:#0000ff;'>=</span></b> daeFiniteElementModel(<span style='color:#cc0000;'>'SolidBodyRotation'</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>'Solid Body Rotation problem'</span>, <span style='color:#3605fb;'>self</span>.fe_system)
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_i, fe_q)
+        phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)
+        dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>, fe_i, fe_q)
+        dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
+
+        <span style='color:#017a31;'># The counterclockwise velocity field (0.5-y, x-0.5) Function&lt;dim&gt;::gradient wrapper.</span>
+        <span style='color:#3605fb;'>self</span>.fun_u <b><span style='color:#0000ff;'>=</span></b> VelocityFunction_2D()
+        u_grad <b><span style='color:#0000ff;'>=</span></b> function_gradient_2D(<span style='color:#cc0000;'>&quot;u&quot;</span>, <span style='color:#3605fb;'>self</span>.fun_u, xyz)
+
+        <span style='color:#017a31;'># Boundary IDs</span>
+        left_edge   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
+        top_edge    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
+        right_edge  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>
+        bottom_edge <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3</span>
+
+        dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
+        dirichletBC[left_edge]   <b><span style='color:#0000ff;'>=</span></b> [ 
+                                    (<span style='color:#cc0000;'>'c'</span>,  adoubleConstantFunction_2D(adouble(<span style='color:#cc047c;'>0.0</span>), <span style='color:#3605fb;'>self</span>.n_components)),
+                                   ]
+        dirichletBC[top_edge]    <b><span style='color:#0000ff;'>=</span></b> [ 
+                                    (<span style='color:#cc0000;'>'c'</span>,  adoubleConstantFunction_2D(adouble(<span style='color:#cc047c;'>0.0</span>), <span style='color:#3605fb;'>self</span>.n_components)),
+                                   ]
+        dirichletBC[right_edge]  <b><span style='color:#0000ff;'>=</span></b> [ 
+                                    (<span style='color:#cc0000;'>'c'</span>,  adoubleConstantFunction_2D(adouble(<span style='color:#cc047c;'>0.0</span>), <span style='color:#3605fb;'>self</span>.n_components)),
+                                   ]
+        dirichletBC[bottom_edge] <b><span style='color:#0000ff;'>=</span></b> [ 
+                                    (<span style='color:#cc0000;'>'c'</span>,  adoubleConstantFunction_2D(adouble(<span style='color:#cc047c;'>0.0</span>), <span style='color:#3605fb;'>self</span>.n_components)),
+                                   ]
+
+        <span style='color:#017a31;'># FE weak form terms</span>
+        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        diffusion    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
+        convection   <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> (u_grad <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        source       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
+
+        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> convection,
+                                                  Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,
+                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> source,
+                                                  functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC)
+
+        <span style='color:#017a31;'># Setting the weak form of the FE system will declare a set of equations:</span>
+        <span style='color:#017a31;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>
+        <span style='color:#3605fb;'>self</span>.fe_system.WeakForm <b><span style='color:#0000ff;'>=</span></b> weakForm
+
+<b>class</b> simTutorial(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Nx):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;tutorial_cv_9&quot;</span>, Nx)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+        <span style='color:#3605fb;'>self</span>.m.fe_model.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <b>pass</b>
+    
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Get coordinates for every DOF</span>
+        sp <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.fe_system.GetDOFSupportPoints()
+
+        <span style='color:#017a31;'># Define a conical body</span>
+        (x0, y0) <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#cc047c;'>0.5</span>, <span style='color:#cc047c;'>0.25</span>)
+        r0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.15</span>
+        r <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x,y: (<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>r0) <b><span style='color:#0000ff;'>*</span></b> numpy.sqrt((x<b><span style='color:#0000ff;'>-</span></b>x0)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>+</span></b> (y<b><span style='color:#0000ff;'>-</span></b>y0)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
+        <b>def</b> ic(internal_index, overall_index):
+            p <b><span style='color:#0000ff;'>=</span></b> sp[overall_index]
+            <b>if</b> r(p.x, p.y) <b><span style='color:#0000ff;'>&lt;=</span></b> <span style='color:#cc047c;'>1.0</span>:
+                <b>return</b> <span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>-</span></b> r(p.x, p.y)
+            <b>else</b>:
+                <b>return</b> <span style='color:#cc047c;'>0.0</span>
+
+        setFEInitialConditions(<span style='color:#3605fb;'>self</span>.m.fe_model, <span style='color:#3605fb;'>self</span>.m.fe_system, <span style='color:#cc0000;'>'c'</span>, ic)
+
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
+<b>def</b> simulate(Nx):
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
+    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
+    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial(Nx)
+
+    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1E-6</span>
+    
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+    lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
+    daesolver.SetLASolver(lasolver)
+
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'Nx=</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span><b><span style='color:#0000ff;'>%</span></b>Nx <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial_cv_9-results(Nx=</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> Nx)
+
+    <span style='color:#017a31;'># Create three data reporters:</span>
+    <span style='color:#017a31;'># 1. DealII</span>
+    feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
+    datareporter.AddDataReporter(feDataReporter)
+    <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):
+        sys.exit()
+
+    <span style='color:#017a31;'># 2. TCP/IP</span>
+    tcpipDataReporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+    datareporter.AddDataReporter(tcpipDataReporter)
+    <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
+        sys.exit()
+
+    <span style='color:#017a31;'># 3. Data</span>
+    dr <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr)
+
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>numpy.pi <b><span style='color:#0000ff;'>/</span></b> <span style='color:#cc047c;'>100</span>
+    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>numpy.pi
+
+    <span style='color:#017a31;'># Initialize the simulation</span>
+    simulation.Initialize(daesolver, datareporter, log)
+
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    <span style='color:#017a31;'>#simulation.m.fe_model.SaveModelReport(simulation.m.Name + &quot;.xml&quot;)</span>
+    <span style='color:#017a31;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
+
+    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
+    simulation.SolveInitial()
+
+    <span style='color:#017a31;'># Run</span>
+    simulation.Run()
+    simulation.Finalize()
+    
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    <span style='color:#017a31;'>#  Plots and data                         #</span>
+    <span style='color:#017a31;'>########################################</span><span style='color:#81ca2d;'>###</span>
+    results <b><span style='color:#0000ff;'>=</span></b> dr.Process.dictVariables
+    cvar <b><span style='color:#0000ff;'>=</span></b> results[simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>'.SolidBodyRotation.c'</span>]
+    points <b><span style='color:#0000ff;'>=</span></b> cvar.Domains[<span style='color:#cc047c;'>0</span>].Points
+    c       <b><span style='color:#0000ff;'>=</span></b> cvar.Values[<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>,:] <span style='color:#017a31;'># 2D array [t,omega]</span>
+    <span style='color:#017a31;'># After t = 2pi system returned to the initial position</span>
+    c_exact <b><span style='color:#0000ff;'>=</span></b> cvar.Values[<span style='color:#cc047c;'>0</span>,:] <span style='color:#017a31;'># 2D array [t,omega]</span>
+   
+    <b>return</b> points, c, c_exact
+
+<b>def</b> run():
+    Nxs <b><span style='color:#0000ff;'>=</span></b> numpy.array([<span style='color:#cc047c;'>32</span>, <span style='color:#cc047c;'>64</span>, <span style='color:#cc047c;'>96</span>]) <span style='color:#017a31;'>#, 128])</span>
+    n <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>len</span>(Nxs)
+    L <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span> <b><span style='color:#0000ff;'>-</span></b> (<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1.0</span>) <span style='color:#017a31;'># = 2.0</span>
+    hs <b><span style='color:#0000ff;'>=</span></b> L <b><span style='color:#0000ff;'>/</span></b> Nxs
+    E <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    C <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    p <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    E2 <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(n)
+    
+    <span style='color:#017a31;'># The normalised global errors</span>
+    <b>for</b> i,Nx <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(Nxs):
+        points, numerical_sol, manufactured_sol <b><span style='color:#0000ff;'>=</span></b> simulate(<span style='color:#2a00d6;'>int</span>(Nx))
+        E[i] <b><span style='color:#0000ff;'>=</span></b> numpy.sqrt((<span style='color:#cc047c;'>1.0</span><b><span style='color:#0000ff;'>/</span></b>Nx) <b><span style='color:#0000ff;'>*</span></b> numpy.<span style='color:#2a00d6;'>sum</span>((numerical_sol<b><span style='color:#0000ff;'>-</span></b>manufactured_sol)<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>))
+
+    <span style='color:#017a31;'># Order of accuracy</span>
+    <b>for</b> i,Nx <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(Nxs):
+        p[i] <b><span style='color:#0000ff;'>=</span></b> numpy.log(E[i]<b><span style='color:#0000ff;'>/</span></b>E[i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>]) <b><span style='color:#0000ff;'>/</span></b> numpy.log(hs[i]<b><span style='color:#0000ff;'>/</span></b>hs[i<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>])
+        C[i] <b><span style='color:#0000ff;'>=</span></b> E[i] <b><span style='color:#0000ff;'>/</span></b> hs[i]<b><span style='color:#0000ff;'>**</span></b>p[i]
+        
+    C2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100.0</span> <span style='color:#017a31;'># constant for the second order slope line (to get close to the actual line)</span>
+    E2 <b><span style='color:#0000ff;'>=</span></b> C2 <b><span style='color:#0000ff;'>*</span></b> hs<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span> <span style='color:#017a31;'># E for the second order slope</span>
+    
+    fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
+    fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>
+    fig <b><span style='color:#0000ff;'>=</span></b> plt.figure(figsize<b><span style='color:#0000ff;'>=</span></b>(<span style='color:#cc047c;'>10</span>,<span style='color:#cc047c;'>4</span>), facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    fig.canvas.set_window_title(<span style='color:#cc0000;'>'The Normalised global errors and the Orders of accuracy (Nelems = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>)'</span> <b><span style='color:#0000ff;'>%</span></b> Nxs.tolist())
+    
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>121</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.loglog(hs, E,  <span style='color:#cc0000;'>'ro'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'E(h)'</span>)
+    plt.loglog(hs, E2, <span style='color:#cc0000;'>'b-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'2nd order slope'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'h'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'||E||'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    <span style='color:#017a31;'>#plt.xlim((0.04, 0.11))</span>
+        
+    ax <b><span style='color:#0000ff;'>=</span></b> plt.subplot(<span style='color:#cc047c;'>122</span>)
+    plt.figure(<span style='color:#cc047c;'>1</span>, facecolor<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'white'</span>)
+    plt.semilogx(hs[<span style='color:#cc047c;'>1</span>:], p[<span style='color:#cc047c;'>1</span>:],  <span style='color:#cc0000;'>'rs-'</span>, label<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc0000;'>'Order of Accuracy (p)'</span>)
+    plt.xlabel(<span style='color:#cc0000;'>'h'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.ylabel(<span style='color:#cc0000;'>'p'</span>, fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize)
+    plt.legend(fontsize<b><span style='color:#0000ff;'>=</span></b>fontsize_legend)
+    <span style='color:#017a31;'>#plt.xlim((0.04, 0.075))</span>
+    <span style='color:#017a31;'>#plt.ylim((2.0, 2.04))</span>
+    
+    plt.tight_layout()
+    plt.show()
+      
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    run()
+    
+</pre>
+</body>
+</html>

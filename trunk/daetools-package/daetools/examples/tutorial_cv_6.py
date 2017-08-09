@@ -51,12 +51,9 @@ from pyUnits import m, g, kg, s, K, mol, kmol, J, um
     
 c_t = daeVariableType("c_t", dimless, -1.0e+20, 1.0e+20, 0.0, 1e-07)
 
-a  = 0.2
-b  = 0.4
 u  = 1.0
 D  = 0.002
 L  = 1.0
-k  = 1
 dt = 0.3
 pi = numpy.pi
 
@@ -68,15 +65,13 @@ class modTutorial(daeModel):
 
         self.c = daeVariable("c", c_t, self, "c using high resolution upwind scheme", [self.x])
         
-        self.hr = daeHRUpwindScheme(self.c,  self.x, daeHRUpwindScheme.Phi_Koren, 1e-10)
-
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        hr = self.hr
         xp = self.x.Points
         Nx = self.x.NumberOfPoints
         t  = Time()
+        hr = daeHRUpwindSchemeEquation(self.c,  self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
         
         c = lambda i: self.c(i)
         
@@ -105,10 +100,7 @@ class simTutorial(daeSimulation):
         Nx = self.m.x.NumberOfPoints
         xp = self.m.x.Points
         for i in range(1, Nx):
-            if xp[i] >= a and xp[i] <= b:
-                self.m.c.SetInitialCondition(i, numpy.sin(pi*(xp[i]-a)/(b-a)))
-            else:
-                self.m.c.SetInitialCondition(i, 0)
+            self.m.c.SetInitialCondition(i, numpy.sin(pi*xp[i]))
 
 # Setup everything manually and run in a console
 def simulate(Nx):
@@ -160,7 +152,6 @@ def simulate(Nx):
     results = dr.Process.dictVariables
     
     cvar  = results[simulation.m.Name + '.c']
-    
     c       = cvar.Values[-1, :]        # 2D array [t,x]
     
     return simulation.m.x.Points, c
@@ -174,7 +165,15 @@ def run():
     # Run simulations
     for i,Nx in enumerate(Nxs):
         nx, c_ = simulate(int(Nx))
-        c.append((nx, c_))
+        # Exact solution:
+        cexact_ = []
+        for xk in nx:
+            if xk >= u*dt:
+                ce = numpy.exp(-D*dt) * numpy.sin(pi*(xk-u*dt))
+            else:
+                ce = 0
+            cexact_.append(ce)
+        c.append((nx, c_, cexact_))
     
     fontsize = 14
     fontsize_legend = 11
@@ -182,30 +181,33 @@ def run():
     
     ax = plt.subplot(131)
     plt.figure(1, facecolor='white')
-    plt.plot(c[0][0], c[0][1], 'ro-', linewidth=1.0, label='c (Nx=20)')
+    plt.plot(c[0][0], c[0][1], 'ro', linewidth=1.0, label='c (Nx=20)')
+    plt.plot(c[0][0], c[0][2], 'b-', linewidth=1.0, label='c_exact (Nx=20)')
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('c', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)
-    #plt.xlim((0.04, 0.11))
-    plt.ylim((0.0, 1.0))
+    #plt.xlim((0.0, 1.0))
+    #plt.ylim((0.0, 1.0))
         
     ax = plt.subplot(132)
     plt.figure(1, facecolor='white')
-    plt.plot(c[1][0], c[1][1], 'ro-', linewidth=1.0, label='c (Nx=40)')
+    plt.plot(c[1][0], c[1][1], 'ro', linewidth=1.0, label='c (Nx=40)')
+    plt.plot(c[1][0], c[1][2], 'b-', linewidth=1.0, label='c_exact (Nx=40)')
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('c', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)
-    #plt.xlim((0.04, 0.075))
-    plt.ylim((0.0, 1.0))
+    #plt.xlim((0.0, 1.0))
+    #plt.ylim((0.0, 1.0))
     
     ax = plt.subplot(133)
     plt.figure(1, facecolor='white')
-    plt.plot(c[2][0], c[2][1], 'ro-', linewidth=1.0, label='c (Nx=80)')
+    plt.plot(c[2][0], c[2][1], 'ro', linewidth=1.0, label='c (Nx=80)')
+    plt.plot(c[2][0], c[2][2], 'b-', linewidth=1.0, label='c_exact (Nx=80)')
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('c', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)
-    #plt.xlim((0.04, 0.075))
-    plt.ylim((0.0, 1.0))
+    #plt.xlim((0.0, 1.0))
+    #plt.ylim((0.0, 1.0))
     
     plt.tight_layout()
     plt.show()

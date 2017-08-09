@@ -110,7 +110,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>   :width: 800px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#3605fb;'>import</span> sys, numpy
+<span style='color:#3605fb;'>import</span> os, sys, numpy, time
 <span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
 <span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
 <span style='color:#017a31;'># Standard variable types are defined in variable_types.py</span>
@@ -181,7 +181,19 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <span style='color:#3605fb;'>self</span>.m.x.SetInitialCondition(<span style='color:#3605fb;'>self</span>.x_0)
         <span style='color:#3605fb;'>self</span>.m.theta.SetInitialCondition(<span style='color:#3605fb;'>self</span>.theta_0)
 
+<b>def</b> simulate_p(args):
+    run_no, n, B, gamma, psi, theta_a, x_0, theta_0 <b><span style='color:#0000ff;'>=</span></b> args
+    <b>return</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0)
+
 <b>def</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
+    <span style='color:#017a31;'>#print('run_no %d on tid=%s' % (run_no, os.getpid()))</span>
+    
+    <span style='color:#017a31;'># Disable OpenMP for evaluation of residuals and derivatives.</span>
+    <span style='color:#017a31;'># Running multiple simulations where all of them use OpenMP at the same time</span>
+    <span style='color:#017a31;'># will actually tremendously decrease the computational performance.</span>
+    cfg  <b><span style='color:#0000ff;'>=</span></b> daeGetConfig()
+    cfg.SetBoolean(<span style='color:#cc0000;'>&quot;daetools.core.equations.useOpenMP&quot;</span>, <span style='color:#3605fb;'>False</span>)
+        
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
@@ -190,6 +202,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
 
     <span style='color:#017a31;'># Do no print progress</span>
     log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+    log.Enabled <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
     <span style='color:#017a31;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
@@ -251,7 +264,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'>#     - Sobol  (Variance based method)</span>
     <span style='color:#017a31;'>#     - FAST   (Variance based method)</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
-    SA_method <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Morris'</span>
+    SA_method <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'Sobol'</span>
     
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'># 2. Definition of the model inputs (used by all methods).</span>
@@ -334,27 +347,42 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'># 4. Generation of outputs for a given input matrix (daetools).</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
-    theta_max  <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N)
-    <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N): 
-        theta_max[i] <b><span style='color:#0000ff;'>=</span></b> simulate(run_no  <b><span style='color:#0000ff;'>=</span></b> i,
-                                n       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
-                                B       <b><span style='color:#0000ff;'>=</span></b> B[i], 
-                                gamma   <b><span style='color:#0000ff;'>=</span></b> gamma[i], 
-                                psi     <b><span style='color:#0000ff;'>=</span></b> psi[i], 
-                                theta_a <b><span style='color:#0000ff;'>=</span></b> theta_a[i], 
-                                x_0     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>, 
-                                theta_0 <b><span style='color:#0000ff;'>=</span></b> theta_0[i])
+    theta_max <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N)
+    
+    <b>def</b> evaluate_parallel():
+        <span style='color:#3605fb;'>from</span> multiprocessing <span style='color:#3605fb;'>import</span> Pool
+        <span style='color:#017a31;'># Create a pool of workers to calculate N outputs</span>
+        <span style='color:#017a31;'># Don't forget to disable OpenMP for evaluation of residuals and derivatives!!</span>
+        pool <b><span style='color:#0000ff;'>=</span></b> Pool()
+        args <b><span style='color:#0000ff;'>=</span></b> [(i, <span style='color:#cc047c;'>1</span>, B[i], gamma[i], psi[i], theta_a[i], <span style='color:#cc047c;'>0.0</span>, theta_0[i]) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N)]
+        theta_max[:] <b><span style='color:#0000ff;'>=</span></b> pool.<span style='color:#2a00d6;'>map</span>(simulate_p, args, chunksize<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1</span>)
         
+    <b>def</b> evaluate_sequential():
+        <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N): 
+            theta_max[i] <b><span style='color:#0000ff;'>=</span></b> simulate(run_no  <b><span style='color:#0000ff;'>=</span></b> i,
+                                    n       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                    B       <b><span style='color:#0000ff;'>=</span></b> B[i], 
+                                    gamma   <b><span style='color:#0000ff;'>=</span></b> gamma[i], 
+                                    psi     <b><span style='color:#0000ff;'>=</span></b> psi[i], 
+                                    theta_a <b><span style='color:#0000ff;'>=</span></b> theta_a[i], 
+                                    x_0     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>, 
+                                    theta_0 <b><span style='color:#0000ff;'>=</span></b> theta_0[i])
+    
+    start <b><span style='color:#0000ff;'>=</span></b> time.time()
+    evaluate_parallel()
+    end <b><span style='color:#0000ff;'>=</span></b> time.time()
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Time to evaluate </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'> simulations: </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>s'</span> <b><span style='color:#0000ff;'>%</span></b> (N, end<b><span style='color:#0000ff;'>-</span></b>start))
+    
     <span style='color:#017a31;'># Transform theta_max: (T0-T)*gamma/T0 into the Max. rise in temperature: (Tmax-T0)/T0</span>
     max_rise_T <b><span style='color:#0000ff;'>=</span></b> theta_max <b><span style='color:#0000ff;'>/</span></b> gamma
     
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
-    <span style='color:#017a31;'># 5. Perform Sensitivity Analysis (Morris, FAST or Sobol methods).</span>
+    <span style='color:#017a31;'># 5. Performing Sensitivity Analysis (Morris, FAST or Sobol).</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     num_vars <b><span style='color:#0000ff;'>=</span></b> problem[<span style='color:#cc0000;'>'num_vars'</span>]
     names <b><span style='color:#0000ff;'>=</span></b> problem[<span style='color:#cc0000;'>'names'</span>]
     
-    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>\n</span><span style='color:#cc0000;'>'</span>)
+    <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>''</span>)
     <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
         res <b><span style='color:#0000ff;'>=</span></b> analyze(problem, param_values, max_rise_T, conf_level<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>0.95</span>, print_to_console<b><span style='color:#0000ff;'>=</span></b><span style='color:#3605fb;'>True</span>, num_levels<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>4</span>, grid_jump<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>2</span>)
         
@@ -411,7 +439,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'---------------------------------'</span>)
     
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
-    <span style='color:#017a31;'># 6. Generate scatter plots.</span>
+    <span style='color:#017a31;'># 6. Generation of scatter plots.</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     fontsize <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>14</span>
     fontsize_legend <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>11</span>

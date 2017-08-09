@@ -99,7 +99,7 @@ The scatter plot for the FAST method:
    :width: 800px
 """
 
-import sys, numpy
+import os, sys, numpy, time
 from daetools.pyDAE import *
 from time import localtime, strftime
 # Standard variable types are defined in variable_types.py
@@ -170,7 +170,19 @@ class simTutorial(daeSimulation):
         self.m.x.SetInitialCondition(self.x_0)
         self.m.theta.SetInitialCondition(self.theta_0)
 
+def simulate_p(args):
+    run_no, n, B, gamma, psi, theta_a, x_0, theta_0 = args
+    return simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0)
+
 def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
+    #print('run_no %d on tid=%s' % (run_no, os.getpid()))
+    
+    # Disable OpenMP for evaluation of residuals and derivatives.
+    # Running multiple simulations where all of them use OpenMP at the same time
+    # will actually tremendously decrease the computational performance.
+    cfg  = daeGetConfig()
+    cfg.SetBoolean("daetools.core.equations.useOpenMP", False)
+        
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
@@ -179,6 +191,7 @@ def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
 
     # Do no print progress
     log.PrintProgress = False
+    log.Enabled = False
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
@@ -240,7 +253,7 @@ def run():
     #     - Sobol  (Variance based method)
     #     - FAST   (Variance based method)
     ###################################################################
-    SA_method = 'Morris'
+    SA_method = 'Sobol'
     
     ###################################################################
     # 2. Definition of the model inputs (used by all methods).
@@ -323,27 +336,42 @@ def run():
     ###################################################################
     # 4. Generation of outputs for a given input matrix (daetools).
     ###################################################################
-    theta_max  = numpy.zeros(N)
-    for i in range(N): 
-        theta_max[i] = simulate(run_no  = i,
-                                n       = 1, 
-                                B       = B[i], 
-                                gamma   = gamma[i], 
-                                psi     = psi[i], 
-                                theta_a = theta_a[i], 
-                                x_0     = 0.0, 
-                                theta_0 = theta_0[i])
+    theta_max = numpy.zeros(N)
         
+    def evaluate_sequential():
+        for i in range(N): 
+            theta_max[i] = simulate(run_no  = i,
+                                    n       = 1, 
+                                    B       = B[i], 
+                                    gamma   = gamma[i], 
+                                    psi     = psi[i], 
+                                    theta_a = theta_a[i], 
+                                    x_0     = 0.0, 
+                                    theta_0 = theta_0[i])
+    
+    def evaluate_parallel():
+        from multiprocessing import Pool
+        # Create a pool of workers to calculate N outputs
+        # Don't forget to disable OpenMP for evaluation of residuals and derivatives!!
+        pool = Pool()
+        args = [(i, 1, B[i], gamma[i], psi[i], theta_a[i], 0.0, theta_0[i]) for i in range(N)]
+        theta_max[:] = pool.map(simulate_p, args, chunksize=1)
+    
+    start = time.time()
+    evaluate_parallel()
+    end = time.time()
+    print('Time to evaluate %d simulations: %fs' % (N, end-start))
+    
     # Transform theta_max: (T0-T)*gamma/T0 into the Max. rise in temperature: (Tmax-T0)/T0
     max_rise_T = theta_max / gamma
     
     ###################################################################
-    # 5. Perform Sensitivity Analysis (Morris, FAST or Sobol methods).
+    # 5. Performing Sensitivity Analysis (Morris, FAST or Sobol).
     ###################################################################
     num_vars = problem['num_vars']
     names = problem['names']
     
-    print('\n')
+    print('')
     if SA_method == 'Morris':
         res = analyze(problem, param_values, max_rise_T, conf_level=0.95, print_to_console=True, num_levels=4, grid_jump=2)
         
@@ -400,7 +428,7 @@ def run():
         print('---------------------------------')
     
     ###################################################################
-    # 6. Generate scatter plots.
+    # 6. Generation of scatter plots.
     ###################################################################
     fontsize = 14
     fontsize_legend = 11

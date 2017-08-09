@@ -91,20 +91,29 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         kr  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span> <span style='color:#017a31;'># First-order reaction rate constant</span>
         Cab <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span> <span style='color:#017a31;'># Boundary concentration</span>
 
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_i, fe_q)
+        phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_j, fe_q)
+        dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_i, fe_q)
+        dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_j, fe_q)
+        normal <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
+
         dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
         dirichletBC[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'Ca'</span>, adoubleConstantFunction_2D(adouble(Cab)))]
 
         <span style='color:#017a31;'># FE weak form terms</span>
-        diffusion    <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(dphi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> De <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        reaction     <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>kr <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        accumulation <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        rhs          <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+        diffusion    <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(dphi_i <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> De <b><span style='color:#0000ff;'>*</span></b> JxW
+        reaction     <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>kr <b><span style='color:#0000ff;'>*</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j <b><span style='color:#0000ff;'>*</span></b> JxW
+        accumulation <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
+        rhs          <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
         <span style='color:#017a31;'># Robin type BC's:</span>
         faceAij <b><span style='color:#0000ff;'>=</span></b> {
-                    <span style='color:#cc047c;'>2</span>: km <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+                    <span style='color:#cc047c;'>2</span>: km <b><span style='color:#0000ff;'>*</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j <b><span style='color:#0000ff;'>*</span></b> JxW
                   }
         faceFi  <b><span style='color:#0000ff;'>=</span></b> {
-                    <span style='color:#cc047c;'>2</span>: km <b><span style='color:#0000ff;'>*</span></b> Cab <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'Ca'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+                    <span style='color:#cc047c;'>2</span>: km <b><span style='color:#0000ff;'>*</span></b> Cab <b><span style='color:#0000ff;'>*</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> JxW
                   }
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> reaction,

@@ -384,12 +384,12 @@ class daeSimulationExplorer(QtWidgets.QDialog):
                 _runtimeSettings['Log']          = {'Name'    : simulation.Log.Name,
                                                     'Options' : {}}
 
-            _runtimeSettings['QuazySteadyState']       = True if simulation.InitialConditionMode == eQuasySteadyState else False
+            _runtimeSettings['QuasiSteadyState']       = True if simulation.InitialConditionMode == eQuasiSteadyState else False
             _runtimeSettings['CalculateSensitivities'] = simulation.CalculateSensitivities
 
             _runtimeSettings['Parameters']             = _inspector.treeParameters.toDictionary()
             _runtimeSettings['Domains']                = _inspector.treeDomains.toDictionary()
-            if not _runtimeSettings['QuazySteadyState']:
+            if not _runtimeSettings['QuasiSteadyState']:
                 _runtimeSettings['InitialConditions']  = _inspector.treeInitialConditions.toDictionary()
             _runtimeSettings['DOFs']                   = _inspector.treeDOFs.toDictionary()
             _runtimeSettings['STNs']                   = _inspector.treeStates.toDictionary()
@@ -414,10 +414,10 @@ class daeSimulationExplorer(QtWidgets.QDialog):
         self._timeHorizon        = self._simulation.TimeHorizon
         self._reportingInterval  = self._simulation.ReportingInterval
         self._relativeTolerance  = self._simulation.DAESolver.RelativeTolerance
-        if self._simulation.InitialConditionMode == eQuasySteadyState:
-            self._quazySteadyState = True
+        if self._simulation.InitialConditionMode == eQuasiSteadyState:
+            self._quasiSteadyState = True
         else:
-            self._quazySteadyState = False
+            self._quasiSteadyState = False
 
         self._daesolver    = self._simulation.DAESolver
         self._lasolver     = self._simulation.DAESolver.LASolver
@@ -433,7 +433,7 @@ class daeSimulationExplorer(QtWidgets.QDialog):
         self._ui.reportingIntervalEdit.setText(str(self._reportingInterval))
         self._ui.relativeToleranceEdit.setValidator(d_validator)
         self._ui.relativeToleranceEdit.setText(str(self._relativeTolerance))
-        if self._quazySteadyState:
+        if self._quasiSteadyState:
             self._ui.quazySteadyStateCheckBox.setCheckState(Qt.Checked)
             self._ui.tab_InitialConditions.setEnabled(False)
         else:
@@ -610,12 +610,12 @@ class daeSimulationExplorer(QtWidgets.QDialog):
             self._runtimeSettings['Log']          = {'Name'    : self._simulation.Log.Name,
                                                      'Options' : {}}
 
-        self._runtimeSettings['QuazySteadyState']      = self._quazySteadyState
+        self._runtimeSettings['QuasiSteadyState']      = self._quasiSteadyState
         self._runtimeSettings['CalculateSensitivities']= self._simulation.CalculateSensitivities
         
         self._runtimeSettings['Parameters']            = self._inspector.treeParameters.toDictionary()
         self._runtimeSettings['Domains']               = self._inspector.treeDomains.toDictionary()
-        if not self._quazySteadyState:
+        if not self._quasiSteadyState:
             self._runtimeSettings['InitialConditions'] = self._inspector.treeInitialConditions.toDictionary()
         self._runtimeSettings['DOFs']                  = self._inspector.treeDOFs.toDictionary()
         self._runtimeSettings['STNs']                  = self._inspector.treeStates.toDictionary()

@@ -20,6 +20,9 @@ Code Verification Examples
 :ref:`tutorial_cv_5`      |tcv_5|
 :ref:`tutorial_cv_6`      |tcv_6|
 :ref:`tutorial_cv_7`      |tcv_7|
+:ref:`tutorial_cv_8`      |tcv_8|
+:ref:`tutorial_cv_9`      |tcv_9|
+:ref:`tutorial_cv_10`     |tcv_10|
 =======================   =================================================================
 
 
@@ -41,10 +44,22 @@ Code Verification Examples
 .. |tcv_6| replace:: Code verification method using the Method of Exact Solutions
                      (1D homogeneous transient convection-diffusion equation
                      solved using the high-resolution upwind finite volume scheme with flux limiter).
-.. |tcv_7| replace:: Code verification method using the Method of Manufactured Solutions
-                     (1D steady-state convection-diffusion equation with a source term 
-                     solved using the high-resolution upwind finite volume scheme with flux limiter).
                      
+.. |tcv_7| replace:: Code verification method using the Method of Manufactured Solutions
+                     (1D steady-state convection-diffusion-reaction equation 
+                     solved using the high-resolution upwind finite volume scheme with flux limiter).
+
+.. |tcv_8| replace:: Code verification method using the Method of Manufactured Solutions
+                     (1D transient convection-diffusion-reaction equation
+                     solved using the high-resolution upwind finite volume scheme with flux limiter).
+
+.. |tcv_9| replace:: Code verification using the Method of Exact Solutions 
+                     (Solid Body Rotation problem solved using the Finite Elements method).
+
+.. |tcv_10| replace:: Code verification using the Method of Exact Solutions 
+                      (Rotating Gaussian Hill problem solved using the Finite Elements method).
+
+
 .. begin-command
 
 .. _tutorial_cv_1:
@@ -170,6 +185,62 @@ Code Verification Example 7
 Model report            `tutorial_cv_7.xml <../examples/tutorial_cv_7.xml>`_
 Runtime model report    `tutorial_cv_7-rt.xml <../examples/tutorial_cv_7-rt.xml>`_
 Source code             `tutorial_cv_7.py <../examples/tutorial_cv_7.html>`_
+=====================   =================================================================
+
+
+.. _tutorial_cv_8:
+
+Code Verification Example 8
+===========================
+
+.. automodule:: daetools.examples.tutorial_cv_8
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_cv_8.xml <../examples/tutorial_cv_8.xml>`_
+Runtime model report    `tutorial_cv_8-rt.xml <../examples/tutorial_cv_8-rt.xml>`_
+Source code             `tutorial_cv_8.py <../examples/tutorial_cv_8.html>`_
+=====================   =================================================================
+
+.. _tutorial_cv_9:
+
+Code Verification Example 9
+===========================
+
+.. automodule:: daetools.examples.tutorial_cv_9
+    :no-members:
+    :no-undoc-members:
+
+.. 
+  Animated gif created using png images from VisIt (size 426x400 px):
+    convert -delay 1x20 -loop 0 movie00*.png animation.gif
+  
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_cv_9.xml <../examples/tutorial_cv_9.xml>`_
+Runtime model report    `tutorial_cv_9-rt.xml <../examples/tutorial_cv_9-rt.xml>`_
+Source code             `tutorial_cv_9.py <../examples/tutorial_cv_9.html>`_
+=====================   =================================================================
+
+.. _tutorial_cv_10:
+
+Code Verification Example 10
+============================
+
+.. automodule:: daetools.examples.tutorial_cv_10
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_cv_10.xml <../examples/tutorial_cv_10.xml>`_
+Runtime model report    `tutorial_cv_10-rt.xml <../examples/tutorial_cv_10-rt.xml>`_
+Source code             `tutorial_cv_10.py <../examples/tutorial_cv_10.html>`_
 =====================   =================================================================
 
 

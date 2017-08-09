@@ -24,6 +24,7 @@ This tutorial introduces the following concepts:
 - Making equations more readable
 - Degrees of freedom
 - Setting an initial guess for variables (used by a DAE solver during an initial phase)
+- Print DAE solver statistics
 
 The model in this example is very similar to the model used in the tutorial 1.
 The differences are:
@@ -85,7 +86,7 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        # Create some auxiliary functions to make equations more readable 
+        # Declare some auxiliary functions to make equations more readable 
         rho     = self.rho()
         a       = self.a()
         b       = self.b()
@@ -266,7 +267,7 @@ def consoleRun():
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()
     simulation   = simTutorial()
-
+    
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
@@ -295,7 +296,7 @@ def consoleRun():
     # Run
     simulation.Run()
     simulation.Finalize()
-
+    
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()

@@ -68,6 +68,10 @@ void daeSimulation::DoDataPartitioning(daeEquationsIndexes& equationsIndexes, st
 {
 }
 
+void daeSimulation::DoPostProcessing(void)
+{
+}
+
 void daeSimulation::Resume(void)
 {
     if(!m_bIsInitialized)
@@ -1937,10 +1941,10 @@ void daeSimulation::SetUpVariables_RuntimeSettings()
         }
     }
 
-    bool QuazySteadyState = m_ptreeRuntimeSettings.get<bool>("QuazySteadyState");
-    if(QuazySteadyState)
+    bool QuasiSteadyState = m_ptreeRuntimeSettings.get<bool>("QuasiSteadyState");
+    if(QuasiSteadyState)
     {
-        SetInitialConditionMode(eQuasySteadyState);
+        SetInitialConditionMode(eQuasiSteadyState);
     }
     else
     {
@@ -2399,6 +2403,11 @@ void daeSimulation::ReportData(real_t dCurrentTime)
 {
     if(!m_pDataReporter)
         daeDeclareAndThrowException(exInvalidPointer);
+
+    // First, do post-processing to calculate some variables that depend on the current solution.
+    // DoPostProcessing function is overloaded in the derived-daeSimulation classes.
+    // This function can be also called in daesolver.Solve() function but it is better to do it here.
+    DoPostProcessing();
 
     if(!m_pDataReporter->StartNewResultSet(dCurrentTime))
     {

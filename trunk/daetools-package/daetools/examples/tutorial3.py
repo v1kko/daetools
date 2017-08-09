@@ -100,7 +100,7 @@ class modTutorial(daeModel):
         eq.Residual = d(self.T(x,y), self.x)
 
         # There are several functions that return arrays of values (or time- or partial-derivatives)
-        # such as daeParameter and daeVariable functions array(), which return an array of parameter/variable values.
+        # such as daeParameter.array() and daeVariable.array() functions, which return an array of parameter/variable values.
         # To obtain the array of values it is necessary to define points from all domains that the parameter
         # or variable is distributed on. Functions that return array of values accept the following arguments:
         #  - daeIndexRange objects

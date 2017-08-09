@@ -187,7 +187,7 @@ elif platform.system() == 'Darwin':
     for blib in blibs:
         ext_modules.append( os.path.join(shared_libs_dir, blib) )
 
-    # Do the actual update on all reuired shared libraries
+    # Do the actual update on all required shared libraries
     for ext_mod_path in ext_modules:
         dummy, ext_mod_name = os.path.split(ext_mod_path)
         print('Start install_name_tool -change for: %s' % ext_mod_name)

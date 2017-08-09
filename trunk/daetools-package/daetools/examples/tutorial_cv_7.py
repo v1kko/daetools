@@ -107,15 +107,14 @@ class modTutorial(daeModel):
 
         self.c_exact = daeVariable("c_exact", c_t, self, "c using the analytical solution",       [self.x])
         self.c       = daeVariable("c",       c_t, self, "c using high resolution upwind scheme", [self.x])
-        
-        self.hr = daeHRUpwindScheme(self.c,  self.x, daeHRUpwindScheme.Phi_Koren, 1e-10)
 
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        hr = self.hr
         xp = self.x.Points
         Nx = self.x.NumberOfPoints
+        hr = daeHRUpwindSchemeEquation(self.c,  self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
+
         term1 = pi/(b-a)
         term2 = lambda x: 2*pi * (x-a) / (b-a)   
         
@@ -148,7 +147,7 @@ class modTutorial(daeModel):
         # Convection-diffusion equation
         for i in range(1, Nx):
             eq = self.CreateEquation("c(%d)" % i, "")
-            eq.Residual = u * hr.dc_dx(i, S) - D * hr.d2c_dx2(i) #- S_num(i)
+            eq.Residual = u * hr.dc_dx(i, S = S) - D * hr.d2c_dx2(i)
             eq.CheckUnitsConsistency = False
         
         # BCs

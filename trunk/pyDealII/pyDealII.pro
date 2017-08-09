@@ -15,10 +15,10 @@ QMAKE_LIBDIR += $${PYTHON_LIB_DIR} \
                 $${DEALII_LIB_DIR}
 
 unix::QMAKE_CXXFLAGS += -fpermissive -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
-                        -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused \
+                        -O2 -fstrict-aliasing -felide-constructors -Wno-unused -frounding-math -fsignaling-nans \
                         -DBOOST_NO_HASH -DBOOST_NO_SLIST
 unix::QMAKE_LFLAGS   += -pedantic -fpic -Wall -Wpointer-arith -Wwrite-strings -Wsynth -Wsign-compare -Wswitch -Wno-unused-local-typedefs \
-                        -O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -felide-constructors -Wno-unused
+                        -O2 -fstrict-aliasing -felide-constructors -Wno-unused
 
 win32-msvc2015::QMAKE_CXXFLAGS += -W2 -O2 -DBOOST_NO_HASH -DBOOST_NO_SLIST
 # There are some multiply defined template functions (dealii::Vector<int>::lp_norm, dealii::Vector<class std::complex<float>>::operator=),
@@ -27,6 +27,9 @@ win32-msvc2015::QMAKE_LFLAGS   += /FORCE:MULTIPLE
 
 unix::QMAKE_CXXFLAGS  += -std=c++11
 unix::QMAKE_LFLAGS    += -std=c++11
+
+#unix::QMAKE_CXXFLAGS  += --param ggc-min-expand=1
+
 # deal.ii with msvc++ 2017 cannot use cxx11 (for some reasons)
 win32-msvc2015::QMAKE_CXXFLAGS  +=
 win32-msvc2015::QMAKE_LFLAGS    +=
@@ -39,6 +42,7 @@ LIBS += $${DEALII_LIBS} \
         $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
+        #$${OMP_LIB} \
         $${RT}
 
 SOURCES += stdafx.cpp \
@@ -55,13 +59,13 @@ HEADERS += stdafx.h \
 QMAKE_POST_LINK = $${COPY_FILE} \
                   $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_APPEND} \
                   $${SOLVERS_DIR}/$${TARGET}.$${PYTHON_EXTENSION_MODULE_EXT}
-                  
+
 # win32{
 # QMAKE_POST_LINK = move /y \
 # 	$${DAE_DEST_DIR}/pyDealII1.dll \
 #     $${SOLVERS_DIR}/pyDealII.pyd
 # }
-# 
+#
 # unix{
 # QMAKE_POST_LINK = cp -f \
 #         $${DAE_DEST_DIR}/lib$${TARGET}.$${SHARED_LIB_APPEND} \

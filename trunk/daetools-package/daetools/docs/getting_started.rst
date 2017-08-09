@@ -171,8 +171,7 @@ There are three ways to obtain the results from the simulation:
 
 DAE Tools Plotter
 -----------------
-
-The simulation/optimisation results can be easily plotted using the **DAE Tools Plotter** application.
+The simulation/optimisation results can be plotted using the **DAE Tools Plotter** application.
 Several types of plots are supported: Matplotlib-based 2D, animated 2D, auto-update 2D plots, user-defined plot,
 plot from the user-specified data, Mayavi 3D plot, and VTK file plot.
 After choosing a desired type, a **Choose variable** (given in :numref:`Figure-GetStarted-5`)
@@ -706,7 +705,7 @@ Optimisations, like simulations can be set-up to run in two modes:
      # Create Log, NLPSolver, DAESolver, DataReporter, Simulation and Optimization objects
      log          = daePythonStdOutLog()
      daesolver    = daeIDAS()
-     nlpsolver    = daeBONMIN()
+     nlpsolver    = daeIPOPT()
      datareporter = daeTCPIPDataReporter()
      simulation   = mySimulation()
      optimization = daeOptimization()
@@ -741,7 +740,7 @@ Optimisations, like simulations can be set-up to run in two modes:
     boost::scoped_ptr<daeDataReporter_t>      pDataReporter(daeCreateTCPIPDataReporter());
     boost::scoped_ptr<daeIDASolver>           pDAESolver(daeCreateIDASolver());
     boost::scoped_ptr<daeLog_t>               pLog(daeCreateStdOutLog());
-    boost::scoped_ptr<daeNLPSolver_t>         pNLPSolver(new daeBONMINSolver());
+    boost::scoped_ptr<daeNLPSolver_t>         pNLPSolver(new daeIPOPTSolver());
     boost::scoped_ptr<daeOptimization_t>      pOptimization(new daeOptimization());
 
     // Report ALL variables in the model

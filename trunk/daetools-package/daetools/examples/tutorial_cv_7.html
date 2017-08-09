@@ -118,15 +118,14 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
 
         <span style='color:#3605fb;'>self</span>.c_exact <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;c_exact&quot;</span>, c_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;c using the analytical solution&quot;</span>,       [<span style='color:#3605fb;'>self</span>.x])
         <span style='color:#3605fb;'>self</span>.c       <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;c&quot;</span>,       c_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;c using high resolution upwind scheme&quot;</span>, [<span style='color:#3605fb;'>self</span>.x])
-        
-        <span style='color:#3605fb;'>self</span>.hr <b><span style='color:#0000ff;'>=</span></b> daeHRUpwindScheme(<span style='color:#3605fb;'>self</span>.c,  <span style='color:#3605fb;'>self</span>.x, daeHRUpwindScheme.Phi_Koren, <span style='color:#cc047c;'>1e-10</span>)
 
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        hr <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.hr
         xp <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x.Points
         Nx <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.x.NumberOfPoints
+        hr <b><span style='color:#0000ff;'>=</span></b> daeHRUpwindSchemeEquation(<span style='color:#3605fb;'>self</span>.c,  <span style='color:#3605fb;'>self</span>.x, daeHRUpwindSchemeEquation.Phi_Koren, <span style='color:#cc047c;'>1e-10</span>)
+
         term1 <b><span style='color:#0000ff;'>=</span></b> pi<b><span style='color:#0000ff;'>/</span></b>(b<b><span style='color:#0000ff;'>-</span></b>a)
         term2 <b><span style='color:#0000ff;'>=</span></b> <b>lambda</b> x: <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>pi <b><span style='color:#0000ff;'>*</span></b> (x<b><span style='color:#0000ff;'>-</span></b>a) <b><span style='color:#0000ff;'>/</span></b> (b<b><span style='color:#0000ff;'>-</span></b>a)   
         
@@ -159,7 +158,7 @@ pi <b><span style='color:#0000ff;'>=</span></b> numpy.pi
         <span style='color:#017a31;'># Convection-diffusion equation</span>
         <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>1</span>, Nx):
             eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;c(</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>)&quot;</span> <b><span style='color:#0000ff;'>%</span></b> i, <span style='color:#cc0000;'>&quot;&quot;</span>)
-            eq.Residual <b><span style='color:#0000ff;'>=</span></b> u <b><span style='color:#0000ff;'>*</span></b> hr.dc_dx(i, S) <b><span style='color:#0000ff;'>-</span></b> D <b><span style='color:#0000ff;'>*</span></b> hr.d2c_dx2(i) <span style='color:#017a31;'>#- S_num(i)</span>
+            eq.Residual <b><span style='color:#0000ff;'>=</span></b> u <b><span style='color:#0000ff;'>*</span></b> hr.dc_dx(i, S <b><span style='color:#0000ff;'>=</span></b> S) <b><span style='color:#0000ff;'>-</span></b> D <b><span style='color:#0000ff;'>*</span></b> hr.d2c_dx2(i)
             eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
         
         <span style='color:#017a31;'># BCs</span>

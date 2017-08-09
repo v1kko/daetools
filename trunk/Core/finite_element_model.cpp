@@ -2,9 +2,9 @@
 #include "nodes.h"
 #include "../variable_types.h"
 
-namespace dae 
+namespace dae
 {
-namespace core 
+namespace core
 {
 
 /*********************************************************
@@ -48,7 +48,7 @@ daeFiniteElementModel::daeFiniteElementModel(std::string strName, daeModel* pMod
         omega_i->CreateArray(feVarInfo.m_nNumberOfDOFs);
         m_ptrarrFESubDomains.push_back(omega_i);
 
-        pVariable = new daeVariable(feVarInfo.m_strName, variable_types::no_t, this, feVarInfo.m_strDescription, omega_i);
+        pVariable = new daeVariable(feVarInfo.m_strName, feVarInfo.m_VariableType, this, feVarInfo.m_strDescription, omega_i);
         m_ptrarrFEVariables.push_back(pVariable);
    }
 }
@@ -134,6 +134,7 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
 
             pEq->SetDescription("");
             pEq->SetScaling(1.0);
+            pEq->SetSimplifyExpressions(true);
 
             //daeNodeSaveAsContext c(this);
             //adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
@@ -184,6 +185,7 @@ void daeFiniteElementModel::DeclareEquationsForWeakForm(void)
 
         pEq->SetDescription("");
         pEq->SetScaling(1.0);
+        pEq->SetSimplifyExpressions(true);
 
         //daeNodeSaveAsContext c(this);
         //adSetupVariableNode* psvn = dynamic_cast<adSetupVariableNode*>(ad_variable.node.get());
@@ -327,7 +329,13 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         //a_Fi = create_adouble(new adFEVectorItemNode("f", *m_FEModel.m_Fi, row, unit()));
         adouble adFi_item = m_FEModel.m_Fi->GetItem(row);
         if(adFi_item.node)
-            a_Fi = adFi_item.node->Evaluate(&EC);
+        {
+            adNodePtr setup_node = adNode::SimplifyNode(adFi_item.node);
+            a_Fi = setup_node->Evaluate(&EC);
+
+            // Reset the vector item with the new simplified runtime node
+            m_FEModel.m_Fi->SetItem(row, a_Fi);
+        }
         else
             a_Fi = create_adouble(new adConstantNode(adFi_item.getValue()));
 
@@ -353,11 +361,25 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
             adouble adAij_item = m_FEModel.m_Aij->GetItem(row, column);
             if(adAij_item.node)
             {
-                adouble ad = adAij_item.node->Evaluate(&EC) * variable->Create_adouble(indexes, 1);
-                if(!a_Aij.node)
-                    a_Aij = ad;
+                adNodePtr setup_node = adNode::SimplifyNode(adAij_item.node);
+                adouble   runtime_ad = setup_node->Evaluate(&EC);
+
+                // Reset the matrix item with the new simplified runtime node
+                m_FEModel.m_Aij->SetItem(row, column, runtime_ad);
+
+                adConstantNode* cn = dynamic_cast<adConstantNode*>(runtime_ad.node.get());
+                if(cn && cn->m_quantity.getValue() == 0)
+                {
+                    // The node is zero - do nothing
+                }
                 else
-                    a_Aij = a_Aij + ad;
+                {
+                    adouble ad = runtime_ad * variable->Create_adouble(indexes, 1);
+                    if(!a_Aij.node)
+                        a_Aij = ad;
+                    else
+                        a_Aij = a_Aij + ad;
+                }
             }
             else
             {
@@ -386,12 +408,25 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
 
                 if(adMij_item.node)
                 {
+                    adNodePtr setup_node = adNode::SimplifyNode(adMij_item.node);
+                    adouble   runtime_ad = setup_node->Evaluate(&EC);
 
-                    adouble ad = adMij_item.node->Evaluate(&EC) * variable->Calculate_dt(indexes, 1);
-                    if(!a_Mij.node)
-                        a_Mij = ad;
+                    // Reset the matrix item with the new simplified runtime node
+                    m_FEModel.m_Mij->SetItem(row, column, runtime_ad);
+
+                    adConstantNode* cn = dynamic_cast<adConstantNode*>(runtime_ad.node.get());
+                    if(cn && cn->m_quantity.getValue() == 0)
+                    {
+                        // The node is zero - do nothing
+                    }
                     else
-                        a_Mij = a_Mij + ad;
+                    {
+                        adouble ad = runtime_ad * variable->Calculate_dt(indexes, 1);
+                        if(!a_Mij.node)
+                            a_Mij = ad;
+                        else
+                            a_Mij = a_Mij + ad;
+                    }
                 }
                 else
                 {
@@ -436,6 +471,10 @@ void daeFiniteElementEquation::CreateEquationExecutionInfos(daeModel* pModel, st
         // However, daeEquation owns the pointers.
         this->m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
     }
+
+    // Clear the matrices and the system vector
+    // If matrices are required after the assembly phase do not do it!
+    //fe->ClearAssembledSystem();
 
     pTopLevelModel->PropagateGlobalExecutionContext(NULL);
 }

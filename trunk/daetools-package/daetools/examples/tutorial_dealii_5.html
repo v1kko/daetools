@@ -41,7 +41,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>.. image:: _static/square(-1,1)x(-1,1)-50x50.png</span>
 <span style='color:#cc0000;'>   :width: 300 px</span>
 
-<span style='color:#cc0000;'>The velocity plot at t = 500s:</span>
+<span style='color:#cc0000;'>The velocity magnitude plot:</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_5-results.png</span>
 <span style='color:#cc0000;'>   :width: 500 px</span>
@@ -131,26 +131,41 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         right_edge  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>
         bottom_edge <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3</span>
 
-        dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_p_i         <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'p'</span>, fe_i, fe_q)
+        phi_p_j         <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'p'</span>, fe_j, fe_q)
+        dphi_p_i        <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'p'</span>, fe_i, fe_q)
+        dphi_p_j        <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'p'</span>, fe_j, fe_q)
+        phi_vector_u_i  <b><span style='color:#0000ff;'>=</span></b>  phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q)
+        phi_vector_u_j  <b><span style='color:#0000ff;'>=</span></b>  phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_j, fe_q)
+        dphi_vector_u_i <b><span style='color:#0000ff;'>=</span></b> dphi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q)
+        dphi_vector_u_j <b><span style='color:#0000ff;'>=</span></b> dphi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_j, fe_q)
+        div_phi_u_i     <b><span style='color:#0000ff;'>=</span></b>     div_phi_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q)
+        div_phi_u_j     <b><span style='color:#0000ff;'>=</span></b>     div_phi_2D(<span style='color:#cc0000;'>'u'</span>, fe_j, fe_q)
+        normal <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
 
+        dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
+        
         <span style='color:#017a31;'># Function value wrapper</span>
-        p_boundary <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>&quot;p_boundary&quot;</span>, <span style='color:#3605fb;'>self</span>.fun_p_boundary, xyz_2D(fe_q))
+        p_boundary <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>&quot;p_boundary&quot;</span>, <span style='color:#3605fb;'>self</span>.fun_p_boundary, xyz)
         faceFi <b><span style='color:#0000ff;'>=</span></b> {
-                   left_edge:   <b><span style='color:#0000ff;'>-</span></b>(phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q),
-                   top_edge:    <b><span style='color:#0000ff;'>-</span></b>(phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q),
-                   right_edge:  <b><span style='color:#0000ff;'>-</span></b>(phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q),
-                   bottom_edge: <b><span style='color:#0000ff;'>-</span></b>(phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+                   left_edge:   <b><span style='color:#0000ff;'>-</span></b>(phi_vector_u_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW,
+                   top_edge:    <b><span style='color:#0000ff;'>-</span></b>(phi_vector_u_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW,
+                   right_edge:  <b><span style='color:#0000ff;'>-</span></b>(phi_vector_u_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW,
+                   bottom_edge: <b><span style='color:#0000ff;'>-</span></b>(phi_vector_u_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> p_boundary <b><span style='color:#0000ff;'>*</span></b> JxW
                  }
 
         <span style='color:#017a31;'># TensorFunction&lt;2,dim&gt;::value wrappers</span>
-        k_inverse <b><span style='color:#0000ff;'>=</span></b> tensor2_function_value_2D(<span style='color:#cc0000;'>'k_inverse'</span>, <span style='color:#3605fb;'>self</span>.fun_k_inverse, xyz_2D(fe_q))
+        k_inverse <b><span style='color:#0000ff;'>=</span></b> tensor2_function_value_2D(<span style='color:#cc0000;'>'k_inverse'</span>, <span style='color:#3605fb;'>self</span>.fun_k_inverse, xyz)
 
         <span style='color:#017a31;'># FE weak form terms</span>
-        accumulation <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        velocity     <b><span style='color:#0000ff;'>=</span></b> (phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> k_inverse <b><span style='color:#0000ff;'>*</span></b> phi_vector_2D(<span style='color:#cc0000;'>'u'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        p_gradient   <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(div_phi_2D(<span style='color:#cc0000;'>'u'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'p'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        continuity   <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(phi_2D(<span style='color:#cc0000;'>'p'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> div_phi_2D(<span style='color:#cc0000;'>'u'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        source       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+        accumulation <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
+        velocity     <b><span style='color:#0000ff;'>=</span></b> (phi_vector_u_i <b><span style='color:#0000ff;'>*</span></b> k_inverse <b><span style='color:#0000ff;'>*</span></b> phi_vector_u_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        p_gradient   <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(div_phi_u_i <b><span style='color:#0000ff;'>*</span></b> phi_p_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        continuity   <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(phi_p_i <b><span style='color:#0000ff;'>*</span></b> div_phi_u_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        source       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> velocity <b><span style='color:#0000ff;'>+</span></b> p_gradient <b><span style='color:#0000ff;'>+</span></b> continuity,
                                                   Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,

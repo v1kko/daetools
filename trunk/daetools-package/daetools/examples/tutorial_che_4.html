@@ -114,6 +114,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_che_4-results2.png</span>
 <span style='color:#cc0000;'>   :width: 500px</span>
+
+<span style='color:#cc0000;'>Animation:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_che_4-animation.gif</span>
+<span style='color:#cc0000;'>   :width: 500 px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> sys, numpy
@@ -130,24 +135,22 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;pbm_number_density_t&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1.0e+40</span>,  <span style='color:#cc047c;'>0.0</span>, <span style='color:#cc047c;'>1e-0</span>)
 
 <b>class</b> modelMoC(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, G, Phi_callable, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, G, Phi, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#3605fb;'>self</span>.G  <b><span style='color:#0000ff;'>=</span></b> Constant(G)
-
+        <span style='color:#3605fb;'>self</span>.G   <b><span style='color:#0000ff;'>=</span></b> Constant(G)
+        <span style='color:#3605fb;'>self</span>.Phi <b><span style='color:#0000ff;'>=</span></b> Phi
+        
         <span style='color:#3605fb;'>self</span>.L  <b><span style='color:#0000ff;'>=</span></b> daeDomain(<span style='color:#cc0000;'>&quot;L&quot;</span>,  <span style='color:#3605fb;'>self</span>, um, <span style='color:#cc0000;'>&quot;Characteristic dimension (size) of crystals&quot;</span>)
-
         <span style='color:#3605fb;'>self</span>.ni <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;ni&quot;</span>, pbm_number_density_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Van Leer k-interpolation scheme (k = 1/3)&quot;</span>, [<span style='color:#3605fb;'>self</span>.L])
         
-        <span style='color:#3605fb;'>self</span>.hr <b><span style='color:#0000ff;'>=</span></b> daeHRUpwindScheme(<span style='color:#3605fb;'>self</span>.ni, <span style='color:#3605fb;'>self</span>.L, Phi_callable, Constant(<span style='color:#cc047c;'>1e-10</span> <b><span style='color:#0000ff;'>*</span></b> pbm_number_density_t.Units))
-
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
         G  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.G 
         L  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L.Points
         nL <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.L.NumberOfPoints
-        hr <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.hr
+        hr <b><span style='color:#0000ff;'>=</span></b> daeHRUpwindSchemeEquation(<span style='color:#3605fb;'>self</span>.ni, <span style='color:#3605fb;'>self</span>.L, <span style='color:#3605fb;'>self</span>.Phi, Constant(<span style='color:#cc047c;'>1e-10</span> <b><span style='color:#0000ff;'>*</span></b> pbm_number_density_t.Units))
 
         <span style='color:#017a31;'># High-resolution cell-centered finite-volume upwind scheme.</span>
         <span style='color:#017a31;'># Available functions:</span>
@@ -241,9 +244,9 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <b>if</b> L[i] <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>10</span> <b>and</b> L[i] <b><span style='color:#0000ff;'>&lt;</span></b> <span style='color:#cc047c;'>20</span>:
             ni_0[i] <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e10</span>
 
-    reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>
     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>60</span>
-    timeIndex         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>12</span>
+    timeIndex         <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>30</span>
 
     <span style='color:#017a31;'># First find analytical solution</span>
     process_analytical <b><span style='color:#0000ff;'>=</span></b> run_analytical(<span style='color:#cc0000;'>'Analytical'</span>, <span style='color:#cc0000;'>'Analytical'</span>, N, L, G, ni_0, reportingInterval, timeHorizon)
@@ -251,7 +254,7 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
 
     L_report <b><span style='color:#0000ff;'>=</span></b> []
     <b>try</b>:
-        <b>for</b> flux_limiter <b>in</b> daeHRUpwindScheme.supported_flux_limiters:
+        <b>for</b> flux_limiter <b>in</b> daeHRUpwindSchemeEquation.supported_flux_limiters:
             flux_limiter_name <b><span style='color:#0000ff;'>=</span></b> flux_limiter.__doc__
             process_dpb <b><span style='color:#0000ff;'>=</span></b> run_simulation(flux_limiter_name, flux_limiter_name, N, L, G, ni_0, reportingInterval, timeHorizon, flux_limiter)
             ni_dpb      <b><span style='color:#0000ff;'>=</span></b> process_dpb.dictVariables[<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.ni'</span> <b><span style='color:#0000ff;'>%</span></b> flux_limiter_name]

@@ -191,6 +191,13 @@ macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'@loader_path\'
 ####################################################################################
 CONFIG += rtti
 
+# OpenMP
+unix::QMAKE_CXXFLAGS           += -fopenmp
+win32-msvc2015::QMAKE_CXXFLAGS += /openmp
+
+unix::OMP_LIB           = -lgomp
+win32-msvc2015::OMP_LIB =
+
 win32-msvc2015::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 win32-msvc2015::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
 win32-msvc2015::QMAKE_CXXFLAGS += /bigobj
@@ -800,7 +807,7 @@ win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 
 unix::DAE_CONFIG_LIB                    = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::DAE_CORE_LIB                      = -lcdaeCore
+unix::DAE_CORE_LIB                      = -lcdaeCore $${OMP_LIB}
 unix::DAE_DATAREPORTING_LIB             = -lcdaeDataReporting
 unix::DAE_ACTIVITY_LIB                  = -lcdaeActivity
 unix::DAE_IDAS_SOLVER_LIB               = -lcdaeIDAS_DAESolver

@@ -32,7 +32,7 @@ typedef struct
     real_t      timeHorizon;
     real_t      reportingInterval;
     real_t      relativeTolerance;    
-    bool        quasySteadyState;
+    bool        quasiSteadyState;
     %(runtimeInformation_h)s
     
     real_t* values;

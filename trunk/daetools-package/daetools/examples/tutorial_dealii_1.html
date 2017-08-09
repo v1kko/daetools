@@ -64,8 +64,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>The temperature plot at t = 500s (generated in VisIt):</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_1-results.png</span>
-<span style='color:#cc0000;'>   :width: 600 px</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 
+<span style='color:#cc0000;'>Animation:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_1-animation.gif</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> os, sys, numpy, json, tempfile
@@ -205,47 +209,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         dirichletBC[innerEllipse]   <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#cc047c;'>350</span>) ))]
         dirichletBC[innerDiamond]   <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#cc047c;'>250</span>) ))]
 
-        <span style='color:#017a31;'>#    3.4 Often, it is required to calculate surface or volume integrals.</span>
-        <span style='color:#017a31;'>#        For instance, this is useful to obtain the total quantity flowing through a boundary</span>
-        <span style='color:#017a31;'>#        in this example the total heat.</span>
-        <span style='color:#017a31;'>#        Surface integrals are given as dictionaries</span>
-        <span style='color:#017a31;'>#        {boundary ID : list of tuples (daetools variable, integral weak form)}</span>
-        <span style='color:#017a31;'>#        This way, several surface integrals for a single boundary can be integrated.</span>
-        <span style='color:#017a31;'>#        The variables are used to create equations in the following form:</span>
-        <span style='color:#017a31;'>#          eq.Residual = variable() - integral_expression</span>
-        <span style='color:#017a31;'>#        This way the results of integration are stored in the specified variable.</span>
-        <span style='color:#017a31;'>#        More details about specification of the weak form is given below in section 3.6.</span>
-        <span style='color:#017a31;'>#</span>
-        <span style='color:#017a31;'>#        In this example we specify four boundary integrals:</span>
-        <span style='color:#017a31;'>#          a) The simplest case is to use a surface integral to calculate the mesh surface</span>
-        <span style='color:#017a31;'>#             at the given boundary (in 2D case it is equal to circumference).</span>
-        <span style='color:#017a31;'>#             This is also useful for testing the validity of the results.</span>
-        <span style='color:#017a31;'>#          b-d) The total heat passing through the outer rectangle, inner ellipse and inner diamond boundary.</span>
-        surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
-        surfaceIntegrals[outerRectangle] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>None</span>, <span style='color:#3605fb;'>None</span>]
-        <span style='color:#017a31;'>#        a) Area of the mesh outer surface (a test, just to check the integration validity).</span>
-        <span style='color:#017a31;'>#           In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.</span>
-        surfaceIntegrals[outerRectangle][<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.MeshSurface(), (phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)))
-        <span style='color:#017a31;'>#        b) Total heat transferred through the outer rectangle boundary</span>
-        surfaceIntegrals[outerRectangle][<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.Q0_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i))
-        <span style='color:#017a31;'>#        c) Total heat transferred through the inner ellipse boundary</span>
-        surfaceIntegrals[innerEllipse] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q1_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i))]
-        <span style='color:#017a31;'>#        d) Total heat transferred through the inner diamond boundary</span>
-        surfaceIntegrals[innerDiamond] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q2_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i))]
-
-        <span style='color:#017a31;'>#    3.5 Volume integrals are specified similarly. The only difference is that they do not require boundary IDs.</span>
-        <span style='color:#017a31;'>#        Nota bene:</span>
-        <span style='color:#017a31;'>#          Care should be taken with the volume integrals since they include values at ALL cells</span>
-        <span style='color:#017a31;'>#          and the resulting equations can be enormously long!!</span>
-        <span style='color:#017a31;'>#</span>
-        <span style='color:#017a31;'>#        In this example we specify only one volume integral: the simplest case used to calculate</span>
-        <span style='color:#017a31;'>#        the mesh surface area (in 2D it is area; in 3D it is the volume).</span>
-        <span style='color:#017a31;'>#        This is another test to check the integration validity.</span>
-        <span style='color:#017a31;'>#        Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732...</span>
-        <span style='color:#017a31;'>#        (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).</span>
-        volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#3605fb;'>self</span>.MeshVolume(), (phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q))) ]
-
-        <span style='color:#017a31;'>#    3.6 Derive and specify the weak form of the problem.</span>
+        <span style='color:#017a31;'>#    3.4 Derive and specify the weak form of the problem.</span>
         <span style='color:#017a31;'>#        The weak form consists of the following contributions:</span>
         <span style='color:#017a31;'>#         a) Aij - cell contribution to the system stiffness matrix.</span>
         <span style='color:#017a31;'>#         b) Mij - cell contribution to the mass stiffness matrix.</span>
@@ -295,48 +259,100 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'>#         In the future they will be expanded to support a broader class of problems.</span>
         <span style='color:#017a31;'>#</span>
         <span style='color:#017a31;'>#         Functions are developed for the most of the functionality provided by deal.II FEValues&lt;dim&gt; and</span>
-        <span style='color:#017a31;'>#         FEFaceValues&lt;dim&gt; classes used for matrix assembly. The current list include (for 1D, 2D and 3D):</span>
-        <span style='color:#017a31;'>#          - phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II</span>
-        <span style='color:#017a31;'>#          - dphi (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II</span>
-        <span style='color:#017a31;'>#          - d2phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian in deal.II</span>
-        <span style='color:#017a31;'>#          - phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_value of vector dofs in deal.II</span>
-        <span style='color:#017a31;'>#          - dphi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad of vector dofs in deal.II</span>
-        <span style='color:#017a31;'>#          - d2phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian of vector dofs in deal.II</span>
-        <span style='color:#017a31;'>#          - div_phi (variableName, shapeFunction, quadraturePoint): corresponds to divergence in deal.II</span>
-        <span style='color:#017a31;'>#          - JxW (quadraturePoint): corresponds to the mapped quadrature weight in deal.II</span>
-        <span style='color:#017a31;'>#          - xyz (quadraturePoint): returns the point for the specified quadrature point in deal.II</span>
-        <span style='color:#017a31;'>#          - normal (quadraturePoint): corresponds to the normal_vector in deal.II</span>
-        <span style='color:#017a31;'>#          - function_value (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a value</span>
-        <span style='color:#017a31;'>#          - function_gradient (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a gradient</span>
-        <span style='color:#017a31;'>#          - function_adouble_value (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns adouble value</span>
-        <span style='color:#017a31;'>#          - function_adouble_gradient (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns adouble gradient</span>
-        <span style='color:#017a31;'>#          - dof (variableName, shapeFunction): returns daetools variable at the given index (adouble object)</span>
-        <span style='color:#017a31;'>#          - dof_approximation (variableName, shapeFunction): returns FE approximation of a quantity as a daetools variable (adouble object)</span>
-        <span style='color:#017a31;'>#          - dof_gradient_approximation (variableName, shapeFunction): returns FE gradient approximation of a quantity as a daetools variable (adouble object)</span>
-        <span style='color:#017a31;'>#          - dof_hessian_approximation (variableName, shapeFunction): returns FE hessian approximation of a quantity as a daetools variable (adouble object)</span>
-        <span style='color:#017a31;'>#          - vector_dof_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
-        <span style='color:#017a31;'>#          - vector_dof_gradient_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
-        <span style='color:#017a31;'>#          - adouble (ad): wraps any daetools expression to be used in matrix assembly</span>
-        <span style='color:#017a31;'>#          - tensor1 (t): wraps deal.II Tensor&lt;rank=1,double&gt;</span>
-        <span style='color:#017a31;'>#          - tensor2 (t): wraps deal.II Tensor&lt;rank=2,double&gt;</span>
-        <span style='color:#017a31;'>#          - tensor3 (t): wraps deal.II Tensor&lt;rank=3,double&gt;</span>
-        <span style='color:#017a31;'>#          - adouble_tensor1 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
-        <span style='color:#017a31;'>#          - adouble_tensor2 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
-        <span style='color:#017a31;'>#          - adouble_tensor3 (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#017a31;'>#         FEFaceValues&lt;dim&gt; classes used for matrix assembly. </span>
+        <span style='color:#017a31;'>#         The current list include (a version exist for 1D, 2D and 3D):</span>
+        <span style='color:#017a31;'>#          - phi_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II</span>
+        <span style='color:#017a31;'>#          - dphi_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II</span>
+        <span style='color:#017a31;'>#          - d2phi_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian in deal.II</span>
+        <span style='color:#017a31;'>#          - phi_vector_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_value of vector dofs in deal.II</span>
+        <span style='color:#017a31;'>#          - dphi_vector_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad of vector dofs in deal.II</span>
+        <span style='color:#017a31;'>#          - d2phi_vector_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian of vector dofs in deal.II</span>
+        <span style='color:#017a31;'>#          - div_phi_1D (variableName, shapeFunction, quadraturePoint): corresponds to divergence in deal.II</span>
+        <span style='color:#017a31;'>#          - JxW_1D (quadraturePoint): corresponds to the mapped quadrature weight in deal.II</span>
+        <span style='color:#017a31;'>#          - xyz_1D (quadraturePoint): returns the point for the specified quadrature point in deal.II</span>
+        <span style='color:#017a31;'>#          - normal_1D (quadraturePoint): corresponds to the normal_vector in deal.II</span>
+        <span style='color:#017a31;'>#          - function_value_1D (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a value</span>
+        <span style='color:#017a31;'>#          - function_gradient_1D (functionName, function, point, component): wraps Function&lt;dim&gt; object that returns a gradient</span>
+        <span style='color:#017a31;'>#          - function_adouble_value_1D (functionName, function, point, component): wraps Function&lt;dim,adouble&gt; object that returns adouble value</span>
+        <span style='color:#017a31;'>#          - function_adouble_gradient_1D (functionName, function, point, component): wraps Function&lt;dim,adouble&gt; object that returns adouble gradient</span>
+        <span style='color:#017a31;'>#          - dof_1D (variableName, shapeFunction): returns daetools variable at the given index (adouble object)</span>
+        <span style='color:#017a31;'>#          - dof_approximation_1D (variableName, shapeFunction): returns FE approximation of a quantity as a daetools variable (adouble object)</span>
+        <span style='color:#017a31;'>#          - dof_gradient_approximation_1D (variableName, shapeFunction): returns FE gradient approximation of a quantity as a daetools variable (adouble object)</span>
+        <span style='color:#017a31;'>#          - dof_hessian_approximation_1D (variableName, shapeFunction): returns FE hessian approximation of a quantity as a daetools variable (adouble object)</span>
+        <span style='color:#017a31;'>#          - vector_dof_approximation_1D (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
+        <span style='color:#017a31;'>#          - vector_dof_gradient_approximation_1D (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)</span>
+        <span style='color:#017a31;'>#          - adouble_1D (ad): wraps any daetools expression to be used in matrix assembly</span>
+        <span style='color:#017a31;'>#          - tensor1_1D (t): wraps deal.II Tensor&lt;rank=1,double&gt;</span>
+        <span style='color:#017a31;'>#          - tensor2_1D (t): wraps deal.II Tensor&lt;rank=2,double&gt;</span>
+        <span style='color:#017a31;'>#          - tensor3_1D (t): wraps deal.II Tensor&lt;rank=3,double&gt;</span>
+        <span style='color:#017a31;'>#          - adouble_tensor1_1D (t): wraps deal.II Tensor&lt;rank=1,adouble&gt;</span>
+        <span style='color:#017a31;'>#          - adouble_tensor2_1D (t): wraps deal.II Tensor&lt;rank=2,adouble&gt;</span>
+        <span style='color:#017a31;'>#          - adouble_tensor3_1D (t): wraps deal.II Tensor&lt;rank=3,adouble&gt;</span>
 
-        <span style='color:#017a31;'>#         First, we need to wrap Function&lt;dim&gt; objects to be used in the weak form using the function_value function:</span>
-        Diffusivity <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>'Diffusivity'</span>, <span style='color:#3605fb;'>self</span>.fun_Diffusivity, xyz_2D(fe_q))
-        Generation  <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>'Generation'</span>,  <span style='color:#3605fb;'>self</span>.fun_Generation,  xyz_2D(fe_q))
+        <span style='color:#017a31;'>#         Create some auxiliary objects for readability</span>
+        phi_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        dof_T  <b><span style='color:#0000ff;'>=</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i)
+        normal <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
 
+        <span style='color:#017a31;'>#         We need to wrap Function&lt;dim&gt; objects to be used in the weak form using the function_value function:</span>
+        Diffusivity <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>'Diffusivity'</span>, <span style='color:#3605fb;'>self</span>.fun_Diffusivity, xyz)
+        Generation  <b><span style='color:#0000ff;'>=</span></b> function_value_2D(<span style='color:#cc0000;'>'Generation'</span>,  <span style='color:#3605fb;'>self</span>.fun_Generation,  xyz)
+        
+        <span style='color:#017a31;'>#         Contributions to the system's mass and stiffness matrices and the system load vector.</span>
         <span style='color:#017a31;'>#         Heat conduction equation is a typical example of convection-diffusion equations.</span>
         <span style='color:#017a31;'>#         In the case of pure conduction it simplifies into a diffusion-only equation.</span>
         <span style='color:#017a31;'>#         Its weak formulation is simple and given as:</span>
         <span style='color:#017a31;'>#           - Cell contribution to the mass matrix:      Mij = phi_i * phi_j * JxW</span>
         <span style='color:#017a31;'>#           - Cell contribution to the stiffness matrix: Aij = (dphi_i * dphi_j) * Diffusivity * JxW</span>
         <span style='color:#017a31;'>#           - Cell contribution to the load vector:      Fi  = phi_i * Generation * JxW</span>
-        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> Diffusivity <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        source       <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> Generation <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> Diffusivity <b><span style='color:#0000ff;'>*</span></b> JxW
+        source       <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> Generation <b><span style='color:#0000ff;'>*</span></b> JxW
+
+        <span style='color:#017a31;'>#         3.4.1 Often, it is required to calculate surface or volume integrals.</span>
+        <span style='color:#017a31;'>#               For instance, this is useful to obtain the total quantity flowing through a boundary</span>
+        <span style='color:#017a31;'>#               in this example the total heat.</span>
+        <span style='color:#017a31;'>#               Surface integrals are given as dictionaries</span>
+        <span style='color:#017a31;'>#               {boundary ID : list of tuples (daetools variable, integral weak form)}</span>
+        <span style='color:#017a31;'>#               This way, several surface integrals for a single boundary can be integrated.</span>
+        <span style='color:#017a31;'>#               The variables are used to create equations in the following form:</span>
+        <span style='color:#017a31;'>#                 eq.Residual = variable() - integral_expression</span>
+        <span style='color:#017a31;'>#               This way the results of integration are stored in the specified variable.</span>
+        <span style='color:#017a31;'>#               More details about specification of the weak form is given below in section 3.6.</span>
+        <span style='color:#017a31;'>#</span>
+        <span style='color:#017a31;'>#               In this example we specify four boundary integrals:</span>
+        <span style='color:#017a31;'>#                 a) The simplest case is to use a surface integral to calculate the mesh surface</span>
+        <span style='color:#017a31;'>#                    at the given boundary (in 2D case it is equal to circumference).</span>
+        <span style='color:#017a31;'>#                    This is also useful for testing the validity of the results.</span>
+        <span style='color:#017a31;'>#                 b-d) The total heat passing through the outer rectangle, inner ellipse and inner diamond boundary.</span>
+        surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
+        surfaceIntegrals[outerRectangle] <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#3605fb;'>None</span>, <span style='color:#3605fb;'>None</span>]
+        <span style='color:#017a31;'>#        a) Area of the mesh outer surface (a test, just to check the integration validity).</span>
+        <span style='color:#017a31;'>#           In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.</span>
+        surfaceIntegrals[outerRectangle][<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.MeshSurface(), (phi_i <b><span style='color:#0000ff;'>*</span></b> JxW))
+        <span style='color:#017a31;'>#        b) Total heat transferred through the outer rectangle boundary</span>
+        surfaceIntegrals[outerRectangle][<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> (<span style='color:#3605fb;'>self</span>.Q0_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> dof_T)
+        <span style='color:#017a31;'>#        c) Total heat transferred through the inner ellipse boundary</span>
+        surfaceIntegrals[innerEllipse] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q1_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> dof_T)]
+        <span style='color:#017a31;'>#        d) Total heat transferred through the inner diamond boundary</span>
+        surfaceIntegrals[innerDiamond] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q2_total(), (<b><span style='color:#0000ff;'>-</span></b>alpha <b><span style='color:#0000ff;'>*</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> dof_T)]
+
+        <span style='color:#017a31;'>#         3.4.2 Volume integrals are specified similarly. The only difference is that they do not require boundary IDs.</span>
+        <span style='color:#017a31;'>#               Nota bene:</span>
+        <span style='color:#017a31;'>#                 Care should be taken with the volume integrals since they include values at ALL cells</span>
+        <span style='color:#017a31;'>#                 and the resulting equations can be enormously long!!</span>
+        <span style='color:#017a31;'>#</span>
+        <span style='color:#017a31;'>#               In this example we specify only one volume integral: the simplest case used to calculate</span>
+        <span style='color:#017a31;'>#               the mesh surface area (in 2D it is area; in 3D it is the volume).</span>
+        <span style='color:#017a31;'>#               This is another test to check the integration validity.</span>
+        <span style='color:#017a31;'>#               Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732...</span>
+        <span style='color:#017a31;'>#               (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).</span>
+        volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#3605fb;'>self</span>.MeshVolume(), (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j <b><span style='color:#0000ff;'>*</span></b> JxW)) ]
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion,
                                                   Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,
@@ -381,8 +397,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
     <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
         <span style='color:#017a31;'># 4. Set the initial conditions for differential variables using the setFEInitialConditions function.</span>
-        <span style='color:#017a31;'>#    This function requires a dof name and either a float variable or a callable object to be called</span>
-        <span style='color:#017a31;'>#    for every index in the variable. Here we use a simple constant value of 300 Kelvins.</span>
+        <span style='color:#017a31;'>#    This function requires a dof name and either a float variable or a callable object that accepts</span>
+        <span style='color:#017a31;'>#    two arguments: index_in_the_domain and overall_index. If the initial conditions are x,y,z dependent</span>
+        <span style='color:#017a31;'>#    the location of the current point can be obtained using the function fe_system.GetDOFSupportPoints()</span>
+        <span style='color:#017a31;'>#    which returns an array of Point&lt;dim&gt; objects:</span>
+        <span style='color:#017a31;'>#      sp = self.m.fe_system.GetDOFSupportPoints()</span>
+        <span style='color:#017a31;'>#      point = sp[overall_index]</span>
+        <span style='color:#017a31;'>#    Here we use a simple constant value of 300 Kelvins for all points.</span>
         setFEInitialConditions(<span style='color:#3605fb;'>self</span>.m.fe_model, <span style='color:#3605fb;'>self</span>.m.fe_system, <span style='color:#cc0000;'>'T'</span>, <span style='color:#cc047c;'>300</span>)
 
 <span style='color:#017a31;'># 5. Set-up the main program</span>

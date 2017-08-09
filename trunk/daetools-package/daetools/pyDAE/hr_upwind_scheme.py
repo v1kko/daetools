@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-***********************************************************************************
+"""***********************************************************************************
                            hr_upwind_scheme.py
                 DAE Tools: pyDAE module, www.daetools.com
                 Copyright (C) Dragan Nikolic
@@ -14,8 +13,7 @@ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FO
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
-************************************************************************************
-"""
+************************************************************************************"""
 import sys, numpy, math
 import matplotlib.pyplot
 from daetools.pyDAE import *
@@ -27,40 +25,87 @@ FABS    = Abs
 beta    = 1.5 # For Sweby and Osher (1 <= beta  <= 2)
 theta   = 1.5 # For van Leer minmod (1 <= theta <= 2)
 
-class daeHRUpwindScheme(object):
+class daeHRUpwindSchemeEquation(object):
     supported_flux_limiters = []
     
-    def __init__(self, c, x, phi, r_epsilon = 1e-10):
+    def __init__(self, variable, domain, phi, r_epsilon = 1e-10):
+        """
+        """
         if not callable(phi):
             raise RuntimeError('Invalid flux limiter function specified (must be a callable)')
-        if not callable(c):
+        if not callable(variable):
             raise RuntimeError('Invalid variable specified (must be daeVariable object or a callable)')
-        if not callable(x):
+        if not callable(domain):
             raise RuntimeError('Invalid domain specified (must be daeDomain object)')
 
-        self.c         = c         # daeVariable object (or a callable)
-        self.x         = x         # daeDomain object
+        self.c         = variable  # daeVariable object (or a callable)
+        self.x         = domain    # daeDomain object
         self.phi       = phi       # Flux limiter function (a callable)
         self.r_epsilon = r_epsilon # epsilon in the upwind ratio (r) expression
 
-    def dc_dt(self, i):
-        # Accumulation term in the cell-centered finite-volume discretisation
+    def dc_dt(self, i, variable = None):
+        """Accumulation term in the cell-centered finite-volume discretisation:
+            
+           :math:`\int_{\Omega_i} {\partial c_i \over \partial t} dx`
+        """
         x     = self.x
-        c     = self.c
-        dc_dt = lambda i: dt(c(i))  
-        return (x[i]-x[i-1]) * dc_dt(i)
+        Nx    = self.x.NumberOfPoints
+        if variable:
+            if not callable(variable):
+                raise RuntimeError('Invalid variable specified (must be daeVariable object or a callable)')
+            c = variable
+        else:
+            c = self.c
+        dc_dt = lambda i: dt(c(i))
+        
+        if i == 0: # Sto ovde imam za 0??
+            return (x[1]-x[0]) * dc_dt(0)
+        else:
+            return (x[i]-x[i-1]) * dc_dt(i)
     
-    def dc_dx(self, i, S = None):
-        # Convection term in the cell-centered finite-volume discretisation
-        return self.c_edge_plus(i,S) - self.c_edge_plus(i-1,S)
+    def dc_dx(self, i, S = None, variable = None):
+        """Convection term in the cell-centered finite-volume discretisation:
+            
+           :math:`c_{i + {1 \over 2}} - c_{i - {1 \over 2}}`.
+           
+           Cell-face state :math:`c_{i+{1 \over 2}}` is given as:
+               
+           :math:`{c}_{i + {1 \over 2}} = c_i  + \phi \left( r_{i + {1 \over 2}} \\right) \left( c_i - c_{i-1}  \\right)`
+           
+           where :math:`\phi` is the flux limiter function and :math:`r_{i + {1 \over 2}}` the upwind ratio of consecutive 
+           solution gradients:
+               
+           :math:`r_{i + {1 \over 2}} = {{c_{i+1} - c_{i} + \epsilon} \over {c_{i} - c_{i-1} + \epsilon}}`.
+           
+           If the source term integral :math:`S= {1 \over u} \int_{\Omega_i} s(x) dx` is not ``None`` then the convection term is given as:
+           :math:`(c-S)_{i + {1 \over 2}} - (c-S)_{i - {1 \over 2}}`.
+        """
+        if variable:
+            if not callable(variable):
+                raise RuntimeError('Invalid variable specified (must be daeVariable object or a callable)')
+            c = variable
+        else:
+            c = self.c
+        
+        return self.c_edge_plus(i, c, S) - self.c_edge_plus(i-1, c, S)
     
-    def d2c_dx2(self, i):
-        # Diffusion term in the cell-centered finite-volume discretisation
-        return self.dc_dx_edge_plus(i) - self.dc_dx_edge_plus(i-1)
-
-    def S_integral(self, s, i, u):
-        # Integral of the source term: S(x) = 1/u * Integral[s(x)*dx]
-        return (1 / u(i)) * self._AverageOverCell(s, i)
+    def d2c_dx2(self, i, variable = None):
+        """Diffusion term in the cell-centered finite-volume discretisation:           
+           
+           :math:`\left( \partial c_i \over \partial x \\right)_{i + {1 \over 2}} - \left( \partial c_i \over \partial x \\right)_{i - {1 \over 2}}`
+        """
+        if variable:
+            c = variable
+        else:
+            c = self.c
+        return self.dc_dx_edge_plus(i, c) - self.dc_dx_edge_plus(i-1, c)
+    
+    def source(self, s, i):
+        """Source term in the cell-centered finite-volume discretisation: 
+            
+           :math:`\int_{\Omega_i} s(x) dx`
+        """
+        return self._AverageOverCell(s,i)
 
     ########################################################################
     # Implementation details
@@ -74,15 +119,26 @@ class daeHRUpwindScheme(object):
             
         return (cs(i+1) - cs(i) + eps) / (cs(i) - cs(i-1) + eps)
     
-    def c_edge_plus(self, i, S = None):
+    def r_rev(self, i, S = None):
+        # Upwind ratio of consecutive solution gradients
+        # It may include the source term integral S(x)
+        eps = self.r_epsilon
+        c   = self.c
+        cs = lambda i: c(i)-S(i) if S else c(i)
+            
+        return (cs(i) - cs(i+1) + eps) / (cs(i+1) - cs(i+2) + eps)
+
+    def c_edge_plus(self, i, c, S):
         # c at the i+1/2 face (cell outlet)
         phi = self.phi
         r   = self.r
         x   = self.x
         Nx  = self.x.NumberOfPoints
-        c   = self.c
         cs = lambda i: c(i)-S(i) if S else c(i)
         
+        #if i == 0:      
+        #    # Left face of the first cell: boundary condition
+        #    return cs(0)
         if i == 0:      
             # Right face of the first cell: central interpolation (k=1)
             return 0.5 * (cs(0) + cs(1))
@@ -95,11 +151,30 @@ class daeHRUpwindScheme(object):
         else:
             raise RuntimeError('c_edge_plus: Invalid index specified: %d (no. points is %d)' % (i, Nx))
 
-    def dc_dx_edge_plus(self, i):
+    def c_edge_plus_rev(self, i, c, S):
+        # c at the i+1/2 face (cell outlet)
+        phi = self.phi
+        r   = self.r
+        x   = self.x
+        Nx  = self.x.NumberOfPoints
+        cs = lambda i: c(i)-S(i) if S else c(i)
+        
+        if i == Nx-1:
+            # Right face of the last cell (first in reversible): central interpolation (k=1)  Double check!!
+            return 0.5 * (cs(Nx-1) + cs(Nx-2))
+        elif i == Nx-1: 
+            # Right face of the last cell: one-sided upwind scheme (k=-1)
+            return cs(i) + 0.5 * (cs(i) - cs(i-1))
+        elif i > 0 and i < Nx-1:           
+            # Other cells: k=1/3
+            return cs(i) + 0.5 * phi(r(i,S)) * (cs(i) - cs(i-1))
+        else:
+            raise RuntimeError('c_edge_plus: Invalid index specified: %d (no. points is %d)' % (i, Nx))
+
+    def dc_dx_edge_plus(self, i, c):
         # Diffusion at the i+1/2 face (cell outlet)
         x   = self.x
         Nx  = self.x.NumberOfPoints
-        c   = self.c
 
         if i == 0:
             # Right face of the first cell: biased central-difference
@@ -118,21 +193,25 @@ class daeHRUpwindScheme(object):
         Integral over a cell i: S = integral      (f(x)*dx)
                                               i-1/2
 
-        Here we use a simple trapezoidal rule: (x      - x     ) * [f(x     ) + f(x     )] / 2
-                                                 i+1/2    i-1/2        i+1/2       i-1/2
+        We could use a simple trapezoidal rule: (x      - x     ) * [f(x     ) + f(x     )] / 2
+                                                  i+1/2    i-1/2        i+1/2       i-1/2
+        or to assume the source everywhere in the cell is equal to the value at the plus edge:
+                                                (x      - x     ) * f(x     )   
+                                                  i+1/2    i-1/2       i+1/2
+        The latter gives better results (double check why).
         """
         x   = self.x
         xp  = self.x.Points
         Nx  = self.x.NumberOfPoints
         if i == 0:
-            # The first cell
-            return 0.5 * (f(0) + f(1)) * (xp[1] - xp[0])
+            # The first cell (double check this!!!)
+            return f(0) * (xp[1] - xp[0])
         elif i == Nx-1:
             # The last cell
-            return 0.5 * (f(i) + f(i-1)) * (xp[i] - xp[i-1])
+            return f(i) * (xp[i] - xp[i-1]) 
         elif i > 0 and i < Nx-1:           
             # Other cells
-            return 0.5 * (f(i) + f(i-1)) * (xp[i] - xp[i-1])
+            return f(i) * (xp[i] - xp[i-1])
         else:
             raise RuntimeError('VolumeAverage: Invalid index specified: %d (no. points is %d)' % (i, Nx))
         
@@ -234,21 +313,21 @@ class daeHRUpwindScheme(object):
         # 1 <= theta <= 2
         return MAX(0.0, MIN(theta*r, MIN(0.5*(1.0+r), theta)))
 
-daeHRUpwindScheme.supported_flux_limiters = [daeHRUpwindScheme.Phi_HCUS, 
-                                             daeHRUpwindScheme.Phi_HQUICK, 
-                                             daeHRUpwindScheme.Phi_Koren, 
-                                             daeHRUpwindScheme.Phi_monotinized_central,
-                                             daeHRUpwindScheme.Phi_minmod, 
-                                             daeHRUpwindScheme.Phi_Osher, 
-                                             daeHRUpwindScheme.Phi_ospre, 
-                                             daeHRUpwindScheme.Phi_smart, 
-                                             daeHRUpwindScheme.Phi_superbee,
-                                             daeHRUpwindScheme.Phi_Sweby, 
-                                             daeHRUpwindScheme.Phi_UMIST, 
-                                             daeHRUpwindScheme.Phi_vanAlbada1, 
-                                             daeHRUpwindScheme.Phi_vanAlbada2, 
-                                             daeHRUpwindScheme.Phi_vanLeer,
-                                             daeHRUpwindScheme.Phi_vanLeer_minmod]
+daeHRUpwindSchemeEquation.supported_flux_limiters = [daeHRUpwindSchemeEquation.Phi_HCUS, 
+                                                     daeHRUpwindSchemeEquation.Phi_HQUICK, 
+                                                     daeHRUpwindSchemeEquation.Phi_Koren, 
+                                                     daeHRUpwindSchemeEquation.Phi_monotinized_central,
+                                                     daeHRUpwindSchemeEquation.Phi_minmod, 
+                                                     daeHRUpwindSchemeEquation.Phi_Osher, 
+                                                     daeHRUpwindSchemeEquation.Phi_ospre, 
+                                                     daeHRUpwindSchemeEquation.Phi_smart, 
+                                                     daeHRUpwindSchemeEquation.Phi_superbee,
+                                                     daeHRUpwindSchemeEquation.Phi_Sweby, 
+                                                     daeHRUpwindSchemeEquation.Phi_UMIST, 
+                                                     daeHRUpwindSchemeEquation.Phi_vanAlbada1, 
+                                                     daeHRUpwindSchemeEquation.Phi_vanAlbada2, 
+                                                     daeHRUpwindSchemeEquation.Phi_vanLeer,
+                                                     daeHRUpwindSchemeEquation.Phi_vanLeer_minmod]
 
 def plot_flux_limiters():
     n = 30

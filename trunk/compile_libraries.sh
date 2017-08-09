@@ -331,7 +331,7 @@ vCOLAMD=2.8.0
 vCCOLAMD=2.8.0
 vSUITESPARSE_CONFIG=4.2.1
 vOPENBLAS=0.2.8
-vDEALII=8.4.1
+vDEALII=8.5.0
 vSUPERLU=5.2.1
 vSUPERLU_MT=3.1
 vCOOLPROP=6.1.0
@@ -1650,7 +1650,10 @@ configure_dealii()
 
   WITH_CXX11=ON
   WITH_CXX14=OFF
-  DEALII_CXX_FLAGS=
+  # Floating point c++ flags
+  #  - Unix: "-frounding-math -fsignaling-nans"
+  #  - Windows: "/fp:strict"
+  DEALII_CXX_FLAGS=""
   if [ ${PLATFORM} = "Windows" ]; then
     WITH_CXX11=OFF
     WITH_CXX14=OFF

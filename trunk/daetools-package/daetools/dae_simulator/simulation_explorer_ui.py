@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'simulation_explorer.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -314,7 +314,7 @@ class Ui_SimulationExplorer(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
         self.retranslateUi(SimulationExplorer)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(3)
         QtCore.QMetaObject.connectSlotsByName(SimulationExplorer)
 
     def retranslateUi(self, SimulationExplorer):
@@ -340,7 +340,7 @@ class Ui_SimulationExplorer(object):
         self.treeParameters.headerItem().setText(1, _translate("SimulationExplorer", "Value"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Parameters), _translate("SimulationExplorer", "Parameters"))
         self.tabWidget.setTabToolTip(self.tabWidget.indexOf(self.tab_Parameters), _translate("SimulationExplorer", "<html><head/><body><p>Set the data related to parameters.</p></body></html>"))
-        self.initialConditionsLabel.setText(_translate("SimulationExplorer", "Quazy Steady State InitialConditions"))
+        self.initialConditionsLabel.setText(_translate("SimulationExplorer", "Quasi Steady State InitialConditions"))
         self.treeInitialConditions.headerItem().setText(0, _translate("SimulationExplorer", "Name"))
         self.treeInitialConditions.headerItem().setText(1, _translate("SimulationExplorer", "Value"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_InitialConditions), _translate("SimulationExplorer", "InitialConditions"))

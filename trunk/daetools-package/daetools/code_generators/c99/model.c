@@ -54,7 +54,7 @@ void modInitializeValuesReferences(daeModel_t* _m_, real_t* values, real_t* time
 
 void modSetInitialConditions(daeModel_t* _m_, real_t* values)
 {
-    if(_m_->quasySteadyState)
+    if(_m_->quasiSteadyState)
         return;
 
     %(initialConditions)s

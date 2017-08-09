@@ -1001,7 +1001,7 @@ class daeCodeGenerator_cxx_mpi(daeCodeGenerator):
         self.runtimeInformation_init.append('_m_->timeHorizon       = %f;'   % runtimeInformation['TimeHorizon'])
         self.runtimeInformation_init.append('_m_->reportingInterval = %f;'   % runtimeInformation['ReportingInterval'])
         self.runtimeInformation_init.append('_m_->relativeTolerance = %f;'   % runtimeInformation['RelativeTolerance'])        
-        self.runtimeInformation_init.append('_m_->quasySteadyState  = %s;\n' % ('true' if runtimeInformation['QuasySteadyState'] else 'false'))
+        self.runtimeInformation_init.append('_m_->quasiSteadyState  = %s;\n' % ('true' if runtimeInformation['QuasiSteadyState'] else 'false'))
 
         self.variableNames   = Neq * ['']
         blockIDs             = Neq * [-1]

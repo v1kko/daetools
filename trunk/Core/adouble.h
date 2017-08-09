@@ -156,28 +156,28 @@ public:
     virtual ~adouble();
 
 public:
-    const adouble operator -(void) const;
-    const adouble operator +(void) const;
+    adouble operator -(void) const;
+    adouble operator +(void) const;
 
     //const adouble operator +(const real_t v) const;
-    const adouble operator +(const adouble& a) const;
-    friend DAE_CORE_API const adouble operator +(const real_t v, const adouble& a);
-    friend DAE_CORE_API const adouble operator +(const adouble& a, const real_t v);
+    adouble operator +(const adouble& a) const;
+    friend DAE_CORE_API adouble operator +(const real_t v, const adouble& a);
+    friend DAE_CORE_API adouble operator +(const adouble& a, const real_t v);
 
     //const adouble operator -(const real_t v) const;
-    const adouble operator -(const adouble& a) const;
-    friend DAE_CORE_API const adouble operator -(const real_t v, const adouble& a);
-    friend DAE_CORE_API const adouble operator -(const adouble& a, const real_t v);
+    adouble operator -(const adouble& a) const;
+    friend DAE_CORE_API adouble operator -(const real_t v, const adouble& a);
+    friend DAE_CORE_API adouble operator -(const adouble& a, const real_t v);
 
     //const adouble operator *(const real_t v) const;
-    const adouble operator *(const adouble& a) const;
-    friend DAE_CORE_API const adouble operator *(const real_t v, const adouble& a);
-    friend DAE_CORE_API const adouble operator *(const adouble& a, const real_t v);
+    adouble operator *(const adouble& a) const;
+    friend DAE_CORE_API adouble operator *(const real_t v, const adouble& a);
+    friend DAE_CORE_API adouble operator *(const adouble& a, const real_t v);
 
     //const adouble operator /(const real_t v) const;
-    const adouble operator /(const adouble& a) const;
-    friend DAE_CORE_API const adouble operator /(const real_t v, const adouble& a);
-    friend DAE_CORE_API const adouble operator /(const adouble& a, const real_t v);
+    adouble operator /(const adouble& a) const;
+    friend DAE_CORE_API adouble operator /(const real_t v, const adouble& a);
+    friend DAE_CORE_API adouble operator /(const adouble& a, const real_t v);
 
     adouble& operator +=(const adouble& a);
     adouble& operator -=(const adouble& a);
@@ -189,52 +189,52 @@ public:
     adouble& operator *=(const real_t v);
     adouble& operator /=(const real_t v);
 
-    friend DAE_CORE_API const adouble dt(const adouble& a);
+    friend DAE_CORE_API adouble dt(const adouble& a);
 
-    friend DAE_CORE_API const adouble d(const adouble&                            a,
-                                        daeDomain&                                domain,
-                                        daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
-                                        const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
-    friend DAE_CORE_API const adouble d2(const adouble&                            a,
-                                         daeDomain&                                domain,
-                                         daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
-                                         const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
+    friend DAE_CORE_API adouble d(const adouble&                            a,
+                                  daeDomain&                                domain,
+                                  daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                  const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
+    friend DAE_CORE_API adouble d2(const adouble&                            a,
+                                   daeDomain&                                domain,
+                                   daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                   const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
 
-    friend DAE_CORE_API const adouble exp(const adouble &a);
-    friend DAE_CORE_API const adouble log(const adouble &a);
-    friend DAE_CORE_API const adouble sqrt(const adouble &a);
-    friend DAE_CORE_API const adouble sin(const adouble &a);
-    friend DAE_CORE_API const adouble cos(const adouble &a);
-    friend DAE_CORE_API const adouble tan(const adouble &a);
-    friend DAE_CORE_API const adouble asin(const adouble &a);
-    friend DAE_CORE_API const adouble acos(const adouble &a);
-    friend DAE_CORE_API const adouble atan(const adouble &a);
+    friend DAE_CORE_API adouble exp(const adouble &a);
+    friend DAE_CORE_API adouble log(const adouble &a);
+    friend DAE_CORE_API adouble sqrt(const adouble &a);
+    friend DAE_CORE_API adouble sin(const adouble &a);
+    friend DAE_CORE_API adouble cos(const adouble &a);
+    friend DAE_CORE_API adouble tan(const adouble &a);
+    friend DAE_CORE_API adouble asin(const adouble &a);
+    friend DAE_CORE_API adouble acos(const adouble &a);
+    friend DAE_CORE_API adouble atan(const adouble &a);
 
-    friend DAE_CORE_API const adouble sinh(const adouble &a);
-    friend DAE_CORE_API const adouble cosh(const adouble &a);
-    friend DAE_CORE_API const adouble tanh(const adouble &a);
-    friend DAE_CORE_API const adouble asinh(const adouble &a);
-    friend DAE_CORE_API const adouble acosh(const adouble &a);
-    friend DAE_CORE_API const adouble atanh(const adouble &a);
-    friend DAE_CORE_API const adouble atan2(const adouble &a, const adouble &b);
-    friend DAE_CORE_API const adouble erf(const adouble &a);
+    friend DAE_CORE_API adouble sinh(const adouble &a);
+    friend DAE_CORE_API adouble cosh(const adouble &a);
+    friend DAE_CORE_API adouble tanh(const adouble &a);
+    friend DAE_CORE_API adouble asinh(const adouble &a);
+    friend DAE_CORE_API adouble acosh(const adouble &a);
+    friend DAE_CORE_API adouble atanh(const adouble &a);
+    friend DAE_CORE_API adouble atan2(const adouble &a, const adouble &b);
+    friend DAE_CORE_API adouble erf(const adouble &a);
 
-    friend DAE_CORE_API const adouble pow(const adouble &a, real_t v);
-    friend DAE_CORE_API const adouble pow(const adouble &a, const adouble &b);
-    friend DAE_CORE_API const adouble pow(real_t v, const adouble &a);
-    friend DAE_CORE_API const adouble log10(const adouble &a);
+    friend DAE_CORE_API adouble pow(const adouble &a, real_t v);
+    friend DAE_CORE_API adouble pow(const adouble &a, const adouble &b);
+    friend DAE_CORE_API adouble pow(real_t v, const adouble &a);
+    friend DAE_CORE_API adouble log10(const adouble &a);
 
 // ceil/floor are non-differentiable: should I remove them?
-    friend DAE_CORE_API const adouble ceil(const adouble &a);
-    friend DAE_CORE_API const adouble floor(const adouble &a);
+    friend DAE_CORE_API adouble ceil(const adouble &a);
+    friend DAE_CORE_API adouble floor(const adouble &a);
 
-    friend DAE_CORE_API const adouble abs(const adouble &a);
-    friend DAE_CORE_API const adouble max(const adouble &a, const adouble &b);
-    friend DAE_CORE_API const adouble max(real_t v, const adouble &a);
-    friend DAE_CORE_API const adouble max(const adouble &a, real_t v);
-    friend DAE_CORE_API const adouble min(const adouble &a, const adouble &b);
-    friend DAE_CORE_API const adouble min(real_t v, const adouble &a);
-    friend DAE_CORE_API const adouble min(const adouble &a, real_t v);
+    friend DAE_CORE_API adouble abs(const adouble &a);
+    friend DAE_CORE_API adouble max(const adouble &a, const adouble &b);
+    friend DAE_CORE_API adouble max(real_t v, const adouble &a);
+    friend DAE_CORE_API adouble max(const adouble &a, real_t v);
+    friend DAE_CORE_API adouble min(const adouble &a, const adouble &b);
+    friend DAE_CORE_API adouble min(real_t v, const adouble &a);
+    friend DAE_CORE_API adouble min(const adouble &a, real_t v);
 
     adouble& operator =(const real_t v);
     adouble& operator =(const adouble& a);
@@ -356,23 +356,23 @@ public:
 
     void operator =(const adouble_array& a);
 
-    const adouble_array operator -(void) const;
+    adouble_array operator -(void) const;
 
-    const adouble_array operator +(const adouble_array& a) const;
-    const adouble_array operator +(const real_t v) const;
-    const adouble_array operator +(const adouble& a) const;
+    adouble_array operator +(const adouble_array& a) const;
+    adouble_array operator +(const real_t v) const;
+    adouble_array operator +(const adouble& a) const;
 
-    const adouble_array operator -(const adouble_array& a) const;
-    const adouble_array operator -(const real_t v) const;
-    const adouble_array operator -(const adouble& a) const;
+    adouble_array operator -(const adouble_array& a) const;
+    adouble_array operator -(const real_t v) const;
+    adouble_array operator -(const adouble& a) const;
 
-    const adouble_array operator *(const adouble_array& a) const;
-    const adouble_array operator *(const real_t v) const;
-    const adouble_array operator *(const adouble& a) const;
+    adouble_array operator *(const adouble_array& a) const;
+    adouble_array operator *(const real_t v) const;
+    adouble_array operator *(const adouble& a) const;
 
-    const adouble_array operator /(const adouble_array& a) const;
-    const adouble_array operator /(const real_t v) const;
-    const adouble_array operator /(const adouble& a) const;
+    adouble_array operator /(const adouble_array& a) const;
+    adouble_array operator /(const real_t v) const;
+    adouble_array operator /(const adouble& a) const;
 
     std::string NodeAsPlainText(void) const;
     std::string NodeAsLatex(void) const;
@@ -403,66 +403,66 @@ public:
     std::vector<adouble>	m_arrValues;
 };
 
-DAE_CORE_API const adouble_array operator +(const real_t v, const adouble_array& a);
-DAE_CORE_API const adouble_array operator -(const real_t v, const adouble_array& a);
-DAE_CORE_API const adouble_array operator *(const real_t v, const adouble_array& a);
-DAE_CORE_API const adouble_array operator /(const real_t v, const adouble_array& a);
+DAE_CORE_API adouble_array operator +(const real_t v, const adouble_array& a);
+DAE_CORE_API adouble_array operator -(const real_t v, const adouble_array& a);
+DAE_CORE_API adouble_array operator *(const real_t v, const adouble_array& a);
+DAE_CORE_API adouble_array operator /(const real_t v, const adouble_array& a);
 
-DAE_CORE_API const adouble_array operator +(const adouble& a, const adouble_array& arr);
-DAE_CORE_API const adouble_array operator -(const adouble& a, const adouble_array& arr);
-DAE_CORE_API const adouble_array operator *(const adouble& a, const adouble_array& arr);
-DAE_CORE_API const adouble_array operator /(const adouble& a, const adouble_array& arr);
+DAE_CORE_API adouble_array operator +(const adouble& a, const adouble_array& arr);
+DAE_CORE_API adouble_array operator -(const adouble& a, const adouble_array& arr);
+DAE_CORE_API adouble_array operator *(const adouble& a, const adouble_array& arr);
+DAE_CORE_API adouble_array operator /(const adouble& a, const adouble_array& arr);
 
-DAE_CORE_API const adouble_array dt_array(adouble_array& adarr);
-DAE_CORE_API const adouble_array d_array(adouble_array&                            adarr,
-                                         daeDomain&                                domain,
-                                         daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
-                                         const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
-DAE_CORE_API const adouble_array d2_array(adouble_array&                            adarr,
-                                          daeDomain&                                domain,
-                                          daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
-                                          const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
+DAE_CORE_API adouble_array dt_array(adouble_array& adarr);
+DAE_CORE_API adouble_array d_array(adouble_array&                            adarr,
+                                   daeDomain&                                domain,
+                                   daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                   const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
+DAE_CORE_API adouble_array d2_array(adouble_array&                            adarr,
+                                    daeDomain&                                domain,
+                                    daeeDiscretizationMethod                  eDiscretizationMethod    = eCFDM,
+                                    const std::map<std::string, std::string>& mapDiscretizationOptions = std::map<std::string, std::string>());
 
-DAE_CORE_API const adouble Sum(const adouble_array& a, bool bIsLargeArray = false);
-DAE_CORE_API const adouble Product(const adouble_array& a, bool bIsLargeArray = false);
-DAE_CORE_API const adouble Min(const adouble_array& a);
-DAE_CORE_API const adouble Max(const adouble_array& a);
-DAE_CORE_API const adouble Average(const adouble_array& a);
-DAE_CORE_API const adouble Integral(const adouble_array& a);
+DAE_CORE_API adouble Sum(const adouble_array& a, bool bIsLargeArray = false);
+DAE_CORE_API adouble Product(const adouble_array& a, bool bIsLargeArray = false);
+DAE_CORE_API adouble Min(const adouble_array& a);
+DAE_CORE_API adouble Max(const adouble_array& a);
+DAE_CORE_API adouble Average(const adouble_array& a);
+DAE_CORE_API adouble Integral(const adouble_array& a);
 
-DAE_CORE_API const adouble_array exp(const adouble_array& a);
-DAE_CORE_API const adouble_array sqrt(const adouble_array& a);
-DAE_CORE_API const adouble_array log(const adouble_array& a);
-DAE_CORE_API const adouble_array log10(const adouble_array& a);
-DAE_CORE_API const adouble_array abs(const adouble_array& a);
-DAE_CORE_API const adouble_array floor(const adouble_array& a);
-DAE_CORE_API const adouble_array ceil(const adouble_array& a);
-DAE_CORE_API const adouble_array sin(const adouble_array& a);
-DAE_CORE_API const adouble_array cos(const adouble_array& a);
-DAE_CORE_API const adouble_array tan(const adouble_array& a);
-DAE_CORE_API const adouble_array asin(const adouble_array& a);
-DAE_CORE_API const adouble_array acos(const adouble_array& a);
-DAE_CORE_API const adouble_array atan(const adouble_array& a);
+DAE_CORE_API adouble_array exp(const adouble_array& a);
+DAE_CORE_API adouble_array sqrt(const adouble_array& a);
+DAE_CORE_API adouble_array log(const adouble_array& a);
+DAE_CORE_API adouble_array log10(const adouble_array& a);
+DAE_CORE_API adouble_array abs(const adouble_array& a);
+DAE_CORE_API adouble_array floor(const adouble_array& a);
+DAE_CORE_API adouble_array ceil(const adouble_array& a);
+DAE_CORE_API adouble_array sin(const adouble_array& a);
+DAE_CORE_API adouble_array cos(const adouble_array& a);
+DAE_CORE_API adouble_array tan(const adouble_array& a);
+DAE_CORE_API adouble_array asin(const adouble_array& a);
+DAE_CORE_API adouble_array acos(const adouble_array& a);
+DAE_CORE_API adouble_array atan(const adouble_array& a);
 
-DAE_CORE_API const adouble_array sinh(const adouble_array &a);
-DAE_CORE_API const adouble_array cosh(const adouble_array &a);
-DAE_CORE_API const adouble_array tanh(const adouble_array &a);
-DAE_CORE_API const adouble_array asinh(const adouble_array &a);
-DAE_CORE_API const adouble_array acosh(const adouble_array &a);
-DAE_CORE_API const adouble_array atanh(const adouble_array &a);
-DAE_CORE_API const adouble_array atan2(const adouble_array &a, const adouble_array &b);
-DAE_CORE_API const adouble_array erf(const adouble_array &a);
+DAE_CORE_API adouble_array sinh(const adouble_array &a);
+DAE_CORE_API adouble_array cosh(const adouble_array &a);
+DAE_CORE_API adouble_array tanh(const adouble_array &a);
+DAE_CORE_API adouble_array asinh(const adouble_array &a);
+DAE_CORE_API adouble_array acosh(const adouble_array &a);
+DAE_CORE_API adouble_array atanh(const adouble_array &a);
+DAE_CORE_API adouble_array atan2(const adouble_array &a, const adouble_array &b);
+DAE_CORE_API adouble_array erf(const adouble_array &a);
 
-//DAE_CORE_API const adouble_array pow(const adouble_array& a, real_t v);
+//DAE_CORE_API adouble_array pow(const adouble_array& a, real_t v);
 
 
-DAE_CORE_API const adouble Time(void);
-DAE_CORE_API const adouble InverseTimeStep(void);
-DAE_CORE_API const adouble Constant(const quantity& q);
-DAE_CORE_API const adouble Constant(real_t c);
-DAE_CORE_API const adouble_array Array(const std::vector<quantity>& arrq);
-DAE_CORE_API const adouble_array Array(const std::vector<real_t>& darrValues);
-DAE_CORE_API const adouble_array Array(const std::vector<adNodePtr>& ptrarrNodes);
+DAE_CORE_API adouble Time(void);
+DAE_CORE_API adouble InverseTimeStep(void);
+DAE_CORE_API adouble Constant(const quantity& q);
+DAE_CORE_API adouble Constant(real_t c);
+DAE_CORE_API adouble_array Array(const std::vector<quantity>& arrq);
+DAE_CORE_API adouble_array Array(const std::vector<real_t>& darrValues);
+DAE_CORE_API adouble_array Array(const std::vector<adNodePtr>& ptrarrNodes);
 
 
 /*********************************************************************************************

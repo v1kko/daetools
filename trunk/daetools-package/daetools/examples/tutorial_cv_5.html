@@ -182,6 +182,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'># Thermal diffusivity (m**2/s)</span>
         alpha <b><span style='color:#0000ff;'>=</span></b> kappa<b><span style='color:#0000ff;'>/</span></b>(rho <b><span style='color:#0000ff;'>*</span></b> cp)
 
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_i  <b><span style='color:#0000ff;'>=</span></b>  phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_1D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_1D(fe_q)
+
         <span style='color:#017a31;'># Boundary IDs</span>
         left_edge   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
         right_edge  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
@@ -195,28 +202,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
                                    ]
 
         <span style='color:#3605fb;'>self</span>.fun_Q <b><span style='color:#0000ff;'>=</span></b> TemperatureSource_1D(L, tau, t, alpha)
-        Q <b><span style='color:#0000ff;'>=</span></b> function_adouble_value_1D(<span style='color:#cc0000;'>'Q'</span>, <span style='color:#3605fb;'>self</span>.fun_Q, xyz_1D(fe_q))
-
+        Q <b><span style='color:#0000ff;'>=</span></b> function_adouble_value_1D(<span style='color:#cc0000;'>'Q'</span>, <span style='color:#3605fb;'>self</span>.fun_Q, xyz)
+        
         <span style='color:#017a31;'># FE weak form terms</span>
-        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_1D(fe_q)
-        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_1D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> alpha <b><span style='color:#0000ff;'>*</span></b> JxW_1D(fe_q)
-        convection   <b><span style='color:#0000ff;'>=</span></b> phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW_1D(fe_q)
-        source       <b><span style='color:#0000ff;'>=</span></b> phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> Q <b><span style='color:#0000ff;'>*</span></b> JxW_1D(fe_q)
+        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> alpha <b><span style='color:#0000ff;'>*</span></b> JxW
+        convection   <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
+        source       <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> Q <b><span style='color:#0000ff;'>*</span></b> JxW
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_1D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> convection,
                                                   Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,
                                                   Fi  <b><span style='color:#0000ff;'>=</span></b> source,
                                                   functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC)
-
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Transient heat convection equations:'</span>)
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Aij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Mij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Fi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceAij]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceFi]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.surfaceIntegrals]))
 
         <span style='color:#017a31;'># Setting the weak form of the FE system will declare a set of equations:</span>
         <span style='color:#017a31;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>

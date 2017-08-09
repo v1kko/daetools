@@ -170,7 +170,7 @@ void adouble_array::SetItem(size_t nIndex, adouble& a)
 // adUnaryNodeArray and adBinaryNodeArray::evaluate() function.
 // The calculation part is left just in case.
 
-const adouble_array adouble_array::operator -(void) const
+adouble_array adouble_array::operator -(void) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -188,7 +188,7 @@ const adouble_array adouble_array::operator -(void) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator +(const adouble_array& a) const
+adouble_array adouble_array::operator +(const adouble_array& a) const
 {
     adouble_array tmp;
     if(getGatherInfo() || a.getGatherInfo())
@@ -211,7 +211,7 @@ const adouble_array adouble_array::operator +(const adouble_array& a) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator +(const real_t v) const
+adouble_array adouble_array::operator +(const real_t v) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -230,7 +230,7 @@ const adouble_array adouble_array::operator +(const real_t v) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator +(const adouble& a) const
+adouble_array adouble_array::operator +(const adouble& a) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -249,7 +249,7 @@ const adouble_array adouble_array::operator +(const adouble& a) const
     return tmp;
 }
 
-const adouble_array operator +(const adouble& a, const adouble_array& arr)
+adouble_array operator +(const adouble& a, const adouble_array& arr)
 {
     adouble_array tmp;
     if(arr.getGatherInfo())
@@ -269,7 +269,7 @@ const adouble_array operator +(const adouble& a, const adouble_array& arr)
     return tmp;
 }
 
-const adouble_array operator +(const real_t v, const adouble_array& a)
+adouble_array operator +(const real_t v, const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -288,7 +288,7 @@ const adouble_array operator +(const real_t v, const adouble_array& a)
     return tmp;
 }
 
-const adouble_array adouble_array::operator -(const adouble_array& a) const
+adouble_array adouble_array::operator -(const adouble_array& a) const
 {
     adouble_array tmp;
     if(getGatherInfo() || a.getGatherInfo())
@@ -311,7 +311,7 @@ const adouble_array adouble_array::operator -(const adouble_array& a) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator -(const real_t v) const
+adouble_array adouble_array::operator -(const real_t v) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -330,7 +330,7 @@ const adouble_array adouble_array::operator -(const real_t v) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator -(const adouble& a) const
+adouble_array adouble_array::operator -(const adouble& a) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -349,7 +349,7 @@ const adouble_array adouble_array::operator -(const adouble& a) const
     return tmp;
 }
 
-const adouble_array operator -(const adouble& a, const adouble_array& arr)
+adouble_array operator -(const adouble& a, const adouble_array& arr)
 {
     adouble_array tmp;
     if(arr.getGatherInfo())
@@ -369,7 +369,7 @@ const adouble_array operator -(const adouble& a, const adouble_array& arr)
     return tmp;
 }
 
-const adouble_array operator -(const real_t v, const adouble_array& a)
+adouble_array operator -(const real_t v, const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -388,7 +388,7 @@ const adouble_array operator -(const real_t v, const adouble_array& a)
     return tmp;
 }
 
-const adouble_array adouble_array::operator *(const adouble_array& a) const
+adouble_array adouble_array::operator *(const adouble_array& a) const
 {
     adouble_array tmp;
     if(getGatherInfo() || a.getGatherInfo())
@@ -411,7 +411,7 @@ const adouble_array adouble_array::operator *(const adouble_array& a) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator *(const real_t v) const
+adouble_array adouble_array::operator *(const real_t v) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -430,7 +430,7 @@ const adouble_array adouble_array::operator *(const real_t v) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator *(const adouble& a) const
+adouble_array adouble_array::operator *(const adouble& a) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -449,7 +449,7 @@ const adouble_array adouble_array::operator *(const adouble& a) const
     return tmp;
 }
 
-const adouble_array operator *(const adouble& a, const adouble_array& arr)
+adouble_array operator *(const adouble& a, const adouble_array& arr)
 {
     adouble_array tmp;
     if(arr.getGatherInfo())
@@ -469,7 +469,7 @@ const adouble_array operator *(const adouble& a, const adouble_array& arr)
     return tmp;
 }
 
-const adouble_array operator *(const real_t v, const adouble_array& a)
+adouble_array operator *(const real_t v, const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -488,7 +488,7 @@ const adouble_array operator *(const real_t v, const adouble_array& a)
     return tmp;
 }
 
-const adouble_array adouble_array::operator /(const adouble_array& a) const
+adouble_array adouble_array::operator /(const adouble_array& a) const
 {
     adouble_array tmp;
     if(getGatherInfo() || a.getGatherInfo())
@@ -511,7 +511,7 @@ const adouble_array adouble_array::operator /(const adouble_array& a) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator /(const real_t v) const
+adouble_array adouble_array::operator /(const real_t v) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -530,7 +530,7 @@ const adouble_array adouble_array::operator /(const real_t v) const
     return tmp;
 }
 
-const adouble_array adouble_array::operator /(const adouble& a) const
+adouble_array adouble_array::operator /(const adouble& a) const
 {
     adouble_array tmp;
     if(getGatherInfo())
@@ -549,7 +549,7 @@ const adouble_array adouble_array::operator /(const adouble& a) const
     return tmp;
 }
 
-const adouble_array operator /(const adouble& a, const adouble_array& arr)
+adouble_array operator /(const adouble& a, const adouble_array& arr)
 {
     adouble_array tmp;
     if(arr.getGatherInfo())
@@ -569,7 +569,7 @@ const adouble_array operator /(const adouble& a, const adouble_array& arr)
     return tmp;
 }
 
-const adouble_array operator /(const real_t v, const adouble_array& a)
+adouble_array operator /(const real_t v, const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -591,7 +591,7 @@ const adouble_array operator /(const real_t v, const adouble_array& a)
 /*********************************************************************************************
   d_array, d2_array, dt_array
 **********************************************************************************************/
-const adouble_array dt_array(adouble_array& adarr)
+adouble_array dt_array(adouble_array& adarr)
 {
     adouble_array tmp;
     tmp.setGatherInfo(true);
@@ -614,7 +614,7 @@ const adouble_array dt_array(adouble_array& adarr)
     return tmp;
 }
 
-const adouble_array d_array(adouble_array&                            adarr,
+adouble_array d_array(adouble_array&                            adarr,
                             daeDomain&                                domain,
                             daeeDiscretizationMethod                  eDiscretizationMethod,
                             const std::map<std::string, std::string>& mapDiscretizationOptions)
@@ -651,7 +651,7 @@ const adouble_array d_array(adouble_array&                            adarr,
 */
 }
 
-const adouble_array d2_array(adouble_array&                            adarr,
+adouble_array d2_array(adouble_array&                            adarr,
                              daeDomain&                                domain,
                              daeeDiscretizationMethod                  eDiscretizationMethod,
                              const std::map<std::string, std::string>& mapDiscretizationOptions)
@@ -692,7 +692,7 @@ const adouble_array d2_array(adouble_array&                            adarr,
 **********************************************************************************************/
 // If called during declaring of equations then GatherInfo is true
 // In other cases will calculate a value of the function
-const adouble Average(const adouble_array& a)
+adouble Average(const adouble_array& a)
 {
     adouble tmp;
 
@@ -712,7 +712,7 @@ const adouble Average(const adouble_array& a)
     return tmp;
 }
 
-const adouble Sum(const adouble_array& a, bool bIsLargeArray)
+adouble Sum(const adouble_array& a, bool bIsLargeArray)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -732,7 +732,7 @@ const adouble Sum(const adouble_array& a, bool bIsLargeArray)
     return tmp;
 }
 
-const adouble Product(const adouble_array& a, bool bIsLargeArray)
+adouble Product(const adouble_array& a, bool bIsLargeArray)
 {
     adouble tmp;
 
@@ -752,7 +752,7 @@ const adouble Product(const adouble_array& a, bool bIsLargeArray)
     return tmp;
 }
 
-const adouble Integral(const adouble_array& a)
+adouble Integral(const adouble_array& a)
 {
     adouble tmp;
     size_t i, nCount;
@@ -799,7 +799,7 @@ const adouble Integral(const adouble_array& a)
     return tmp;
 }
 
-const adouble Min(const adouble_array& a)
+adouble Min(const adouble_array& a)
 {
     adouble tmp;
 
@@ -817,7 +817,7 @@ const adouble Min(const adouble_array& a)
     return tmp;
 }
 
-const adouble Max(const adouble_array& a)
+adouble Max(const adouble_array& a)
 {
     adouble tmp;
 
@@ -835,7 +835,7 @@ const adouble Max(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array exp(const adouble_array& a)
+adouble_array exp(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -853,7 +853,7 @@ const adouble_array exp(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array sqrt(const adouble_array& a)
+adouble_array sqrt(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -871,7 +871,7 @@ const adouble_array sqrt(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array log(const adouble_array& a)
+adouble_array log(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -889,7 +889,7 @@ const adouble_array log(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array log10(const adouble_array& a)
+adouble_array log10(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -907,7 +907,7 @@ const adouble_array log10(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array abs(const adouble_array& a)
+adouble_array abs(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -925,7 +925,7 @@ const adouble_array abs(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array floor(const adouble_array& a)
+adouble_array floor(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -943,7 +943,7 @@ const adouble_array floor(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array ceil(const adouble_array& a)
+adouble_array ceil(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -961,7 +961,7 @@ const adouble_array ceil(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array sin(const adouble_array& a)
+adouble_array sin(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -979,7 +979,7 @@ const adouble_array sin(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array cos(const adouble_array& a)
+adouble_array cos(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -997,7 +997,7 @@ const adouble_array cos(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array tan(const adouble_array& a)
+adouble_array tan(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1015,7 +1015,7 @@ const adouble_array tan(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array asin(const adouble_array& a)
+adouble_array asin(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1033,7 +1033,7 @@ const adouble_array asin(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array acos(const adouble_array& a)
+adouble_array acos(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1051,7 +1051,7 @@ const adouble_array acos(const adouble_array& a)
     return tmp;
 }
 
-const adouble_array atan(const adouble_array& a)
+adouble_array atan(const adouble_array& a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1071,7 +1071,7 @@ const adouble_array atan(const adouble_array& a)
 
 
 
-const adouble_array sinh(const adouble_array &a)
+adouble_array sinh(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1089,7 +1089,7 @@ const adouble_array sinh(const adouble_array &a)
     return tmp;
 }
 
-const adouble_array cosh(const adouble_array &a)
+adouble_array cosh(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1107,7 +1107,7 @@ const adouble_array cosh(const adouble_array &a)
     return tmp;
 }
 
-const adouble_array tanh(const adouble_array &a)
+adouble_array tanh(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1125,7 +1125,7 @@ const adouble_array tanh(const adouble_array &a)
     return tmp;
 }
 
-const adouble_array asinh(const adouble_array &a)
+adouble_array asinh(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1143,7 +1143,7 @@ const adouble_array asinh(const adouble_array &a)
     return tmp;
 }
 
-const adouble_array acosh(const adouble_array &a)
+adouble_array acosh(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1161,7 +1161,7 @@ const adouble_array acosh(const adouble_array &a)
     return tmp;
 }
 
-const adouble_array atanh(const adouble_array &a)
+adouble_array atanh(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1179,7 +1179,7 @@ const adouble_array atanh(const adouble_array &a)
     return tmp;
 }
 
-const adouble_array atan2(const adouble_array &a, const adouble_array &b)
+adouble_array atan2(const adouble_array &a, const adouble_array &b)
 {
     adouble_array tmp;
     if(a.getGatherInfo())
@@ -1198,7 +1198,7 @@ const adouble_array atan2(const adouble_array &a, const adouble_array &b)
     return tmp;
 }
 
-const adouble_array erf(const adouble_array &a)
+adouble_array erf(const adouble_array &a)
 {
     adouble_array tmp;
     if(a.getGatherInfo())

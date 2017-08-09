@@ -252,7 +252,7 @@ int solSolveInitial(daeIDASolver_t* s)
 
     for(iCounter = 0; iCounter < 100; iCounter++)
     {
-        if(model->quasySteadyState)
+        if(model->quasiSteadyState)
             retval = IDACalcIC(s->mem, IDA_Y_INIT, 0.001);
         else
             retval = IDACalcIC(s->mem, IDA_YA_YDP_INIT, 0.001);
@@ -309,7 +309,7 @@ int solReinitialize(daeIDASolver_t* s, bool bCopyDataFromBlock, bool bResetSensi
     {
         /* Here we always use the IDA_YA_YDP_INIT flag (and discard InitialConditionMode).
          * The reason is that in this phase we may have been reinitialized the diff. variables
-         * with the new values and using the eQuasySteadyState flag would be meaningless.
+         * with the new values and using the eQuasiSteadyState flag would be meaningless.
          */
         retval = IDACalcIC(s->mem, IDA_YA_YDP_INIT, s->m_dCurrentTime + 0.001);
         if(retval < 0)

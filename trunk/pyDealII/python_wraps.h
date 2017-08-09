@@ -10,6 +10,7 @@
 //#include <boost/python/numeric.hpp>
 #include <boost/python/slice.hpp>
 #include <boost/python/slice.hpp>
+#include <boost/python/tuple.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
@@ -395,9 +396,9 @@ class dealiiFiniteElementWeakFormWrapper : public dealiiFiniteElementWeakForm<di
                                            public boost::python::wrapper< dealiiFiniteElementWeakForm<dim> >
 {
 public:
-    dealiiFiniteElementWeakFormWrapper(const feExpression<dim>& Aij,               // Local contribution to the stiffness matrix
-                                       const feExpression<dim>& Mij,               // Local contribution to the mass matrix
-                                       const feExpression<dim>& Fi,                // Local contribution to the load vector
+    dealiiFiniteElementWeakFormWrapper(boost::python::object    Aij,
+                                       boost::python::object    Mij,
+                                       boost::python::object    Fi,
                                        const feExpression<dim>& innerCellFaceAij         = feExpression<dim>(),
                                        const feExpression<dim>& innerCellFaceFi          = feExpression<dim>(),
                                        boost::python::dict      dictBoundaryFaceAij      = boost::python::dict(),
@@ -408,10 +409,133 @@ public:
     {
         boost::python::list keys;
 
-	// These terms get copied using the copy constructor and do need to be stored internally
-        this->m_Aij              = Aij;
-        this->m_Mij              = Mij;
-        this->m_Fi               = Fi;
+        {
+            // Cell contributions can be an expression or a list of expressions
+            boost::python::extract< boost::python::list > lcontributions(Aij);
+            boost::python::extract< feExpression<dim>   > contribution(Aij);
+
+            if(contribution.check())
+            {
+                dealiiCellContribution<dim> cc(contribution()); // only a single expression
+                this->m_Aij.push_back(cc);
+            }
+            else if(lcontributions.check())
+            {
+                // Items in the list of cell contributions can be:
+                //  - feExpression<dim> object
+                //  - tuple: (q_loop_expression, q_loop_expression, j_loop_expression)
+                boost::python::list contributions = lcontributions();
+                boost::python::ssize_t n = boost::python::len(contributions);
+
+                for(boost::python::ssize_t i = 0; i < n; i++)
+                {
+                    boost::python::extract< boost::python::tuple > qij_contribution(contributions[i]);
+                    boost::python::extract< feExpression<dim>    > s_contribution(contributions[i]);
+
+                    if(s_contribution.check())
+                    {
+                        dealiiCellContribution<dim> cc(s_contribution()); // only a single expression
+                        this->m_Aij.push_back(cc);
+                    }
+                    else if(qij_contribution.check())
+                    {
+                        boost::python::tuple t = qij_contribution();
+                        if(len(t) != 3)
+                            throw std::runtime_error(std::string("Invalid Aij expression (must be a tuple of 3 items)"));
+
+                        feExpression<dim> q_contribution = boost::python::extract< feExpression<dim> >(t[0]);
+                        feExpression<dim> i_contribution = boost::python::extract< feExpression<dim> >(t[1]);
+                        feExpression<dim> j_contribution = boost::python::extract< feExpression<dim> >(t[2]);
+
+                        dealiiCellContribution<dim> cc(q_contribution, i_contribution, j_contribution); // q, i, j loop contributions
+                        this->m_Aij.push_back(cc);
+                    }
+                }
+
+            }
+        }
+
+        {
+            boost::python::extract< boost::python::list > lcontributions(Mij);
+            boost::python::extract< feExpression<dim>   > contribution(Mij);
+
+            if(contribution.check())
+            {
+                dealiiCellContribution<dim> cc(contribution()); // only j_loop
+                this->m_Mij.push_back(cc);
+            }
+            else if(lcontributions.check())
+            {
+                boost::python::list contributions = lcontributions();
+                boost::python::ssize_t n = boost::python::len(contributions);
+                for(boost::python::ssize_t i = 0; i < n; i++)
+                {
+                    boost::python::extract< boost::python::tuple > qij_contribution(contributions[i]);
+                    boost::python::extract< feExpression<dim>    > s_contribution(contributions[i]);
+
+                    if(s_contribution.check())
+                    {
+                        dealiiCellContribution<dim> cc(s_contribution()); // only a single expression
+                        this->m_Mij.push_back(cc);
+                    }
+                    else if(qij_contribution.check())
+                    {
+                        boost::python::tuple t = qij_contribution();
+                        if(len(t) != 3)
+                            throw std::runtime_error(std::string("Invalid Mij expression (must be a tuple of 3 items)"));
+
+                        feExpression<dim> q_contribution = boost::python::extract< feExpression<dim> >(t[0]);
+                        feExpression<dim> i_contribution = boost::python::extract< feExpression<dim> >(t[1]);
+                        feExpression<dim> j_contribution = boost::python::extract< feExpression<dim> >(t[2]);
+
+                        dealiiCellContribution<dim> cc(q_contribution, i_contribution, j_contribution); // q, i, j loop contributions
+                        this->m_Mij.push_back(cc);
+                    }
+                }
+
+            }
+        }
+
+        {
+            boost::python::extract< boost::python::list > lcontributions(Fi);
+            boost::python::extract< feExpression<dim>   > contribution(Fi);
+
+            if(contribution.check())
+            {
+                dealiiCellContribution<dim> cc(contribution()); // only j_loop
+                this->m_Fi.push_back(cc);
+            }
+            else if(lcontributions.check())
+            {
+                boost::python::list contributions = lcontributions();
+                boost::python::ssize_t n = boost::python::len(contributions);
+                for(boost::python::ssize_t i = 0; i < n; i++)
+                {
+                    boost::python::extract< boost::python::tuple > qij_contribution(contributions[i]);
+                    boost::python::extract< feExpression<dim>    > s_contribution(contributions[i]);
+
+                    if(s_contribution.check())
+                    {
+                        dealiiCellContribution<dim> cc(s_contribution()); // only a single expression
+                        this->m_Fi.push_back(cc);
+                    }
+                    else if(qij_contribution.check())
+                    {
+                        boost::python::tuple t = qij_contribution();
+                        if(len(t) != 2)
+                            throw std::runtime_error(std::string("Invalid Fi expression (must be a tuple of 3 items)"));
+
+                        feExpression<dim> q_contribution = boost::python::extract< feExpression<dim> >(t[0]);
+                        feExpression<dim> i_contribution = boost::python::extract< feExpression<dim> >(t[1]);
+
+                        dealiiCellContribution<dim> cc(q_contribution, i_contribution); // q, i loop contributions
+                        this->m_Fi.push_back(cc);
+                    }
+                }
+
+            }
+        }
+
         this->m_innerCellFaceAij = innerCellFaceAij;
         this->m_innerCellFaceFi  = innerCellFaceFi;
 
@@ -440,7 +564,7 @@ public:
 
                 adouble           advar  = boost::python::extract<adouble>(o_variable);
                 feExpression<dim> expr  = boost::python::extract< feExpression<dim> >(o_expression);
-                
+
                 if(!advar.node || !dynamic_cast<adSetupVariableNode*>(advar.node.get()))
                     throw std::runtime_error(std::string("Invalid variable node in the surface integrals dictionary (must be a single variable)"));
 
@@ -510,7 +634,7 @@ public:
             if(bcs_adouble.size() > 0)
                 this->m_adoubleFunctionsDirichletBC[key] = bcs_adouble;
         }
-        
+
         /*
         keys = dictFunctions.keys();
         for(int i = 0; i < len(keys); ++i)
@@ -539,7 +663,7 @@ public:
             }
         }
         */
-        
+
         keys = dictBoundaryFaceAij.keys();
         for(int i = 0; i < len(keys); ++i)
         {
@@ -595,7 +719,7 @@ public:
             dealiiFiniteElementDOF<dim>* dof = boost::python::extract< dealiiFiniteElementDOF<dim>* >(listDOFs[i]);
             arrDOFs.push_back(dof);
         }
-        
+
         // Keep these objects so they do not go out of scope and get destroyed while still in use by daetools
         this->m_oDOFs = listDOFs;
 
@@ -664,7 +788,25 @@ public:
         this->RowIndices(row, narrIndices);
         return getListFromVectorByValue(narrIndices);
     }
-    
+
+    boost::python::list GetBoundaryDOFs_(const std::string& variableName, boost::python::list boundaryIDs)
+    {
+        // Populate std::set from the python list
+        std::set<types::boundary_id> setBoundaryIDs;
+        boost::python::ssize_t n = boost::python::len(boundaryIDs);
+        for(boost::python::ssize_t i = 0; i < n; i++)
+            setBoundaryIDs.insert(boost::python::extract<types::boundary_id>(boundaryIDs[i]));
+
+        // Get the array
+        std::vector<bool> selectedDOFS = this->GetBoundaryDOFs(variableName, setBoundaryIDs);
+
+        // Populate a python list from the resulting array
+        boost::python::list lSelectedDOFs;
+        for(size_t k = 0; k < selectedDOFS.size(); k++)
+            lSelectedDOFs.append((bool)selectedDOFS[k]);
+        return lSelectedDOFs;
+    }
+
 public:
     boost::python::object m_oWeakForm;
     boost::python::object m_oDOFs;

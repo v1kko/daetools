@@ -317,6 +317,59 @@ public:
         return *(iter->second);
     }
     */
+
+    daeVariable* findVariable(const std::string& variableName, unsigned int li, unsigned int& index_in_block) const
+    {
+        //pyGILState GIL;
+
+        // a) Find the index within block using the local cell dof index
+        int global_dof_index = m_local_dof_indices[li];
+        const BlockIndices & index_mapping = m_sparsity_pattern.get_column_indices();
+        //             <block_index,  index_in_block>
+        std::pair<unsigned int, BlockIndices::size_type> block_index = index_mapping.global_to_local(global_dof_index);
+        unsigned int block = block_index.first;
+        index_in_block     = block_index.second;
+
+        //printf("dof_number = %d -> (block=%d, block_index = %d) \n", global_dof_index, block_index.first, block_index.second);
+
+        // b) Find variable in the parent model using its name
+        daeVariable* variable = NULL;
+        unsigned int variable_block = -1;
+
+        std::vector<daeVariable_t*> arrVariables;
+        m_model->GetVariables(arrVariables);
+
+        for(int i = 0; i < arrVariables.size(); i++)
+        {
+            daeVariable* pVariable = dynamic_cast<daeVariable*>(arrVariables[i]);
+            if(pVariable && pVariable->GetName() == variableName)
+            {
+                variable_block = i; //  counter i is also the block counter: each variable forms one block (including the vector dofs)
+                variable       = pVariable;
+                break;
+            }
+        }
+        if(!variable)
+            throw std::runtime_error((boost::format("Invalid DOF name in function dof('%s', %d)") % variableName % li).str());
+
+        if(variable_block != block)
+        {
+            std::string err = (boost::format("The block index found for the specified index [%d] does not match the block where variable belongs [%d]. "
+                                             "Returning an empty adouble object.\n") % block % variable_block).str();
+            throw std::runtime_error(err);
+        }
+
+        size_t n = variable->GetNumberOfPoints();
+        if(index_in_block >= n)
+        {
+            printf("dof_number = %d -> (block=%d, block_index = %d) \n", global_dof_index, block_index.first, block_index.second);
+            throw std::runtime_error((boost::format("DOF '%s' index in function dof('%s', %d) is out of bounds (global[%d] = %d) >= %d")
+                                      % variableName % variableName % li % li % index_in_block % n).str());
+        }
+
+        return variable;
+    }
+
     virtual adouble dof(const std::string& variableName, const unsigned int li) const
     {
         /* Achtung, Achtung!!
@@ -331,6 +384,10 @@ public:
         if(li == -1)
             throw std::runtime_error((boost::format("Invalid index in function dof('%s', %d)") % variableName % li).str());
 
+        unsigned int index_in_block;
+        daeVariable* variable = findVariable(variableName, li, index_in_block);
+
+        /*
         // a) Find the index within block using the local cell dof index
         int global_dof_index = m_local_dof_indices[li];
         const BlockIndices & index_mapping = m_sparsity_pattern.get_column_indices();
@@ -367,20 +424,15 @@ public:
                    "Returning an empty adouble object.\n", block, variable_block);
             return adouble();
         }
+        */
 
         // c) Create adouble
-        size_t n = variable->GetNumberOfPoints();
-        if(index_in_block >= n)
-        {
-            printf("dof_number = %d -> (block=%d, block_index = %d) \n", global_dof_index, block_index.first, block_index.second);
-            throw std::runtime_error((boost::format("DOF '%s' index in function dof('%s', %d) is out of bounds (global[%d] = %d) >= %d")
-                                      % variableName % variableName % li % li % index_in_block % n).str());
-        }
 
         return (*variable)(index_in_block);
     }
 
-    virtual Tensor<1,dim,adouble> vector_dof_approximation(const std::string& variableName, const unsigned int q) const
+    /*
+    virtual Tensor<1,dim,adouble> vector_dof_approximation_old(const std::string& variableName, const unsigned int q) const
     {
         if(q == -1)
             throw std::runtime_error((boost::format("Invalid index in function vector_dof_approximation('%s', %d)") % variableName % q).str());
@@ -415,13 +467,102 @@ public:
 
             adouble dof = this->dof(variableName, j);
 
-            ad_vector_approximation += (dof * phi_vector_j);
+            // Bypass Tensor<1,dim,adouble> operator += and do additions only if phi_vector[i] != 0.0
+            for(unsigned int i = 0; i < dim; i++)
+                if(phi_vector_j[i] != 0.0)
+                    ad_vector_approximation[i] += dof * phi_vector_j[i];
+
+            //ad_vector_approximation += (dof * phi_vector_j);
         }
 
         return ad_vector_approximation;
     }
+    */
 
-    virtual Tensor<2,dim,adouble> vector_dof_gradient_approximation(const std::string& variableName, const unsigned int q) const
+    virtual daeTensor1DoFSum<dim> vector_dof_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function vector_dof_approximation('%s', %d)") % variableName % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function vector_dof_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call of the function vector_dof_approximation() for the non-vector variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        daeTensor1DoFSum<dim> vectorDoFApproximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            Tensor<1,dim,double>  phi_vector_j = m_fe_values[*extractorVector].value(j, q);
+            bool non_zero = false;
+            for(int x = 0; x < dim; x++)
+                if(phi_vector_j[x] != 0)
+                {
+                    non_zero = true;
+                    break;
+                }
+            // If all items in the tensor are zero skip the addition
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(non_zero == false)
+                continue;
+
+            unsigned int index_in_block;
+            daeVariable* variable = findVariable(variableName, j, index_in_block);
+
+            vectorDoFApproximation.items.push_back( daeTensorDoFItem<1,dim>(phi_vector_j, variable, index_in_block) );
+        }
+        return vectorDoFApproximation;
+    }
+
+    virtual daeTensor2DoFSum<dim> vector_dof_gradient_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function vector_dof_gradient_approximation('%s', %d)") % variableName % q).str());
+
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function vector_dof_gradient_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Vector* extractorVector = boost::get<FEValuesExtractors::Vector>(&iter->second);
+        if(!extractorVector)
+            throw std::runtime_error("Invalid call of the function vector_dof_gradient_approximation() for the non-vector variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        daeTensor2DoFSum<dim> vectorDoFGradientApproximation;
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            Tensor<2,dim,double>  dphi_vector_j = m_fe_values[*extractorVector].gradient(j, q);
+            bool non_zero = false;
+            for(int x = 0; x < dim; x++)
+                for(int y = 0; y < dim; y++)
+                    if(dphi_vector_j[x][y] != 0)
+                    {
+                        non_zero = true;
+                        break;
+                    }
+            // If all items in the tensor are zero skip the addition
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(non_zero == false)
+                continue;
+
+            unsigned int index_in_block;
+            daeVariable* variable = findVariable(variableName, j, index_in_block);
+
+            vectorDoFGradientApproximation.items.push_back( daeTensorDoFItem<2,dim>(dphi_vector_j, variable, index_in_block) );
+        }
+        return vectorDoFGradientApproximation;
+    }
+/*
+    virtual Tensor<2,dim,adouble> vector_dof_gradient_approximation_old(const std::string& variableName, const unsigned int q) const
     {
         if(q == -1)
             throw std::runtime_error((boost::format("Invalid index in function vector_dof_gradient_approximation('%s', %d)") % variableName % q).str());
@@ -459,11 +600,10 @@ public:
 
             ad_vector_approximation += (dof * dphi_vector_j);
         }
-
         return ad_vector_approximation;
     }
 
-    virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const
+    virtual adouble dof_approximation_old(const std::string& variableName, const unsigned int q) const
     {
         if(q == -1)
             throw std::runtime_error((boost::format("Invalid index in function dof_approximation('%s', %d)") % variableName % q).str());
@@ -496,8 +636,44 @@ public:
 
         return ad_approximation;
     }
+*/
+    virtual adouble dof_approximation(const std::string& variableName, const unsigned int q) const
+    {
+        if(q == -1)
+            throw std::runtime_error((boost::format("Invalid index in function dof_approximation('%s', %d)") % variableName % q).str());
 
-    virtual Tensor<1,dim,adouble> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const
+        typename map_String_FEValuesExtractor::iterator iter = m_mapExtractors.find(variableName);
+        if(iter == m_mapExtractors.end())
+            throw std::runtime_error((boost::format("Invalid DOF name in function dof_approximation('%s', %d)") % variableName % q).str());
+
+        FEValuesExtractors::Scalar* extractorScalar = boost::get<FEValuesExtractors::Scalar>(&iter->second);
+        if(!extractorScalar)
+            throw std::runtime_error("Invalid call of the function dof_approximation() for the non-scalar variable: " + variableName);
+
+        const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
+
+        adouble dof_approximation;
+        adFloatCoefficientVariableSumNode* node = new adFloatCoefficientVariableSumNode();
+        dof_approximation.setGatherInfo(true);
+        dof_approximation.node.reset(node);
+
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            double phi_j = m_fe_values[*extractorScalar].value(j, q);
+            // If it is equal to zero skip the addition.
+            if(phi_j == 0)
+                continue;
+
+            unsigned int index_in_block;
+            daeVariable* variable = findVariable(variableName, j, index_in_block);
+
+            node->AddItem(phi_j, variable, index_in_block);
+        }
+
+        return dof_approximation;
+    }
+
+    virtual daeTensor1DoFSum<dim> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const
     {
         if(q == -1)
             throw std::runtime_error((boost::format("Invalid index in function dof_gradient_approximation('%s', %d)") % variableName % q).str());
@@ -512,19 +688,34 @@ public:
 
         const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
 
-        Tensor<1,dim,adouble> ad_approximation;
+        daeTensor1DoFSum<dim> dofGradientApproximation;
         for(unsigned int j = 0; j < dofs_per_cell; ++j)
         {
-            adouble               dof    = this->dof(variableName, j);
-            Tensor<1,dim,double>  dphi_j = m_fe_values[*extractorScalar].gradient(j, q);
+            Tensor<1,dim,double> dphi_j = m_fe_values[*extractorScalar].gradient(j, q);
+            bool non_zero = false;
+            for(int x = 0; x < dim; x++)
+                if(dphi_j[x] != 0)
+                {
+                    non_zero = true;
+                    break;
+                }
+            // If all items in the tensor are zero skip the addition
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(non_zero == false)
+                continue;
 
-            ad_approximation += (dof * dphi_j);
+            unsigned int index_in_block;
+            daeVariable* variable = findVariable(variableName, j, index_in_block);
+
+            dofGradientApproximation.items.push_back( daeTensorDoFItem<1,dim>(dphi_j, variable, index_in_block) );
         }
 
-        return ad_approximation;
+        return dofGradientApproximation;
     }
 
-    virtual Tensor<2,dim,adouble> dof_hessian_approximation(const std::string& variableName, const unsigned int q) const
+    virtual daeTensor2DoFSum<dim> dof_hessian_approximation(const std::string& variableName, const unsigned int q) const
     {
         if(q == -1)
             throw std::runtime_error((boost::format("Invalid index in function dof_hessian_approximation('%s', %d)") % variableName % q).str());
@@ -539,16 +730,32 @@ public:
 
         const unsigned int dofs_per_cell = m_fe_values.get_fe().dofs_per_cell;
 
-        Tensor<2,dim,adouble> ad_approximation;
+        daeTensor2DoFSum<dim> dofHessianApproximation;
         for(unsigned int j = 0; j < dofs_per_cell; ++j)
         {
-            adouble               dof     = this->dof(variableName, j);
-            Tensor<2,dim,double>  d2phi_j = m_fe_values[*extractorScalar].hessian(j, q);
+            Tensor<2,dim,double> d2phi_j = m_fe_values[*extractorScalar].hessian(j, q);
+            bool non_zero = false;
+            for(int x = 0; x < dim; x++)
+                for(int y = 0; y < dim; y++)
+                    if(d2phi_j[x][y] != 0)
+                    {
+                        non_zero = true;
+                        break;
+                    }
+            // If all items in the tensor are zero skip the addition
+            // This will also skip creating adouble for indexes that represent variables
+            // other than the requested one (variableName).
+            // That creates a wrong variable and could throw an out-of-bounds exception in some cases.
+            if(non_zero == false)
+                continue;
 
-            ad_approximation += (dof * d2phi_j);
+            unsigned int index_in_block;
+            daeVariable* variable = findVariable(variableName, j, index_in_block);
+
+            dofHessianApproximation.items.push_back( daeTensorDoFItem<2,dim>(d2phi_j, variable, index_in_block) );
         }
 
-        return ad_approximation;
+        return dofHessianApproximation;
     }
 
     virtual unsigned int q() const

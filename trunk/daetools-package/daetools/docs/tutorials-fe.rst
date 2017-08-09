@@ -24,6 +24,10 @@ Finite Element Tutorials
 :ref:`tutorial_dealii_5`    |tdealii_5|
 -------------------------   -----------------------------------------------------------------
 :ref:`tutorial_dealii_6`    |tdealii_6|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_7`    |tdealii_7|
+-------------------------   -----------------------------------------------------------------
+:ref:`tutorial_dealii_8`    |tdealii_8|
 =========================   =================================================================
 
  
@@ -40,6 +44,11 @@ Finite Element Tutorials
 .. |tdealii_5| replace:: Flow through porous media (Darcy's law).
 
 .. |tdealii_6| replace:: A simple steady-state diffusion and first-order reaction in an irregular catalyst shape.
+
+.. |tdealii_7| replace:: Transient Stokes flow driven by the temperature differences in the fluid.
+
+.. |tdealii_8| replace:: Model of a small parallel-plate reactor with a catalytic surface 
+                         (phenomena defined in two coupled FE systems with different dimensions: 2D and 1D).
 
 
 .. begin-command
@@ -144,6 +153,40 @@ Tutorial deal.II 6
 Model report            `tutorial_dealii_6.xml <../examples/tutorial_dealii_6.xml>`_
 Runtime model report    `tutorial_dealii_6-rt.xml <../examples/tutorial_dealii_6-rt.xml>`_
 Source code             `tutorial_dealii_6.py <../examples/tutorial_dealii_6.html>`_
+=====================   =================================================================
+
+.. _tutorial_dealii_7:
+
+Tutorial deal.II 7
+==================
+
+.. automodule:: daetools.examples.tutorial_dealii_7
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_dealii_7.xml <../examples/tutorial_dealii_7.xml>`_
+Runtime model report    `tutorial_dealii_7-rt.xml <../examples/tutorial_dealii_7-rt.xml>`_
+Source code             `tutorial_dealii_7.py <../examples/tutorial_dealii_7.html>`_
+=====================   =================================================================
+
+.. _tutorial_dealii_8:
+
+Tutorial deal.II 8
+==================
+
+.. automodule:: daetools.examples.tutorial_dealii_8
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_dealii_8.xml <../examples/tutorial_dealii_8.xml>`_
+Runtime model report    `tutorial_dealii_8-rt.xml <../examples/tutorial_dealii_8-rt.xml>`_
+Source code             `tutorial_dealii_8.py <../examples/tutorial_dealii_8.html>`_
 =====================   =================================================================
 
 .. end-command

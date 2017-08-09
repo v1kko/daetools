@@ -26,4 +26,7 @@ Transfinite Surface {113} = {1, 2, 3, 4};
 Recombine Surface(113); // combine triangles into quads
 
 Physical Surface(0) = {113};
-
+//+
+Characteristic Length {10, 11, 12} = 0.01;
+//+
+Transfinite Surface {113} Alternated;

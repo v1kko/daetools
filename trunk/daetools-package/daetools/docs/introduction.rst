@@ -121,9 +121,6 @@ at the moment. In addition to the built-in Sundials linear solvers, several thir
 `Trilinos Amesos <http://trilinos.sandia.gov/packages/amesos/>`_ (KLU, Umfpack, SuperLU, Lapack),
 and `Trilinos AztecOO <http://trilinos.sandia.gov/packages/aztecoo>`_ (with built-in, Ifpack or ML preconditioners)
 which can take advantage of multi-core/cpu computers.
-Linear solvers that exploit general-purpose graphics processing
-units (`GPGPU <http://en.wikipedia.org/wiki/GPGPU>`_, such as `NVidia CUDA <http://www.nvidia.com/object/cuda_home_new.html>`_)
-are also available (`CUSP <http://code.google.com/p/cusp-library>`_) but in an early development stage.
 
 Licence
 =======

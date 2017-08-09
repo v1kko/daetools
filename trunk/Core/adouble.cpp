@@ -65,7 +65,7 @@ adouble::~adouble()
 {
 }
 
-const adouble adouble::operator - () const
+adouble adouble::operator - () const
 {
     adouble tmp;
     if(m_bGatherInfo)
@@ -79,7 +79,7 @@ const adouble adouble::operator - () const
     return tmp;
 }
 
-const adouble adouble::operator + () const
+adouble adouble::operator + () const
 {
     adouble tmp;
     if(m_bGatherInfo)
@@ -93,7 +93,7 @@ const adouble adouble::operator + () const
     return tmp;
 }
 
-const adouble operator +(const adouble& a, const real_t v)
+adouble operator +(const adouble& a, const real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -110,7 +110,7 @@ const adouble operator +(const adouble& a, const real_t v)
     return tmp;
 }
 
-const adouble adouble::operator + (const adouble& a) const
+adouble adouble::operator + (const adouble& a) const
 {
     adouble tmp;
     if(m_bGatherInfo || a.getGatherInfo())
@@ -183,7 +183,7 @@ adouble& adouble::operator /=(const real_t v)
     return *this;
 }
 
-const adouble operator +(const real_t v, const adouble& a)
+adouble operator +(const real_t v, const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -200,7 +200,7 @@ const adouble operator +(const real_t v, const adouble& a)
     return tmp;
 }
 
-const adouble operator -(const adouble& a, const real_t v)
+adouble operator -(const adouble& a, const real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -216,7 +216,7 @@ const adouble operator -(const adouble& a, const real_t v)
     return tmp;
 }
 
-const adouble adouble::operator - (const adouble& a) const
+adouble adouble::operator - (const adouble& a) const
 {
     adouble tmp;
     if(m_bGatherInfo || a.getGatherInfo())
@@ -233,7 +233,7 @@ const adouble adouble::operator - (const adouble& a) const
     return tmp;
 }
 
-const adouble operator - (const real_t v, const adouble& a)
+adouble operator - (const real_t v, const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -250,7 +250,7 @@ const adouble operator - (const real_t v, const adouble& a)
     return tmp;
 }
 
-const adouble operator *(const adouble& a, const real_t v)
+adouble operator *(const adouble& a, const real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -267,7 +267,7 @@ const adouble operator *(const adouble& a, const real_t v)
     return tmp;
 }
 
-const adouble adouble::operator * (const adouble& a) const
+adouble adouble::operator * (const adouble& a) const
 {
     adouble tmp;
     if(m_bGatherInfo || a.getGatherInfo())
@@ -284,7 +284,7 @@ const adouble adouble::operator * (const adouble& a) const
     return tmp;
 }
 
-const adouble operator * (const real_t v, const adouble& a)
+adouble operator * (const real_t v, const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -300,7 +300,7 @@ const adouble operator * (const real_t v, const adouble& a)
     return tmp;
 }
 
-const adouble operator /(const adouble& a, const real_t v)
+adouble operator /(const adouble& a, const real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -316,7 +316,7 @@ const adouble operator /(const adouble& a, const real_t v)
     return tmp;
 }
 
-const adouble adouble::operator / (const adouble& a) const
+adouble adouble::operator / (const adouble& a) const
 {
     adouble tmp;
     if(m_bGatherInfo || a.getGatherInfo())
@@ -332,7 +332,7 @@ const adouble adouble::operator / (const adouble& a) const
     return tmp;
 }
 
-const adouble operator / (const real_t v, const adouble& a)
+adouble operator / (const real_t v, const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -348,7 +348,7 @@ const adouble operator / (const real_t v, const adouble& a)
     return tmp;
 }
 
-const adouble pow(const adouble &a, real_t v)
+adouble pow(const adouble &a, real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -366,7 +366,7 @@ const adouble pow(const adouble &a, real_t v)
     return tmp;
 }
 
-const adouble pow(const adouble &a, const adouble &b)
+adouble pow(const adouble &a, const adouble &b)
 {
     adouble tmp;
     if(a.m_bGatherInfo || b.getGatherInfo())
@@ -401,7 +401,7 @@ const adouble pow(const adouble &a, const adouble &b)
     return tmp;
 }
 
-const adouble pow(real_t v, const adouble &a)
+adouble pow(real_t v, const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -431,7 +431,7 @@ const adouble pow(real_t v, const adouble &a)
     return tmp;
 }
 
-const adouble log10(const adouble &a)
+adouble log10(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -459,7 +459,7 @@ const adouble log10(const adouble &a)
     return tmp;
 }
 
-const adouble exp(const adouble &a)
+adouble exp(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -474,7 +474,7 @@ const adouble exp(const adouble &a)
     return tmp;
 }
 
-const adouble log(const adouble &a)
+adouble log(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -507,7 +507,7 @@ const adouble log(const adouble &a)
 //		tmp.m_dDeriv = makeNaN();
 }
 
-const adouble sqrt(const adouble &a)
+adouble sqrt(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -547,7 +547,7 @@ const adouble sqrt(const adouble &a)
 //		tmp.m_dDeriv = makeNaN();
 }
 
-const adouble abs(const adouble &a)
+adouble abs(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -579,7 +579,7 @@ const adouble abs(const adouble &a)
     return tmp;
 }
 
-const adouble sin(const adouble &a)
+adouble sin(const adouble &a)
 {
     adouble tmp;
     real_t tmp2;
@@ -597,7 +597,7 @@ const adouble sin(const adouble &a)
     return tmp;
 }
 
-const adouble cos(const adouble &a)
+adouble cos(const adouble &a)
 {
     adouble tmp;
     real_t tmp2;
@@ -615,7 +615,7 @@ const adouble cos(const adouble &a)
     return tmp;
 }
 
-const adouble tan(const adouble& a)
+adouble tan(const adouble& a)
 {
     adouble tmp;
     real_t tmp2;
@@ -634,7 +634,7 @@ const adouble tan(const adouble& a)
     return tmp;
 }
 
-const adouble asin(const adouble &a)
+adouble asin(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -651,7 +651,7 @@ const adouble asin(const adouble &a)
     return tmp;
 }
 
-const adouble acos(const adouble &a)
+adouble acos(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -668,7 +668,7 @@ const adouble acos(const adouble &a)
     return tmp;
 }
 
-const adouble atan(const adouble &a)
+adouble atan(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -688,7 +688,7 @@ const adouble atan(const adouble &a)
     return tmp;
 }
 
-const adouble sinh(const adouble& a)
+adouble sinh(const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -711,7 +711,7 @@ const adouble sinh(const adouble& a)
     }
 }
 
-const adouble cosh(const adouble& a)
+adouble cosh(const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -726,7 +726,7 @@ const adouble cosh(const adouble& a)
     return 0.5*(tmp + 1.0/tmp);
 }
 
-const adouble tanh(const adouble& a)
+adouble tanh(const adouble& a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -749,7 +749,7 @@ const adouble tanh(const adouble& a)
     }
 }
 
-const adouble asinh(const adouble &a)
+adouble asinh(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -766,7 +766,7 @@ const adouble asinh(const adouble &a)
     return tmp;
 }
 
-const adouble acosh(const adouble &a)
+adouble acosh(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -783,7 +783,7 @@ const adouble acosh(const adouble &a)
     return tmp;
 }
 
-const adouble atanh(const adouble &a)
+adouble atanh(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -800,7 +800,7 @@ const adouble atanh(const adouble &a)
     return tmp;
 }
 
-const adouble atan2(const adouble &a, const adouble &b)
+adouble atan2(const adouble &a, const adouble &b)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -824,7 +824,7 @@ const adouble atan2(const adouble &a, const adouble &b)
     return tmp;
 }
 
-const adouble erf(const adouble &a)
+adouble erf(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -843,7 +843,7 @@ const adouble erf(const adouble &a)
 }
 
 // ceil is non-differentiable: should I remove it?
-const adouble ceil(const adouble &a)
+adouble ceil(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -860,7 +860,7 @@ const adouble ceil(const adouble &a)
 }
 
 // floor is non-differentiable: should I remove it?
-const adouble floor(const adouble &a)
+adouble floor(const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -876,7 +876,7 @@ const adouble floor(const adouble &a)
     return tmp;
 }
 
-const adouble max(const adouble &a, const adouble &b)
+adouble max(const adouble &a, const adouble &b)
 {
     adouble tmp;
     if(a.getGatherInfo() || b.getGatherInfo())
@@ -912,7 +912,7 @@ const adouble max(const adouble &a, const adouble &b)
     return tmp;
 }
 
-const adouble max(real_t v, const adouble &a)
+adouble max(real_t v, const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -948,7 +948,7 @@ const adouble max(real_t v, const adouble &a)
     return tmp;
 }
 
-const adouble max(const adouble &a, real_t v)
+adouble max(const adouble &a, real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -984,7 +984,7 @@ const adouble max(const adouble &a, real_t v)
     return tmp;
 }
 
-const adouble min(const adouble &a, const adouble &b)
+adouble min(const adouble &a, const adouble &b)
 {
     adouble tmp;
     if(a.getGatherInfo() || b.getGatherInfo())
@@ -1020,7 +1020,7 @@ const adouble min(const adouble &a, const adouble &b)
     return tmp;
 }
 
-const adouble min(real_t v, const adouble &a)
+adouble min(real_t v, const adouble &a)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -1056,7 +1056,7 @@ const adouble min(real_t v, const adouble &a)
     return tmp;
 }
 
-const adouble min(const adouble &a, real_t v)
+adouble min(const adouble &a, real_t v)
 {
     adouble tmp;
     if(a.getGatherInfo())
@@ -1092,7 +1092,7 @@ const adouble min(const adouble &a, real_t v)
     return tmp;
 }
 
-const adouble Time(void)
+adouble Time(void)
 {
     adouble tmp;
     tmp.setGatherInfo(true);
@@ -1100,7 +1100,7 @@ const adouble Time(void)
     return tmp;
 }
 
-const adouble InverseTimeStep(void)
+adouble InverseTimeStep(void)
 {
     adouble tmp;
     tmp.setGatherInfo(true);
@@ -1108,7 +1108,7 @@ const adouble InverseTimeStep(void)
     return tmp;
 }
 
-const adouble Constant(const quantity& q)
+adouble Constant(const quantity& q)
 {
     adouble tmp;
     tmp.setGatherInfo(true);
@@ -1116,7 +1116,7 @@ const adouble Constant(const quantity& q)
     return tmp;
 }
 
-const adouble Constant(real_t c)
+adouble Constant(real_t c)
 {
     quantity q(c, unit());
     return Constant(q);
@@ -1126,7 +1126,7 @@ const adouble Constant(real_t c)
 /*********************************************************************************************
   d, d2, dt
 **********************************************************************************************/
-const adouble dt(const adouble& a)
+adouble dt(const adouble& a)
 {
     adouble tmp;
     tmp.setGatherInfo(true);
@@ -1134,10 +1134,10 @@ const adouble dt(const adouble& a)
     return tmp;
 }
 
-const adouble d(const adouble&                            a,
-                daeDomain&                                domain,
-                daeeDiscretizationMethod                  eDiscretizationMethod,
-                const std::map<std::string, std::string>& mapDiscretizationOptions)
+adouble d(const adouble&                            a,
+          daeDomain&                                domain,
+          daeeDiscretizationMethod                  eDiscretizationMethod,
+          const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
     adouble tmp;
     tmp.setGatherInfo(true);
@@ -1149,10 +1149,10 @@ const adouble d(const adouble&                            a,
     return tmp;
 }
 
-const adouble d2(const adouble&                            a,
-                 daeDomain&                                domain,
-                 daeeDiscretizationMethod                  eDiscretizationMethod,
-                 const std::map<std::string, std::string>& mapDiscretizationOptions)
+adouble d2(const adouble&                            a,
+           daeDomain&                                domain,
+           daeeDiscretizationMethod                  eDiscretizationMethod,
+           const std::map<std::string, std::string>& mapDiscretizationOptions)
 {
     adouble tmp;
     tmp.setGatherInfo(true);

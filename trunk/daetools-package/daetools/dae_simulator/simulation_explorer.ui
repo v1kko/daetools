@@ -38,7 +38,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
@@ -361,7 +361,7 @@ QTreeWidget::branch:has-siblings:!adjoins-item {
             </size>
            </property>
            <property name="text">
-            <string>Quazy Steady State InitialConditions</string>
+            <string>Quasi Steady State InitialConditions</string>
            </property>
           </widget>
          </item>

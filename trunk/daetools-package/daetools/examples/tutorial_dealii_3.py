@@ -34,8 +34,12 @@ The mesh is a simple square (0-100)x(0-100):
 The concentration plot at t = 500s:
 
 .. image:: _static/tutorial_dealii_3-results.png
-   :width: 400 px
+   :height: 400 px
 
+Animation:
+    
+.. image:: _static/tutorial_dealii_3-animation.gif
+   :height: 400 px
 """
 
 import os, sys, numpy, json, tempfile, random
@@ -62,8 +66,8 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        # This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,100)x(0,100)-50x50.msh
-        mesh_file  = os.path.join(meshes_dir, 'square(0,100)x(0,100)-30x30.msh')
+        # This mesh is a coarse one (30x30 cells); there are finer meshes available: 50x50, 100x100, 200x200
+        mesh_file  = os.path.join(meshes_dir, 'square(0,100)x(0,100)-50x50.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -76,6 +80,22 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        # Create some auxiliary objects for readability
+        phi_c_i  =  phi_2D('c', fe_i, fe_q)
+        phi_c_j  =  phi_2D('c', fe_j, fe_q)
+        dphi_c_i = dphi_2D('c', fe_i, fe_q)
+        dphi_c_j = dphi_2D('c', fe_j, fe_q)
+        phi_mu_i  =  phi_2D('mu', fe_i, fe_q)
+        phi_mu_j  =  phi_2D('mu', fe_j, fe_q)
+        dphi_mu_i = dphi_2D('mu', fe_i, fe_q)
+        dphi_mu_j = dphi_2D('mu', fe_j, fe_q)
+        # FE approximation of a quantity at the specified quadrature point (adouble object)
+        c      = dof_approximation_2D('c', fe_q)
+        normal = normal_2D(fe_q)
+        xyz    = xyz_2D(fe_q)
+        JxW    = JxW_2D(fe_q)
+
+        # Boundary IDs
         left_edge   = 0
         top_edge    = 1
         right_edge  = 2
@@ -83,9 +103,6 @@ class modTutorial(daeModel):
 
         dirichletBC = {}
         surfaceIntegrals = {}
-
-        # FE approximation of a quantity at the specified quadrature point (adouble object)
-        c = dof_approximation_2D('c', fe_q)
 
         self.useWikipedia_fc = True
 
@@ -103,30 +120,38 @@ class modTutorial(daeModel):
             Omg_a       = 3.4
             log_fe = feExpression_2D.log
             def f(c):
-                return log_fe(c/(1-c)) + Omg_a*(1-2*c)
+                # The original expression is:
+                #   log_fe(c/(1-c)) + Omg_a*(1-2*c)                #
+                # However, the one below is much more computationally efficient and requires less memory,
+                # since a Finite Element approximation of a DoF is an expensive operation:
+                #   sum(phi_j * dof(j))
+                # For vector-valued DoFs it is even more demanding for the approximation is:
+                #   sum(phi_vector_j * dof(j)) 
+                # where phi_vector_j is a rank=1 Tensor.
+                return log_fe(1 + 1/(1-c)) + Omg_a - (2*Omg_a)*c
 
         # FE weak form terms
-        c_accumulation    = (phi_2D('c', fe_i, fe_q) * phi_2D('c', fe_j, fe_q)) * JxW_2D(fe_q)
-        mu_diffusion_c_eq = dphi_2D('c',  fe_i, fe_q) * dphi_2D('mu', fe_j, fe_q) * Diffusivity * JxW_2D(fe_q)
-        mu                = phi_2D('mu', fe_i, fe_q) *  phi_2D('mu', fe_j, fe_q) * JxW_2D(fe_q)
-        c_diffusion_mu_eq = -dphi_2D('mu', fe_i, fe_q) * dphi_2D('c',  fe_j, fe_q) * gamma * JxW_2D(fe_q)
-        fun_c             = (phi_2D('mu', fe_i, fe_q) * JxW_2D(fe_q)) * f(c)
+        c_accumulation    = (phi_c_i * phi_c_j) * JxW
+        mu_diffusion_c_eq = (dphi_c_i * dphi_mu_j) * Diffusivity * JxW
+        mu                = phi_mu_i *  phi_mu_j * JxW
+        c_diffusion_mu_eq = (-dphi_mu_i * dphi_c_j) * gamma * JxW
+        fun_c             = (phi_mu_i * JxW) * f(c)
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq,
-                                                  Mij = c_accumulation,
-                                                  Fi  = fun_c,
+        cell_Aij = mu_diffusion_c_eq + mu + c_diffusion_mu_eq + c_diffusion_mu_eq
+        cell_Mij = c_accumulation
+        cell_Fi  = fun_c
+        
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = cell_Aij,
+                                                  Mij = cell_Mij,
+                                                  Fi  = cell_Fi,
                                                   functionsDirichletBC = dirichletBC,
                                                   surfaceIntegrals = surfaceIntegrals)
 
         print('Cahn-Hilliard equation:')
-        print('    Aij = %s' % str(weakForm.Aij))
-        print('    Mij = %s' % str(weakForm.Mij))
-        print('    Fi  = %s' % str(weakForm.Fi))
-        print('    boundaryFaceAij = %s' % str([item for item in weakForm.boundaryFaceAij]))
-        print('    boundaryFaceFi  = %s' % str([item for item in weakForm.boundaryFaceFi]))
-        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
-        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals  = %s' % str([item for item in weakForm.surfaceIntegrals]))
+        print('    Aij = %s' % str(cell_Aij))
+        print('    Mij = %s' % str(cell_Mij))
+        print('    Fi  = %s' % str(cell_Fi))
+        print('    surfaceIntegrals  = %s' % str([item for item in surfaceIntegrals]))
 
         # Setting the weak form of the FE system will declare a set of equations:
         # [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations
@@ -145,12 +170,12 @@ class simTutorial(daeSimulation):
     def SetUpVariables(self):
         numpy.random.seed(124)
 
-        def c_with_noise_wiki(index):
+        def c_with_noise_wiki(index, overallIndex):
             c0     = 0.0
             stddev = 0.1
             return numpy.random.normal(c0, stddev)
 
-        def c_with_noise_ray(index):
+        def c_with_noise_ray(index, overallIndex):
             c0     = 0.5
             stddev = 0.1
             return numpy.random.normal(c0, stddev)
@@ -170,7 +195,7 @@ def guiRun(app):
     results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_3-')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -231,6 +256,28 @@ def consoleRun():
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
     #simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
+    """
+    from daetools.pyDAE.eval_node_graph import daeNodeGraph
+    for equation in simulation.m.fe_model.Equations:
+        for i,eei in enumerate(equation.EquationExecutionInfos):
+            if (i in range(25, 31)) or (i in range(925, 931)):
+                print('Processing node %d...' % i)
+                ng = daeNodeGraph('residual', eei.Node)
+                ng.SaveGraph('%s[%04d].svg' % (simulation.m.fe_model.Name, i))
+    """
+    """
+    from PyQt5 import QtSvg, QtCore
+    app = daeCreateQtApplication(sys.argv)
+    svgWidget = QtSvg.QSvgWidget('dot-CahnHilliard[0929].svg')
+    renderer = svgWidget.renderer()
+    size = renderer.defaultSize()
+    print(size)
+    svgWidget.setGeometry(0, 0, size.height(), size.width())
+    renderer.setViewBox(QtCore.QRect(0, 0, size.height(), size.width()))
+    svgWidget.show()
+    app.exec_()
+    """
+    
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

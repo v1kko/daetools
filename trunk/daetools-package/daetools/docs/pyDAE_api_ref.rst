@@ -1,6 +1,6 @@
-*******************
-pyDAE API Reference
-*******************
+*************
+API Reference
+*************
 ..
     Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
@@ -15,6 +15,7 @@ pyDAE API Reference
    :maxdepth: 3 
 
    core
+   hr_upwind_scheme
    finite_element
    log
    activity
@@ -26,5 +27,7 @@ pyDAE API Reference
    code_generators
    dae_plotter
    dae_simulator
+   thermo_packages
+   
 
    

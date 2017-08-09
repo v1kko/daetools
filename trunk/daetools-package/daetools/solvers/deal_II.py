@@ -19,10 +19,11 @@ from pyDealII import *
 def setFEInitialConditions(FEmodel, FEsystem, dofName, ic):
     """
     Arguments:
-        FEmodel is an instance of daeFiniteElementModel
-        FEsystem is an instance of daeFiniteElementObject (i.e. dealiiFiniteElementSystem_xD)
-        dofName is a string with the dof name
-        ic can be float value or a callable that returns float value for the given index in variable
+      - FEmodel is an instance of daeFiniteElementModel
+      - FEsystem is an instance of daeFiniteElementObject (i.e. dealiiFiniteElementSystem_xD)
+      - dofName is a string with the dof name
+      - ic can be a float value or a callable that returns a float value for the given arguments:
+        index_in_the_domain and overall_index
 
     Nota bene:
         There can be other variables in the model.
@@ -47,9 +48,17 @@ def setFEInitialConditions(FEmodel, FEsystem, dofName, ic):
                 oi_index = var.OverallIndex+i
                 dict_oi_varIndex[oi_index] = i
             break
-
+    #print(dict_oi_varIndex)
+    
     if not variable:
         raise RuntimeError('DOF %s not found' % dofName)
+
+    # ic can be a callable or a single float value.
+    # If it is a float value wrap it into a lambda function.
+    if callable(ic):
+        fun_ic = ic
+    else:
+        fun_ic = lambda varIndex, overallIndex: ic
 
     ic_already_set = {}
     Mij = FEsystem.Msystem()
@@ -59,6 +68,7 @@ def setFEInitialConditions(FEmodel, FEsystem, dofName, ic):
         for column in FEsystem.RowIndices(row):
             if Mij(row, column).Node or Mij(row, column).Value != 0:
                 oi_column = fe_start_index + column
+                #print(oi_column)
                 # Proceed if the column belongs to the selected variable
                 if oi_column in dict_oi_varIndex:
                     # If the IC has already been set skip the column
@@ -66,9 +76,6 @@ def setFEInitialConditions(FEmodel, FEsystem, dofName, ic):
                         continue
                     # Internal index is the internal variable index
                     internal_index = dict_oi_varIndex[oi_column]
-                    if callable(ic):
-                        ic_val = float(ic(internal_index))
-                    else:
-                        ic_val = float(ic)
+                    ic_val = float(fun_ic(internal_index, oi_column))
                     variable.SetInitialCondition(internal_index, ic_val)
                     ic_already_set[oi_column] = ic_val # Not used, can be any value

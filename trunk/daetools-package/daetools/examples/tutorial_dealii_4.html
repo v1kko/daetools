@@ -52,7 +52,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>The temperature plot at t = 3600s:</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_4-results.png</span>
-<span style='color:#cc0000;'>   :width: 500 px</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
+
+<span style='color:#cc0000;'>Animation:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_4-animation.gif</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> os, sys, numpy, json, math, tempfile
@@ -155,6 +160,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Beneath source flux = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> flux_beneath)
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Above source flux = </span><span style='color:#cc0000;'>%f</span><span style='color:#cc0000;'> x (1,-1)'</span> <b><span style='color:#0000ff;'>%</span></b> flux_above)
 
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        dof_T  <b><span style='color:#0000ff;'>=</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i)
+        normal <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
+
         <span style='color:#017a31;'># deal.II Function&lt;dim,Number&gt; wrappers.</span>
         <span style='color:#3605fb;'>self</span>.fun_Diffusivity <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(alpha)
         <span style='color:#3605fb;'>self</span>.fun_Generation  <b><span style='color:#0000ff;'>=</span></b> ConstantFunction_2D(<span style='color:#cc047c;'>0.0</span>)
@@ -170,23 +185,23 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         dirichletBC[<span style='color:#cc047c;'>2</span>] <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#cc0000;'>'T'</span>, adoubleConstantFunction_2D( adouble(<span style='color:#cc047c;'>300</span>) )) ] <span style='color:#017a31;'># at boundary id=2 (inner tube)</span>
 
         surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
-        surfaceIntegrals[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q0_total(), (<b><span style='color:#0000ff;'>-</span></b>kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i))]
-        surfaceIntegrals[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q1_total(), (<b><span style='color:#0000ff;'>-</span></b>kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i))]
-        surfaceIntegrals[<span style='color:#cc047c;'>2</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q2_total(), (<b><span style='color:#0000ff;'>-</span></b>kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> dof_2D(<span style='color:#cc0000;'>'T'</span>, fe_i))]
+        surfaceIntegrals[<span style='color:#cc047c;'>0</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q0_total(), (<b><span style='color:#0000ff;'>-</span></b>kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> dof_T)]
+        surfaceIntegrals[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q1_total(), (<b><span style='color:#0000ff;'>-</span></b>kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> dof_T)]
+        surfaceIntegrals[<span style='color:#cc047c;'>2</span>] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#3605fb;'>self</span>.Q2_total(), (<b><span style='color:#0000ff;'>-</span></b>kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> dof_T)]
 
         <span style='color:#017a31;'># Function&lt;dim&gt;::value and Function&lt;dim&gt;::gradient wrappers</span>
-        D      <b><span style='color:#0000ff;'>=</span></b> function_value_2D        (<span style='color:#cc0000;'>'Diffusivity'</span>, <span style='color:#3605fb;'>self</span>.fun_Diffusivity, xyz_2D(fe_q))
-        G      <b><span style='color:#0000ff;'>=</span></b> function_value_2D        (<span style='color:#cc0000;'>'Generation'</span>,  <span style='color:#3605fb;'>self</span>.fun_Generation,  xyz_2D(fe_q))
-        Flux_a <b><span style='color:#0000ff;'>=</span></b> function_gradient_2D     (<span style='color:#cc0000;'>'Flux_a'</span>,      <span style='color:#3605fb;'>self</span>.fun_Flux_a,      xyz_2D(fe_q))
-        Flux_b <b><span style='color:#0000ff;'>=</span></b> function_adouble_value_2D(<span style='color:#cc0000;'>'Flux_b'</span>,      <span style='color:#3605fb;'>self</span>.fun_Flux_b,      xyz_2D(fe_q))
+        D      <b><span style='color:#0000ff;'>=</span></b> function_value_2D        (<span style='color:#cc0000;'>'Diffusivity'</span>, <span style='color:#3605fb;'>self</span>.fun_Diffusivity, xyz)
+        G      <b><span style='color:#0000ff;'>=</span></b> function_value_2D        (<span style='color:#cc0000;'>'Generation'</span>,  <span style='color:#3605fb;'>self</span>.fun_Generation,  xyz)
+        Flux_a <b><span style='color:#0000ff;'>=</span></b> function_gradient_2D     (<span style='color:#cc0000;'>'Flux_a'</span>,      <span style='color:#3605fb;'>self</span>.fun_Flux_a,      xyz)
+        Flux_b <b><span style='color:#0000ff;'>=</span></b> function_adouble_value_2D(<span style='color:#cc0000;'>'Flux_b'</span>,      <span style='color:#3605fb;'>self</span>.fun_Flux_b,      xyz)
 
         <span style='color:#017a31;'># FE weak form terms</span>
-        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> D <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        source       <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> G <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> D <b><span style='color:#0000ff;'>*</span></b> JxW
+        source       <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> G <b><span style='color:#0000ff;'>*</span></b> JxW
         faceFluxes   <b><span style='color:#0000ff;'>=</span></b> {
-                         <span style='color:#cc047c;'>0</span>: phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> (Flux_a <b><span style='color:#0000ff;'>*</span></b> normal_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q),
-                         <span style='color:#cc047c;'>1</span>: phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> Flux_b <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+                         <span style='color:#cc047c;'>0</span>: phi_i <b><span style='color:#0000ff;'>*</span></b> (Flux_a <b><span style='color:#0000ff;'>*</span></b> normal) <b><span style='color:#0000ff;'>*</span></b> JxW,
+                         <span style='color:#cc047c;'>1</span>: phi_i <b><span style='color:#0000ff;'>*</span></b> Flux_b <b><span style='color:#0000ff;'>*</span></b> JxW
                        }
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion,

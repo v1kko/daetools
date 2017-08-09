@@ -1043,7 +1043,7 @@ daeVectorExternalFunction* adVectorExternalFunctionNode_ExternalFunction(adVecto
 {
     return node.m_pExternalFunction;
 }
-
+/*
 adouble adFEMatrixItemNode_Value(adFEMatrixItemNode& self)
 {
     return self.m_matrix.GetItem(self.m_row, self.m_column);
@@ -1052,6 +1052,24 @@ adouble adFEMatrixItemNode_Value(adFEMatrixItemNode& self)
 adouble adFEVectorItemNode_Value(adFEVectorItemNode& self)
 {
     return self.m_vector.GetItem(self.m_row);
+}
+*/
+
+daeVariable* daeFloatCoefficientVariableProduct_variable(daeFloatCoefficientVariableProduct& self)
+{
+    return self.variable;
+}
+
+boost::python::list map_Uint_daeFloatCoefficientVariableProduct_values(std::map<size_t, daeFloatCoefficientVariableProduct>& self)
+{
+    boost::python::list res;
+
+    std::map<size_t, daeFloatCoefficientVariableProduct>::const_iterator it;
+    for(it = self.begin(); it != self.end(); it++)
+    {
+        res.append(boost::python::make_tuple(it->first, it->second));
+    }
+    return res;
 }
 
 /*******************************************************

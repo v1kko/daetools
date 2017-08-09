@@ -11,6 +11,7 @@
 #include <deal.II/lac/sparse_matrix.h>
 #include <deal.II/lac/sparsity_pattern.h>
 #include "../Core/coreimpl.h"
+#include "../Core/nodes.h"
 #include <typeinfo>
 
 using namespace dealii;
@@ -81,6 +82,93 @@ namespace dae
 {
 namespace fe_solver
 {
+const adouble operator_plus(const real_t v, const adouble& a)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_plus(const adouble& a, const real_t v)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_minus(const real_t v, const adouble& a)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_minus(const adouble& a, const real_t v)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_multi(const real_t v, const adouble& a)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_multi(const adouble& a, const real_t v)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_divide(const real_t v, const adouble& a)
+{
+    adouble tmp;
+    return tmp;
+}
+
+const adouble operator_divide(const adouble& a, const real_t v)
+{
+    adouble tmp;
+    return tmp;
+}
+
+template<int rank, int dim>
+class daeTensorDoFItem
+{
+public:
+    daeTensorDoFItem(const Tensor<rank,dim,double>& t_, daeVariable* variable_, size_t index_)
+    {
+        tensor   = t_;
+        variable = variable_;
+        index    = index_;
+    }
+
+public:
+    Tensor<rank,dim,double> tensor;
+    daeVariable*            variable;
+    size_t                  index;
+};
+
+template<int dim>
+class daeTensor1DoFSum
+{
+public:
+    typedef typename std::list< daeTensorDoFItem<1,dim> >::iterator       iterator;
+    typedef typename std::list< daeTensorDoFItem<1,dim> >::const_iterator const_iterator;
+
+public:
+    std::list< daeTensorDoFItem<1,dim> > items;
+};
+
+template<int dim>
+class daeTensor2DoFSum
+{
+public:
+    typedef typename std::list< daeTensorDoFItem<2,dim> >::iterator       iterator;
+    typedef typename std::list< daeTensorDoFItem<2,dim> >::const_iterator const_iterator;
+
+public:
+    std::list< daeTensorDoFItem<2,dim> > items;
+};
+
 /*********************************************************
  * daeFEMatrix
  * A wrapper around deal.II SparseMatrix<double>
@@ -89,7 +177,7 @@ template<typename REAL = double>
 class daeFEMatrix : public daeMatrix<REAL>
 {
 public:
-    daeFEMatrix(const SparseMatrix<REAL>& matrix) : deal_ii_matrix(matrix)
+    daeFEMatrix(SparseMatrix<REAL>& matrix) : deal_ii_matrix(matrix)
     {
     }
 
@@ -105,8 +193,7 @@ public:
 
     virtual void SetItem(size_t row, size_t col, REAL value)
     {
-        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
-        daeDeclareAndThrowException(exInvalidCall);
+        deal_ii_matrix.set(row, col, value);
     }
 
     virtual size_t GetNrows(void) const
@@ -120,7 +207,7 @@ public:
     }
 
 protected:
-    const SparseMatrix<REAL>& deal_ii_matrix;
+    SparseMatrix<REAL>& deal_ii_matrix;
 };
 
 /*********************************************************
@@ -131,7 +218,7 @@ template<typename REAL = double>
 class daeFEBlockMatrix : public daeMatrix<REAL>
 {
 public:
-    daeFEBlockMatrix(const BlockSparseMatrix<REAL>& matrix) : deal_ii_matrix(matrix)
+    daeFEBlockMatrix(BlockSparseMatrix<REAL>& matrix) : deal_ii_matrix(matrix)
     {
     }
 
@@ -147,8 +234,7 @@ public:
 
     virtual void SetItem(size_t row, size_t col, REAL value)
     {
-        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
-        daeDeclareAndThrowException(exInvalidCall);
+        deal_ii_matrix.set(row, col, value);
     }
 
     virtual size_t GetNrows(void) const
@@ -162,7 +248,7 @@ public:
     }
 
 protected:
-    const BlockSparseMatrix<REAL>& deal_ii_matrix;
+    BlockSparseMatrix<REAL>& deal_ii_matrix;
 };
 
 /*********************************************************
@@ -173,7 +259,7 @@ template<typename REAL = double>
 class daeFEArray : public daeArray<REAL>
 {
 public:
-    daeFEArray(const Vector<REAL>& vect) : deal_ii_vector(vect)
+    daeFEArray(Vector<REAL>& vect) : deal_ii_vector(vect)
     {
     }
 
@@ -194,8 +280,7 @@ public:
 
     void SetItem(size_t i, REAL value)
     {
-        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
-        daeDeclareAndThrowException(exInvalidCall);
+        deal_ii_vector[i] = value;
     }
 
     size_t GetSize(void) const
@@ -204,7 +289,7 @@ public:
     }
 
 protected:
-    const Vector<REAL>& deal_ii_vector;
+    Vector<REAL>& deal_ii_vector;
 };
 
 /*********************************************************
@@ -215,7 +300,7 @@ template<typename REAL = double>
 class daeFEBlockArray : public daeArray<REAL>
 {
 public:
-    daeFEBlockArray(const BlockVector<REAL>& vect) : deal_ii_vector(vect)
+    daeFEBlockArray(BlockVector<REAL>& vect) : deal_ii_vector(vect)
     {
     }
 
@@ -236,8 +321,7 @@ public:
 
     void SetItem(size_t i, REAL value)
     {
-        // ACHTUNG, ACHTUNG!! Setting a new value is NOT permitted!
-        daeDeclareAndThrowException(exInvalidCall);
+        deal_ii_vector[i] = value;
     }
 
     size_t GetSize(void) const
@@ -246,7 +330,7 @@ public:
     }
 
 protected:
-    const BlockVector<REAL>& deal_ii_vector;
+    BlockVector<REAL>& deal_ii_vector;
 };
 
 /*********************************************************
@@ -286,6 +370,79 @@ public:
     SparsityPattern::iterator m_end;
 };
 
+#include <Python.h>
+
+/*  pyAllowThreads class does the analog of the following:
+    In the constructor:
+        if(!PyEval_ThreadsInitialized())
+            PyEval_InitThreads();
+        Py_BEGIN_ALLOW_THREADS
+
+    Run the multithreaded code that acquires the GIL using PyGILState_Ensure()
+    and releases it using PyGILState_Release().
+
+    In the destructor:
+        Py_END_ALLOW_THREADS
+*/
+class pyAllowThreads : public daeAllowThreads_t
+{
+public:
+    pyAllowThreads(bool doNothing_ = true) : doNothing(doNothing_)
+    {
+        if(doNothing)
+            return;
+
+        // Initialise the python interpreter thread-state and implicitly acquire the GIL in the calling thread.
+        // If the threads are already initialised do nothing.
+        if(!PyEval_ThreadsInitialized())
+            PyEval_InitThreads();
+
+        // Now, having acquired the GIL in the calling thread, release it so that the spawned threads can acquire it when required.
+        save = PyEval_SaveThread();
+    }
+
+    virtual ~pyAllowThreads()
+    {
+        if(doNothing)
+            return;
+
+        // Re-acquire the GIL in the calling thread.
+        PyEval_RestoreThread(save);
+    }
+
+protected:
+    const bool     doNothing;
+    PyThreadState* save;
+};
+
+class pyGILState : public daeGILState_t
+{
+public:
+    pyGILState(bool doNothing_ = true) : doNothing(doNothing_)
+    {
+        if(doNothing)
+            return;
+
+        // Acquire the GIL for the current thread.
+        gstate = PyGILState_Ensure();
+    }
+
+    virtual ~pyGILState()
+    {
+        if(doNothing)
+            return;
+
+        // Release the GIL (no Python API allowed beyond this point).
+        PyGILState_Release(gstate);
+    }
+
+protected:
+    const bool       doNothing;
+    PyGILState_STATE gstate;
+};
+
+#define INIT_THREAD_STATE_AND_RELEASE_GIL boost::shared_ptr<daeAllowThreads_t> _allowThreads_(new pyAllowThreads(false))
+#define ACQUIRE_GIL_STATE                 boost::shared_ptr<daeGILState_t>     _GIL_         (new pyGILState(false))
 
 /*********************************************************
  * feExpression
@@ -303,6 +460,8 @@ enum efeNumberType
     eFETensor2_adouble,
     eFETensor3_adouble,
     eFESymmetricTensor2,
+    eFETensor1DoFSum,
+    eFETensor2DoFSum,
     eFEInvalid
 };
 
@@ -351,7 +510,7 @@ public:
         if(m_node)
             return m_node->ToString();
         else
-            return std::string("");
+            return std::string("0");
     }
 
 public:
@@ -382,6 +541,8 @@ inline std::string type(efeNumberType eType)
         return "SymmetricTensor2";
     else if(eType == eFECurl2D)
         return "Curl2D";
+    else if(eType == eFETensor1DoFSum)
+        return "Tensor1DoFSum";
     else if(eType == eFEInvalid)
         return "Invalid";
     else
@@ -465,6 +626,18 @@ public:
         m_symmetric_tensor2 = st;
     }
 
+    feRuntimeNumber(const daeTensor1DoFSum<dim>& tensor1_dof_sum)
+    {
+        m_eType           = eFETensor1DoFSum;
+        m_tensor1_dof_sum = tensor1_dof_sum;
+    }
+
+    feRuntimeNumber(const daeTensor2DoFSum<dim>& tensor2_dof_sum)
+    {
+        m_eType           = eFETensor2DoFSum;
+        m_tensor2_dof_sum = tensor2_dof_sum;
+    }
+
     std::string ToString() const
     {
         if(m_eType == eFEScalar)
@@ -546,6 +719,14 @@ public:
                                                                                     % m_symmetric_tensor2[1][0] % m_symmetric_tensor2[1][1] % m_symmetric_tensor2[1][2]
                                                                                     % m_symmetric_tensor2[2][0] % m_symmetric_tensor2[2][1] % m_symmetric_tensor2[2][2]).str();
         }
+        else if(m_eType == eFETensor1DoFSum)
+        {
+            return "tensor1_dof_sum";
+        }
+        else if(m_eType == eFETensor2DoFSum)
+        {
+            return "tensor2_dof_sum";
+        }
         else if(m_eType == eFEPoint)
         {
             if(dim == 1)
@@ -560,20 +741,22 @@ public:
     }
 
 public:
-    efeNumberType                       m_eType;
-    Point<dim, double>                  m_point;
+    efeNumberType                           m_eType;
+    Point<dim, double>                      m_point;
     /* CURL
-    Tensor<1, 1, double>                m_curl2D;
+    Tensor<1, 1, double>                    m_curl2D;
     */
-    Tensor<1, dim, double>              m_tensor1;
-    Tensor<2, dim, double>              m_tensor2;
-    Tensor<3, dim, double>              m_tensor3;
-    Tensor<1, dim, adouble>             m_tensor1_adouble;
-    Tensor<2, dim, adouble>             m_tensor2_adouble;
-    Tensor<3, dim, adouble>             m_tensor3_adouble;
-    SymmetricTensor<2, dim, double>     m_symmetric_tensor2;
-    double                              m_value;
-    adouble                             m_adouble_value;
+    Tensor<1, dim, double>                  m_tensor1;
+    Tensor<2, dim, double>                  m_tensor2;
+    Tensor<3, dim, double>                  m_tensor3;
+    Tensor<1, dim, adouble>                 m_tensor1_adouble;
+    Tensor<2, dim, adouble>                 m_tensor2_adouble;
+    Tensor<3, dim, adouble>                 m_tensor3_adouble;
+    SymmetricTensor<2, dim, double>         m_symmetric_tensor2;
+    daeTensor1DoFSum<dim>                   m_tensor1_dof_sum;
+    daeTensor2DoFSum<dim>                   m_tensor2_dof_sum;
+    double                                  m_value;
+    adouble                                 m_adouble_value;
 };
 
 template<int dim>
@@ -651,7 +834,7 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
     {
         tmp.m_eType = eFEScalar_adouble;
-        
+
         adouble lad, rad;
 
         if(l.m_eType == eFEScalar)
@@ -717,7 +900,7 @@ feRuntimeNumber<dim> operator +(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else
     {
         std::string error = std::string("Invalid operation ") + type(l.m_eType) + " + " + type(r.m_eType) + ":\n";
-        error += l.ToString() + " + " + r.ToString(); 
+        error += l.ToString() + " + " + r.ToString();
         throw std::runtime_error(error);
     }
     return tmp;
@@ -735,7 +918,7 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
     {
         tmp.m_eType = eFEScalar_adouble;
-        
+
         adouble lad, rad;
 
         if(l.m_eType == eFEScalar)
@@ -801,25 +984,38 @@ feRuntimeNumber<dim> operator -(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else
     {
         std::string error = std::string("Invalid operation ") + type(l.m_eType) + " - " + type(r.m_eType) + ":\n";
-        error += l.ToString() + " - " + r.ToString(); 
+        error += l.ToString() + " - " + r.ToString();
         throw std::runtime_error(error);
     }
     return tmp;
 }
 
 template<int dim>
-feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNumber<dim>& r)
+feRuntimeNumber<dim> operator *(feRuntimeNumber<dim>& l, feRuntimeNumber<dim>& r)
 {
     feRuntimeNumber<dim> tmp;
+
     if(l.m_eType == eFEScalar && r.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_value * r.m_value;
     }
+    else if(l.m_eType == eFEScalar_adouble && r.m_eType == eFEScalar)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        if(r.m_value != 0.0)
+            tmp.m_adouble_value = l.m_adouble_value * r.m_value;
+    }
+    else if(l.m_eType == eFEScalar && r.m_eType == eFEScalar_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        if(l.m_value != 0.0)
+            tmp.m_adouble_value = l.m_value * r.m_adouble_value;
+    }
     else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
     {
         tmp.m_eType = eFEScalar_adouble;
-        
+
         adouble lad, rad;
         if(l.m_eType == eFEScalar)
             lad = l.m_value;
@@ -849,12 +1045,12 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar;
         tmp.m_value = l.m_tensor1 * r.m_tensor1;
     }
+    /*
     else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor2)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = scalar_product(l.m_tensor2, r.m_tensor2);
+        tmp.m_value = l.m_tensor2 * r.m_tensor2;
     }
-    /*
     else if(l.m_eType == eFETensor3 && r.m_eType == eFETensor3)
     {
         tmp.m_eType = eFETensor2;
@@ -866,12 +1062,12 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_eType = eFEScalar_adouble;
         tmp.m_adouble_value = l.m_tensor1_adouble * r.m_tensor1_adouble;
     }
+    /*
     else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFETensor2_adouble)
     {
         tmp.m_eType = eFEScalar_adouble;
-        tmp.m_adouble_value = scalar_product(l.m_tensor2_adouble, r.m_tensor2_adouble);
+        tmp.m_adouble_value = l.m_tensor2_adouble * r.m_tensor2_adouble;
     }
-    /*
     else if(l.m_eType == eFETensor3_adouble && r.m_eType == eFETensor3_adouble)
     {
         tmp.m_eType = eFETensor2_adouble;
@@ -901,34 +1097,200 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor1_adouble = l.m_tensor1_adouble * r.m_tensor2;
     }
 
-    
+    // Cases:
+    //   Tensor<1>               * SUM(Tensor<1> * DOF[j])
+    //   SUM(Tensor<1> * DOF[j]) * Tensor<1>
+    // The result is always a scalar (adouble object with the adFloatCoefficientVariableSumNode node)
+    else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1DoFSum)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+
+        adFloatCoefficientVariableSumNode* node = NULL;
+
+        typename daeTensor1DoFSum<dim>::iterator it = r.m_tensor1_dof_sum.items.begin();
+        for(; it != r.m_tensor1_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<1,dim>& t_dof = *it;
+            double res = l.m_tensor1 * t_dof.tensor;
+            if(res != 0.0)
+            {
+                if(!node) // create adFloatCoefficientVariableSumNode node only on demand
+                {
+                    node = new adFloatCoefficientVariableSumNode();
+                    tmp.m_adouble_value.setGatherInfo(true);
+                    tmp.m_adouble_value.node.reset(node);
+                }
+                //tmp.m_adouble_value += res * (*t_dof.variable)(t_dof.index);
+                node->AddItem(res, t_dof.variable, t_dof.index);
+            }
+        }
+    }
+    else if(l.m_eType == eFETensor1DoFSum && r.m_eType == eFETensor1)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+
+        adFloatCoefficientVariableSumNode* node = NULL;
+
+        typename daeTensor1DoFSum<dim>::iterator it = l.m_tensor1_dof_sum.items.begin();
+        for(; it != l.m_tensor1_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<1,dim>& t_dof = *it;
+            double res = t_dof.tensor * r.m_tensor1;
+            if(res != 0.0)
+            {
+                if(!node) // create adFloatCoefficientVariableSumNode node only on demand
+                {
+                    node = new adFloatCoefficientVariableSumNode();
+                    tmp.m_adouble_value.setGatherInfo(true);
+                    tmp.m_adouble_value.node.reset(node);
+                }
+                //tmp.m_adouble_value += res * (*t_dof.variable)(t_dof.index);
+                node->AddItem(res, t_dof.variable, t_dof.index);
+            }
+        }
+    }
+    // Case:
+    //   SUM(Tensor<1> * DOF[j]) * SUM(Tensor<1> * DOF[j])
+    // The result is a scalar (adouble object with the adFloatCoefficientVariableSumNode node)
+    else if(l.m_eType == eFETensor1DoFSum && r.m_eType == eFETensor1DoFSum)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+
+        if(l.m_tensor1_dof_sum.items.size() != r.m_tensor1_dof_sum.items.size())
+        {
+            std::string error = std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType) + ":\n";
+            error += "the sizes of the lists: phi_vector[j,q]*dof(j) mismatch";
+            throw std::runtime_error(error);
+
+        }
+        typename daeTensor1DoFSum<dim>::iterator lit = l.m_tensor1_dof_sum.items.begin();
+        typename daeTensor1DoFSum<dim>::iterator rit = r.m_tensor1_dof_sum.items.begin();
+        for(;
+            lit != l.m_tensor1_dof_sum.items.end(), rit != r.m_tensor1_dof_sum.items.end();
+            lit++, rit++)
+        {
+            daeTensorDoFItem<1,dim>& l_dof = *lit;
+            daeTensorDoFItem<1,dim>& r_dof = *rit;
+            double res = l_dof.tensor * r_dof.tensor;
+            if(res != 0.0)
+                tmp.m_adouble_value += res * ((*l_dof.variable)(l_dof.index) * (*r_dof.variable)(r_dof.index));
+        }
+    }
+    // Cases:
+    //   float                   * SUM(Tensor<1> * DOF[j])
+    //   SUM(Tensor<1> * DOF[j]) * float
+    // The result is the same SUM(Tensor<1> * DOF[j]) object with its tensors multiplied by the scalar
+    else if(l.m_eType == eFEScalar && r.m_eType == eFETensor1DoFSum)
+    {
+        tmp = r;
+
+        typename daeTensor1DoFSum<dim>::iterator it = tmp.m_tensor1_dof_sum.items.begin();
+        for(; it != tmp.m_tensor1_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<1,dim>& t_dof = *it;
+            t_dof.tensor *= l.m_value;
+        }
+    }
+    else if(l.m_eType == eFETensor1DoFSum && r.m_eType == eFEScalar)
+    {
+        tmp = l;
+
+        typename daeTensor1DoFSum<dim>::iterator it = tmp.m_tensor1_dof_sum.items.begin();
+        for(; it != tmp.m_tensor1_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<1,dim>& t_dof = *it;
+            t_dof.tensor *= r.m_value;
+        }
+    }
+
+    // Cases:
+    //   Tensor<1>               * SUM(Tensor<2> * DOF[j])
+    //   SUM(Tensor<2> * DOF[j]) * Tensor<1>
+    // The result is SUM(Tensor<1> * DOF[j]) object (for the product Tensor<2>*Tensor<1> yields the Tensor<1>)
+    else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor2DoFSum)
+    {
+        tmp.m_eType = eFETensor1DoFSum;
+        typename daeTensor2DoFSum<dim>::iterator it = r.m_tensor2_dof_sum.items.begin();
+        for(; it != r.m_tensor2_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<2,dim>& t_dof = *it;
+            tmp.m_tensor1_dof_sum.items.push_back( daeTensorDoFItem<1,dim>(l.m_tensor1 * t_dof.tensor, t_dof.variable, t_dof.index) );
+        }
+    }
+    else if(l.m_eType == eFETensor2DoFSum && r.m_eType == eFETensor1)
+    {
+        tmp.m_eType = eFETensor1DoFSum;
+        typename daeTensor2DoFSum<dim>::iterator it = l.m_tensor2_dof_sum.items.begin();
+        for(; it != l.m_tensor2_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<2,dim>& t_dof = *it;
+            tmp.m_tensor1_dof_sum.items.push_back( daeTensorDoFItem<1,dim>(t_dof.tensor*r.m_tensor1, t_dof.variable, t_dof.index) );
+        }
+    }
+    // Cases:
+    //   float                   * SUM(Tensor<2> * DOF[j])
+    //   SUM(Tensor<2> * DOF[j]) * float
+    // The result is the same SUM(Tensor<2> * DOF[j]) object with its tensors multiplied by the scalar
+    else if(l.m_eType == eFEScalar && r.m_eType == eFETensor2DoFSum)
+    {
+        tmp = r;
+
+        typename daeTensor2DoFSum<dim>::iterator it = tmp.m_tensor2_dof_sum.items.begin();
+        for(; it != tmp.m_tensor2_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<2,dim>& t_dof = *it;
+            t_dof.tensor *= l.m_value;
+        }
+    }
+    else if(l.m_eType == eFETensor2DoFSum && r.m_eType == eFEScalar)
+    {
+        tmp = l;
+
+        typename daeTensor2DoFSum<dim>::iterator it = tmp.m_tensor2_dof_sum.items.begin();
+        for(; it != tmp.m_tensor2_dof_sum.items.end(); it++)
+        {
+            daeTensorDoFItem<2,dim>& t_dof = *it;
+            t_dof.tensor *= r.m_value;
+        }
+    }
+
     else if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1_adouble)
     {
         tmp.m_eType = eFEScalar_adouble;
-        tmp.m_adouble_value = l.m_tensor1 * r.m_tensor1_adouble;
+        // Bypass Tensor<1,dim,adouble> operator * and do additions only if left[i] != 0.0
+        for(unsigned int i = 0; i < dim; i++)
+            if(l.m_tensor1[i] != 0.0)
+                tmp.m_adouble_value += l.m_tensor1[i] * r.m_tensor1_adouble[i];
+        //tmp.m_adouble_value = l.m_tensor1 * r.m_tensor1_adouble;
     }
     else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor1)
     {
         tmp.m_eType = eFEScalar_adouble;
-        tmp.m_adouble_value = l.m_tensor1_adouble * r.m_tensor1;
+        // Bypass Tensor<1,dim,adouble> operator * and do additions only if right[i] != 0.0
+        for(unsigned int i = 0; i < dim; i++)
+            if(r.m_tensor1[i] != 0.0)
+                tmp.m_adouble_value += l.m_tensor1_adouble[i] * r.m_tensor1[i];
+        //tmp.m_adouble_value = l.m_tensor1_adouble * r.m_tensor1;
     }
-    
-    
+
+
     else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFESymmetricTensor2)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = scalar_product(l.m_symmetric_tensor2, r.m_symmetric_tensor2);
+        tmp.m_value = l.m_symmetric_tensor2 * r.m_symmetric_tensor2;
     }
+/*
     else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFETensor2)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = scalar_product(l.m_symmetric_tensor2, r.m_tensor2);
+        tmp.m_value = l.m_symmetric_tensor2 * r.m_tensor2;
     }
     else if(l.m_eType == eFETensor2 && r.m_eType == eFESymmetricTensor2)
     {
         tmp.m_eType = eFEScalar;
-        tmp.m_value = scalar_product(l.m_tensor2, r.m_symmetric_tensor2);
+        tmp.m_value = l.m_tensor2 * r.m_symmetric_tensor2;
     }
+*/
     else if(l.m_eType == eFEPoint && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEScalar;
@@ -1015,7 +1377,6 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor2_adouble = l.m_tensor2_adouble * r.m_adouble_value;
     }
 
-
     else if(l.m_eType == eFEScalar && r.m_eType == eFETensor3)
     {
         tmp.m_eType = eFETensor3;
@@ -1049,7 +1410,6 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor3_adouble = l.m_tensor3_adouble * r.m_adouble_value;
     }
 
-
     else if(l.m_eType == eFEScalar && r.m_eType == eFEPoint)
     {
         tmp.m_eType = eFEPoint;
@@ -1064,11 +1424,82 @@ feRuntimeNumber<dim> operator *(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else
     {
         std::string error = std::string("Invalid operation ") + type(l.m_eType) + " * " + type(r.m_eType) + ":\n";
-        error += l.ToString() + " * " + r.ToString(); 
+        error += l.ToString() + " * " + r.ToString();
         throw std::runtime_error(error);
     }
     return tmp;
 }
+
+template<int dim>
+feRuntimeNumber<dim> scalar_product_rt(const feRuntimeNumber<dim>& l, const feRuntimeNumber<dim>& r)
+{
+    feRuntimeNumber<dim> tmp;
+
+    if(l.m_eType == eFETensor1 && r.m_eType == eFETensor1)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_tensor1, r.m_tensor1);
+    }
+    else if(l.m_eType == eFETensor2 && r.m_eType == eFETensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_tensor2, r.m_tensor2);
+    }
+
+    else if(l.m_eType == eFETensor1_adouble && r.m_eType == eFETensor1_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = scalar_product(l.m_tensor1_adouble, r.m_tensor1_adouble);
+    }
+    else if(l.m_eType == eFETensor2_adouble && r.m_eType == eFETensor2_adouble)
+    {
+        tmp.m_eType = eFEScalar_adouble;
+        tmp.m_adouble_value = scalar_product(l.m_tensor2_adouble, r.m_tensor2_adouble);
+    }
+
+    else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFESymmetricTensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_symmetric_tensor2, r.m_symmetric_tensor2);
+    }
+    else if(l.m_eType == eFESymmetricTensor2 && r.m_eType == eFETensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_symmetric_tensor2, r.m_tensor2);
+    }
+    else if(l.m_eType == eFETensor2 && r.m_eType == eFESymmetricTensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = scalar_product(l.m_tensor2, r.m_symmetric_tensor2);
+    }
+    else
+    {
+        std::string error = std::string("Invalid operation scalar_product(") + type(l.m_eType) + ", " + type(r.m_eType) + "):\n";
+        error += "scalar_product(" + l.ToString() + ", " + r.ToString() + ")";
+        throw std::runtime_error(error);
+    }
+    return tmp;
+}
+
+template<int dim>
+feRuntimeNumber<dim> double_contract_rt(const feRuntimeNumber<dim>& l, const feRuntimeNumber<dim>& r)
+{
+    feRuntimeNumber<dim> tmp;
+
+    if(l.m_eType == eFETensor2 && r.m_eType == eFETensor2)
+    {
+        tmp.m_eType = eFEScalar;
+        tmp.m_value = double_contract<dim,double>(l.m_tensor2, r.m_tensor2);
+    }
+    else
+    {
+        std::string error = std::string("Invalid operation double_contract(") + type(l.m_eType) + ", " + type(r.m_eType) + "):\n";
+        error += "double_contract(" + l.ToString() + ", " + r.ToString() + ")";
+        throw std::runtime_error(error);
+    }
+    return tmp;
+}
+
 
 template<int dim>
 feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNumber<dim>& r)
@@ -1082,7 +1513,7 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else if(l.m_eType == eFEScalar_adouble || r.m_eType == eFEScalar_adouble)
     {
         tmp.m_eType = eFEScalar_adouble;
-        
+
         adouble lad, rad;
         if(l.m_eType == eFEScalar)
             lad = l.m_value;
@@ -1155,7 +1586,6 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
         tmp.m_tensor3_adouble = l.m_tensor3_adouble / r.m_adouble_value;
     }
 
-
     else if(l.m_eType == eFEPoint && r.m_eType == eFEScalar)
     {
         tmp.m_eType = eFEPoint;
@@ -1164,7 +1594,7 @@ feRuntimeNumber<dim> operator /(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else
     {
         std::string error = std::string("Invalid operation ") + type(l.m_eType) + " / " + type(r.m_eType) + ":\n";
-        error += l.ToString() + " / " + r.ToString(); 
+        error += l.ToString() + " / " + r.ToString();
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1192,7 +1622,7 @@ feRuntimeNumber<dim> operator ^(const feRuntimeNumber<dim>& l, const feRuntimeNu
     else
     {
         std::string error = std::string("Invalid operation ") + type(l.m_eType) + " ** " + type(r.m_eType) + ":\n";
-        error += l.ToString() + " ** " + r.ToString(); 
+        error += l.ToString() + " ** " + r.ToString();
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1221,7 +1651,7 @@ feRuntimeNumber<dim> sin_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation sin(") + type(fe.m_eType) + "):\n";
-        error += "sin(" + fe.ToString() + ")"; 
+        error += "sin(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1244,7 +1674,7 @@ feRuntimeNumber<dim> cos_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation cos(") + type(fe.m_eType) + "):\n";
-        error += "cos(" + fe.ToString() + ")"; 
+        error += "cos(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1267,7 +1697,7 @@ feRuntimeNumber<dim> tan_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation tan(") + type(fe.m_eType) + "):\n";
-        error += "tan(" + fe.ToString() + ")"; 
+        error += "tan(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1290,7 +1720,7 @@ feRuntimeNumber<dim> asin_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation asin(") + type(fe.m_eType) + "):\n";
-        error += "asin(" + fe.ToString() + ")"; 
+        error += "asin(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1313,7 +1743,7 @@ feRuntimeNumber<dim> acos_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation acos(") + type(fe.m_eType) + "):\n";
-        error += "acos(" + fe.ToString() + ")"; 
+        error += "acos(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1336,7 +1766,7 @@ feRuntimeNumber<dim> atan_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation atan(") + type(fe.m_eType) + "):\n";
-        error += "atan(" + fe.ToString() + ")"; 
+        error += "atan(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1359,7 +1789,7 @@ feRuntimeNumber<dim> sqrt_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation sqrt(") + type(fe.m_eType) + "):\n";
-        error += "sqrt(" + fe.ToString() + ")"; 
+        error += "sqrt(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1382,7 +1812,7 @@ feRuntimeNumber<dim> log_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation log(") + type(fe.m_eType) + "):\n";
-        error += "log(" + fe.ToString() + ")"; 
+        error += "log(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1405,7 +1835,7 @@ feRuntimeNumber<dim> log10_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation log10(") + type(fe.m_eType) + "):\n";
-        error += "log10(" + fe.ToString() + ")"; 
+        error += "log10(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1428,7 +1858,7 @@ feRuntimeNumber<dim> exp_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation exp(") + type(fe.m_eType) + "):\n";
-        error += "exp(" + fe.ToString() + ")"; 
+        error += "exp(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1451,7 +1881,7 @@ feRuntimeNumber<dim> abs_(const feRuntimeNumber<dim>& fe)
     else
     {
         std::string error = std::string("Invalid operation abs(") + type(fe.m_eType) + "):\n";
-        error += "abs(" + fe.ToString() + ")"; 
+        error += "abs(" + fe.ToString() + ")";
         throw std::runtime_error(error);
     }
     return tmp;
@@ -1590,7 +2020,6 @@ feRuntimeNumber<dim> erf_(const feRuntimeNumber<dim>& fe)
     return tmp;
 }
 
-
 template<int dim>
 class feCellContext
 {
@@ -1638,17 +2067,14 @@ public:
     virtual double JxW (const unsigned int q) const = 0;
     virtual const Tensor<1,dim>& normal_vector (const unsigned int q) const = 0;
 
-    //virtual const Function<dim, double>&  function(const std::string& functionName) const = 0;
-    //virtual const Function<dim, adouble>& adouble_function(const std::string& functionName) const = 0;
-
     virtual adouble dof(const std::string& variableName, const unsigned int i) const = 0;
 
-    virtual adouble               dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
-    virtual Tensor<1,dim,adouble> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
-    virtual Tensor<2,dim,adouble> dof_hessian_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual adouble               dof_approximation         (const std::string& variableName, const unsigned int q) const = 0;
+    virtual daeTensor1DoFSum<dim> dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual daeTensor2DoFSum<dim> dof_hessian_approximation (const std::string& variableName, const unsigned int q) const = 0;
 
-    virtual Tensor<1,dim,adouble> vector_dof_approximation(const std::string& variableName, const unsigned int q) const = 0;
-    virtual Tensor<2,dim,adouble> vector_dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
+    virtual daeTensor1DoFSum<dim> vector_dof_approximation         (const std::string& variableName, const unsigned int q) const = 0;
+    virtual daeTensor2DoFSum<dim> vector_dof_gradient_approximation(const std::string& variableName, const unsigned int q) const = 0;
 
     virtual unsigned int q() const = 0;
     virtual unsigned int i() const = 0;
@@ -1665,6 +2091,11 @@ public:
 public:
     virtual feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const = 0;
     virtual std::string          ToString() const                                       = 0;
+    virtual feRuntimeNumber<dim> Evaluate_with_GIL(const feCellContext<dim>* pCellContext) const
+    {
+        //pyGILState GIL;
+        return this->Evaluate(pCellContext);
+    }
 };
 
 template<int dim>
@@ -2272,6 +2703,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         // According to the documentation for FiniteElement<dim,spacedim>::system_to_component_index(index):
         //  - for scalar elements, this returns always zero
         //  - for vector elements, this returns the corresponding vector component
@@ -2338,6 +2771,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         feRuntimeNumber<dim> node = m_xyz_node->Evaluate(pCellContext);
 
         if(node.m_eType != eFEPoint)
@@ -2387,19 +2822,21 @@ public:
         m_dofName  = dofName;
         m_i        = i;
     }
-    
+
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         unsigned int index = getIndex<dim>(m_i, pCellContext);
         return feRuntimeNumber<dim>( pCellContext->dof(m_dofName, index) );
     }
-    
+
     std::string ToString() const
     {
         return (boost::format("dof('%s', %s)") % m_dofName % getIndex(m_i)).str();
     }
-    
+
 public:
     std::string  m_dofName;
     int          m_i;
@@ -2418,6 +2855,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         unsigned int index = getIndex<dim>(m_q, pCellContext);
         return feRuntimeNumber<dim>( pCellContext->vector_dof_approximation(m_dofName, index) );
     }
@@ -2445,6 +2884,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         unsigned int index = getIndex<dim>(m_q, pCellContext);
         return feRuntimeNumber<dim>( pCellContext->vector_dof_gradient_approximation(m_dofName, index) );
     }
@@ -2472,6 +2913,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         unsigned int index = getIndex<dim>(m_q, pCellContext);
         return feRuntimeNumber<dim>( pCellContext->dof_approximation(m_dofName, index) );
     }
@@ -2499,6 +2942,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         unsigned int index = getIndex<dim>(m_q, pCellContext);
         return feRuntimeNumber<dim>( pCellContext->dof_gradient_approximation(m_dofName, index) );
     }
@@ -2526,6 +2971,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         unsigned int index = getIndex<dim>(m_q, pCellContext);
         return feRuntimeNumber<dim>( pCellContext->dof_hessian_approximation(m_dofName, index) );
     }
@@ -2552,6 +2999,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         return feRuntimeNumber<dim>( m_ad );
     }
 
@@ -2577,6 +3026,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         return feRuntimeNumber<dim>( m_tensor );
     }
 
@@ -2604,6 +3055,8 @@ public:
 public:
     feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
     {
+        ACQUIRE_GIL_STATE;
+
         return feRuntimeNumber<dim>( m_tensor );
     }
 
@@ -2618,6 +3071,7 @@ public:
 public:
     Tensor<rank,dim,adouble> m_tensor;
 };
+
 
 enum efeUnaryFunction
 {
@@ -2648,7 +3102,9 @@ enum efeBinaryFunction
     eMinus,
     eMulti,
     eDivide,
-    ePower
+    ePower,
+    eScalarProduct,
+    eDoubleContract
 };
 
 template<int dim>
@@ -2786,7 +3242,20 @@ public:
             return left / right;
         else if(m_function == ePower)
             return pow(left, right);
+        else if(m_function == eScalarProduct)
+            return scalar_product_rt(left, right);
+        else if(m_function == eDoubleContract)
+        {
+             std::cout << "double_contract(" << left.m_tensor2 << ", " << right.m_tensor2 << ") = ";
+             std::cout.flush();
 
+             feRuntimeNumber<dim> res = double_contract_rt(left, right);
+
+             std::cout << res.m_value << std::endl;
+             std::cout.flush();
+
+             return res;
+        }
         throw std::runtime_error(std::string("Invalid binary function"));
     }
 
@@ -2802,6 +3271,10 @@ public:
             return (boost::format("(%s / %s)") % m_left->ToString() % m_right->ToString()).str();
         else if(m_function == ePower)
             return (boost::format("(%s ** %s)") % m_left->ToString() % m_right->ToString()).str();
+        else if(m_function == eScalarProduct)
+            return (boost::format("scalar_product(%s, %s)") % m_left->ToString() % m_right->ToString()).str();
+        else if(m_function == eDoubleContract)
+            return (boost::format("double_contract(%s, %s)") % m_left->ToString() % m_right->ToString()).str();
 
         throw std::runtime_error(std::string("Invalid unary function"));
     }
@@ -2828,6 +3301,18 @@ template<int dim>
 feExpression<dim> operator *(const feExpression<dim>& l, const feExpression<dim>& r)
 {
     return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eMulti, l.m_node, r.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> scalar_product(const feExpression<dim>& l, const feExpression<dim>& r)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eScalarProduct, l.m_node, r.m_node) ));
+}
+
+template<int dim>
+feExpression<dim> double_contract(const feExpression<dim>& l, const feExpression<dim>& r)
+{
+    return feExpression<dim>(typename feExpression<dim>::feNodePtr( new feNode_binary<dim>(eDoubleContract, l.m_node, r.m_node) ));
 }
 
 template<int dim>

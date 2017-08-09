@@ -16,6 +16,8 @@ import sys, os, platform, numpy
 
 sys.path.insert(0, os.path.abspath('../../'))
 from daetools import *
+from daetools.pyDAE import *
+from daetools.dae_simulator import *
 from daetools.solvers.superlu import *
 from daetools.solvers.superlu_mt import *
 from daetools.solvers.trilinos import *
@@ -33,7 +35,6 @@ import sphinx_bootstrap_theme
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-
 #autodoc_docstring_signature = False
 #autoclass_content = 'both'
 #autodoc_member_order = 'groupwise'
@@ -46,7 +47,8 @@ autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance']
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.todo', 'sphinx.ext.mathjax', 
+              'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

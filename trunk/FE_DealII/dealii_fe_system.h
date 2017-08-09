@@ -5,6 +5,13 @@
 #include "dealii_datareporter.h"
 #include "dealii_template_inst.h"
 #include "../Core/nodes.h"
+#include "../variable_types.h"
+#include <deal.II/base/work_stream.h>
+
+#ifdef _OPENMP
+#include <iterator>
+#include <omp.h>
+#endif
 
 namespace dae
 {
@@ -25,11 +32,11 @@ adouble getValueFromNumber(const feRuntimeNumber<dim>& fe_number)
     return adouble();
 }
 
-inline bool hasNonzeroValue(adouble& a)
+inline bool hasNonzeroValue(const adouble& a)
 {
     if(a.node)
     {
-        adConstantNode* cn = dynamic_cast<adConstantNode*>(a.node.get());
+        const adConstantNode* cn = dynamic_cast<const adConstantNode*>(a.node.get());
         if(cn)
         {
             if(cn->m_quantity.getValue() == 0)
@@ -50,6 +57,7 @@ inline bool hasNonzeroValue(adouble& a)
     }
 }
 
+
 /******************************************************************
     dealiiFiniteElementDOF<dim>
 *******************************************************************/
@@ -60,12 +68,14 @@ public:
     dealiiFiniteElementDOF(const std::string&                      strName,
                            const std::string&                      strDescription,
                            boost::shared_ptr< FiniteElement<dim> > fe,
-                           unsigned int                            nMultiplicity)
+                           unsigned int                            nMultiplicity,
+                           daeVariableType                         variableType = variable_types::no_t)
     {
         m_strName        = strName;
         m_strDescription = strDescription;
         m_fe             = fe;
         m_nMultiplicity  = nMultiplicity;
+        m_VariableType   = variableType;
 
         // For vector-valued FE spaces use 1, and for the others the normal multiplicity
         m_nMultiplicityForFESystem = m_nMultiplicity;
@@ -76,17 +86,75 @@ public:
            dynamic_cast< FE_DGNedelec<dim>*       >(m_fe.get()) ||
            dynamic_cast< FE_BDM<dim>*             >(m_fe.get()) ||
            dynamic_cast< FE_DGBDM<dim>*           >(m_fe.get()))
+        {
             m_nMultiplicityForFESystem = 1;
+        }
     }
 
 public:
-    std::string  m_strName;
-    std::string  m_strDescription;
-    unsigned int m_nMultiplicity;
-    unsigned int m_nMultiplicityForFESystem;
+    std::string     m_strName;
+    std::string     m_strDescription;
+    unsigned int    m_nMultiplicity;
+    unsigned int    m_nMultiplicityForFESystem;
+    daeVariableType m_VariableType;
 
 // Internal data
     boost::shared_ptr< FiniteElement<dim> > m_fe;
+};
+
+enum dealiiContributionType
+{
+    eExpression_invalid,
+    eExpression_single,
+    eExpression_qi,
+    eExpression_qij
+};
+
+template <int dim>
+class dealiiCellContribution
+{
+public:
+    dealiiCellContribution()
+    {
+        m_eContributionType = eExpression_invalid;
+    }
+
+    dealiiCellContribution(const feExpression<dim>& single)
+    {
+        m_eContributionType = eExpression_single;
+        m_single = single;
+    }
+
+    dealiiCellContribution(const feExpression<dim>& q_loop, const feExpression<dim>& i_loop)
+    {
+        m_eContributionType = eExpression_qi;
+        m_q_loop = q_loop;
+        m_i_loop = i_loop;
+    }
+
+    dealiiCellContribution(const feExpression<dim>& q_loop, const feExpression<dim>& i_loop, const feExpression<dim>& j_loop)
+    {
+        m_eContributionType = eExpression_qij;
+        m_q_loop = q_loop;
+        m_i_loop = i_loop;
+        m_j_loop = j_loop;
+    }
+
+    bool operator ==(const dealiiCellContribution& other)
+    {
+        return (this->m_eContributionType == other.m_eContributionType) &&
+               (this->m_single == other.m_single) &&
+               (this->m_q_loop == other.m_q_loop) &&
+               (this->m_i_loop == other.m_i_loop) &&
+               (this->m_j_loop == other.m_j_loop);
+    }
+
+public:
+    dealiiContributionType m_eContributionType;
+    feExpression<dim> m_q_loop;
+    feExpression<dim> m_i_loop;
+    feExpression<dim> m_j_loop;
+    feExpression<dim> m_single;
 };
 
 /******************************************************************
@@ -114,16 +182,15 @@ public:
 
 public:
     bool                                            m_bNeedsUpdate;     // Not used at the moment
-    feExpression<dim>                               m_Aij;              // Stiffness matrix
-    feExpression<dim>                               m_Mij;              // Mass matrix (dt)
-    feExpression<dim>                               m_Fi;               // Load vector (rhs)
+    std::vector< dealiiCellContribution<dim> >      m_Aij;              // Stiffness matrix contributions
+    std::vector< dealiiCellContribution<dim> >      m_Mij;              // Mass matrix (dt) contributions
+    std::vector< dealiiCellContribution<dim> >      m_Fi;               // Load vector (rhs) contributions
     feExpression<dim>                               m_innerCellFaceAij;
     feExpression<dim>                               m_innerCellFaceFi;
     map_Uint_Expression                             m_boundaryFaceAij;
     map_Uint_Expression                             m_boundaryFaceFi;
     map_String_FunctionPtr                          m_functions;
     map_String_adoubleFunctionPtr                   m_adouble_functions;
-    //map_Uint_vector_pair_String_FunctionPtr       m_functionsDirichletBC;
     map_Uint_vector_pair_String_adoubleFunctionPtr  m_adoubleFunctionsDirichletBC;
     map_Uint_vector_pair_Variable_Expression        m_mapSurfaceIntegrals;
     vector_pair_Variable_Expression                 m_arrVolumeIntegrals;
@@ -158,6 +225,7 @@ public:
 public:
     virtual void SetModel(daeFiniteElementModel* pFEModel);
     virtual void AssembleSystem();
+    virtual void ClearAssembledSystem();
     virtual bool NeedsReAssembling();
     virtual void ReAssembleSystem();
 
@@ -169,8 +237,12 @@ public:
 
     virtual void                        RowIndices(unsigned int row, std::vector<unsigned int>& narrIndices) const;
     virtual daeFiniteElementObjectInfo  GetObjectInfo() const;
-    virtual std::vector<unsigned int>   GetDOFtoBoundaryMap();
     virtual dealIIDataReporter*         CreateDataReporter();
+
+public:
+    std::vector<bool>           GetBoundaryDOFs(const std::string& variableName, const std::set<types::boundary_id>& setBoundaryIDs);
+    std::vector< Point<dim> >   GetDOFSupportPoints() const;
+    std::vector<unsigned int>   GetDOFtoBoundaryMap();
 
     void Initialize(const std::string&       meshFilename,
                     const Quadrature<dim>&   quadrature,
@@ -183,22 +255,44 @@ public:
 protected:
     void setup_system();
     void assemble_system();
+    void assemble_system_old();
     void update_block(unsigned int block_index, double* values, unsigned int n);
     void write_solution(const std::string& strFilename);
 
-    void assemble_cell(const unsigned int dofs_per_cell,
-                       const unsigned int n_q_points,
-                       feCellContextImpl< dim,FEValues<dim> >& cellContext,
-                       boost::numeric::ublas::matrix<adouble>& cell_matrix_dt,
-                       boost::numeric::ublas::matrix<adouble>& cell_matrix,
-                       std::vector<adouble>& cell_rhs);
+    void cell_matrix_contribution(const unsigned int dofs_per_cell,
+                               const unsigned int n_q_points,
+                               feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                               boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                               feExpression<dim>& contribution);
+
+    void cell_matrix_contribution(const unsigned int dofs_per_cell,
+                                  const unsigned int n_q_points,
+                                  feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                                  boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                  feExpression<dim>& q_term,
+                                  feExpression<dim>& i_term,
+                                  feExpression<dim>& j_term);
+
+    void cell_rhs_contribution(const unsigned int dofs_per_cell,
+                               const unsigned int n_q_points,
+                               feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                               std::vector<adouble>& cell_rhs,
+                               feExpression<dim>& contribution);
+
+    void cell_rhs_contribution(const unsigned int dofs_per_cell,
+                               const unsigned int n_q_points,
+                               feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                               std::vector<adouble>& cell_rhs,
+                               feExpression<dim>& q_term,
+                               feExpression<dim>& i_term);
+
     void assemble_boundary_face(const unsigned int face,
                                 const unsigned int boundary_id,
                                 FEFaceValues<dim>& fe_face_values,
                                 const unsigned int dofs_per_cell,
                                 const unsigned int n_face_q_points,
                                 feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
-                                typename DoFHandler<dim>::active_cell_iterator& cell,
+                                const typename DoFHandler<dim>::active_cell_iterator& cell,
                                 boost::numeric::ublas::matrix<adouble>& cell_matrix,
                                 std::vector<adouble>& cell_rhs);
     void assemble_inner_cell_face(const unsigned int face,
@@ -206,7 +300,7 @@ protected:
                                   const unsigned int dofs_per_cell,
                                   const unsigned int n_face_q_points,
                                   feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
-                                  typename DoFHandler<dim>::active_cell_iterator& cell,
+                                  const typename DoFHandler<dim>::active_cell_iterator& cell,
                                   boost::numeric::ublas::matrix<adouble>& cell_matrix,
                                   std::vector<adouble>& cell_rhs);
     void integrate_surface_integrals(const unsigned int face,
@@ -215,10 +309,97 @@ protected:
                                      const unsigned int dofs_per_cell,
                                      const unsigned int n_face_q_points,
                                      feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
-                                     typename DoFHandler<dim>::active_cell_iterator& cell);
+                                     const typename DoFHandler<dim>::active_cell_iterator& cell);
     void integrate_volume_integrals(const unsigned int dofs_per_cell,
                                     const unsigned int n_q_points,
                                     feCellContextImpl< dim,FEValues<dim> >& cellContext);
+
+    /******************************************************************
+        Assemble classes
+    *******************************************************************/
+    struct PerTaskData {
+        PerTaskData(const FiniteElement<dim> &fe) :
+            cell_matrix   (fe.dofs_per_cell, fe.dofs_per_cell),
+            cell_matrix_dt(fe.dofs_per_cell, fe.dofs_per_cell),
+            cell_rhs      (fe.dofs_per_cell),
+            local_dof_indices(fe.dofs_per_cell),
+            dofs_per_cell(fe.dofs_per_cell)
+        {
+        }
+
+        PerTaskData(const PerTaskData &data) :
+            cell_matrix   (data.dofs_per_cell, data.dofs_per_cell),
+            cell_matrix_dt(data.dofs_per_cell, data.dofs_per_cell),
+            cell_rhs      (data.dofs_per_cell),
+            local_dof_indices(data.dofs_per_cell),
+            dofs_per_cell(data.dofs_per_cell)
+        {
+        }
+
+        boost::numeric::ublas::matrix<adouble> cell_matrix;
+        boost::numeric::ublas::matrix<adouble> cell_matrix_dt;
+        std::vector<adouble>                   cell_rhs;
+        std::vector<unsigned int>              local_dof_indices;
+        unsigned int                           dofs_per_cell;
+        CellId id;
+
+    };
+
+    struct ScratchData {
+        FEValues<dim>               fe_values;
+        FEFaceValues<dim>           fe_face_values;
+        const unsigned int          n_q_points;
+        const unsigned int          n_face_q_points;
+        const unsigned int          dofs_per_cell;
+        //std::vector<unsigned int>   local_dof_indices;
+        map_String_FEValuesExtractor& mapExtractors;
+        map_string_ComponentMask&     mapComponentMasks;
+        std::map<types::global_dof_index, adouble>& boundary_values_map_adouble;
+
+      ScratchData (FiniteElement<dim>& fe,
+                   Quadrature<dim>&    quadrature_formula,
+                   Quadrature<dim-1>&  face_quadrature_formula,
+                   map_String_FEValuesExtractor& mapExtractors_,
+                   map_string_ComponentMask& mapComponentMasks_,
+                   std::map<types::global_dof_index, adouble>& boundary_values_map_adouble_) :
+            fe_values (fe,
+                       quadrature_formula,
+                       update_values   | update_gradients |
+                       update_quadrature_points | update_normal_vectors | update_JxW_values),
+            fe_face_values(fe,
+                            face_quadrature_formula,
+                            update_values | update_gradients | update_quadrature_points  |
+                            update_normal_vectors | update_JxW_values),
+            n_q_points(quadrature_formula.size()),
+            n_face_q_points(face_quadrature_formula.size()),
+            dofs_per_cell(fe.dofs_per_cell),
+            //local_dof_indices(fe->dofs_per_cell),
+            mapExtractors(mapExtractors_),
+            mapComponentMasks(mapComponentMasks_),
+            boundary_values_map_adouble(boundary_values_map_adouble_)
+      {}
+
+      ScratchData (const ScratchData &scratch) :
+                fe_values (scratch.fe_values.get_fe(),
+                           scratch.fe_values.get_quadrature(),
+                           scratch.fe_values.get_update_flags()),
+                fe_face_values (scratch.fe_face_values.get_fe(),
+                                scratch.fe_face_values.get_quadrature(),
+                                scratch.fe_face_values.get_update_flags()),
+                n_q_points(scratch.n_q_points),
+                n_face_q_points(scratch.n_face_q_points),
+                dofs_per_cell(scratch.dofs_per_cell),
+                //local_dof_indices(scratch.local_dof_indices),
+                mapExtractors(scratch.mapExtractors),
+                mapComponentMasks(scratch.mapComponentMasks),
+                boundary_values_map_adouble(scratch.boundary_values_map_adouble)
+        {}
+    };
+
+    void copy_local_to_global(const PerTaskData &data);
+    void assemble_one_cell(const typename DoFHandler<dim>::active_cell_iterator& cell,
+                                                           ScratchData& scratch,
+                                                           PerTaskData& data);
 
 public:
     // Additional deal.II specific data
@@ -245,8 +426,23 @@ public:
     dealiiFiniteElementWeakForm<dim>*         m_weakForm;
     std::vector<dealiiFiniteElementDOF<dim>*> m_DOFs;
     unsigned int                              m_no_components;
-    std::vector<unsigned int>                 m_block_component;
+    std::vector<unsigned int>                 m_sub_blocks;
     std::vector<types::global_dof_index>      m_dofs_per_block;
+
+    // Used to identify FEValues/FEFaceValues that belong to a particular equation
+    map_String_FEValuesExtractor m_mapExtractors;
+    // Used to identify DOFs that belong to a particular equation
+    map_string_ComponentMask m_mapComponentMasks;
+
+    bool m_bPrintInfo;
+
+    bool        m_bUseOpenMP;
+    int         m_omp_num_threads;
+    std::string m_omp_schedule;
+    int         m_omp_shedule_chunk_size;
+
+    int numberOfAssembled;
+    int n_active_cells;
 };
 
 template <int dim>
@@ -255,6 +451,28 @@ dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
 {
     m_pfeModel = NULL;
     m_weakForm = NULL;
+
+    daeConfig& cfg = daeConfig::GetConfig();
+    m_bPrintInfo = cfg.GetBoolean  ("daetools.deal_II.printInfo", false);
+
+    m_bUseOpenMP = cfg.GetBoolean("daetools.deal_II.assembly.useOpenMP", false);
+
+    m_omp_num_threads = cfg.GetInteger("daetools.deal_II.assembly.ompNumThreads", 1);
+    if(m_omp_num_threads > 1)
+        omp_set_num_threads(m_omp_num_threads);
+
+    m_omp_schedule           = cfg.GetString ("daetools.deal_II.assembly.ompSchedule",         "default");
+    m_omp_shedule_chunk_size = cfg.GetInteger("daetools.deal_II.assembly.ompScheduleChunkSize", 0);
+
+    // If the schedule in the config file is 'default' then it is left to the implementation default
+    if(m_omp_schedule == "static")
+        omp_set_schedule(omp_sched_static, m_omp_shedule_chunk_size);
+    else if(m_omp_schedule == "dynamic")
+        omp_set_schedule(omp_sched_dynamic, m_omp_shedule_chunk_size);
+    else if(m_omp_schedule == "guided")
+        omp_set_schedule(omp_sched_guided, m_omp_shedule_chunk_size);
+    else if(m_omp_schedule == "auto")
+        omp_set_schedule(omp_sched_auto, m_omp_shedule_chunk_size);
 }
 
 template <int dim>
@@ -336,32 +554,61 @@ void dealiiFiniteElementSystem<dim>::setup_system()
 {
     dof_handler.distribute_dofs (*fe);
 
-    size_t n_dofs = m_DOFs.size();
-
     m_no_components = 0;
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
         m_no_components += m_DOFs[i]->m_nMultiplicity;
+    if(m_bPrintInfo)
+        printf("m_no_components = %d\n", m_no_components);
 
-    //m_block_component.clear();
-    //for(unsigned int i = 0; i < n_dofs; i++)
-    //    m_block_component.insert(m_block_component.end(), m_DOFs[i]->m_nMultiplicity, i);
+    size_t n_blocks = m_DOFs.size();
 
-    DoFRenumbering::component_wise(dof_handler);//, m_block_component);
+    if(m_bPrintInfo)
+    {
+        printf("n_blocks fe     = %d\n", fe->n_blocks());
+        printf("n_components fe = %d\n", fe->n_components());
+        printf("is_primitive fe = %d\n", fe->is_primitive());
+    }
 
-    m_dofs_per_block.resize(n_dofs);
-    DoFTools::count_dofs_per_block (dof_handler, m_dofs_per_block);//, m_block_component);
+    // Important!
+    // If we use primitive FE we need to mark components that belong to the same vector dof,
+    //   i.e. m_sub_blocks = [0, 0, 1, 2]
+    //   (the number of components is equal to the number of blocks).
+    // If some of the FE spaces in the FESystem are a non-primitive FE we *can not* use m_sub_blocks
+    //   and it must be left empty
+    //   (the number of components is not equal to the number of blocks).
+    m_sub_blocks.clear();
+    if(fe->is_primitive()) // || (fe->n_blocks() == fe->n_components()))
+    {
+        for(unsigned int dof = 0; dof < m_DOFs.size(); dof++)
+            for(unsigned int i = 0; i < m_DOFs[dof]->m_nMultiplicityForFESystem; i++)
+                m_sub_blocks.push_back(dof);
 
-    //for(unsigned int i = 0; i < m_no_components; i++)
-    //    printf("m_block_component[%d] = %d\n", i, m_block_component[i]);
-    for(unsigned int i = 0; i < n_dofs; i++)
-        printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
+        if(m_bPrintInfo)
+            for(unsigned int i = 0; i < m_sub_blocks.size(); i++)
+                printf("m_sub_blocks[%d] = %d\n", i, m_sub_blocks[i]);
+    }
+
+    DoFRenumbering::component_wise(dof_handler, m_sub_blocks);
+
+    m_dofs_per_block.resize(n_blocks);
+    DoFTools::count_dofs_per_block (dof_handler, m_dofs_per_block, m_sub_blocks);
+    if(m_bPrintInfo)
+        for(unsigned int i = 0; i < m_dofs_per_block.size(); i++)
+            printf("m_dofs_per_block[%d] = %d\n", i, m_dofs_per_block[i]);
+
+    std::vector<unsigned int> dofs_per_component(fe->n_components());
+    DoFTools::count_dofs_per_component (dof_handler, dofs_per_component);
+    if(m_bPrintInfo)
+        for(unsigned int i = 0; i < dofs_per_component.size(); i++)
+            printf("dofs_per_component[%d] = %d\n", i, dofs_per_component[i]);
 
     const unsigned int n_couplings = dof_handler.max_couplings_between_dofs();
-    //printf("n_couplings = %d\n", n_couplings);
+    if(m_bPrintInfo)
+        printf("n_couplings = %d\n", n_couplings);
 
-    sparsity_pattern.reinit (n_dofs, n_dofs);
-    for(unsigned int i = 0; i < n_dofs; i++)
-        for(unsigned int j = 0; j < n_dofs; j++)
+    sparsity_pattern.reinit (n_blocks, n_blocks);
+    for(unsigned int i = 0; i < n_blocks; i++)
+        for(unsigned int j = 0; j < n_blocks; j++)
             sparsity_pattern.block(i, j).reinit (m_dofs_per_block[i], m_dofs_per_block[j], n_couplings);
 
     sparsity_pattern.collect_sizes();
@@ -372,20 +619,60 @@ void dealiiFiniteElementSystem<dim>::setup_system()
     system_matrix.reinit (sparsity_pattern);
     system_matrix_dt.reinit(sparsity_pattern);
 
-    solution.reinit (n_dofs);
-    for(unsigned int i = 0; i < n_dofs; i++)
+    solution.reinit (n_blocks);
+    for(unsigned int i = 0; i < n_blocks; i++)
         solution.block(i).reinit(m_dofs_per_block[i]);
     solution.collect_sizes();
 
-    datareporter_solution.reinit (n_dofs);
-    for(unsigned int i = 0; i < n_dofs; i++)
+    datareporter_solution.reinit (n_blocks);
+    for(unsigned int i = 0; i < n_blocks; i++)
         datareporter_solution.block(i).reinit(m_dofs_per_block[i]);
     datareporter_solution.collect_sizes();
 
-    system_rhs.reinit (n_dofs);
-    for(unsigned int i = 0; i < n_dofs; i++)
+    system_rhs.reinit (n_blocks);
+    for(unsigned int i = 0; i < n_blocks; i++)
         system_rhs.block(i).reinit(m_dofs_per_block[i]);
     system_rhs.collect_sizes();
+
+    int currentIndex = 0;
+    for(unsigned int k = 0; k < m_DOFs.size(); k++)
+    {
+        const dealiiFiniteElementDOF<dim>& dof = *m_DOFs[k];
+
+        if(dof.m_nMultiplicity == 1)
+        {
+            if(m_bPrintInfo)
+                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            m_mapExtractors[dof.m_strName]     = FEValuesExtractors::Scalar(currentIndex);
+            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
+        }
+        else
+        {
+            if(m_bPrintInfo)
+                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            m_mapExtractors[dof.m_strName]     = FEValuesExtractors::Vector(currentIndex);
+            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
+        }
+
+        currentIndex += dof.m_nMultiplicity;
+    }
+}
+
+template <int dim>
+std::vector< Point<dim> > dealiiFiniteElementSystem<dim>::GetDOFSupportPoints() const
+{
+    std::vector< Point<dim> > support_points;
+    unsigned int n_dofs = dof_handler.n_dofs();
+    support_points.resize(n_dofs);
+
+    // We need FEValues to get the mapping object
+    FEValues<dim>  fe_values (*fe, *m_quadrature_formula,
+                              update_values   | update_gradients |
+                              update_quadrature_points | update_normal_vectors | update_JxW_values);
+    const Mapping<dim>& mapping = fe_values.get_mapping();
+
+    DoFTools::map_dofs_to_support_points (mapping, dof_handler, support_points);
+    return support_points;
 }
 
 template <int dim>
@@ -407,12 +694,11 @@ void dealiiFiniteElementSystem<dim>::AssembleSystem()
 }
 
 template <int dim>
-void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_cell,
-                                                   const unsigned int n_q_points,
-                                                   feCellContextImpl< dim,FEValues<dim> >& cellContext,
-                                                   boost::numeric::ublas::matrix<adouble>& cell_matrix_dt,
-                                                   boost::numeric::ublas::matrix<adouble>& cell_matrix,
-                                                   std::vector<adouble>& cell_rhs)
+void dealiiFiniteElementSystem<dim>::cell_matrix_contribution(const unsigned int dofs_per_cell,
+                                                              const unsigned int n_q_points,
+                                                              feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                                                              boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                                              feExpression<dim>& contribution)
 {
     for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
     {
@@ -426,12 +712,13 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
             {
                 cellContext.m_j = j;
 
-                /* Stifness matrix (Aij) */
-                if(m_weakForm->m_Aij.m_node)
+                if(contribution.m_node)
                 {
-                    feRuntimeNumber<dim> result = m_weakForm->m_Aij.m_node->Evaluate(&cellContext);
+                    feRuntimeNumber<dim> result = contribution.m_node->Evaluate_with_GIL(&cellContext);
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                        throw std::runtime_error(std::string("Invalid Aij expression specified (it must be a scalar value or adouble)"));
+                        throw std::runtime_error(std::string("Invalid expression specified:") +
+                                                 contribution.ToString() +
+                                                 std::string(" (its result must be a scalar value or adouble)"));
 
                     adouble res = getValueFromNumber<dim>(result);
                     if(res.node)
@@ -440,31 +727,35 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
                     if(hasNonzeroValue(res))
                         cell_matrix(i,j) += res;
                 }
-
-                /* Mass matrix (Mij) */
-                if(m_weakForm->m_Mij.m_node)
-                {
-                    feRuntimeNumber<dim> result = m_weakForm->m_Mij.m_node->Evaluate(&cellContext);
-                    if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                        throw std::runtime_error(std::string("Invalid Mij expression specified (it must be a scalar value or adouble)"));
-
-                    adouble res = getValueFromNumber<dim>(result);
-                    if(res.node)
-                        res.node = adNode::SimplifyNode(res.node);
-
-                    if(hasNonzeroValue(res))
-                        cell_matrix_dt(i,j) += res;
-                }
             }
+        }
+    }
+}
 
-            /* Load vector (Fi) */
-            if(m_weakForm->m_Fi.m_node)
+template <int dim>
+void dealiiFiniteElementSystem<dim>::cell_rhs_contribution(const unsigned int dofs_per_cell,
+                                                           const unsigned int n_q_points,
+                                                           feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                                                           std::vector<adouble>& cell_rhs,
+                                                           feExpression<dim>& contribution)
+{
+    for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
+    {
+        cellContext.m_q = q_point;
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            cellContext.m_i = i;
+
+            if(contribution.m_node)
             {
                 cellContext.m_j = -1; // Set the unphysical value since it must not be used in Fi contributions
 
-                feRuntimeNumber<dim> result = m_weakForm->m_Fi.m_node->Evaluate(&cellContext);
+                feRuntimeNumber<dim> result = contribution.m_node->Evaluate_with_GIL(&cellContext);
                 if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
-                    throw std::runtime_error(std::string("Invalid Fi expression specified: (it must be a scalar value or adouble)"));
+                    throw std::runtime_error(std::string("Invalid expression specified:") +
+                                             contribution.ToString() +
+                                             std::string(" (its result must be a scalar value or adouble)"));
 
                 adouble res = getValueFromNumber<dim>(result);
                 if(res.node)
@@ -478,12 +769,134 @@ void dealiiFiniteElementSystem<dim>::assemble_cell(const unsigned int dofs_per_c
 }
 
 template <int dim>
+void dealiiFiniteElementSystem<dim>::cell_matrix_contribution(const unsigned int dofs_per_cell,
+                                                              const unsigned int n_q_points,
+                                                              feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                                                              boost::numeric::ublas::matrix<adouble>& cell_matrix,
+                                                              feExpression<dim>& q_term,
+                                                              feExpression<dim>& i_term,
+                                                              feExpression<dim>& j_term)
+{
+    for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
+    {
+        // Matrix will be initialised with feRuntimeNumber<dim> objects with eFEInvalid type
+        boost::numeric::ublas::matrix< feRuntimeNumber<dim> > cell_matrix_temp(dofs_per_cell, dofs_per_cell);
+
+        cellContext.m_q = q_point;
+
+        feRuntimeNumber<dim> q_rt(0.0);
+        if(q_term.m_node)
+            q_rt = q_term.m_node->Evaluate_with_GIL(&cellContext);
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            cellContext.m_i = i;
+
+            feRuntimeNumber<dim> i_rt(0.0);
+            if(i_term.m_node)
+                i_rt = i_term.m_node->Evaluate_with_GIL(&cellContext);
+
+            for(unsigned int j = 0; j < dofs_per_cell; ++j)
+            {
+                cellContext.m_j = j;
+
+                feRuntimeNumber<dim> j_rt(0.0);
+                if(j_term.m_node)
+                    j_rt = j_term.m_node->Evaluate_with_GIL(&cellContext);
+
+                // If it is a first addition do an assignment; otherwise add the new value to the existing item
+                if(cell_matrix_temp(i,j).m_eType == eFEInvalid)
+                    cell_matrix_temp(i,j) = i_rt * j_rt;
+                else
+                    cell_matrix_temp(i,j) = cell_matrix_temp(i,j) + i_rt * j_rt;
+            }
+        }
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+            for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                cell_matrix_temp(i,j) = q_rt * cell_matrix_temp(i,j);
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            for(unsigned int j = 0; j < dofs_per_cell; ++j)
+            {
+                feRuntimeNumber<dim>& result = cell_matrix_temp(i,j);
+
+                if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                    throw std::runtime_error(std::string("Invalid expression specified: ") +
+                                             (q_term*i_term*j_term).ToString() +
+                                             std::string(" (its result must be a scalar value or adouble)"));
+
+                adouble res = getValueFromNumber<dim>(result);
+                if(res.node)
+                    res.node = adNode::SimplifyNode(res.node);
+
+                if(hasNonzeroValue(res))
+                    cell_matrix(i,j) += res;
+            }
+        }
+    }
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::cell_rhs_contribution(const unsigned int dofs_per_cell,
+                                                           const unsigned int n_q_points,
+                                                           feCellContextImpl< dim,FEValues<dim> >& cellContext,
+                                                           std::vector<adouble>& cell_rhs,
+                                                           feExpression<dim>& q_term,
+                                                           feExpression<dim>& i_term)
+{
+    for(unsigned int q_point = 0; q_point < n_q_points; ++q_point)
+    {
+        // Vector will be initialised with feRuntimeNumber<dim> objects with eFEInvalid type
+        std::vector< feRuntimeNumber<dim> > cell_rhs_temp(dofs_per_cell);
+
+        cellContext.m_q = q_point;
+
+        feRuntimeNumber<dim> q_rt(0.0);
+        if(q_term.m_node)
+            q_rt = q_term.m_node->Evaluate_with_GIL(&cellContext);
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            cellContext.m_i = i;
+
+            feRuntimeNumber<dim> i_rt(0.0);
+            if(i_term.m_node)
+                i_rt = i_term.m_node->Evaluate_with_GIL(&cellContext);
+
+            cell_rhs_temp[i] = i_rt;
+        }
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+            cell_rhs_temp[i] = q_rt * cell_rhs_temp[i];
+
+        for(unsigned int i = 0; i < dofs_per_cell; ++i)
+        {
+            feRuntimeNumber<dim>& result = cell_rhs_temp[i];
+
+            if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
+                throw std::runtime_error(std::string("Invalid expression specified: ") +
+                                         (q_term*i_term).ToString() +
+                                         std::string(" (its result must be a scalar value or adouble)"));
+
+            adouble res = getValueFromNumber<dim>(result);
+            if(res.node)
+                res.node = adNode::SimplifyNode(res.node);
+
+            if(hasNonzeroValue(res))
+                cell_rhs[i] += res;
+        }
+    }
+}
+
+template <int dim>
 void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int face,
                                                               FEFaceValues<dim>& fe_face_values,
                                                               const unsigned int dofs_per_cell,
                                                               const unsigned int n_face_q_points,
                                                               feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
-                                                              typename DoFHandler<dim>::active_cell_iterator& cell,
+                                                              const typename DoFHandler<dim>::active_cell_iterator& cell,
                                                               boost::numeric::ublas::matrix<adouble>& cell_matrix,
                                                               std::vector<adouble>& cell_rhs)
 {
@@ -507,7 +920,7 @@ void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int
                     if(!faceAij.m_node)
                         throw std::runtime_error(std::string("Empty innerCellFaceAij expression specified"));
 
-                    feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
+                    feRuntimeNumber<dim> result = faceAij.m_node->Evaluate_with_GIL(&cellFaceContext);
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                         throw std::runtime_error(std::string("Invalid innerCellFaceAij expression specified (it must be a scalar value or adouble)"));
 
@@ -528,7 +941,7 @@ void dealiiFiniteElementSystem<dim>::assemble_inner_cell_face(const unsigned int
 
                 cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
 
-                feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
+                feRuntimeNumber<dim> result = faceFi.m_node->Evaluate_with_GIL(&cellFaceContext);
                 if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                     throw std::runtime_error(std::string("Invalid innerCellFaceFi expression specified (it must be a scalar value or adouble)"));
 
@@ -550,7 +963,7 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
                                                             const unsigned int dofs_per_cell,
                                                             const unsigned int n_face_q_points,
                                                             feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
-                                                            typename DoFHandler<dim>::active_cell_iterator& cell,
+                                                            const typename DoFHandler<dim>::active_cell_iterator& cell,
                                                             boost::numeric::ublas::matrix<adouble>& cell_matrix,
                                                             std::vector<adouble>& cell_rhs)
 {
@@ -580,7 +993,7 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
                         if(!faceAij.m_node)
                             throw std::runtime_error(std::string("Empty boundaryFaceAij expression specified"));
 
-                        feRuntimeNumber<dim> result = faceAij.m_node->Evaluate(&cellFaceContext);
+                        feRuntimeNumber<dim> result = faceAij.m_node->Evaluate_with_GIL(&cellFaceContext);
                         if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                             throw std::runtime_error(std::string("Invalid boundaryFaceAij expression specified (it must be a scalar value or adouble)"));
 
@@ -601,7 +1014,7 @@ void dealiiFiniteElementSystem<dim>::assemble_boundary_face(const unsigned int f
 
                     cellFaceContext.m_j = -1; // Set the unphysical value since it must not be used in faceFi contributions
 
-                    feRuntimeNumber<dim> result = faceFi.m_node->Evaluate(&cellFaceContext);
+                    feRuntimeNumber<dim> result = faceFi.m_node->Evaluate_with_GIL(&cellFaceContext);
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                         throw std::runtime_error(std::string("Invalid boundaryFaceFi expression specified (it must be a scalar value or adouble)"));
 
@@ -648,7 +1061,7 @@ void dealiiFiniteElementSystem<dim>::integrate_volume_integrals(const unsigned i
                 {
                     cellContext.m_j = j;
 
-                    feRuntimeNumber<dim> result = viExpression.m_node->Evaluate(&cellContext);
+                    feRuntimeNumber<dim> result = viExpression.m_node->Evaluate_with_GIL(&cellContext);
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                         throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
 
@@ -665,6 +1078,8 @@ void dealiiFiniteElementSystem<dim>::integrate_volume_integrals(const unsigned i
         // Finally, add the sum to the vector's item v
         std::pair<adouble,adouble>& pad = m_arrVolumeIntegrals[v];
         adouble& pad_integral = pad.second;
+        if(adIntegral.node)
+            adIntegral.node = adNode::SimplifyNode(adIntegral.node);
         pad_integral += adIntegral;
     }
 }
@@ -676,7 +1091,7 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
                                                                  const unsigned int dofs_per_cell,
                                                                  const unsigned int n_face_q_points,
                                                                  feCellContextImpl< dim,FEFaceValues<dim> >& cellFaceContext,
-                                                                 typename DoFHandler<dim>::active_cell_iterator& cell)
+                                                                 const typename DoFHandler<dim>::active_cell_iterator& cell)
 {
     typename map_Uint_vector_pair_Variable_Expression::const_iterator itboundaryIntegral = m_weakForm->m_mapSurfaceIntegrals.find(boundary_id);
     if(itboundaryIntegral != m_weakForm->m_mapSurfaceIntegrals.end())
@@ -687,7 +1102,7 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
 
         const std::vector<pair_Variable_Expression>& arrExpressions = itboundaryIntegral->second;
 
-        // Get the vector of pairs <variable,integral_adouble_expression> where the integral expressions wil be stored
+        // Get the vector of pairs <variable,integral_adouble_expression> where the integral expressions will be stored
         std::vector< std::pair<adouble,adouble> >& vpaa = m_mapSurfaceIntegrals[boundary_id];
 
         for(int v = 0; v < arrExpressions.size(); v++)
@@ -710,7 +1125,7 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
                     cellFaceContext.m_i = i;
                     cellFaceContext.m_j = -1;
 
-                    feRuntimeNumber<dim> result = siExpression.m_node->Evaluate(&cellFaceContext);
+                    feRuntimeNumber<dim> result = siExpression.m_node->Evaluate_with_GIL(&cellFaceContext);
                     if(result.m_eType != eFEScalar && result.m_eType != eFEScalar_adouble)
                         throw std::runtime_error(std::string("Invalid boundaryIntegral expression specified (it must be a scalar value or adouble)"));
 
@@ -726,9 +1141,244 @@ void dealiiFiniteElementSystem<dim>::integrate_surface_integrals(const unsigned 
             // Finally, add the sum to the vpaa vector's item v (which is the vector at boundary=ID)
             std::pair<adouble,adouble>& pad = vpaa[v];
             adouble& pad_integral = pad.second;
+            if(adIntegral.node)
+                adIntegral.node = adNode::SimplifyNode(adIntegral.node);
             pad_integral += adIntegral;
         }
     }
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::assemble_one_cell(const typename DoFHandler<dim>::active_cell_iterator& cell,
+                                                       ScratchData& scratch,
+                                                       PerTaskData& data)
+{
+    CellId id = cell->id();
+    data.id = id;
+
+    FEValues<dim>&                              fe_values                   = scratch.fe_values;
+    FEFaceValues<dim>&                          fe_face_values              = scratch.fe_face_values;
+    const unsigned int                          n_q_points                  = scratch.n_q_points;
+    const unsigned int                          n_face_q_points             = scratch.n_face_q_points;
+    const unsigned int                          dofs_per_cell               = scratch.dofs_per_cell;
+    map_String_FEValuesExtractor&               mapExtractors               = scratch.mapExtractors;
+    map_string_ComponentMask&                   mapComponentMasks           = scratch.mapComponentMasks;
+    std::map<types::global_dof_index, adouble>& boundary_values_map_adouble = scratch.boundary_values_map_adouble;
+
+    boost::numeric::ublas::matrix<adouble>& cell_matrix       = data.cell_matrix;
+    boost::numeric::ublas::matrix<adouble>& cell_matrix_dt    = data.cell_matrix_dt;
+    std::vector<adouble>&                   cell_rhs          = data.cell_rhs;
+    std::vector<unsigned int>&              local_dof_indices = data.local_dof_indices;
+
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+
+    cell_matrix.clear();
+    cell_matrix_dt.clear();
+    std::fill(cell_rhs.begin(), cell_rhs.end(), adouble(0.0));
+
+    fe_values.reinit(cell);
+    cell->get_dof_indices(local_dof_indices);
+
+    //printf("local_dof_indices = [");
+    //for(unsigned int i = 0; i < local_dof_indices.size(); i++)
+    //    printf("%d, ", local_dof_indices[i]);
+    //printf("]\n");
+
+    for(size_t k = 0; k < m_weakForm->m_Mij.size(); k++)
+    {
+        dealiiCellContribution<dim>& contribution = m_weakForm->m_Mij[k];
+        //printf("Mij = %s\n", contribution.m_single.ToString().c_str());
+
+        if(contribution.m_eContributionType == eExpression_single)
+            cell_matrix_contribution(dofs_per_cell,
+                                     n_q_points,
+                                     cellContext,
+                                     cell_matrix_dt,
+                                     contribution.m_single);
+
+        else if(contribution.m_eContributionType == eExpression_qij)
+            cell_matrix_contribution(dofs_per_cell,
+                                     n_q_points,
+                                     cellContext,
+                                     cell_matrix_dt,
+                                     contribution.m_q_loop, contribution.m_i_loop, contribution.m_j_loop);
+    }
+
+    for(size_t k = 0; k < m_weakForm->m_Aij.size(); k++)
+    {
+        dealiiCellContribution<dim>& contribution = m_weakForm->m_Aij[k];
+        //printf("Aij = %s\n", contribution.m_single.ToString().c_str());
+
+        if(contribution.m_eContributionType == eExpression_single)
+            cell_matrix_contribution(dofs_per_cell,
+                                     n_q_points,
+                                     cellContext,
+                                     cell_matrix,
+                                     contribution.m_single);
+
+        else if(contribution.m_eContributionType == eExpression_qij)
+            cell_matrix_contribution(dofs_per_cell,
+                                     n_q_points,
+                                     cellContext,
+                                     cell_matrix,
+                                     contribution.m_q_loop, contribution.m_i_loop, contribution.m_j_loop);
+    }
+
+    for(size_t k = 0; k < m_weakForm->m_Fi.size(); k++)
+    {
+        dealiiCellContribution<dim>& contribution = m_weakForm->m_Fi[k];
+        //printf("Fi = %s\n", contribution.m_single.ToString().c_str());
+
+        if(contribution.m_eContributionType == eExpression_single)
+            cell_rhs_contribution(dofs_per_cell,
+                                  n_q_points,
+                                  cellContext,
+                                  cell_rhs,
+                                  contribution.m_single);
+
+        else if(contribution.m_eContributionType == eExpression_qi)
+            cell_rhs_contribution(dofs_per_cell,
+                                  n_q_points,
+                                  cellContext,
+                                  cell_rhs,
+                                  contribution.m_q_loop, contribution.m_i_loop);
+    }
+
+    integrate_volume_integrals(dofs_per_cell,
+                               n_q_points,
+                               cellContext);
+
+    /* Typically boundary conditions of the Neumann or Robin type. */
+    for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
+    {
+        // Only boundary faces
+        if(cell->face(face)->at_boundary())
+        {
+            const unsigned int id = cell->face(face)->boundary_id();
+
+            assemble_boundary_face(face,
+                                   id,
+                                   fe_face_values,
+                                   dofs_per_cell,
+                                   n_face_q_points,
+                                   cellFaceContext,
+                                   cell,
+                                   cell_matrix,
+                                   cell_rhs);
+
+            integrate_surface_integrals(face,
+                                        id,
+                                        fe_face_values,
+                                        dofs_per_cell,
+                                        n_face_q_points,
+                                        cellFaceContext,
+                                        cell);
+        }
+
+        // All faces
+        assemble_inner_cell_face(face,
+                                 fe_face_values,
+                                 dofs_per_cell,
+                                 n_face_q_points,
+                                 cellFaceContext,
+                                 cell,
+                                 cell_matrix,
+                                 cell_rhs);
+    }
+
+/*
+    printf("cell_matrix before bcs:\n");
+    for(int x = 0; x < cell_matrix.size1(); x++)
+    {
+        printf("[");
+        for(int y = 0; y < cell_matrix.size2(); y++)
+            printf("%+f ", cell_matrix(x,y).getValue());
+        printf("]\n");
+    }
+    printf("\n");
+
+    printf("cell_rhs before bcs:\n");
+    printf("[");
+    for(int x = 0; x < cell_rhs.size(); x++)
+        printf("%+f ", cell_rhs[x].getValue());
+    printf("]\n");
+    printf("\n");
+*/
+
+    // Apply a map with values of Dirichlet BCs using the adouble version of local_apply_boundary_values()
+    // and local_process_mass_matrix() functions.
+    {
+        // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
+        daeMatrixTools::local_apply_boundary_values(boundary_values_map_adouble,
+                                                    local_dof_indices,
+                                                    cell_matrix,
+                                                    cell_rhs);
+
+        // Modify the local mass matrix for those nodes that have Dirichlet boundary conditions set
+        daeMatrixTools::local_process_mass_matrix(boundary_values_map_adouble,
+                                                  local_dof_indices,
+                                                  cell_matrix_dt);
+    }
+
+/*
+    printf("cell_matrix after bcs:\n");
+    for(int x = 0; x < cell_matrix.size1(); x++)
+    {
+        printf("[");
+        for(int y = 0; y < cell_matrix.size2(); y++)
+            printf("%+f ", cell_matrix(x,y).getValue());
+        printf("]\n");
+    }
+    printf("\n");
+
+    printf("cell_rhs after bcs:\n");
+    printf("[");
+    for(int x = 0; x < cell_rhs.size(); x++)
+        printf("%+f ", cell_rhs[x].getValue());
+    printf("]\n");
+    printf("\n");
+*/
+
+    // Do the final simplification before adding the local contributions to the system matrices
+    for(unsigned int i = 0; i < dofs_per_cell; ++i)
+    {
+        if(cell_rhs[i].node)
+            cell_rhs[i].node = adNode::SimplifyNode(cell_rhs[i].node);
+
+        for(unsigned int j = 0; j < dofs_per_cell; ++j)
+        {
+            if(cell_matrix(i,j).node)
+                cell_matrix(i,j).node = adNode::SimplifyNode(cell_matrix(i,j).node);
+            if(cell_matrix_dt(i,j).node)
+                cell_matrix_dt(i,j).node = adNode::SimplifyNode(cell_matrix_dt(i,j).node);
+        }
+    }
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::copy_local_to_global (const PerTaskData &data)
+{
+
+    // Add local contributions Aij, Mij, Fi to the system matrices/vector
+    for(unsigned int i = 0; i < data.dofs_per_cell; ++i)
+    {
+        for(unsigned int j = 0; j < data.dofs_per_cell; ++j)
+        {
+            if(hasNonzeroValue( data.cell_matrix(i,j) ))
+                system_matrix.add(data.local_dof_indices[i], data.local_dof_indices[j], data.cell_matrix(i,j));
+
+            if(hasNonzeroValue( data.cell_matrix_dt(i,j) ))
+                system_matrix_dt.add(data.local_dof_indices[i], data.local_dof_indices[j], data.cell_matrix_dt(i,j));
+        }
+        if(hasNonzeroValue( data.cell_rhs[i] ))
+            system_rhs(data.local_dof_indices[i]) += data.cell_rhs[i];
+    }
+
+    float percent = 100.0*(numberOfAssembled+1)/n_active_cells;
+    printf("\rAssembling the cell %d / %d (%5.1f%%)...", percent, numberOfAssembled+1, n_active_cells);
+    fflush(stdout);
+    numberOfAssembled++;
 }
 
 template <int dim>
@@ -744,31 +1394,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
     const unsigned int n_q_points      = quadrature_formula.size();
     const unsigned int n_face_q_points = face_quadrature_formula.size();
+    const unsigned int dofs_per_cell   = fe->dofs_per_cell;
 
-    const unsigned int dofs_per_cell = fe->dofs_per_cell;
-
-    boost::numeric::ublas::matrix<adouble> cell_matrix   (dofs_per_cell, dofs_per_cell);
-    boost::numeric::ublas::matrix<adouble> cell_matrix_dt(dofs_per_cell, dofs_per_cell);
-    std::vector<adouble>                   cell_rhs      (dofs_per_cell);
-
-    std::vector<unsigned int> local_dof_indices (dofs_per_cell);
-
-    FEValues<dim>  fe_values (*fe, quadrature_formula,
-                              update_values   | update_gradients |
-                              update_quadrature_points | update_normal_vectors | update_JxW_values);
-
-    FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
-                                      update_values | update_gradients | update_quadrature_points  |
-                                      update_normal_vectors | update_JxW_values);
-    
-    std::vector<types::global_dof_index> mapGlobalDOFtoBoundary;
-    DoFTools::map_dof_to_boundary_indices(dof_handler, mapGlobalDOFtoBoundary);
-
-    // Used to identify FEValues/FEFaceValues that belong to a particular equation
-    map_String_FEValuesExtractor mapExtractors;
-
-    // Used to identify DOFs that belong to a particular equation
-    map_string_ComponentMask mapComponentMasks;
+    std::map<types::global_dof_index, adouble> boundary_values_map_adouble;
+/*
     int currentIndex = 0;
     for(unsigned int k = 0; k < m_DOFs.size(); k++)
     {
@@ -776,27 +1405,24 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
         if(dof.m_nMultiplicity == 1)
         {
-            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
-            mapExtractors[dof.m_strName] = FEValuesExtractors::Scalar(currentIndex);
-            mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
+            if(m_bPrintInfo)
+                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Scalar(currentIndex);
+            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
         }
         else
         {
-            std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
-            mapExtractors[dof.m_strName] = FEValuesExtractors::Vector(currentIndex);
-            mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
+            if(m_bPrintInfo)
+                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Vector(currentIndex);
+            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
         }
 
         currentIndex += dof.m_nMultiplicity;
     }
-
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, mapExtractors);
+*/
 
     // Interpolate Dirichlet boundary conditions on the system matrix and rhs
-    //std::map<types::global_dof_index,  double> boundary_values_map_double;
-    std::map<types::global_dof_index, adouble> boundary_values_map_adouble;
-
     // Create a map with values for Dirichlet BCs using the adouble version of interpolate_boundary_values() function
     {
         typedef typename std::pair<std::string, const Function<dim,adouble>*>          pair_String_FunctionPtr;
@@ -813,30 +1439,35 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                 const std::string           variableName =  p.first;
                 const Function<dim,adouble>& fun          = *p.second;
 
-                typename map_string_ComponentMask::iterator iter = mapComponentMasks.find(variableName);
-                if(iter == mapComponentMasks.end())
+                typename map_string_ComponentMask::iterator iter = m_mapComponentMasks.find(variableName);
+                if(iter == m_mapComponentMasks.end())
                     throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
 
-                std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << " with sample value for component = 0 and at point (0,0,0): " << fun.value(Point<dim>(0,0,0), 0) << std::endl;
+                if(m_bPrintInfo)
+                    std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << std::endl;
 
                 daeVectorTools::interpolate_boundary_values (dof_handler,
                                                              id,
                                                              fun,
                                                              boundary_values_map_adouble,
                                                              iter->second);
-
-                //printf("bc[%d] = [", id);
-                //for(std::map<types::global_dof_index, double>::const_iterator it = boundary_values.begin(); it != boundary_values.end(); it++)
-                //    printf("(%d,%f) ", it->first, it->second);
-                //printf("]\n");
+                /*
+                if(m_bPrintInfo)
+                {
+                    printf("bc[%d] = [", id);
+                    for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
+                        printf("(%d,%f) ", it->first, it->second);
+                    printf("]\n");
+                }
+                */
             }
         }
     }
-    
+
     //for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
     //   printf("(%d,%f) ", it->first, it->second.getValue());
     //printf("\n");
-    
+
     // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects.
     // The integral expressions will be built and added later.
     for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapSurfaceIntegrals.begin(); it != m_weakForm->m_mapSurfaceIntegrals.end(); it++)
@@ -852,7 +1483,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             const adouble& ad_variable = pve.first;
             vpaa.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
         }
-        this->m_mapSurfaceIntegrals[id] = vpaa;
+        m_mapSurfaceIntegrals[id] = vpaa;
     }
 
     // Populate the vector std:vector< std::pair<adouble,adouble> > with variable adouble objects.
@@ -865,11 +1496,239 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         m_arrVolumeIntegrals.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
     }
 
-    int n_active_cells = triangulation.n_active_cells();
-    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active(),
-                                                   endc = dof_handler.end();    
+    n_active_cells = triangulation.n_active_cells();
+    numberOfAssembled = 0;
+
+    // TBB therads settings
+    daeConfig& cfg = daeGetConfig();
+    bool parallelAssembly;
+    unsigned int n_threads, queue_length, chunk_size;
+
+    parallelAssembly = cfg.GetBoolean("daetools.deal_II.assembly.parallelAssembly", false);
+    if(parallelAssembly)
+    {
+        n_threads = cfg.GetInteger("daetools.deal_II.assembly.numThreads", 0);
+        if(n_threads > 0)
+            MultithreadInfo::set_thread_limit(n_threads);
+
+        queue_length = 2 * MultithreadInfo::n_threads();
+        chunk_size   = 8;
+
+        unsigned int ql = cfg.GetInteger("daetools.deal_II.assembly.queueLength", 0);
+        if(ql > 0)
+            queue_length = ql;
+
+        unsigned int cs = cfg.GetInteger("daetools.deal_II.assembly.chunkSize", 0);
+        if(cs > 0)
+            chunk_size = cs;
+    }
+    else
+    {
+        n_threads    = 1;
+        MultithreadInfo::set_thread_limit(1);
+        queue_length = 1;
+        chunk_size   = 1;
+    }
+
+    if(m_bPrintInfo)
+    {
+        printf("n_threads    = %d\n", MultithreadInfo::n_threads());
+        printf("queue_length = %d\n", queue_length);
+        printf("chunk_size   = %d\n", chunk_size);
+    }
+
+    PerTaskData per_task_data(*fe);
+    ScratchData scratch(*fe,
+                        quadrature_formula,
+                        face_quadrature_formula,
+                        m_mapExtractors,
+                        m_mapComponentMasks,
+                        boundary_values_map_adouble);
+
+    // Acquire thread state and release the GIL so that the spawned worker-threads can acquire it when required.
+    INIT_THREAD_STATE_AND_RELEASE_GIL;
+
+    WorkStream::run (dof_handler.begin_active(),
+                     dof_handler.end(),
+                     *this,
+                     &dealiiFiniteElementSystem<dim>::assemble_one_cell,
+                     &dealiiFiniteElementSystem<dim>::copy_local_to_global,
+                     scratch,
+                     per_task_data,
+                     queue_length,
+                     chunk_size);
+
+    printf("\rAssembling the system... done.                      \n");
+    fflush(stdout);
+}
+
+template <int dim>
+void dealiiFiniteElementSystem<dim>::assemble_system_old()
+{
+    if(!m_weakForm)
+        throw std::runtime_error(std::string("The weak form has not been set"));
+    if(!m_pfeModel)
+        throw std::runtime_error(std::string("The finite element model has not been set"));
+
+    Quadrature<dim>&   quadrature_formula      = *m_quadrature_formula;
+    Quadrature<dim-1>& face_quadrature_formula = *m_face_quadrature_formula;
+
+    const unsigned int n_q_points      = quadrature_formula.size();
+    const unsigned int n_face_q_points = face_quadrature_formula.size();
+
+    const unsigned int dofs_per_cell = fe->dofs_per_cell;
+
+    std::map<types::global_dof_index, adouble> boundary_values_map_adouble;
+
+/*
+    int currentIndex = 0;
+    for(unsigned int k = 0; k < m_DOFs.size(); k++)
+    {
+        const dealiiFiniteElementDOF<dim>& dof = *m_DOFs[k];
+
+        if(dof.m_nMultiplicity == 1)
+        {
+            if(m_bPrintInfo)
+                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Scalar(currentIndex);
+            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
+        }
+        else
+        {
+            if(m_bPrintInfo)
+                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
+            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Vector(currentIndex);
+            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
+        }
+
+        currentIndex += dof.m_nMultiplicity;
+    }
+*/
+    // Interpolate Dirichlet boundary conditions on the system matrix and rhs
+    // Create a map with values for Dirichlet BCs using the adouble version of interpolate_boundary_values() function
+    {
+        typedef typename std::pair<std::string, const Function<dim,adouble>*>          pair_String_FunctionPtr;
+        typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
+
+        for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_adoubleFunctionsDirichletBC.begin(); it != m_weakForm->m_adoubleFunctionsDirichletBC.end(); it++)
+        {
+            const unsigned int   id                         = it->first;
+            const std::vector<pair_String_FunctionPtr>& bcs = it->second;
+
+            for(int k = 0; k < bcs.size(); k++)
+            {
+                pair_String_FunctionPtr p = bcs[k];
+                const std::string           variableName =  p.first;
+                const Function<dim,adouble>& fun          = *p.second;
+
+                typename map_string_ComponentMask::iterator iter = m_mapComponentMasks.find(variableName);
+                if(iter == m_mapComponentMasks.end())
+                    throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
+
+                if(m_bPrintInfo)
+                    std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << std::endl;
+
+                daeVectorTools::interpolate_boundary_values (dof_handler,
+                                                             id,
+                                                             fun,
+                                                             boundary_values_map_adouble,
+                                                             iter->second);
+                /*
+                if(m_bPrintInfo)
+                {
+                    printf("bc[%d] = [", id);
+                    for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
+                        printf("(%d,%f) ", it->first, it->second);
+                    printf("]\n");
+                }
+                */
+            }
+        }
+    }
+
+    //for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
+    //   printf("(%d,%f) ", it->first, it->second.getValue());
+    //printf("\n");
+
+    // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects.
+    // The integral expressions will be built and added later.
+    for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapSurfaceIntegrals.begin(); it != m_weakForm->m_mapSurfaceIntegrals.end(); it++)
+    {
+        const unsigned int                           id   = it->first;
+        const std::vector<pair_Variable_Expression>& vpve = it->second;
+
+        vector_pair_Variable_adouble vpaa;
+        vpaa.reserve(vpve.size());
+        for(size_t i = 0; i < vpve.size(); i++)
+        {
+            const pair_Variable_Expression& pve = vpve[i];
+            const adouble& ad_variable = pve.first;
+            vpaa.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
+        }
+        m_mapSurfaceIntegrals[id] = vpaa;
+    }
+
+    // Populate the vector std:vector< std::pair<adouble,adouble> > with variable adouble objects.
+    // The integral expressions will be built and added later.
+    m_arrVolumeIntegrals.reserve(m_weakForm->m_arrVolumeIntegrals.size());
+    for(size_t i = 0; i < m_weakForm->m_arrVolumeIntegrals.size(); i++)
+    {
+        const pair_Variable_Expression& pve = m_weakForm->m_arrVolumeIntegrals[i];
+        const adouble& ad_variable = pve.first;
+        m_arrVolumeIntegrals.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
+    }
+
+    n_active_cells = triangulation.n_active_cells();
+    numberOfAssembled = 0;
+//    omp_lock_t lock;
+//    omp_init_lock(&lock);
+
+//#pragma omp parallel if (m_bUseOpenMP)
+//{
+//    pyGILState GIL;
+
+    boost::numeric::ublas::matrix<adouble> cell_matrix   (dofs_per_cell, dofs_per_cell);
+    boost::numeric::ublas::matrix<adouble> cell_matrix_dt(dofs_per_cell, dofs_per_cell);
+    std::vector<adouble>                   cell_rhs      (dofs_per_cell);
+
+    std::vector<unsigned int> local_dof_indices (dofs_per_cell);
+
+    FEValues<dim>  fe_values (*fe, quadrature_formula,
+                              update_values   | update_gradients |
+                              update_quadrature_points | update_normal_vectors | update_JxW_values);
+
+    FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
+                                      update_values | update_gradients | update_quadrature_points  |
+                                      update_normal_vectors | update_JxW_values);
+
+    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, m_mapExtractors);
+    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, m_mapExtractors);
+
+    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active();
+    typename DoFHandler<dim>::active_cell_iterator endc = dof_handler.end();
+
+/*
+    int tid      = omp_get_thread_num();
+    int Nthreads = omp_get_num_threads();
+    int chunk    = n_active_cells / Nthreads;
+    int i_start  = chunk * tid;
+    int i_end    = (tid == Nthreads-1 ? n_active_cells : chunk*(tid+1));
+
+    printf("  Nthreads = %d\n", Nthreads);
+    printf("  chunk = %d\n", chunk);
+    printf("  Thread %d processing cells %d - %d\n", omp_get_thread_num(), i_start, i_end);
+    fflush(stdout);
+
+    std::advance(cell, i_start);
+
+    for(int cellCounter = i_start; (cellCounter < i_end) && (cell != dof_handler.end()); cellCounter++)
+*/
+
     for(int cellCounter = 0; cell != endc; ++cell, cellCounter++)
     {
+        //printf("  Thread %d processing cell %d\n", omp_get_thread_num(), cellCounter);
+        //fflush(stdout);
+
         cell_matrix.clear();
         cell_matrix_dt.clear();
         std::fill(cell_rhs.begin(), cell_rhs.end(), adouble(0.0));
@@ -877,12 +1736,70 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         fe_values.reinit(cell);
         cell->get_dof_indices(local_dof_indices);
 
-        assemble_cell(dofs_per_cell,
-                      n_q_points,
-                      cellContext,
-                      cell_matrix_dt,
-                      cell_matrix,
-                      cell_rhs);
+        //printf("local_dof_indices = [");
+        //for(unsigned int i = 0; i < local_dof_indices.size(); i++)
+        //    printf("%d, ", local_dof_indices[i]);
+        //printf("]\n");
+
+        for(size_t k = 0; k < m_weakForm->m_Mij.size(); k++)
+        {
+            dealiiCellContribution<dim>& contribution = m_weakForm->m_Mij[k];
+            //printf("Mij = %s\n", contribution.m_single.ToString().c_str());
+
+            if(contribution.m_eContributionType == eExpression_single)
+                cell_matrix_contribution(dofs_per_cell,
+                                         n_q_points,
+                                         cellContext,
+                                         cell_matrix_dt,
+                                         contribution.m_single);
+
+            else if(contribution.m_eContributionType == eExpression_qij)
+                cell_matrix_contribution(dofs_per_cell,
+                                         n_q_points,
+                                         cellContext,
+                                         cell_matrix_dt,
+                                         contribution.m_q_loop, contribution.m_i_loop, contribution.m_j_loop);
+        }
+
+        for(size_t k = 0; k < m_weakForm->m_Aij.size(); k++)
+        {
+            dealiiCellContribution<dim>& contribution = m_weakForm->m_Aij[k];
+            //printf("Aij = %s\n", contribution.m_single.ToString().c_str());
+
+            if(contribution.m_eContributionType == eExpression_single)
+                cell_matrix_contribution(dofs_per_cell,
+                                         n_q_points,
+                                         cellContext,
+                                         cell_matrix,
+                                         contribution.m_single);
+
+            else if(contribution.m_eContributionType == eExpression_qij)
+                cell_matrix_contribution(dofs_per_cell,
+                                         n_q_points,
+                                         cellContext,
+                                         cell_matrix,
+                                         contribution.m_q_loop, contribution.m_i_loop, contribution.m_j_loop);
+        }
+
+        for(size_t k = 0; k < m_weakForm->m_Fi.size(); k++)
+        {
+            dealiiCellContribution<dim>& contribution = m_weakForm->m_Fi[k];
+            //printf("Fi = %s\n", contribution.m_single.ToString().c_str());
+
+            if(contribution.m_eContributionType == eExpression_single)
+                cell_rhs_contribution(dofs_per_cell,
+                                      n_q_points,
+                                      cellContext,
+                                      cell_rhs,
+                                      contribution.m_single);
+
+            else if(contribution.m_eContributionType == eExpression_qi)
+                cell_rhs_contribution(dofs_per_cell,
+                                      n_q_points,
+                                      cellContext,
+                                      cell_rhs,
+                                      contribution.m_q_loop, contribution.m_i_loop);
+        }
 
         integrate_volume_integrals(dofs_per_cell,
                                    n_q_points,
@@ -945,21 +1862,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         printf("]\n");
         printf("\n");
     */
-        // double version, not used anymore
-/*      {
-            // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
-            daeMatrixTools::local_apply_boundary_values(boundary_values_map_double,
-                                                        local_dof_indices,
-                                                        cell_matrix,
-                                                        cell_rhs);
 
-            // Modify the local mass atrix for those nodes that have Dirichlet boundary conditions set
-            daeMatrixTools::local_process_mass_matrix(boundary_values_map_double,
-                                                      local_dof_indices,
-                                                      cell_matrix_dt);
-        }
-*/
-        
         // Apply a map with values of Dirichlet BCs using the adouble version of local_apply_boundary_values()
         // and local_process_mass_matrix() functions.
         {
@@ -969,7 +1872,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                                                         cell_matrix,
                                                         cell_rhs);
 
-            // Modify the local mass atrix for those nodes that have Dirichlet boundary conditions set
+            // Modify the local mass matrix for those nodes that have Dirichlet boundary conditions set
             daeMatrixTools::local_process_mass_matrix(boundary_values_map_adouble,
                                                       local_dof_indices,
                                                       cell_matrix_dt);
@@ -993,30 +1896,78 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
         printf("\n");
     */
 
-        // Add local contributions Aij, Mij, Fi to the system matrices/vector
+        // Do the final simplification before adding the local contributions to the system matrices
         for(unsigned int i = 0; i < dofs_per_cell; ++i)
         {
+            if(cell_rhs[i].node)
+                cell_rhs[i].node = adNode::SimplifyNode(cell_rhs[i].node);
+
             for(unsigned int j = 0; j < dofs_per_cell; ++j)
             {
-                if(hasNonzeroValue( cell_matrix(i,j) ))
-                    system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
-
-                if(hasNonzeroValue( cell_matrix_dt(i,j) ))
-                    system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
+                if(cell_matrix(i,j).node)
+                    cell_matrix(i,j).node = adNode::SimplifyNode(cell_matrix(i,j).node);
+                if(cell_matrix_dt(i,j).node)
+                    cell_matrix_dt(i,j).node = adNode::SimplifyNode(cell_matrix_dt(i,j).node);
             }
-            if(hasNonzeroValue( cell_rhs[i] ))
-                system_rhs(local_dof_indices[i]) += cell_rhs[i];
         }
-        
-        printf("\rAssembling the system... %5.1f%%", float((100.0*(cellCounter+1))/n_active_cells));
-        fflush(stdout);
-        
+
+        //omp_set_lock(&lock);
+        {
+            // Add local contributions Aij, Mij, Fi to the system matrices/vector
+            for(unsigned int i = 0; i < dofs_per_cell; ++i)
+            {
+                for(unsigned int j = 0; j < dofs_per_cell; ++j)
+                {
+                    if(hasNonzeroValue( cell_matrix(i,j) ))
+                        system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
+
+                    if(hasNonzeroValue( cell_matrix_dt(i,j) ))
+                        system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
+                }
+                if(hasNonzeroValue( cell_rhs[i] ))
+                    system_rhs(local_dof_indices[i]) += cell_rhs[i];
+            }
+
+            float percent = 100.0*(numberOfAssembled+1)/n_active_cells;
+            printf("\rAssembling the cell %d / %d (%5.1f%%)...", percent, numberOfAssembled+1, n_active_cells);
+            fflush(stdout);
+            numberOfAssembled++;
+        }
+        //omp_unset_lock(&lock);
+
+        //cell++;
+
     } // End cell iteration
-    printf("\rAssembling the system... done.  \n");
-    fflush(stdout);
-    
+//}
+
+/* Simplify items (DOES NOT WORK!!!!!)
+    adouble ad, adnew;
+    unsigned int col;
+    std::vector<unsigned int> cols;
+    for(unsigned int row = 0; row < system_matrix.n(); row++)
+    {
+        adouble& adfi = system_rhs[row];
+        adfi.node = adNode::SimplifyNode(adfi.node);
+
+        cols.clear();
+        RowIndices(row, cols);
+        for(unsigned int j = 0; j < cols.size(); j++)
+        {
+            col = cols[j];
+
+            ad = system_matrix(row,col);
+            adnew.node = adNode::SimplifyNode(ad.node);
+            system_matrix.set(row,col,adnew);
+
+            ad = system_matrix_dt(row,col);
+            adnew.node = adNode::SimplifyNode(ad.node);
+            system_matrix_dt.set(row,col,adnew);
+        }
+    }
+*/
+
     // Achtung, Achtung!!!
-    //   Hanging nodes are NOT supported at th moment!! 
+    //   Hanging nodes are NOT supported at the moment!!
     //   There must be a way to stop simulation if hanging nodes are detected.
 
     // If using refined grids condense hanging nodes
@@ -1025,6 +1976,9 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
 
     // What about this matrix? Should it also be condensed?
     //hanging_node_constraints.condense(system_matrix_dt);
+
+    printf("\rAssembling the system... done.                      \n");
+    fflush(stdout);
 }
 
 template <int dim>
@@ -1074,13 +2028,14 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
     feObjectInfo.m_VariableInfos.resize(m_DOFs.size());
 
     feObjectInfo.m_nTotalNumberDOFs         = dof_handler.n_dofs();
-    feObjectInfo.m_nNumberOfDOFsPerVariable = dof_handler.n_dofs() / m_no_components;
-
-    for(unsigned int i = 0; i < m_DOFs.size(); i++)
-    {
-        if(m_dofs_per_block[i] / m_DOFs[i]->m_nMultiplicity != feObjectInfo.m_nNumberOfDOFsPerVariable)
-            std::runtime_error("Number of DOFs per each component must be equal (for dof " + m_DOFs[i]->m_strName + ")");
-    }
+    feObjectInfo.m_nNumberOfDOFsPerVariable = 0;
+    //feObjectInfo.m_nNumberOfDOFsPerVariable = dof_handler.n_dofs() / m_no_components;
+    //
+    //for(unsigned int i = 0; i < m_DOFs.size(); i++)
+    //{
+    //    if(m_dofs_per_block[i] / m_DOFs[i]->m_nMultiplicity != feObjectInfo.m_nNumberOfDOFsPerVariable)
+    //        std::runtime_error("Number of DOFs per each component must be equal (for dof " + m_DOFs[i]->m_strName + ")");
+    //}
 
     for(unsigned int i = 0; i < m_DOFs.size(); i++)
     {
@@ -1088,6 +2043,7 @@ daeFiniteElementObjectInfo dealiiFiniteElementSystem<dim>::GetObjectInfo() const
         feObjectInfo.m_VariableInfos[i].m_strDescription = m_DOFs[i]->m_strDescription;
         feObjectInfo.m_VariableInfos[i].m_nMultiplicity  = m_DOFs[i]->m_nMultiplicity;
         feObjectInfo.m_VariableInfos[i].m_nNumberOfDOFs  = m_dofs_per_block[i];
+        feObjectInfo.m_VariableInfos[i].m_VariableType   = m_DOFs[i]->m_VariableType;
     }
 
     return feObjectInfo;
@@ -1140,22 +2096,33 @@ void dealiiFiniteElementSystem<dim>::RowIndices(unsigned int row, std::vector<un
 }
 
 template <int dim>
+void dealiiFiniteElementSystem<dim>::ClearAssembledSystem()
+{
+    system_matrix.clear();
+    system_matrix_dt.clear();
+    system_rhs.reinit(0);
+}
+
+
+template <int dim>
 dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Asystem() const
 {
-    dae::daeMatrix<adouble>* p = new daeFEBlockMatrix<adouble>(system_matrix);
-    return p;
+    BlockSparseMatrix<adouble>* Aij = const_cast<BlockSparseMatrix<adouble>*>(&system_matrix);
+    return new daeFEBlockMatrix<adouble>(*Aij);
 }
 
 template <int dim>
 dae::daeMatrix<adouble>* dealiiFiniteElementSystem<dim>::Msystem() const
 {
-    return new daeFEBlockMatrix<adouble>(system_matrix_dt);
+    BlockSparseMatrix<adouble>* Mij = const_cast<BlockSparseMatrix<adouble>*>(&system_matrix_dt);
+    return new daeFEBlockMatrix<adouble>(*Mij);
 }
 
 template <int dim>
 dae::daeArray<adouble>* dealiiFiniteElementSystem<dim>::Fload() const
 {
-    return new daeFEBlockArray<adouble>(system_rhs);
+    BlockVector<adouble>* Fi = const_cast<BlockVector<adouble>*>(&system_rhs);
+    return new daeFEBlockArray<adouble>(*Fi);
 }
 
 template <int dim>
@@ -1177,6 +2144,24 @@ std::vector<unsigned int> dealiiFiniteElementSystem<dim>::GetDOFtoBoundaryMap()
     std::vector<types::global_dof_index> mapGlobalDOFtoBoundary;
     DoFTools::map_dof_to_boundary_indices(dof_handler, mapGlobalDOFtoBoundary);
     return mapGlobalDOFtoBoundary;
+}
+
+template <int dim>
+std::vector<bool> dealiiFiniteElementSystem<dim>::GetBoundaryDOFs(const std::string& variableName, const std::set<types::boundary_id>& setBoundaryIDs)
+{
+    std::vector<bool> selectedDOFS;
+
+    selectedDOFS.resize(dof_handler.n_dofs());
+
+    typename map_string_ComponentMask::iterator iter = m_mapComponentMasks.find(variableName);
+    if(iter == m_mapComponentMasks.end())
+        throw std::runtime_error(std::string("Invalid DOF name in function GetBoundaryDOFs"));
+
+    const ComponentMask& component_mask = iter->second;
+
+    DoFTools::extract_boundary_dofs(dof_handler, component_mask, selectedDOFS, setBoundaryIDs);
+
+    return selectedDOFS;
 }
 
 template <int dim>

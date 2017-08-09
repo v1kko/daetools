@@ -52,7 +52,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>The temperature plot at t = 500s:</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_2-results.png</span>
-<span style='color:#cc0000;'>   :width: 600 px</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
+
+<span style='color:#cc0000;'>Animation:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_2-animation.gif</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> os, sys, numpy, json, tempfile
@@ -156,6 +161,14 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         T_base   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>300</span> <span style='color:#017a31;'># Base temperature, K</span>
         T_offset <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>50</span>  <span style='color:#017a31;'># Offset temperature, K</span>
 
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
+        dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
+
         <span style='color:#017a31;'># Boundary IDs</span>
         left_edge   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
         top_edge    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
@@ -169,14 +182,14 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
         <span style='color:#017a31;'># Function&lt;dim&gt; wrapper</span>
         <span style='color:#3605fb;'>self</span>.fun_u_grad <b><span style='color:#0000ff;'>=</span></b> VelocityFunction_2D(velocity, direction)
-        <span style='color:#017a31;'># Function&lt;dim&gt;::value wrappers</span>
-        u_grad <b><span style='color:#0000ff;'>=</span></b> function_gradient_2D(<span style='color:#cc0000;'>&quot;u&quot;</span>, <span style='color:#3605fb;'>self</span>.fun_u_grad, xyz_2D(fe_q))
+        <span style='color:#017a31;'># Function&lt;dim&gt;::gradient wrapper</span>
+        u_grad <b><span style='color:#0000ff;'>=</span></b> function_gradient_2D(<span style='color:#cc0000;'>&quot;u&quot;</span>, <span style='color:#3605fb;'>self</span>.fun_u_grad, xyz)
 
         <span style='color:#017a31;'># FE weak form terms</span>
-        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> alpha <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        convection   <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> (u_grad <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        source       <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
+        accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> alpha <b><span style='color:#0000ff;'>*</span></b> JxW
+        convection   <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> (u_grad <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        source       <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> convection,
                                                   Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,

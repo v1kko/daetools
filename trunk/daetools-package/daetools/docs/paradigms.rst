@@ -150,7 +150,7 @@ nonlinear algebraic equations (**NLAE**) and linear algebraic equations (**LAE**
 is almost always used to solve problems described by NLAEs. A brief history of Equation-Oriented solvers and comparison of
 **SeqM** and **EO** approaches as well as descriptions of the simultaneous modular and equation-oriented methods can be found
 in Morton, 2003 ([#Morton2003]_). Also a good overview of the equation-oriented approach and its application in
-`gPROMS <http://www.psenterprise.com/gproms>`_ is given by Barton & Pantelides ([#Pantelides1]_, [#Pantelides2]_, [#Pantelides3]_).
+`gPROMS <http://www.psenterprise.com/gproms>`_ is given by Barton & Pantelides ([#Pantelides1]_ [#Pantelides2]_ [#Pantelides3]_).
 
 **DAE Tools** use the Equation-Oriented approach to process modelling, and the following types of processes can be modelled:
 

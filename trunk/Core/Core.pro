@@ -6,7 +6,7 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 INCLUDEPATH += $${BOOSTDIR} \
-	           $${MPI_INCLUDE}
+               $${MPI_INCLUDE}
 
 LIBS +=	$${DAE_CONFIG_LIB} \
         $${MPI_LIBS}
@@ -31,6 +31,7 @@ SOURCES += xmlreadstream.cpp \
     model_port_arrays.cpp \
     model.cpp \
     finite_element_model.cpp \
+    ode_model.cpp \
     equation.cpp \
     domain.cpp \
     distributed_variable_array.cpp \
@@ -85,7 +86,7 @@ HEADERS += xmlfunctions.h \
     tcpiplog.h \
     optimization.h \
     export.h \
-    units_io.h \ 
+    units_io.h \
     event_handling.h \
     simplify_node.h \
     thermo_package.h
@@ -126,29 +127,29 @@ HEADERS += xmlfunctions.h \
 #                Install files
 #######################################################
 root_headers.path  = $${HEADERS_DIR}
-root_headers.files = ../dae.h  \        
+root_headers.files = ../dae.h  \
                      ../dae_develop.h  \
-                     ../config.h  \     
-                     ../nlp_common.h  \ 
-                     ../dae.pri         
+                     ../config.h  \
+                     ../nlp_common.h  \
+                     ../dae.pri
 
 core_headers.path  = $${HEADERS_DIR}/Core
 core_headers.files = definitions.h  \
-                     core.h  \         
-                     log.h  \          
-                     activity.h  \     
-                     optimization.h  \ 
-                     solver.h  \       
+                     core.h  \
+                     log.h  \
+                     activity.h  \
+                     optimization.h  \
+                     solver.h  \
                      datareporting.h  \
-                     coreimpl.h  \     
-                     helpers.h  \      
+                     coreimpl.h  \
+                     helpers.h  \
                      class_factory.h  \
-                     base_logging.h  \ 
-                     adouble.h  \      
-                     export.h  \       
-                     io.h  \           
-                     io_impl.h  \      
-                     xmlfile.h      
+                     base_logging.h  \
+                     adouble.h  \
+                     export.h  \
+                     io.h  \
+                     io_impl.h  \
+                     xmlfile.h
 
 core_libs.path         = $${STATIC_LIBS_DIR}
 win32::core_libs.files = $${DAE_DEST_DIR}/$${TARGET}.lib

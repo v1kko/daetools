@@ -76,6 +76,7 @@ Classes
 
 Extra logs
 ----------
+.. py:module:: daetools.pyDAE.logs
 .. py:currentmodule:: daetools.pyDAE.logs
 
 .. autoclass:: daetools.pyDAE.logs.daePythonStdOutLog

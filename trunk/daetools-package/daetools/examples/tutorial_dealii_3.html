@@ -45,8 +45,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>The concentration plot at t = 500s:</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_3-results.png</span>
-<span style='color:#cc0000;'>   :width: 400 px</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 
+<span style='color:#cc0000;'>Animation:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_dealii_3-animation.gif</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
 <span style='color:#3605fb;'>import</span> os, sys, numpy, json, tempfile, random
@@ -87,6 +91,22 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
+        <span style='color:#017a31;'># Create some auxiliary objects for readability</span>
+        phi_c_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_i, fe_q)
+        phi_c_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)
+        dphi_c_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>, fe_i, fe_q)
+        dphi_c_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)
+        phi_mu_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q)
+        phi_mu_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_j, fe_q)
+        dphi_mu_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q)
+        dphi_mu_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_j, fe_q)
+        <span style='color:#017a31;'># FE approximation of a quantity at the specified quadrature point (adouble object)</span>
+        c      <b><span style='color:#0000ff;'>=</span></b> dof_approximation_2D(<span style='color:#cc0000;'>'c'</span>, fe_q)
+        normal <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_2D(fe_q)
+        JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_2D(fe_q)
+
+        <span style='color:#017a31;'># Boundary IDs</span>
         left_edge   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0</span>
         top_edge    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
         right_edge  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>
@@ -94,9 +114,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
         dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
         surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> {}
-
-        <span style='color:#017a31;'># FE approximation of a quantity at the specified quadrature point (adouble object)</span>
-        c <b><span style='color:#0000ff;'>=</span></b> dof_approximation_2D(<span style='color:#cc0000;'>'c'</span>, fe_q)
 
         <span style='color:#3605fb;'>self</span>.useWikipedia_fc <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
 
@@ -117,11 +134,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
                 <b>return</b> log_fe(c<b><span style='color:#0000ff;'>/</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b>c)) <b><span style='color:#0000ff;'>+</span></b> Omg_a<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>c)
 
         <span style='color:#017a31;'># FE weak form terms</span>
-        c_accumulation    <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        mu_diffusion_c_eq <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>,  fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> Diffusivity <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        mu                <b><span style='color:#0000ff;'>=</span></b> phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b>  phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        c_diffusion_mu_eq <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>dphi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>,  fe_j, fe_q) <b><span style='color:#0000ff;'>*</span></b> gamma <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)
-        fun_c             <b><span style='color:#0000ff;'>=</span></b> (phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q) <b><span style='color:#0000ff;'>*</span></b> JxW_2D(fe_q)) <b><span style='color:#0000ff;'>*</span></b> f(c)
+        c_accumulation    <b><span style='color:#0000ff;'>=</span></b> (phi_c_i <b><span style='color:#0000ff;'>*</span></b> phi_c_j) <b><span style='color:#0000ff;'>*</span></b> JxW
+        mu_diffusion_c_eq <b><span style='color:#0000ff;'>=</span></b> (dphi_c_i <b><span style='color:#0000ff;'>*</span></b> dphi_mu_j) <b><span style='color:#0000ff;'>*</span></b> Diffusivity <b><span style='color:#0000ff;'>*</span></b> JxW
+        mu                <b><span style='color:#0000ff;'>=</span></b> phi_mu_i <b><span style='color:#0000ff;'>*</span></b>  phi_mu_j <b><span style='color:#0000ff;'>*</span></b> JxW
+        c_diffusion_mu_eq <b><span style='color:#0000ff;'>=</span></b> (<b><span style='color:#0000ff;'>-</span></b>dphi_mu_i <b><span style='color:#0000ff;'>*</span></b> dphi_c_j) <b><span style='color:#0000ff;'>*</span></b> gamma <b><span style='color:#0000ff;'>*</span></b> JxW
+        fun_c             <b><span style='color:#0000ff;'>=</span></b> (phi_mu_i <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> f(c)
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> mu_diffusion_c_eq <b><span style='color:#0000ff;'>+</span></b> mu <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq,
                                                   Mij <b><span style='color:#0000ff;'>=</span></b> c_accumulation,
@@ -156,12 +173,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
         numpy.random.seed(<span style='color:#cc047c;'>124</span>)
 
-        <b>def</b> c_with_noise_wiki(index):
+        <b>def</b> c_with_noise_wiki(index, overallIndex):
             c0     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
             stddev <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.1</span>
             <b>return</b> numpy.random.normal(c0, stddev)
 
-        <b>def</b> c_with_noise_ray(index):
+        <b>def</b> c_with_noise_ray(index, overallIndex):
             c0     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.5</span>
             stddev <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.1</span>
             <b>return</b> numpy.random.normal(c0, stddev)

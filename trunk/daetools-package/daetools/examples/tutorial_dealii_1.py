@@ -53,8 +53,12 @@ Dirichlet boundary conditions are set to 300 K on the outer rectangle,
 The temperature plot at t = 500s (generated in VisIt):
 
 .. image:: _static/tutorial_dealii_1-results.png
-   :width: 600 px
+   :height: 400 px
 
+Animation:
+    
+.. image:: _static/tutorial_dealii_1-animation.gif
+   :height: 400 px
 """
 
 import os, sys, numpy, json, tempfile
@@ -194,47 +198,7 @@ class modTutorial(daeModel):
         dirichletBC[innerEllipse]   = [('T', adoubleConstantFunction_2D( adouble(350) ))]
         dirichletBC[innerDiamond]   = [('T', adoubleConstantFunction_2D( adouble(250) ))]
 
-        #    3.4 Often, it is required to calculate surface or volume integrals.
-        #        For instance, this is useful to obtain the total quantity flowing through a boundary
-        #        in this example the total heat.
-        #        Surface integrals are given as dictionaries
-        #        {boundary ID : list of tuples (daetools variable, integral weak form)}
-        #        This way, several surface integrals for a single boundary can be integrated.
-        #        The variables are used to create equations in the following form:
-        #          eq.Residual = variable() - integral_expression
-        #        This way the results of integration are stored in the specified variable.
-        #        More details about specification of the weak form is given below in section 3.6.
-        #
-        #        In this example we specify four boundary integrals:
-        #          a) The simplest case is to use a surface integral to calculate the mesh surface
-        #             at the given boundary (in 2D case it is equal to circumference).
-        #             This is also useful for testing the validity of the results.
-        #          b-d) The total heat passing through the outer rectangle, inner ellipse and inner diamond boundary.
-        surfaceIntegrals = {}
-        surfaceIntegrals[outerRectangle] = [None, None]
-        #        a) Area of the mesh outer surface (a test, just to check the integration validity).
-        #           In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.
-        surfaceIntegrals[outerRectangle][0] = (self.MeshSurface(), (phi_2D('T', fe_i, fe_q) * JxW_2D(fe_q)))
-        #        b) Total heat transferred through the outer rectangle boundary
-        surfaceIntegrals[outerRectangle][1] = (self.Q0_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))
-        #        c) Total heat transferred through the inner ellipse boundary
-        surfaceIntegrals[innerEllipse] = [(self.Q1_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-        #        d) Total heat transferred through the inner diamond boundary
-        surfaceIntegrals[innerDiamond] = [(self.Q2_total(), (-alpha * (dphi_2D('T', fe_i, fe_q) * normal_2D(fe_q)) * JxW_2D(fe_q)) * dof_2D('T', fe_i))]
-
-        #    3.5 Volume integrals are specified similarly. The only difference is that they do not require boundary IDs.
-        #        Nota bene:
-        #          Care should be taken with the volume integrals since they include values at ALL cells
-        #          and the resulting equations can be enormously long!!
-        #
-        #        In this example we specify only one volume integral: the simplest case used to calculate
-        #        the mesh surface area (in 2D it is area; in 3D it is the volume).
-        #        This is another test to check the integration validity.
-        #        Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732...
-        #        (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).
-        volumeIntegrals = [ (self.MeshVolume(), (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q) * JxW_2D(fe_q))) ]
-
-        #    3.6 Derive and specify the weak form of the problem.
+        #    3.4 Derive and specify the weak form of the problem.
         #        The weak form consists of the following contributions:
         #         a) Aij - cell contribution to the system stiffness matrix.
         #         b) Mij - cell contribution to the mass stiffness matrix.
@@ -284,67 +248,117 @@ class modTutorial(daeModel):
         #         In the future they will be expanded to support a broader class of problems.
         #
         #         Functions are developed for the most of the functionality provided by deal.II FEValues<dim> and
-        #         FEFaceValues<dim> classes used for matrix assembly. The current list include (for 1D, 2D and 3D):
-        #          - phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II
-        #          - dphi (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II
-        #          - d2phi (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian in deal.II
-        #          - phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_value of vector dofs in deal.II
-        #          - dphi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad of vector dofs in deal.II
-        #          - d2phi_vector (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian of vector dofs in deal.II
-        #          - div_phi (variableName, shapeFunction, quadraturePoint): corresponds to divergence in deal.II
-        #          - JxW (quadraturePoint): corresponds to the mapped quadrature weight in deal.II
-        #          - xyz (quadraturePoint): returns the point for the specified quadrature point in deal.II
-        #          - normal (quadraturePoint): corresponds to the normal_vector in deal.II
-        #          - function_value (functionName, function, point, component): wraps Function<dim> object that returns a value
-        #          - function_gradient (functionName, function, point, component): wraps Function<dim> object that returns a gradient
-        #          - function_adouble_value (functionName, function, point, component): wraps Function<dim> object that returns adouble value
-        #          - function_adouble_gradient (functionName, function, point, component): wraps Function<dim> object that returns adouble gradient
-        #          - dof (variableName, shapeFunction): returns daetools variable at the given index (adouble object)
-        #          - dof_approximation (variableName, shapeFunction): returns FE approximation of a quantity as a daetools variable (adouble object)
-        #          - dof_gradient_approximation (variableName, shapeFunction): returns FE gradient approximation of a quantity as a daetools variable (adouble object)
-        #          - dof_hessian_approximation (variableName, shapeFunction): returns FE hessian approximation of a quantity as a daetools variable (adouble object)
-        #          - vector_dof_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)
-        #          - vector_dof_gradient_approximation (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)
-        #          - adouble (ad): wraps any daetools expression to be used in matrix assembly
-        #          - tensor1 (t): wraps deal.II Tensor<rank=1,double>
-        #          - tensor2 (t): wraps deal.II Tensor<rank=2,double>
-        #          - tensor3 (t): wraps deal.II Tensor<rank=3,double>
-        #          - adouble_tensor1 (t): wraps deal.II Tensor<rank=1,adouble>
-        #          - adouble_tensor2 (t): wraps deal.II Tensor<rank=1,adouble>
-        #          - adouble_tensor3 (t): wraps deal.II Tensor<rank=1,adouble>
+        #         FEFaceValues<dim> classes used for matrix assembly. 
+        #         The current list include (a version exist for 1D, 2D and 3D):
+        #          - phi_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_value in deal.II
+        #          - dphi_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad in deal.II
+        #          - d2phi_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian in deal.II
+        #          - phi_vector_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_value of vector dofs in deal.II
+        #          - dphi_vector_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_grad of vector dofs in deal.II
+        #          - d2phi_vector_1D (variableName, shapeFunction, quadraturePoint): corresponds to shape_hessian of vector dofs in deal.II
+        #          - div_phi_1D (variableName, shapeFunction, quadraturePoint): corresponds to divergence in deal.II
+        #          - JxW_1D (quadraturePoint): corresponds to the mapped quadrature weight in deal.II
+        #          - xyz_1D (quadraturePoint): returns the point for the specified quadrature point in deal.II
+        #          - normal_1D (quadraturePoint): corresponds to the normal_vector in deal.II
+        #          - function_value_1D (functionName, function, point, component): wraps Function<dim> object that returns a value
+        #          - function_gradient_1D (functionName, function, point, component): wraps Function<dim> object that returns a gradient
+        #          - function_adouble_value_1D (functionName, function, point, component): wraps Function<dim,adouble> object that returns adouble value
+        #          - function_adouble_gradient_1D (functionName, function, point, component): wraps Function<dim,adouble> object that returns adouble gradient
+        #          - dof_1D (variableName, shapeFunction): returns daetools variable at the given index (adouble object)
+        #          - dof_approximation_1D (variableName, shapeFunction): returns FE approximation of a quantity as a daetools variable (adouble object)
+        #          - dof_gradient_approximation_1D (variableName, shapeFunction): returns FE gradient approximation of a quantity as a daetools variable (adouble object)
+        #          - dof_hessian_approximation_1D (variableName, shapeFunction): returns FE hessian approximation of a quantity as a daetools variable (adouble object)
+        #          - vector_dof_approximation_1D (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)
+        #          - vector_dof_gradient_approximation_1D (variableName, shapeFunction): returns FE approximation of a vector quantity as a daetools variable (adouble object)
+        #          - adouble_1D (ad): wraps any daetools expression to be used in matrix assembly
+        #          - tensor1_1D (t): wraps deal.II Tensor<rank=1,double>
+        #          - tensor2_1D (t): wraps deal.II Tensor<rank=2,double>
+        #          - tensor3_1D (t): wraps deal.II Tensor<rank=3,double>
+        #          - adouble_tensor1_1D (t): wraps deal.II Tensor<rank=1,adouble>
+        #          - adouble_tensor2_1D (t): wraps deal.II Tensor<rank=2,adouble>
+        #          - adouble_tensor3_1D (t): wraps deal.II Tensor<rank=3,adouble>
 
-        #         First, we need to wrap Function<dim> objects to be used in the weak form using the function_value function:
-        Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz_2D(fe_q))
-        Generation  = function_value_2D('Generation',  self.fun_Generation,  xyz_2D(fe_q))
+        #         Create some auxiliary objects for readability
+        phi_i  =  phi_2D('T', fe_i, fe_q)
+        phi_j  =  phi_2D('T', fe_j, fe_q)
+        dphi_i = dphi_2D('T', fe_i, fe_q)
+        dphi_j = dphi_2D('T', fe_j, fe_q)
+        dof_T  = dof_2D('T', fe_i)
+        normal = normal_2D(fe_q)
+        xyz    = xyz_2D(fe_q)
+        JxW    = JxW_2D(fe_q)
 
+        #         We need to wrap Function<dim> objects to be used in the weak form using the function_value function:
+        Diffusivity = function_value_2D('Diffusivity', self.fun_Diffusivity, xyz)
+        Generation  = function_value_2D('Generation',  self.fun_Generation,  xyz)
+        
+        #         Contributions to the system's mass and stiffness matrices and the system load vector.
         #         Heat conduction equation is a typical example of convection-diffusion equations.
         #         In the case of pure conduction it simplifies into a diffusion-only equation.
         #         Its weak formulation is simple and given as:
         #           - Cell contribution to the mass matrix:      Mij = phi_i * phi_j * JxW
         #           - Cell contribution to the stiffness matrix: Aij = (dphi_i * dphi_j) * Diffusivity * JxW
         #           - Cell contribution to the load vector:      Fi  = phi_i * Generation * JxW
-        accumulation = (phi_2D('T', fe_i, fe_q) * phi_2D('T', fe_j, fe_q)) * JxW_2D(fe_q)
-        diffusion    = (dphi_2D('T', fe_i, fe_q) * dphi_2D('T', fe_j, fe_q)) * Diffusivity * JxW_2D(fe_q)
-        source       = phi_2D('T', fe_i, fe_q) * Generation * JxW_2D(fe_q)
+        accumulation = (phi_i * phi_j) * JxW
+        diffusion    = (dphi_i * dphi_j) * Diffusivity * JxW
+        source       = phi_i * Generation * JxW
 
-        weakForm = dealiiFiniteElementWeakForm_2D(Aij = diffusion,
-                                                  Mij = accumulation,
-                                                  Fi  = source,
+        #         3.4.1 Often, it is required to calculate surface or volume integrals.
+        #               For instance, this is useful to obtain the total quantity flowing through a boundary
+        #               in this example the total heat.
+        #               Surface integrals are given as dictionaries
+        #               {boundary ID : list of tuples (daetools variable, integral weak form)}
+        #               This way, several surface integrals for a single boundary can be integrated.
+        #               The variables are used to create equations in the following form:
+        #                 eq.Residual = variable() - integral_expression
+        #               This way the results of integration are stored in the specified variable.
+        #               More details about specification of the weak form is given below in section 3.6.
+        #
+        #               In this example we specify four boundary integrals:
+        #                 a) The simplest case is to use a surface integral to calculate the mesh surface
+        #                    at the given boundary (in 2D case it is equal to circumference).
+        #                    This is also useful for testing the validity of the results.
+        #                 b-d) The total heat passing through the outer rectangle, inner ellipse and inner diamond boundary.
+        surfaceIntegrals = {}
+        surfaceIntegrals[outerRectangle] = [None, None]
+        #        a) Area of the mesh outer surface (a test, just to check the integration validity).
+        #           In 2D circumference has to be 2*1.5 + 2*0.8 = 4.6.
+        surfaceIntegrals[outerRectangle][0] = (self.MeshSurface(), (phi_i * JxW))
+        #        b) Total heat transferred through the outer rectangle boundary
+        surfaceIntegrals[outerRectangle][1] = (self.Q0_total(), (-alpha * (dphi_i * normal) * JxW) * dof_T)
+        #        c) Total heat transferred through the inner ellipse boundary
+        surfaceIntegrals[innerEllipse] = [(self.Q1_total(), (-alpha * (dphi_i * normal) * JxW) * dof_T)]
+        #        d) Total heat transferred through the inner diamond boundary
+        surfaceIntegrals[innerDiamond] = [(self.Q2_total(), (-alpha * (dphi_i * normal) * JxW) * dof_T)]
+
+        #         3.4.2 Volume integrals are specified similarly. The only difference is that they do not require boundary IDs.
+        #               Nota bene:
+        #                 Care should be taken with the volume integrals since they include values at ALL cells
+        #                 and the resulting equations can be enormously long!!
+        #
+        #               In this example we specify only one volume integral: the simplest case used to calculate
+        #               the mesh surface area (in 2D it is area; in 3D it is the volume).
+        #               This is another test to check the integration validity.
+        #               Area consists of the rectangle minus inner ellipse and diamond; here it should be 1.11732...
+        #               (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).
+        volumeIntegrals = [ (self.MeshVolume(), (phi_i * phi_j * JxW)) ]
+
+        cell_Aij = diffusion
+        cell_Mij = accumulation
+        cell_Fi  = source
+        
+        weakForm = dealiiFiniteElementWeakForm_2D(Aij = cell_Aij,
+                                                  Mij = cell_Mij,
+                                                  Fi  = cell_Fi,
                                                   functionsDirichletBC = dirichletBC,
                                                   surfaceIntegrals = surfaceIntegrals,
                                                   volumeIntegrals = volumeIntegrals)
 
         # Print the assembled weak form as they will be seen from deal.II wrappers:
         print('Transient heat conduction equation:')
-        print('    Aij = %s' % str(weakForm.Aij))
-        print('    Mij = %s' % str(weakForm.Mij))
-        print('    Fi  = %s' % str(weakForm.Fi))
-        print('    boundaryFaceAij = %s' % str([item for item in enumerate(weakForm.boundaryFaceAij)]))
-        print('    boundaryFaceFi  = %s' % str([item for item in enumerate(weakForm.boundaryFaceFi)]))
-        print('    innerCellFaceAij = %s' % str(weakForm.innerCellFaceAij))
-        print('    innerCellFaceFi  = %s' % str(weakForm.innerCellFaceFi))
-        print('    surfaceIntegrals  = %s' % str([item for item in enumerate(weakForm.surfaceIntegrals)]))
-        print('    volumeIntegrals  = %s' % str([item for item in enumerate(weakForm.volumeIntegrals)]))
+        print('    Aij = %s' % str(cell_Aij))
+        print('    Mij = %s' % str(cell_Mij))
+        print('    Fi  = %s' % str(cell_Fi))
 
         #    3.7 Finally, set the weak form of the FE system.
         #        This will declare a set of equations in the following form:
@@ -353,7 +367,7 @@ class modTutorial(daeModel):
         self.fe_system.WeakForm = weakForm
 
         # As an exercise, define a time varying quantity T_outer to be used as a Dirichlet boundary condition
-        # to illistrate coupling between daetools and deal.II.
+        # to illustrate coupling between daetools and deal.II.
         # Here it is a simple constant, but it can be any valid daetools equation.
         eq = self.CreateEquation("T_outer", "Boundary conditions for the outer edge")
         eq.Residual = self.T_outer() - Constant(200 * K)
@@ -370,8 +384,13 @@ class simTutorial(daeSimulation):
 
     def SetUpVariables(self):
         # 4. Set the initial conditions for differential variables using the setFEInitialConditions function.
-        #    This function requires a dof name and either a float variable or a callable object to be called
-        #    for every index in the variable. Here we use a simple constant value of 300 Kelvins.
+        #    This function requires a dof name and either a float variable or a callable object that accepts
+        #    two arguments: index_in_the_domain and overall_index. If the initial conditions are x,y,z dependent
+        #    the location of the current point can be obtained using the function fe_system.GetDOFSupportPoints()
+        #    which returns an array of Point<dim> objects:
+        #      sp = self.m.fe_system.GetDOFSupportPoints()
+        #      point = sp[overall_index]
+        #    Here we use a simple constant value of 300 Kelvins for all points.
         setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 300)
 
 # 5. Set-up the main program
@@ -425,7 +444,7 @@ def consoleRun():
     results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results')
 
     # Create two data reporters:
-    # 1. DealII
+    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
@@ -453,7 +472,16 @@ def consoleRun():
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
-
+    """
+    print(simulation.m.fe_model.Equations)
+    from daetools.pyDAE.eval_node_graph import daeNodeGraph
+    for equation in simulation.m.fe_model.Equations:
+        for i,eei in enumerate(equation.EquationExecutionInfos):
+            if (i in range(0, 1)):
+                print('Processing node %d...' % i)
+                ng = daeNodeGraph('residual', eei.Node)
+                ng.SaveGraph('%s-%s[%04d].svg' % (simulation.m.fe_model.Name, equation.Name, i))
+    """
     # Run
     simulation.Run()
     simulation.Finalize()

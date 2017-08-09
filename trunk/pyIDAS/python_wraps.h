@@ -27,82 +27,98 @@ boost::python::list getListFromVectorByValue(std::vector<ITEM>& arrItems)
     return l;
 }
 
+template<typename KEY, typename VALUE>
+boost::python::dict getDictFromMapByValue(std::map<KEY,VALUE>& mapItems)
+{
+    boost::python::dict res;
+    typename std::map<KEY,VALUE>::iterator iter;
+
+    for(iter = mapItems.begin(); iter != mapItems.end(); iter++)
+    {
+        KEY   key = iter->first;
+        VALUE val = iter->second;
+        res[key] = val;
+    }
+
+    return res;
+}
+
 boost::python::list daeArray_GetValues(daeArray<real_t>& self);
 boost::python::object daeDenseMatrix_ndarray(daeDenseMatrix& self);
 
 /*******************************************************
-	daeDAESolver
+    daeDAESolver
 *******************************************************/
 class daeDAESolverWrapper : public daeDAESolver_t,
-	                        public boost::python::wrapper<daeDAESolver_t>
+                            public boost::python::wrapper<daeDAESolver_t>
 {
 public:
-	daeDAESolverWrapper(void){}
+    daeDAESolverWrapper(void){}
 
-	void Initialize(daeBlock_t* pBlock, daeLog_t* pLog)
-	{
-		this->get_override("Initialize")(pBlock, pLog);
-	}
-	
-	real_t Solve(real_t dTime, bool bStopAtDiscontinuity)
-	{
-		return this->get_override("Solve")(dTime, bStopAtDiscontinuity);
-	}
-	
-	daeBlock_t* GetBlock(void) const
-	{
-		return this->get_override("GetBlock")();
-	}
-	
-	daeLog_t* GetLog(void) const
-	{
-		return this->get_override("GetLog")();
-	}
-    
-    void OnCalculateResiduals() 
+    void Initialize(daeBlock_t* pBlock, daeLog_t* pLog)
+    {
+        this->get_override("Initialize")(pBlock, pLog);
+    }
+
+    real_t Solve(real_t dTime, bool bStopAtDiscontinuity)
+    {
+        return this->get_override("Solve")(dTime, bStopAtDiscontinuity);
+    }
+
+    daeBlock_t* GetBlock(void) const
+    {
+        return this->get_override("GetBlock")();
+    }
+
+    daeLog_t* GetLog(void) const
+    {
+        return this->get_override("GetLog")();
+    }
+
+    void OnCalculateResiduals()
     {
         this->get_override("OnCalculateResiduals")();
     }
-    
-    void OnCalculateConditions() 
+
+    void OnCalculateConditions()
     {
         this->get_override("OnCalculateConditions")();
-	}
-    
-    void OnCalculateJacobian() 
+    }
+
+    void OnCalculateJacobian()
     {
         this->get_override("OnCalculateJacobian")();
-	}
-    
+    }
+
     void OnCalculateSensitivityResiduals()
     {
         this->get_override("OnCalculateSensitivityResiduals")();
-	}
-    
+    }
+
 };
 
 
 class daeIDASolverWrapper : public daeIDASolver,
-	                        public boost::python::wrapper<daeIDASolver>
+                            public boost::python::wrapper<daeIDASolver>
 {
 public:
-	daeIDASolverWrapper(void)
-	{
-	}
+    daeIDASolverWrapper(void)
+    {
+    }
 
-	void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeSimulation_t* pSimulation, daeeInitialConditionMode eMode, bool bCalculateSensitivities, boost::python::list l)
-	{
-		size_t index;
-		std::vector<size_t> narrParametersIndexes;
-		boost::python::ssize_t n = boost::python::len(l);
-		for(boost::python::ssize_t i = 0; i < n; i++) 
-		{
-			index = boost::python::extract<size_t>(l[i]);
-			narrParametersIndexes.push_back(index);
-		}
-		
-		daeIDASolver::Initialize(pBlock, pLog, pSimulation, eMode, bCalculateSensitivities, narrParametersIndexes);
-	}
+    void Initialize(daeBlock_t* pBlock, daeLog_t* pLog, daeSimulation_t* pSimulation, daeeInitialConditionMode eMode, bool bCalculateSensitivities, boost::python::list l)
+    {
+        size_t index;
+        std::vector<size_t> narrParametersIndexes;
+        boost::python::ssize_t n = boost::python::len(l);
+        for(boost::python::ssize_t i = 0; i < n; i++)
+        {
+            index = boost::python::extract<size_t>(l[i]);
+            narrParametersIndexes.push_back(index);
+        }
+
+        daeIDASolver::Initialize(pBlock, pLog, pSimulation, eMode, bCalculateSensitivities, narrParametersIndexes);
+    }
 
     daeIDALASolver_t* GetLASolver(void)
     {
@@ -110,62 +126,62 @@ public:
     }
 
     void SetLASolver1(daeeIDALASolverType eLASolverType)
-	{
-		daeIDASolver::SetLASolver(eLASolverType);
-	}
+    {
+        daeIDASolver::SetLASolver(eLASolverType);
+    }
 
-	void SetLASolver2(daeIDALASolver_t* pLASolver)
-	{
-		daeIDASolver::SetLASolver(pLASolver);
-	}
-	
+    void SetLASolver2(daeIDALASolver_t* pLASolver)
+    {
+        daeIDASolver::SetLASolver(pLASolver);
+    }
+
     void OnCalculateResiduals()
     {
         if(boost::python::override f = this->get_override("OnCalculateResiduals"))
             f();
-		else
-			this->daeIDASolver::OnCalculateResiduals();
-	}
-	void def_OnCalculateResiduals()
-	{
+        else
+            this->daeIDASolver::OnCalculateResiduals();
+    }
+    void def_OnCalculateResiduals()
+    {
         this->daeIDASolver::OnCalculateResiduals();
-	}
+    }
 
-    void OnCalculateConditions() 
+    void OnCalculateConditions()
     {
         if(boost::python::override f = this->get_override("OnCalculateConditions"))
             f();
-		else
-			this->daeIDASolver::OnCalculateConditions();
-	}
-	void def_OnCalculateConditions()
-	{
+        else
+            this->daeIDASolver::OnCalculateConditions();
+    }
+    void def_OnCalculateConditions()
+    {
         this->daeIDASolver::OnCalculateConditions();
-	}
-    
-    void OnCalculateJacobian() 
+    }
+
+    void OnCalculateJacobian()
     {
         if(boost::python::override f = this->get_override("OnCalculateJacobian"))
             f();
-		else
-			this->daeIDASolver::OnCalculateJacobian();
-	}
-	void def_OnCalculateJacobian()
-	{
+        else
+            this->daeIDASolver::OnCalculateJacobian();
+    }
+    void def_OnCalculateJacobian()
+    {
         this->daeIDASolver::OnCalculateJacobian();
-	}
-    
+    }
+
     void OnCalculateSensitivityResiduals()
     {
         if(boost::python::override f = this->get_override("OnCalculateSensitivityResiduals"))
             f();
-		else
-			this->daeIDASolver::OnCalculateSensitivityResiduals();
-	}
-	void def_OnCalculateSensitivityResiduals()
-	{
+        else
+            this->daeIDASolver::OnCalculateSensitivityResiduals();
+    }
+    void def_OnCalculateSensitivityResiduals()
+    {
         this->daeIDASolver::OnCalculateSensitivityResiduals();
-	}
+    }
 
     boost::python::list GetEstLocalErrors_()
     {
@@ -177,6 +193,12 @@ public:
     {
         std::vector<real_t> arr = daeIDASolver::GetErrWeights();
         return getListFromVectorByValue(arr);
+    }
+
+    boost::python::dict GetIntegratorStats_()
+    {
+        std::map<std::string, real_t> stats = GetIntegratorStats();
+        return getDictFromMapByValue(stats);
     }
 };
 
