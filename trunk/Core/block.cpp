@@ -28,11 +28,11 @@ daeBlock::daeBlock(void)
     daeConfig& cfg = daeGetConfig();
 
     m_bUseOpenMP      = cfg.GetBoolean("daetools.core.equations.parallelEvaluation", false);
-
     m_omp_num_threads = cfg.GetInteger("daetools.core.equations.numThreads", 0);
     if(m_omp_num_threads > 0)
         omp_set_num_threads(m_omp_num_threads);
 
+/*
     m_omp_schedule           = cfg.GetString ("daetools.core.equations.schedule",         "default");
     m_omp_shedule_chunk_size = cfg.GetInteger("daetools.core.equations.scheduleChunkSize", 0);
     // If the schedule in the config file is 'default' then it is left to the implementation default
@@ -44,6 +44,7 @@ daeBlock::daeBlock(void)
         omp_set_schedule(omp_sched_guided, m_omp_shedule_chunk_size);
     else if(m_omp_schedule == "auto")
         omp_set_schedule(omp_sched_auto, m_omp_shedule_chunk_size);
+*/
 
 #if defined(DAE_MPI)
     m_nEquationIndexesStart = ULONG_MAX;
@@ -154,7 +155,7 @@ void daeBlock::CalculateResiduals(real_t			dTime,
     GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
 
     #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
-    for(size_t i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
+    for(int i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
     {
         daeEquationExecutionInfo* pEquationExecutionInfo = ptrarrEquationExecutionInfos[i];
         pEquationExecutionInfo->Residual(EC);
@@ -230,7 +231,7 @@ void daeBlock::CalculateJacobian(real_t				dTime,
     GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
 
     #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
-    for(size_t i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
+    for(int i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
     {
         //std::cout << "  thread id " << omp_get_thread_num() << " calculating Jacobian for equation " << i << std::endl;
         daeEquationExecutionInfo* pEquationExecutionInfo = ptrarrEquationExecutionInfos[i];
@@ -308,7 +309,7 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
     GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
 
     #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
-    for(size_t i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
+    for(int i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
     {
 
         daeEquationExecutionInfo* pEquationExecutionInfo = ptrarrEquationExecutionInfos[i];

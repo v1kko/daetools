@@ -195,9 +195,6 @@ CONFIG += rtti
 unix::QMAKE_CXXFLAGS           += -fopenmp
 win32-msvc2015::QMAKE_CXXFLAGS += /openmp
 
-unix::OMP_LIB           = -lgomp
-win32-msvc2015::OMP_LIB =
-
 win32-msvc2015::QMAKE_CXXFLAGS += -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX
 win32-msvc2015::QMAKE_CXXFLAGS += -DBOOST_ALL_NO_LIB=1
 win32-msvc2015::QMAKE_CXXFLAGS += /bigobj
@@ -719,9 +716,15 @@ win64-g++-*::COOLPROP_LIBS    = -L$${COOLPROP_LIB_DIR}/Windows -lCoolProp
 macx-g++::COOLPROP_LIBS       = -L$${COOLPROP_LIB_DIR}/Darwin  -lCoolProp
 
 
-cdaeCoolPropThermoPackage
 #####################################################################################
-#                                 MPI SUPPORT
+#                                 OpenMP
+#####################################################################################
+# OpenMP libraries are typically linked automatically
+unix::OPENMP_LIB           = -lgomp
+win32-msvc2015::OPENMP_LIB =
+
+#####################################################################################
+#                                 MPI
 #####################################################################################
 enable_mpi {
 QMAKE_CXXFLAGS += -DDAE_MPI
@@ -744,7 +747,7 @@ unix::MPI_LIBS           = -lboost_mpi-mt -lboost_serialization -lmpi_cxx -lmpi
 #                                  DAE Tools
 #####################################################################################
 win32-msvc2015::DAE_CONFIG_LIB                  = cdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}$${SHARED_LIB_POSTFIX}.lib
-win32-msvc2015::DAE_CORE_LIB                    = cdaeCore.lib
+win32-msvc2015::DAE_CORE_LIB                    = cdaeCore.lib $${OPENMP_LIB}
 win32-msvc2015::DAE_DATAREPORTING_LIB           = cdaeDataReporting.lib
 win32-msvc2015::DAE_ACTIVITY_LIB                = cdaeActivity.lib
 win32-msvc2015::DAE_IDAS_SOLVER_LIB             = cdaeIDAS_DAESolver.lib
@@ -765,7 +768,7 @@ win32-msvc2015::DAE_CAPE_THERMO_PACKAGE_LIB     = cdaeCapeOpenThermoPackage.lib
 win32-msvc2015::DAE_COOLPROP_THERMO_PACKAGE_LIB = cdaeCoolPropThermoPackage.lib
 
 win32-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win32-g++-*::DAE_CORE_LIB                    = -lcdaeCore
+win32-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
 win32-g++-*::DAE_DATAREPORTING_LIB           = -lcdaeDataReporting
 win32-g++-*::DAE_ACTIVITY_LIB                = -lcdaeActivity
 win32-g++-*::DAE_IDAS_SOLVER_LIB             = -lcdaeIDAS_DAESolver
@@ -786,7 +789,7 @@ win32-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win32-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 
 win64-g++-*::DAE_CONFIG_LIB                  = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-win64-g++-*::DAE_CORE_LIB                    = -lcdaeCore
+win64-g++-*::DAE_CORE_LIB                    = -lcdaeCore $${OPENMP_LIB}
 win64-g++-*::DAE_DATAREPORTING_LIB           = -lcdaeDataReporting
 win64-g++-*::DAE_ACTIVITY_LIB                = -lcdaeActivity
 win64-g++-*::DAE_IDAS_SOLVER_LIB             = -lcdaeIDAS_DAESolver
@@ -807,7 +810,7 @@ win64-g++-*::DAE_CAPE_THERMO_PACKAGE_LIB     =
 win64-g++-*::DAE_COOLPROP_THERMO_PACKAGE_LIB = -lcdaeCoolPropThermoPackage
 
 unix::DAE_CONFIG_LIB                    = -lcdaeConfig-py$${PYTHON_MAJOR}$${PYTHON_MINOR}
-unix::DAE_CORE_LIB                      = -lcdaeCore $${OMP_LIB}
+unix::DAE_CORE_LIB                      = -lcdaeCore $${OPENMP_LIB}
 unix::DAE_DATAREPORTING_LIB             = -lcdaeDataReporting
 unix::DAE_ACTIVITY_LIB                  = -lcdaeActivity
 unix::DAE_IDAS_SOLVER_LIB               = -lcdaeIDAS_DAESolver

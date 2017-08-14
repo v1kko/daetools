@@ -157,7 +157,7 @@ adNodePtr simplify(adNodePtr node)
             {
                 // Division by zero!!!
                 if(cright->m_quantity.getValue() == 0.0)
-                    return adNodePtr(new adConstantNode(0.0 / 0.0));
+                    return adNodePtr(new adConstantNode( std::numeric_limits<double>::quiet_NaN() ));
 
                 std::map<size_t, daeFloatCoefficientVariableProduct>::iterator it;
 

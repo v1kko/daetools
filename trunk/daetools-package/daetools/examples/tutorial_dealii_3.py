@@ -85,10 +85,12 @@ class modTutorial(daeModel):
         phi_c_j  =  phi_2D('c', fe_j, fe_q)
         dphi_c_i = dphi_2D('c', fe_i, fe_q)
         dphi_c_j = dphi_2D('c', fe_j, fe_q)
+        
         phi_mu_i  =  phi_2D('mu', fe_i, fe_q)
         phi_mu_j  =  phi_2D('mu', fe_j, fe_q)
         dphi_mu_i = dphi_2D('mu', fe_i, fe_q)
         dphi_mu_j = dphi_2D('mu', fe_j, fe_q)
+        
         # FE approximation of a quantity at the specified quadrature point (adouble object)
         c      = dof_approximation_2D('c', fe_q)
         normal = normal_2D(fe_q)
@@ -121,7 +123,7 @@ class modTutorial(daeModel):
             log_fe = feExpression_2D.log
             def f(c):
                 # The original expression is:
-                #   log_fe(c/(1-c)) + Omg_a*(1-2*c)                #
+                #   log_fe(c/(1-c)) + Omg_a*(1-2*c)
                 # However, the one below is much more computationally efficient and requires less memory,
                 # since a Finite Element approximation of a DoF is an expensive operation:
                 #   sum(phi_j * dof(j))

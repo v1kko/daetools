@@ -1648,6 +1648,7 @@ configure_dealii()
   # The line below should be enabled for newer versions of deal.ii
   mv dealii-${vDEALII} deal.II
 
+  WITH_THREADS=OFF
   WITH_CXX11=ON
   WITH_CXX14=OFF
   # Floating point c++ flags
@@ -1659,7 +1660,10 @@ configure_dealii()
     WITH_CXX14=OFF
     DEALII_CXX_FLAGS="/MD /EHsc"
   fi
-
+  if [ ${PLATFORM} = "Linux" ]; then
+    WITH_THREADS=ON
+  fi
+  
   cd deal.II
   mkdir -p build
   cmake \
@@ -1673,7 +1677,7 @@ configure_dealii()
     -DDEAL_II_WITH_CXX14:BOOL=${WITH_CXX14} \
     -DDEAL_II_WITH_CXX11:BOOL=${WITH_CXX11} \
     -DDEAL_II_WITH_LAPACK:BOOL=OFF \
-    -DDEAL_II_WITH_THREADS:BOOL=OFF \
+    -DDEAL_II_WITH_THREADS:BOOL=${WITH_THREADS} \
     -DDEAL_II_WITH_MPI:BOOL=OFF \
     -DDEAL_II_WITH_P4EST:BOOL=OFF \
     -DDEAL_II_WITH_SLEPC:BOOL=OFF \

@@ -7,6 +7,7 @@
 #include "../Core/nodes.h"
 #include "../variable_types.h"
 #include <deal.II/base/work_stream.h>
+#include <queue>
 
 #ifdef _OPENMP
 #include <iterator>
@@ -255,7 +256,6 @@ public:
 protected:
     void setup_system();
     void assemble_system();
-    void assemble_system_old();
     void update_block(unsigned int block_index, double* values, unsigned int n);
     void write_solution(const std::string& strFilename);
 
@@ -434,15 +434,12 @@ public:
     // Used to identify DOFs that belong to a particular equation
     map_string_ComponentMask m_mapComponentMasks;
 
-    bool m_bPrintInfo;
-
-    bool        m_bUseOpenMP;
-    int         m_omp_num_threads;
-    std::string m_omp_schedule;
-    int         m_omp_shedule_chunk_size;
-
-    int numberOfAssembled;
-    int n_active_cells;
+    bool         m_bPrintInfo;
+    std::string  m_paralell_assembly_scheme;
+    int          m_num_threads;
+    unsigned int m_queueSize;
+    int          numberOfAssembled;
+    int          n_active_cells;
 };
 
 template <int dim>
@@ -455,24 +452,9 @@ dealiiFiniteElementSystem<dim>::dealiiFiniteElementSystem():
     daeConfig& cfg = daeConfig::GetConfig();
     m_bPrintInfo = cfg.GetBoolean  ("daetools.deal_II.printInfo", false);
 
-    m_bUseOpenMP = cfg.GetBoolean("daetools.deal_II.assembly.useOpenMP", false);
-
-    m_omp_num_threads = cfg.GetInteger("daetools.deal_II.assembly.ompNumThreads", 1);
-    if(m_omp_num_threads > 1)
-        omp_set_num_threads(m_omp_num_threads);
-
-    m_omp_schedule           = cfg.GetString ("daetools.deal_II.assembly.ompSchedule",         "default");
-    m_omp_shedule_chunk_size = cfg.GetInteger("daetools.deal_II.assembly.ompScheduleChunkSize", 0);
-
-    // If the schedule in the config file is 'default' then it is left to the implementation default
-    if(m_omp_schedule == "static")
-        omp_set_schedule(omp_sched_static, m_omp_shedule_chunk_size);
-    else if(m_omp_schedule == "dynamic")
-        omp_set_schedule(omp_sched_dynamic, m_omp_shedule_chunk_size);
-    else if(m_omp_schedule == "guided")
-        omp_set_schedule(omp_sched_guided, m_omp_shedule_chunk_size);
-    else if(m_omp_schedule == "auto")
-        omp_set_schedule(omp_sched_auto, m_omp_shedule_chunk_size);
+    m_paralell_assembly_scheme = cfg.GetString ("daetools.deal_II.assembly.parallelAssembly", "Sequential");
+    m_num_threads              = cfg.GetInteger("daetools.deal_II.assembly.numThreads", 1);
+    m_queueSize                = cfg.GetInteger("daetools.deal_II.assembly.queueSize", 32);
 }
 
 template <int dim>
@@ -1376,7 +1358,7 @@ void dealiiFiniteElementSystem<dim>::copy_local_to_global (const PerTaskData &da
     }
 
     float percent = 100.0*(numberOfAssembled+1)/n_active_cells;
-    printf("\rAssembling the cell %d / %d (%5.1f%%)...", percent, numberOfAssembled+1, n_active_cells);
+    printf("\rAssembling the cell %d / %d (%5.1f%%)...", numberOfAssembled+1, n_active_cells, percent);
     fflush(stdout);
     numberOfAssembled++;
 }
@@ -1397,30 +1379,6 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     const unsigned int dofs_per_cell   = fe->dofs_per_cell;
 
     std::map<types::global_dof_index, adouble> boundary_values_map_adouble;
-/*
-    int currentIndex = 0;
-    for(unsigned int k = 0; k < m_DOFs.size(); k++)
-    {
-        const dealiiFiniteElementDOF<dim>& dof = *m_DOFs[k];
-
-        if(dof.m_nMultiplicity == 1)
-        {
-            if(m_bPrintInfo)
-                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
-            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Scalar(currentIndex);
-            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
-        }
-        else
-        {
-            if(m_bPrintInfo)
-                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
-            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Vector(currentIndex);
-            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
-        }
-
-        currentIndex += dof.m_nMultiplicity;
-    }
-*/
 
     // Interpolate Dirichlet boundary conditions on the system matrix and rhs
     // Create a map with values for Dirichlet BCs using the adouble version of interpolate_boundary_values() function
@@ -1499,483 +1457,149 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
     n_active_cells = triangulation.n_active_cells();
     numberOfAssembled = 0;
 
-    // TBB therads settings
-    daeConfig& cfg = daeGetConfig();
-    bool parallelAssembly;
-    unsigned int n_threads, queue_length, chunk_size;
+    typedef typename DoFHandler<dim>::active_cell_iterator cell_iterator;
 
-    parallelAssembly = cfg.GetBoolean("daetools.deal_II.assembly.parallelAssembly", false);
-    if(parallelAssembly)
-    {
-        n_threads = cfg.GetInteger("daetools.deal_II.assembly.numThreads", 0);
-        if(n_threads > 0)
-            MultithreadInfo::set_thread_limit(n_threads);
+    PerTaskData copy_data_s(*fe);
+    ScratchData scratch_s(*fe,
+                          quadrature_formula,
+                          face_quadrature_formula,
+                          m_mapExtractors,
+                          m_mapComponentMasks,
+                          boundary_values_map_adouble);
 
-        queue_length = 2 * MultithreadInfo::n_threads();
-        chunk_size   = 8;
-
-        unsigned int ql = cfg.GetInteger("daetools.deal_II.assembly.queueLength", 0);
-        if(ql > 0)
-            queue_length = ql;
-
-        unsigned int cs = cfg.GetInteger("daetools.deal_II.assembly.chunkSize", 0);
-        if(cs > 0)
-            chunk_size = cs;
-    }
-    else
-    {
-        n_threads    = 1;
-        MultithreadInfo::set_thread_limit(1);
-        queue_length = 1;
-        chunk_size   = 1;
-    }
-
-    if(m_bPrintInfo)
-    {
-        printf("n_threads    = %d\n", MultithreadInfo::n_threads());
-        printf("queue_length = %d\n", queue_length);
-        printf("chunk_size   = %d\n", chunk_size);
-    }
-
-    PerTaskData per_task_data(*fe);
-    ScratchData scratch(*fe,
-                        quadrature_formula,
-                        face_quadrature_formula,
-                        m_mapExtractors,
-                        m_mapComponentMasks,
-                        boundary_values_map_adouble);
-
-    // Acquire thread state and release the GIL so that the spawned worker-threads can acquire it when required.
+    // Very important!!
+    //   Acquire thread state and release the GIL so that the spawned worker-threads can acquire it when required.
     INIT_THREAD_STATE_AND_RELEASE_GIL;
 
-    WorkStream::run (dof_handler.begin_active(),
-                     dof_handler.end(),
-                     *this,
-                     &dealiiFiniteElementSystem<dim>::assemble_one_cell,
-                     &dealiiFiniteElementSystem<dim>::copy_local_to_global,
-                     scratch,
-                     per_task_data,
-                     queue_length,
-                     chunk_size);
-
-    printf("\rAssembling the system... done.                      \n");
-    fflush(stdout);
-}
-
-template <int dim>
-void dealiiFiniteElementSystem<dim>::assemble_system_old()
-{
-    if(!m_weakForm)
-        throw std::runtime_error(std::string("The weak form has not been set"));
-    if(!m_pfeModel)
-        throw std::runtime_error(std::string("The finite element model has not been set"));
-
-    Quadrature<dim>&   quadrature_formula      = *m_quadrature_formula;
-    Quadrature<dim-1>& face_quadrature_formula = *m_face_quadrature_formula;
-
-    const unsigned int n_q_points      = quadrature_formula.size();
-    const unsigned int n_face_q_points = face_quadrature_formula.size();
-
-    const unsigned int dofs_per_cell = fe->dofs_per_cell;
-
-    std::map<types::global_dof_index, adouble> boundary_values_map_adouble;
-
-/*
-    int currentIndex = 0;
-    for(unsigned int k = 0; k < m_DOFs.size(); k++)
+    if(m_paralell_assembly_scheme == "TBB")
     {
-        const dealiiFiniteElementDOF<dim>& dof = *m_DOFs[k];
+        if(m_num_threads > 0)
+            MultithreadInfo::set_thread_limit(m_num_threads);
 
-        if(dof.m_nMultiplicity == 1)
+        if(m_bPrintInfo)
         {
-            if(m_bPrintInfo)
-                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Scalar(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
-            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Scalar(currentIndex);
-            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Scalar(currentIndex));
-        }
-        else
-        {
-            if(m_bPrintInfo)
-                std::cout << (boost::format("VariableName = %s, FEValuesExtractors::Vector(index = %d)") % dof.m_strName % currentIndex).str() << std::endl;
-            m_mapExtractors[dof.m_strName] = FEValuesExtractors::Vector(currentIndex);
-            m_mapComponentMasks[dof.m_strName] = fe->component_mask(FEValuesExtractors::Vector(currentIndex));
+            printf("Number of threads = %d\n", MultithreadInfo::n_threads());
+            //printf("Queue length    = %d\n", queue_length);
+            //printf("Chunk size      = %d\n", chunk_size);
         }
 
-        currentIndex += dof.m_nMultiplicity;
+        WorkStream::run (dof_handler.begin_active(),
+                         dof_handler.end(),
+                         *this,
+                         &dealiiFiniteElementSystem<dim>::assemble_one_cell,
+                         &dealiiFiniteElementSystem<dim>::copy_local_to_global,
+                         scratch_s,
+                         copy_data_s);
     }
-*/
-    // Interpolate Dirichlet boundary conditions on the system matrix and rhs
-    // Create a map with values for Dirichlet BCs using the adouble version of interpolate_boundary_values() function
+    else if(m_paralell_assembly_scheme == "OpenMP")
     {
-        typedef typename std::pair<std::string, const Function<dim,adouble>*>          pair_String_FunctionPtr;
-        typedef typename std::map<unsigned int, std::vector<pair_String_FunctionPtr> > map_Uint_vector_pair_String_FunctionPtr;
+        omp_lock_t lock;
+        omp_init_lock(&lock);
 
-        for(typename map_Uint_vector_pair_String_FunctionPtr::const_iterator it = m_weakForm->m_adoubleFunctionsDirichletBC.begin(); it != m_weakForm->m_adoubleFunctionsDirichletBC.end(); it++)
+        if(m_num_threads > 0)
+            omp_set_num_threads(m_num_threads);
+
+        cell_iterator cell_i = dof_handler.begin_active();
+        cell_iterator endc   = dof_handler.end();
+
+        // OpenMP does not work with iterators so populate std::vector with all cells.
+        // The std::vector supports the random access and can be used with OpenMP.
+        std::vector<cell_iterator> all_iterators;
+        all_iterators.reserve(n_active_cells);
+        for(; cell_i != endc; ++cell_i)
+            all_iterators.push_back(cell_i);
+
+        std::queue< boost::shared_ptr<PerTaskData> > copy_data_queue;
+        std::queue< boost::shared_ptr<PerTaskData> > copy_data_queue_swap;
+
+        int n_cells = all_iterators.size();
+        #pragma omp parallel
         {
-            const unsigned int   id                         = it->first;
-            const std::vector<pair_String_FunctionPtr>& bcs = it->second;
-
-            for(int k = 0; k < bcs.size(); k++)
+            if(m_bPrintInfo && omp_get_thread_num() == 0)
             {
-                pair_String_FunctionPtr p = bcs[k];
-                const std::string           variableName =  p.first;
-                const Function<dim,adouble>& fun          = *p.second;
+                printf("Number of threads    = %d\n", omp_get_num_threads());
+                printf("Queue size           = %d\n", m_queueSize);
+            }
 
-                typename map_string_ComponentMask::iterator iter = m_mapComponentMasks.find(variableName);
-                if(iter == m_mapComponentMasks.end())
-                    throw std::runtime_error("Cannot find variable: " + variableName + " in the DirichletBC dictionary");
+            #pragma omp for schedule(static, 1)
+            for(int cellCounter = 0; cellCounter < n_cells; cellCounter++)
+            {
+                int tid = omp_get_thread_num();
 
-                if(m_bPrintInfo)
-                    std::cout << "Interpolate DirichletBC at id: " << id << " for variable " << variableName << std::endl;
+                // Get the cell
+                cell_iterator cell = all_iterators[cellCounter];
+                //printf("Thread %d assembling cell %s\n", tid, cell->id().to_string().c_str());
 
-                daeVectorTools::interpolate_boundary_values (dof_handler,
-                                                             id,
-                                                             fun,
-                                                             boundary_values_map_adouble,
-                                                             iter->second);
-                /*
-                if(m_bPrintInfo)
+                // Create the scratch and the copy_data objects
+                boost::shared_ptr<PerTaskData> copy_data(new PerTaskData(copy_data_s));
+                ScratchData scratch(scratch_s);
+
+                // Assemble cell
+                assemble_one_cell(cell, scratch, *copy_data);
+
+                // Add the data to the queue
+                omp_set_lock(&lock);
+                    copy_data_queue.push(copy_data);
+                omp_unset_lock(&lock);
+
+                // When the queue size reaches the specified m_queueSize
+                // the master thread takes all copy_data objects from the queue
+                // and copies the data to the global matrices/array.
+                if(tid == 0)
                 {
-                    printf("bc[%d] = [", id);
-                    for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
-                        printf("(%d,%f) ", it->first, it->second);
-                    printf("]\n");
+                    //printf("copy_data_queue.size = %d\n", copy_data_queue.size());
+                    if(copy_data_queue.size() >= m_queueSize)
+                    {
+                        // Take all objects from the queue and copy them to the global structures.
+                        // This way, the other threads do not wait to acquire the omp lock.
+                        // The std::queue::swap() function should be fast since copying the shared_ptr objects is cheap.
+                        omp_set_lock(&lock);
+                        copy_data_queue_swap.swap(copy_data_queue);
+                        omp_unset_lock(&lock);
+
+                        //printf("copy_data_queue_swap.size = %d\n", copy_data_queue_swap.size());
+                        while(!copy_data_queue_swap.empty())
+                        {
+                            boost::shared_ptr<PerTaskData> cd = copy_data_queue_swap.front();
+                            copy_data_queue_swap.pop();
+
+                            copy_local_to_global(*cd);
+                        }
+                    }
                 }
-                */
-            }
-        }
-    }
-
-    //for(std::map<types::global_dof_index, adouble>::const_iterator it = boundary_values_map_adouble.begin(); it != boundary_values_map_adouble.end(); it++)
-    //   printf("(%d,%f) ", it->first, it->second.getValue());
-    //printf("\n");
-
-    // Populate the map std:map< std::vector< std::pair<adouble,adouble> > > with variable adouble objects.
-    // The integral expressions will be built and added later.
-    for(typename map_Uint_vector_pair_Variable_Expression::const_iterator it = m_weakForm->m_mapSurfaceIntegrals.begin(); it != m_weakForm->m_mapSurfaceIntegrals.end(); it++)
-    {
-        const unsigned int                           id   = it->first;
-        const std::vector<pair_Variable_Expression>& vpve = it->second;
-
-        vector_pair_Variable_adouble vpaa;
-        vpaa.reserve(vpve.size());
-        for(size_t i = 0; i < vpve.size(); i++)
-        {
-            const pair_Variable_Expression& pve = vpve[i];
-            const adouble& ad_variable = pve.first;
-            vpaa.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
-        }
-        m_mapSurfaceIntegrals[id] = vpaa;
-    }
-
-    // Populate the vector std:vector< std::pair<adouble,adouble> > with variable adouble objects.
-    // The integral expressions will be built and added later.
-    m_arrVolumeIntegrals.reserve(m_weakForm->m_arrVolumeIntegrals.size());
-    for(size_t i = 0; i < m_weakForm->m_arrVolumeIntegrals.size(); i++)
-    {
-        const pair_Variable_Expression& pve = m_weakForm->m_arrVolumeIntegrals[i];
-        const adouble& ad_variable = pve.first;
-        m_arrVolumeIntegrals.push_back( std::pair<adouble,adouble>(ad_variable, adouble()) );
-    }
-
-    n_active_cells = triangulation.n_active_cells();
-    numberOfAssembled = 0;
-//    omp_lock_t lock;
-//    omp_init_lock(&lock);
-
-//#pragma omp parallel if (m_bUseOpenMP)
-//{
-//    pyGILState GIL;
-
-    boost::numeric::ublas::matrix<adouble> cell_matrix   (dofs_per_cell, dofs_per_cell);
-    boost::numeric::ublas::matrix<adouble> cell_matrix_dt(dofs_per_cell, dofs_per_cell);
-    std::vector<adouble>                   cell_rhs      (dofs_per_cell);
-
-    std::vector<unsigned int> local_dof_indices (dofs_per_cell);
-
-    FEValues<dim>  fe_values (*fe, quadrature_formula,
-                              update_values   | update_gradients |
-                              update_quadrature_points | update_normal_vectors | update_JxW_values);
-
-    FEFaceValues<dim> fe_face_values (*fe, face_quadrature_formula,
-                                      update_values | update_gradients | update_quadrature_points  |
-                                      update_normal_vectors | update_JxW_values);
-
-    feCellContextImpl< dim, FEValues<dim> >      cellContext    (fe_values,      m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, m_mapExtractors);
-    feCellContextImpl< dim, FEFaceValues<dim> >  cellFaceContext(fe_face_values, m_pfeModel, sparsity_pattern, local_dof_indices, m_weakForm->m_functions, m_weakForm->m_adouble_functions, m_mapExtractors);
-
-    typename DoFHandler<dim>::active_cell_iterator cell = dof_handler.begin_active();
-    typename DoFHandler<dim>::active_cell_iterator endc = dof_handler.end();
-
-/*
-    int tid      = omp_get_thread_num();
-    int Nthreads = omp_get_num_threads();
-    int chunk    = n_active_cells / Nthreads;
-    int i_start  = chunk * tid;
-    int i_end    = (tid == Nthreads-1 ? n_active_cells : chunk*(tid+1));
-
-    printf("  Nthreads = %d\n", Nthreads);
-    printf("  chunk = %d\n", chunk);
-    printf("  Thread %d processing cells %d - %d\n", omp_get_thread_num(), i_start, i_end);
-    fflush(stdout);
-
-    std::advance(cell, i_start);
-
-    for(int cellCounter = i_start; (cellCounter < i_end) && (cell != dof_handler.end()); cellCounter++)
-*/
-
-    for(int cellCounter = 0; cell != endc; ++cell, cellCounter++)
-    {
-        //printf("  Thread %d processing cell %d\n", omp_get_thread_num(), cellCounter);
-        //fflush(stdout);
-
-        cell_matrix.clear();
-        cell_matrix_dt.clear();
-        std::fill(cell_rhs.begin(), cell_rhs.end(), adouble(0.0));
-
-        fe_values.reinit(cell);
-        cell->get_dof_indices(local_dof_indices);
-
-        //printf("local_dof_indices = [");
-        //for(unsigned int i = 0; i < local_dof_indices.size(); i++)
-        //    printf("%d, ", local_dof_indices[i]);
-        //printf("]\n");
-
-        for(size_t k = 0; k < m_weakForm->m_Mij.size(); k++)
-        {
-            dealiiCellContribution<dim>& contribution = m_weakForm->m_Mij[k];
-            //printf("Mij = %s\n", contribution.m_single.ToString().c_str());
-
-            if(contribution.m_eContributionType == eExpression_single)
-                cell_matrix_contribution(dofs_per_cell,
-                                         n_q_points,
-                                         cellContext,
-                                         cell_matrix_dt,
-                                         contribution.m_single);
-
-            else if(contribution.m_eContributionType == eExpression_qij)
-                cell_matrix_contribution(dofs_per_cell,
-                                         n_q_points,
-                                         cellContext,
-                                         cell_matrix_dt,
-                                         contribution.m_q_loop, contribution.m_i_loop, contribution.m_j_loop);
-        }
-
-        for(size_t k = 0; k < m_weakForm->m_Aij.size(); k++)
-        {
-            dealiiCellContribution<dim>& contribution = m_weakForm->m_Aij[k];
-            //printf("Aij = %s\n", contribution.m_single.ToString().c_str());
-
-            if(contribution.m_eContributionType == eExpression_single)
-                cell_matrix_contribution(dofs_per_cell,
-                                         n_q_points,
-                                         cellContext,
-                                         cell_matrix,
-                                         contribution.m_single);
-
-            else if(contribution.m_eContributionType == eExpression_qij)
-                cell_matrix_contribution(dofs_per_cell,
-                                         n_q_points,
-                                         cellContext,
-                                         cell_matrix,
-                                         contribution.m_q_loop, contribution.m_i_loop, contribution.m_j_loop);
-        }
-
-        for(size_t k = 0; k < m_weakForm->m_Fi.size(); k++)
-        {
-            dealiiCellContribution<dim>& contribution = m_weakForm->m_Fi[k];
-            //printf("Fi = %s\n", contribution.m_single.ToString().c_str());
-
-            if(contribution.m_eContributionType == eExpression_single)
-                cell_rhs_contribution(dofs_per_cell,
-                                      n_q_points,
-                                      cellContext,
-                                      cell_rhs,
-                                      contribution.m_single);
-
-            else if(contribution.m_eContributionType == eExpression_qi)
-                cell_rhs_contribution(dofs_per_cell,
-                                      n_q_points,
-                                      cellContext,
-                                      cell_rhs,
-                                      contribution.m_q_loop, contribution.m_i_loop);
-        }
-
-        integrate_volume_integrals(dofs_per_cell,
-                                   n_q_points,
-                                   cellContext);
-
-        /* Typically boundary conditions of the Neumann or Robin type. */
-        for(unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
-        {
-            // Only boundary faces
-            if(cell->face(face)->at_boundary())
-            {
-                const unsigned int id = cell->face(face)->boundary_id();
-
-                assemble_boundary_face(face,
-                                       id,
-                                       fe_face_values,
-                                       dofs_per_cell,
-                                       n_face_q_points,
-                                       cellFaceContext,
-                                       cell,
-                                       cell_matrix,
-                                       cell_rhs);
-
-                integrate_surface_integrals(face,
-                                            id,
-                                            fe_face_values,
-                                            dofs_per_cell,
-                                            n_face_q_points,
-                                            cellFaceContext,
-                                            cell);
-
-            }
-
-            // All faces
-            assemble_inner_cell_face(face,
-                                     fe_face_values,
-                                     dofs_per_cell,
-                                     n_face_q_points,
-                                     cellFaceContext,
-                                     cell,
-                                     cell_matrix,
-                                     cell_rhs);
-        }
-
-   /*
-        printf("cell_matrix before bcs:\n");
-        for(int x = 0; x < cell_matrix.size1(); x++)
-        {
-            printf("[");
-            for(int y = 0; y < cell_matrix.size2(); y++)
-                printf("%+f ", cell_matrix(x,y).getValue());
-            printf("]\n");
-        }
-        printf("\n");
-
-        printf("cell_rhs before bcs:\n");
-        printf("[");
-        for(int x = 0; x < cell_rhs.size(); x++)
-            printf("%+f ", cell_rhs[x].getValue());
-        printf("]\n");
-        printf("\n");
-    */
-
-        // Apply a map with values of Dirichlet BCs using the adouble version of local_apply_boundary_values()
-        // and local_process_mass_matrix() functions.
-        {
-            // Apply Dirichlet boundary conditions on the stiffness matrix and rhs
-            daeMatrixTools::local_apply_boundary_values(boundary_values_map_adouble,
-                                                        local_dof_indices,
-                                                        cell_matrix,
-                                                        cell_rhs);
-
-            // Modify the local mass matrix for those nodes that have Dirichlet boundary conditions set
-            daeMatrixTools::local_process_mass_matrix(boundary_values_map_adouble,
-                                                      local_dof_indices,
-                                                      cell_matrix_dt);
-        }
-    /*
-        printf("cell_matrix after bcs:\n");
-        for(int x = 0; x < cell_matrix.size1(); x++)
-        {
-            printf("[");
-            for(int y = 0; y < cell_matrix.size2(); y++)
-                printf("%+f ", cell_matrix(x,y).getValue());
-            printf("]\n");
-        }
-        printf("\n");
-
-        printf("cell_rhs after bcs:\n");
-        printf("[");
-        for(int x = 0; x < cell_rhs.size(); x++)
-            printf("%+f ", cell_rhs[x].getValue());
-        printf("]\n");
-        printf("\n");
-    */
-
-        // Do the final simplification before adding the local contributions to the system matrices
-        for(unsigned int i = 0; i < dofs_per_cell; ++i)
-        {
-            if(cell_rhs[i].node)
-                cell_rhs[i].node = adNode::SimplifyNode(cell_rhs[i].node);
-
-            for(unsigned int j = 0; j < dofs_per_cell; ++j)
-            {
-                if(cell_matrix(i,j).node)
-                    cell_matrix(i,j).node = adNode::SimplifyNode(cell_matrix(i,j).node);
-                if(cell_matrix_dt(i,j).node)
-                    cell_matrix_dt(i,j).node = adNode::SimplifyNode(cell_matrix_dt(i,j).node);
             }
         }
 
-        //omp_set_lock(&lock);
+        // If something is left in the queue process it
+        while(!copy_data_queue.empty())
         {
-            // Add local contributions Aij, Mij, Fi to the system matrices/vector
-            for(unsigned int i = 0; i < dofs_per_cell; ++i)
-            {
-                for(unsigned int j = 0; j < dofs_per_cell; ++j)
-                {
-                    if(hasNonzeroValue( cell_matrix(i,j) ))
-                        system_matrix.add(local_dof_indices[i], local_dof_indices[j], cell_matrix(i,j));
-
-                    if(hasNonzeroValue( cell_matrix_dt(i,j) ))
-                        system_matrix_dt.add(local_dof_indices[i], local_dof_indices[j], cell_matrix_dt(i,j));
-                }
-                if(hasNonzeroValue( cell_rhs[i] ))
-                    system_rhs(local_dof_indices[i]) += cell_rhs[i];
-            }
-
-            float percent = 100.0*(numberOfAssembled+1)/n_active_cells;
-            printf("\rAssembling the cell %d / %d (%5.1f%%)...", percent, numberOfAssembled+1, n_active_cells);
-            fflush(stdout);
-            numberOfAssembled++;
-        }
-        //omp_unset_lock(&lock);
-
-        //cell++;
-
-    } // End cell iteration
-//}
-
-/* Simplify items (DOES NOT WORK!!!!!)
-    adouble ad, adnew;
-    unsigned int col;
-    std::vector<unsigned int> cols;
-    for(unsigned int row = 0; row < system_matrix.n(); row++)
-    {
-        adouble& adfi = system_rhs[row];
-        adfi.node = adNode::SimplifyNode(adfi.node);
-
-        cols.clear();
-        RowIndices(row, cols);
-        for(unsigned int j = 0; j < cols.size(); j++)
-        {
-            col = cols[j];
-
-            ad = system_matrix(row,col);
-            adnew.node = adNode::SimplifyNode(ad.node);
-            system_matrix.set(row,col,adnew);
-
-            ad = system_matrix_dt(row,col);
-            adnew.node = adNode::SimplifyNode(ad.node);
-            system_matrix_dt.set(row,col,adnew);
+            boost::shared_ptr<PerTaskData> cd = copy_data_queue.front();
+            copy_data_queue.pop();
+            copy_local_to_global(*cd);
+            //printf("copy_data_queue.size = %d\n", copy_data_queue.size());
         }
     }
-*/
+    else // Sequential
+    {
+        if(m_bPrintInfo)
+        {
+            printf("Number of threads = 1 (sequential)\n");
+        }
 
-    // Achtung, Achtung!!!
-    //   Hanging nodes are NOT supported at the moment!!
-    //   There must be a way to stop simulation if hanging nodes are detected.
+        cell_iterator cell = dof_handler.begin_active();
+        cell_iterator endc = dof_handler.end();
+        for(; cell != endc; ++cell)
+        {
+            PerTaskData copy_data(copy_data_s);
+            ScratchData scratch(scratch_s);
 
-    // If using refined grids condense hanging nodes
-    //hanging_node_constraints.condense(system_matrix);
-    //hanging_node_constraints.condense(system_rhs);
+            // Assemble cell
+            assemble_one_cell(cell, scratch, copy_data);
 
-    // What about this matrix? Should it also be condensed?
-    //hanging_node_constraints.condense(system_matrix_dt);
+            // Copies the data to the global matrices/array.
+            copy_local_to_global(copy_data);
+        }
+    }
 
     printf("\rAssembling the system... done.                      \n");
     fflush(stdout);

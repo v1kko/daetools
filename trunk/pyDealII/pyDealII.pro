@@ -42,7 +42,6 @@ LIBS += $${DEALII_LIBS} \
         $${DAE_CONFIG_LIB} \
         $${BOOST_PYTHON_LIB} \
         $${BOOST_LIBS} \
-        #$${OMP_LIB} \
         $${RT}
 
 SOURCES += stdafx.cpp \

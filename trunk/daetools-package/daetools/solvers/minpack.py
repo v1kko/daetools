@@ -283,7 +283,7 @@ class daeMinpackLeastSq:
     def getConfidenceEllipsoid(self, x_param_index, y_param_index, **kwargs):
         if self.IsInitialized == False:
             raise RuntimeError('daeMinpackLeastSq object has not been initialized') 
-        if (self.ier not in [1, 2, 3, 4]) or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
+        if (self.ier not in [1, 2, 3, 4]): # or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
             raise RuntimeError('daeMinpackLeastSq Run has not been called') 
         if (x_param_index < 0) or (x_param_index >= self.Nparameters):
             raise RuntimeError('Invalid [x_param_index] argument') 
@@ -320,7 +320,7 @@ class daeMinpackLeastSq:
     def getFit_SS(self, input_variable_index, measured_variable_index, **kwargs):
         if (self.IsInitialized == False) or (self.experimental_data == None) or (self.Nmeasured_variables == 0) or (self.Nexperiments == 0) or (self.Ntime_points == 0):
             raise RuntimeError('daeMinpackLeastSq has not been initialized') 
-        if (self.ier not in [1, 2, 3, 4]) or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
+        if (self.ier not in [1, 2, 3, 4]): # or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
             raise RuntimeError('daeMinpackLeastSq Run has not been called') 
         if (measured_variable_index < 0) or (measured_variable_index >= self.Nmeasured_variables):
             raise RuntimeError('Invalid [measured_variable_index] argument') 
@@ -344,7 +344,7 @@ class daeMinpackLeastSq:
     def getFit_Dyn(self, measured_variable_index, experiment_index, **kwargs):
         if (self.IsInitialized == False) or (self.experimental_data == None) or (self.Nmeasured_variables == 0) or (self.Nexperiments == 0) or (self.Ntime_points == 0):
             raise RuntimeError('daeMinpackLeastSq has not been initialized') 
-        if (self.ier not in [1, 2, 3, 4]) or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
+        if (self.ier not in [1, 2, 3, 4]): # or (self.p_estimated == None) or (self.cov_x == None) or (self.infodict == None):
             raise RuntimeError('daeMinpackLeastSq Run has not been called') 
         if (measured_variable_index < 0) or (measured_variable_index >= self.Nmeasured_variables):
             raise RuntimeError('Invalid [measured_variable_index] argument') 
