@@ -29,7 +29,8 @@
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 <span style='color:#cc0000;'>In this example 2D transient Stokes flow driven by the differences in buoyancy caused</span>
-<span style='color:#cc0000;'>by the temperature differences in the fluid is solved (deal.II step-31).</span>
+<span style='color:#cc0000;'>by the temperature differences in the fluid is solved </span>
+<span style='color:#cc0000;'>(`deal.II step-31 &lt;https://www.dealii.org/8.5.0/doxygen/deal.II/step_31.html&gt;`_).</span>
 
 <span style='color:#cc0000;'>The differences to the original problem are that the grid is not adaptive and no </span>
 <span style='color:#cc0000;'>stabilisation method is used.</span>
@@ -120,7 +121,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(numpy.<span style='color:#2a00d6;'>sum</span>([dof.Multiplicity <b>for</b> dof <b>in</b> dofs]))
 
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-32x32.msh'</span>)
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-64x64.msh'</span>)
 
         <span style='color:#017a31;'># Store the object so it does not go out of scope while still in use by daetools</span>
         <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#017a31;'># path to mesh</span>
@@ -160,7 +161,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'># FE approximation of T at the specified quadrature point (adouble object)</span>
         T_dof <b><span style='color:#0000ff;'>=</span></b> dof_approximation_2D(<span style='color:#cc0000;'>'T'</span>, fe_q)
         
-        <span style='color:#017a31;'># FE approximation of u at the specified quadrature point (Tensor&lt;1,dim,adouble&gt; object)</span>
+        <span style='color:#017a31;'># FE approximation of u at the specified quadrature point (SUM(Tensor&lt;1&gt;*u(j)) object</span>
         u_dof <b><span style='color:#0000ff;'>=</span></b> vector_dof_approximation_2D(<span style='color:#cc0000;'>'u'</span>, fe_q)
         
         normal  <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
@@ -187,39 +188,38 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         dirichletBC[bottom_edge] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'p'</span>, adoubleConstantFunction_2D(adouble(<span style='color:#cc047c;'>0.0</span>))),
                                     (<span style='color:#cc0000;'>'u'</span>, VelocityFunction_2D(<span style='color:#3605fb;'>self</span>.n_components))]
         
+        <span style='color:#017a31;'># Mass and stiffness matrix contributions can also be in the form of a three item tuple:</span>
+        <span style='color:#017a31;'>#  (q_loop_expression, i_loop_expression, j_loop_expression)</span>
+        <span style='color:#017a31;'># which is evaluated as q_loop_expression*i_loop_expression*j_loop_expression</span>
+        <span style='color:#017a31;'># while load vector contributions can also be in the form of a two item tuple:</span>
+        <span style='color:#017a31;'>#  (q_loop_expression, i_loop_expression)</span>
+        <span style='color:#017a31;'># The advantage of splitting loops is faster assembly (i.e. q_loop_expressions are evaluated only once per quadrature point)</span>
+        <span style='color:#017a31;'># and much simpler evaluation trees resulting in low memory requirements.</span>
+
         <span style='color:#017a31;'># Contributions from the Stokes equation:</span>
         Aij_u_gradient     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> eta <b><span style='color:#0000ff;'>*</span></b> (sym_grad_u_i <b><span style='color:#0000ff;'>*</span></b> sym_grad_u_j) <b><span style='color:#0000ff;'>*</span></b> JxW
         Aij_p_gradient     <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(div_phi_u_i <b><span style='color:#0000ff;'>*</span></b> phi_p_j) <b><span style='color:#0000ff;'>*</span></b> JxW
-        Fi_buoyancy        <b><span style='color:#0000ff;'>=</span></b> (<b><span style='color:#0000ff;'>-</span></b>rho <b><span style='color:#0000ff;'>*</span></b> beta <b><span style='color:#0000ff;'>*</span></b> (gravity <b><span style='color:#0000ff;'>*</span></b> phi_vector_u_i) <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> T_dof <span style='color:#017a31;'># -&gt; float * adouble</span>
+        Fi_buoyancy        <b><span style='color:#0000ff;'>=</span></b> (T_dof, <b><span style='color:#0000ff;'>-</span></b>rho <b><span style='color:#0000ff;'>*</span></b> beta <b><span style='color:#0000ff;'>*</span></b> (gravity <b><span style='color:#0000ff;'>*</span></b> phi_vector_u_i) <b><span style='color:#0000ff;'>*</span></b> JxW)  <span style='color:#017a31;'># -&gt; float * adouble</span>
         
         <span style='color:#017a31;'># Contributions from the continuity equation:</span>
         Aij_continuity     <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>(phi_p_i <b><span style='color:#0000ff;'>*</span></b> div_phi_u_j) <b><span style='color:#0000ff;'>*</span></b> JxW
 
         <span style='color:#017a31;'># Contributions from the heat convection-diffusion equation:</span>
         Mij_T_accumulation <b><span style='color:#0000ff;'>=</span></b> phi_T_i <b><span style='color:#0000ff;'>*</span></b> phi_T_j <b><span style='color:#0000ff;'>*</span></b> JxW
-        Aij_T_convection   <b><span style='color:#0000ff;'>=</span></b> (phi_T_i <b><span style='color:#0000ff;'>*</span></b> dphi_T_j <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> u_dof <span style='color:#017a31;'># -&gt; Tensor&lt;rank=1,float&gt; * Tensor&lt;rank=1,adouble&gt; </span>
+        Aij_T_convection   <b><span style='color:#0000ff;'>=</span></b> (u_dof, phi_T_i, dphi_T_j <b><span style='color:#0000ff;'>*</span></b> JxW)
+        <span style='color:#017a31;'>#Aij_T_convection   = u_dof*(phi_T_i*dphi_T_j * JxW) # -&gt; Tensor&lt;rank=1,float&gt; * Tensor&lt;rank=1,adouble&gt; </span>
         Aij_T_diffusion    <b><span style='color:#0000ff;'>=</span></b> kappa <b><span style='color:#0000ff;'>*</span></b> (dphi_T_i <b><span style='color:#0000ff;'>*</span></b> dphi_T_j) <b><span style='color:#0000ff;'>*</span></b> JxW
         Fi_T_source        <b><span style='color:#0000ff;'>=</span></b> phi_T_i <b><span style='color:#0000ff;'>*</span></b> gamma <b><span style='color:#0000ff;'>*</span></b> JxW
 
-        <span style='color:#017a31;'># Total contributions:</span>
-        Mij <b><span style='color:#0000ff;'>=</span></b> Mij_T_accumulation
-        Aij <b><span style='color:#0000ff;'>=</span></b> (Aij_u_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_p_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_continuity <b><span style='color:#0000ff;'>+</span></b> Aij_T_diffusion) <b><span style='color:#0000ff;'>+</span></b> Aij_T_convection
-        Fi  <b><span style='color:#0000ff;'>=</span></b> Fi_T_source <b><span style='color:#0000ff;'>+</span></b> Fi_buoyancy
+        <span style='color:#017a31;'># Total contributions (using the new way - python lists of expressions or tuples):</span>
+        Mij <b><span style='color:#0000ff;'>=</span></b> [Mij_T_accumulation]
+        Aij <b><span style='color:#0000ff;'>=</span></b> [Aij_u_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_p_gradient <b><span style='color:#0000ff;'>+</span></b> Aij_continuity <b><span style='color:#0000ff;'>+</span></b> Aij_T_diffusion,  Aij_T_convection]
+        Fi  <b><span style='color:#0000ff;'>=</span></b> [Fi_T_source, Fi_buoyancy]
         
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> Aij,
                                                   Mij <b><span style='color:#0000ff;'>=</span></b> Mij,
                                                   Fi  <b><span style='color:#0000ff;'>=</span></b> Fi,
                                                   functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC)
-
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'The Boussinesq equations:'</span>)
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Aij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Mij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Fi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceAij]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceFi]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.surfaceIntegrals]))
 
         <span style='color:#3605fb;'>self</span>.fe_system.WeakForm <b><span style='color:#0000ff;'>=</span></b> weakForm
 
@@ -309,30 +309,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Save the model report and the runtime model report</span>
     simulation.m.fe_model.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
     <span style='color:#017a31;'>#simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + &quot;-rt.xml&quot;)</span>
-    
-    <span style='color:#3605fb;'>from</span> daetools.pyDAE.eval_node_graph <span style='color:#3605fb;'>import</span> daeNodeGraph
-    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
-<span style='color:#017a31;'>    A = simulation.m.fe_system.Asystem()</span>
-<span style='color:#017a31;'>    row = 443</span>
-<span style='color:#017a31;'>    cols = simulation.m.fe_system.RowIndices(row)</span>
-<span style='color:#017a31;'>    print(cols)</span>
-<span style='color:#017a31;'>    for col in cols:</span>
-<span style='color:#017a31;'>        ad = A.GetItem(row, col)</span>
-<span style='color:#017a31;'>        if ad.Node:</span>
-<span style='color:#017a31;'>            print('Processing item (%04d,%04d)...' % (row,col))</span>
-<span style='color:#017a31;'>            ng = daeNodeGraph('item', ad.Node)</span>
-<span style='color:#017a31;'>            ng.SaveGraph('deal.ii-7-item(%04d,%04d).png' % (row,col))</span>
-<span style='color:#017a31;'>    sys.exit()</span>
-<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
-    <span style='color:#017a31;'>&quot;&quot;&quot;</span>
-<span style='color:#017a31;'>    eeis = simulation.m.fe_model.Equations[0].EquationExecutionInfos</span>
-<span style='color:#017a31;'>    for i,eei in enumerate(eeis):</span>
-<span style='color:#017a31;'>        if (i in range(800, 810)) or (i in range(1200, 1210)):</span>
-<span style='color:#017a31;'>            print('Processing node %d...' % i)</span>
-<span style='color:#017a31;'>            ng = daeNodeGraph('residual', eei.Node)</span>
-<span style='color:#017a31;'>            ng.SaveGraph('deal.ii-7-T_equation[%04d].png' % i)</span>
-<span style='color:#017a31;'>    sys.exit()</span>
-<span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+       
     <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
     simulation.SolveInitial()
 

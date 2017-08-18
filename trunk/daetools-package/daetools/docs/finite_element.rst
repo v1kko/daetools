@@ -369,6 +369,10 @@ deal.II Quadrature Rules
 
 .. autoclass:: pyDealII.Quadrature_3D
 
+.. autoclass:: pyDealII.QGauss_0D
+
+    .. automethod:: __init__
+
 .. autoclass:: pyDealII.QGauss_1D
 
     .. automethod:: __init__
@@ -378,6 +382,10 @@ deal.II Quadrature Rules
     .. automethod:: __init__
 
 .. autoclass:: pyDealII.QGauss_3D
+
+    .. automethod:: __init__
+
+.. autoclass:: pyDealII.QGaussLobatto_0D
 
     .. automethod:: __init__
 

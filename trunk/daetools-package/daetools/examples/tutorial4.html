@@ -31,6 +31,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>This tutorial introduces the following concepts:</span>
 
 <span style='color:#cc0000;'>- Discontinuous equations (symmetrical state transition networks: daeIF statements)</span>
+<span style='color:#cc0000;'>- Building of Jacobian expressions</span>
 
 <span style='color:#cc0000;'>In this example we model a very simple heat transfer problem where a small piece of copper</span>
 <span style='color:#cc0000;'>is at one side exposed to the source of heat and at the other to the surroundings.</span>
@@ -84,6 +85,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
+        <span style='color:#017a31;'># If equation expressions are long the computational performance can be improved by</span>
+        <span style='color:#017a31;'># creating and storing the derivative expressions in the equation.</span>
+        <span style='color:#017a31;'># This can be achieved by setting the boolean property BuildJacobianExpressions to True.</span>
+        <span style='color:#017a31;'># Derivative expressions are printed later, once the simulation is initialised. </span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;HeatBalance&quot;</span>, <span style='color:#cc0000;'>&quot;Integral heat balance equation&quot;</span>)
         eq.BuildJacobianExpressions <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.cp() <b><span style='color:#0000ff;'>*</span></b> dt(<span style='color:#3605fb;'>self</span>.T()) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Qin() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#3605fb;'>self</span>.alpha() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.A() <b><span style='color:#0000ff;'>*</span></b> (<span style='color:#3605fb;'>self</span>.T() <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.Tsurr())
@@ -194,6 +199,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Initialize the simulation</span>
     simulation.Initialize(daesolver, datareporter, log)
 
+    <span style='color:#017a31;'># Print the Jacobian expressions for all equations</span>
     <span style='color:#3605fb;'>import</span> pprint
     <b>for</b> eq <b>in</b> simulation.m.Equations:
         <span style='color:#2a00d6;'>print</span>(eq.CanonicalName, <span style='color:#cc0000;'>':'</span>)

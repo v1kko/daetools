@@ -63,7 +63,7 @@ units and variable types must be imported. They can be imported in the following
     from daetools.pyDAE.pyUnits import m, kg, s, K, Pa, J, W
 
 The complete list of units and variable types can be found in
-:doc:`variable_types` and :doc:`units` modules.
+:py:mod:`~daetools.pyDAE.variable_types` and :py:mod:`~daetools.pyDAE.units` modules.
 
 Developing models
 =================
@@ -2384,8 +2384,8 @@ Tuples can contain two or three items.
 Matrix contributions contain three items representing q-loop, i-loop and j-loop expressions in the deal.ii matrix assembly. 
 Load vector contributions contain two items representing q-loop and i-loop expressions in the deal.ii vector assembly. 
 This way the expressions produced by the finite element system assembly can be much simpler and the simulations faster.
-The new way of specifying weak formulations is useful mostly for non-liner terms (i.e. those including scalar or vector
-DOF approximations).
+The new way of specifying weak formulations is useful mostly for specification of non-linear terms 
+(i.e. those including scalar or vector DOF approximations).
 
 For instance, the convection term in the heat convection-diffusion equation (tutorial_dealii_7.py) can be specified in a 
 more efficient way:
@@ -2396,11 +2396,31 @@ more efficient way:
         ...
         def DeclareEquations(self):
             ...
-            # Using the old way:
-            # Aij_T_convection = u_dof*(phi_T_i*dphi_T_j * JxW)
+                
+            # Contributions from the Stokes equation:
+            Aij_u_gradient     = ...
+            Aij_p_gradient     = ...
+            # Using the new way (q-loop, i-loop tuple for the load vector contributions):
+            Fi_buoyancy        = (T_dof, -rho * beta * (gravity * phi_vector_u_i) * JxW)
             
-            # Using the new way (q-loop, i-loop, j-loop tuple):
-            Aij_T_convection = (u_dof, phi_T_i, dphi_T_j * JxW)
+            # Contributions from the continuity equation:
+            Aij_continuity     = ...
+
+            # Contributions from the heat convection-diffusion equation:
+            Mij_T_accumulation = ...
+            # Using the new way (q-loop, i-loop, j-loop tuple for matrix contributions):
+            Aij_T_convection   = (u_dof, phi_T_i, dphi_T_j * JxW)
+            Aij_T_diffusion    = ...
+            Fi_T_source        = ...
+
+            # Total contributions (using the new way - python lists of expressions or tuples):
+            Mij = [Mij_T_accumulation]
+            Aij = [Aij_u_gradient + Aij_p_gradient + Aij_continuity + Aij_T_diffusion,  Aij_T_convection]
+            Fi  = [Fi_T_source, Fi_buoyancy]
+            
+            weakForm = dealiiFiniteElementWeakForm_2D(Aij = Aij,
+                                                      Mij = Mij,
+                                                      Fi  = Fi)
 
 Using the old way the vector DOF approximation (:math:`u_{dof}`) is evaluated 
 :math:`N_{quadrature\,points} \cdot N_{dofs\,per\,cell} \cdot N_{dofs\,per\,cell}` times
@@ -2459,105 +2479,117 @@ The sample configuration file is given below:
 
 .. code-block:: json
 
+ {
+    "daetools":
     {
-        "daetools":
+        "core":
         {
-            "core":
+            "checkForInfiniteNumbers"         : false,
+            "eventTolerance"                  : 1E-7,
+            "logIndent"                       : "    ",
+            "pythonIndent"                    : "    ",
+            "checkUnitsConsistency"           : true,
+            "resetLAMatrixAfterDiscontinuity" : true,
+            "printInfo"                       : false,
+            "deepCopyClonedNodes"             : true,
+            "equations":
             {
-                "checkForInfiniteNumbers": false,
-                "eventTolerance": 1E-7,
-                "logIndent": "    ",
-                "pythonIndent": "    ",
-                "checkUnitsConsistency": true,
-                "resetLAMatrixAfterDiscontinuity": true,
-                "printInfo": false,
-                "deepCopyClonedNodes": true,
-                "useOpenMPForEquations" : false,
-                "ompNumThreads" : 1,
-                "ompSchedule" : "default",
-                "ompScheduleChunkSize" : 0
-            },
-            "activity":
+                "simplifyExpressions" : false,
+                "parallelEvaluation"  : true,
+                "numThreads"          : 0
+            }
+        },
+        "activity":
+        {
+            "timeHorizon"                       : 100.0,
+            "reportingInterval"                 : 1.0,
+            "printHeader"                       : true,
+            "reportTimeDerivatives"             : false,
+            "reportSensitivities"               : false,
+            "objFunctionAbsoluteTolerance"      : 1E-8,
+            "constraintsAbsoluteTolerance"      : 1E-8,
+            "measuredVariableAbsoluteTolerance" : 1E-8
+        },
+        "datareporting":
+        {
+            "tcpipDataReceiverAddress"  : "127.0.0.1",
+            "tcpipDataReceiverPort"     : 50000
+        },
+        "logging":
+        {
+            "tcpipLogAddress" : "127.0.0.1",
+            "tcpipLogPort"    : 51000
+        },
+        "minlpsolver":
+        {
+            "printInfo": false
+        },
+        "IDAS":
+        {
+            "relativeTolerance"             : 1E-5,
+            "nextTimeAfterReinitialization" : 1E-7,
+            "printInfo"                     : false,
+            "numberOfSTNRebuildsDuringInitialization": 1000,
+            "SensitivitySolutionMethod"     : "Staggered",
+            "SensErrCon"                    : false,
+            "maxNonlinIters"                : 3,
+            "sensRelativeTolerance"         : 1E-5,
+            "sensAbsoluteTolerance"         : 1E-5,
+            "MaxOrd"            : 5,
+            "MaxNumSteps"       : 1000,
+            "InitStep"          : 0.0,
+            "MaxStep"           : 0.0,
+            "MaxErrTestFails"   : 10,
+            "MaxNonlinIters"    : 4,
+            "MaxConvFails"      : 10,
+            "NonlinConvCoef"    : 0.33,
+            "SuppressAlg"       : false,
+            "NoInactiveRootWarn": false,
+            "NonlinConvCoefIC"  : 0.0033,
+            "MaxNumStepsIC"     : 5,
+            "MaxNumJacsIC"      : 4,
+            "MaxNumItersIC"     : 10,
+            "LineSearchOffIC"   : false
+        },
+        "superlu":
+        {
+            "factorizationMethod"      : "SamePattern_SameRowPerm",
+            "useUserSuppliedWorkSpace" : false,
+            "workspaceSizeMultiplier"  : 3.0,
+            "workspaceMemoryIncrement" : 1.5
+        },
+        "BONMIN":
+        {
+            "IPOPT":
             {
-                "timeHorizon": 100.0,
-                "reportingInterval": 1.0,
-                "printHeader": true,
-                "reportTimeDerivatives": false,
-                "reportSensitivities": false,
-                "objFunctionAbsoluteTolerance": 1E-8,
-                "constraintsAbsoluteTolerance": 1E-8,
-                "measuredVariableAbsoluteTolerance": 1E-8
-            },
-            "datareporting":
+                "print_level"          : 0,
+                "tol"                  : 1E-5,
+                "linear_solver"        : "mumps",
+                "hessianApproximation" : "limited-memory",
+                "mu_strategy"          : "adaptive"
+            }
+        },
+        "NLOPT":
+        {
+            "printInfo"  : false,
+            "xtol_rel"   : 1E-6,
+            "xtol_abs"   : 1E-6,
+            "ftol_rel"   : 1E-6,
+            "ftol_abs"   : 1E-6,
+            "constr_tol" : 1E-6
+        },
+        "deal_II":
+        {
+            "printInfo": false,
+            "assembly":
             {
-                "tcpipDataReceiverAddress": "127.0.0.1",
-                "tcpipDataReceiverPort": 50000
-            },
-            "logging":
-            {
-                "tcpipLogAddress": "127.0.0.1",
-                "tcpipLogPort": 51000
-            },
-            "minlpsolver":
-            {
-                "printInfo": false
-            },
-            "IDAS":
-            {
-                "relativeTolerance": 1E-5,
-                "nextTimeAfterReinitialization": 1E-7,
-                "printInfo": false,
-                "numberOfSTNRebuildsDuringInitialization": 1000,
-                "SensitivitySolutionMethod": "Staggered",
-                "SensErrCon": false,
-                "maxNonlinIters": 3,
-                "sensRelativeTolerance": 1E-5,
-                "sensAbsoluteTolerance": 1E-5,
-                "MaxOrd": 5,
-                "MaxNumSteps": 1000,
-                "InitStep": 0.0,
-                "MaxStep": 0.0,
-                "MaxErrTestFails": 10,
-                "MaxNonlinIters": 4,
-                "MaxConvFails": 10,
-                "NonlinConvCoef": 0.33,
-                "SuppressAlg": false,
-                "NoInactiveRootWarn": false,
-                "NonlinConvCoefIC": 0.0033,
-                "MaxNumStepsIC": 5,
-                "MaxNumJacsIC": 4,
-                "MaxNumItersIC": 10,
-                "LineSearchOffIC": false
-            },
-            "superlu":
-            {
-                "factorizationMethod": "SamePattern_SameRowPerm",
-                "useUserSuppliedWorkSpace": false,
-                "workspaceSizeMultiplier": 3.0,
-                "workspaceMemoryIncrement": 1.5
-            },
-            "BONMIN":
-            {
-                "IPOPT":
-                {
-                    "print_level": 0,
-                    "tol":1E-5,
-                    "linear_solver": "mumps",
-                    "hessianApproximation": "limited-memory",
-                    "mu_strategy": "adaptive"
-                }
-            },
-            "NLOPT":
-            {
-                "printInfo": false,
-                "xtol_rel": 1E-6,
-                "xtol_abs": 1E-6,
-                "ftol_rel": 1E-6,
-                "ftol_abs": 1E-6,
-                "constr_tol": 1E-6
+                "parallelAssembly" : "OpenMP",
+                "numThreads"       : 0,
+                "queueSize"        : 32
             }
         }
     }
+ }
 
 Units and quantities
 ====================
@@ -3261,7 +3293,34 @@ Screenshots of the running ``Simulation Explorer``:
     
     Degrees of freedom
 
-    
+Parallel computation
+--------------------
+Parallel computation is supported using the shared-memory parallel programming model at the moment. 
+The following part of the code support parallelisation:
+
+- Evaluation of equations, Jacobian matrix and sensitivity residuals using the OpenMP interface.
+
+  This can be controlled in the daetools.cfg config file, section ``daetools.core.equations``.
+  The parallel evaluation can be specified using the boolean ``parallelEvaluation`` option while the 
+  number of threads using the ``numThreads`` option. If ``numThreads`` is 0 the default number of threads 
+  will be used (typically the number of cores in the system).
+  
+- Assembly of Finite Element systems using the OpenMP interface or Intel Thread Building Blocks (TBB)
+  
+  This can be also controlled in the daetools.cfg config file, section ``daetools.deal_II.assembly``.
+  The parallel assembly can be specified using the string ``parallelAssembly`` option while the 
+  number of threads using the ``numThreads`` option. 
+  ``parallelAssembly`` can be one of: ``Sequential``, ``OpenMP`` or ``TBB`` (multithreaded in GNU/Linux only).
+  If ``numThreads`` is 0 the default number of threads will be used (typically the number of cores in the system).
+  The ``queueSize`` specifies the size of the internal queue; when this size is reached the local data are 
+  copied to the global matrices.
+
+- Solution of systems of linear equations (SuperLU_MT, Pardiso and Intel Pardiso solvers)
+
+In addition, there is an experimental code generator that generates C++ source code with the 
+support for MPI interface.
+
+
 Generating code for other modelling languages
 =============================================
 **DAE Tools** can generate code for several modelling or programming languages (Modelica, gPROMS, c99, c++ with MPI).
@@ -3573,7 +3632,7 @@ Typically, the global sensitivity analysis is conducted by [#Saltelli2008]_ [#Sa
 An example of the global sensitivity analysis in **DAE Tools** is given in :ref:`tutorial_sa_3`.
 This tutorial illustrates the global variance-based sensitivity analysis methods available in 
 `SALib <http://salib.readthedocs.io>`_ python library. Three SA methods were applied on a thermal analysis 
-of a batch reactor with exothermic reaction A -> B [#Saltelli2005]_: ``Morris`` (Elementary Effect method), 
+of a batch reactor with exothermic reaction :math:`A \rightarrow B` [#Saltelli2005]_: ``Morris`` (Elementary Effect method), 
 ``FAST`` and ``Sobol`` (Variance-based methods).
 
 In **DAE Tools** the procedure includes the following steps:
@@ -3594,7 +3653,7 @@ In **DAE Tools** the procedure includes the following steps:
                   ]
                 }
 
-3. Generation of samples (Morris, FAST or Sobol sampling):
+3. Generation of samples:
 
    .. code-block:: python
 
@@ -3632,7 +3691,11 @@ In **DAE Tools** the procedure includes the following steps:
         args = [(i, 1, B[i], gamma[i], psi[i], theta_a[i], 0.0, theta_0[i]) for i in range(N)]
         theta_max[:] = pool.map(simulate_p, args, chunksize=1)
 
-5. Performing sensitivity analysis (Morris, FAST or Sobol methods)
+   Whether the simulations will be performed in parallel depends on model complexity and size.
+   Running several large simulations that require a lot of memory at the same time may actually slow down the overall progress.
+   Those cases will benefit more from parallel evaluation of equations / use of multithreaded linear equations solvers.
+   
+5. Performing sensitivity analysis
 
    .. code-block:: python
    

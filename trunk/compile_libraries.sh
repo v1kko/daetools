@@ -40,7 +40,7 @@ OPTIONS:
 
 LIBRARY:
     all    All libraries and solvers.
-           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt coolprop trilinos deal.ii
+           On GNU/Linux and macOS equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt coolprop trilinos deal.ii
            On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt coolprop trilinos deal.ii 
 
     Individual libraries/solvers:
@@ -1660,9 +1660,9 @@ configure_dealii()
     WITH_CXX14=OFF
     DEALII_CXX_FLAGS="/MD /EHsc"
   fi
-  if [ ${PLATFORM} = "Linux" ]; then
-    WITH_THREADS=ON
-  fi
+  #if [ ${PLATFORM} = "Linux" ]; then
+  #  WITH_THREADS=ON
+  #fi
   
   cd deal.II
   mkdir -p build

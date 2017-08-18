@@ -27,7 +27,7 @@
 <span style='color:#017a31;'>********************************************************************************</span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 <span style='color:#cc0000;'>This tutorial illustrates the global variance-based sensitivity analysis methods</span>
-<span style='color:#cc0000;'>available in the SALib python library.</span>
+<span style='color:#cc0000;'>available in the `SALib &lt;http://salib.readthedocs.io&gt;`_ python library.</span>
 
 <span style='color:#cc0000;'>The problem is adopted from the section 2.6 of the following article:</span>
 <span style='color:#cc0000;'>    </span>
@@ -52,45 +52,45 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>        Morris (N = 510)</span>
 <span style='color:#cc0000;'> -------------------------------------------------------</span>
 <span style='color:#cc0000;'>     Param          mu        mu*   mu*_conf      Sigma</span>
-<span style='color:#cc0000;'>         B    0.311943   0.311943   0.115717   0.540381</span>
-<span style='color:#cc0000;'>     gamma   -0.046577   0.052157   0.022149   0.107576</span>
-<span style='color:#cc0000;'>       psi    0.295973   0.295973   0.116256   0.528287</span>
-<span style='color:#cc0000;'>   theta_a    0.215855   0.215855   0.083293   0.411367</span>
-<span style='color:#cc0000;'>   theta_0    0.011023   0.011312   0.006351   0.031471</span>
+<span style='color:#cc0000;'>         B    0.367412   0.367412   0.114161   0.546276</span>
+<span style='color:#cc0000;'>     gamma   -0.040556   0.056616   0.021330   0.111878</span>
+<span style='color:#cc0000;'>       psi    0.311563   0.311563   0.103515   0.504398</span>
+<span style='color:#cc0000;'>   theta_a    0.326932   0.326932   0.102303   0.490423</span>
+<span style='color:#cc0000;'>   theta_0    0.021208   0.023524   0.016015   0.074062</span>
 <span style='color:#cc0000;'> -------------------------------------------------------</span>
 
 <span style='color:#cc0000;'> -------------------------------------------------------</span>
 <span style='color:#cc0000;'>        Sobol (N = 6144)</span>
 <span style='color:#cc0000;'> -------------------------------------------------------</span>
 <span style='color:#cc0000;'>     Param          S1    S1_conf         ST    ST_conf</span>
-<span style='color:#cc0000;'>         B    0.094110   0.089475   0.581946   0.150334</span>
-<span style='color:#cc0000;'>     gamma   -0.002416   0.011938   0.044354   0.028461</span>
-<span style='color:#cc0000;'>       psi    0.171040   0.097859   0.524576   0.140252</span>
-<span style='color:#cc0000;'>   theta_a    0.072511   0.043878   0.523382   0.177241</span>
-<span style='color:#cc0000;'>   theta_0    0.002343   0.004746   0.008174   0.007650</span>
+<span style='color:#cc0000;'>         B    0.094110   0.078918   0.581930   0.154737</span>
+<span style='color:#cc0000;'>     gamma   -0.002416   0.012178   0.044354   0.027352</span>
+<span style='color:#cc0000;'>       psi    0.171043   0.087782   0.524579   0.142115</span>
+<span style='color:#cc0000;'>   theta_a    0.072535   0.042848   0.523394   0.165736</span>
+<span style='color:#cc0000;'>   theta_0    0.002340   0.004848   0.008173   0.005956</span>
 
 <span style='color:#cc0000;'> Parameter pairs          S2    S2_conf</span>
-<span style='color:#cc0000;'>         B/gamma    0.180434   0.153318</span>
-<span style='color:#cc0000;'>           B/psi    0.260698   0.172012</span>
-<span style='color:#cc0000;'>       B/theta_a    0.143292   0.145452</span>
-<span style='color:#cc0000;'>       B/theta_0    0.177137   0.150218</span>
-<span style='color:#cc0000;'>       gamma/psi    0.000981   0.024855</span>
-<span style='color:#cc0000;'>   gamma/theta_a    0.004953   0.040380</span>
-<span style='color:#cc0000;'>   gamma/theta_0   -0.009390   0.027726</span>
-<span style='color:#cc0000;'>     psi/theta_a    0.166102   0.173568</span>
-<span style='color:#cc0000;'>     psi/theta_0   -0.016474   0.132210</span>
-<span style='color:#cc0000;'> theta_a/theta_0    0.109086   0.112104</span>
+<span style='color:#cc0000;'>         B/gamma    0.180427   0.160979</span>
+<span style='color:#cc0000;'>           B/psi    0.260689   0.171367</span>
+<span style='color:#cc0000;'>       B/theta_a    0.143261   0.154060</span>
+<span style='color:#cc0000;'>       B/theta_0    0.177129   0.156582</span>
+<span style='color:#cc0000;'>       gamma/psi    0.000981   0.027443</span>
+<span style='color:#cc0000;'>   gamma/theta_a    0.004956   0.036554</span>
+<span style='color:#cc0000;'>   gamma/theta_0   -0.009392   0.027390</span>
+<span style='color:#cc0000;'>     psi/theta_a    0.166155   0.172727</span>
+<span style='color:#cc0000;'>     psi/theta_0   -0.016434   0.129177</span>
+<span style='color:#cc0000;'> theta_a/theta_0    0.109057   0.127287</span>
 <span style='color:#cc0000;'> -------------------------------------------------------</span>
 
 <span style='color:#cc0000;'> ---------------------------------</span>
 <span style='color:#cc0000;'>        FAST (N = 6150)</span>
 <span style='color:#cc0000;'> ---------------------------------</span>
 <span style='color:#cc0000;'>     Param          S1         ST</span>
-<span style='color:#cc0000;'>         B    0.131657   0.555142</span>
-<span style='color:#cc0000;'>     gamma    0.000741   0.029047</span>
-<span style='color:#cc0000;'>       psi    0.174270   0.600936</span>
-<span style='color:#cc0000;'>   theta_a    0.142095   0.518529</span>
-<span style='color:#cc0000;'>   theta_0    0.001094   0.039504</span>
+<span style='color:#cc0000;'>         B    0.135984   0.559389</span>
+<span style='color:#cc0000;'>     gamma    0.000429   0.029026</span>
+<span style='color:#cc0000;'>       psi    0.171291   0.602461</span>
+<span style='color:#cc0000;'>   theta_a    0.144617   0.534116</span>
+<span style='color:#cc0000;'>   theta_0    0.000248   0.040741</span>
 <span style='color:#cc0000;'> ---------------------------------</span>
 
 
@@ -182,17 +182,19 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <span style='color:#3605fb;'>self</span>.m.theta.SetInitialCondition(<span style='color:#3605fb;'>self</span>.theta_0)
 
 <b>def</b> simulate_p(args):
-    run_no, n, B, gamma, psi, theta_a, x_0, theta_0 <b><span style='color:#0000ff;'>=</span></b> args
-    <b>return</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0)
+    run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential <b><span style='color:#0000ff;'>=</span></b> args
+    <b>return</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential)
 
-<b>def</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
+<b>def</b> simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential):
     <span style='color:#017a31;'>#print('run_no %d on tid=%s' % (run_no, os.getpid()))</span>
     
-    <span style='color:#017a31;'># Disable OpenMP for evaluation of residuals and derivatives.</span>
-    <span style='color:#017a31;'># Running multiple simulations where all of them use OpenMP at the same time</span>
-    <span style='color:#017a31;'># will actually tremendously decrease the computational performance.</span>
+    <span style='color:#017a31;'># If running in parallel disable OpenMP for evaluation of residuals and derivatives!</span>
+    <span style='color:#017a31;'># Running simulations in multiple OpenMP threads where all of them </span>
+    <span style='color:#017a31;'># use OpenMP at the same time for calculations actually decreases </span>
+    <span style='color:#017a31;'># the overall performance.</span>
     cfg  <b><span style='color:#0000ff;'>=</span></b> daeGetConfig()
-    cfg.SetBoolean(<span style='color:#cc0000;'>&quot;daetools.core.equations.useOpenMP&quot;</span>, <span style='color:#3605fb;'>False</span>)
+    <b>if</b> <b>not</b> sequential:
+        cfg.SetBoolean(<span style='color:#cc0000;'>&quot;daetools.core.equations.parallelEvaluation&quot;</span>, <span style='color:#3605fb;'>False</span>)
         
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
@@ -212,12 +214,12 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     
     <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
     simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.002</span> <span style='color:#017a31;'># </span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.2</span>  <span style='color:#017a31;'># 0.5 hour</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.3</span>   <span style='color:#017a31;'># 0.5 hour</span>
 
     <span style='color:#017a31;'># Connect data reporter</span>
     simName <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>]-</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (simulation.m.Name, run_no, strftime(<span style='color:#cc0000;'>&quot;[</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime()))
 
-    <span style='color:#017a31;'># 1. TCP/IP</span>
+    <span style='color:#017a31;'># 1. Disable TCP/IP to improve the performance!</span>
     <span style='color:#017a31;'>#tcpipDataReporter = daeTCPIPDataReporter()</span>
     <span style='color:#017a31;'>#datareporter.AddDataReporter(tcpipDataReporter)</span>
     <span style='color:#017a31;'>#if not tcpipDataReporter.Connect(&quot;&quot;, simName):</span>
@@ -284,7 +286,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'># 3. Generation of samples (Morris, FAST or Sobol sampling).</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
-        <span style='color:#3605fb;'>from</span> SALib.sample.morris <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> SALib.sample.morris  <span style='color:#3605fb;'>import</span> sample
         <span style='color:#3605fb;'>from</span> SALib.analyze.morris <span style='color:#3605fb;'>import</span> analyze
         
         <span style='color:#017a31;'># Generate samples using the Morris method.</span>
@@ -301,7 +303,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     
     <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Sobol'</span>:
         <span style='color:#3605fb;'>from</span> SALib.sample.saltelli <span style='color:#3605fb;'>import</span> sample
-        <span style='color:#3605fb;'>from</span> SALib.analyze.sobol <span style='color:#3605fb;'>import</span> analyze
+        <span style='color:#3605fb;'>from</span> SALib.analyze.sobol   <span style='color:#3605fb;'>import</span> analyze
         
         <span style='color:#017a31;'># Generate samples using a Saltelli's extension of the Sobol sequence.</span>
         <span style='color:#017a31;'># Sample size n=512, no. params k=5 =&gt; N=(2k+2)*n=6144 (as in the referenced article).</span>
@@ -317,7 +319,7 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     
     <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'FAST'</span>:
         <span style='color:#3605fb;'>from</span> SALib.sample.fast_sampler <span style='color:#3605fb;'>import</span> sample
-        <span style='color:#3605fb;'>from</span> SALib.analyze.fast <span style='color:#3605fb;'>import</span> analyze
+        <span style='color:#3605fb;'>from</span> SALib.analyze.fast        <span style='color:#3605fb;'>import</span> analyze
         
         <span style='color:#017a31;'># Generate samples using a FAST method.</span>
         <span style='color:#017a31;'># Sample size n=1230, no. params k=5 =&gt; N=k*n=6150.</span>
@@ -348,16 +350,9 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'># 4. Generation of outputs for a given input matrix (daetools).</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     theta_max <b><span style='color:#0000ff;'>=</span></b> numpy.zeros(N)
-    
-    <b>def</b> evaluate_parallel():
-        <span style='color:#3605fb;'>from</span> multiprocessing <span style='color:#3605fb;'>import</span> Pool
-        <span style='color:#017a31;'># Create a pool of workers to calculate N outputs</span>
-        <span style='color:#017a31;'># Don't forget to disable OpenMP for evaluation of residuals and derivatives!!</span>
-        pool <b><span style='color:#0000ff;'>=</span></b> Pool()
-        args <b><span style='color:#0000ff;'>=</span></b> [(i, <span style='color:#cc047c;'>1</span>, B[i], gamma[i], psi[i], theta_a[i], <span style='color:#cc047c;'>0.0</span>, theta_0[i]) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N)]
-        theta_max[:] <b><span style='color:#0000ff;'>=</span></b> pool.<span style='color:#2a00d6;'>map</span>(simulate_p, args, chunksize<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1</span>)
         
     <b>def</b> evaluate_sequential():
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Running </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'> simulations sequentially...'</span> <b><span style='color:#0000ff;'>%</span></b> N)
         <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N): 
             theta_max[i] <b><span style='color:#0000ff;'>=</span></b> simulate(run_no  <b><span style='color:#0000ff;'>=</span></b> i,
                                     n       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
@@ -366,7 +361,18 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
                                     psi     <b><span style='color:#0000ff;'>=</span></b> psi[i], 
                                     theta_a <b><span style='color:#0000ff;'>=</span></b> theta_a[i], 
                                     x_0     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>, 
-                                    theta_0 <b><span style='color:#0000ff;'>=</span></b> theta_0[i])
+                                    theta_0 <b><span style='color:#0000ff;'>=</span></b> theta_0[i],
+                                    sequential <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)
+            <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'  Finished simulation run </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> i)
+    
+    <b>def</b> evaluate_parallel():
+        <span style='color:#3605fb;'>from</span> multiprocessing <span style='color:#3605fb;'>import</span> Pool
+        <span style='color:#017a31;'># Create a pool of workers to calculate N outputs</span>
+        <span style='color:#017a31;'># Don't forget to disable OpenMP for evaluation of residuals and derivatives!!</span>
+        pool <b><span style='color:#0000ff;'>=</span></b> Pool()
+        args <b><span style='color:#0000ff;'>=</span></b> [(i, <span style='color:#cc047c;'>1</span>, B[i], gamma[i], psi[i], theta_a[i], <span style='color:#cc047c;'>0.0</span>, theta_0[i], <span style='color:#3605fb;'>False</span>) <b>for</b> i <b>in</b> <span style='color:#2a00d6;'>range</span>(N)]
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Running </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'> simulations in parallel...'</span> <b><span style='color:#0000ff;'>%</span></b> N)
+        theta_max[:] <b><span style='color:#0000ff;'>=</span></b> pool.<span style='color:#2a00d6;'>map</span>(simulate_p, args, chunksize<b><span style='color:#0000ff;'>=</span></b><span style='color:#cc047c;'>1</span>)
     
     start <b><span style='color:#0000ff;'>=</span></b> time.time()
     evaluate_parallel()

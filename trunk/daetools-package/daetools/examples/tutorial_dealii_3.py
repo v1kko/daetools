@@ -258,28 +258,6 @@ def consoleRun():
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
     #simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
 
-    """
-    from daetools.pyDAE.eval_node_graph import daeNodeGraph
-    for equation in simulation.m.fe_model.Equations:
-        for i,eei in enumerate(equation.EquationExecutionInfos):
-            if (i in range(25, 31)) or (i in range(925, 931)):
-                print('Processing node %d...' % i)
-                ng = daeNodeGraph('residual', eei.Node)
-                ng.SaveGraph('%s[%04d].svg' % (simulation.m.fe_model.Name, i))
-    """
-    """
-    from PyQt5 import QtSvg, QtCore
-    app = daeCreateQtApplication(sys.argv)
-    svgWidget = QtSvg.QSvgWidget('dot-CahnHilliard[0929].svg')
-    renderer = svgWidget.renderer()
-    size = renderer.defaultSize()
-    print(size)
-    svgWidget.setGeometry(0, 0, size.height(), size.width())
-    renderer.setViewBox(QtCore.QRect(0, 0, size.height(), size.width()))
-    svgWidget.show()
-    app.exec_()
-    """
-    
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

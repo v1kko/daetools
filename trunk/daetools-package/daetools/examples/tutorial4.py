@@ -20,6 +20,7 @@ __doc__ = """
 This tutorial introduces the following concepts:
 
 - Discontinuous equations (symmetrical state transition networks: daeIF statements)
+- Building of Jacobian expressions
 
 In this example we model a very simple heat transfer problem where a small piece of copper
 is at one side exposed to the source of heat and at the other to the surroundings.
@@ -73,6 +74,10 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
+        # If equation expressions are long the computational performance can be improved by
+        # creating and storing the derivative expressions in the equation.
+        # This can be achieved by setting the boolean property BuildJacobianExpressions to True.
+        # Derivative expressions are printed later, once the simulation is initialised. 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.BuildJacobianExpressions = True
         eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
@@ -183,6 +188,7 @@ def consoleRun():
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
 
+    # Print the Jacobian expressions for all equations
     import pprint
     for eq in simulation.m.Equations:
         print(eq.CanonicalName, ':')

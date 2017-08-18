@@ -6,165 +6,166 @@
 <meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
 <title>tutorial_che_opt_1.py</title>
 </head>
+<!-- Highlighting: "Python" -->
 <body>
 <pre style='color:#1f1c1b;background-color:#ffffff;'>
-<span style='color:#008000;'>#!/usr/bin/env python</span>
-<span style='color:#008000;'># -*- coding: utf-8 -*-</span>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
 
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>                           tutorial_che_opt_1.py</span>
-<span style='color:#008000;'>                DAE Tools: pyDAE module, www.daetools.com</span>
-<span style='color:#008000;'>                Copyright (C) Dragan Nikolic</span>
-<span style='color:#008000;'>***********************************************************************************</span>
-<span style='color:#008000;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
-<span style='color:#008000;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
-<span style='color:#008000;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
-<span style='color:#008000;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
-<span style='color:#008000;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
-<span style='color:#008000;'>You should have received a copy of the GNU General Public License along with the</span>
-<span style='color:#008000;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
-<span style='color:#008000;'>************************************************************************************</span>
-<span style='color:#008000;'>&quot;&quot;&quot;</span>
-__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;&quot;</span>
-<span style='color:#c00000;'>Optimisation of the CSTR model and Van de Vusse reactions given in tutorial_che_1:</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                           tutorial_che_opt_1.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Optimisation of the CSTR model and Van de Vusse reactions given in tutorial_che_1:</span>
 
-<span style='color:#c00000;'>Not fully implemented yet.</span>
+<span style='color:#cc0000;'>Not fully implemented yet.</span>
 
-<span style='color:#c00000;'>Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics</span>
-<span style='color:#c00000;'>Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.</span>
-<span style='color:#c00000;'>`doi:10.1021/i160048a700 &lt;https://doi.org/10.1021/i160048a700&gt;`_</span>
-<span style='color:#c00000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>Reference: G.A. Ridlehoover, R.C. Seagrave. Optimization of Van de Vusse Reaction Kinetics</span>
+<span style='color:#cc0000;'>Using Semibatch Reactor Operation, Ind. Eng. Chem. Fundamen. 1973;12(4):444-447.</span>
+<span style='color:#cc0000;'>`doi:10.1021/i160048a700 &lt;https://doi.org/10.1021/i160048a700&gt;`_</span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
 
-<span style='color:#0000ff;'>import</span> sys
-<span style='color:#0000ff;'>from</span> time <span style='color:#0000ff;'>import</span> localtime, strftime
-<span style='color:#0000ff;'>from</span> daetools.pyDAE <span style='color:#0000ff;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
-<span style='color:#0000ff;'>from</span> daetools.solvers.ipopt <span style='color:#0000ff;'>import</span> pyIPOPT
-<span style='color:#0000ff;'>from</span> pyUnits <span style='color:#0000ff;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
+<span style='color:#3605fb;'>import</span> sys
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+<span style='color:#3605fb;'>from</span> daetools.solvers.ipopt <span style='color:#3605fb;'>import</span> pyIPOPT
+<span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W, kJ, hour, l
 
-K_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;k&quot;</span>,  s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>),        <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E20</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
-K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#c00000;'>&quot;k2&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span><b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>s),   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1E20</span>,   <span style='color:#c000c0;'>0</span>, <span style='color:#c000c0;'>1e-5</span>)
+K_t  <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;k&quot;</span>,  s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>),        <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E20</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-5</span>)
+K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;k2&quot;</span>, m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>s),   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E20</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-5</span>)
 
 <b>class</b> CSTR(daeModel):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c00000;'>&quot;&quot;</span>):
-        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>, Name, Parent, Description)
-        <span style='color:#008000;'># Parameters</span>
-        <span style='color:#0000ff;'>self</span>.k10   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;k_10&quot;</span>,         s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;A-&gt;B pre-exponential factor&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k20   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;k_20&quot;</span>,         s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;B-&gt;C pre-exponential factor&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k30   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;k_30&quot;</span>,    m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span><b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>s), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;2A-&gt;D pre-exponential factor&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.E1    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;E_1&quot;</span>,                K, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;A-&gt;B activation energy&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.E2    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;E_2&quot;</span>,                K, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;B-&gt;C activation energy&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.E3    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;E_3&quot;</span>,                K, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;2A-&gt;D activation energy&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.dHr1  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;dHr1&quot;</span>,           J<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;A-&gt;B heat of reaction&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.dHr2  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;dHr2&quot;</span>,           J<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;B-&gt;C heat of reaction&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.dHr3  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;dHr3&quot;</span>,           J<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;2A-&gt;D heat of reaction&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.rho   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>3</span>), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Density&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat capacity of reactants&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.kw    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;k_w&quot;</span>,   J<b><span style='color:#0000ff;'>/</span></b>(K<b><span style='color:#0000ff;'>*</span></b>s<b><span style='color:#0000ff;'>*</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat transfer coefficient&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.AR    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;A_r&quot;</span>,             m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Area of jacket cooling&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.mK    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;m_K&quot;</span>,               kg, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Mass of the cooling fluid&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.cpK   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#c00000;'>&quot;c_pk&quot;</span>,        J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Heat capacity of the cooling fluid&quot;</span>)
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+        <span style='color:#017a31;'># Parameters</span>
+        <span style='color:#3605fb;'>self</span>.k10   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;k_10&quot;</span>,         s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;A-&gt;B pre-exponential factor&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k20   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;k_20&quot;</span>,         s<b><span style='color:#0000ff;'>**</span></b>(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;B-&gt;C pre-exponential factor&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k30   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;k_30&quot;</span>,    m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>s), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;2A-&gt;D pre-exponential factor&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.E1    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;E_1&quot;</span>,                K, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;A-&gt;B activation energy&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.E2    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;E_2&quot;</span>,                K, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;B-&gt;C activation energy&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.E3    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;E_3&quot;</span>,                K, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;2A-&gt;D activation energy&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dHr1  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;dHr1&quot;</span>,           J<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;A-&gt;B heat of reaction&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dHr2  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;dHr2&quot;</span>,           J<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;B-&gt;C heat of reaction&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.dHr3  <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;dHr3&quot;</span>,           J<b><span style='color:#0000ff;'>/</span></b>mol, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;2A-&gt;D heat of reaction&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.rho   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;rho;&quot;</span>,      kg<b><span style='color:#0000ff;'>/</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>3</span>), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Density&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,         J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat capacity of reactants&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.kw    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;k_w&quot;</span>,   J<b><span style='color:#0000ff;'>/</span></b>(K<b><span style='color:#0000ff;'>*</span></b>s<b><span style='color:#0000ff;'>*</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.AR    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A_r&quot;</span>,             m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of jacket cooling&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.mK    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m_K&quot;</span>,               kg, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the cooling fluid&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cpK   <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_pk&quot;</span>,        J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat capacity of the cooling fluid&quot;</span>)
 
-        <span style='color:#008000;'># Degrees of freedom (for optimisation)</span>
-        <span style='color:#0000ff;'>self</span>.VR    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;V_r&quot;</span>,  volume_t,              <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reactor volume&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.F     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;F&quot;</span>,    volume_flowrate_t,     <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Feed flowrate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Qk    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Q_k&quot;</span>,  power_t,               <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Jacket cooling rate&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Ca0   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Ca_0&quot;</span>, molar_concentration_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Inlet feed concentration&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.T0    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T_0&quot;</span>,  temperature_t,         <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Inlet feed temperature&quot;</span>)
+        <span style='color:#017a31;'># Degrees of freedom (for optimisation)</span>
+        <span style='color:#3605fb;'>self</span>.VR    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;V_r&quot;</span>,  volume_t,              <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reactor volume&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.F     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;F&quot;</span>,    volume_flowrate_t,     <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Feed flowrate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Qk    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Q_k&quot;</span>,  power_t,               <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Jacket cooling rate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Ca0   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Ca_0&quot;</span>, molar_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Inlet feed concentration&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T0    <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T_0&quot;</span>,  temperature_t,         <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Inlet feed temperature&quot;</span>)
 
-        <span style='color:#008000;'># Variables</span>
-        <span style='color:#0000ff;'>self</span>.Ca <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Ca&quot;</span>,   molar_concentration_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Concentration of A&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Cb <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Cb&quot;</span>,   molar_concentration_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Concentration of B&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Cc <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Cc&quot;</span>,   molar_concentration_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Concentration of C&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Cd <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;Cd&quot;</span>,   molar_concentration_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Concentration of D&quot;</span>)
+        <span style='color:#017a31;'># Variables</span>
+        <span style='color:#3605fb;'>self</span>.Ca <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Ca&quot;</span>,   molar_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration of A&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Cb <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Cb&quot;</span>,   molar_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration of B&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Cc <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Cc&quot;</span>,   molar_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration of C&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Cd <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Cd&quot;</span>,   molar_concentration_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Concentration of D&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.T  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T&quot;</span>,    temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature in the reactor&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.Tk <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;T_k&quot;</span>,  temperature_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Temperature of the cooling jacket&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.T  <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,    temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature in the reactor&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tk <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T_k&quot;</span>,  temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the cooling jacket&quot;</span>)
 
-        <span style='color:#0000ff;'>self</span>.k1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;k_1&quot;</span>,  K_t,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction A-&gt;B rate constant&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;k_2&quot;</span>,  K_t,  <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction B-&gt;C rate constant&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.k3 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#c00000;'>&quot;k_3&quot;</span>,  K2_t, <span style='color:#0000ff;'>self</span>, <span style='color:#c00000;'>&quot;Reaction 2A-&gt;D rate constant&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k1 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;k_1&quot;</span>,  K_t,  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reaction A-&gt;B rate constant&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k2 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;k_2&quot;</span>,  K_t,  <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reaction B-&gt;C rate constant&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.k3 <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;k_3&quot;</span>,  K2_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Reaction 2A-&gt;D rate constant&quot;</span>)
 
-    <b>def</b> DeclareEquations(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># Create adouble objects to make equations more readable</span>
-        rho <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.rho()
-        cp  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.cp()
-        kw  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.kw()
-        AR  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.AR()
-        mK  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.mK()
-        cpK <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.cpK()
-        Qk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Qk()
-        dHr1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.dHr1()
-        dHr2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.dHr2()
-        dHr3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.dHr3()
-        k10 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k10()
-        k20 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k20()
-        k30 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k30()
-        E1  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.E1()
-        E2  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.E2()
-        E3  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.E3()
-        F   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.F()
-        VR  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.VR()
-        T0  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T0()
-        Ca0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Ca0()
-        <span style='color:#008000;'># Variables</span>
-        k1  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k1()
-        k2  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k2()
-        k3  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.k3()
-        T   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.T()
-        Tk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Tk()
-        Ca  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Ca()
-        Cb  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cb()
-        Cc  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cc()
-        Cd  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.Cd()
-        <span style='color:#008000;'># Derivatives</span>
-        dVr_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR())
-        dVrCa_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Ca())
-        dVrCb_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Cb())
-        dVrCc_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Cc())
-        dVrCd_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.Cd())
-        dVrT_dt  <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.T())
-        dTk_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#0000ff;'>self</span>.Tk())
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Create adouble objects to make equations more readable</span>
+        rho <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.rho()
+        cp  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.cp()
+        kw  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.kw()
+        AR  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.AR()
+        mK  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.mK()
+        cpK <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.cpK()
+        Qk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Qk()
+        dHr1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dHr1()
+        dHr2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dHr2()
+        dHr3 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.dHr3()
+        k10 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k10()
+        k20 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k20()
+        k30 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k30()
+        E1  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.E1()
+        E2  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.E2()
+        E3  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.E3()
+        F   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.F()
+        VR  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.VR()
+        T0  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T0()
+        Ca0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ca0()
+        <span style='color:#017a31;'># Variables</span>
+        k1  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k1()
+        k2  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k2()
+        k3  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.k3()
+        T   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T()
+        Tk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Tk()
+        Ca  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Ca()
+        Cb  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Cb()
+        Cc  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Cc()
+        Cd  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.Cd()
+        <span style='color:#017a31;'># Derivatives</span>
+        dVr_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR())
+        dVrCa_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Ca())
+        dVrCb_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Cb())
+        dVrCc_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Cc())
+        dVrCd_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.Cd())
+        dVrT_dt  <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.VR() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.T())
+        dTk_dt   <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.Tk())
 
-        <span style='color:#008000;'># Intermediates</span>
+        <span style='color:#017a31;'># Intermediates</span>
         r1 <b><span style='color:#0000ff;'>=</span></b> k1 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> Ca
         r2 <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> Cb
-        r3 <b><span style='color:#0000ff;'>=</span></b> k3 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> (Ca<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)
+        r3 <b><span style='color:#0000ff;'>=</span></b> k3 <b><span style='color:#0000ff;'>*</span></b> VR <b><span style='color:#0000ff;'>*</span></b> (Ca<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
 
-        ra <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>r1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#c000c0;'>2</span><b><span style='color:#0000ff;'>*</span></b>r3 <b><span style='color:#0000ff;'>+</span></b> F<b><span style='color:#0000ff;'>*</span></b>(Ca0<b><span style='color:#0000ff;'>-</span></b>Ca)
+        ra <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b>r1 <b><span style='color:#0000ff;'>-</span></b> <span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>r3 <b><span style='color:#0000ff;'>+</span></b> F<b><span style='color:#0000ff;'>*</span></b>(Ca0<b><span style='color:#0000ff;'>-</span></b>Ca)
         rb <b><span style='color:#0000ff;'>=</span></b>  r1   <b><span style='color:#0000ff;'>-</span></b> r2 <b><span style='color:#0000ff;'>-</span></b> F<b><span style='color:#0000ff;'>*</span></b>Cb
         rc <b><span style='color:#0000ff;'>=</span></b>  r2        <b><span style='color:#0000ff;'>-</span></b> F<b><span style='color:#0000ff;'>*</span></b>Cc
         rd <b><span style='color:#0000ff;'>=</span></b>  r3        <b><span style='color:#0000ff;'>-</span></b> F<b><span style='color:#0000ff;'>*</span></b>Cd
 
-        <span style='color:#008000;'># Volume</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;k1&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#017a31;'># Volume</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;k1&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVr_dt <b><span style='color:#0000ff;'>-</span></b> F
 
-        <span style='color:#008000;'># Reaction rate constants</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;k1&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#017a31;'># Reaction rate constants</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;k1&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> k1 <b><span style='color:#0000ff;'>-</span></b> k10 <b><span style='color:#0000ff;'>*</span></b> Exp(<b><span style='color:#0000ff;'>-</span></b>E1 <b><span style='color:#0000ff;'>/</span></b> T)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;k2&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;k2&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> k2 <b><span style='color:#0000ff;'>-</span></b> k20 <b><span style='color:#0000ff;'>*</span></b> Exp(<b><span style='color:#0000ff;'>-</span></b>E2 <b><span style='color:#0000ff;'>/</span></b> T)
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;k3&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;k3&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> k3 <b><span style='color:#0000ff;'>-</span></b> k30 <b><span style='color:#0000ff;'>*</span></b> Exp(<b><span style='color:#0000ff;'>-</span></b>E3 <b><span style='color:#0000ff;'>/</span></b> T)
 
-        <span style='color:#008000;'># Mass balance</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Ca&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#017a31;'># Mass balance</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Ca&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCa_dt <b><span style='color:#0000ff;'>-</span></b> ra
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Cb&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Cb&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCb_dt <b><span style='color:#0000ff;'>-</span></b> rb
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Cc&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Cc&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCc_dt <b><span style='color:#0000ff;'>-</span></b> rc
 
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;Cd&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;Cd&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> dVrCd_dt <b><span style='color:#0000ff;'>-</span></b> rd
 
-        <span style='color:#008000;'># Energy balance - reactor</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;EnergyBalanceReactor&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#017a31;'># Energy balance - reactor</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;EnergyBalanceReactor&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> rho <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> dVrT_dt <b><span style='color:#0000ff;'>-</span></b> (  F <b><span style='color:#0000ff;'>*</span></b> rho <b><span style='color:#0000ff;'>*</span></b> cp <b><span style='color:#0000ff;'>*</span></b> (T0 <b><span style='color:#0000ff;'>-</span></b> T) <b><span style='color:#0000ff;'>\</span></b>
                                             <b><span style='color:#0000ff;'>-</span></b> r1 <b><span style='color:#0000ff;'>*</span></b> dHr1 <b><span style='color:#0000ff;'>\</span></b>
                                             <b><span style='color:#0000ff;'>-</span></b> r2 <b><span style='color:#0000ff;'>*</span></b> dHr2 <b><span style='color:#0000ff;'>\</span></b>
@@ -172,131 +173,131 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
                                             <b><span style='color:#0000ff;'>+</span></b> kw <b><span style='color:#0000ff;'>*</span></b> AR <b><span style='color:#0000ff;'>*</span></b> (Tk <b><span style='color:#0000ff;'>-</span></b> T)
                                            )
 
-        <span style='color:#008000;'># Energy balance - cooling fluid</span>
-        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateEquation(<span style='color:#c00000;'>&quot;EnergyBalanceCooling&quot;</span>, <span style='color:#c00000;'>&quot;&quot;</span>)
+        <span style='color:#017a31;'># Energy balance - cooling fluid</span>
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;EnergyBalanceCooling&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> mK <b><span style='color:#0000ff;'>*</span></b> cpK <b><span style='color:#0000ff;'>*</span></b> dTk_dt <b><span style='color:#0000ff;'>-</span></b> (Qk <b><span style='color:#0000ff;'>+</span></b> kw <b><span style='color:#0000ff;'>*</span></b> AR <b><span style='color:#0000ff;'>*</span></b> (T <b><span style='color:#0000ff;'>-</span></b> Tk))
 
 <b>class</b> simCSTR(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>):
-        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#0000ff;'>self</span>)
-        <span style='color:#0000ff;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> CSTR(<span style='color:#c00000;'>&quot;tutorial_che_opt_1&quot;</span>)
-        <span style='color:#0000ff;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> CSTR(<span style='color:#cc0000;'>&quot;tutorial_che_opt_1&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
 
-    <b>def</b> SetUpParametersAndDomains(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.k10.SetValue(<span style='color:#c000c0;'>1.287e10</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>hour)
-        <span style='color:#0000ff;'>self</span>.m.k20.SetValue(<span style='color:#c000c0;'>1.287e10</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#c000c0;'>1</span><b><span style='color:#0000ff;'>/</span></b>hour)
-        <span style='color:#0000ff;'>self</span>.m.k30.SetValue(<span style='color:#c000c0;'>9.043e9</span> <b><span style='color:#0000ff;'>*</span></b> l<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>hour))
-        <span style='color:#0000ff;'>self</span>.m.E1.SetValue(<span style='color:#c000c0;'>9758.3</span> <b><span style='color:#0000ff;'>*</span></b> K)
-        <span style='color:#0000ff;'>self</span>.m.E2.SetValue(<span style='color:#c000c0;'>9758.3</span> <b><span style='color:#0000ff;'>*</span></b> K)
-        <span style='color:#0000ff;'>self</span>.m.E3.SetValue(<span style='color:#c000c0;'>8560</span> <b><span style='color:#0000ff;'>*</span></b> K)
-        <span style='color:#0000ff;'>self</span>.m.dHr1.SetValue(<span style='color:#c000c0;'>4.2</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>mol)
-        <span style='color:#0000ff;'>self</span>.m.dHr2.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>11</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>mol)
-        <span style='color:#0000ff;'>self</span>.m.dHr3.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>41.85</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>mol)
-        <span style='color:#0000ff;'>self</span>.m.rho.SetValue(<span style='color:#c000c0;'>0.9342</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>l)
-        <span style='color:#0000ff;'>self</span>.m.cp.SetValue(<span style='color:#c000c0;'>3.01</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
-        <span style='color:#0000ff;'>self</span>.m.kw.SetValue(<span style='color:#c000c0;'>4032</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>(K<b><span style='color:#0000ff;'>*</span></b>hour<b><span style='color:#0000ff;'>*</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)))
-        <span style='color:#0000ff;'>self</span>.m.AR.SetValue(<span style='color:#c000c0;'>0.215</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#c000c0;'>2</span>)
-        <span style='color:#0000ff;'>self</span>.m.mK.SetValue(<span style='color:#c000c0;'>5</span> <b><span style='color:#0000ff;'>*</span></b> kg)
-        <span style='color:#0000ff;'>self</span>.m.cpK.SetValue(<span style='color:#c000c0;'>2</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.k10.SetValue(<span style='color:#cc047c;'>1.287e10</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>/</span></b>hour)
+        <span style='color:#3605fb;'>self</span>.m.k20.SetValue(<span style='color:#cc047c;'>1.287e10</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>/</span></b>hour)
+        <span style='color:#3605fb;'>self</span>.m.k30.SetValue(<span style='color:#cc047c;'>9.043e9</span> <b><span style='color:#0000ff;'>*</span></b> l<b><span style='color:#0000ff;'>/</span></b>(mol<b><span style='color:#0000ff;'>*</span></b>hour))
+        <span style='color:#3605fb;'>self</span>.m.E1.SetValue(<span style='color:#cc047c;'>9758.3</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.E2.SetValue(<span style='color:#cc047c;'>9758.3</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.E3.SetValue(<span style='color:#cc047c;'>8560</span> <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.dHr1.SetValue(<span style='color:#cc047c;'>4.2</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>mol)
+        <span style='color:#3605fb;'>self</span>.m.dHr2.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>11</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>mol)
+        <span style='color:#3605fb;'>self</span>.m.dHr3.SetValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>41.85</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>mol)
+        <span style='color:#3605fb;'>self</span>.m.rho.SetValue(<span style='color:#cc047c;'>0.9342</span> <b><span style='color:#0000ff;'>*</span></b> kg<b><span style='color:#0000ff;'>/</span></b>l)
+        <span style='color:#3605fb;'>self</span>.m.cp.SetValue(<span style='color:#cc047c;'>3.01</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
+        <span style='color:#3605fb;'>self</span>.m.kw.SetValue(<span style='color:#cc047c;'>4032</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>(K<b><span style='color:#0000ff;'>*</span></b>hour<b><span style='color:#0000ff;'>*</span></b>(m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)))
+        <span style='color:#3605fb;'>self</span>.m.AR.SetValue(<span style='color:#cc047c;'>0.215</span> <b><span style='color:#0000ff;'>*</span></b> m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
+        <span style='color:#3605fb;'>self</span>.m.mK.SetValue(<span style='color:#cc047c;'>5</span> <b><span style='color:#0000ff;'>*</span></b> kg)
+        <span style='color:#3605fb;'>self</span>.m.cpK.SetValue(<span style='color:#cc047c;'>2</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K))
 
-    <b>def</b> SetUpVariables(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#0000ff;'>self</span>.m.F.AssignValue(<span style='color:#c000c0;'>14.19</span> <b><span style='color:#0000ff;'>*</span></b> l<b><span style='color:#0000ff;'>/</span></b>hour)
-        <span style='color:#0000ff;'>self</span>.m.Qk.AssignValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1579.5</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>hour)
-        <span style='color:#0000ff;'>self</span>.m.Ca0.AssignValue(<span style='color:#c000c0;'>5.1</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
-        <span style='color:#0000ff;'>self</span>.m.T0.AssignValue((<span style='color:#c000c0;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>104.9</span>) <b><span style='color:#0000ff;'>*</span></b> K)
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.F.AssignValue(<span style='color:#cc047c;'>14.19</span> <b><span style='color:#0000ff;'>*</span></b> l<b><span style='color:#0000ff;'>/</span></b>hour)
+        <span style='color:#3605fb;'>self</span>.m.Qk.AssignValue(<b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1579.5</span> <b><span style='color:#0000ff;'>*</span></b> kJ<b><span style='color:#0000ff;'>/</span></b>hour)
+        <span style='color:#3605fb;'>self</span>.m.Ca0.AssignValue(<span style='color:#cc047c;'>5.1</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
+        <span style='color:#3605fb;'>self</span>.m.T0.AssignValue((<span style='color:#cc047c;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>104.9</span>) <b><span style='color:#0000ff;'>*</span></b> K)
 
-        <span style='color:#0000ff;'>self</span>.m.VR.SetInitialCondition(<span style='color:#c000c0;'>10.0</span> <b><span style='color:#0000ff;'>*</span></b> l)
-        <span style='color:#0000ff;'>self</span>.m.Ca.SetInitialCondition(<span style='color:#c000c0;'>2.2291</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
-        <span style='color:#0000ff;'>self</span>.m.Cb.SetInitialCondition(<span style='color:#c000c0;'>1.0417</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
-        <span style='color:#0000ff;'>self</span>.m.Cc.SetInitialCondition(<span style='color:#c000c0;'>0.91397</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
-        <span style='color:#0000ff;'>self</span>.m.Cd.SetInitialCondition(<span style='color:#c000c0;'>0.91520</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
-        <span style='color:#0000ff;'>self</span>.m.T.SetInitialCondition((<span style='color:#c000c0;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>79.591</span>) <b><span style='color:#0000ff;'>*</span></b> K)
-        <span style='color:#0000ff;'>self</span>.m.Tk.SetInitialCondition((<span style='color:#c000c0;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c000c0;'>77.69</span>) <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.VR.SetInitialCondition(<span style='color:#cc047c;'>10.0</span> <b><span style='color:#0000ff;'>*</span></b> l)
+        <span style='color:#3605fb;'>self</span>.m.Ca.SetInitialCondition(<span style='color:#cc047c;'>2.2291</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
+        <span style='color:#3605fb;'>self</span>.m.Cb.SetInitialCondition(<span style='color:#cc047c;'>1.0417</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
+        <span style='color:#3605fb;'>self</span>.m.Cc.SetInitialCondition(<span style='color:#cc047c;'>0.91397</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
+        <span style='color:#3605fb;'>self</span>.m.Cd.SetInitialCondition(<span style='color:#cc047c;'>0.91520</span> <b><span style='color:#0000ff;'>*</span></b> mol<b><span style='color:#0000ff;'>/</span></b>l)
+        <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition((<span style='color:#cc047c;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>79.591</span>) <b><span style='color:#0000ff;'>*</span></b> K)
+        <span style='color:#3605fb;'>self</span>.m.Tk.SetInitialCondition((<span style='color:#cc047c;'>273.15</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>77.69</span>) <b><span style='color:#0000ff;'>*</span></b> K)
 
-    <b>def</b> SetUpOptimization(<span style='color:#0000ff;'>self</span>):
-        <span style='color:#008000;'># Yield of component B (mol)</span>
-        <span style='color:#0000ff;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b><span style='color:#0000ff;'>self</span>.m.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#0000ff;'>self</span>.m.Cb()
+    <b>def</b> SetUpOptimization(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#017a31;'># Yield of component B (mol)</span>
+        <span style='color:#3605fb;'>self</span>.ObjectiveFunction.Residual <b><span style='color:#0000ff;'>=</span></b> <b><span style='color:#0000ff;'>-</span></b><span style='color:#3605fb;'>self</span>.m.rho() <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.m.Cb()
 
-        <span style='color:#008000;'># Set the constraints (inequality, equality)</span>
-        <span style='color:#0000ff;'>self</span>.c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;Tmax&quot;</span>) <span style='color:#008000;'># T - 350K &lt;= 0</span>
-        <span style='color:#0000ff;'>self</span>.c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.m.T() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#c000c0;'>350</span><b><span style='color:#0000ff;'>*</span></b>K)
+        <span style='color:#017a31;'># Set the constraints (inequality, equality)</span>
+        <span style='color:#3605fb;'>self</span>.c1 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateInequalityConstraint(<span style='color:#cc0000;'>&quot;Tmax&quot;</span>) <span style='color:#017a31;'># T - 350K &lt;= 0</span>
+        <span style='color:#3605fb;'>self</span>.c1.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.m.T() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#cc047c;'>350</span><b><span style='color:#0000ff;'>*</span></b>K)
 
-        <span style='color:#0000ff;'>self</span>.c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.CreateInequalityConstraint(<span style='color:#c00000;'>&quot;Tmin&quot;</span>) <span style='color:#008000;'># 345K - T &lt;= 0</span>
-        <span style='color:#0000ff;'>self</span>.c2.Residual <b><span style='color:#0000ff;'>=</span></b> Constant(<span style='color:#c000c0;'>345</span><b><span style='color:#0000ff;'>*</span></b>K) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#0000ff;'>self</span>.m.T()
+        <span style='color:#3605fb;'>self</span>.c2 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateInequalityConstraint(<span style='color:#cc0000;'>&quot;Tmin&quot;</span>) <span style='color:#017a31;'># 345K - T &lt;= 0</span>
+        <span style='color:#3605fb;'>self</span>.c2.Residual <b><span style='color:#0000ff;'>=</span></b> Constant(<span style='color:#cc047c;'>345</span><b><span style='color:#0000ff;'>*</span></b>K) <b><span style='color:#0000ff;'>-</span></b> <span style='color:#3605fb;'>self</span>.m.T()
 
-        <span style='color:#008000;'># Set the optimization variables, their lower/upper bounds and the starting point</span>
-        <span style='color:#008000;'>#self.VR  = self.SetContinuousOptimizationVariable(self.m.VR, 0.005, 0.030, 0.010);</span>
-        <span style='color:#008000;'>#self.F   = self.SetContinuousOptimizationVariable(self.m.F, 1e-7, 10e-6, 3.942e-6);</span>
-        <span style='color:#008000;'>#self.Ca0 = self.SetContinuousOptimizationVariable(self.m.Ca0, 1, 20000, 5100);</span>
-        <span style='color:#008000;'>#self.T0  = self.SetContinuousOptimizationVariable(self.m.T0, 350, 400, 378.05);</span>
-        <span style='color:#0000ff;'>self</span>.Qk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#0000ff;'>self</span>.m.Qk, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>1000</span>, <span style='color:#c000c0;'>0</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#c000c0;'>438.75</span>)<b><span style='color:#0000ff;'>;</span></b>
+        <span style='color:#017a31;'># Set the optimization variables, their lower/upper bounds and the starting point</span>
+        <span style='color:#017a31;'>#self.VR  = self.SetContinuousOptimizationVariable(self.m.VR, 0.005, 0.030, 0.010);</span>
+        <span style='color:#017a31;'>#self.F   = self.SetContinuousOptimizationVariable(self.m.F, 1e-7, 10e-6, 3.942e-6);</span>
+        <span style='color:#017a31;'>#self.Ca0 = self.SetContinuousOptimizationVariable(self.m.Ca0, 1, 20000, 5100);</span>
+        <span style='color:#017a31;'>#self.T0  = self.SetContinuousOptimizationVariable(self.m.T0, 350, 400, 378.05);</span>
+        <span style='color:#3605fb;'>self</span>.Qk  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.Qk, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>1000</span>, <span style='color:#cc047c;'>0</span>, <b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>438.75</span>)<b><span style='color:#0000ff;'>;</span></b>
 
 <b>def</b> setOptions(nlpsolver):
-    nlpsolver.SetOption(<span style='color:#c00000;'>'print_level'</span>, <span style='color:#c000c0;'>5</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'tol'</span>, <span style='color:#c000c0;'>1e-5</span>)
-    nlpsolver.SetOption(<span style='color:#c00000;'>'mu_strategy'</span>, <span style='color:#c00000;'>'adaptive'</span>)
-    <span style='color:#008000;'>#nlpsolver.SetOption('obj_scaling_factor', 0.00001)</span>
-    nlpsolver.SetOption(<span style='color:#c00000;'>'nlp_scaling_method'</span>, <span style='color:#c00000;'>'none'</span>) <span style='color:#008000;'>#'user-scaling')</span>
+    nlpsolver.SetOption(<span style='color:#cc0000;'>'print_level'</span>, <span style='color:#cc047c;'>5</span>)
+    nlpsolver.SetOption(<span style='color:#cc0000;'>'tol'</span>, <span style='color:#cc047c;'>1e-5</span>)
+    nlpsolver.SetOption(<span style='color:#cc0000;'>'mu_strategy'</span>, <span style='color:#cc0000;'>'adaptive'</span>)
+    <span style='color:#017a31;'>#nlpsolver.SetOption('obj_scaling_factor', 0.00001)</span>
+    nlpsolver.SetOption(<span style='color:#cc0000;'>'nlp_scaling_method'</span>, <span style='color:#cc0000;'>'none'</span>) <span style='color:#017a31;'>#'user-scaling')</span>
         
-<span style='color:#008000;'># Use daeSimulator class</span>
+<span style='color:#017a31;'># Use daeSimulator class</span>
 <b>def</b> guiRun(app):
     sim <b><span style='color:#0000ff;'>=</span></b> simCSTR()
     opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
     nlp <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
-    sim.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>600</span>     <span style='color:#008000;'># 10 min</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>60</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>60</span> <span style='color:#008000;'># 3 h</span>
+    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>600</span>     <span style='color:#017a31;'># 10 min</span>
+    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span> <span style='color:#017a31;'># 3 h</span>
     simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
                                   optimization <b><span style='color:#0000ff;'>=</span></b> opt,
                                   nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
                                   nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
     simulator.exec_()
 
-<span style='color:#008000;'># Setup everything manually and run in a console</span>
+<span style='color:#017a31;'># Setup everything manually and run in a console</span>
 <b>def</b> consoleRun():
-    <span style='color:#008000;'># Create Log, Solver, DataReporter and Simulation object</span>
+    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyIPOPT.daeIPOPT()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter() <span style='color:#008000;'>#daeNoOpDataReporter()</span>
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter() <span style='color:#017a31;'>#daeNoOpDataReporter()</span>
     simulation   <b><span style='color:#0000ff;'>=</span></b> simCSTR()
     optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
 
-    <span style='color:#008000;'># Do no print progress</span>
-    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#0000ff;'>True</span>
+    <span style='color:#017a31;'># Do no print progress</span>
+    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
     
-    <span style='color:#008000;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#0000ff;'>True</span>)
+    <span style='color:#017a31;'># Enable reporting of all variables</span>
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
-    <span style='color:#008000;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>600</span>     <span style='color:#008000;'># 10 min</span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#c000c0;'>5</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>60</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#c000c0;'>60</span> <span style='color:#008000;'># 3 h</span>
+    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>600</span>     <span style='color:#017a31;'># 10 min</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span> <span style='color:#017a31;'># 3 h</span>
 
-    <span style='color:#008000;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#c00000;'>&quot; [</span><span style='color:#0057ae;'>%d</span><span style='color:#c00000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#c00000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#0000ff;'>False</span>):
+    <span style='color:#017a31;'># Connect data reporter</span>
+    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
         sys.exit()
 
-    <span style='color:#008000;'># Initialize the optimization</span>
+    <span style='color:#017a31;'># Initialize the optimization</span>
     optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
 
-    <span style='color:#008000;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
-    <span style='color:#008000;'># Otherwise seg. fault occurs for some reasons.</span>
+    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
+    <span style='color:#017a31;'># Otherwise seg. fault occurs for some reasons.</span>
     setOptions(nlpsolver)
 
-    <span style='color:#008000;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#c00000;'>&quot;-rt.xml&quot;</span>)
+    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
+    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
+    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#008000;'># Run</span>
+    <span style='color:#017a31;'># Run</span>
     optimization.Run()
     optimization.Finalize()
 
-<b>if</b> <span style='color:#0000ff;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#0000ff;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#c000c0;'>1</span> <b><span style='color:#0000ff;'>and</span></b> (sys.argv[<span style='color:#c000c0;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#c00000;'>'console'</span>):
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        <span style='color:#0000ff;'>from</span> PyQt4 <span style='color:#0000ff;'>import</span> QtCore, QtGui
+        <span style='color:#3605fb;'>from</span> PyQt4 <span style='color:#3605fb;'>import</span> QtCore, QtGui
         app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
         guiRun(app)
 </pre>

@@ -472,16 +472,7 @@ def consoleRun():
     
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
-    """
-    print(simulation.m.fe_model.Equations)
-    from daetools.pyDAE.eval_node_graph import daeNodeGraph
-    for equation in simulation.m.fe_model.Equations:
-        for i,eei in enumerate(equation.EquationExecutionInfos):
-            if (i in range(0, 1)):
-                print('Processing node %d...' % i)
-                ng = daeNodeGraph('residual', eei.Node)
-                ng.SaveGraph('%s-%s[%04d].svg' % (simulation.m.fe_model.Name, equation.Name, i))
-    """
+
     # Run
     simulation.Run()
     simulation.Finalize()

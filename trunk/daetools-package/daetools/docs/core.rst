@@ -474,6 +474,7 @@ Auxiliary classes
 
     daeVariableWrapper
     daeConfig
+    daeNodeGraph
 
 .. autoclass:: pyCore.daeVariableWrapper
     :members:
@@ -489,6 +490,14 @@ Auxiliary classes
     .. automethod:: __getitem__
     .. automethod:: __setitem__
 
+
+.. autoclass:: daetools.pyDAE.eval_node_graph.daeNodeGraph
+    :members:
+    :undoc-members:
+    
+    .. automethod:: __init__
+    .. automethod:: SaveGraph
+    
 Auxiliary functions
 ===================
 .. autosummary::

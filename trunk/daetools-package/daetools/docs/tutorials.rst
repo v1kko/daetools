@@ -32,9 +32,9 @@ interactive operating procedures, code-generation/co-simulation/model-exchange c
 
 .. _tutorials_code_verification:
 
-.. rubric:: Code Verification Examples
+.. rubric:: Code Verification Tests
 
-`Code Verification Examples <tutorials-cv.html>`_ using the Method of Exact Solutions and the Method of Manufactured Solutions.
+`Code Verification Tests <tutorials-cv.html>`_ using the Method of Exact Solutions and the Method of Manufactured Solutions.
 
 .. _tutorials_fe:
 

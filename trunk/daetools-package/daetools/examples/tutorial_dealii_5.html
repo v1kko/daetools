@@ -173,16 +173,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
                                                   boundaryFaceFi  <b><span style='color:#0000ff;'>=</span></b> faceFi,
                                                   functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC)
 
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Darcy law equations:'</span>)
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Aij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Mij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Fi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceAij]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceFi]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.surfaceIntegrals]))
-
         <span style='color:#017a31;'># Setting the weak form of the FE system will declare a set of equations:</span>
         <span style='color:#017a31;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>
         <span style='color:#3605fb;'>self</span>.fe_system.WeakForm <b><span style='color:#0000ff;'>=</span></b> weakForm
@@ -245,7 +235,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial_deal_II_5-results'</span>)
 
     <span style='color:#017a31;'># Create two data reporters:</span>
-    <span style='color:#017a31;'># 1. DealII</span>
+    <span style='color:#017a31;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
     feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):

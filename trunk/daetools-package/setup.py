@@ -90,7 +90,7 @@ deal_II          = 'deal_II-daetools'
 sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
 fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
 mingw_dlls   = ['libgcc', 'libstdc++', 'libquadmath', 'libwinpthread', 'libgfortran', 'libssp']
-
+mac_gcc_libs = ['libgcc', 'libstdc++', 'libquadmath', 'libgfortran', 'libgomp']
 shared_libs = []
 
 print('shared_libs_dir = ', shared_libs_dir)
@@ -158,10 +158,16 @@ elif platform.system() == 'Darwin':
         for f in shared_libs_files:
             if (sim_loader in f) or (fmu_so in f) or (deal_II in f):
                 shared_libs.append(os.path.join(shared_libs_dir, f))
+            for so in mac_gcc_libs:
+                if so in f:
+                    shared_libs.append(os.path.join(shared_libs_dir, f))
+    print('shared_libs = %s' % shared_libs)
+    #sys.exit()
 
-    for lib_path in shared_libs:
-        dummy, filename = os.path.split(lib_path)
-        cmd = 'install_name_tool -id @rpath/%s %s' % (filename, lib_path)
+    # Shared libraries' install_name must be @rpath/so_name so update their LC_ID_DYLIB section
+    for so_path in shared_libs:
+        dummy, so_name = os.path.split(so_path)
+        cmd = 'install_name_tool -id @rpath/%s %s' % (so_name, so_path)
         ret = os.system(cmd)
         print('%s returned [%s]' %(cmd,ret))
 
@@ -182,21 +188,74 @@ elif platform.system() == 'Darwin':
     for cfg in cfgs:
         ext_modules.append( os.path.join(shared_libs_dir, cfg) )
 
+    # deal_II links boost libs so update its LC_LOAD_DYLIB sections
+    dealiis = [f for f in shared_libs if deal_II in f]
+    for dealii in dealiis:
+        ext_modules.append( os.path.join(shared_libs_dir, dealii) )
+
     # Boost libs link other boost libs so update their LC_LOAD_DYLIB sections
     blibs = [f for f in shared_libs if 'libboost' in f]
     for blib in blibs:
         ext_modules.append( os.path.join(shared_libs_dir, blib) )
 
-    # Do the actual update on all required shared libraries
+    # stdc++ lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
+    stdcxxlibs = [f for f in shared_libs if 'stdc++' in f]
+    for stdcxxlib in stdcxxlibs:
+        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
+
+    # gfortran lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
+    stdcxxlibs = [f for f in shared_libs if 'gfortran' in f]
+    for stdcxxlib in stdcxxlibs:
+        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
+
+    # quadmath lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
+    stdcxxlibs = [f for f in shared_libs if 'quadmath' in f]
+    for stdcxxlib in stdcxxlibs:
+        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
+
+    # gomp lib links gcc_s.1 lib so update its LC_LOAD_DYLIB sections
+    stdcxxlibs = [f for f in shared_libs if 'gomp' in f]
+    for stdcxxlib in stdcxxlibs:
+        ext_modules.append( os.path.join(shared_libs_dir, stdcxxlib) )
+
+    print('ext_modules = %s' % ext_modules)
+    #sys.exit()
+
+    # Do the actual update on all required shared libraries and extension modules
     for ext_mod_path in ext_modules:
         dummy, ext_mod_name = os.path.split(ext_mod_path)
         print('Start install_name_tool -change for: %s' % ext_mod_name)
         for so_path in shared_libs:
-            dummy, so_name = os.path.split(so_path)
-            new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, so_name)
+            use_full_path = any(gcc_lib in so_path for gcc_lib in mac_gcc_libs)
+            # gcc lib names (i.e. libgcc_s.1 and libstdc++.6) are hardcoded during the linking phase
+            # as /usr/local/lib/libgcc_s.1.dylib etc. so use that path with install_name_tool
+            if use_full_path: 
+                dummy, so_name = os.path.split(so_path)
+                new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, so_name)
+                so_name = '/usr/local/lib/' + so_name
+            else:
+                dummy, so_name = os.path.split(so_path)
+                new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, so_name)
             cmd = 'install_name_tool -change %s %s %s' % (so_name, new_so_name, ext_mod_path)
+            print(cmd)
             ret = os.system(cmd)
             print('    %s returned [%s]' %(cmd,ret))
+    #sys.exit()
+
+    # Replace the full path to the libdeal_II-daetools in pyDealII.so
+    for ext_mod_path in ext_modules:
+        dummy, ext_mod_name = os.path.split(ext_mod_path)
+        #print(deal_II, ext_mod_name)
+        if deal_II in ext_mod_name:
+            dealii_daetools_lib = os.path.realpath('../deal.II/build/lib')
+            dealii_daetools_lib = os.path.join(dealii_daetools_lib, ext_mod_name)
+            print(dealii_daetools_lib)
+            new_so_name = '@loader_path/../../solibs/%s_%s/%s' % (daetools_system, daetools_machine, ext_mod_name)
+            pyDealII_path = os.path.join(solvers_libs_dir, 'pyDealII.so')
+            cmd = 'install_name_tool -change %s %s %s' % (dealii_daetools_lib, new_so_name, pyDealII_path)
+            print(cmd)
+            ret = os.system(cmd)
+            #sys.exit()
 
     if not inside_venv:
         data_files = [

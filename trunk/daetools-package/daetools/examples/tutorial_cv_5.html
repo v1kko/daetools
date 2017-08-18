@@ -187,6 +187,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         phi_j  <b><span style='color:#0000ff;'>=</span></b>  phi_1D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
         dphi_i <b><span style='color:#0000ff;'>=</span></b> dphi_1D(<span style='color:#cc0000;'>'T'</span>, fe_i, fe_q)
         dphi_j <b><span style='color:#0000ff;'>=</span></b> dphi_1D(<span style='color:#cc0000;'>'T'</span>, fe_j, fe_q)
+        xyz    <b><span style='color:#0000ff;'>=</span></b> xyz_1D(fe_q)
         JxW    <b><span style='color:#0000ff;'>=</span></b> JxW_1D(fe_q)
 
         <span style='color:#017a31;'># Boundary IDs</span>
@@ -207,7 +208,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'># FE weak form terms</span>
         accumulation <b><span style='color:#0000ff;'>=</span></b> (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
         diffusion    <b><span style='color:#0000ff;'>=</span></b> (dphi_i <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> alpha <b><span style='color:#0000ff;'>*</span></b> JxW
-        convection   <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
+        convection   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
         source       <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> Q <b><span style='color:#0000ff;'>*</span></b> JxW
 
         weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_1D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> convection,

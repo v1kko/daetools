@@ -77,8 +77,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(numpy.<span style='color:#2a00d6;'>sum</span>([dof.Multiplicity <b>for</b> dof <b>in</b> dofs]))
 
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'meshes'</span>)
-        <span style='color:#017a31;'># This mesh is coarse (20x20 cells); also, there is a finer mesh available: square(0,100)x(0,100)-50x50.msh</span>
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,100)x(0,100)-30x30.msh'</span>)
+        <span style='color:#017a31;'># This mesh is a coarse one (30x30 cells); there are finer meshes available: 50x50, 100x100, 200x200</span>
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,100)x(0,100)-50x50.msh'</span>)
 
         <span style='color:#017a31;'># Store the object so it does not go out of scope while still in use by daetools</span>
         <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#017a31;'># path to mesh</span>
@@ -96,10 +96,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         phi_c_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)
         dphi_c_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>, fe_i, fe_q)
         dphi_c_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'c'</span>, fe_j, fe_q)
+        
         phi_mu_i  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q)
         phi_mu_j  <b><span style='color:#0000ff;'>=</span></b>  phi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_j, fe_q)
         dphi_mu_i <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_i, fe_q)
         dphi_mu_j <b><span style='color:#0000ff;'>=</span></b> dphi_2D(<span style='color:#cc0000;'>'mu'</span>, fe_j, fe_q)
+        
         <span style='color:#017a31;'># FE approximation of a quantity at the specified quadrature point (adouble object)</span>
         c      <b><span style='color:#0000ff;'>=</span></b> dof_approximation_2D(<span style='color:#cc0000;'>'c'</span>, fe_q)
         normal <b><span style='color:#0000ff;'>=</span></b> normal_2D(fe_q)
@@ -131,7 +133,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
             Omg_a       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3.4</span>
             log_fe <b><span style='color:#0000ff;'>=</span></b> feExpression_2D.log
             <b>def</b> f(c):
-                <b>return</b> log_fe(c<b><span style='color:#0000ff;'>/</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b>c)) <b><span style='color:#0000ff;'>+</span></b> Omg_a<b><span style='color:#0000ff;'>*</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b><span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>c)
+                <span style='color:#017a31;'># The original expression is:</span>
+                <span style='color:#017a31;'>#   log_fe(c/(1-c)) + Omg_a*(1-2*c)</span>
+                <span style='color:#017a31;'># However, the one below is much more computationally efficient and requires less memory,</span>
+                <span style='color:#017a31;'># since a Finite Element approximation of a DoF is an expensive operation:</span>
+                <span style='color:#017a31;'>#   sum(phi_j * dof(j))</span>
+                <span style='color:#017a31;'># For vector-valued DoFs it is even more demanding for the approximation is:</span>
+                <span style='color:#017a31;'>#   sum(phi_vector_j * dof(j)) </span>
+                <span style='color:#017a31;'># where phi_vector_j is a rank=1 Tensor.</span>
+                <b>return</b> log_fe(<span style='color:#cc047c;'>1</span> <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>/</span></b>(<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b>c)) <b><span style='color:#0000ff;'>+</span></b> Omg_a <b><span style='color:#0000ff;'>-</span></b> (<span style='color:#cc047c;'>2</span><b><span style='color:#0000ff;'>*</span></b>Omg_a)<b><span style='color:#0000ff;'>*</span></b>c
 
         <span style='color:#017a31;'># FE weak form terms</span>
         c_accumulation    <b><span style='color:#0000ff;'>=</span></b> (phi_c_i <b><span style='color:#0000ff;'>*</span></b> phi_c_j) <b><span style='color:#0000ff;'>*</span></b> JxW
@@ -140,21 +150,21 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         c_diffusion_mu_eq <b><span style='color:#0000ff;'>=</span></b> (<b><span style='color:#0000ff;'>-</span></b>dphi_mu_i <b><span style='color:#0000ff;'>*</span></b> dphi_c_j) <b><span style='color:#0000ff;'>*</span></b> gamma <b><span style='color:#0000ff;'>*</span></b> JxW
         fun_c             <b><span style='color:#0000ff;'>=</span></b> (phi_mu_i <b><span style='color:#0000ff;'>*</span></b> JxW) <b><span style='color:#0000ff;'>*</span></b> f(c)
 
-        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> mu_diffusion_c_eq <b><span style='color:#0000ff;'>+</span></b> mu <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq,
-                                                  Mij <b><span style='color:#0000ff;'>=</span></b> c_accumulation,
-                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> fun_c,
+        cell_Aij <b><span style='color:#0000ff;'>=</span></b> mu_diffusion_c_eq <b><span style='color:#0000ff;'>+</span></b> mu <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq <b><span style='color:#0000ff;'>+</span></b> c_diffusion_mu_eq
+        cell_Mij <b><span style='color:#0000ff;'>=</span></b> c_accumulation
+        cell_Fi  <b><span style='color:#0000ff;'>=</span></b> fun_c
+        
+        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> cell_Aij,
+                                                  Mij <b><span style='color:#0000ff;'>=</span></b> cell_Mij,
+                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> cell_Fi,
                                                   functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC,
                                                   surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> surfaceIntegrals)
 
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Cahn-Hilliard equation:'</span>)
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Aij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Mij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Fi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceAij]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceFi]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.surfaceIntegrals]))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Aij))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Mij))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Fi))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> surfaceIntegrals]))
 
         <span style='color:#017a31;'># Setting the weak form of the FE system will declare a set of equations:</span>
         <span style='color:#017a31;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>
@@ -198,7 +208,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     results_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'-results'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_deal_II_3-'</span>)
 
     <span style='color:#017a31;'># Create two data reporters:</span>
-    <span style='color:#017a31;'># 1. DealII</span>
+    <span style='color:#017a31;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
     feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):

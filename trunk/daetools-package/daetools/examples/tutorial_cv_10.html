@@ -75,18 +75,25 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>.. image:: _static/square(-1,1)x(-1,1)-64x64.png</span>
 <span style='color:#cc0000;'>   :width: 300 px</span>
 
-<span style='color:#cc0000;'>The solution plot at t = pi/2 (the initial peak): </span>
+<span style='color:#cc0000;'>The solution plots at t = pi/2 (the initial peak) and t = 5/2pi (96x96 grid): </span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_cv_10-results1.png</span>
-<span style='color:#cc0000;'>   :width: 400 px</span>
-
-<span style='color:#cc0000;'>The solution plot at t = 5/2pi: </span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 
 <span style='color:#cc0000;'>.. image:: _static/tutorial_cv_10-results2.png</span>
-<span style='color:#cc0000;'>   :width: 400 px</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
 
-<span style='color:#cc0000;'>Again, some low-magnitude oscillations in the solution out of the peak appear.</span>
-<span style='color:#cc0000;'>In the original example this problem was resolved  using the flux linearisation techniques.</span>
+<span style='color:#cc0000;'>Animations for 32x32 and 96x96 grids:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_10-animation-32x32.gif</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
+
+<span style='color:#cc0000;'>.. image:: _static/tutorial_cv_10-animation-96x96.gif</span>
+<span style='color:#cc0000;'>   :height: 400 px</span>
+
+<span style='color:#cc0000;'>Again, some low-magnitude oscillations in the solution appear, which are more pronounced </span>
+<span style='color:#cc0000;'>for coarser grids.</span>
+<span style='color:#cc0000;'>In the original example this problem was resolved using the flux linearisation technique.</span>
 
 <span style='color:#cc0000;'>The normalised global errors and the order of accuracy plots </span>
 <span style='color:#cc0000;'>(no. elements = [32x32, 64x64, 96x96, 128x128], t = 5/2pi):</span>
@@ -228,6 +235,7 @@ c_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='co
         <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#2a00d6;'>int</span>(<span style='color:#cc047c;'>100.0</span> <b><span style='color:#0000ff;'>*</span></b> <span style='color:#3605fb;'>self</span>.CurrentTime<b><span style='color:#0000ff;'>/</span></b><span style='color:#3605fb;'>self</span>.TimeHorizon))<b><span style='color:#0000ff;'>;</span></b>   
 
         <span style='color:#017a31;'># Set the initial peak at t = pi/2</span>
+        <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>&quot;Setting an initial peak at t = pi/2 seconds ... &quot;</span>, <span style='color:#cc047c;'>0</span>)
         setFEInitialConditions(<span style='color:#3605fb;'>self</span>.m.fe_model, <span style='color:#3605fb;'>self</span>.m.fe_system, <span style='color:#cc0000;'>'c'</span>, ic)        
         <span style='color:#3605fb;'>self</span>.Reinitialize()
         <span style='color:#3605fb;'>self</span>.ReportData(<span style='color:#3605fb;'>self</span>.CurrentTime)

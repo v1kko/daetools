@@ -38,12 +38,12 @@ OPTIONS:
 
 PROJECT:
     all             Build all daetools c++ libraries, solvers and python extension modules.
-                    On GNU/Linux equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux and macOS equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
                     On Windows equivalent to: dae superlu trilinos ipopt bonmin nlopt deal.ii
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
                     Equivalent to: units data_reporting idas core activity simulation_loader fmi
     solvers         Build all solvers and their python extension modules.
-                    On GNU/Linux equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux and macOS equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
                     On Windows equivalent to: superlu trilinos ipopt bonmin nlopt deal.ii
     pydae           Build daetools core python extension modules only.
     
@@ -187,7 +187,6 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
-Ncpu=3
 
 MAKE="make"
 if [ ${PLATFORM} = "Windows" ]; then

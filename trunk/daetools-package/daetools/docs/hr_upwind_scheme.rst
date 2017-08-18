@@ -18,12 +18,13 @@ Classes
 .. autosummary::
     :nosignatures:
 
-    daeHRUpwindScheme
+    daeHRUpwindSchemeEquation
 
-.. autoclass:: daeHRUpwindScheme
+.. autoclass:: daeHRUpwindSchemeEquation
     :no-members:
     :no-undoc-members:
 
+    .. autoattribute:: supported_flux_limiters
     .. automethod:: __init__
     .. automethod:: dc_dt
     .. automethod:: dc_dx

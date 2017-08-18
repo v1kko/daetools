@@ -32,7 +32,7 @@ The following class of problems can be solved by **DAE Tools**:
 * Initial value problems of implicit form, described by a system of linear, non-linear, and (partial-)differential
   algebraic equations
 * Index-1 DAE systems
-* With lumped or distributed parameters: Finite Difference or Finite Elements Methods (still experimental)
+* With lumped or distributed parameters: Finite Difference, Finite Volume or Finite Elements Methods
 * Steady-state or dynamic
 * Continuous with some elements of event-driven systems (discontinuous equations, state transition networks
   and discrete events)
@@ -40,10 +40,10 @@ The following class of problems can be solved by **DAE Tools**:
 Type of activities that can be performed on models developed in **DAE Tools**:
 
 * Simulation (steady-state or dynamic, with simple or complex schedules)
-* Sensitivity analysis
+* Sensitivity analysis (local or global methods)
 * Optimisation (NLP and MINLP problems)
 * Parameter estimation
-* Generation of model reports (in XML + MathML format with XSL transformations for XHTML code generation)
+* Generation of model reports (in XML + MathML/LaTex format with XSL transformations for XHTML code generation)
 * Code generation for other modelling or general-purpose programming languages
 
   * `Modelica <http://www.modelica.org>`_
@@ -109,6 +109,16 @@ making it suitable for use in embedded systems). Models can be developed in Pyth
 (**pyDAE** module) or c++ (**cDAE** module), compiled into an independent
 executable and deployed without a need for any run time libraries.
 
+Parallel computation is supported using the shared-memory parallel programming model at the moment. 
+The following part of the code support parallelisation:
+
+- Evaluation of equations, Jacobian matrix and sensitivity residuals using the OpenMP interface
+- Assembly of Finite Element systems using the OpenMP interface or Intel Thread Building Blocks (TBB)
+- Solution of systems of linear equations (SuperLU_MT, Pardiso and Intel Pardiso solvers)
+
+In addition, there is an experimental code generator that generates C++ source code with the 
+support for MPI interface.
+
 **DAE Tools** support a large number of solvers. Currently `Sundials IDAS <https://computation.llnl.gov/casc/sundials/main.html>`_
 solver is used to solve DAE systems and calculate sensitivities, while `BONMIN <https://projects.coin-or.org/Bonmin>`_,
 `IPOPT <https://projects.coin-or.org/IPOPT>`_, and `NLOPT <http://ab-initio.mit.edu/wiki/index.php/NLopt>`_
@@ -121,6 +131,11 @@ at the moment. In addition to the built-in Sundials linear solvers, several thir
 `Trilinos Amesos <http://trilinos.sandia.gov/packages/amesos/>`_ (KLU, Umfpack, SuperLU, Lapack),
 and `Trilinos AztecOO <http://trilinos.sandia.gov/packages/aztecoo>`_ (with built-in, Ifpack or ML preconditioners)
 which can take advantage of multi-core/cpu computers.
+
+The quality of the software is a very important aspect and the formal code verification techniques are applied
+to test almost all aspects of the software. Several tests using the most rigorous methods (such as the Method of Exact 
+Solutions and the Method of Manufactured Solutions) and the most rigorous acceptance criteria (such as the order-of-accuracy) 
+have been developed and successfully passed.
 
 Licence
 =======

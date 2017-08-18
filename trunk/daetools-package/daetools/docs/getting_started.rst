@@ -50,7 +50,7 @@ Running tutorials
 
    * Windows:
 
-     Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.5.0_py27`` from the Start menu or execute the following batch file:
+     Run i.e. ``Start/Programs/DAE Tools/daePlotter_1.7.1_py35`` from the Start menu or execute the following batch file:
 
      .. code-block:: bash
 
@@ -63,7 +63,7 @@ Running tutorials
 
    .. code-block:: bash
 
-      python -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"
+      python -m daetools.dae_plotter.plotter
 
    The ``DAE Tools Plotter`` main window should appear (given in :numref:`Figure-GetStarted-1`)
 
@@ -95,7 +95,7 @@ Running tutorials
 
    * Windows:
 
-     Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.5.0_py27`` from the Start menu or execute the following batch file:
+     Run i.e. ``Start/Programs/DAE Tools/daeExamples_1.7.1_py35`` from the Start menu or execute the following batch file:
 
      .. code-block:: bash
 
@@ -108,7 +108,7 @@ Running tutorials
 
    .. code-block:: bash
 
-      python -c "from daetools.examples.run_examples import daeRunExamples; daeRunExamples()"
+      python -m daetools.examples.run_examples
 
 The main window of ``DAE Tools Examples`` application is given in :numref:`Figure-GetStarted-2a` while
 the output from the simulation run in :numref:`Figure-GetStarted-2b`. There, tutorials can be run, their source code

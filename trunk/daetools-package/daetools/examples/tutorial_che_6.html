@@ -622,8 +622,12 @@ rxn_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(
     simulation.SolveInitial()
 
     <span style='color:#017a31;'># Run</span>
-    simulation.Run()
-
+    <b>try</b>:
+        <span style='color:#017a31;'># An exception will be raised at some point when the log function is called for a negative value</span>
+        simulation.Run()
+    <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
+    
     simulation.Finalize()
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:

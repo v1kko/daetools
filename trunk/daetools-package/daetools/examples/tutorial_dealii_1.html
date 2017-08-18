@@ -354,24 +354,22 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'>#               (the total rectangle surface including holes is 1.5 * 0.8 = 1.2).</span>
         volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> [ (<span style='color:#3605fb;'>self</span>.MeshVolume(), (phi_i <b><span style='color:#0000ff;'>*</span></b> phi_j <b><span style='color:#0000ff;'>*</span></b> JxW)) ]
 
-        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion,
-                                                  Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,
-                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> source,
+        cell_Aij <b><span style='color:#0000ff;'>=</span></b> diffusion
+        cell_Mij <b><span style='color:#0000ff;'>=</span></b> accumulation
+        cell_Fi  <b><span style='color:#0000ff;'>=</span></b> source
+        
+        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> cell_Aij,
+                                                  Mij <b><span style='color:#0000ff;'>=</span></b> cell_Mij,
+                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> cell_Fi,
                                                   functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC,
                                                   surfaceIntegrals <b><span style='color:#0000ff;'>=</span></b> surfaceIntegrals,
                                                   volumeIntegrals <b><span style='color:#0000ff;'>=</span></b> volumeIntegrals)
 
         <span style='color:#017a31;'># Print the assembled weak form as they will be seen from deal.II wrappers:</span>
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Transient heat conduction equation:'</span>)
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Aij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Mij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Fi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(weakForm.boundaryFaceAij)]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(weakForm.boundaryFaceFi)]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(weakForm.surfaceIntegrals)]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    volumeIntegrals  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> <span style='color:#2a00d6;'>enumerate</span>(weakForm.volumeIntegrals)]))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Aij))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Mij))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Fi))
 
         <span style='color:#017a31;'>#    3.7 Finally, set the weak form of the FE system.</span>
         <span style='color:#017a31;'>#        This will declare a set of equations in the following form:</span>
@@ -380,7 +378,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.fe_system.WeakForm <b><span style='color:#0000ff;'>=</span></b> weakForm
 
         <span style='color:#017a31;'># As an exercise, define a time varying quantity T_outer to be used as a Dirichlet boundary condition</span>
-        <span style='color:#017a31;'># to illistrate coupling between daetools and deal.II.</span>
+        <span style='color:#017a31;'># to illustrate coupling between daetools and deal.II.</span>
         <span style='color:#017a31;'># Here it is a simple constant, but it can be any valid daetools equation.</span>
         eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;T_outer&quot;</span>, <span style='color:#cc0000;'>&quot;Boundary conditions for the outer edge&quot;</span>)
         eq.Residual <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.T_outer() <b><span style='color:#0000ff;'>-</span></b> Constant(<span style='color:#cc047c;'>200</span> <b><span style='color:#0000ff;'>*</span></b> K)
@@ -457,7 +455,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial_deal_II_1-results'</span>)
 
     <span style='color:#017a31;'># Create two data reporters:</span>
-    <span style='color:#017a31;'># 1. DealII</span>
+    <span style='color:#017a31;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
     feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):

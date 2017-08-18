@@ -35,7 +35,7 @@ The problem in this tutorial is 1D *transient convection-diffusion* equation:
 The equation is solved using the high resolution cell-centered finite volume upwind scheme
 with flux limiter described in the article.
   
-Numerical solutions plot (Nx = [20, 40, 80]):
+Numerical vs. exact solution plots (Nx = [20, 40, 80]):
 
 .. image:: _static/tutorial_cv_6-results.png
    :width: 800px

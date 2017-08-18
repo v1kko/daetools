@@ -13,8 +13,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 from pyCore import *
 from pyDealII import *
-import pygraphviz as pgv
-
+try:
+    import pygraphviz as pgv
+except Exception as e:
+    print(str(e))
+    
 class daeNodeGraph(object):
     def __init__(self, rootLabel, node):
         # node is a Runtime Node object

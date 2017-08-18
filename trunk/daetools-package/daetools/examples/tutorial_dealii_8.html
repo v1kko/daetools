@@ -28,25 +28,38 @@
 <span style='color:#017a31;'>************************************************************************************</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
-<span style='color:#cc0000;'>In this example a simple transient heat convection-diffusion equation is solved.</span>
+<span style='color:#cc0000;'>In this example a small parallel-plate reactor with an active surface is modelled.</span>
 
 <span style='color:#cc0000;'>This problem and its solution in `COMSOL Multiphysics &lt;https://www.comsol.com&gt;`_ software </span>
 <span style='color:#cc0000;'>is described in the Application Gallery: `Transport and Adsorption (id=5)</span>
 <span style='color:#cc0000;'>&lt;https://www.comsol.com/model/transport-and-adsorption-5&gt;`_.</span>
 
+<span style='color:#cc0000;'>The transport in the bulk of the reactor is described by a convection-diffusion equation:</span>
+<span style='color:#cc0000;'>    </span>
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
 <span style='color:#cc0000;'>   dc/dt - D*nabla^2(c) + div(uc) = 0 in Omega</span>
 
-<span style='color:#cc0000;'>The fluid flows from the left side to the right with constant velocity of 0.01 m/s.</span>
-<span style='color:#cc0000;'>The inlet temperature for 0.2 &lt;= y &lt;= 0.3 is iven by the following expression:</span>
+<span style='color:#cc0000;'>The material balance for the surface, including surface diffusion and the reaction rate is:</span>
 
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#cc0000;'>   dcs/dt - Ds*nabla^2(c) = -k_ads * c * (Gamma_s - cs) + k_des * cs in Omega</span>
+<span style='color:#cc0000;'>   dc_s/dt - Ds*nabla^2(c_s) = -k_ads * c * (Gamma_s - c_s) + k_des * c_s in Omega_s</span>
 
-<span style='color:#cc0000;'>creating a bubble-like regions of higher temperature that flow towards the right end</span>
-<span style='color:#cc0000;'>and slowly diffuse into the bulk flow of the fluid due to the heat conduction.</span>
+<span style='color:#cc0000;'>For the bulk, the boundary condition at the active surface couples the rate of the reaction</span>
+<span style='color:#cc0000;'>at the surface with the flux of the reacting species and the concentration of the adsorbed</span>
+<span style='color:#cc0000;'>species and bulk species:</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>.. code-block:: none</span>
+
+<span style='color:#cc0000;'>    n⋅(-D*nabla(c) + c*u) = -k_ads*c*(Gamma_s - c_s) + k_des*c_s</span>
+<span style='color:#cc0000;'>    </span>
+<span style='color:#cc0000;'>The boundary conditions for the surface species are insulating conditions.</span>
+
+<span style='color:#cc0000;'>The problem is modelled using two coupled Finite Element systems: </span>
+<span style='color:#cc0000;'>2D for bulk flow and 1D for the active surface. </span>
+<span style='color:#cc0000;'>The linear interpolation is used to determine the bulk flow and active surface concentrations</span>
+<span style='color:#cc0000;'>at the interface.</span>
 
 <span style='color:#cc0000;'>The mesh is rectangular with the refined elements close to the left/right ends:</span>
 
@@ -79,10 +92,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#3605fb;'>from</span> pyUnits <span style='color:#3605fb;'>import</span> m, kg, s, K, Pa, mol, J, W
 
 <span style='color:#017a31;'># Inputs:</span>
-c0      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>  <span style='color:#017a31;'># [mol/m^3]	    Initial concentration</span>
-k_ads   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>  <span style='color:#017a31;'># [m^3/(mol*s)]	Forward rate constant</span>
+c0      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>  <span style='color:#017a31;'># [mol/m^3]     Initial concentration</span>
+k_ads   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>  <span style='color:#017a31;'># [m^3/(mol*s)] Forward rate constant</span>
 k_des   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-9</span>  <span style='color:#017a31;'># [1/s]	        Backward rate constant</span>
-Gamma_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>  <span style='color:#017a31;'># [mol/m^2]	    Active site concentration</span>
+Gamma_s <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>  <span style='color:#017a31;'># [mol/m^2]     Active site concentration</span>
 Ds      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-11</span> <span style='color:#017a31;'># [m^2/s]       Surface diffusivity</span>
 D       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-9</span>  <span style='color:#017a31;'># [m^2/s]       Gas diffusivity</span>
 v_max   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>  <span style='color:#017a31;'># [m/s]         Maximum velocity</span>
@@ -269,7 +282,7 @@ dy <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-
         c_dof  <b><span style='color:#0000ff;'>=</span></b> dof_approximation_2D(<span style='color:#cc0000;'>'c'</span>, fe_q)
 
         dirichletBC <b><span style='color:#0000ff;'>=</span></b> {}
-        dirichletBC[bottom_edge] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'c'</span>, adoubleConstantFunction_2D(adouble(c0<b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>1.5</span>)))]
+        dirichletBC[bottom_edge] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'c'</span>, adoubleConstantFunction_2D(adouble(c0)))]
         
         <span style='color:#017a31;'># Function&lt;dim&gt; wrapper</span>
         <span style='color:#3605fb;'>self</span>.fun_u_grad <b><span style='color:#0000ff;'>=</span></b> VelocityFunction_2D()

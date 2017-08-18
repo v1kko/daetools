@@ -1,6 +1,6 @@
-**************************
-Code Verification Examples
-**************************
+***********************
+Code Verification Tests
+***********************
 ..
     Copyright (C) Dragan Nikolic
     DAE Tools is free software; you can redistribute it and/or modify it under the
@@ -64,7 +64,7 @@ Code Verification Examples
 
 .. _tutorial_cv_1:
 
-Code Verification Example 1
+Code Verification Test 1
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_1
@@ -82,7 +82,7 @@ Source code             `tutorial_cv_1.py <../examples/tutorial_cv_1.html>`_
 
 .. _tutorial_cv_2:
 
-Code Verification Example 2
+Code Verification Test 2
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_2
@@ -100,7 +100,7 @@ Source code             `tutorial_cv_2.py <../examples/tutorial_cv_2.html>`_
 
 .. _tutorial_cv_3:
 
-Code Verification Example 3
+Code Verification Test 3
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_3
@@ -118,7 +118,7 @@ Source code             `tutorial_cv_3.py <../examples/tutorial_cv_3.html>`_
 
 .. _tutorial_cv_4:
 
-Code Verification Example 4
+Code Verification Test 4
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_4
@@ -136,7 +136,7 @@ Source code             `tutorial_cv_4.py <../examples/tutorial_cv_4.html>`_
 
 .. _tutorial_cv_5:
 
-Code Verification Example 5
+Code Verification Test 5
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_5
@@ -154,7 +154,7 @@ Source code             `tutorial_cv_5.py <../examples/tutorial_cv_5.html>`_
 
 .. _tutorial_cv_6:
 
-Code Verification Example 6
+Code Verification Test 6
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_6
@@ -172,7 +172,7 @@ Source code             `tutorial_cv_6.py <../examples/tutorial_cv_6.html>`_
 
 .. _tutorial_cv_7:
 
-Code Verification Example 7
+Code Verification Test 7
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_7
@@ -190,7 +190,7 @@ Source code             `tutorial_cv_7.py <../examples/tutorial_cv_7.html>`_
 
 .. _tutorial_cv_8:
 
-Code Verification Example 8
+Code Verification Test 8
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_8
@@ -207,7 +207,7 @@ Source code             `tutorial_cv_8.py <../examples/tutorial_cv_8.html>`_
 
 .. _tutorial_cv_9:
 
-Code Verification Example 9
+Code Verification Test 9
 ===========================
 
 .. automodule:: daetools.examples.tutorial_cv_9
@@ -228,7 +228,7 @@ Source code             `tutorial_cv_9.py <../examples/tutorial_cv_9.html>`_
 
 .. _tutorial_cv_10:
 
-Code Verification Example 10
+Code Verification Test 10
 ============================
 
 .. automodule:: daetools.examples.tutorial_cv_10

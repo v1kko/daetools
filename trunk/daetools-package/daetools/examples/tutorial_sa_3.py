@@ -16,7 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 __doc__ = """
 This tutorial illustrates the global variance-based sensitivity analysis methods
-available in the SALib python library.
+available in the `SALib <http://salib.readthedocs.io>`_ python library.
 
 The problem is adopted from the section 2.6 of the following article:
     
@@ -41,45 +41,45 @@ Results from the sensitivity analysis:
         Morris (N = 510)
  -------------------------------------------------------
      Param          mu        mu*   mu*_conf      Sigma
-         B    0.311943   0.311943   0.115717   0.540381
-     gamma   -0.046577   0.052157   0.022149   0.107576
-       psi    0.295973   0.295973   0.116256   0.528287
-   theta_a    0.215855   0.215855   0.083293   0.411367
-   theta_0    0.011023   0.011312   0.006351   0.031471
+         B    0.367412   0.367412   0.114161   0.546276
+     gamma   -0.040556   0.056616   0.021330   0.111878
+       psi    0.311563   0.311563   0.103515   0.504398
+   theta_a    0.326932   0.326932   0.102303   0.490423
+   theta_0    0.021208   0.023524   0.016015   0.074062
  -------------------------------------------------------
 
  -------------------------------------------------------
         Sobol (N = 6144)
  -------------------------------------------------------
      Param          S1    S1_conf         ST    ST_conf
-         B    0.094110   0.089475   0.581946   0.150334
-     gamma   -0.002416   0.011938   0.044354   0.028461
-       psi    0.171040   0.097859   0.524576   0.140252
-   theta_a    0.072511   0.043878   0.523382   0.177241
-   theta_0    0.002343   0.004746   0.008174   0.007650
+         B    0.094110   0.078918   0.581930   0.154737
+     gamma   -0.002416   0.012178   0.044354   0.027352
+       psi    0.171043   0.087782   0.524579   0.142115
+   theta_a    0.072535   0.042848   0.523394   0.165736
+   theta_0    0.002340   0.004848   0.008173   0.005956
 
  Parameter pairs          S2    S2_conf
-         B/gamma    0.180434   0.153318
-           B/psi    0.260698   0.172012
-       B/theta_a    0.143292   0.145452
-       B/theta_0    0.177137   0.150218
-       gamma/psi    0.000981   0.024855
-   gamma/theta_a    0.004953   0.040380
-   gamma/theta_0   -0.009390   0.027726
-     psi/theta_a    0.166102   0.173568
-     psi/theta_0   -0.016474   0.132210
- theta_a/theta_0    0.109086   0.112104
+         B/gamma    0.180427   0.160979
+           B/psi    0.260689   0.171367
+       B/theta_a    0.143261   0.154060
+       B/theta_0    0.177129   0.156582
+       gamma/psi    0.000981   0.027443
+   gamma/theta_a    0.004956   0.036554
+   gamma/theta_0   -0.009392   0.027390
+     psi/theta_a    0.166155   0.172727
+     psi/theta_0   -0.016434   0.129177
+ theta_a/theta_0    0.109057   0.127287
  -------------------------------------------------------
 
  ---------------------------------
         FAST (N = 6150)
  ---------------------------------
      Param          S1         ST
-         B    0.131657   0.555142
-     gamma    0.000741   0.029047
-       psi    0.174270   0.600936
-   theta_a    0.142095   0.518529
-   theta_0    0.001094   0.039504
+         B    0.135984   0.559389
+     gamma    0.000429   0.029026
+       psi    0.171291   0.602461
+   theta_a    0.144617   0.534116
+   theta_0    0.000248   0.040741
  ---------------------------------
 
 
@@ -171,17 +171,19 @@ class simTutorial(daeSimulation):
         self.m.theta.SetInitialCondition(self.theta_0)
 
 def simulate_p(args):
-    run_no, n, B, gamma, psi, theta_a, x_0, theta_0 = args
-    return simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0)
+    run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential = args
+    return simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential)
 
-def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
+def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential):
     #print('run_no %d on tid=%s' % (run_no, os.getpid()))
     
-    # Disable OpenMP for evaluation of residuals and derivatives.
-    # Running multiple simulations where all of them use OpenMP at the same time
-    # will actually tremendously decrease the computational performance.
+    # If running in parallel disable OpenMP for evaluation of residuals and derivatives!
+    # Running simulations in multiple OpenMP threads where all of them 
+    # use OpenMP at the same time for calculations actually decreases 
+    # the overall performance.
     cfg  = daeGetConfig()
-    cfg.SetBoolean("daetools.core.equations.useOpenMP", False)
+    if not sequential:
+        cfg.SetBoolean("daetools.core.equations.parallelEvaluation", False)
         
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -201,12 +203,12 @@ def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0):
     
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 0.002 # 
-    simulation.TimeHorizon       = 0.2  # 0.5 hour
+    simulation.TimeHorizon       = 0.3   # 0.5 hour
 
     # Connect data reporter
     simName = '%s [%d]-%s' % (simulation.m.Name, run_no, strftime("[%d.%m.%Y %H:%M:%S]", localtime()))
 
-    # 1. TCP/IP
+    # 1. Disable TCP/IP to improve the performance!
     #tcpipDataReporter = daeTCPIPDataReporter()
     #datareporter.AddDataReporter(tcpipDataReporter)
     #if not tcpipDataReporter.Connect("", simName):
@@ -273,7 +275,7 @@ def run():
     # 3. Generation of samples (Morris, FAST or Sobol sampling).
     ###################################################################
     if SA_method == 'Morris':
-        from SALib.sample.morris import sample
+        from SALib.sample.morris  import sample
         from SALib.analyze.morris import analyze
         
         # Generate samples using the Morris method.
@@ -290,7 +292,7 @@ def run():
     
     elif SA_method == 'Sobol':
         from SALib.sample.saltelli import sample
-        from SALib.analyze.sobol import analyze
+        from SALib.analyze.sobol   import analyze
         
         # Generate samples using a Saltelli's extension of the Sobol sequence.
         # Sample size n=512, no. params k=5 => N=(2k+2)*n=6144 (as in the referenced article).
@@ -306,7 +308,7 @@ def run():
     
     elif SA_method == 'FAST':
         from SALib.sample.fast_sampler import sample
-        from SALib.analyze.fast import analyze
+        from SALib.analyze.fast        import analyze
         
         # Generate samples using a FAST method.
         # Sample size n=1230, no. params k=5 => N=k*n=6150.
@@ -339,6 +341,7 @@ def run():
     theta_max = numpy.zeros(N)
         
     def evaluate_sequential():
+        print('Running %d simulations sequentially...' % N)
         for i in range(N): 
             theta_max[i] = simulate(run_no  = i,
                                     n       = 1, 
@@ -347,14 +350,17 @@ def run():
                                     psi     = psi[i], 
                                     theta_a = theta_a[i], 
                                     x_0     = 0.0, 
-                                    theta_0 = theta_0[i])
+                                    theta_0 = theta_0[i],
+                                    sequential = True)
+            print('  Finished simulation run %d' % i)
     
     def evaluate_parallel():
         from multiprocessing import Pool
         # Create a pool of workers to calculate N outputs
         # Don't forget to disable OpenMP for evaluation of residuals and derivatives!!
         pool = Pool()
-        args = [(i, 1, B[i], gamma[i], psi[i], theta_a[i], 0.0, theta_0[i]) for i in range(N)]
+        args = [(i, 1, B[i], gamma[i], psi[i], theta_a[i], 0.0, theta_0[i], False) for i in range(N)]
+        print('Running %d simulations in parallel...' % N)
         theta_max[:] = pool.map(simulate_p, args, chunksize=1)
     
     start = time.time()

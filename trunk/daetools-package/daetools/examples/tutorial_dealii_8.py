@@ -17,25 +17,38 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ************************************************************************************
 """
 __doc__ = """
-In this example a simple transient heat convection-diffusion equation is solved.
+In this example a small parallel-plate reactor with an active surface is modelled.
 
 This problem and its solution in `COMSOL Multiphysics <https://www.comsol.com>`_ software 
 is described in the Application Gallery: `Transport and Adsorption (id=5)
 <https://www.comsol.com/model/transport-and-adsorption-5>`_.
 
+The transport in the bulk of the reactor is described by a convection-diffusion equation:
+    
 .. code-block:: none
 
    dc/dt - D*nabla^2(c) + div(uc) = 0 in Omega
 
-The fluid flows from the left side to the right with constant velocity of 0.01 m/s.
-The inlet temperature for 0.2 <= y <= 0.3 is iven by the following expression:
+The material balance for the surface, including surface diffusion and the reaction rate is:
 
 .. code-block:: none
 
-   dcs/dt - Ds*nabla^2(c) = -k_ads * c * (Gamma_s - cs) + k_des * cs in Omega
+   dc_s/dt - Ds*nabla^2(c_s) = -k_ads * c * (Gamma_s - c_s) + k_des * c_s in Omega_s
 
-creating a bubble-like regions of higher temperature that flow towards the right end
-and slowly diffuse into the bulk flow of the fluid due to the heat conduction.
+For the bulk, the boundary condition at the active surface couples the rate of the reaction
+at the surface with the flux of the reacting species and the concentration of the adsorbed
+species and bulk species:
+    
+.. code-block:: none
+
+    n⋅(-D*nabla(c) + c*u) = -k_ads*c*(Gamma_s - c_s) + k_des*c_s
+    
+The boundary conditions for the surface species are insulating conditions.
+
+The problem is modelled using two coupled Finite Element systems: 
+2D for bulk flow and 1D for the active surface. 
+The linear interpolation is used to determine the bulk flow and active surface concentrations
+at the interface.
 
 The mesh is rectangular with the refined elements close to the left/right ends:
 
@@ -68,10 +81,10 @@ from daetools.solvers.superlu import pySuperLU
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 # Inputs:
-c0      = 1000  # [mol/m^3]	    Initial concentration
-k_ads   = 1e-6  # [m^3/(mol*s)]	Forward rate constant
+c0      = 1000  # [mol/m^3]     Initial concentration
+k_ads   = 1e-6  # [m^3/(mol*s)] Forward rate constant
 k_des   = 1e-9  # [1/s]	        Backward rate constant
-Gamma_s = 1000  # [mol/m^2]	    Active site concentration
+Gamma_s = 1000  # [mol/m^2]     Active site concentration
 Ds      = 1e-11 # [m^2/s]       Surface diffusivity
 D       = 1e-9  # [m^2/s]       Gas diffusivity
 v_max   = 1e-3  # [m/s]         Maximum velocity

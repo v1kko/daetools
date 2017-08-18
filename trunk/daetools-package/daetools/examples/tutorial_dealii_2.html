@@ -142,6 +142,19 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
+        <span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>        # Overall indexes of the DOFs at the boundaries:</span>
+<span style='color:#017a31;'>        # 0 (left edge), 1 (top edge), 2 (right edge) and 3 (bottom edge)</span>
+<span style='color:#017a31;'>        bdofs = self.fe_system.GetBoundaryDOFs('T', [0])</span>
+<span style='color:#017a31;'>        print(numpy.where(bdofs))</span>
+<span style='color:#017a31;'>        bdofs = self.fe_system.GetBoundaryDOFs('T', [1])</span>
+<span style='color:#017a31;'>        print(numpy.where(bdofs))</span>
+<span style='color:#017a31;'>        bdofs = self.fe_system.GetBoundaryDOFs('T', [2])</span>
+<span style='color:#017a31;'>        print(numpy.where(bdofs))</span>
+<span style='color:#017a31;'>        bdofs = self.fe_system.GetBoundaryDOFs('T', [3])</span>
+<span style='color:#017a31;'>        print(numpy.where(bdofs))</span>
+<span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
+
         <span style='color:#017a31;'># Thermo-physical properties of the liquid (water).</span>
         <span style='color:#017a31;'># The specific heat conductivity is normally 0.6 W/mK,</span>
         <span style='color:#017a31;'># however, here we used much larger value to amplify the effect of conduction</span>
@@ -191,20 +204,19 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         convection   <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> (u_grad <b><span style='color:#0000ff;'>*</span></b> dphi_j) <b><span style='color:#0000ff;'>*</span></b> JxW
         source       <b><span style='color:#0000ff;'>=</span></b> phi_i <b><span style='color:#0000ff;'>*</span></b> <span style='color:#cc047c;'>0.0</span> <b><span style='color:#0000ff;'>*</span></b> JxW
 
-        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> convection,
-                                                  Mij <b><span style='color:#0000ff;'>=</span></b> accumulation,
-                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> source,
+        cell_Aij <b><span style='color:#0000ff;'>=</span></b> diffusion <b><span style='color:#0000ff;'>+</span></b> convection
+        cell_Mij <b><span style='color:#0000ff;'>=</span></b> accumulation
+        cell_Fi  <b><span style='color:#0000ff;'>=</span></b> source
+        
+        weakForm <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementWeakForm_2D(Aij <b><span style='color:#0000ff;'>=</span></b> cell_Aij,
+                                                  Mij <b><span style='color:#0000ff;'>=</span></b> cell_Mij,
+                                                  Fi  <b><span style='color:#0000ff;'>=</span></b> cell_Fi,
                                                   functionsDirichletBC <b><span style='color:#0000ff;'>=</span></b> dirichletBC)
 
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Transient heat convection equations:'</span>)
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Aij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Mij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.Fi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceAij]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    boundaryFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.boundaryFaceFi]))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceAij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceAij))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    innerCellFaceFi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(weakForm.innerCellFaceFi))
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    surfaceIntegrals  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>([item <b>for</b> item <b>in</b> weakForm.surfaceIntegrals]))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Aij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Aij))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Mij = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Mij))
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'    Fi  = </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>str</span>(cell_Fi))
 
         <span style='color:#017a31;'># Setting the weak form of the FE system will declare a set of equations:</span>
         <span style='color:#017a31;'># [Mij]{dx/dt} + [Aij]{x} = {Fi} and boundary integral equations</span>
@@ -269,7 +281,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial_deal_II_2-results'</span>)
 
     <span style='color:#017a31;'># Create two data reporters:</span>
-    <span style='color:#017a31;'># 1. DealII</span>
+    <span style='color:#017a31;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
     feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     <b>if</b> <b>not</b> feDataReporter.Connect(results_folder, simName):

@@ -456,26 +456,54 @@ class dae2DPlot(QtWidgets.QDialog):
         .. code-block:: javascript
 
            {
-               'curves' : [variableName, domainIndexes, domainPoints, lineTitle, style],
-               'updateInterval' : float,
-               'xlabel' : string,
-               'xmin' : float,
-               'xmax' : float,
-               'xscale' : string [linear, log],
-               'xtransform': float,
-               'ylabel' : string,
-               'ymin' : float,
-               'ymax' : float,
-               'yscale' : string [linear, log],
-               'ytransform': float,
-               'legendOn' : Bool,
-               'gridOn' : Bool,
-               'plotTitle' : string,
-               'windowTitle' : string
-               'xmin_policy': int,
-               'xmax_policy': int,
-               'ymin_policy': int,
-               'ymax_policy': int
+            "curves": [
+                [
+                "variableName", 
+                [
+                    1, 
+                    -1
+                ], 
+                [
+                    "0.05", 
+                    "*"
+                ], 
+                "variableName(0.05, *)", 
+                {
+                    "color": [
+                    0.0, 
+                    0.0, 
+                    0.0, 
+                    1.0
+                    ], 
+                    "linestyle": "-", 
+                    "linewidth": 1.0, 
+                    "marker": "o", 
+                    "markeredgecolor": "#000000ff", 
+                    "markerfacecolor": "#000000ff", 
+                    "markersize": 0.0
+                }
+                ]
+            ], 
+            "gridOn": true, 
+            "legendOn": true, 
+            "plotTitle": "", 
+            "plotType": 0, 
+            "updateInterval": 0, 
+            "windowTitle": "tutorial_dealii_8.ActiveSurface.cs(2.0, *)", 
+            "xlabel": "y-cordinate", 
+            "xmax": 31.45, 
+            "xmax_policy": 0, 
+            "xmin": -0.4500000000000002, 
+            "xmin_policy": 0, 
+            "xscale": "linear", 
+            "xtransform": 1.0, 
+            "ylabel": "cs (mol/m**2)", 
+            "ymax": 0.34935417753491, 
+            "ymax_policy": 1, 
+            "ymin": -0.00938086024107475, 
+            "ymin_policy": 1, 
+            "yscale": "linear", 
+            "ytransform": 1.0
            }
         """
         processes = {}

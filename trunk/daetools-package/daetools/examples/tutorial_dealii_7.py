@@ -19,7 +19,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 __doc__ = """
 In this example 2D transient Stokes flow driven by the differences in buoyancy caused
 by the temperature differences in the fluid is solved 
-(`deal.II step-31 <https://www.dealii.org/8.4.0/doxygen/deal.II/step_31.html>`_).
+(`deal.II step-31 <https://www.dealii.org/8.5.0/doxygen/deal.II/step_31.html>`_).
 
 The differences to the original problem are that the grid is not adaptive and no 
 stabilisation method is used.
@@ -200,8 +200,8 @@ class modTutorial(daeModel):
         Aij_T_diffusion    = kappa * (dphi_T_i * dphi_T_j) * JxW
         Fi_T_source        = phi_T_i * gamma * JxW
 
-        # Total contributions:
-        Mij = Mij_T_accumulation
+        # Total contributions (using the new way - python lists of expressions or tuples):
+        Mij = [Mij_T_accumulation]
         Aij = [Aij_u_gradient + Aij_p_gradient + Aij_continuity + Aij_T_diffusion,  Aij_T_convection]
         Fi  = [Fi_T_source, Fi_buoyancy]
         
@@ -298,31 +298,7 @@ def consoleRun():
     # Save the model report and the runtime model report
     simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
     #simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-    
-    from daetools.pyDAE.eval_node_graph import daeNodeGraph
-    """
-    A = simulation.m.fe_system.Asystem()
-    row = 443
-    cols = simulation.m.fe_system.RowIndices(row)
-    print(cols)
-    for col in cols:
-        ad = A.GetItem(row, col)
-        if ad.Node:
-            print('Processing item (%04d,%04d)...' % (row,col))
-            ng = daeNodeGraph('item', ad.Node)
-            ng.SaveGraph('deal.ii-7-item(%04d,%04d).png' % (row,col))
-    sys.exit()
-    """
-    """
-    eeis = simulation.m.fe_model.Equations[0].EquationExecutionInfos
-    for i,eei in enumerate(eeis):
-        if (i in range(4000, 4005)) or (i in range(1200, 1210)):
-            print('Processing node %d...' % i)
-            ng = daeNodeGraph('residual', eei.Node)
-            ng.SaveGraph('deal.ii-7-T_equation[%04d].png' % i)
-    sys.exit()
-    """
-    
+       
     # Solve at time=0 (initialization)
     simulation.SolveInitial()
 

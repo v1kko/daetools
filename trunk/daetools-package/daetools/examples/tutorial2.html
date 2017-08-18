@@ -35,6 +35,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>- Making equations more readable</span>
 <span style='color:#cc0000;'>- Degrees of freedom</span>
 <span style='color:#cc0000;'>- Setting an initial guess for variables (used by a DAE solver during an initial phase)</span>
+<span style='color:#cc0000;'>- Print DAE solver statistics</span>
 
 <span style='color:#cc0000;'>The model in this example is very similar to the model used in the tutorial 1.</span>
 <span style='color:#cc0000;'>The differences are:</span>
@@ -96,7 +97,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
         daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#017a31;'># Create some auxiliary functions to make equations more readable </span>
+        <span style='color:#017a31;'># Declare some auxiliary functions to make equations more readable </span>
         rho     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.rho()
         a       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.a()
         b       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.b()
@@ -277,7 +278,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-
+    
     <span style='color:#017a31;'># Enable reporting of all variables</span>
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
 
@@ -306,7 +307,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Run</span>
     simulation.Run()
     simulation.Finalize()
-
+    
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()

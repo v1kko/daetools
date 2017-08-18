@@ -1552,9 +1552,10 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
                     {
                         // Take all objects from the queue and copy them to the global structures.
                         // This way, the other threads do not wait to acquire the omp lock.
-                        // The std::queue::swap() function should be fast since copying the shared_ptr objects is cheap.
+                        // The std::queue::swap() function should be fast since it only swaps a couple of pointers.
+                        // Anyhow, even copying the shared_ptr objects is cheap.
                         omp_set_lock(&lock);
-                        copy_data_queue_swap.swap(copy_data_queue);
+                            copy_data_queue_swap.swap(copy_data_queue);
                         omp_unset_lock(&lock);
 
                         //printf("copy_data_queue_swap.size = %d\n", copy_data_queue_swap.size());

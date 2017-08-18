@@ -38,6 +38,7 @@ Optional packages:
 * python-xlwt
 * python-h5py
 * python-pandas
+* PyGraphviz (can be installed using pip)
 
 Optional packages (proprietary):
 
@@ -68,16 +69,16 @@ or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ web
     From the version 1.6.0 Windows installer is not provided anymore.
 
 The naming convention for the installation files: ``daetools-major.minor.platform-architecture.tar.gz``
-where ``major.minor.build`` represents the version (``1.7.0`` for instance),
+where ``major.minor.build`` represents the version (``1.7.1`` for instance),
 ``platform`` can be ``gnu_linux``, ``win32`` and ``macosx``, and
 ``architecture`` can be ``i686``, ``x86_64`` or ``universal``.
 
-An example: ``daetools-1.7.0-gnu_linux-x86_64.tar.gz`` is the version 1.7.0 for 64 bit GNU/Linux.
+An example: ``daetools-1.7.1-gnu_linux-x86_64.tar.gz`` is the version 1.7.1 for 64 bit GNU/Linux.
 
 For other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the download section
-(``daetools-1.7.0-source.tar.gz`` for instance).
+(``daetools-1.7.1-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -343,8 +344,8 @@ It is also possible to compile individual libraries using one of the following o
 .. code-block:: none
 
     all    All libraries and solvers.
-           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt 
-                                       coolprop trilinos deal.ii
+           On GNU/Linux and macOS equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt 
+                                                 coolprop trilinos deal.ii
            On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt coolprop trilinos deal.ii
 
     Individual libraries/solvers:
@@ -376,12 +377,12 @@ It is also possible to compile individual libraries using one of the following o
 .. code-block:: none
 
     all             Build all daetools c++ libraries, solvers and python extension modules.
-                    On GNU/Linux equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux and macOS equivalent to: dae superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
                     On Windows equivalent to: dae superlu trilinos ipopt bonmin nlopt deal.ii
     dae             Build all daetools c++ libraries and python extension modules (no 3rd party LA/(MI)NLP/FE solvers).
                     Equivalent to: config units data_reporting idas core activity simulation_loader fmi
     solvers         Build all solvers and their python extension modules.
-                    On GNU/Linux equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
+                    On GNU/Linux and macOS equivalent to: superlu superlu_mt trilinos ipopt bonmin nlopt deal.ii
                     On Windows equivalent to: superlu trilinos ipopt bonmin nlopt deal.ii
     pydae           Build daetools core python extension modules only.
     
@@ -476,8 +477,8 @@ when asked select the following options:
 
 Then, compile all the third party libraries except the ``bonmin`` by executing ``compile_libraries.sh`` shell script located in the
 ``trunk`` directory. The script will download all necessary source archives from the **DAE Tools** SourceForge web-site,
-unpack them, apply changes and compile them. If all dependencies are installed there should not be problems compiling
-the libraries.
+unpack them, apply changes and compile them. If ``wget`` is missing the source archives must be downloaded manually to the ``trunk`` directory.
+If all dependencies are installed there should not be problems compiling the libraries.
 
 .. code-block:: bash
 
@@ -497,96 +498,96 @@ in the ``trunk`` directory.
 
     sh compile.sh all
 
-Cross-compilation (deprecated)
-++++++++++++++++++++++++++++++
-First, compile the third party libraries:
+..  Cross-compilation (deprecated)
+    ++++++++++++++++++++++++++++++
+    First, compile the third party libraries:
 
-.. code-block:: none
+    .. code-block:: none
 
-   Prerequisities:
-     1. Install the mingw-w64 package from the main Debian repository.
+    Prerequisities:
+        1. Install the mingw-w64 package from the main Debian repository.
 
-     2. Install Python on Windows using the binary from the python.org website
-        and copy it to trunk/PythonXY-arch (i.e. Python34-win32).
-        Modify PYTHON_MAJOR and PYTHON_MINOR in the crossCompile section in the dae.pri file (line ~90):
-            PYTHON_MAJOR = 3
-            PYTHON_MINOR = 4
+        2. Install Python on Windows using the binary from the python.org website
+            and copy it to trunk/PythonXY-arch (i.e. Python34-win32).
+            Modify PYTHON_MAJOR and PYTHON_MINOR in the crossCompile section in the dae.pri file (line ~90):
+                PYTHON_MAJOR = 3
+                PYTHON_MINOR = 4
 
-     3. cmake cross-compilation requires the toolchain file: set it up using -DCMAKE_TOOLCHAIN_FILE=[path_to_toolchain_file].cmake
-        Cross-compile .cmake files are provided by daetools and located in the trunk folder.
-          cross-compile-i686-w64-mingw32.cmake   file targets a toolchain located in /usr/mingw32-i686 directory.
-          cross-compile-x86_64-w64-mingw32.cmake file targets a toolchain located in /usr/mingw32-x86_64 directory.
+        3. cmake cross-compilation requires the toolchain file: set it up using -DCMAKE_TOOLCHAIN_FILE=[path_to_toolchain_file].cmake
+            Cross-compile .cmake files are provided by daetools and located in the trunk folder.
+            cross-compile-i686-w64-mingw32.cmake   file targets a toolchain located in /usr/mingw32-i686 directory.
+            cross-compile-x86_64-w64-mingw32.cmake file targets a toolchain located in /usr/mingw32-x86_64 directory.
 
-     4. deal.II specific options:
-        The native "expand_instantiations_exe" is required but cannot be run under the build architecture.
-        and must be used from the native build.
-        Therefore, set up a native deal.II build directory first and run the following command in it:
-            make expand_instantiations_exe
-        Typically, it is located in the deal.II/common/scripts directory.
-        That directory will be added to the PATH environment variable by this script.
-        If necessary, modify the line 'export PATH=...:${PATH}' to match the actual location.
+        4. deal.II specific options:
+            The native "expand_instantiations_exe" is required but cannot be run under the build architecture.
+            and must be used from the native build.
+            Therefore, set up a native deal.II build directory first and run the following command in it:
+                make expand_instantiations_exe
+            Typically, it is located in the deal.II/common/scripts directory.
+            That directory will be added to the PATH environment variable by this script.
+            If necessary, modify the line 'export PATH=...:${PATH}' to match the actual location.
 
-     5. Boost specific options:
-        boost-python linking will fail. Append the value of:
-           ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a
-        at the end of the failed linking command, re-run it, and manually copy the stage/lib/*.dll(s) to the "daetools/solibs/${PLATFORM}_${HOST_ARCH}" directory.
-        Win64 (x86_64-w64-mingw32):
-         - Python 2.7 won't compile (probably issues with the MS Universal CRT voodoo mojo)
-         - dl and util libraries are missing when compiling with x86_64-w64-mingw32.
-           solution: just remove -ldl and -lutil from the linking line.
+        5. Boost specific options:
+            boost-python linking will fail. Append the value of:
+            ${DAE_CROSS_COMPILE_PYTHON_ROOT}/libs/libpython${PYTHON_MAJOR}${PYTHON_MINOR}.a
+            at the end of the failed linking command, re-run it, and manually copy the stage/lib/*.dll(s) to the "daetools/solibs/${PLATFORM}_${HOST_ARCH}" directory.
+            Win64 (x86_64-w64-mingw32):
+            - Python 2.7 won't compile (probably issues with the MS Universal CRT voodoo mojo)
+            - dl and util libraries are missing when compiling with x86_64-w64-mingw32.
+            solution: just remove -ldl and -lutil from the linking line.
 
-     6. Trilinos specific options
-        i686-w64-mingw32 specific:
-          1. In the file:
-            - trilinos/packages/teuchos/src/Teuchos_BLAS.cpp
-             "template BLAS<...>" (lines 96-104)
-                #ifdef _WIN32
-                #ifdef HAVE_TEUCHOS_COMPLEX
-                    template class BLAS<long int, std::complex<float> >;
-                    template class BLAS<long int, std::complex<double> >;
-                #endif
-                    template class BLAS<long int, float>;
-                    template class BLAS<long int, double>;
-                #endif
-             should be replaced by "template class BLAS<...>"
-          2. In the files:
-               - trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp,
-               - trilinos/packages/ml/src/Utils/ml_utils.c
-               - trilinos/packages/ml/src/MLAPI/MLAPI_Workspace.cpp:
-              the functions "gethostname" and "sleep" do not exist
-                a) Add include file:
-                      #include <winsock2.h>
-                   and if that does not work (getting unresolved _gethostname function in pyTrilinos),
-                   then comment-out all "gethostname" occurences (they are not important - just for printing some info)
-                b) Rename sleep() to Sleep() (if needed, wasn't needed for 10.12.2)
+        6. Trilinos specific options
+            i686-w64-mingw32 specific:
+            1. In the file:
+                - trilinos/packages/teuchos/src/Teuchos_BLAS.cpp
+                "template BLAS<...>" (lines 96-104)
+                    #ifdef _WIN32
+                    #ifdef HAVE_TEUCHOS_COMPLEX
+                        template class BLAS<long int, std::complex<float> >;
+                        template class BLAS<long int, std::complex<double> >;
+                    #endif
+                        template class BLAS<long int, float>;
+                        template class BLAS<long int, double>;
+                    #endif
+                should be replaced by "template class BLAS<...>"
+            2. In the files:
+                - trilinos/packages/ml/src/Utils/ml_epetra_utils.cpp,
+                - trilinos/packages/ml/src/Utils/ml_utils.c
+                - trilinos/packages/ml/src/MLAPI/MLAPI_Workspace.cpp:
+                the functions "gethostname" and "sleep" do not exist
+                    a) Add include file:
+                        #include <winsock2.h>
+                    and if that does not work (getting unresolved _gethostname function in pyTrilinos),
+                    then comment-out all "gethostname" occurences (they are not important - just for printing some info)
+                    b) Rename sleep() to Sleep() (if needed, wasn't needed for 10.12.2)
 
-        x86_64-w64-mingw32 specific:
-          All the same as above. Additionally:
-          1. trilinos/packages/teuchos/src/Teuchos_SerializationTraits.hpp
-             Comment lines: UndefinedSerializationTraits<T>::notDefined();
-          2. trilinos/packages/epetra/src/Epetra_C_wrappers.cpp
-             Add lines at the beggining of the file:
-               #pragma GCC diagnostic push
-               #pragma GCC diagnostic warning "-fpermissive"
+            x86_64-w64-mingw32 specific:
+            All the same as above. Additionally:
+            1. trilinos/packages/teuchos/src/Teuchos_SerializationTraits.hpp
+                Comment lines: UndefinedSerializationTraits<T>::notDefined();
+            2. trilinos/packages/epetra/src/Epetra_C_wrappers.cpp
+                Add lines at the beggining of the file:
+                #pragma GCC diagnostic push
+                #pragma GCC diagnostic warning "-fpermissive"
 
-   Cross compiling notes:
-     1. Requirements for Boost:
-          --with-python-version 3.4
-          --cross-compile-python-root .../trunk/Python34-win32
-          --host i686-w64-mingw32
+    Cross compiling notes:
+        1. Requirements for Boost:
+            --with-python-version 3.4
+            --cross-compile-python-root .../trunk/Python34-win32
+            --host i686-w64-mingw32
 
-     2. The other libraries:
-          --host i686-w64-mingw32 (the only necessary)
+        2. The other libraries:
+            --host i686-w64-mingw32 (the only necessary)
 
-   Example cross-compile call:
-       sh compile_libraries_linux.sh --with-python-version 3.4 --cross-compile-python-root ~/daetools-win32-cross/trunk/Python34-win32 --host i686-w64-mingw32 boost
-       sh compile_libraries_linux.sh --host i686-w64-mingw32 ref_blas_lapack umfpack idas superlu superlu_mt trilinos bonmin nlopt deal.ii
+    Example cross-compile call:
+        sh compile_libraries_linux.sh --with-python-version 3.4 --cross-compile-python-root ~/daetools-win32-cross/trunk/Python34-win32 --host i686-w64-mingw32 boost
+        sh compile_libraries_linux.sh --host i686-w64-mingw32 ref_blas_lapack umfpack idas superlu superlu_mt trilinos bonmin nlopt deal.ii
 
-Finally, compile all **DAE Tools** libraries and python modules by executing ``compile_linux.sh`` shell script located
-in the ``trunk`` directory.
+    Finally, compile all **DAE Tools** libraries and python modules by executing ``compile_linux.sh`` shell script located
+    in the ``trunk`` directory.
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    sh compile_linux.sh --host i686-w64-mingw32 all
+        sh compile_linux.sh --host i686-w64-mingw32 all
 
-**DAE Tools** can be now installed using the information from the sections above.
+    **DAE Tools** can be now installed using the information from the sections above.

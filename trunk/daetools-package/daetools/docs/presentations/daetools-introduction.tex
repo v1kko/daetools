@@ -152,7 +152,7 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{1 June 2017} 
+\date{16 August 2017} 
 
 \hypersetup{
 pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -240,19 +240,21 @@ pdfcreator = {Dragan Nikolić}
       \item Transient
     \end{itemize}
   \item \alert{Sensitivity analysis}
+    \begin{itemize}
+      \item Local methods (derivative-based) 
+      \item Global methods (Morris, FAST, Sobol variance-based)
+    \end{itemize}
   \item \alert{Optimisation}
     \begin{itemize}
-      \item Non-Linear Programming (NLP) problems
-      \item Mixed Integer Non-Linear Programming (MINLP) problems
+      \item Non-Linear Programming (NLP)
+      \item Mixed Integer Non-Linear Programming (MINLP)
     \end{itemize}
   \item \alert{Parameter estimation}
   \item \alert{Code-generation}, \alert{model-exchange}, \alert{co-simulation} 
     \begin{itemize}
-      \item Modelica, gPROMS
+      \item Modelica, gPROMS, Functional Mockup Interface (FMI)
       \item Matlab MEX-functions, Simulink user-defined S-functions
-      \item Functional Mockup Interface (FMI)
-      \item C99 (for embedded systems)
-      \item C++ MPI (for distributed computing) 
+      \item C99, C++ MPI (embedded and distributed systems) 
     \end{itemize}
 \end{itemize}
 \end{frame}
@@ -413,6 +415,26 @@ Current approaches to mathematical modelling:
         \item Support for the generation of \alert{model reports} (XML + MathML, Latex)
         \item \alert{Export} of the \alert{simulation results} to various file formats (Matlab, Excel, json, xml, HDF5, Pandas, VTK)
     \end{itemize}
+\end{frame}
+
+\begin{frame}{Additional \textsc{DAE Tools} features (cont'd)}
+  \begin{itemize}
+      \item The \alert{formal code verification techniques} applied to test almost all aspects of the software
+      \item The \alert{most rigorous code verification methods} used:
+        \begin{itemize}
+          \item The \alert{Method of Exact Solutions} (MES) 
+          \item The \alert{Method of Manufactured Solutions} (MMS)
+        \end{itemize}
+      \item The \alert{most rigorous acceptance criteria} used:
+        \begin{itemize}
+          \item Percent Error
+          \item Consistency
+          \item \alert{Order-of-accuracy}
+        \end{itemize}
+  \end{itemize}
+  \begin{center}
+      \includegraphics[align=c, height=0.27\paperheight]{code_verification.png}
+  \end{center}
 \end{frame}
 
 \section{Programming Paradigms}
@@ -820,27 +842,35 @@ Current approaches to mathematical modelling:
     \begin{itemize}
        {\small
           \item \alert{Continuously Stirred Tank Reactor} (Van de Vusse)
-                \href{https://doi.org/10.1021/i160048a700}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-1}{[code]}
+                \href{https://doi.org/10.1021/i160048a700}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-1}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Plug Flow Reactor}
-                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-7}{[code]}
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-7}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Distillation column}
-                \href{http://dx.doi.org/10.1016/S0098-1354(02)00120-5}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-2}{[code]}
+                \href{http://dx.doi.org/10.1016/S0098-1354(02)00120-5}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-2}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Batch crystalliser}
-                \href{http://dx.doi.org/10.1016/j.jcrysgro.2011.06.016}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-3}{[code]}
+                \href{http://dx.doi.org/10.1016/j.jcrysgro.2011.06.016}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-3}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Discretised Population Balance equations}
-                \href{http://dx.doi.org/10.20944/preprints201611.0012.v1}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-4}{[code1]}
-                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-5}{[code2]}
+                \href{http://dx.doi.org/10.20944/preprints201611.0012.v1}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-4}{\includegraphics[align=b, height=0.8em]{link.png}}
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-5}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Newman Porous Electrode Theory} (PET) 
-                \href{http://dx.doi.org/10.1007/0-306-47508-1_13}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-6}{[code1]}
-                \href{https://github.com/raybsmith/daetools-example-battery}{[code2]}
+                \href{http://dx.doi.org/10.1007/0-306-47508-1_13}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-6}{\includegraphics[align=b, height=0.8em]{link.png}}
+                \href{https://github.com/raybsmith/daetools-example-battery}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Multiphase Porous Electrode Theory} (MPET)
-                \href{https://arxiv.org/abs/1702.08432}{[ref]} \href{https://bitbucket.org/bazantgroup/mpet}{[code]}
+                \href{https://arxiv.org/abs/1702.08432}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{https://bitbucket.org/bazantgroup/mpet}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Hydroxide Exchange Membrane Fuel Cells} (HEMFCs)
-                \href{http://doi.org/10.1038/nnano.2016.265}{[ref]}
+                \href{http://doi.org/10.1038/nnano.2016.265}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Maxwell-Stefan equations} (porous membranes)
-                \href{http://doi.org/10.1007/s10450-015-9670-z}{[ref]} \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-8}{[code]}
+                \href{http://doi.org/10.1007/s10450-015-9670-z}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://daetools.com/docs/tutorials-chemeng.html\#tutorial-che-8}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Presssure Swing Adsorption}
-                \href{http://doi.org/10.1021/ie801357a}{[ref1]} \href{http://doi.org/10.1021/ie0712582}{[ref2]}
+                \href{http://doi.org/10.1021/ie801357a}{\includegraphics[align=b, height=0.8em]{link.png}} 
+                \href{http://doi.org/10.1021/ie0712582}{\includegraphics[align=b, height=0.8em]{link.png}}
        }
     \end{itemize}
 \end{frame}
@@ -849,40 +879,44 @@ Current approaches to mathematical modelling:
     \begin{itemize}
       {\small
           \item \alert{Transient heat conduction/convection}
-                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-2}{[code]}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-2}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Cahn-Hilliard equation}
-                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-3}{[code]}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-3}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Flow through the porous media}
-                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-5}{[code]}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-5}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item \alert{Diffusion/reaction in an irregular catalyst shape}
-                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-6}{[code]}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-6}{\includegraphics[align=b, height=0.8em]{link.png}}
+          \item \alert{Stokes flow driven by the differences in buoyancy}
+                \href{http://daetools.com/docs/tutorials-fe.html\#tutorial-dealii-7}{\includegraphics[align=b, height=0.8em]{link.png}}
       }
     \end{itemize}
     \begin{center}
-        \includegraphics[align=c, height=0.35\textheight]{cahn-hilliard.png}
+        \includegraphics[align=c, height=0.30\textheight]{cahn-hilliard.png}
         \;
-        \includegraphics[align=c, height=0.35\textheight]{heat_convection.png}
+        \includegraphics[align=c, height=0.30\textheight]{heat_convection.png}
+        \;
+        \includegraphics[align=c, height=0.30\textheight]{buoyancy.png}
     \end{center}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 3 - Parameter Estimation \& Optimal Control}
+\begin{frame}[plain]{Use Case 3 - Parameter Estimation \& Optimisation}
     \begin{center}
         {\small
-            \alert{Large-scale Constrained Optimization Problem Set (COPS)}
+            \alert{Large-scale Constrained Optimisation Problem Set (COPS)}
         }
     \end{center}  
     \begin{itemize}
       {\small
           \item Determination of the reaction coefficients in the thermal isomerization of $\alpha$-pinene (COPS 5)
-                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-2}{[code]}
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-2}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item Determination of stage specific growth and mortality rates for species at each stage as a function of time (COPS 6)
-                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-3}{[code]}
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-3}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item Determination of the reaction coefficients for the catalytic cracking of gas oil and other byproducts (COPS 12)
-                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-4}{[code]}
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-4}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item Determination of the reaction coefficients for the conversion of methanol into various hydrocarbons (COPS 13)
-                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-5}{[code]}
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-5}{\includegraphics[align=b, height=0.8em]{link.png}}
           \item Catalyst mixing in a tubular plug flow reactor (COPS 14)
-                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-6}{[code]}
+                \href{http://daetools.com/docs/tutorials-chemeng-optimisation.html\#tutorial-che-opt-6}{\includegraphics[align=b, height=0.8em]{link.png}}
       }
     \end{itemize}
 \end{frame}
@@ -966,7 +1000,38 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 5 - Embedded simulator (back end)}
+\begin{frame}[plain]{Use Case 5 - Sensitivity Analysis}
+    \begin{center}
+        \alert{Thermal analysis of a batch reactor \& exothermic reaction} \href{http://daetools.com/docs/tutorials-sa.html\#tutorial_sa_3}{\includegraphics[align=b, height=0.8em]{link.png}}
+    \end{center}   
+    {\scriptsize
+    \begin{itemize}
+      \item The global sensitivity analysis methods available via Python \alert{\href{http://salib.readthedocs.io}{SALib}} library
+      \item Three sensitivity analysis methods applied:
+      \begin{itemize}
+      {\scriptsize
+        \item \alert{Morris} (Elementary Effect/Screening method)
+        \item \alert{FAST} and \alert{Sobol} (Variance-based methods)
+      }
+      \end{itemize}
+      \item \alert{Calculations can be performed in parallel} (Python \alert{multiprocessing} module)
+      \item Available information:
+        \begin{itemize}
+        {\scriptsize
+          \item \alert{$1^{st}$ and $2^{nd}$ order sensitivities} and confidence intervals
+          \item \alert{Total sensitivity indices} and confidence intervals
+          \item \alert{Scatter plots}
+        }
+        \end{itemize}
+    \end{itemize}
+    }    
+    \begin{center}
+        \includegraphics[align=c, width=\textwidth]{sa_scatter_sobol.png}
+    \end{center}
+    
+\end{frame}
+
+\begin{frame}[plain]{Use Case 6 - Embedded simulator (back end)}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   
@@ -1016,7 +1081,7 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 6 - Web application / Web service}
+\begin{frame}[plain]{Use Case 7 - Web application / Web service}
     \begin{center}
         \alert{Network Interchange format for NEuroscience (NineML)}
     \end{center}   
@@ -1201,4 +1266,4 @@ Current approaches to mathematical modelling:
 % 
 % \end{frame}
 
-\end{document}
+\end{document}\grid

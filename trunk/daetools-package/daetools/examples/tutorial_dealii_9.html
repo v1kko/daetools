@@ -36,7 +36,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <span style='color:#cc0000;'>.. code-block:: none</span>
 
-<span style='color:#cc0000;'>   -div(2 * eta * eps(u)) + nabla(p) = -rho * beta * g * T in Omega</span>
+<span style='color:#cc0000;'>   du/dt + u div(u) + nabla(p) = 0, in Omega</span>
 <span style='color:#cc0000;'>   -div(u) = 0 in Omega</span>
 
 <span style='color:#cc0000;'>The mesh is a simple square (0,1)x(0,1):</span>
@@ -111,7 +111,7 @@ p_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='co
         <span style='color:#3605fb;'>self</span>.n_components <b><span style='color:#0000ff;'>=</span></b> <span style='color:#2a00d6;'>int</span>(numpy.<span style='color:#2a00d6;'>sum</span>([dof.Multiplicity <b>for</b> dof <b>in</b> dofs]))
 
         meshes_dir <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'meshes'</span>)
-        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-32x32.msh'</span>)
+        mesh_file  <b><span style='color:#0000ff;'>=</span></b> os.path.join(meshes_dir, <span style='color:#cc0000;'>'square(0,1)x(0,1)-64x64.msh'</span>)
 
         <span style='color:#017a31;'># Store the object so it does not go out of scope while still in use by daetools</span>
         <span style='color:#3605fb;'>self</span>.fe_system <b><span style='color:#0000ff;'>=</span></b> dealiiFiniteElementSystem_2D(meshFilename    <b><span style='color:#0000ff;'>=</span></b> mesh_file,     <span style='color:#017a31;'># path to mesh</span>
@@ -166,7 +166,7 @@ p_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='co
         dirichletBC[bottom_edge] <b><span style='color:#0000ff;'>=</span></b> [(<span style='color:#cc0000;'>'p'</span>, adoubleConstantFunction_2D(adouble(<span style='color:#cc047c;'>0.0</span>))),
                                     (<span style='color:#cc0000;'>'u'</span>, WallVelocityFunction_2D(<span style='color:#3605fb;'>self</span>.n_components))]
         
-        <span style='color:#017a31;'># Contributions from the Stokes equation:</span>
+        <span style='color:#017a31;'># Contributions from the Navie-Stokes equation:</span>
         Aij_u_viscosity  <b><span style='color:#0000ff;'>=</span></b> mu <b><span style='color:#0000ff;'>*</span></b> scalar_product(dphi_vector_u_i, dphi_vector_u_j) <b><span style='color:#0000ff;'>*</span></b> JxW
         <span style='color:#017a31;'>#Aij_u_convection = (JxW, du_dof*phi_vector_u_i, phi_vector_u_j)</span>
         Aij_u_convection1 <b><span style='color:#0000ff;'>=</span></b> (u_dof, phi_vector_u_i, dphi_vector_u_j <b><span style='color:#0000ff;'>*</span></b> JxW)
