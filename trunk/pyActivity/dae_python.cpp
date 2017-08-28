@@ -163,6 +163,9 @@ BOOST_PYTHON_MODULE(pyActivity)
         .add_property("ReportTimeDerivatives",          &daeSimulation::GetReportTimeDerivatives, &daeSimulation::SetReportTimeDerivatives)
         .add_property("ReportSensitivities",            &daeSimulation::GetReportSensitivities,   &daeSimulation::SetReportSensitivities)
 
+        .add_property("StopAtModelDiscontinuity",        &daeSimulation::GetStopAtModelDiscontinuity,        &daeSimulation::SetStopAtModelDiscontinuity)
+        .add_property("ReportDataAroundDiscontinuities", &daeSimulation::GetReportDataAroundDiscontinuities, &daeSimulation::SetReportDataAroundDiscontinuities)
+
         .def("SetUpParametersAndDomains",   &daeSimulation::SetUpParametersAndDomains, &daepython::daeDefaultSimulationWrapper::def_SetUpParametersAndDomains,
                                             ( arg("self") ), DOCSTR_daeSimulation_SetUpParametersAndDomains)
         .def("SetUpVariables",              &daeSimulation::SetUpVariables,            &daepython::daeDefaultSimulationWrapper::def_SetUpVariables,

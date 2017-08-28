@@ -276,7 +276,7 @@ def simulate(Nx):
    
     return points, c, c_exact
 
-def run():
+def run(guiRun = False, qtApp = None):
     Nxs = numpy.array([32, 64, 96]) #, 128])
     n = len(Nxs)
     L = 1.0 - (-1.0) # = 2.0

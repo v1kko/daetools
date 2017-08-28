@@ -1903,16 +1903,16 @@ except at the inflow and outflow boundaries where:
   \left( \partial c \over \partial x \right)_{n + {1 \over 2}} &= {{8c_{n + {1 \over 2}} - 9c_n + c_{n-1}} \over 3h}
 
 
-.. py:currentmodule:: hr_upwind_scheme
+.. py:currentmodule:: daetools.pyDAE.hr_upwind_scheme
 
-The above convection-diffusion-reaction equation can be specified using the :py:class:`daeHRUpwindScheme` class
+The above convection-diffusion-reaction equation can be specified using the :py:class:`daeHRUpwindSchemeEquation` class
 with the following functions:
 
-- Accumulation term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindScheme.dc_dt`:
+- Accumulation term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindSchemeEquation.dc_dt`:
 
   :math:`dc\_dt(i) = \int_{\Omega_i} {\partial c_i \over \partial t} dx`
 
-- Convection term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindScheme.dc_dx`
+- Convection term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindSchemeEquation.dc_dx`
   (may contain the :math:`\mathbf{S} = {1 \over u} \int_{\Omega_i} s(x) dx` integral for the consistent discretisation
   of the convection and the source terms):
 
@@ -1922,11 +1922,11 @@ with the following functions:
   
   :math:`dc\_dx(i) = \left( c_{i + {1 \over 2}} - \mathbf{S}_{i + {1 \over 2}} \right) - \left( c_{i - {1 \over 2}} - \mathbf{S}_{i - {1 \over 2}} \right)`
 
-- Diffusion term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindScheme.d2c_dx2`:
+- Diffusion term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindSchemeEquation.d2c_dx2`:
 
   :math:`d2c\_dx2(i) = \left( \partial c \over \partial x \right)_{i + {1 \over 2}} - \left( \partial c \over \partial x \right)_{i - {1 \over 2}}`
 
-- Source term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindScheme.source`:
+- Source term in the cell-centered finite-volume discretisation: :py:meth:`~daeHRUpwindSchemeEquation.source`:
 
   :math:`source(i) = \int_{\Omega_i} s_i dx`
 
@@ -1944,7 +1944,7 @@ as given in the example below:
             #     - x is a domain object
             #     - u is velocity
             #     - Phi_Koren is a flux limiter function
-            self.hr = daeHRUpwindScheme(self.c, self.x, daeHRUpwindScheme.Phi_Koren, 1e-10)
+            self.hr = daeHRUpwindSchemeEquation(self.c, self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
             
         def DeclareEquations(self):
             daeModel.DeclareEquations(self)
@@ -1991,12 +1991,12 @@ The example above now becomes:
         def __init__(self, Name, Parent = None, Description = ""):
             daeModel.__init__(self, Name, Parent, Description)
         
-            # 1. Declare the HR upwnd scheme object in the __init__ function:
+            # 1. Declare the HR upwind scheme object in the __init__ function:
             #     - c is a state variable
             #     - x is a domain object
             #     - u is velocity
             #     - Phi_Koren is a flux limiter function
-            self.hr = daeHRUpwindScheme(self.c, self.x, daeHRUpwindScheme.Phi_Koren, 1e-10)
+            self.hr = daeHRUpwindSchemeEquation(self.c, self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
             
         def DeclareEquations(self):
             daeModel.DeclareEquations(self)
@@ -3380,7 +3380,7 @@ Generating ``FMU`` files for use in FMI capable simulators is similar to the cod
     # Generate Functional Mock-up Interface for co-simulation file (.fmu)
     from daetools.code_generators.fmi import daeCodeGenerator_FMI
     cg = daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation', '', [])
+    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation_callable_object', 'arguments', [])
 
 The :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimulation` function generates a ``simulation name.fmu`` file
 which is basically a zip file with the files required by the ``FMI standard``.
@@ -3389,11 +3389,21 @@ Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimul
 - ``simulation``: initialised daeSimulation object
 - ``directory``: directory where the .fmu file will be generated
 - ``py_simulation_file``: a path to the python file with the simulation source code
-- ``callable_object_name``: the name of python callable object that returns an *initialized* :py:class:`~pyActivity.daeSimulation` object
+- ``create_simulation_callable_object``: the name of python callable object that returns an *initialized* :py:class:`~pyActivity.daeSimulation` object
 - ``arguments``: arguments for the above callable object; can be anything that python accepts
 - ``py_additional_files``: paths to the additional files to pack into a .fmu file (empty list by default)
     
-A sample function that can be used as the ``callable_object_name`` argument (from the :ref:`tutorial_adv_3` example):
+As a default ``create_simulation_callable_object`` object the function :py:meth:`~daetools.pyDAE.create_simulation_for_cosimulation`
+can be used which accepts a single argument ``simulation_class`` (the user-defined daeSimulation-derived class name):
+
+.. code-block:: python
+
+    from daetools.code_generators.fmi import daeCodeGenerator_FMI
+    cg = daeCodeGenerator_FMI()
+    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation_for_cosimulation', 'simTutorial', [])
+
+
+In addition, the ``create_simulation_callable_object`` argument can be a user-defined function (as specified in the :ref:`tutorial_adv_3` example):
 
 .. code-block:: python
 
@@ -3403,20 +3413,15 @@ A sample function that can be used as the ``callable_object_name`` argument (fro
         # Create Log, Solver, DataReporter and Simulation object
         log          = daePythonStdOutLog()
         daesolver    = daeIDAS()
-        datareporter = daeTCPIPDataReporter()
+        datareporter = daeNoOpDataReporter()
         simulation   = simTutorial()
 
         # Enable reporting of all variables
         simulation.m.SetReportingOn(True)
 
         # Set the time horizon and the reporting interval
-        simulation.ReportingInterval = 10
-        simulation.TimeHorizon = 100
-
-        # Connect data reporter
-        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-        if(datareporter.Connect("", simName) == False):
-            sys.exit()
+        simulation.ReportingInterval = 1
+        simulation.TimeHorizon       = 1
 
         # Initialize the simulation
         simulation.Initialize(daesolver, datareporter, log)
@@ -3476,7 +3481,7 @@ Now the compiled ``daetools_mex`` executable can be used to run **DAE Tools** si
 
 .. code-block:: bash
 
-  res = daetools_mex('.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 100.0, 10.0)
+  res = daetools_mex('.../daetools/examples/tutorial_adv_3.py', 'create_simulation_for_cosimulation', 'simTutorial', 100.0, 10.0)
   
 ``daetools_mex`` accepts the following arguments:
 
@@ -3516,7 +3521,7 @@ Running ``deatools_s`` S-functions:
     
   - S-Function parameters: see the description below
   
-    example: '.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 2, 2
+    example: '.../daetools/examples/tutorial_adv_3.py', 'create_simulation_for_cosimulation', 'simTutorial', 2, 2
   
   - S-Function modules: leave blank
 

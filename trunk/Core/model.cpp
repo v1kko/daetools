@@ -768,13 +768,14 @@ bool compareCanonicalNames(CLASS first, CLASS second)
 void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrParameters,
                                         std::vector<daeVariable_t*>&  ptrarrInputs,
                                         std::vector<daeVariable_t*>&  ptrarrOutputs,
+                                        std::vector<daeVariable_t*>&  ptrarrModelVariables,
                                         std::vector<daeSTN_t*>&       ptrarrSTNs)
 {
     // Collect all parameters and ports and initialize parameters/inputs/outputs arrays
-    std::vector<daeVariable_t*> ptrarrVariables;
     std::map<std::string, daeParameter_t*> mapParameters;
     std::map<std::string, daeSTN_t*> mapSTNs;
     std::vector<daePort_t*> arrPorts;
+    std::vector<daeVariable_t*> arrVariables;
 
     // All parameters
     CollectAllParameters(mapParameters);
@@ -782,6 +783,8 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
     CollectAllSTNs(mapSTNs);
     // Only ports in the top-level model
     GetPorts(arrPorts);
+    // Only variables in the top-level model
+    GetVariables(arrVariables);
 
     for(std::map<std::string, daeParameter_t*>::iterator iter = mapParameters.begin(); iter != mapParameters.end(); iter++)
         ptrarrParameters.push_back(iter->second);
@@ -794,7 +797,7 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
     {
         daePort_t* port = arrPorts[i];
 
-        ptrarrVariables.clear();
+        std::vector<daeVariable_t*> ptrarrVariables;
         port->GetVariables(ptrarrVariables);
 
         if(port->GetType() == eInletPort)
@@ -820,14 +823,16 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
         {
             for(size_t i = 0; i < ptrarrVariables.size(); i++)
             {
+                // Add all variables from the outlet ports (even if they are assigned)
                 daeVariable_t* pVariable = ptrarrVariables[i];
+            /*
                 if(pVariable->GetType() == cnAssigned || pVariable->GetType() == cnSomePointsAssigned)
                 {
                     daeDeclareException(exInvalidCall);
                     e << "Outlet port variables [" << pVariable->GetCanonicalName() << "] cannot have assigned values (can't be DOFs)";
                     throw e;
                 }
-
+            */
                 ptrarrOutputs.push_back(pVariable);
             }
         }
@@ -839,30 +844,25 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
         }
     }
 
-    // DOFs
-    // Nota bene:
-    //   Here we have a problem: inlet ports are marked as DOFs, so there is an overlap between the DOF and Input variables)
-    /*
-    for(std::map<std::string, daeVariable_t*>::iterator iter = mapVariables.begin(); iter != mapVariables.end(); iter++)
+    // Add all non-DOF variables from the top-level model.
+    for(size_t i = 0; i < arrVariables.size(); i++)
     {
-        daeVariable_t* pVariable = iter->second;
-        if(pVariable->GetType() == cnAssigned)
+        daeVariable_t* pVariable = arrVariables[i];
+        if(pVariable->GetType() != cnAssigned)
         {
-            ptrarrDOFs.push_back(pVariable);
-        }
-        else if(pVariable->GetType() == cnSomePointsAssigned)
-        {
-            std::cout << "Variable: " << pVariable->GetCanonicalName() << " has only some points assigned" << std::endl;
+            // Variable can be algebraic/differential or it can have some points assigned
+            // but it cannot be assigned (DOF).
+            ptrarrModelVariables.push_back(pVariable);
         }
     }
-    */
 
     /* Achtung, Achtung!!
      * Sort by name so that every platform get identical vectors! */
-    std::sort(ptrarrParameters.begin(), ptrarrParameters.end(), compareCanonicalNames<daeParameter_t*>);
-    std::sort(ptrarrInputs.begin(),     ptrarrInputs.end(),     compareCanonicalNames<daeVariable_t*>);
-    std::sort(ptrarrOutputs.begin(),    ptrarrOutputs.end(),    compareCanonicalNames<daeVariable_t*>);
-    std::sort(ptrarrSTNs.begin(),       ptrarrSTNs.end(),       compareCanonicalNames<daeSTN_t*>);
+    std::sort(ptrarrParameters.begin(),     ptrarrParameters.end(),     compareCanonicalNames<daeParameter_t*>);
+    std::sort(ptrarrInputs.begin(),         ptrarrInputs.end(),         compareCanonicalNames<daeVariable_t*>);
+    std::sort(ptrarrOutputs.begin(),        ptrarrOutputs.end(),        compareCanonicalNames<daeVariable_t*>);
+    std::sort(ptrarrModelVariables.begin(), ptrarrModelVariables.end(), compareCanonicalNames<daeVariable_t*>);
+    std::sort(ptrarrSTNs.begin(),           ptrarrSTNs.end(),           compareCanonicalNames<daeSTN_t*>);
 }
 
 void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
@@ -870,6 +870,7 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
     std::vector<daeParameter_t*> ptrarrParameters;
     std::vector<daeVariable_t*>  ptrarrInputs;
     std::vector<daeVariable_t*>  ptrarrOutputs;
+    std::vector<daeVariable_t*>  ptrarrModelVariables;
     std::vector<daeSTN_t*>       ptrarrSTNs;
     std::map<size_t, std::vector<size_t> > mapDomainsIndexes;
     std::map<size_t, std::vector<size_t> >::iterator iter;
@@ -877,9 +878,11 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
     GetCoSimulationInterface(ptrarrParameters,
                              ptrarrInputs,
                              ptrarrOutputs,
+                             ptrarrModelVariables,
                              ptrarrSTNs);
 
-    size_t counter = 0;
+    // The index attribute must have a value between 1 and the number of model variables.
+    size_t counter = 1;
     for(size_t i = 0; i < ptrarrParameters.size(); i++)
     {
         daeParameter* pParameter = dynamic_cast<daeParameter*>(ptrarrParameters[i]);
@@ -896,7 +899,7 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
             fmi.indexes     = iter->second;
             fmi.name        = daeGetStrippedRelativeName(this, pParameter);
             if(noPoints > 1)
-                fmi.name  += "(" + toString(iter->second, ",") + ")";
+                fmi.name  += "[" + toString(iter->second, ",") + "]";
             fmi.description = pParameter->GetDescription();
             fmi.units       = pParameter->GetUnits().toString();
             mapInterface[counter] = fmi;
@@ -936,7 +939,7 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
             fmi.indexes   = iter->second;
             fmi.name      = daeGetStrippedRelativeName(this, pVariable);
             if(noPoints > 1)
-                fmi.name  += "(" + toString(iter->second, ",") + ")";
+                fmi.name  += "[" + toString(iter->second, ",") + "]";
             fmi.description = pVariable->GetDescription();
             fmi.units       = pVariable->GetVariableType()->GetUnits().toString();
             mapInterface[counter] = fmi;
@@ -960,7 +963,31 @@ void daeModel::GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface)
             fmi.indexes   = iter->second;
             fmi.name      = daeGetStrippedRelativeName(this, pVariable);
             if(noPoints > 1)
-                fmi.name  += "(" + toString(iter->second, ",") + ")";
+                fmi.name  += "[" + toString(iter->second, ",") + "]";
+            fmi.description = pVariable->GetDescription();
+            fmi.units       = pVariable->GetVariableType()->GetUnits().toString();
+            mapInterface[counter] = fmi;
+            counter++;
+        }
+    }
+
+    for(size_t i = 0; i < ptrarrModelVariables.size(); i++)
+    {
+        daeVariable* pVariable = dynamic_cast<daeVariable*>(ptrarrModelVariables[i]);
+        mapDomainsIndexes.clear();
+        pVariable->GetDomainsIndexesMap(mapDomainsIndexes, 0);
+        size_t noPoints = pVariable->GetNumberOfPoints();
+
+        for(iter = mapDomainsIndexes.begin(); iter != mapDomainsIndexes.end(); iter++)
+        {
+            daeFMI2Object_t fmi;
+            fmi.type      = "Local";
+            fmi.variable  = pVariable;
+            fmi.reference = counter;
+            fmi.indexes   = iter->second;
+            fmi.name      = daeGetStrippedRelativeName(this, pVariable);
+            if(noPoints > 1)
+                fmi.name  += "[" + toString(iter->second, ",") + "]";
             fmi.description = pVariable->GetDescription();
             fmi.units       = pVariable->GetVariableType()->GetUnits().toString();
             mapInterface[counter] = fmi;

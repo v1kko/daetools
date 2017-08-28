@@ -228,64 +228,16 @@ def setOptions(nlpsolver):
     #nlpsolver.SetOption('obj_scaling_factor', 0.00001)
     nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
         
-# Use daeSimulator class
-def guiRun(app):
-    sim = simCSTR()
-    opt = daeOptimization()
-    nlp = pyIPOPT.daeIPOPT()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 600     # 10 min
-    sim.TimeHorizon       = 5*60*60 # 3 h
-    simulator = daeSimulator(app, simulation = sim,
-                                  optimization = opt,
-                                  nlpsolver = nlp,
-                                  nlpsolver_setoptions_fn = setOptions)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    nlpsolver    = pyIPOPT.daeIPOPT()
-    datareporter = daeTCPIPDataReporter() #daeNoOpDataReporter()
-    simulation   = simCSTR()
-    optimization = daeOptimization()
-
-    # Do no print progress
-    log.PrintProgress = True
-    
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 600     # 10 min
-    simulation.TimeHorizon       = 5*60*60 # 3 h
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the optimization
-    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
-
-    # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
-    # Otherwise seg. fault occurs for some reasons.
-    setOptions(nlpsolver)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Run
-    optimization.Run()
-    optimization.Finalize()
+def run(guiRun = False, qtApp = None):
+    simulation = simCSTR()
+    nlpsolver  = pyIPOPT.daeIPOPT()
+    daeActivity.optimize(simulation, reportingInterval       = 600, 
+                                     timeHorizon             = 5*60*60,
+                                     nlpsolver               = nlpsolver,
+                                     nlpsolver_setoptions_fn = setOptions,
+                                     guiRun                  = guiRun,
+                                     qtApp                   = qtApp)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun)

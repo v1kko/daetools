@@ -286,7 +286,7 @@ class daeSimulationExplorer(QtWidgets.QDialog):
 
         elif language == 'FMI (Co-Simulation)':
             from daetools.code_generators.fmi import daeCodeGenerator_FMI
-            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Code generator: %s" % language, 
+            directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Select the directory for the generated files for %s" % language, 
                                                                    "",
                                                                    options)
             if not directory:
@@ -299,12 +299,12 @@ class daeSimulationExplorer(QtWidgets.QDialog):
                 return
             py_file = str(qt_file)
 
-            qt_callable_name, ok = QtWidgets.QInputDialog.getText(self, "FMU Code generator", "Insert the name of python callable object:")
+            qt_callable_name, ok = QtWidgets.QInputDialog.getText(self, "FMU Code generator", "Insert the name of python callable object:", text = 'create_simulation_for_cosimulation')
             if not ok:
                 return
             callable_name = str(qt_callable_name)
 
-            qt_arguments, ok = QtWidgets.QInputDialog.getText(self, "FMU Code generator", "Insert the arguments for the python callable object:")
+            qt_arguments, ok = QtWidgets.QInputDialog.getText(self, "FMU Code generator", "Insert the arguments for the python callable object:", text = 'simTutorial')
             if not ok:
                 return
             arguments = str(qt_arguments)

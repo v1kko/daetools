@@ -86,6 +86,7 @@ boost_filesystem = 'boost_filesystem-daetools-py{0}{1}'.format(python_major, pyt
 boost_chrono     = 'boost_chrono-daetools-py{0}{1}'.format(python_major, python_minor)
 dae_config       = 'cdaeConfig-py{0}{1}'.format(python_major, python_minor)
 cape_open_thermo = 'cdaeCapeOpenThermoPackage'
+vc_omp_lib       = 'vcomp'
 deal_II          = 'deal_II-daetools'
 sim_loader       = 'cdaeSimulationLoader-py{0}{1}'.format(python_major, python_minor)
 fmu_so           = 'cdaeFMU_CS-py{0}{1}'.format(python_major, python_minor)
@@ -105,6 +106,9 @@ if os.path.isdir(shared_libs_dir):
             shared_libs.append(os.path.join(shared_libs_dir, f))
 
         if cape_open_thermo in f:
+            shared_libs.append(os.path.join(shared_libs_dir, f))
+
+        if vc_omp_lib in f:
             shared_libs.append(os.path.join(shared_libs_dir, f))
 
 print('shared_libs = ', shared_libs)

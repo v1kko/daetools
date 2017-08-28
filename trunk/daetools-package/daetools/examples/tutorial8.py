@@ -233,51 +233,14 @@ def setupDataReporters(simulation):
         print('%s (%s): %s' % (dr.__class__.__name__, dr.ConnectString, 'connected' if dr.IsConnected() else 'NOT connected'))
 
     return datareporter
-
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    dr  = setupDataReporters(sim)
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 100
-    simulator  = daeSimulator(app, simulation=sim, datareporter=dr)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    simulation   = simTutorial()
-    datareporter = setupDataReporters(simulation)
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 100
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-    simulation._data_reporters_[3].Plot(
-        simulation.m.T,                       # Subplot 1
-        [simulation.m.T, simulation.m.T]      # Subplot 2 (2 sets)
-        )
-
+   
+def process_data_reporters(simulation, log):
     try:
+        simulation._data_reporters_[3].Plot(
+            simulation.m.T,                       # Subplot 1
+            [simulation.m.T, simulation.m.T]      # Subplot 2 (2 sets)
+            )
+
         # All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter
         # classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class
         # contains dictVariableValues property which represents a dictionary
@@ -285,7 +248,7 @@ def consoleRun():
         # First print the contents of the abovementioned dictionary:
         import pprint
         pprint.pprint(simulation._data_reporters_[0].Process.dictVariableValues)
-
+        
         # Get the dictionary
         dvals = simulation._data_reporters_[0].Process.dictVariableValues
         # Plot some variables
@@ -299,11 +262,16 @@ def consoleRun():
         print('pandas dataset')
         print(simulation._data_reporters_[8].data_frame)
     except Exception as e:
-        print(str(e))
+        log.Message(str(e), 0)
     
+def run(**kwargs):
+    simulation = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval       = 10, 
+                                     timeHorizon             = 100,
+                                     datareporter            = setupDataReporters(simulation),
+                                     run_after_simulation_fn = process_data_reporters,
+                                     **kwargs)
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

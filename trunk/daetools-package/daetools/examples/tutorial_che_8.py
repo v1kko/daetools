@@ -71,7 +71,7 @@ except:
     from .membrane_unit import MembraneUnit
 
 class simTutorial(daeSimulation):
-    def __init__(self, Phigh):
+    def __init__(self, Phigh = 3e5):
         daeSimulation.__init__(self)
         self.m = MembraneUnit("tutorial_che_8")
         self.m.Description = __doc__
@@ -254,17 +254,6 @@ class simTutorial(daeSimulation):
         self.Log.SetProgress(100)
         self.Log.Message('Done!!', 0)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial(3e5 * Pa)
-    daesolver = daeIDAS()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 1
-    sim.TimeHorizon       = 1
-    daesolver.RelativeTolerance = 1e-6
-    simulator  = daeSimulator(app, simulation=sim, daesolver=daesolver)
-    simulator.exec_()
-
 def simulate(Phigh):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -379,11 +368,18 @@ def full_experiment():
     plt.tight_layout()
     plt.show()
 
+def run(**kwargs):
+    simulation = simTutorial(3e5 * Pa)
+    relativeTolerance = 1e-6
+    daeActivity.simulate(simulation, reportingInterval = 1, 
+                                     timeHorizon       = 1,
+                                     relativeTolerance = relativeTolerance,
+                                     **kwargs)
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         simulate(3e5 * Pa)
     elif len(sys.argv) > 1 and (sys.argv[1] == 'full_experiment'):
         full_experiment()
     else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+        run(guiRun = True)

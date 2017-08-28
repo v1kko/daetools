@@ -16,7 +16,7 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 __doc__ = """
 This tutorial illustrates the global variance-based sensitivity analysis methods
-available in the `SALib <http://salib.readthedocs.io>`_ python library.
+available in the `SALib <https://github.com/SALib/SALib>`_ python library.
 
 The problem is adopted from the section 2.6 of the following article:
     
@@ -247,7 +247,7 @@ def simulate(run_no, n, B, gamma, psi, theta_a, x_0, theta_0, sequential):
     
     return numpy.max(theta)
 
-def run():
+def run(**kwargs):
     ###################################################################
     # 1. Selection of the global sensitivity method.
     #    Available methods:

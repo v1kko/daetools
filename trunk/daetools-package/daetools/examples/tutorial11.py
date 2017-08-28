@@ -316,58 +316,15 @@ def setOptions(lasolver):
         #paramListAztec.set_float("AZ_rthresh",       0.0)
         paramListAztec.Print()
     
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 1000
-    la = createLASolver()
-    simulator = daeSimulator(app, simulation = sim, lasolver = la, lasolver_setoptions_fn=setOptions)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-    daesolver    = daeIDAS()
-    lasolver     = createLASolver()
-    daesolver.SetLASolver(lasolver)
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 1000
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Set the solver options
-    setOptions(lasolver)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+def run(**kwargs):
+    simulation = simTutorial()
+    lasolver = createLASolver()
+    daeActivity.simulate(simulation, reportingInterval      = 10, 
+                                     timeHorizon            = 1000,
+                                     lasolver               = lasolver,
+                                     lasolver_setoptions_fn = setOptions,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

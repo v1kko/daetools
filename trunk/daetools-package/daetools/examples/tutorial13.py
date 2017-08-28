@@ -231,60 +231,33 @@ class simTutorial(daeSimulation):
         self.m.T.SetInitialCondition(283 * K)
         self.m.event.AssignValue(0.0)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 2
-    sim.TimeHorizon       = 500
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon = 500
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-
+def print_list_of_events(simulation, log):
     # Print the list of events
+    print('\n')
     log.Message('Events occured at the {0} event port:'.format(simulation.m.epOut.CanonicalName), 0)
     log.Message(str(simulation.m.epOut.Events), 0)
 
     log.Message('Events occured at the {0} event port:'.format(simulation.m.epIn.CanonicalName), 0)
     log.Message(str(simulation.m.epIn.Events), 0)
-    
-    simulation.Finalize()
+
+def run(**kwargs):
+    simulation = simTutorial()
+    def exportFMU(simulation, log):
+        from daetools.code_generators.fmi import daeCodeGenerator_FMI
+        cg = daeCodeGenerator_FMI()
+        cg.generateSimulation(simulation, 
+                              '/home/ciroki/Downloads/FMUChecker-2.0.3-linux64', 
+                              __file__, 
+                              'create_simulation_for_cosimulation',
+                              'simTutorial', 
+                              [],
+                              localsAsOutputs = True)
+    daeActivity.simulate(simulation, reportingInterval       = 2, 
+                                     timeHorizon             = 500,
+                                     run_before_simulation_fn = exportFMU,
+                                     run_after_simulation_fn = print_list_of_events,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

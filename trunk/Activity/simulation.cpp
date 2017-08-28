@@ -38,6 +38,13 @@ daeSimulation::daeSimulation(void)
     daeConfig& cfg = daeConfig::GetConfig();
     m_bReportTimeDerivatives = cfg.GetBoolean("daetools.activity.reportTimeDerivatives", false);
     m_bReportSensitivities   = cfg.GetBoolean("daetools.activity.reportSensitivities",   false);
+
+    if( cfg.GetBoolean("daetools.activity.stopAtModelDiscontinuity", true) )
+        m_eStopAtModelDiscontinuity = eStopAtModelDiscontinuity;
+    else
+        m_eStopAtModelDiscontinuity = eDoNotStopAtDiscontinuity;
+
+    m_bReportDataAroundDiscontinuities = cfg.GetBoolean("daetools.activity.reportDataAroundDiscontinuities", true);
 }
 
 daeSimulation::~daeSimulation(void)
@@ -649,7 +656,7 @@ void daeSimulation::Run(void)
             m_pLog->Message(string("Integrating from [") + toStringFormatted<real_t>(m_dCurrentTime, -1, 15, false, true) +
                             string("] to [")             + toStringFormatted<real_t>(t, -1, 15, false, true)              +
                             string("] ..."), 0);
-            m_dCurrentTime = IntegrateUntilTime(t, eStopAtModelDiscontinuity, true);
+            m_dCurrentTime = IntegrateUntilTime(t, m_eStopAtModelDiscontinuity, m_bReportDataAroundDiscontinuities);
         }
 
         m_dCurrentTime = t;
@@ -1282,6 +1289,26 @@ std::string daeSimulation::GetSensitivityDataDirectory(void) const
 void daeSimulation::SetSensitivityDataDirectory(const std::string strSensitivityDataDirectory)
 {
     m_strSensitivityDataDirectory = strSensitivityDataDirectory;
+}
+
+daeeStopCriterion daeSimulation::GetStopAtModelDiscontinuity(void) const
+{
+    return m_eStopAtModelDiscontinuity;
+}
+
+void daeSimulation::SetStopAtModelDiscontinuity(daeeStopCriterion eStopAtModelDiscontinuity)
+{
+    m_eStopAtModelDiscontinuity = eStopAtModelDiscontinuity;
+}
+
+bool daeSimulation::GetReportDataAroundDiscontinuities(void) const
+{
+    return m_bReportDataAroundDiscontinuities;
+}
+
+void daeSimulation::SetReportDataAroundDiscontinuities(bool bReportDataAroundDiscontinuities)
+{
+    m_bReportDataAroundDiscontinuities = bReportDataAroundDiscontinuities;
 }
 
 void daeSimulation::EnterConditionalIntegrationMode(void)

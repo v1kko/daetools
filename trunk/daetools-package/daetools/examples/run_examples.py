@@ -235,8 +235,7 @@ class RunExamples(QtWidgets.QDialog):
                           "tutorial_sa_1", "tutorial_sa_2", "tutorial_sa_3"]:
                 self.consoleRunAndShowResults(module)
             else:
-                module.guiRun(self.app)
-
+                module.run(True, self.app)
         except RuntimeError as e:
             QtGui.QMessageBox.warning(self, "daeRunExamples", "Exception raised: " + str(e))
 
@@ -245,7 +244,11 @@ class RunExamples(QtWidgets.QDialog):
             output = StringIO()
             saveout = sys.stdout
             sys.stdout = output
-            module.run()
+            #import multiprocessing
+            #t = multiprocessing.Process(target=module.run, args=(True, ))
+            #t.start()
+            #t.join()
+            module.run(True, self.app)
             sys.stdout = saveout
             message = '<pre>{0}</pre>'.format(output.getvalue())
             try:
@@ -259,7 +262,8 @@ class RunExamples(QtWidgets.QDialog):
                 f.write(message)
                 f.close()
                 firefox.open_new_tab(path)
-        except:
+        except Exception as e:
+            print(str(e))
             sys.stdout = saveout
 
 def daeRunExamples():

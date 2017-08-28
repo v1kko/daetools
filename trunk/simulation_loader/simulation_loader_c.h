@@ -24,6 +24,7 @@ DAE_API bool Initialize(void* s,
 DAE_API bool InitializeJSON(void* s, const char* strJSONRuntimeSettings);
 
 /* Low-level simulation functions */
+DAE_API bool SetRelativeTolerance(void* s, double relTolerance);
 DAE_API bool SetTimeHorizon(void* s, double timeHorizon);
 DAE_API bool SetReportingInterval(void* s, double reportingInterval);
 DAE_API bool SolveInitial(void* s);

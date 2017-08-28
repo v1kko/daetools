@@ -121,7 +121,7 @@ class simTutorial(daeSimulation):
         self.SetSensitivityParameter(self.m.k1)
         self.SetSensitivityParameter(self.m.k_1)
 
-def run():
+def run(**kwargs):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()

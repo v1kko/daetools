@@ -348,7 +348,7 @@ class simTutorial(daeSimulation):
              'Sensitivities from DAESolver.SensitivityMatrix')
     """
     
-def run():
+def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()

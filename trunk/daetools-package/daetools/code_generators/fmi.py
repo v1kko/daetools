@@ -23,18 +23,25 @@ class daeCodeGenerator_FMI(fmiModelDescription):
     def __init__(self):
         fmiModelDescription.__init__(self)        
     
-    def generateSimulation(self, simulation, directory, py_simulation_file, callable_object_name, arguments, py_additional_files = []):
+    def generateSimulation(self, simulation, 
+                                 directory, 
+                                 py_simulation_file, 
+                                 callable_object_name, 
+                                 arguments, 
+                                 additional_files = [], 
+                                 localsAsOutputs = True):
         try:
             tmp_folder = ''
             if not simulation:
                 raise RuntimeError('Invalid simulation object')
             if not os.path.isdir(directory):
                 os.makedirs(directory)
-            if not isinstance(py_additional_files, list):
-                raise RuntimeError('Additional python files must be a list')
+            if not isinstance(additional_files, list):
+                raise RuntimeError('Additional python files must be a list of tuples')
             if not callable_object_name:
                 raise RuntimeError('No python callable object name specified for FMU')
             
+            self.localsAsOutputs     = localsAsOutputs
             self.wrapperInstanceName = simulation.m.Name
             modelIdentifier          = simulation.m.GetStrippedName()
             
@@ -81,10 +88,22 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 os.makedirs(folder)
 
             # Copy the python file with the simulation class and all additional files to the 'resources' folder
-            files_to_copy = py_additional_files + [py_simulation_file]
-            for py_file in files_to_copy:
-                py_path, py_filename = os.path.split(str(py_file))
-                shutil.copy2(py_file, os.path.join(resources_dir, py_filename))
+            # py_simulation_file argument is often specified using the __file__ attribute.
+            # In Python 2.7 __file__ points to 'file.pyc' - correct it to 'file.py'
+            if py_simulation_file.endswith('.pyc'):
+                py_simulation_file = py_simulation_file[:-1]
+
+            py_path, py_filename = os.path.split(str(py_simulation_file))
+            shutil.copy2(py_simulation_file, os.path.join(resources_dir, py_filename))
+            
+            # Copy the additional files to the locations relative to the 'resources' folder
+            # Additional files are a list of tuples: [('file_path', 'resources_dir_relative_path'), ...]
+            for py_file, relative_path in additional_files:
+                destination_file = os.path.join(resources_dir, relative_path)
+                py_path, py_filename = os.path.split(destination_file)
+                if not os.path.isdir(py_path):
+                    os.makedirs(py_path)
+                shutil.copy2(py_file, destination_file)
 
             # Copy all available libcdaeFMU_CS-pyXY.[so/dll/dynlib] to the 'binaries/platform[32/64]' folder
             self._copy_solib('Linux',   'x86_64', modelIdentifier, binaries_dir)
@@ -96,7 +115,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Generate settings.json file
             f = open(os.path.join(resources_dir, 'settings.json'), "w")
             settings = {}
-            settings['simulationFile']     = py_simulation_file
+            settings['simulationFile']     = os.path.basename(py_simulation_file)
             settings['callableObjectName'] = callable_object_name
             settings['arguments']          = arguments
             f.write(json.dumps(settings, indent = 4, sort_keys = True))
@@ -155,7 +174,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
             variableTypesUsed = {}
             unitsUsed = {}
-            for ref, f in fmi_interface.items():
+            for ref, f in sorted(fmi_interface.items()):
                 if f.type == 'Input':
                     self._addInput(f)
                     if not f.variable.VariableType.Name in variableTypesUsed:
@@ -165,6 +184,17 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
                 elif f.type == 'Output':
                     self._addOutput(f)
+                    if not f.variable.VariableType.Name in variableTypesUsed:
+                        variableTypesUsed[f.variable.VariableType.Name] = f.variable.VariableType
+                    if not str(f.variable.VariableType.Units) in unitsUsed:
+                        unitsUsed[str(f.variable.VariableType.Units)] = f.variable.VariableType.Units
+
+                elif f.type == 'Local':
+                    # Treat all locals as outputs at the moment
+                    if self.localsAsOutputs:
+                        self._addOutput(f)
+                    else:
+                        self._addLocal(f)
                     if not f.variable.VariableType.Name in variableTypesUsed:
                         variableTypesUsed[f.variable.VariableType.Name] = f.variable.VariableType
                     if not str(f.variable.VariableType.Units) in unitsUsed:
@@ -258,6 +288,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             so_ext = 'so'
             so_ext_pattern = 'so.*'
             shared_lib_prefix = 'lib'
+            shared_lib_postfix = ''
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'linux64')
             else:
@@ -266,6 +297,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             so_ext = 'dll'
             so_ext_pattern = 'dll'
             shared_lib_prefix = ''
+            shared_lib_postfix = '1'
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'win64')
             else:
@@ -276,6 +308,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             so_ext = 'dylib'
             so_ext_pattern = 'dylib'
             shared_lib_prefix = 'lib'
+            shared_lib_postfix = ''
             if platform_machine == 'x86_64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'darwin64')
             else:
@@ -287,14 +320,16 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
         solibs_dir = os.path.join(daetools.daetools_dir, 'solibs', '%s_%s' % (platform_system, platform_machine))
         daetools_fmu_solib = '%s.%s' % (modelIdentifier, so_ext)
-        daetools_fmi_cs = '%scdaeFMU_CS-py%s%s.%s' % (shared_lib_prefix,
-                                                      daetools.python_version_major,
-                                                      daetools.python_version_minor,
-                                                      so_ext)
-        daetools_simulation_loader = '%scdaeSimulationLoader-py%s%s.%s' % (shared_lib_prefix,
-                                                                           daetools.python_version_major,
-                                                                           daetools.python_version_minor,
-                                                                           so_ext)
+        daetools_fmi_cs = '%scdaeFMU_CS-py%s%s%s.%s' % (shared_lib_prefix,
+                                                        daetools.python_version_major,
+                                                        daetools.python_version_minor,
+                                                        shared_lib_postfix,
+                                                        so_ext)
+        daetools_simulation_loader = '%scdaeSimulationLoader-py%s%s%s.%s' % (shared_lib_prefix,
+                                                                             daetools.python_version_major,
+                                                                             daetools.python_version_minor,
+                                                                             shared_lib_postfix,
+                                                                             so_ext)
         boost_files = glob.iglob(os.path.join(solibs_dir, "*boost_*-daetools-py%s%s.%s" % (daetools.python_version_major,
                                                                                            daetools.python_version_minor,
                                                                                            so_ext_pattern)))
@@ -344,13 +379,19 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         self.ModelVariables.append(sv)
 
     def _addOutput(self, fmi_obj):
-        #
+        # In general, the index is not equal to he reference but to the index in the ModelVariables list.
+        # But, the references in daetools start at 1 and increase and they are added in the sorted order.
+        # So it should be fine to use reference as an index.
+        # Anyway, the index in the ModelStructure.Outputs is used.
+        # The indexes in FMI start at 1 (not at zero).
+        var_index = len(self.ModelVariables) + 1
+        
         unknown = fmiVariableDependency()
-        unknown.index = int(fmi_obj.reference) #*
+        unknown.index = var_index #*
         self.ModelStructure.Outputs.append(unknown)
 
         unknown = fmiVariableDependency()
-        unknown.index = int(fmi_obj.reference) #*
+        unknown.index = var_index #*
         self.ModelStructure.InitialUnknowns.append(unknown)
         
         sv = fmiScalarVariable()
@@ -358,6 +399,19 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         sv.valueReference = int(fmi_obj.reference) #*
         sv.description    = str(fmi_obj.description)
         sv.causality      = fmiScalarVariable.causalityOutput
+        sv.variability    = fmiScalarVariable.variabilityContinuous
+        sv.initial        = fmiScalarVariable.initialCalculated
+        sv.type           = fmiReal()
+        sv.type.declaredType = fmi_obj.variable.VariableType.Name
+        self.ModelVariables.append(sv)
+
+    def _addLocal(self, fmi_obj):
+        # Here, do not add anything in the ModelStructure
+        sv = fmiScalarVariable()
+        sv.name           = str(fmi_obj.name) #*
+        sv.valueReference = int(fmi_obj.reference) #*
+        sv.description    = str(fmi_obj.description)
+        sv.causality      = fmiScalarVariable.causalityLocal
         sv.variability    = fmiScalarVariable.variabilityContinuous
         sv.initial        = fmiScalarVariable.initialCalculated
         sv.type           = fmiReal()

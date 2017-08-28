@@ -33,5 +33,6 @@ HEADERS += stdafx.h \
            dealii_cell_context.h \
            dealii_template_inst.h \
            dealii_datareporter.h \
+           dealii_omp_work_stream.h \
            dealii_fe_system.h
 

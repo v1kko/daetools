@@ -7,10 +7,8 @@
 #include "../Core/nodes.h"
 #include "../variable_types.h"
 #include <deal.II/base/work_stream.h>
-#include <queue>
-
+#include "dealii_omp_work_stream.h"
 #ifdef _OPENMP
-#include <iterator>
 #include <omp.h>
 #endif
 
@@ -1483,16 +1481,31 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             //printf("Chunk size      = %d\n", chunk_size);
         }
 
-        WorkStream::run (dof_handler.begin_active(),
-                         dof_handler.end(),
-                         *this,
-                         &dealiiFiniteElementSystem<dim>::assemble_one_cell,
-                         &dealiiFiniteElementSystem<dim>::copy_local_to_global,
-                         scratch_s,
-                         copy_data_s);
+        WorkStream::run(dof_handler.begin_active(),
+                        dof_handler.end(),
+                        *this,
+                        &dealiiFiniteElementSystem<dim>::assemble_one_cell,
+                        &dealiiFiniteElementSystem<dim>::copy_local_to_global,
+                        scratch_s,
+                        copy_data_s);
     }
     else if(m_paralell_assembly_scheme == "OpenMP")
     {
+#ifdef _OPENMP
+        if(m_num_threads > 0)
+            omp_set_num_threads(m_num_threads);
+#endif
+        OpenMP_WorkStream::run(dof_handler.begin_active(),
+                               dof_handler.end(),
+                               *this,
+                               &dealiiFiniteElementSystem<dim>::assemble_one_cell,
+                               &dealiiFiniteElementSystem<dim>::copy_local_to_global,
+                               scratch_s,
+                               copy_data_s,
+                               m_queueSize,
+                               m_bPrintInfo);
+    /* The code below is refactored into the OpenMP_WorkStream::run function.
+
         omp_lock_t lock;
         omp_init_lock(&lock);
 
@@ -1579,6 +1592,7 @@ void dealiiFiniteElementSystem<dim>::assemble_system()
             copy_local_to_global(*cd);
             //printf("copy_data_queue.size = %d\n", copy_data_queue.size());
         }
+    */
     }
     else // Sequential
     {

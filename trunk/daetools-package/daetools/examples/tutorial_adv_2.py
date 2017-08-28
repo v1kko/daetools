@@ -161,56 +161,15 @@ class simTutorial(daeSimulation):
         self.m.ni_II_central.SetInitialConditions(ni_0)
         self.m.ni_k_int.SetInitialConditions(ni_0)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 5
-    sim.TimeHorizon       = 60
-    simulator  = daeSimulator(app, simulation=sim, lasolver = lasolver)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Umfpack", "")
-    daesolver.SetLASolver(lasolver)
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 5
-    simulation.TimeHorizon = 60
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+def run(**kwargs):
+    simulation = simTutorial()
+    print('Supported Trilinos solvers: %s' % pyTrilinos.daeTrilinosSupportedSolvers())
+    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    daeActivity.simulate(simulation, reportingInterval = 5, 
+                                     timeHorizon       = 60,
+                                     lasolver          = lasolver,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

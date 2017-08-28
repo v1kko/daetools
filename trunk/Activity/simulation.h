@@ -149,6 +149,12 @@ public:
     std::string GetSensitivityDataDirectory(void) const;
     void        SetSensitivityDataDirectory(const std::string strSensitivityDataDirectory);
 
+    daeeStopCriterion GetStopAtModelDiscontinuity(void) const;
+    void SetStopAtModelDiscontinuity(daeeStopCriterion eStopAtModelDiscontinuity);
+
+    bool GetReportDataAroundDiscontinuities(void) const;
+    void SetReportDataAroundDiscontinuities(bool bReportDataAroundDiscontinuities);
+
 protected:
 //	void	SetInitialConditionsToZero(void);
     void	CheckSystem(void) const;
@@ -189,6 +195,8 @@ protected:
 
     bool                        m_bReportTimeDerivatives;
     bool                        m_bReportSensitivities;
+    daeeStopCriterion           m_eStopAtModelDiscontinuity;
+    bool                        m_bReportDataAroundDiscontinuities;
     daeDenseMatrix*             m_pCurrentSensitivityMatrix;
     std::vector<daeVariable*>	m_ptrarrReportVariables;
     std::vector<daeParameter*>	m_ptrarrReportParameters;

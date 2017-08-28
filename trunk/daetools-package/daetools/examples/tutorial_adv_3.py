@@ -73,92 +73,6 @@ the variable multipliers (dm1/dt = 10, m1(t=0) = 2):
 
 .. image:: _static/tutorial_adv_3-results2.png
    :width: 500px
-
-FMI Cross-Check results:
-
-1. Start the DAEPlotter (or change the data reporter below).
-
-2. Execute:
-
-   .. code-block:: none
-
-      ./fmuCheck.linux64 -n 10 tutorial_adv_3.fmu
-
-3. Results:
-
-   .. code-block:: none
-
-    [INFO][FMUCHK] FMI compliance checker 2.0 [FMILibrary: 2.0] build date: Aug 22 2014
-    [INFO][FMUCHK] Will process FMU tutorial_adv_3.fmu
-    [INFO][FMILIB] XML specifies FMI standard version 2.0
-    [INFO][FMUCHK] Model name: tutorial_adv_3
-    [INFO][FMUCHK] Model GUID: e9654532-0998-11e6-957b-9cb70d5dfdfc
-    [INFO][FMUCHK] Model version:
-    [INFO][FMUCHK] FMU kind: CoSimulation
-    [INFO][FMUCHK] The FMU contains:
-    0 constants
-    3 parameters
-    0 discrete variables
-    4 continuous variables
-    2 inputs
-    2 outputs
-    0 local variables
-    0 independent variables
-    0 calculated parameters
-    6 real variables
-    0 integer variables
-    0 enumeration variables
-    0 boolean variables
-    1 string variables
-
-    [INFO][FMUCHK] Printing output file header
-    time,out_1.y,out_2.y
-    [INFO][FMUCHK] Model identifier for CoSimulation: tutorial_adv_3
-    [INFO][FMILIB] Loading 'linux64' binary with 'default' platform types
-    [INFO][FMUCHK] Version returned from CS FMU:   2.0
-    ***********************************************************************
-                                     Version:   1.5.0
-                                     Copyright: Dragan Nikolic
-                                     Homepage:  http://www.daetools.com
-           @                       @
-           @   @@@@@     @@@@@   @@@@@    @@@@@    @@@@@   @      @@@@@
-      @@@@@@        @   @     @    @     @     @  @     @  @     @
-     @     @   @@@@@@   @@@@@@     @     @     @  @     @  @      @@@@@
-     @     @  @     @   @          @     @     @  @     @  @           @
-      @@@@@@   @@@@@@    @@@@@      @@@   @@@@@    @@@@@    @@@@  @@@@@
-    ***********************************************************************
-    DAE Tools is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License version 3
-    as published by the Free Software Foundation.
-    DAE Tools is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-    General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses>.
-    ***********************************************************************
-    Creating the system...
-    The system created successfully in: 0.002 s
-    Starting the initialization of the system... Done.
-    [INFO][FMUCHK] Initialized FMU for simulation starting at time 0
-    0,1.0000000010000001E+00,2.0000000039999999E+00
-    10,1.0100000000000001E+02,4.0200000000000006E+02
-    20,2.0099999999999994E+02,8.0199999999999977E+02
-    30,3.0100000000000000E+02,1.2020000000000000E+03
-    40,4.0100000000000000E+02,1.6020000000000000E+03
-    50,5.0099999999999989E+02,2.0019999999999995E+03
-    60,6.0100000000000000E+02,2.4020000000000000E+03
-    70,7.0100000000000000E+02,2.8020000000000000E+03
-    80,8.0100000000000000E+02,3.2020000000000000E+03
-    90,9.0099999999999977E+02,3.6019999999999991E+03
-    100,1.0009999999999998E+03,4.0019999999999991E+03
-    [INFO][FMUCHK] Simulation finished successfully at time 100
-    FMU check summary:
-    FMU reported:
-            0 warning(s) and error(s)
-    Checker reported:
-            0 Warning(s)
-            0 Error(s)
 """
 
 import sys, numpy
@@ -280,39 +194,29 @@ def run_code_generators(simulation, log):
     cg.generateSimulation(simulation, tmp_folder)
 
     # Functional Mock-up Interface for co-simulation
+    # There are two options for loading the simulation:
+    # 1. Use the default function create_simulation_for_cosimulation which accepts
+    #    a single argument: simulationClassName (here 'simTutorial')
+    # 2. Use a custom function (here create_simulation)
     from daetools.code_generators.fmi import daeCodeGenerator_FMI
     cg = daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation', '', [])
+    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation_for_cosimulation', 'simTutorial', [], localsAsOutputs = False)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 100
-    simulator  = daeSimulator(app, simulation=sim, run_before_simulation_begin_fn = run_code_generators)
-    simulator.exec_()
-
-# This function is used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
+# This function can be used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
 # It can have any number of arguments, but must return an initialized daeSimulation object.
 def create_simulation():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
+    datareporter = daeNoOpDataReporter()
     simulation   = simTutorial()
 
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
 
     # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 100
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
+    simulation.ReportingInterval = 1
+    simulation.TimeHorizon       = 100
 
     # Initialize the simulation
     simulation.Initialize(daesolver, datareporter, log)
@@ -322,28 +226,13 @@ def create_simulation():
 
     return simulation
     
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create simulation
-    simulation = create_simulation()
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Run code-generators
-    run_code_generators(simulation, simulation.Log)
-    
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+def run(**kwargs):
+    simulation = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval        = 1, 
+                                     timeHorizon              = 100,
+                                     run_before_simulation_fn = run_code_generators,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

@@ -137,68 +137,34 @@ class simTutorial(daeSimulation):
             for y in range(1, self.m.y.NumberOfPoints - 1):
                 self.m.T.SetInitialCondition(x, y, 300 * K)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 10
-    sim.TimeHorizon       = 500
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 10
-    simulation.TimeHorizon = 500
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
+def loadInitFile(simulation, log):
     # Load initialization file previously saved after the successful initialization phase.
     # The function LoadInitializationValues requires a call to daeSimulation.Reinitialize, 
     # however here the system has not been solved initially (at t = 0) and the values and  
     # initial conditions will be copied automatically to DAE solver during SolveInitial call.
-    print('T before loading:')
-    print(simulation.m.T.npyValues)
+    log.Message('T before loading:', 0)
+    log.Message(str(simulation.m.T.npyValues), 0)
     init_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'tutorial10.init')
     simulation.LoadInitializationValues(init_file)
-    print('T after loading:')
-    print(simulation.m.T.npyValues)
+    log.Message('T after loading:', 0)
+    log.Message(str(simulation.m.T.npyValues), 0)
     
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-    print('T after SolveInitial:')
-    print(simulation.m.T.npyValues)
+def saveInitFile(simulation, log):
+    log.Message('T after SolveInitial:', 0)
+    log.Message(str(simulation.m.T.npyValues), 0)
     
     # Save the initialization file that can be used during later initialization
-    simulation.StoreInitializationValues("tutorial10.init")
+    init_file = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'tutorial10.init')
+    simulation.StoreInitializationValues(init_file)
 
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+def run(**kwargs):
+    simulation = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval            = 10, 
+                                     timeHorizon                  = 500,
+                                     run_after_simulation_init_fn = loadInitFile,
+                                     run_before_simulation_fn     = saveInitFile,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

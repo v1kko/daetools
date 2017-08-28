@@ -232,63 +232,6 @@ def setOptions(nlpsolver):
     nlpsolver.SetOption('obj_scaling_factor', 10.0)
     nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
 
-# Use daeSimulator class
-def guiRun(app):
-    dae = daeIDAS()
-    sim = simOilCracking_opt()
-    opt = daeOptimization()
-    nlp = pyIPOPT.daeIPOPT()
-    lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    dae.RelativeTolerance = 1e-6
-    sim.m.SetReportingOn(True)
-    sim.ReportingTimes = times.tolist()
-    simulator = daeSimulator(app, simulation = sim,
-                                  optimization = opt,
-                                  daesolver = dae,
-                                  nlpsolver = nlp,
-                                  lasolver = lasolver,
-                                  nlpsolver_setoptions_fn = setOptions)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    nlpsolver    = pyIPOPT.daeIPOPT()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simOilCracking_opt()
-    optimization = daeOptimization()
-    lasolver     = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    daesolver.SetLASolver(lasolver)
-
-    daesolver.RelativeTolerance = 1e-6
-
-    # Do no print progress
-    log.PrintProgress = True
-    
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingTimes = times.tolist()
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the optimization
-    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
-
-    # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
-    # Otherwise seg. fault occurs for some reasons.
-    setOptions(nlpsolver)
-
-    # Run
-    optimization.Run()
-    optimization.Finalize()
-
 def consoleSimulation():
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
@@ -344,12 +287,25 @@ def consoleSimulation():
     print('y2     = numpy.%s' % repr(y2))
     print('y2_obs = numpy.%s' % repr(y2_exp))
 
+def run(guiRun = False, qtApp = None):
+    simulation = simOilCracking_opt()
+    nlpsolver  = pyIPOPT.daeIPOPT()
+    lasolver   = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
+    relativeTolerance = 1e-6
+    reportingTimes = times.tolist()
+    daeActivity.optimize(simulation, reportingInterval       = 1, 
+                                     timeHorizon             = 1,
+                                     reportingTimes          = reportingTimes,
+                                     lasolver                = lasolver,
+                                     nlpsolver               = nlpsolver,
+                                     nlpsolver_setoptions_fn = setOptions,
+                                     relativeTolerance       = relativeTolerance,
+                                     guiRun                  = guiRun,
+                                     qtApp                   = qtApp)
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    elif len(sys.argv) > 1 and (sys.argv[1] == 'simulation'):
+    if len(sys.argv) > 1 and (sys.argv[1] == 'simulation'):
         consoleSimulation()
     else:
-        from PyQt4 import QtCore, QtGui
-        app = QtGui.QApplication(sys.argv)
-        guiRun(app)
+        guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+        run(guiRun)

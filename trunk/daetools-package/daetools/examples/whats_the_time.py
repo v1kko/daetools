@@ -210,7 +210,7 @@ class simTutorial(daeSimulation):
         """
         daeSimulation.__init__(self)
 
-        self.m = modTutorial("wtt")
+        self.m = modTutorial("whats_the_time")
         self.m.Description = __doc__
         
     def SetUpParametersAndDomains(self):
@@ -232,13 +232,13 @@ class simTutorial(daeSimulation):
         self.m.tau.SetInitialCondition(0.0)
 
 # Use daeSimulator class (pyQt GUI)
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportTimeDerivatives = True
-    sim.ReportingInterval = 5
-    sim.TimeHorizon       = 100
-    simulator  = daeSimulator(app, simulation=sim)
+def guiRun(qtApp):
+    simulation = simTutorial()
+    simulation.m.SetReportingOn(True)
+    simulation.ReportTimeDerivatives = True
+    simulation.ReportingInterval = 5
+    simulation.TimeHorizon       = 100
+    simulator  = daeSimulator(qtApp, simulation = simulation)
     simulator.exec_()
 
 # Setup everything manually and run in a console
@@ -280,7 +280,7 @@ def consoleRun():
          Here, we enable reporting of all variables in the model.
        - The time derivatives of all variables will be reported
     """
-    simulation.TimeHorizon = 100
+    simulation.TimeHorizon       = 100
     simulation.ReportingInterval = 5
     
     simulation.m.SetReportingOn(True)
@@ -338,6 +338,21 @@ def consoleRun():
     # 8.4 Finally, call the function Finalize to clean-up.
     simulation.Finalize()
 
+# Simulations can also be executed in a simple way using the static daeActivity.simulate function.
+# The function uses the default objects for all missing data (as in the consoleRun function above):
+#   log          = daePythonStdOutLog()
+#   daesolver    = daeIDAS()
+#   datareporter = daeTCPIPDataReporter()
+# Several additional arguments can be specified such as: 
+#   time horizon, reporting interval, datareporter, log, daesolver, lasolver, relative tolerance,
+#   callback functions to be called after initialisation, before and after simulation, etc.
+# If the keyword arguments **kwargs contain 'guiRun=True' the simulation will be run using the Qt GUI.
+def run(**kwargs):
+    simulation = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval = 5, 
+                                     timeHorizon       = 100,
+                                     **kwargs)
+
 """
 This part of the code executes if the python script is executed from a shell
 1) If called as: "python whats_the_time.py console" the simulation will be launched in the console
@@ -348,5 +363,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
         consoleRun()
     else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+        qtApp = daeCreateQtApplication(sys.argv)
+        guiRun(qtApp)

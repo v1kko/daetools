@@ -2724,6 +2724,7 @@ public:
     virtual void    GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrParameters,
                                              std::vector<daeVariable_t*>&  ptrarrInputs,
                                              std::vector<daeVariable_t*>&  ptrarrOutputs,
+                                             std::vector<daeVariable_t*>&  ptrarrModelVariables,
                                              std::vector<daeSTN_t*>&       ptrarrSTNs);
     virtual void    GetFMIInterface(std::map<size_t, daeFMI2Object_t>& mapInterface);
 

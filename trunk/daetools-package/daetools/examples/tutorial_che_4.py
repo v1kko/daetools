@@ -216,12 +216,7 @@ def run_simulation(simPrefix, modelName, N, L, G, ni_0, reportingInterval, timeH
     simulation.Finalize()
     return dr_data.Process
 
-# Use daeSimulator class
-def guiRun(app):
-    msg = "This tutorial can be run from the command line only: python tutorial_che_4.py console"
-    daeQtMessage("tutorial_che_4", msg)
-
-if __name__ == "__main__":
+def run(**kwargs):
     # Create an initial CSD array and growth rate
     N    = 100
     L_lb = 0.0
@@ -266,3 +261,6 @@ if __name__ == "__main__":
         for flux_limiter, L1, L2 in L_report:
             print('  %15s  %.3e  %.3e' % (flux_limiter, L1, L2))
         print('   --------------------------------------')
+
+if __name__ == "__main__":
+    run()

@@ -28,6 +28,7 @@ public:
     void Initialize(const std::string& strJSONRuntimeSettings);
 
 // Low-level simulation functions
+    void SetRelativeTolerance(double relTolerance);
     void SetTimeHorizon(double timeHorizon);
     void SetReportingInterval(double reportingInterval);
     void SolveInitial();

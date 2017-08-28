@@ -34,7 +34,7 @@ The comparison between the numerical and the analytical sensitivities:
 .. image:: _static/tutorial_cv_1-results.png
    :width: 800px
 """
-import os, sys, numpy, scipy, scipy.io
+import os, sys, numpy, scipy
 from time import localtime, strftime
 from daetools.pyDAE import *
 import matplotlib.pyplot as plt
@@ -217,7 +217,7 @@ class simTutorial(daeSimulation):
         plt.show()
 
 # Setup everything manually and run in a console
-def run():
+def run(guiRun = False, qtApp = None):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()

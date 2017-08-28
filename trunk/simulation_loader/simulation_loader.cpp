@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "simulation_loader.h"
 #include "../dae.h"
@@ -53,6 +54,7 @@ public:
     std::vector<daeParameter_t*> m_ptrarrParameters;
     std::vector<daeVariable_t*>  m_ptrarrInputs;
     std::vector<daeVariable_t*>  m_ptrarrOutputs;
+    std::vector<daeVariable_t*>  m_ptrarrLocals;
     std::vector<daeSTN_t*>       m_ptrarrSTNs;
     std::vector<daeVariable_t*>  m_ptrarrDOFs;
 
@@ -68,8 +70,48 @@ daeSimulationLoader::daeSimulationLoader()
 {
     m_pData = new daeSimulationLoaderData;
 
-    // Achtung, Achtung!!
-    // Py_Initialize() call moved to dllmain.cpp
+    std::vector<std::string> paths;
+    char* szpathEnv       = getenv("PATH");
+    char* szpythonpathEnv = getenv("PYTHONPATH");
+    std::string pathEnv       = szpathEnv       ? szpathEnv       : "";
+    std::string pythonpathEnv = szpythonpathEnv ? szpythonpathEnv : "";
+
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+    std::string path_separator = ";";
+    std::string python_exe     = "python.exe";
+
+    boost::split(paths, pathEnv, boost::is_any_of(path_separator.c_str()));
+    for(int i = 0; i < paths.size(); i++)
+    {
+          std::string path = paths[i];
+          boost::filesystem::path pythonPath = boost::filesystem::path(path) / python_exe;
+          if (boost::filesystem::exists(pythonPath))
+          {
+                boost::filesystem::path pythonHome      = pythonPath.parent_path();
+                boost::filesystem::path pythonHome_Lib  = pythonHome / std::string("Lib");
+                boost::filesystem::path pythonHome_Dlls = pythonHome / std::string("DLLS");
+                std::string dirs = pythonHome_Lib.string() + path_separator + pythonHome_Dlls.string();
+
+                if(pathEnv.find(pythonHome_Lib.string().c_str())  == std::string::npos &&
+                   pathEnv.find(pythonHome_Dlls.string().c_str()) == std::string::npos)
+                    _putenv(("PATH="       + dirs + path_separator + pathEnv).c_str());
+
+                if(pythonpathEnv.find(pythonHome_Lib.string().c_str())  == std::string::npos &&
+                   pythonpathEnv.find(pythonHome_Dlls.string().c_str()) == std::string::npos)
+                    _putenv(("PYTHONPATH=" + dirs + path_separator + pythonpathEnv).c_str());
+
+                //std::cout << getenv("PYTHONPATH") << std::endl;
+                //std::cout << getenv("PATH")       << std::endl;
+                break;
+          }
+    }
+#else
+    std::string path_separator = ":";
+    std::string python_exe     = "python";
+#endif
+
+    if(!Py_IsInitialized())
+        Py_Initialize();
 
     if(!Py_IsInitialized())
     {
@@ -89,7 +131,10 @@ daeSimulationLoader::~daeSimulationLoader()
     }
 
     // Achtung, Achtung!!
-    //Py_Finalize() call moved to dllmain.cpp
+    // Do not call Py_Finalize (the requirement from Boost lib docs)
+    //if(Py_IsInitialized())
+    //    Py_Finalize();
+
 }
 
 void daeSimulationLoader::LoadSimulation(const std::string& strPythonFile,
@@ -233,20 +278,38 @@ void daeSimulationLoader::SetupInputsAndOutputs()
     pTopLevelModel->GetCoSimulationInterface(pData->m_ptrarrParameters,
                                              pData->m_ptrarrInputs,
                                              pData->m_ptrarrOutputs,
+                                             pData->m_ptrarrLocals,
                                              pData->m_ptrarrSTNs);
 }
 
 std::string daeSimulationLoader::GetStrippedName(const std::string& strSource)
 {
     std::string strStripped = strSource;
-  
+
     std::replace(strStripped.begin(), strStripped.end(), '.', '_');
     std::replace(strStripped.begin(), strStripped.end(), '(', '_');
     std::replace(strStripped.begin(), strStripped.end(), ')', '_');
     std::replace(strStripped.begin(), strStripped.end(), '&', '_');
     std::replace(strStripped.begin(), strStripped.end(), ';', '_');
-    
+
     return strStripped;
+}
+
+void daeSimulationLoader::SetRelativeTolerance(double relTolerance)
+{
+    daeSimulationLoaderData* pData = static_cast<daeSimulationLoaderData*>(m_pData);
+    if(!pData)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    if(!pData->m_pSimulation)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    daeDAESolver_t* pDAESolver = pData->m_pSimulation->GetDAESolver();
+
+    if(!pDAESolver)
+        daeDeclareAndThrowException(exInvalidPointer);
+
+    pDAESolver->SetRelativeTolerance(relTolerance);
 }
 
 void daeSimulationLoader::SetTimeHorizon(double timeHorizon)
@@ -482,7 +545,7 @@ void daeSimulationLoader::GetInputInfo(unsigned int index, std::string& strName,
 
     unsigned int nInputs = pData->m_ptrarrInputs.size();
     unsigned int nDOFs   = pData->m_ptrarrDOFs.size();
-    
+
     if(index >= nInputs + nDOFs)
     {
         daeDeclareAndThrowException(exOutOfBounds);
@@ -734,7 +797,7 @@ void daeSimulationLoader::SetInputValue(unsigned int index, const double* value,
         for(unsigned int i = 0; i < numberOfPoints; i++)
             s_values[i] = static_cast<const real_t>(value[i]);
 
-        pVariable->ReAssignValues(s_values);       
+        pVariable->ReAssignValues(s_values);
     }
 }
 
@@ -820,7 +883,7 @@ double daeSimulationLoader::GetFMIValue(unsigned int fmi_reference) const
     const daeFMI2Object_t& fmi = citer->second;
     if(fmi.type == "Parameter")
         return fmi.parameter->GetValue(fmi.indexes);
-    else if(fmi.type == "Input" || fmi.type == "Output")
+    else if(fmi.type == "Input" || fmi.type == "Output" || fmi.type == "Local")
         return fmi.variable->GetValue(fmi.indexes);
     else if(fmi.type == "STN")
         return fmi.variable->GetValue(fmi.indexes);
@@ -869,7 +932,7 @@ void daeSimulationLoader::SetFMIValue(unsigned int fmi_reference, double value)
     else if(fmi.type == "STN")
         fmi.variable->SetValue(fmi.indexes, value);
 
-    else if(fmi.type == "Output")
+    else if(fmi.type == "Output" || fmi.type == "Local")
     {
         daeDeclareAndThrowException(exInvalidCall);
     }

@@ -4680,17 +4680,20 @@ boost::python::dict daeModel_GetCoSimulationInterface(daeModel& self)
     std::vector<daeParameter_t*> ptrarrParameters;
     std::vector<daeVariable_t*>  ptrarrInputs;
     std::vector<daeVariable_t*>  ptrarrOutputs;
+    std::vector<daeVariable_t*>  ptrarrModelVariables;
     std::vector<daeSTN_t*>       ptrarrSTNs;
 
     self.GetCoSimulationInterface(ptrarrParameters,
                                   ptrarrInputs,
                                   ptrarrOutputs,
+                                  ptrarrModelVariables,
                                   ptrarrSTNs);
 
     boost::python::dict dictCSInterface;
     dictCSInterface["Parameters"] = getListFromVectorAndCastPointer<daeParameter_t*, daeParameter*>(ptrarrParameters);
     dictCSInterface["Inputs"]     = getListFromVectorAndCastPointer<daeVariable_t*,  daeVariable*> (ptrarrInputs);
     dictCSInterface["Outputs"]    = getListFromVectorAndCastPointer<daeVariable_t*,  daeVariable*> (ptrarrOutputs);
+    dictCSInterface["Locals"]     = getListFromVectorAndCastPointer<daeVariable_t*,  daeVariable*> (ptrarrModelVariables);
     dictCSInterface["STNs"]       = getListFromVectorAndCastPointer<daeSTN_t*,       daeSTN*>      (ptrarrSTNs);
 
     return dictCSInterface;

@@ -171,56 +171,12 @@ class simTutorial(daeSimulation):
 
         self.m.T.SetInitialCondition(283 * K)
         
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportTimeDerivatives = True
-    sim.ReportingInterval = 2
-    sim.TimeHorizon       = 500
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Enable reporting of time derivatives for all reported variables
-    simulation.ReportTimeDerivatives = True
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon = 500
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+def run(**kwargs):
+    simulation = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval = 1, 
+                                     timeHorizon       = 500,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

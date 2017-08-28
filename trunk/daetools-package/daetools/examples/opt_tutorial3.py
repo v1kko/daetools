@@ -78,7 +78,7 @@ class simTutorial(daeSimulation):
         self.SetContinuousOptimizationVariable(self.m.x4, 1, 5, 2);
 
 def chooseAlgorithm():
-    from PyQt5 import QtCore, QtGui, QtWidgets
+    from PyQt5 import QtWidgets
     algorithms = ['NLOPT_GN_DIRECT','NLOPT_GN_DIRECT_L','NLOPT_GN_DIRECT_L_RAND','NLOPT_GN_DIRECT_NOSCAL','NLOPT_GN_DIRECT_L_NOSCAL',
                   'NLOPT_GN_DIRECT_L_RAND_NOSCAL','NLOPT_GN_ORIG_DIRECT','NLOPT_GN_ORIG_DIRECT_L','NLOPT_GD_STOGO','NLOPT_GD_STOGO_RAND',
                   'NLOPT_LD_LBFGS_NOCEDAL','NLOPT_LD_LBFGS','NLOPT_LN_PRAXIS','NLOPT_LD_VAR1','NLOPT_LD_VAR2','NLOPT_LD_TNEWTON',
@@ -94,61 +94,21 @@ def chooseAlgorithm():
     else:
         return 'NLOPT_LD_SLSQP'
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    opt = daeOptimization()
-    algorithm = chooseAlgorithm()
-    nlp = pyNLOPT.daeNLOPT(algorithm)
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 1
-    sim.TimeHorizon       = 5
-    simulator = daeSimulator(app, simulation = sim,
-                                  optimization = opt,
-                                  nlpsolver = nlp)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-    optimization = daeOptimization()
-
+def run(guiRun = False, qtApp = None):
+    simulation = simTutorial()
     # NLOPT algorithm must be set in its constructor
-    nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
-
-    # Do no print progress
-    log.PrintProgress = False
-    
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 5
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Run
-    optimization.Run()
-    optimization.Finalize()
+    if guiRun:
+        algorithm = chooseAlgorithm()
+        nlpsolver = pyNLOPT.daeNLOPT(algorithm)
+    else:
+        nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
+    daeActivity.optimize(simulation, reportingInterval       = 1, 
+                                     timeHorizon             = 1,
+                                     nlpsolver               = nlpsolver,
+                                     guiRun                  = guiRun,
+                                     qtApp                   = qtApp)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    app = daeCreateQtApplication(sys.argv)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun, app)

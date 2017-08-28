@@ -225,87 +225,42 @@ class simTutorial(daeSimulation):
         # setFEInitialConditions(daeFiniteElementModel, dealiiFiniteElementSystem_xD, str, float|callable)
         setFEInitialConditions(self.m.fe_model, self.m.fe_system, 'T', 300.0)
 
-# Use daeSimulator class
-def guiRun(app):
-    datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial()
+def run(**kwargs):
+    guiRun = kwargs.get('guiRun', False)
+    
+    simulation = simTutorial()
+
+    # Create SuperLU LA solver
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
+    # Create and setup two data reporters:
+    datareporter = daeDelegateDataReporter()
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
-
-    # Create two data reporters:
+    if guiRun:
+        results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_2-')
+        daeQtMessage("deal.II", "The simulation results will be located in: %s" % results_folder)
+    else:
+        results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results')
+        print("The simulation results will be located in: %s" % results_folder)
+    
     # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
     if not feDataReporter.Connect(results_folder, simName):
         sys.exit()
-
+        
     # 2. TCP/IP
     tcpipDataReporter = daeTCPIPDataReporter()
     datareporter.AddDataReporter(tcpipDataReporter)
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
-    daeQtMessage("deal.II", "The simulation results will be located in: %s" % results_folder)
-
-    simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon       = 200
-    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial()
-
-    lasolver = pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_2-results')
-
-    # Create two data reporters:
-    # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
-    feDataReporter = simulation.m.fe_system.CreateDataReporter()
-    datareporter.AddDataReporter(feDataReporter)
-    if not feDataReporter.Connect(results_folder, simName):
-        sys.exit()
-
-    # 2. TCP/IP
-    tcpipDataReporter = daeTCPIPDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
-    if not tcpipDataReporter.Connect("", simName):
-        sys.exit()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 2
-    simulation.TimeHorizon = 200
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.fe_model.SaveModelReport(simulation.m.Name + ".xml")
-    #simulation.m.fe_model.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+    daeActivity.simulate(simulation, reportingInterval = 2, 
+                                     timeHorizon       = 200,
+                                     lasolver          = lasolver,
+                                     datareporter      = datareporter,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

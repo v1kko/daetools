@@ -82,7 +82,7 @@ void daeConfig::Reload(void)
         }
         catch(boost::property_tree::file_parser_error& infoe)
         {
-            std::cout << "Cannot load daetools.cfg config file in neither 'json' nor 'info' format. Error: " << jsone.message() << std::endl;
+            std::cout << "Cannot load daetools.cfg config file [" << configfile << "] in neither 'json' nor 'info' format. Error: " << jsone.message() << std::endl;
             std::cout << "Config files are located in: (1)current_exe_directory, (b).../daetools or (c)$HOME/.daetools directory" << std::endl;
             return;
         }
@@ -207,6 +207,10 @@ std::string daeConfig::GetBONMINOptionsFile()
     return cfg_file.string();
 }
 
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+extern HMODULE config_hModule;
+#endif
+
 std::string daeConfig::GetConfigFolder()
 {
     boost::filesystem::path cfg_home_folder,
@@ -228,15 +232,22 @@ std::string daeConfig::GetConfigFolder()
         std::wstring w_cfg_app_folder(szModuleFileName); // i.e. app_folder/some_file.exe
 
         cfg_app_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end());
+        //printf("szModuleFileName folder %s\n", cfg_app_folder.string().c_str());
         cfg_app_folder = cfg_app_folder.parent_path();  // i.e. app_folder
+    }
 
-        // If we are in daetools module, GetModuleFileName returns a path of the python exectable, i.e. c:\Python34\python.exe
-        cfg_python_daetools_folder = std::string(w_cfg_app_folder.begin(), w_cfg_app_folder.end());
-        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // python root, i.e. c:\Python34
-        // Now we need to append "/Lib/site-packages/daetools" to the python root firectory
-        cfg_python_daetools_folder /= "Lib";
-        cfg_python_daetools_folder /= "site-packages";
-        cfg_python_daetools_folder /= "daetools";
+    // GetModuleFileName with this .dll handle returns a path of this dll (not the executable).
+    returned = GetModuleFileName(config_hModule, szModuleFileName, MAX_PATH);
+    if(returned > 0)
+    {
+        std::wstring w_szModuleFileName(szModuleFileName);
+        boost::filesystem::path canonical_config_path = std::string(w_szModuleFileName.begin(), w_szModuleFileName.end());
+        canonical_config_path = boost::filesystem::weakly_canonical(canonical_config_path);
+
+        cfg_python_daetools_folder = canonical_config_path;                    // i.e. daetools/solibs/Windows_win32/libcdaeConfig-py27.so
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Windows_win32
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs
+        cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools
     }
 #else
     char* szUserProfile = getenv("HOME");
@@ -251,13 +262,13 @@ std::string daeConfig::GetConfigFolder()
     //printf("module %s loaded\n", dl_info.dli_fname);
     if(dl_info.dli_fname != NULL)
     {
-        boost::filesystem::path canonical_app_folder = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
-        canonical_app_folder = boost::filesystem::canonical(canonical_app_folder);
+        boost::filesystem::path canonical_config_path = std::string(dl_info.dli_fname); // i.e. app_folder/some_file
+        canonical_config_path = boost::filesystem::weakly_canonical(canonical_config_path);
 
-        cfg_app_folder = canonical_app_folder;
+        cfg_app_folder = canonical_config_path;
         cfg_app_folder = cfg_app_folder.parent_path();   // i.e. app_folder
 
-        cfg_python_daetools_folder = canonical_app_folder;                     // i.e. daetools/solibs/Linux_x86_64/libcdaeConfig-py27.so
+        cfg_python_daetools_folder = canonical_config_path;                    // i.e. daetools/solibs/Linux_x86_64/libcdaeConfig-py27.so
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs/Linux_x86_64_py27
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools/solibs
         cfg_python_daetools_folder = cfg_python_daetools_folder.parent_path(); // i.e. daetools

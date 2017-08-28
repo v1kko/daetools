@@ -303,8 +303,8 @@ def simulate(Nx):
         
     return points, c, c_exact
 
-def run():
-    Nxs = numpy.array([32, 64, 96]) #, 128])
+def run(guiRun = False, qtApp = None):
+    Nxs = numpy.array([32, 64, 96, 128])
     n = len(Nxs)
     L = 1.0
     hs = L / Nxs

@@ -101,18 +101,21 @@ class daeSimulator(QtWidgets.QDialog):
         actionRun.triggered.connect(self.slotRun)
         actionShowExplorerAndRun.triggered.connect(self.slotShowExplorerAndRun)
 
-        self.app                         = app
-        self.simulation                  = kwargs.get('simulation',                 None)
-        self.optimization                = kwargs.get('optimization',               None)
-        self.datareporter                = kwargs.get('datareporter',               None)
-        self.log                         = kwargs.get('log',                        None)
-        self.daesolver                   = kwargs.get('daesolver',                  None)
-        self.lasolver                    = kwargs.get('lasolver',                   None)
-        self.nlpsolver                   = kwargs.get('nlpsolver',                  None)
-        self.nlpsolver_setoptions_fn     = kwargs.get('nlpsolver_setoptions_fn',    None)
-        self.lasolver_setoptions_fn      = kwargs.get('lasolver_setoptions_fn',     None)
-        self.run_before_simulation_begin_fn = kwargs.get('run_before_simulation_begin_fn',None)
-        self.run_after_simulation_end_fn    = kwargs.get('run_after_simulation_end_fn',None)
+        self.app                          = app
+        self.simulation                   = kwargs.get('simulation',                   None)
+        self.optimization                 = kwargs.get('optimization',                 None)
+        self.datareporter                 = kwargs.get('datareporter',                 None)
+        self.log                          = kwargs.get('log',                          None)
+        self.daesolver                    = kwargs.get('daesolver',                    None)
+        self.relativeTolerance            = kwargs.get('relativeTolerance',            None)
+        self.lasolver                     = kwargs.get('lasolver',                     None)
+        self.nlpsolver                    = kwargs.get('nlpsolver',                    None)
+        self.nlpsolver_setoptions_fn      = kwargs.get('nlpsolver_setoptions_fn',      None)
+        self.lasolver_setoptions_fn       = kwargs.get('lasolver_setoptions_fn',       None)
+        self.generate_code_fn             = kwargs.get('generate_code_fn',             None)
+        self.run_after_simulation_init_fn = kwargs.get('run_after_simulation_init_fn', None)
+        self.run_before_simulation_fn     = kwargs.get('run_before_simulation_fn',     None)
+        self.run_after_simulation_fn      = kwargs.get('run_after_simulation_fn',      None)
 
         if self.app == None:
             if not QtCore.QCoreApplication.instance():
@@ -220,6 +223,9 @@ class daeSimulator(QtWidgets.QDialog):
             if self.daesolver == None:
                 self.daesolver = daeIDAS()
 
+            if self.relativeTolerance:
+                self.daesolver.RelativeTolerance = self.relativeTolerance
+            
             lasolverIndex    = -1
             minlpsolverIndex = -1
 
@@ -267,7 +273,11 @@ class daeSimulator(QtWidgets.QDialog):
                 self.daesolver.SetLASolver(self.lasolver)
 
             if self.optimization == None:
-                self.simulation.Initialize(self.daesolver, self.datareporter, self.log)
+                self.simulation.Initialize(self.daesolver, self.datareporter, self.log)                
+                        
+                if self.run_after_simulation_init_fn:
+                    self.run_after_simulation_init_fn(self.simulation, self.log)
+
                 if(self.lasolver_setoptions_fn):
                     self.lasolver_setoptions_fn(self.lasolver)
 
@@ -275,9 +285,12 @@ class daeSimulator(QtWidgets.QDialog):
                 if not self.simulation.IsSolveInitial:
                     raise RuntimeError('The initial conditions have not been calculated')
 
-                if self.run_before_simulation_begin_fn:
-                    self.run_before_simulation_begin_fn(self.simulation, self.log)
+                if self.run_before_simulation_fn:
+                    self.run_before_simulation_fn(self.simulation, self.log)
 
+                if self.generate_code_fn:
+                    self.generate_code_fn(self.simulation, self.log)
+                    
                 if showExplorer:
                     explorer = simulation_explorer.daeSimulationExplorer(self.app, simulation = self.simulation)
                     explorer.exec_()
@@ -310,14 +323,14 @@ class daeSimulator(QtWidgets.QDialog):
     def _AfterRunCalls(self):
         if self.optimization == None:
             if self.simulation.CurrentTime == self.simulation.TimeHorizon: # We reached the end of simulation
-                if self.run_after_simulation_end_fn:
-                    self.run_after_simulation_end_fn(self.simulation, self.log)
+                if self.run_after_simulation_fn:
+                    self.run_after_simulation_fn(self.simulation, self.log)
                 self.simulation.Finalize()
 
         else:
             if self.simulation.CurrentTime == self.simulation.TimeHorizon: # We reached the end of simulation
-                if self.run_after_simulation_end_fn:
-                    self.run_after_simulation_end_fn(self.simulation, self.log)
+                if self.run_after_simulation_fn:
+                    self.run_after_simulation_fn(self.simulation, self.log)
                 self.optimization.Finalize()
 
     def showMessage(self, msg):

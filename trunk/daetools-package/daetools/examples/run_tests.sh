@@ -70,6 +70,7 @@ echo tutorial19.py
 $PYTHON $ROOT/tutorial19.py console
 
 
+
 echo tutorial_adv_1.py
 $PYTHON $ROOT/tutorial_adv_1.py console
 
@@ -112,6 +113,7 @@ echo tutorial_che_9.py
 $PYTHON $ROOT/tutorial_che_9.py console
 
 
+
 echo tutorial_cv_1.py
 $PYTHON $ROOT/tutorial_cv_1.py console
 
@@ -143,6 +145,7 @@ echo tutorial_cv_10.py
 $PYTHON $ROOT/tutorial_cv_10.py console
 
 
+
 echo tutorial_dealii_1.py
 $PYTHON $ROOT/tutorial_dealii_1.py console
 
@@ -171,6 +174,7 @@ echo tutorial_dealii_8.py
 $PYTHON $ROOT/tutorial_dealii_8.py console
 
 
+
 echo opt_tutorial1.py
 $PYTHON $ROOT/opt_tutorial1.py console
 
@@ -191,6 +195,7 @@ $PYTHON $ROOT/opt_tutorial6.py console
 
 echo opt_tutorial7.py
 $PYTHON $ROOT/opt_tutorial7.py console
+
 
 
 echo tutorial_che_opt_1.py

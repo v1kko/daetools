@@ -428,7 +428,7 @@ class ModCell(daeModel):
             eq = self.CreateEquation("applied_potential")
             eq.Residual = self.V() - self.Vset()*(1 - np.exp(-Time()/self.tau_ramp()))
 
-class SimBattery(daeSimulation):
+class simTutorial(daeSimulation):
     def __init__(self):
         daeSimulation.__init__(self)
         self.F = 96485.34 * A*s/mol
@@ -571,57 +571,13 @@ class SimBattery(daeSimulation):
             for indx_r in range(1, p.r.NumberOfPoints-1):
                 p.c.SetInitialCondition(indx_r, cs0_p)
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = SimBattery()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = sim.process_info["tend"].value / 100
-    sim.TimeHorizon       = sim.process_info["tend"].value
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = SimBattery()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = simulation.process_info["tend"].value / 100
-    simulation.TimeHorizon = simulation.process_info["tend"].value
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) is False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    try:
-        # An exception will be raised at some point when the log function is called for a negative value
-        simulation.Run()
-    except Exception as e:
-        print(str(e))
-    
-    simulation.Finalize()
+def run(**kwargs):
+    # An exception will be raised at some point when the log function is called for a negative value
+    simulation = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval = simulation.process_info["tend"].value / 100,
+                                     timeHorizon       = simulation.process_info["tend"].value,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

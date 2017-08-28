@@ -3,6 +3,8 @@
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/detail/file_parser_error.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 /***************************************************
   Types for Common Functions
@@ -30,16 +32,19 @@ static std::string getFolderFromURI(const std::string& uri)
 {
     std::string protocol;
     size_t found;
-
+    size_t offset = 1;
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+    offset = 0;
+#endif
     protocol = "file:///";
     found = uri.find(protocol);
     if(found != std::string::npos)
-        return uri.substr(found + protocol.size() - 1) + std::string("/");
+        return uri.substr(found + protocol.size() - offset) + std::string("/");
 
     protocol = "file:/";
     found = uri.find(protocol);
     if(found != std::string::npos)
-        return uri.substr(found + protocol.size() - 1) + std::string("/");
+        return uri.substr(found + protocol.size() - offset) + std::string("/");
 
     // If nothing found - simply return an original URI
     return uri + "/";
@@ -72,11 +77,13 @@ fmi2Component fmi2Instantiate(fmi2String                    instanceName,
         c->loggingOn            = loggingOn;
 
         boost::property_tree::ptree pt;
-        std::string resources_dir = getFolderFromURI(fmuResourceLocation);
-        std::string	json_settings = resources_dir + "settings.json";
+        boost::filesystem::path resources_path = getFolderFromURI(fmuResourceLocation);
+        boost::filesystem::path settings_path  = resources_path / std::string("settings.json");
 
-        boost::property_tree::json_parser::read_json(json_settings, pt);
-        strPythonFile         = resources_dir + pt.get<std::string>("simulationFile");
+        boost::property_tree::json_parser::read_json(settings_path.string(), pt);
+
+        boost::filesystem::path python_file_path = resources_path / pt.get<std::string>("simulationFile");
+        strPythonFile         = python_file_path.string();
         strCallableObjectName = pt.get<std::string>("callableObjectName");
         strArguments          = pt.get<std::string>("arguments");
 
@@ -145,7 +152,12 @@ fmi2Status fmi2SetupExperiment(fmi2Component comp,
         if(stopTimeDefined)
         {
             c->simulationLoader.SetTimeHorizon(stopTime);
-            c->simulationLoader.SetReportingInterval(stopTime/2);
+            c->simulationLoader.SetReportingInterval(stopTime/10);
+        }
+
+        if(toleranceDefined)
+        {
+            c->simulationLoader.SetRelativeTolerance(tolerance);
         }
 
         /* First solve initial with the inputs provided at the beggining.
@@ -374,8 +386,14 @@ fmi2Status fmi2DoStep(fmi2Component comp,
         /* Set the time horizon. */
         c->simulationLoader.SetTimeHorizon(stepTimeHorizon);
 
-        /* Integrate until specified time and report data. */
+        /* Since we only change assigned variable values we might not need to reinitialize the DAE system.
+           The most likely... Double check this!! */
         c->simulationLoader.Reinitialize();
+
+        /* Integrate until specified time and report data.
+           Nota bene:
+             Perhaps do not report the data around discontinuities!!
+        */
         c->simulationLoader.IntegrateUntilTime(stepTimeHorizon, false, true);
         c->simulationLoader.ReportData();
     }

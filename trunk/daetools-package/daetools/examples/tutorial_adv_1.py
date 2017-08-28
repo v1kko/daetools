@@ -99,7 +99,7 @@ class InteractiveOP(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
         self.setWindowIcon(QtGui.QIcon(join(dirname(__file__), 'daetools-48x48.png')))
-        self.setWindowTitle("Advanced Tutorial 1 - An Interactive Operating Procedure")
+        self.setWindowTitle("Advanced Tutorial 1 - An Interactive Schedule")
 
         self.simulation = simulation
         self.ui.powerSpinBox.setValue(self.simulation.m.Qin.GetValue())
@@ -181,7 +181,8 @@ class InteractiveOP(QtWidgets.QDialog):
             self.ui.runButton.setEnabled(True)
 
     def _updatePlot(self):
-        temperature = self.simulation.DataReporter.dictVariables['tutorial_adv_1.T']
+        dr = self.simulation.DataReporter
+        temperature = dr.dictVariables['tutorial_adv_1.T']
         x = temperature.TimeValues
         y = temperature.Values
         self.line.set_xdata(x)
@@ -192,72 +193,15 @@ class InteractiveOP(QtWidgets.QDialog):
         self.ui.currentTimeEdit.setText(str(self.simulation.CurrentTime) + ' s')
         QtWidgets.QApplication.processEvents()
 
-def guiRun(app):
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
+def run(**kwargs):
+    simulation = simTutorial()
     datareporter = daeDataReporterLocal()
-    simulation   = simTutorial()
+    daeActivity.simulate(simulation, reportingInterval = 1, 
+                                     timeHorizon       = 1000,
+                                     datareporter      = datareporter,
+                                     **kwargs)
 
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 10000
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeDataReporterLocal()
-    simulation   = simTutorial()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 1
-    simulation.TimeHorizon = 10000
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-    
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        app = QtWidgets.QApplication(sys.argv)
-        consoleRun()
-    else:
-        app = QtWidgets.QApplication(sys.argv)
-        guiRun(app)
+    qtApp  = QtWidgets.QApplication(sys.argv)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun, qtApp = qtApp)

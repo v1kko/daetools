@@ -103,6 +103,28 @@ bool InitializeJSON(void* s, const char* strJSONRuntimeSettings)
     return false;
 }
 
+bool SetRelativeTolerance(void* s, double relTolerance)
+{
+    try
+    {
+        daeSimulationLoader* ptr_loader = (daeSimulationLoader*)s;
+        if(!ptr_loader)
+        {
+            g_strLastError = "Invalid simulation pointer (has the simulation been loaded?)";
+            return false;
+        }
+
+        ptr_loader->SetRelativeTolerance(relTolerance);
+        return true;
+    }
+    catch(std::exception& e)
+    {
+        g_strLastError = e.what();
+        std::cout << e.what() << std::endl;
+    }
+    return false;
+}
+
 bool SetTimeHorizon(void* s, double timeHorizon)
 {
     try

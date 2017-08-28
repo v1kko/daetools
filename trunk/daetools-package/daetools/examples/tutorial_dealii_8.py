@@ -341,17 +341,26 @@ class simTutorial(daeSimulation):
         setFEInitialConditions(self.m.fe_model_c,  self.m.fe_system_c,  'c',  c0)
         setFEInitialConditions(self.m.fe_model_cs, self.m.fe_system_cs, 'cs', 0.0)
     
-# Use daeSimulator class
-def guiRun(app):
-    datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial()
+def run(**kwargs):
+    guiRun = kwargs.get('guiRun', False)
+    
+    simulation = simTutorial()
+
+    # Create SuperLU LA solver
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
+    # Create and setup two data reporters:
+    datareporter = daeDelegateDataReporter()
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder_c  = tempfile.mkdtemp(suffix = '-results_c',  prefix = 'tutorial_deal_II_8-')
-    results_folder_cs = tempfile.mkdtemp(suffix = '-results_cs', prefix = 'tutorial_deal_II_8-')
-
-    # Create three data reporters:
+    if guiRun:
+        results_folder_c  = tempfile.mkdtemp(suffix = '-results_c',  prefix = 'tutorial_deal_II_8-')
+        results_folder_cs = tempfile.mkdtemp(suffix = '-results_cs', prefix = 'tutorial_deal_II_8-')
+        daeQtMessage("deal.II", "The simulation results will be located in: %s and %s" % (results_folder_c, results_folder_cs))
+    else:
+        results_folder_c  = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_8-results-c')
+        results_folder_cs = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_8-results-cs')
+        print("The simulation results will be located in: %s and %s" % (results_folder_c, results_folder_cs))
+    
     # 1. deal.II for c
     feDataReporter_c = simulation.m.fe_system_c.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter_c)
@@ -370,73 +379,12 @@ def guiRun(app):
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
-    daeQtMessage("deal.II", "The simulation results will be located in: %s" % results_folder)
-
-    simulation.m.SetReportingOn(True)
-    simulation.ReportingInterval = 0.05
-    simulation.TimeHorizon       = 2
-    simulator  = daeSimulator(app, simulation=simulation, datareporter = datareporter, lasolver=lasolver)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeDelegateDataReporter()
-    simulation   = simTutorial()
-
-    lasolver = pySuperLU.daeCreateSuperLUSolver()
-    daesolver.SetLASolver(lasolver)
-
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    results_folder_c  = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_8-results-c')
-    results_folder_cs = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_8-results-cs')
-
-    # Create two data reporters:
-    # 1. deal.II for c
-    feDataReporter_c = simulation.m.fe_system_c.CreateDataReporter()
-    datareporter.AddDataReporter(feDataReporter_c)
-    if not feDataReporter_c.Connect(results_folder_c, simName):
-        sys.exit()
-
-    # 2. deal.II for cs
-    feDataReporter_cs = simulation.m.fe_system_cs.CreateDataReporter()
-    datareporter.AddDataReporter(feDataReporter_cs)
-    if not feDataReporter_cs.Connect(results_folder_cs, simName):
-        sys.exit()
-
-    # 3. TCP/IP
-    tcpipDataReporter = daeTCPIPDataReporter()
-    datareporter.AddDataReporter(tcpipDataReporter)
-    if not tcpipDataReporter.Connect("", simName):
-        sys.exit()
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 0.05
-    simulation.TimeHorizon = 2.0
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.fe_model_c.SaveModelReport(simulation.m.Name + "-c.xml")
-    #simulation.m.fe_model_cs.SaveModelReport(simulation.m.Name + "-cs.xml")
-    #simulation.m.fe_model_cs.SaveRuntimeModelReport(simulation.m.Name + "-cs-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+    daeActivity.simulate(simulation, reportingInterval = 0.05, 
+                                     timeHorizon       = 2,
+                                     lasolver          = lasolver,
+                                     datareporter      = datareporter,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

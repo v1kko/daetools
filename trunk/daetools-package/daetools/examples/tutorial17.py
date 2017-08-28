@@ -183,12 +183,12 @@ def setupLog():
     log.AddLog(log1)
     log.AddLog(log2)
 
-    # Return all of them for we have to keep referencem to them
+    # Return all of them for we have to keep references to them
     # and prevent them going out of scope
     return log, log1, log2
 
 # Use daeSimulator class
-def guiRun(app):
+def runGUI(app):
     # Start TCP/IP log server
     log_server = tcpipLogServerMainWindow(app)
     log_server.show()
@@ -207,7 +207,7 @@ def guiRun(app):
     app.exec_()
 
 # Setup everything manually and run in a console
-def consoleRun(app):
+def runConsole(app):
     # Start TCP/IP log server
     log_server = tcpipLogServerMainWindow(app)
     log_server.show()
@@ -221,9 +221,16 @@ def consoleRun(app):
     app.exec_()
     st.join()
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun(app)
+def run(**kwargs):
+    qtApp  = kwargs.get('qtApp',  None)
+    guiRun = kwargs.get('guiRun', False)
+    simulation = simTutorial()
+    if guiRun:
+        runGUI(qtApp)
     else:
-        guiRun(app)
+        runConsole(qtApp)
+
+if __name__ == "__main__":
+    qtApp  = daeCreateQtApplication(sys.argv)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun, qtApp = qtApp)

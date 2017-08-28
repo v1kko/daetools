@@ -11,7 +11,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, numpy
+import os, sys, numpy, itertools
 from pyCore import *
 from pyDataReporting import *
 
@@ -494,3 +494,83 @@ class daePlotDataReporter(daeDataReporterLocal):
         except Exception as e:
             import traceback
             print(('Cannot generate matplotlib plots:\n' + traceback.format_exc()))
+
+class daeCSVFileDataReporter(daeDataReporterFile):
+    """
+    Saves data in .csv file.
+    """
+    def __init__(self, uniqueTimeValues = False):
+        daeDataReporterFile.__init__(self)
+
+        self.uniqueTimeValues = uniqueTimeValues
+        
+    def WriteDataToFile(self):
+        variable_names  = []
+        variable_values = []
+        
+        max_n_times = 0
+        variable_names.append('time')
+        for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
+            name = daeGetStrippedName(variable_name)
+            lname = name.split('.')
+            varName = '.'.join(lname[1:])
+            domain_sizes = [range(len(d)) for d in l_domains]
+            indexes = itertools.product(*domain_sizes)
+            n_times = ndarr_values.shape[0]
+            
+            if n_times > max_n_times:
+                max_n_times = n_times
+                times       = ndarr_times.tolist()
+                
+            # Generate variable names for distributed variables
+            if indexes:
+                for index_list in indexes:
+                    str_index_list = [str(item) for item in index_list]
+                    if str_index_list:
+                        inds = '[' + ','.join(str_index_list) + ']' 
+                    else:
+                        inds = ''
+                    variable_names.append('%s%s' % (varName, inds))
+                    var_indexes = [slice(0,n_times)] + list(index_list)
+                    values = ndarr_values[var_indexes].tolist()
+                    variable_values.append(values)
+        
+        # Add time values
+        variable_values.insert(0, times)
+        
+        try:
+            f = open(self.ConnectString, 'wb')
+            
+            # Some variables (i.e. parameters) have only one value so generate values for all time points
+            for i in range(len(variable_values)):
+                if len(variable_values[i]) == 1:
+                    variable_values[i] = variable_values[i] * max_n_times 
+
+            # Create ndarray for easier slicing
+            vals = numpy.array(variable_values, copy = False)
+            
+            # Write variable names in the header
+            row = ','.join(['\"%s\"' % v for v in variable_names])
+            f.write(row + '\n')
+            
+            # Write rows
+            if self.uniqueTimeValues:
+                unique_vals = {}
+                for i in range(max_n_times):
+                    row_vals = vals[..., i]
+                    t = row_vals[0]
+                    unique_vals[t] = row_vals
+                    
+                for t,row_vals in sorted(unique_vals.items()):
+                    row = ','.join(['%.16e' % v for v in row_vals])
+                    f.write(row + '\n')                
+            else:
+                for i in range(max_n_times):
+                    row = ','.join(['%.16e' % v for v in vals[..., i]])
+                    f.write(row + '\n')
+            
+            f.close()
+            
+        except Exception as e:
+            print(('Cannot write data in CSV format:\n' + str(e)))
+   

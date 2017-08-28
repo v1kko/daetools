@@ -110,6 +110,9 @@ def simulate(Nx):
     datareporter = daeDelegateDataReporter()
     simulation   = simTutorial(Nx)
 
+    # Do no print progress
+    log.PrintProgress = False
+
     daesolver.RelativeTolerance = 1e-7
     
     # Enable reporting of all variables
@@ -156,7 +159,7 @@ def simulate(Nx):
     
     return simulation.m.x.Points, c
 
-def run():
+def run(guiRun = False, qtApp = None):
     Nxs = numpy.array([20, 40, 80])
     n = len(Nxs)
     hs = L / Nxs

@@ -22,12 +22,12 @@ Batch reactor seeded crystallisation using the method of moments.
 References (model equations and input parameters):
 
 - Nikolic D.D., Frawley P.J. (2016) Application of the Lagrangian Meshfree Approach
-  to Modelling of Batch Crystallisation: Part I – Modelling of Stirred Tank Hydrodynamics.
-  Chemical Engineering Science 145:317–328.
+  to Modelling of Batch Crystallisation: Part I - Modelling of Stirred Tank Hydrodynamics.
+  Chemical Engineering Science 145:317-328.
   `doi:10.1016/j.ces.2015.08.052 <http://dx.doi.org/10.1016/j.ces.2015.08.052>`_
-- Mitchell N.A., O’Ciardha C.T., Frawley P.J. (2011) Estimation of the growth kinetics
+- Mitchell N.A., O'Ciardha C.T., Frawley P.J. (2011) Estimation of the growth kinetics
   for the cooling crystallisation of paracetamol and ethanol solutions.
-  Journal of Crystal Growth 328:39–49.
+  Journal of Crystal Growth 328:39-49.
   `doi:10.1016/j.jcrysgro.2011.06.016 <http://dx.doi.org/10.1016/j.jcrysgro.2011.06.016>`_
 
 The main assumptions:
@@ -303,55 +303,14 @@ class simTutorial(daeSimulation):
         for k in range(0, self.m.Nm.NumberOfPoints):
             moments[k].SetInitialCondition(m_seed[k])
 
-# Use daeSimulator class
-def guiRun(app):
-    sim = simTutorial()
-    sim.m.SetReportingOn(True)
-    sim.ReportingInterval = 60
-    sim.TimeHorizon       = 3000
-    simulator  = daeSimulator(app, simulation=sim)
-    simulator.exec_()
-
-# Setup everything manually and run in a console
-def consoleRun():
-    # Create Log, Solver, DataReporter and Simulation object
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    datareporter = daeTCPIPDataReporter()
-    simulation   = simTutorial()
-
-    # Relative tolerance
-    daesolver.RelativeTolerance = 1e-07
-    
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Set the time horizon and the reporting interval
-    simulation.ReportingInterval = 60
-    simulation.TimeHorizon       = 3000
-
-    # Connect data reporter
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if(datareporter.Connect("", simName) == False):
-        sys.exit()
-
-    # Initialize the simulation
-    simulation.Initialize(daesolver, datareporter, log)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
+def run(**kwargs):
+    simulation = simTutorial()
+    relativeTolerance = 1e-07
+    daeActivity.simulate(simulation, reportingInterval = 60,
+                                     timeHorizon       = 3000,
+                                     relativeTolerance = relativeTolerance,
+                                     **kwargs)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and (sys.argv[1] == 'console'):
-        consoleRun()
-    else:
-        app = daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
+    run(guiRun = guiRun)

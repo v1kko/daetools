@@ -89,7 +89,7 @@ class simTutorial(daeSimulation):
         # If required, the optimisation functions can be added using the simulation.SetNumberOfObjectiveFunctions(n) function.
         self.SetSensitivityParameter(self.m.Qin)
 
-def run():
+def run(**kwargs):
     # Create Log, Solver, DataReporter and Simulation object
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
