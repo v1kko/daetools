@@ -163,42 +163,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
         <span style='color:#3605fb;'>self</span>.m.T.SetInitialCondition(<span style='color:#cc047c;'>283</span> <b><span style='color:#0000ff;'>*</span></b> K)
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
-    simulator.exec_()
-
-<span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
-    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Enable reporting of time derivatives for all reported variables</span>
-    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
-        sys.exit()
-
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    simulation.Initialize(daesolver, datareporter, log)
-
+<b>def</b> printJacobianExpressions(simulation):
     <span style='color:#017a31;'># Print the Jacobian expressions for all equations</span>
     <span style='color:#3605fb;'>import</span> pprint
     <b>for</b> eq <b>in</b> simulation.m.Equations:
@@ -208,24 +173,16 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
             <span style='color:#017a31;'># dictionary {overall_index : (block_index,derivative_node)}</span>
             <b>for</b> oi, (bi,node) <b>in</b> eei.JacobianExpressions.items():
                 <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'        </span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'> : </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (bi, node))
-            
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
 
-    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
-    simulation.SolveInitial()
-
-    <span style='color:#017a31;'># Run</span>
-    simulation.Run()
-    simulation.Finalize()
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
-</pre>
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+    </pre>
 </body>
 </html>

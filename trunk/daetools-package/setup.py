@@ -15,22 +15,21 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 
 Installation instructions
 
-- GNU/Linux, MacOS (.tar.gz):
+- GNU/Linux, macOS, Windows (.tar.gz):
   python setup.py install
 
-- Windows (.exe):
+- Windows (.exe) [unused now]:
   python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.7.1" --bitmap wininst.bmp
 
-Create .tar.gz under GNU/Linux:
+Create the source dist (.tar.gz):
   python setup.py sdist --formats=gztar
-  
 """
 
 import os, sys, platform, shutil
 from distutils.core import setup
 from distutils import dir_util
 
-daetools_version = '1.7.1'
+daetools_version = '1.7.2'
 
 # Python version
 python_major = str(sys.version_info[0])

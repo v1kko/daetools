@@ -111,7 +111,7 @@ matplotlib.use(<span style='color:#cc0000;'>'Qt5Agg'</span>)
     ax.legend(legend) <span style='color:#017a31;'>#, frameon=False)</span>
     <b>return</b> fig
     
-<b>def</b> run():
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()

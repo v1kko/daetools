@@ -244,51 +244,14 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> (</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>): </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (dr.__class__.<span style='color:#3605fb;'>__name__</span>, dr.ConnectString, <span style='color:#cc0000;'>'connected'</span> <b>if</b> dr.IsConnected() <b>else</b> <span style='color:#cc0000;'>'NOT connected'</span>))
 
     <b>return</b> datareporter
-
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    dr  <b><span style='color:#0000ff;'>=</span></b> setupDataReporters(sim)
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, datareporter<b><span style='color:#0000ff;'>=</span></b>dr)
-    simulator.exec_()
-
-<span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
-    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> setupDataReporters(simulation)
-
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
-
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    simulation.Initialize(daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
-
-    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
-    simulation.SolveInitial()
-
-    <span style='color:#017a31;'># Run</span>
-    simulation.Run()
-    simulation.Finalize()
-    simulation._data_reporters_[<span style='color:#cc047c;'>3</span>].Plot(
-        simulation.m.T,                       <span style='color:#017a31;'># Subplot 1</span>
-        [simulation.m.T, simulation.m.T]      <span style='color:#017a31;'># Subplot 2 (2 sets)</span>
-        )
-
+   
+<b>def</b> process_data_reporters(simulation, log):
     <b>try</b>:
+        simulation._data_reporters_[<span style='color:#cc047c;'>3</span>].Plot(
+            simulation.m.T,                       <span style='color:#017a31;'># Subplot 1</span>
+            [simulation.m.T, simulation.m.T]      <span style='color:#017a31;'># Subplot 2 (2 sets)</span>
+            )
+
         <span style='color:#017a31;'># All data reporters derived from daeDataReporterLocal and daeTCPIPDataReporter</span>
         <span style='color:#017a31;'># classes have Process property (daeDataReceiverProcess object). The daeDataReceiverProcess class</span>
         <span style='color:#017a31;'># contains dictVariableValues property which represents a dictionary</span>
@@ -296,7 +259,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#017a31;'># First print the contents of the abovementioned dictionary:</span>
         <span style='color:#3605fb;'>import</span> pprint
         pprint.pprint(simulation._data_reporters_[<span style='color:#cc047c;'>0</span>].Process.dictVariableValues)
-
+        
         <span style='color:#017a31;'># Get the dictionary</span>
         dvals <b><span style='color:#0000ff;'>=</span></b> simulation._data_reporters_[<span style='color:#cc047c;'>0</span>].Process.dictVariableValues
         <span style='color:#017a31;'># Plot some variables</span>
@@ -310,14 +273,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'pandas dataset'</span>)
         <span style='color:#2a00d6;'>print</span>(simulation._data_reporters_[<span style='color:#cc047c;'>8</span>].data_frame)
     <b>except</b> <b><span style='color:#4e9a06;'>Exception</span></b> <span style='color:#3605fb;'>as</span> e:
-        <span style='color:#2a00d6;'>print</span>(<span style='color:#2a00d6;'>str</span>(e))
+        log.Message(<span style='color:#2a00d6;'>str</span>(e), <span style='color:#cc047c;'>0</span>)
     
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    daeActivity.simulate(simulation, reportingInterval       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 
+                                     timeHorizon             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
+                                     datareporter            <b><span style='color:#0000ff;'>=</span></b> setupDataReporters(simulation),
+                                     run_after_simulation_fn <b><span style='color:#0000ff;'>=</span></b> process_data_reporters,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
-</pre>
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
 </body>
 </html>

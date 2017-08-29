@@ -102,7 +102,7 @@ def setOptions(nlpsolver):
     except Exception as e:
         print(str(e))
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     simulation = simTutorial()
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
@@ -111,9 +111,8 @@ def run(guiRun = False, qtApp = None):
                                      timeHorizon             = 1,
                                      nlpsolver               = nlpsolver,
                                      nlpsolver_setoptions_fn = setOptions,
-                                     guiRun                  = guiRun,
-                                     qtApp                   = qtApp)
+                                     **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-    run(guiRun)
+    run(guiRun = guiRun)

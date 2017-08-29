@@ -402,10 +402,6 @@ class simTutorial(daeSimulation):
 #    deal.II data reporter will create files only for FE dofs. The other can be plotted in an usual fashion.
 def run(**kwargs):
     guiRun = kwargs.get('guiRun', False)
-    # If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.
-    if 'datareporter' in kwargs:
-        datareporter_arg = kwargs.get('datareporter', None)
-        del kwargs['datareporter']
         
     simulation = simTutorial()
 
@@ -414,8 +410,12 @@ def run(**kwargs):
 
     # Create and setup two data reporters:
     datareporter = daeDelegateDataReporter()
-    if datareporter_arg:
+
+    # If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.
+    if 'datareporter' in kwargs:
+        datareporter_arg = kwargs.get('datareporter', None)
         datareporter.AddDataReporter(datareporter_arg)
+        del kwargs['datareporter']
     
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if guiRun:

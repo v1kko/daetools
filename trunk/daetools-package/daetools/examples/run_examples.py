@@ -235,7 +235,7 @@ class RunExamples(QtWidgets.QDialog):
                           "tutorial_sa_1", "tutorial_sa_2", "tutorial_sa_3"]:
                 self.consoleRunAndShowResults(module)
             else:
-                module.run(True, self.app)
+                module.run(guiRun = True, qtApp = self.app)
         except RuntimeError as e:
             QtGui.QMessageBox.warning(self, "daeRunExamples", "Exception raised: " + str(e))
 
@@ -248,7 +248,7 @@ class RunExamples(QtWidgets.QDialog):
             #t = multiprocessing.Process(target=module.run, args=(True, ))
             #t.start()
             #t.join()
-            module.run(True, self.app)
+            module.run(guiRun = False, qtApp = self.app)
             sys.stdout = saveout
             message = '<pre>{0}</pre>'.format(output.getvalue())
             try:

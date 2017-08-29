@@ -242,19 +242,8 @@ def print_list_of_events(simulation, log):
 
 def run(**kwargs):
     simulation = simTutorial()
-    def exportFMU(simulation, log):
-        from daetools.code_generators.fmi import daeCodeGenerator_FMI
-        cg = daeCodeGenerator_FMI()
-        cg.generateSimulation(simulation, 
-                              '/home/ciroki/Downloads/FMUChecker-2.0.3-linux64', 
-                              __file__, 
-                              'create_simulation_for_cosimulation',
-                              'simTutorial', 
-                              [],
-                              localsAsOutputs = True)
     daeActivity.simulate(simulation, reportingInterval       = 2, 
                                      timeHorizon             = 500,
-                                     run_before_simulation_fn = exportFMU,
                                      run_after_simulation_fn = print_list_of_events,
                                      **kwargs)
 

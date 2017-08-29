@@ -12,7 +12,7 @@
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
 DAE_TOOLS_MINOR = 7
-DAE_TOOLS_BUILD = 1
+DAE_TOOLS_BUILD = 2
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}

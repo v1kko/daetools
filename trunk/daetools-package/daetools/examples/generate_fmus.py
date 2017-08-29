@@ -27,7 +27,9 @@ import tutorial_che_1, tutorial_che_2, tutorial_che_3, tutorial_che_7
 import tutorial_dealii_1
 
 # Global variables (arguments for the generateSimulation function)
-directory                   = None
+base_directory              = None
+fmu_name                    = None
+fmu_directory               = None
 py_simulation_file          = None
 callable_object_name        = 'create_simulation_for_cosimulation'
 additional_files            = []
@@ -44,50 +46,61 @@ def formatDescription(simulation):
     return description
 
 def exportFMU(simulation, log):
-    global directory
+    global fmu_name
+    global fmu_directory
     global py_simulation_file
     global callable_object_name
     global additional_files
     global localsAsOutputs
     global run_fmuCheck_all_fmus_bat
     global run_fmuCheck_all_fmus_sh
-    
+       
     # Create options for the FMI code generator and output files
     simulationClassName    = simulation.__class__.__name__
     relativeTolerance      = simulation.DAESolver.RelativeTolerance
     calculateSensitivities = simulation.CalculateSensitivities
     t_stop                 = simulation.TimeHorizon
-    fmu_name               = simulation.m.GetStrippedName()
     numSteps               = int(simulation.TimeHorizon / simulation.ReportingInterval)
     if calculateSensitivities:
         arguments = '%s, relativeTolerance=%e, calculateSensitivities=%s' % (simulationClassName, relativeTolerance, calculateSensitivities)
     else:
         arguments = '%s, relativeTolerance=%e' % (simulationClassName, relativeTolerance)
+    fmu_directory_basename = os.path.basename(fmu_directory)
+    fmu_relative_location  = os.path.join(fmu_directory_basename, fmu_name)
     
     # Write shell scripts for executing the generated fmu with the ComplianceChecker
     #  a) GNU/Linux shell script
     #  b) Windows batch file
-    FMUName_cc_sh  = './fmuCheck.linux64 -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name) 
-    FMUName_cc_bat = 'fmuCheck.win32.exe -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name)
+    FMUName_cc_sh  = '$FMU_CHECK_BIN -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name) 
+    FMUName_cc_bat = '%%FMU_CHECK_BIN%% -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name)
 
-    f = open(os.path.join(directory, '%s_cc.sh' % fmu_name), "w")
+    fmu_cc_sh = '%s_cc.sh' % fmu_name
+    f = open(os.path.join(fmu_directory, fmu_cc_sh), "w")
     f.write('#!/bin/bash\n')
-    f.write('# -*- coding: utf-8 -*-\n\n')
+    f.write('# -*- coding: utf-8 -*-\n')
+    #f.write('set -e\n\n')
     f.write(FMUName_cc_sh)
     f.close()
 
-    f = open(os.path.join(directory, '%s_cc.bat' % fmu_name), "w")
+    fmu_cc_bat = '%s_cc.bat' % fmu_name
+    f = open(os.path.join(fmu_directory, fmu_cc_bat), "w")
     f.write(FMUName_cc_bat)
     f.close()
     
     # Add the generated commands to the files for running all FMUs with the ComplianceChecker
-    run_fmuCheck_all_fmus_bat.write('echo \"Executing %s...\"\n' % FMUName_cc_bat)
-    run_fmuCheck_all_fmus_bat.write(FMUName_cc_bat + '\n\n')
-    run_fmuCheck_all_fmus_sh.write('echo \"Executing %s...\"\n' % FMUName_cc_sh)
-    run_fmuCheck_all_fmus_sh.write (FMUName_cc_sh  + '\n\n')
+    fmu_cc_sh_rel = os.path.join(fmu_directory_basename, fmu_cc_sh)
+    run_fmuCheck_all_fmus_sh.write('echo \"Executing: sh %s...\"\n' % fmu_cc_sh_rel)
+    run_fmuCheck_all_fmus_sh.write ('cd %s\n' % fmu_name)
+    run_fmuCheck_all_fmus_sh.write ('sh ' + fmu_cc_sh  + '\n')
+    run_fmuCheck_all_fmus_sh.write ('cd ..\n\n')
+    fmu_cc_bat_rel = os.path.join(fmu_directory_basename, fmu_cc_bat)
+    run_fmuCheck_all_fmus_bat.write('echo \"Executing: %s...\"\n' % fmu_cc_bat_rel)
+    run_fmuCheck_all_fmus_bat.write ('cd %s\n' % fmu_name)
+    run_fmuCheck_all_fmus_bat.write('call ' + fmu_cc_bat + '\n')
+    run_fmuCheck_all_fmus_bat.write ('cd ..\n\n')
     
     # Write the options to create the reference output
-    f = open(os.path.join(directory, '%s_ref.opt' % fmu_name), "wb")
+    f = open(os.path.join(fmu_directory, '%s_ref.opt' % fmu_name), "w")
     csv_f = csv.writer(f, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_NONNUMERIC)
     csv_f.writerow(['StartTime', 0.0])
     csv_f.writerow(['StopTime',  simulation.TimeHorizon])
@@ -96,7 +109,7 @@ def exportFMU(simulation, log):
     f.close()
 
     # Write the ReadMe.txt file
-    f = open(os.path.join(directory, '%s-ReadMe.txt' % fmu_name), "w")
+    f = open(os.path.join(fmu_directory, 'ReadMe.txt'), "w")
     f.write('Model Description:\n')
     f.write('    %s\n\n' % formatDescription(simulation))
     f.write('Compiler:\n')
@@ -112,7 +125,7 @@ def exportFMU(simulation, log):
     # Generate the FMU file
     cg = daeCodeGenerator_FMI()
     cg.generateSimulation(simulation, 
-                          directory            = directory, 
+                          directory            = fmu_directory, 
                           py_simulation_file   = py_simulation_file, 
                           callable_object_name = callable_object_name,
                           arguments            = arguments, 
@@ -151,23 +164,31 @@ def compare_solutions(csv_ref_path, csv_cc_path, out_file):
         E[varName] = numpy.sqrt((1.0/n) * numpy.sum((ref_solution-cc_solution)**2))
     
     f = open(out_file, 'wb')
-    csv_f = csv.writer(f, delimiter = ',', quotechar = '"')
+    csv_f = csv.writer(f, delimiter = ',')
     for varName, error in sorted(E.items()):
-        csv_f.writerow(['\"%s\"' % varName, '%.5e' % error])
+        csv_f.writerow(['%s'%varName, '%.5e' % error])
     f.close()
     
 def exportSimulationFromTutorial(tutorial_module):
     # In Python 2.7 __file__ points to 'file.pyc' - correct it to 'file.py'
     global py_simulation_file
+    global base_directory
+    global fmu_name
+    global fmu_directory
     py_simulation_file = tutorial_module.__file__
     if py_simulation_file.endswith('.pyc'):
         py_simulation_file = py_simulation_file[:-1]
         
+    fmu_name      = os.path.basename(py_simulation_file)
+    fmu_name      = os.path.splitext(fmu_name)[0]
+    fmu_directory = os.path.join(base_directory, fmu_name)
+    if not os.path.isdir(fmu_directory):
+        os.makedirs(fmu_directory)
+
     # To compare with the cc solution we need to remove duplicate times
-    csv_filename = os.path.basename(py_simulation_file)
-    csv_filename = os.path.splitext(csv_filename)[0]
-    csv_cc_path  = os.path.join(directory, '%s_cc.csv'  % csv_filename)
-    csv_ref_path = os.path.join(directory, '%s_ref.csv' % csv_filename)
+    csv_filename = fmu_name
+    csv_cc_path  = os.path.join(fmu_directory, '%s_cc.csv'  % csv_filename)
+    csv_ref_path = os.path.join(fmu_directory, '%s_ref.csv' % csv_filename)
     datareporter = daeCSVFileDataReporter()
     datareporter.Connect(csv_ref_path, csv_filename)
     
@@ -177,19 +198,21 @@ def exportSimulationFromTutorial(tutorial_module):
                         stopAtModelDiscontinuity        = eDoNotStopAtDiscontinuity,
                         reportDataAroundDiscontinuities = False)
     
-    compare_ref_and_cc_solutions.write('    compare_solutions(\'%s\', \'%s\', \'%s\')\n' % (os.path.basename(csv_ref_path), 
-                                                                                            os.path.basename(csv_cc_path),
-                                                                                            '%s-norm-error.csv' % csv_filename))
+    fmu_directory_basename = os.path.basename(fmu_directory)
+    csv_ref_rel_path    = os.path.join(fmu_directory_basename, os.path.basename(csv_ref_path))
+    csv_cc_rel_path     = os.path.join(fmu_directory_basename, os.path.basename(csv_cc_path))
+    norm_error_rel_path = os.path.join(fmu_directory_basename, '%s-norm-error.csv' % csv_filename)
+    compare_ref_and_cc_solutions.write('    compare_solutions(\'%s\', \'%s\', \'%s\')\n' % (csv_ref_rel_path, 
+                                                                                            csv_cc_rel_path,
+                                                                                            norm_error_rel_path))
     
 def generateFMUs():
-    global directory
+    global base_directory
+    global fmu_directory
     global py_simulation_file
     global callable_object_name
     global additional_files
     global localsAsOutputs
-    
-    if not os.path.isdir(directory):
-        os.makedirs(directory)
 
     # Basic tutorials
     exportSimulationFromTutorial(whats_the_time)
@@ -218,9 +241,11 @@ if __name__ == "__main__":
         sys.exit()
     
     # Set the output directory
-    directory = os.path.abspath(sys.argv[1])
+    base_directory = os.path.abspath(sys.argv[1])
+    if not os.path.isdir(base_directory):
+        os.makedirs(base_directory)
     
-    compare_ref_and_cc_solutions = open(os.path.join(directory, 'compare_ref_and_cc_solutions.py'), "wb")
+    compare_ref_and_cc_solutions = open(os.path.join(base_directory, 'compare_ref_and_cc_solutions.py'), "w")
     compare_ref_and_cc_solutions.write('#!/bin/bash\n')
     compare_ref_and_cc_solutions.write('# -*- coding: utf-8 -*-\n')
     compare_ref_and_cc_solutions.write('import os, sys, numpy, csv\n\n')
@@ -228,11 +253,15 @@ if __name__ == "__main__":
     compare_ref_and_cc_solutions.write(inspect.getsource(compare_solutions) + '\n')
     compare_ref_and_cc_solutions.write('if __name__ == "__main__":\n')
    
-    run_fmuCheck_all_fmus_bat = open(os.path.join(directory, 'run_fmuCheck_all_fmus-win32.bat'),  "wb")
-    run_fmuCheck_all_fmus_sh  = open(os.path.join(directory, 'run_fmuCheck_all_fmus-linux64.sh'), "wb")
+    run_fmuCheck_all_fmus_bat = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-win32.bat'),  "w")
+    run_fmuCheck_all_fmus_bat.write('set FMU_CHECK_BIN=../fmuCheck.win32.exe\n\n')
+    
+    run_fmuCheck_all_fmus_sh  = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-linux64.sh'), "w")
     run_fmuCheck_all_fmus_sh.write('#!/bin/bash\n')
     run_fmuCheck_all_fmus_sh.write('# -*- coding: utf-8 -*-\n\n')
-    run_fmuCheck_all_fmus_sh.write('set -e\n\n')
+    run_fmuCheck_all_fmus_sh.write('set -e\n')
+    #run_fmuCheck_all_fmus_sh.write('set -x\n\n')
+    run_fmuCheck_all_fmus_sh.write('export FMU_CHECK_BIN=../fmuCheck.linux64\n\n')
         
     # Generate .fmu files
     generateFMUs()

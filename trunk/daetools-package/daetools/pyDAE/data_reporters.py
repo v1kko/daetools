@@ -539,7 +539,7 @@ class daeCSVFileDataReporter(daeDataReporterFile):
         variable_values.insert(0, times)
         
         try:
-            f = open(self.ConnectString, 'wb')
+            f = open(self.ConnectString, 'w')
             
             # Some variables (i.e. parameters) have only one value so generate values for all time points
             for i in range(len(variable_values)):

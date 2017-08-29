@@ -89,7 +89,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.SetContinuousOptimizationVariable(<span style='color:#3605fb;'>self</span>.m.x4, <span style='color:#cc047c;'>1</span>, <span style='color:#cc047c;'>5</span>, <span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>;</span></b>
 
 <b>def</b> chooseAlgorithm():
-    <span style='color:#3605fb;'>from</span> PyQt5 <span style='color:#3605fb;'>import</span> QtCore, QtGui, QtWidgets
+    <span style='color:#3605fb;'>from</span> PyQt5 <span style='color:#3605fb;'>import</span> QtWidgets
     algorithms <b><span style='color:#0000ff;'>=</span></b> [<span style='color:#cc0000;'>'NLOPT_GN_DIRECT'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L_RAND'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_NOSCAL'</span>,<span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L_NOSCAL'</span>,
                   <span style='color:#cc0000;'>'NLOPT_GN_DIRECT_L_RAND_NOSCAL'</span>,<span style='color:#cc0000;'>'NLOPT_GN_ORIG_DIRECT'</span>,<span style='color:#cc0000;'>'NLOPT_GN_ORIG_DIRECT_L'</span>,<span style='color:#cc0000;'>'NLOPT_GD_STOGO'</span>,<span style='color:#cc0000;'>'NLOPT_GD_STOGO_RAND'</span>,
                   <span style='color:#cc0000;'>'NLOPT_LD_LBFGS_NOCEDAL'</span>,<span style='color:#cc0000;'>'NLOPT_LD_LBFGS'</span>,<span style='color:#cc0000;'>'NLOPT_LN_PRAXIS'</span>,<span style='color:#cc0000;'>'NLOPT_LD_VAR1'</span>,<span style='color:#cc0000;'>'NLOPT_LD_VAR2'</span>,<span style='color:#cc0000;'>'NLOPT_LD_TNEWTON'</span>,
@@ -105,64 +105,22 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>else</b>:
         <b>return</b> <span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-    algorithm <b><span style='color:#0000ff;'>=</span></b> chooseAlgorithm()
-    nlp <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(algorithm)
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
-    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
-                                  optimization <b><span style='color:#0000ff;'>=</span></b> opt,
-                                  nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp)
-    simulator.exec_()
-
-<span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
-    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
     <span style='color:#017a31;'># NLOPT algorithm must be set in its constructor</span>
-    nlpsolver <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
-
-    <span style='color:#017a31;'># Do no print progress</span>
-    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
-    
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
-        sys.exit()
-
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
-
-    <span style='color:#017a31;'># Run</span>
-    optimization.Run()
-    optimization.Finalize()
+    <b>if</b> guiRun:
+        algorithm <b><span style='color:#0000ff;'>=</span></b> chooseAlgorithm()
+        nlpsolver <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(algorithm)
+    <b>else</b>:
+        nlpsolver <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
+    daeActivity.optimize(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
+                                     nlpsolver         <b><span style='color:#0000ff;'>=</span></b> nlpsolver,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
-</pre>
+    app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun, qtApp <b><span style='color:#0000ff;'>=</span></b> app)</pre>
 </body>
 </html>

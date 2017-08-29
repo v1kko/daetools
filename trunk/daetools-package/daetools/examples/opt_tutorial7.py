@@ -166,7 +166,9 @@ def setOptions(nlpsolver):
     except Exception as e:
         print(str(e))
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
+    qtApp = kwargs.get('qtApp', None)
+
     simulation   = simTutorial()
     optimization = optTutorial(qtApp)
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
@@ -177,11 +179,10 @@ def run(guiRun = False, qtApp = None):
                                      optimization            = optimization,
                                      nlpsolver               = nlpsolver,
                                      nlpsolver_setoptions_fn = setOptions,
-                                     guiRun                  = guiRun,
-                                     qtApp                   = qtApp)
+                                     **kwargs)
 
 if __name__ == "__main__":
     app = daeCreateQtApplication(sys.argv)
     guiRun_ = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-    run(guiRun_, app)
+    run(guiRun = guiRun_, qtApp = app)
     app.exec_()

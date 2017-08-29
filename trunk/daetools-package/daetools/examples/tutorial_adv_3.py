@@ -200,7 +200,13 @@ def run_code_generators(simulation, log):
     # 2. Use a custom function (here create_simulation)
     from daetools.code_generators.fmi import daeCodeGenerator_FMI
     cg = daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation_for_cosimulation', 'simTutorial', [], localsAsOutputs = False)
+    cg.generateSimulation(simulation, 
+                          directory            = tmp_folder, 
+                          py_simulation_file   = __file__,
+                          callable_object_name = 'create_simulation_for_cosimulation',
+                          arguments            = 'simTutorial', 
+                          additional_files     = [],
+                          localsAsOutputs      = False)
 
 # This function can be used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
 # It can have any number of arguments, but must return an initialized daeSimulation object.

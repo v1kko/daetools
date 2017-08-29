@@ -23,6 +23,7 @@ Classes
 .. autosummary::
     daeSimulation
     daeOptimization
+    daeActivity
 
 .. autoclass:: pyActivity.daeSimulation
     :members:
@@ -147,6 +148,10 @@ Classes
     .. automethod:: Initialize
     .. automethod:: Run
     .. automethod:: Finalize
+
+.. autoclass:: pyDAE.daeActivity
+    :members:
+    :undoc-members:
 
 Enumerations
 =============

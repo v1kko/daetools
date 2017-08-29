@@ -100,7 +100,7 @@ def plotExpFitComparison(minpack, input_variable_index, measured_variable_index,
     ax.legend(legend) #, frameon=False)
     return fig
     
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()

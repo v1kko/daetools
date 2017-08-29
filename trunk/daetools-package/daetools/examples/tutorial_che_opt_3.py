@@ -364,7 +364,7 @@ def consoleSimulation():
     simulation.Run()
     simulation.Finalize()
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     simulation = simMarinePopulation_opt()
     #nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
     nlpsolver  = pyIPOPT.daeIPOPT()
@@ -378,12 +378,11 @@ def run(guiRun = False, qtApp = None):
                                      nlpsolver               = nlpsolver,
                                      nlpsolver_setoptions_fn = setOptions,
                                      relativeTolerance       = relativeTolerance,
-                                     guiRun                  = guiRun,
-                                     qtApp                   = qtApp)
+                                     **kwargs)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'simulation'):
         consoleSimulation()
     else:
         guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-        run(guiRun)
+        run(guiRun = guiRun)

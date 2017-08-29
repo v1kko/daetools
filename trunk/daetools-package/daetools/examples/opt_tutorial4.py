@@ -120,7 +120,7 @@ def ObjectiveFunction(x, *args):
     print('')
     return simulation.ObjectiveFunction.Value
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()

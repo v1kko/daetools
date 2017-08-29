@@ -313,8 +313,6 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                 platform_binaries_dir = os.path.join(binaries_dir, 'darwin64')
             else:
                 platform_binaries_dir = os.path.join(binaries_dir, 'darwin32')
-            # Modify platform_machine to match daetools naming
-            platform_machine = 'universal'
         else:
             raise RuntimeError('Unsupported platform: %s' % platform_system)
 

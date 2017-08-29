@@ -33,12 +33,12 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#cc0000;'>References (model equations and input parameters):</span>
 
 <span style='color:#cc0000;'>- Nikolic D.D., Frawley P.J. (2016) Application of the Lagrangian Meshfree Approach</span>
-<span style='color:#cc0000;'>  to Modelling of Batch Crystallisation: Part I – Modelling of Stirred Tank Hydrodynamics.</span>
-<span style='color:#cc0000;'>  Chemical Engineering Science 145:317–328.</span>
+<span style='color:#cc0000;'>  to Modelling of Batch Crystallisation: Part I - Modelling of Stirred Tank Hydrodynamics.</span>
+<span style='color:#cc0000;'>  Chemical Engineering Science 145:317-328.</span>
 <span style='color:#cc0000;'>  `doi:10.1016/j.ces.2015.08.052 &lt;http://dx.doi.org/10.1016/j.ces.2015.08.052&gt;`_</span>
-<span style='color:#cc0000;'>- Mitchell N.A., O’Ciardha C.T., Frawley P.J. (2011) Estimation of the growth kinetics</span>
+<span style='color:#cc0000;'>- Mitchell N.A., O'Ciardha C.T., Frawley P.J. (2011) Estimation of the growth kinetics</span>
 <span style='color:#cc0000;'>  for the cooling crystallisation of paracetamol and ethanol solutions.</span>
-<span style='color:#cc0000;'>  Journal of Crystal Growth 328:39–49.</span>
+<span style='color:#cc0000;'>  Journal of Crystal Growth 328:39-49.</span>
 <span style='color:#cc0000;'>  `doi:10.1016/j.jcrysgro.2011.06.016 &lt;http://dx.doi.org/10.1016/j.jcrysgro.2011.06.016&gt;`_</span>
 
 <span style='color:#cc0000;'>The main assumptions:</span>
@@ -314,58 +314,16 @@ pbm_diameter_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<spa
         <b>for</b> k <b>in</b> <span style='color:#2a00d6;'>range</span>(<span style='color:#cc047c;'>0</span>, <span style='color:#3605fb;'>self</span>.m.Nm.NumberOfPoints):
             moments[k].SetInitialCondition(m_seed[k])
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>60</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3000</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
-    simulator.exec_()
-
-<span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
-    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-
-    <span style='color:#017a31;'># Relative tolerance</span>
-    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-07</span>
-    
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>60</span>
-    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3000</span>
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
-        sys.exit()
-
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    simulation.Initialize(daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
-
-    <span style='color:#017a31;'># Solve at time=0 (initialization)</span>
-    simulation.SolveInitial()
-
-    <span style='color:#017a31;'># Run</span>
-    simulation.Run()
-    simulation.Finalize()
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    relativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-07</span>
+    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>60</span>,
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3000</span>,
+                                     relativeTolerance <b><span style='color:#0000ff;'>=</span></b> relativeTolerance,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
-</pre>
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
 </body>
 </html>

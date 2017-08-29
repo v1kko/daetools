@@ -574,8 +574,9 @@ class simTutorial(daeSimulation):
 def run(**kwargs):
     # An exception will be raised at some point when the log function is called for a negative value
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval = simulation.process_info["tend"].value / 100,
-                                     timeHorizon       = simulation.process_info["tend"].value,
+    timeHorizon = min(3770.0, simulation.process_info["tend"].value)
+    daeActivity.simulate(simulation, reportingInterval = timeHorizon / 100,
+                                     timeHorizon       = timeHorizon,
                                      **kwargs)
 
 if __name__ == "__main__":

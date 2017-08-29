@@ -162,7 +162,7 @@ def setOptions(nlpsolver):
     #nlpsolver.SetOption('obj_scaling_factor', 100.0)
     #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     simulation = simCatalystMixing(100, 1.0/100)
     nlpsolver  = pyIPOPT.daeIPOPT()
     lasolver   = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
@@ -173,9 +173,8 @@ def run(guiRun = False, qtApp = None):
                                      nlpsolver               = nlpsolver,
                                      nlpsolver_setoptions_fn = setOptions,
                                      relativeTolerance       = relativeTolerance,
-                                     guiRun                  = guiRun,
-                                     qtApp                   = qtApp)
+                                     **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-    run(guiRun)
+    run(guiRun = guiRun)

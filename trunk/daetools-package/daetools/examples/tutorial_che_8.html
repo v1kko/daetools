@@ -82,7 +82,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#3605fb;'>from</span> .membrane_unit <span style='color:#3605fb;'>import</span> MembraneUnit
 
 <b>class</b> simTutorial(daeSimulation):
-    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Phigh):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Phigh <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3e5</span>):
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
         <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> MembraneUnit(<span style='color:#cc0000;'>&quot;tutorial_che_8&quot;</span>)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
@@ -265,17 +265,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         <span style='color:#3605fb;'>self</span>.Log.SetProgress(<span style='color:#cc047c;'>100</span>)
         <span style='color:#3605fb;'>self</span>.Log.Message(<span style='color:#cc0000;'>'Done!!'</span>, <span style='color:#cc047c;'>0</span>)
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial(<span style='color:#cc047c;'>3e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
-    daesolver <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim, daesolver<b><span style='color:#0000ff;'>=</span></b>daesolver)
-    simulator.exec_()
-
 <b>def</b> simulate(Phigh):
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
@@ -390,14 +379,20 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     plt.tight_layout()
     plt.show()
 
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial(<span style='color:#cc047c;'>3e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
+    relativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
+    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
+                                     relativeTolerance <b><span style='color:#0000ff;'>=</span></b> relativeTolerance,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         simulate(<span style='color:#cc047c;'>3e5</span> <b><span style='color:#0000ff;'>*</span></b> Pa)
     <b>elif</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'full_experiment'</span>):
         full_experiment()
     <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
-</pre>
+        run(guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>)</pre>
 </body>
 </html>

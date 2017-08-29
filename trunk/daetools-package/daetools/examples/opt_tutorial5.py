@@ -135,7 +135,7 @@ def Derivatives(p, simulation, xin, ymeas):
 def peval(x, p):
     return p[0] * numpy.sin(2 * numpy.pi * p[1] * x + p[2])
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     datareporter = daeTCPIPDataReporter()

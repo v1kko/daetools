@@ -211,12 +211,7 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     simulation.Finalize()
     <b>return</b> dr_data.Process
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    msg <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;This tutorial can be run from the command line only: python tutorial_che_5.py console&quot;</span>
-    daeQtMessage(<span style='color:#cc0000;'>&quot;tutorial_che_5&quot;</span>, msg)
-
-<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     <span style='color:#017a31;'># Create an initial CSD array and growth rate</span>
     N    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>200</span>
     L_lb <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.0</span>
@@ -278,6 +273,8 @@ pbm_number_density_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         <b>for</b> flux_limiter, L1, L2 <b>in</b> L_report:
             <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'  </span><span style='color:#cc0000;'>%15s</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%.3e</span><span style='color:#cc0000;'>  </span><span style='color:#cc0000;'>%.3e</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (flux_limiter, L1, L2))
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'   -------------------------------------'</span>)
-</pre>
+
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    run()</pre>
 </body>
 </html>

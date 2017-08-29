@@ -221,7 +221,7 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
 <span style='color:#017a31;'>        </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
         daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
 
-        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;wtt&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial(<span style='color:#cc0000;'>&quot;whats_the_time&quot;</span>)
         <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
         
     <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
@@ -243,13 +243,13 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
         <span style='color:#3605fb;'>self</span>.m.tau.SetInitialCondition(<span style='color:#cc047c;'>0.0</span>)
 
 <span style='color:#017a31;'># Use daeSimulator class (pyQt GUI)</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
-    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation<b><span style='color:#0000ff;'>=</span></b>sim)
+<b>def</b> guiRun(qtApp):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
+    simulation.ReportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
+    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
+    simulator  <b><span style='color:#0000ff;'>=</span></b> daeSimulator(qtApp, simulation <b><span style='color:#0000ff;'>=</span></b> simulation)
     simulator.exec_()
 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
@@ -291,7 +291,7 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
 <span style='color:#017a31;'>         Here, we enable reporting of all variables in the model.</span>
 <span style='color:#017a31;'>       - The time derivatives of all variables will be reported</span>
 <span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
+    simulation.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>
     simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
     
     simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
@@ -349,6 +349,21 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
     <span style='color:#017a31;'># 8.4 Finally, call the function Finalize to clean-up.</span>
     simulation.Finalize()
 
+<span style='color:#017a31;'># Simulations can also be executed in a simple way using the static daeActivity.simulate function.</span>
+<span style='color:#017a31;'># The function uses the default objects for all missing data (as in the consoleRun function above):</span>
+<span style='color:#017a31;'>#   log          = daePythonStdOutLog()</span>
+<span style='color:#017a31;'>#   daesolver    = daeIDAS()</span>
+<span style='color:#017a31;'>#   datareporter = daeTCPIPDataReporter()</span>
+<span style='color:#017a31;'># Several additional arguments can be specified such as: </span>
+<span style='color:#017a31;'>#   time horizon, reporting interval, datareporter, log, daesolver, lasolver, relative tolerance,</span>
+<span style='color:#017a31;'>#   callback functions to be called after initialisation, before and after simulation, etc.</span>
+<span style='color:#017a31;'># If the keyword arguments **kwargs contain 'guiRun=True' the simulation will be run using the Qt GUI.</span>
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>, 
+                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>This part of the code executes if the python script is executed from a shell</span>
 <span style='color:#017a31;'>1) If called as: &quot;python whats_the_time.py console&quot; the simulation will be launched in the console</span>
@@ -359,8 +374,8 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
     <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
         consoleRun()
     <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
+        qtApp <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
+        guiRun(qtApp)
 </pre>
 </body>
 </html>

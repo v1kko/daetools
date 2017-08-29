@@ -3391,7 +3391,8 @@ Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimul
 - ``py_simulation_file``: a path to the python file with the simulation source code
 - ``create_simulation_callable_object``: the name of python callable object that returns an *initialized* :py:class:`~pyActivity.daeSimulation` object
 - ``arguments``: arguments for the above callable object; can be anything that python accepts
-- ``py_additional_files``: paths to the additional files to pack into a .fmu file (empty list by default)
+- ``additional_files``: paths to the additional files to pack into a .fmu file (empty list by default)
+- ``localsAsOutputs``: if True all variables from the top-level model will be treated as model outputs, otherwise as locals
     
 As a default ``create_simulation_callable_object`` object the function :py:meth:`~daetools.pyDAE.create_simulation_for_cosimulation`
 can be used which accepts a single argument ``simulation_class`` (the user-defined daeSimulation-derived class name):

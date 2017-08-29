@@ -94,7 +94,7 @@ def chooseAlgorithm():
     else:
         return 'NLOPT_LD_SLSQP'
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     simulation = simTutorial()
     # NLOPT algorithm must be set in its constructor
     if guiRun:
@@ -102,13 +102,12 @@ def run(guiRun = False, qtApp = None):
         nlpsolver = pyNLOPT.daeNLOPT(algorithm)
     else:
         nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
-    daeActivity.optimize(simulation, reportingInterval       = 1, 
-                                     timeHorizon             = 1,
-                                     nlpsolver               = nlpsolver,
-                                     guiRun                  = guiRun,
-                                     qtApp                   = qtApp)
+    daeActivity.optimize(simulation, reportingInterval = 1, 
+                                     timeHorizon       = 1,
+                                     nlpsolver         = nlpsolver,
+                                     **kwargs)
 
 if __name__ == "__main__":
     app = daeCreateQtApplication(sys.argv)
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-    run(guiRun, app)
+    run(guiRun = guiRun, qtApp = app)

@@ -107,69 +107,20 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># ClearOptions can clear all options:</span>
     <span style='color:#017a31;'>#nlpsolver.ClearOptions()</span>
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    sim <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-    nlp <b><span style='color:#0000ff;'>=</span></b> pyBONMIN.daeBONMIN()
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    sim.TimeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
-    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()</span>
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
+    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
     <span style='color:#017a31;'># Otherwise seg. fault occurs for some reasons.</span>
-    <span style='color:#017a31;'># That is why we send a callback function to set the options after Initialize()</span>
-    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
-                                  optimization <b><span style='color:#0000ff;'>=</span></b> opt,
-                                  nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
-                                  nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
-    simulator.exec_()
-
-<span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
-    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyBONMIN.daeBONMIN()
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-
-    <span style='color:#017a31;'># Do no print progress</span>
-    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
-    
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>
-    simulation.TimeHorizon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
-        sys.exit()
-
-    <span style='color:#017a31;'># Initialize the simulation</span>
-    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can be only set after optimization.Initialize()</span>
-    <span style='color:#017a31;'># Otherwise seg. fault occurs for some reasons.</span>
-    setOptions(nlpsolver)
-
-    <span style='color:#017a31;'># Save the model report and the runtime model report</span>
-    simulation.m.SaveModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;.xml&quot;</span>)
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;-rt.xml&quot;</span>)
-
-    <span style='color:#017a31;'># Run</span>
-    optimization.Run()
-    optimization.Finalize()
+    nlpsolver  <b><span style='color:#0000ff;'>=</span></b> pyBONMIN.daeBONMIN()
+    daeActivity.optimize(simulation, reportingInterval       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                     timeHorizon             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
+                                     nlpsolver               <b><span style='color:#0000ff;'>=</span></b> nlpsolver,
+                                     nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>else</b>:
-        app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)
-        guiRun(app)
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
 </pre>
 </body>
 </html>

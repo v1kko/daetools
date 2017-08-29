@@ -277,64 +277,6 @@ y3_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>
     nlpsolver.ftol_rel <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
     nlpsolver.ftol_abs <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
 
-<span style='color:#017a31;'># Use daeSimulator class</span>
-<b>def</b> guiRun(app):
-    dae <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    sim <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
-    opt <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-    nlp <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
-    lasolver <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
-    dae.SetLASolver(lasolver)
-    dae.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
-    sim.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-    sim.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
-    simulator <b><span style='color:#0000ff;'>=</span></b> daeSimulator(app, simulation <b><span style='color:#0000ff;'>=</span></b> sim,
-                                  optimization <b><span style='color:#0000ff;'>=</span></b> opt,
-                                  nlpsolver <b><span style='color:#0000ff;'>=</span></b> nlp,
-                                  daesolver <b><span style='color:#0000ff;'>=</span></b> dae,
-                                  lasolver <b><span style='color:#0000ff;'>=</span></b> lasolver,
-                                  nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions)
-    simulator.exec_()
-
-<span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> consoleRun():
-    <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
-    log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
-    daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
-    nlpsolver    <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    simulation   <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
-    optimization <b><span style='color:#0000ff;'>=</span></b> daeOptimization()
-    lasolver     <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
-    daesolver.SetLASolver(lasolver)
-
-    daesolver.RelativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
-
-    <span style='color:#017a31;'># Do no print progress</span>
-    log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>
-
-    <span style='color:#017a31;'># Enable reporting of all variables</span>
-    simulation.m.SetReportingOn(<span style='color:#3605fb;'>True</span>)
-
-    <span style='color:#017a31;'># Set the time horizon and the reporting interval</span>
-    simulation.ReportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
-
-    <span style='color:#017a31;'># Connect data reporter</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b>(datareporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName) <b><span style='color:#0000ff;'>==</span></b> <span style='color:#3605fb;'>False</span>):
-        sys.exit()
-
-    <span style='color:#017a31;'># Initialize the optimization</span>
-    optimization.Initialize(simulation, nlpsolver, daesolver, datareporter, log)
-
-    <span style='color:#017a31;'># Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()</span>
-    <span style='color:#017a31;'># Otherwise seg. fault occurs for some reasons.</span>
-    setOptions(nlpsolver)
-
-    <span style='color:#017a31;'># Run</span>
-    optimization.Run()
-    optimization.Finalize()
-
 <b>def</b> consoleSimulation():
     <span style='color:#017a31;'># Create Log, Solver, DataReporter and Simulation object</span>
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
@@ -394,15 +336,26 @@ y3_t0 <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>
     <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'y3     = numpy.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>repr</span>(y3))
     <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'y3_obs = numpy.</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> <span style='color:#2a00d6;'>repr</span>(y3_exp))
 
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simMethanol2Hydrocarbons_opt()
+    nlpsolver  <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
+    lasolver   <b><span style='color:#0000ff;'>=</span></b> pyTrilinos.daeCreateTrilinosSolver(<span style='color:#cc0000;'>&quot;Amesos_Klu&quot;</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+    relativeTolerance <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
+    reportingTimes <b><span style='color:#0000ff;'>=</span></b> times.tolist()
+    daeActivity.optimize(simulation, reportingInterval       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                     timeHorizon             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
+                                     reportingTimes          <b><span style='color:#0000ff;'>=</span></b> reportingTimes,
+                                     lasolver                <b><span style='color:#0000ff;'>=</span></b> lasolver,
+                                     nlpsolver               <b><span style='color:#0000ff;'>=</span></b> nlpsolver,
+                                     nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions,
+                                     relativeTolerance       <b><span style='color:#0000ff;'>=</span></b> relativeTolerance,
+                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
-    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>):
-        consoleRun()
-    <b>elif</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'simulation'</span>):
+    <b>if</b> <span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> (sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'simulation'</span>):
         consoleSimulation()
     <b>else</b>:
-        <span style='color:#3605fb;'>from</span> PyQt4 <span style='color:#3605fb;'>import</span> QtCore, QtGui
-        app <b><span style='color:#0000ff;'>=</span></b> QtGui.QApplication(sys.argv)
-        guiRun(app)
-</pre>
+        guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+        run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
 </body>
 </html>

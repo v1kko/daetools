@@ -228,16 +228,15 @@ def setOptions(nlpsolver):
     #nlpsolver.SetOption('obj_scaling_factor', 0.00001)
     nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
         
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     simulation = simCSTR()
     nlpsolver  = pyIPOPT.daeIPOPT()
     daeActivity.optimize(simulation, reportingInterval       = 600, 
                                      timeHorizon             = 5*60*60,
                                      nlpsolver               = nlpsolver,
                                      nlpsolver_setoptions_fn = setOptions,
-                                     guiRun                  = guiRun,
-                                     qtApp                   = qtApp)
+                                     **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
-    run(guiRun)
+    run(guiRun = guiRun)
