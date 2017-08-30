@@ -72,7 +72,7 @@ def exportFMU(simulation, log):
     #  a) GNU/Linux shell script
     #  b) Windows batch file
     FMUName_cc_sh  = '$FMU_CHECK_BIN -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name) 
-    FMUName_cc_bat = '%%FMU_CHECK_BIN%% -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name)
+    FMUName_cc_bat = 'start /wait %%FMU_CHECK_BIN%% -e %s_cc.log -o %s_cc.csv -n %d -s %.3f -l 5 %s.fmu' % (fmu_name, fmu_name, numSteps, t_stop, fmu_name)
 
     fmu_cc_sh = '%s_cc.sh' % fmu_name
     f = open(os.path.join(fmu_directory, fmu_cc_sh), "w")
@@ -137,17 +137,16 @@ def open_csv(csv_filename):
 
     # Get the variable names from the.csv file using Python csv module.
     f = open(csv_filename, 'r')
-    csv_f = csv.reader(f, delimiter = ',', quotechar = '"')
-    names = {}
-    header = csv_f.next()
-    for index, name in enumerate(header):
-        names[name] = index
-        
+    header = f.readline()
+    names = header.split('","')
+    dictNames = {}
+    for index, name in enumerate(names):
+        dictNames[name.strip('\"\n')] = index
+
     # Return to the beginning of the file and get the variable values. 
-    f.seek(0,0)
-    values = numpy.loadtxt(f, delimiter=',', skiprows=1, unpack=True)
+    values = numpy.loadtxt(csv_filename, delimiter=',', skiprows=1, unpack=True)
     
-    return names, values
+    return dictNames, values
     
 def compare_solutions(csv_ref_path, csv_cc_path, out_file):
     # Generates normalised global errors from the reference and the ComplianceChecker values.
@@ -163,7 +162,7 @@ def compare_solutions(csv_ref_path, csv_cc_path, out_file):
         n = len(cc_solution)
         E[varName] = numpy.sqrt((1.0/n) * numpy.sum((ref_solution-cc_solution)**2))
     
-    f = open(out_file, 'wb')
+    f = open(out_file, 'w')
     csv_f = csv.writer(f, delimiter = ',')
     for varName, error in sorted(E.items()):
         csv_f.writerow(['%s'%varName, '%.5e' % error])
@@ -199,12 +198,12 @@ def exportSimulationFromTutorial(tutorial_module):
                         reportDataAroundDiscontinuities = False)
     
     fmu_directory_basename = os.path.basename(fmu_directory)
-    csv_ref_rel_path    = os.path.join(fmu_directory_basename, os.path.basename(csv_ref_path))
-    csv_cc_rel_path     = os.path.join(fmu_directory_basename, os.path.basename(csv_cc_path))
-    norm_error_rel_path = os.path.join(fmu_directory_basename, '%s-norm-error.csv' % csv_filename)
-    compare_ref_and_cc_solutions.write('    compare_solutions(\'%s\', \'%s\', \'%s\')\n' % (csv_ref_rel_path, 
-                                                                                            csv_cc_rel_path,
-                                                                                            norm_error_rel_path))
+    csv_ref_rel_path    = 'os.path.join(\"%s\",\"%s\")' % (fmu_directory_basename, os.path.basename(csv_ref_path))
+    csv_cc_rel_path     = 'os.path.join(\"%s\",\"%s\")' % (fmu_directory_basename, os.path.basename(csv_cc_path))
+    norm_error_rel_path = 'os.path.join(\"%s\",\"%s\")' % (fmu_directory_basename, '%s-norm-error.csv' % csv_filename)
+    compare_ref_and_cc_solutions.write('    compare_solutions(%s, %s, %s)\n' % (csv_ref_rel_path, 
+                                                                                csv_cc_rel_path,
+                                                                                norm_error_rel_path))
     
 def generateFMUs():
     global base_directory
