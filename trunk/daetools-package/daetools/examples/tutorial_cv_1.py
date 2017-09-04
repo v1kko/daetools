@@ -217,7 +217,7 @@ class simTutorial(daeSimulation):
         plt.show()
 
 # Setup everything manually and run in a console
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()
@@ -258,7 +258,7 @@ def run(guiRun = False, qtApp = None):
 
     simulation.Run()
     simulation.Finalize()
-    
+
     ##############################################################################################
     # Plot the comparison between numerical and analytical sensitivities using the data reporter #
     ##############################################################################################

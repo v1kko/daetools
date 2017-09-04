@@ -159,7 +159,7 @@ def simulate(Nx):
     
     return simulation.m.x.Points, c
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     Nxs = numpy.array([20, 40, 80])
     n = len(Nxs)
     hs = L / Nxs

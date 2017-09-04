@@ -242,10 +242,10 @@ def print_list_of_events(simulation, log):
 
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval       = 2, 
-                                     timeHorizon             = 500,
-                                     run_after_simulation_fn = print_list_of_events,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval       = 2, 
+                                            timeHorizon             = 500,
+                                            run_after_simulation_fn = print_list_of_events,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

@@ -140,7 +140,7 @@ BOOST_PYTHON_MODULE(pyDataReporting)
         .def("EndOfData",	    	&daeDataReporter_t::EndOfData,		    &daepython::daeDelegateDataReporterWrapper::def_EndOfData)
         .def("SendVariable",	  	&daeDataReporter_t::SendVariable,		&daepython::daeDelegateDataReporterWrapper::def_SendVariable)
 
-        .def("AddDataReporter",	  	&daeDelegateDataReporter::AddDataReporter, ( arg("self"), arg("dataReporter") ), DOCSTR_daeDelegateDataReporter_AddDataReporter)
+        .def("AddDataReporter",	  	&daepython::daeDelegateDataReporterWrapper::AddDataReporter, ( arg("self"), arg("dataReporter") ), DOCSTR_daeDelegateDataReporter_AddDataReporter)
 
         .add_property("DataReporters",  &daepython::daeDelegateDataReporterWrapper::GetDataReporters, DOCSTR_daeDelegateDataReporter_DataReporters)
         ;

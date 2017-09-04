@@ -194,19 +194,19 @@ def run_code_generators(simulation, log):
     cg.generateSimulation(simulation, tmp_folder)
 
     # Functional Mock-up Interface for co-simulation
-    # There are two options for loading the simulation:
-    # 1. Use the default function create_simulation_for_cosimulation which accepts
-    #    a single argument: simulationClassName (here 'simTutorial')
-    # 2. Use a custom function (here create_simulation)
+    # The interface requires a function (or a callable object) that returns an initialised simulation object:
+    # the function run(**kwargs) or any other function can be used (here, for an illustration: create_simulation).
+    # In general, using the function such as run(**kwargs) from daetools tutorials is more flexible.
     from daetools.code_generators.fmi import daeCodeGenerator_FMI
     cg = daeCodeGenerator_FMI()
     cg.generateSimulation(simulation, 
                           directory            = tmp_folder, 
                           py_simulation_file   = __file__,
-                          callable_object_name = 'create_simulation_for_cosimulation',
-                          arguments            = 'simTutorial', 
+                          callable_object_name = 'create_simulation',
+                          arguments            = '', 
                           additional_files     = [],
-                          localsAsOutputs      = False)
+                          localsAsOutputs      = False,
+                          add_xml_stylesheet   = True)
 
 # This function can be used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
 # It can have any number of arguments, but must return an initialized daeSimulation object.
@@ -234,10 +234,10 @@ def create_simulation():
     
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval        = 1, 
-                                     timeHorizon              = 100,
-                                     run_before_simulation_fn = run_code_generators,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval        = 1, 
+                                            timeHorizon              = 100,
+                                            run_before_simulation_fn = run_code_generators,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

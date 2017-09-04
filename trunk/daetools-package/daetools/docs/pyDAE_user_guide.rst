@@ -3317,6 +3317,8 @@ The following part of the code support parallelisation:
 
 - Solution of systems of linear equations (SuperLU_MT, Pardiso and Intel Pardiso solvers)
 
+- Global Sensitivity Analysis (using multiprocessing.Pool available in Python)
+
 In addition, there is an experimental code generator that generates C++ source code with the 
 support for MPI interface.
 
@@ -3369,19 +3371,12 @@ Functional Mock-up Interface for co-simulation (FMI)
 
 .. topic:: Nota bene
     
-        The model inputs are defined by the inlet ports while the model outputs by the outlet ports. 
-        If there are no ports defined in the top-level model the ``FMI`` object 
-        will not have inputs nor outputs.
+        The model inputs are defined by the inlet ports while the model outputs by the outlet ports.
+        In addition, assigned variables (degrees of freedom) from the top-level model are added to
+        the list of inputs and the rest of variables from the top-level model can be added as either
+        local FMI variables or as outputs.
 
-Generating ``FMU`` files for use in FMI capable simulators is similar to the code-generation procedure:
-
-.. code-block:: python
-
-    # Generate Functional Mock-up Interface for co-simulation file (.fmu)
-    from daetools.code_generators.fmi import daeCodeGenerator_FMI
-    cg = daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation_callable_object', 'arguments', [])
-
+Generating ``FMU`` files for use in FMI capable simulators is similar to the code-generation procedure.
 The :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimulation` function generates a ``simulation name.fmu`` file
 which is basically a zip file with the files required by the ``FMI standard``.
 Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimulation` function requires the following arguments:
@@ -3393,18 +3388,28 @@ Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimul
 - ``arguments``: arguments for the above callable object; can be anything that python accepts
 - ``additional_files``: paths to the additional files to pack into a .fmu file (empty list by default)
 - ``localsAsOutputs``: if True all variables from the top-level model will be treated as model outputs, otherwise as locals
-    
-As a default ``create_simulation_callable_object`` object the function :py:meth:`~daetools.pyDAE.create_simulation_for_cosimulation`
-can be used which accepts a single argument ``simulation_class`` (the user-defined daeSimulation-derived class name):
+- ``add_xml_stylesheet``: if True the xsl file ``daetools-fmi.xsl`` will be added to the modelDescription.xml file
+
+All tutorials provide ``run(**kwargs)`` function that can be used to run a simulation (using the console or Qt GUI) 
+and for co-simulation to return an initialised simulation object (if the ``initializeAndReturn`` argument is True).
+This way the same setup can be used for different activities. 
 
 .. code-block:: python
 
     from daetools.code_generators.fmi import daeCodeGenerator_FMI
     cg = daeCodeGenerator_FMI()
-    cg.generateSimulation(simulation, tmp_folder, __file__, 'create_simulation_for_cosimulation', 'simTutorial', [])
+    cg.generateSimulation(simulation, 
+                          directory            = tmp_folder, 
+                          py_simulation_file   = __file__, 
+                          callable_object_name = 'run',
+                          arguments            = 'initializeAndReturn = True', 
+                          additional_files     = [],
+                          localsAsOutputs      = True,
+                          add_xml_stylesheet   = True)
 
 
-In addition, the ``create_simulation_callable_object`` argument can be a user-defined function (as specified in the :ref:`tutorial_adv_3` example):
+In addition, the ``create_simulation_callable_object`` argument can be any other user-defined function 
+(as specified in the :ref:`tutorial_adv_3` example):
 
 .. code-block:: python
 
@@ -3422,13 +3427,10 @@ In addition, the ``create_simulation_callable_object`` argument can be a user-de
 
         # Set the time horizon and the reporting interval
         simulation.ReportingInterval = 1
-        simulation.TimeHorizon       = 1
+        simulation.TimeHorizon       = 100
 
         # Initialize the simulation
         simulation.Initialize(daesolver, datareporter, log)
-
-        # Nota bene: store the objects since they will be destroyed when they go out of scope
-        simulation.__rt_objects__ = [daesolver, datareporter, log]
 
         return simulation
    
@@ -3482,7 +3484,7 @@ Now the compiled ``daetools_mex`` executable can be used to run **DAE Tools** si
 
 .. code-block:: bash
 
-  res = daetools_mex('.../daetools/examples/tutorial_adv_3.py', 'create_simulation_for_cosimulation', 'simTutorial', 100.0, 10.0)
+  res = daetools_mex('.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 100.0, 10.0)
   
 ``daetools_mex`` accepts the following arguments:
 
@@ -3522,7 +3524,7 @@ Running ``deatools_s`` S-functions:
     
   - S-Function parameters: see the description below
   
-    example: '.../daetools/examples/tutorial_adv_3.py', 'create_simulation_for_cosimulation', 'simTutorial', 2, 2
+    example: '.../daetools/examples/tutorial_adv_3.py', 'create_simulation', ' ', 2, 2
   
   - S-Function modules: leave blank
 

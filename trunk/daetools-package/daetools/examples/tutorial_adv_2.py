@@ -165,10 +165,10 @@ def run(**kwargs):
     simulation = simTutorial()
     print('Supported Trilinos solvers: %s' % pyTrilinos.daeTrilinosSupportedSolvers())
     lasolver = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
-    daeActivity.simulate(simulation, reportingInterval = 5, 
-                                     timeHorizon       = 60,
-                                     lasolver          = lasolver,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 5, 
+                                            timeHorizon       = 60,
+                                            lasolver          = lasolver,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

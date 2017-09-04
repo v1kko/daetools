@@ -196,10 +196,10 @@ class InteractiveOP(QtWidgets.QDialog):
 def run(**kwargs):
     simulation = simTutorial()
     datareporter = daeDataReporterLocal()
-    daeActivity.simulate(simulation, reportingInterval = 1, 
-                                     timeHorizon       = 1000,
-                                     datareporter      = datareporter,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 1, 
+                                            timeHorizon       = 1000,
+                                            datareporter      = datareporter,
+                                            **kwargs)
 
 if __name__ == "__main__":
     qtApp  = QtWidgets.QApplication(sys.argv)

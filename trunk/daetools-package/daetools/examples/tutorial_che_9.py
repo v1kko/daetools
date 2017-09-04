@@ -347,56 +347,13 @@ class simTutorial(daeSimulation):
              k3n_du5_dk3n,
              'Sensitivities from DAESolver.SensitivityMatrix')
     """
-    
-def run(**kwargs):
-    log          = daePythonStdOutLog()
-    daesolver    = daeIDAS()
-    simulation   = simTutorial()
-    datareporter = daeDelegateDataReporter()
-    dr_tcpip     = daeTCPIPDataReporter()
-    dr_data      = daeNoOpDataReporter()
-    datareporter.AddDataReporter(dr_tcpip)
-    datareporter.AddDataReporter(dr_data)
 
-    # Do no print progress
-    log.PrintProgress = False
-
-    # Enable reporting of all variables
-    simulation.m.SetReportingOn(True)
-
-    # Enable reporting of time derivatives for all reported variables
-    simulation.ReportTimeDerivatives = True
-
-    # Enable reporting of sensitivities for all reported variables
-    simulation.ReportSensitivities = True
-
-    simulation.ReportingInterval =  1*60   #  1 min
-    simulation.TimeHorizon       = 10*3600 # 10 hr
-
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if not dr_tcpip.Connect("",simName):
-        sys.exit()
-
-    # Initialize the simulation
-    # The .mmx files with the sensitivity matrices will not be saved in this example.
-    #simulation.SensitivityDataDirectory = tempfile.mkdtemp(suffix = '-sensitivities', prefix = 'tutorial_che_9-')
-    simulation.Initialize(daesolver, datareporter, log, calculateSensitivities = True)
-
-    # Save the model report and the runtime model report
-    simulation.m.SaveModelReport(simulation.m.Name + ".xml")
-    simulation.m.SaveRuntimeModelReport(simulation.m.Name + "-rt.xml")
-
-    # Solve at time=0 (initialization)
-    simulation.SolveInitial()
-
-    # Run
-    simulation.Run()
-    simulation.Finalize()
-
+def plot_figures(simulation, log):
     ###########################################################################
     # Plot the Figures 4, 6, 7 and 8 from the article using the data reporter #
     ###########################################################################
     # Get a dictionary with the reported variables
+    dr_data = simulation.DataReporter.DataReporters[1]
     variables = dr_data.Process.dictVariables
 
     # Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).
@@ -582,6 +539,40 @@ def plot(times,
     plt.tight_layout()
     plt.subplots_adjust(top=0.9)
     plt.show()
+    
+def run(**kwargs):
+    log          = daePythonStdOutLog()
+    daesolver    = daeIDAS()
+    simulation   = simTutorial()
+
+    datareporter = daeDelegateDataReporter()
+    dr_tcpip     = daeTCPIPDataReporter()
+    dr_data      = daeNoOpDataReporter()
+    datareporter.AddDataReporter(dr_tcpip)
+    datareporter.AddDataReporter(dr_data)
+    
+    # If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.
+    if 'datareporter' in kwargs:
+        datareporter_arg = kwargs.get('datareporter', None)
+        datareporter.AddDataReporter(datareporter_arg)
+        del kwargs['datareporter']
+
+    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    if not dr_tcpip.Connect("", simName):
+        sys.exit()
+
+    # Do no print progress
+    log.PrintProgress = False
+
+    return daeActivity.simulate(simulation, reportingInterval      = 1*60, 
+                                            timeHorizon            = 10*3600,
+                                            log                    = log,
+                                            datareporter           = datareporter,
+                                            calculateSensitivities = True,
+                                            reportTimeDerivatives  = True,
+                                            reportSensitivities    = True,
+                                            run_after_simulation_fn= plot_figures,
+                                            **kwargs)
 
 if __name__ == "__main__":
     run()

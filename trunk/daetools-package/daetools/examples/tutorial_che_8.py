@@ -371,10 +371,10 @@ def full_experiment():
 def run(**kwargs):
     simulation = simTutorial(3e5 * Pa)
     relativeTolerance = 1e-6
-    daeActivity.simulate(simulation, reportingInterval = 1, 
-                                     timeHorizon       = 1,
-                                     relativeTolerance = relativeTolerance,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 1, 
+                                            timeHorizon       = 1,
+                                            relativeTolerance = relativeTolerance,
+                                            **kwargs)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and (sys.argv[1] == 'console'):

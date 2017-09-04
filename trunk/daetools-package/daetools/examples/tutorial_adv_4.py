@@ -181,12 +181,12 @@ def setupLASolver():
 def run(**kwargs):
     simulation = simTutorial()
     lasolver = setupLASolver()
-    daeActivity.simulate(simulation, reportingInterval        = 10, 
-                                     timeHorizon              = 100,
-                                     lasolver                 = lasolver,
-                                     relativeTolerance        = 1e-3,
-                                     run_before_simulation_fn = run_code_generators,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval        = 10, 
+                                            timeHorizon              = 100,
+                                            lasolver                 = lasolver,
+                                            relativeTolerance        = 1e-3,
+                                            run_before_simulation_fn = run_code_generators,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

@@ -102,10 +102,10 @@ def run(**kwargs):
         nlpsolver = pyNLOPT.daeNLOPT(algorithm)
     else:
         nlpsolver = pyNLOPT.daeNLOPT('NLOPT_LD_SLSQP')
-    daeActivity.optimize(simulation, reportingInterval = 1, 
-                                     timeHorizon       = 1,
-                                     nlpsolver         = nlpsolver,
-                                     **kwargs)
+    return daeActivity.optimize(simulation, reportingInterval = 1, 
+                                            timeHorizon       = 1,
+                                            nlpsolver         = nlpsolver,
+                                            **kwargs)
 
 if __name__ == "__main__":
     app = daeCreateQtApplication(sys.argv)

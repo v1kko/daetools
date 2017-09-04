@@ -70,7 +70,7 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         FeedTray = int(self.FeedTray.GetValue())
         Ntrays   = self.Nt.NumberOfPoints
-        print(FeedTray, Ntrays)
+        #print(FeedTray, Ntrays)
         
         eq = self.CreateEquation("Condenser", "")
         eq.Residual = self.Acond() * self.x.dt(0) - ( self.V() * (self.y(1) - self.x(0)) )
@@ -140,9 +140,9 @@ class simTutorial(daeSimulation):
 
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval = 2*60,   # 2 min
-                                     timeHorizon       = 120*60, # 120 min
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 2*60,   # 2 min
+                                            timeHorizon       = 120*60, # 120 min
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

@@ -408,15 +408,6 @@ def run(**kwargs):
     # Create SuperLU LA solver
     lasolver = pySuperLU.daeCreateSuperLUSolver()
 
-    # Create and setup two data reporters:
-    datareporter = daeDelegateDataReporter()
-
-    # If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.
-    if 'datareporter' in kwargs:
-        datareporter_arg = kwargs.get('datareporter', None)
-        datareporter.AddDataReporter(datareporter_arg)
-        del kwargs['datareporter']
-    
     simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
     if guiRun:
         results_folder = tempfile.mkdtemp(suffix = '-results', prefix = 'tutorial_deal_II_1-')
@@ -425,6 +416,8 @@ def run(**kwargs):
         results_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tutorial_deal_II_1-results')
         print("The simulation results will be located in: %s" % results_folder)
     
+    # Create and setup two data reporters:
+    datareporter = daeDelegateDataReporter()
     # 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)
     feDataReporter = simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
@@ -436,12 +429,18 @@ def run(**kwargs):
     datareporter.AddDataReporter(tcpipDataReporter)
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
+    
+    # If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.
+    if 'datareporter' in kwargs:
+        datareporter_arg = kwargs.get('datareporter', None)
+        datareporter.AddDataReporter(datareporter_arg)
+        del kwargs['datareporter']
 
-    daeActivity.simulate(simulation, reportingInterval = 10, 
-                                     timeHorizon       = 500,
-                                     lasolver          = lasolver,
-                                     datareporter      = datareporter,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 10, 
+                                            timeHorizon       = 500,
+                                            lasolver          = lasolver,
+                                            datareporter      = datareporter,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

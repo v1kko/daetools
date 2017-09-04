@@ -300,7 +300,7 @@ def simulate(mesh, quadratureFormulaOrder):
    
     return times,T,u
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     Nx1 = 5
     Nx2 = 20
     quadratureFormulaOrder = 2

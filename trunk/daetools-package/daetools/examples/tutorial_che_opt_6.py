@@ -167,13 +167,13 @@ def run(**kwargs):
     nlpsolver  = pyIPOPT.daeIPOPT()
     lasolver   = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     relativeTolerance = 1e-6
-    daeActivity.optimize(simulation, reportingInterval       = 1, 
-                                     timeHorizon             = 1,
-                                     lasolver                = lasolver,
-                                     nlpsolver               = nlpsolver,
-                                     nlpsolver_setoptions_fn = setOptions,
-                                     relativeTolerance       = relativeTolerance,
-                                     **kwargs)
+    return daeActivity.optimize(simulation, reportingInterval       = 1, 
+                                            timeHorizon             = 1,
+                                            lasolver                = lasolver,
+                                            nlpsolver               = nlpsolver,
+                                            nlpsolver_setoptions_fn = setOptions,
+                                            relativeTolerance       = relativeTolerance,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

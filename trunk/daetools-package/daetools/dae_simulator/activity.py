@@ -41,6 +41,7 @@ class daeActivity(object):
                              run_after_simulation_init_fn   = None,
                              run_before_simulation_fn       = None,
                              run_after_simulation_fn        = None,
+                             initializeAndReturn            = False,
                              **kwargs):
         if reportingInterval <= 0.0:
             raise RuntimeError('Invalid reportingInterval specified: %fs')
@@ -124,7 +125,11 @@ class daeActivity(object):
             
             if run_after_simulation_init_fn:
                 run_after_simulation_init_fn(simulation, log)
-
+            
+            if initializeAndReturn:
+                #simulation.__aux__objects = [daesolver, log, datareporter, lasolver]
+                return simulation
+            
             # Solve at time=0 (initialization)
             simulation.SolveInitial()
             
@@ -172,6 +177,7 @@ class daeActivity(object):
                              lasolver_setoptions_fn         = None,
                              daesolver_setoptions_fn        = None,
                              nlpsolver_setoptions_fn        = None,
+                             initializeAndReturn            = False,
                              **kwargs):
         if reportingInterval <= 0.0:
             raise RuntimeError('Invalid reportingInterval specified: %fs')
@@ -261,6 +267,9 @@ class daeActivity(object):
             if nlpsolver and nlpsolver_setoptions_fn:
                 nlpsolver_setoptions_fn(nlpsolver)
             
+            if initializeAndReturn:
+                return optimization
+
             # Run
             try:
                 optimization.Run()
@@ -269,3 +278,5 @@ class daeActivity(object):
                         
             # Finalize
             optimization.Finalize()
+    
+        return optimization

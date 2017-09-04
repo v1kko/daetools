@@ -98,8 +98,7 @@ BOOST_PYTHON_MODULE(pyIDAS)
         .def_readonly("Jacobian",               &daepython::daeIDASolverWrapper::m_matJacobian)
         .def_readonly("SensitivityResiduals",	&daepython::daeIDASolverWrapper::m_matSResiduals)
 
-        .add_property("LASolver",               make_function(&daepython::daeIDASolverWrapper::GetLASolver,
-                                                              return_internal_reference<>()),         DOCSTR_daeIDAS_LASolver)
+        .add_property("LASolver",               &daepython::daeIDASolverWrapper::GetLASolver,         DOCSTR_daeIDAS_LASolver)
         .add_property("EstLocalErrors",		    &daepython::daeIDASolverWrapper::GetEstLocalErrors_,  DOCSTR_daeIDAS_EstLocalErrors)
         .add_property("ErrWeights",		   	    &daepython::daeIDASolverWrapper::GetErrWeights_,      DOCSTR_daeIDAS_ErrWeights)
         .add_property("IntegratorStats",		&daepython::daeIDASolverWrapper::GetIntegratorStats_, DOCSTR_daeIDAS_IntegratorStats)

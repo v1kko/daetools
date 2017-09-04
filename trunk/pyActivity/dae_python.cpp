@@ -197,7 +197,7 @@ BOOST_PYTHON_MODULE(pyActivity)
         .def("Pause",                       &daeSimulation::Pause,  ( arg("self") ), DOCSTR_daeSimulation_Pause)
         .def("Resume",                      &daeSimulation::Resume, ( arg("self") ), DOCSTR_daeSimulation_Resume)
 
-        .def("Initialize",					&daeSimulation::Initialize,
+        .def("Initialize",					&daepython::daeDefaultSimulationWrapper::Initialize,
                                             ( arg("self"), arg("daeSolver"), arg("dataReporter"), arg("log"), arg("calculateSensitivities") = false, arg("jsonRuntimeSettings") = "" ), DOCSTR_daeSimulation_Initialize)
         .def("Reinitialize",                &daeSimulation::Reinitialize,
                                             ( arg("self") ), DOCSTR_daeSimulation_Reinitialize)
@@ -257,7 +257,6 @@ BOOST_PYTHON_MODULE(pyActivity)
     daeOptimization_t
 ***************************************************************/
     class_<daepython::daeOptimization_tWrapper, boost::noncopyable>("daeOptimization_t", no_init)
-        .def("Initialize",             pure_virtual(&daeOptimization_t::Initialize))
         .def("Run",                    pure_virtual(&daeOptimization_t::Run))
         .def("Finalize",               pure_virtual(&daeOptimization_t::Finalize))
         .def("StartIterationRun",      pure_virtual(&daeOptimization_t::StartIterationRun))
@@ -267,16 +266,16 @@ BOOST_PYTHON_MODULE(pyActivity)
     class_<daepython::daeOptimizationWrapper, bases<daeOptimization_t>, boost::noncopyable>("daeOptimization", DOCSTR_daeOptimization, no_init)
         .def(init<>(( arg("self") ), DOCSTR_daeOptimization_init))
 
-        .add_property("Simulation",	   make_function(&daepython::daeOptimizationWrapper::GetSimulation_, return_internal_reference<>()))
+        .add_property("Simulation",	   &daepython::daeOptimizationWrapper::GetSimulation_)
 
-        .def("Initialize",             &daeOptimization::Initialize, ( arg("self"),
-                                                                       arg("simulation"),
-                                                                       arg("nlpSolver"),
-                                                                       arg("daeSolver"),
-                                                                       arg("dataReporter"),
-                                                                       arg("log"),
-                                                                       arg("initializationFile") = std::string("")
-                                                                     ), DOCSTR_daeOptimization_Initialize)
+        .def("Initialize",             &daepython::daeOptimizationWrapper::Initialize, ( arg("self"),
+                                                                                         arg("simulation"),
+                                                                                         arg("nlpSolver"),
+                                                                                         arg("daeSolver"),
+                                                                                         arg("dataReporter"),
+                                                                                         arg("log"),
+                                                                                         arg("initializationFile") = std::string("")
+                                                                                       ), DOCSTR_daeOptimization_Initialize)
         .def("Run",                    &daeOptimization::Run,        ( arg("self") ), DOCSTR_daeOptimization_Run)
         .def("Finalize",               &daeOptimization::Finalize,   ( arg("self") ), DOCSTR_daeOptimization_Finalize)
 

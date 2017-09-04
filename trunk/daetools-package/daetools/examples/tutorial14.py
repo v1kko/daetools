@@ -248,12 +248,14 @@ class simTutorial(daeSimulation):
 
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval       = 0.5, 
-                                     timeHorizon             = 500,
-                                     **kwargs)
+    res = daeActivity.simulate(simulation, reportingInterval       = 0.5, 
+                                           timeHorizon             = 500,
+                                           **kwargs)
     # Print some interp1d stats
     print('\n\nscipy.interp1d statistics:')
     print('  interp1d called %d times (cache value used %d times)' % (simulation.m.interp1d.counter, simulation.m.interp1d.cache_counter))
+    
+    return res
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

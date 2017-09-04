@@ -202,9 +202,9 @@ class simTutorial(daeSimulation):
 
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval = 1,
-                                     timeHorizon       = 1,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 1,
+                                            timeHorizon       = 1,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

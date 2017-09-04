@@ -120,9 +120,9 @@ public:
         daeIDASolver::Initialize(pBlock, pLog, pSimulation, eMode, bCalculateSensitivities, narrParametersIndexes);
     }
 
-    daeIDALASolver_t* GetLASolver(void)
+    boost::python::object GetLASolver(void)
     {
-        return daeIDASolver::GetLASolver();
+        return lasolver;
     }
 
     void SetLASolver1(daeeIDALASolverType eLASolverType)
@@ -130,8 +130,10 @@ public:
         daeIDASolver::SetLASolver(eLASolverType);
     }
 
-    void SetLASolver2(daeIDALASolver_t* pLASolver)
+    void SetLASolver2(boost::python::object LASolver)
     {
+        lasolver = LASolver;
+        daeIDALASolver_t* pLASolver = boost::python::extract<daeIDALASolver_t*>(LASolver);
         daeIDASolver::SetLASolver(pLASolver);
     }
 
@@ -200,6 +202,9 @@ public:
         std::map<std::string, real_t> stats = GetIntegratorStats();
         return getDictFromMapByValue(stats);
     }
+
+protected:
+    boost::python::object lasolver;
 };
 
 }

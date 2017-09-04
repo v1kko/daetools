@@ -66,9 +66,11 @@ class fmiModelDescription(fmiObject):
     variableNamingConventionFlat       = 'flat'
     variableNamingConventionStructured = 'structured'
 
-    def __init__(self, fmiVersion = fmiDefaultVersion):
+    def __init__(self, fmiVersion = fmiDefaultVersion, xml_stylesheet = None):
         fmiObject.__init__(self, fmiVersion)
 
+        self.xml_stylesheet = xml_stylesheet
+        
         if self.fmiVersion == '2.0':
             # Required attributes
             self.modelName         = ''    # string
@@ -130,6 +132,9 @@ class fmiModelDescription(fmiObject):
         else:
             raise RuntimeError('Unsupported FMI version: %s' % self.fmiVersion)
             
+        if self.xml_stylesheet:
+            fmi_root.addprevious(etree.PI('xml-stylesheet', 'type="text/xsl" href="%s"' % self.xml_stylesheet))
+        
         etree.ElementTree(fmi_root).write(filename, encoding="utf-8", pretty_print=True, xml_declaration=True)
         
     @classmethod

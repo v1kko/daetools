@@ -104,7 +104,7 @@ add_module_names = False
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'vs' # vs, colorful, friendly, pastie, manni
+pygments_style = 'vs' 
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -128,7 +128,6 @@ html_theme = 'bootstrap'
 # documentation.
 html_theme_options = {
     #"sidebarwidth" : 250
-
     'navbar_links': [
                       ("Home", "/", True)
                     ],
@@ -136,7 +135,7 @@ html_theme_options = {
     'globaltoc_depth': 1,
     'navbar_sidebarrel': False,
     'navbar_class': "navbar navbar-inverse",
-    'bootswatch_theme': "readable" # cosmo, readable, simplex, paper, flatly, sandstone, journal, yeti
+    'bootswatch_theme': "readable"
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

@@ -725,40 +725,6 @@ void daeModel::DetectVariableTypesForExport(std::vector<const daeVariableType*>&
         m_ptrarrComponentArrays[i]->DetectVariableTypesForExport(ptrarrVariableTypes);
 }
 
-/*
-//#if !defined(__MINGW32__) && (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
-//#include <***.h>
-//#else
-//#include <dlfcn.h>
-//#endif
-
-boost::shared_ptr<daeExternalObject_t> daeModel::LoadExternalObject(const string& strPath)
-{
-    boost::shared_ptr<daeExternalObject_t> extobj;
-
-//	void* lib_handle;
-//	pfnGetExternalObject pfn;
-//
-//	lib_handle = dlopen(strPath.c_str(), RTLD_LAZY);
-//	if(!lib_handle)
-//		daeDeclareAndThrowException(exInvalidCall);
-//
-//	pfn = dlsym(lib_handle, "GetExternalObject");
-//	if ((error = dlerror()) != NULL)
-//	{
-//		fprintf(stderr, "%s\n", error);
-//		exit(1);
-//	}
-//
-//	(*fn)(&x);
-//	printf("Valx=%d\n",x);
-//
-//	dlclose(lib_handle);
-
-    return extobj;
-}
-*/
-
 template<class CLASS>
 bool compareCanonicalNames(CLASS first, CLASS second)
 {
@@ -844,14 +810,19 @@ void daeModel::GetCoSimulationInterface(std::vector<daeParameter_t*>& ptrarrPara
         }
     }
 
-    // Add all non-DOF variables from the top-level model.
+    // Process the top-level model variables.
     for(size_t i = 0; i < arrVariables.size(); i++)
     {
         daeVariable_t* pVariable = arrVariables[i];
-        if(pVariable->GetType() != cnAssigned)
+
+        if(pVariable->GetType() == cnAssigned)
         {
-            // Variable can be algebraic/differential or it can have some points assigned
-            // but it cannot be assigned (DOF).
+            // DOF variables go to Inputs if it is requested.
+            ptrarrInputs.push_back(pVariable);
+        }
+        else if(pVariable->GetType() != cnAssigned)
+        {
+            // Non-DOF variables go to model variables (they can have some points assigned, though).
             ptrarrModelVariables.push_back(pVariable);
         }
     }

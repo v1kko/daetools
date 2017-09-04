@@ -195,20 +195,22 @@ public:
         this->m_pModel = pModel;
     }
 
-//	void Initialize(boost::python::object DAESolver,
-//		 		    boost::python::object DataReporter,
-//					boost::python::object Log,
-//					bool bCalculateSensitivities = false)
-//	{
-//		daesolver    = DAESolver;
-//		datareporter = DataReporter;
-//		log          = Log;
+    void Initialize(boost::python::object DAESolver,
+                    boost::python::object DataReporter,
+                    boost::python::object Log,
+                    bool bCalculateSensitivities = false,
+                    const std::string& strJSONRuntimeSettings = "")
+    {
+        daesolver    = DAESolver;
+        datareporter = DataReporter;
+        log          = Log;
 
-//		daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
-//		daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
-//		daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
-//		daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities);
-//	}
+        daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
+        daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
+        daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
+
+        daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities, strJSONRuntimeSettings);
+    }
 
     boost::python::object GetModel_(void) const
     {
@@ -615,6 +617,9 @@ public:
 
 public:
     boost::python::object model;
+    boost::python::object daesolver;
+    boost::python::object log;
+    boost::python::object datareporter;
 };
 
 
@@ -623,21 +628,6 @@ class daeOptimization_tWrapper : public daeOptimization_t,
                                  public boost::python::wrapper<daeOptimization_t>
 {
 public:
-    void Initialize(daeSimulation_t*   pSimulation,
-                    daeNLPSolver_t*    pNLPSolver,
-                    daeDAESolver_t*    pDAESolver,
-                    daeDataReporter_t* pDataReporter,
-                    daeLog_t*          pLog,
-                    size_t			   nNumberOfObjectiveFunctions = 1)
-    {
-        this->get_override("Initialize")(pSimulation,
-                                         pNLPSolver,
-                                         pDAESolver,
-                                         pDataReporter,
-                                         pLog,
-                                         nNumberOfObjectiveFunctions);
-    }
-
     void Run(void)
     {
         this->get_override("Run")();
@@ -663,6 +653,33 @@ class daeOptimizationWrapper : public daeOptimization,
                                public boost::python::wrapper<daeOptimization>
 {
 public:
+    void Initialize(boost::python::object Simulation,
+                    boost::python::object NLPSolver,
+                    boost::python::object DAESolver,
+                    boost::python::object DataReporter,
+                    boost::python::object Log,
+                    const std::string&    initializationFile)
+     {
+        daeDefaultSimulationWrapper* pSimulation   = boost::python::extract<daeDefaultSimulationWrapper*>(Simulation);
+        daeDAESolver_t*              pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
+        daeDataReporter_t*           pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
+        daeLog_t*                    pLog          = boost::python::extract<daeLog_t*>(Log);
+        daeNLPSolver_t*              pNLPSolver    = boost::python::extract<daeNLPSolver_t*>(NLPSolver);
+
+        // Keep the python objects so they do not get destroyed if the go out of scope (in python code)
+        if(!pSimulation)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        pSimulation->daesolver    = DAESolver;
+        pSimulation->datareporter = DataReporter;
+        pSimulation->log          = Log;
+
+        simulation = Simulation;
+        nlpsolver  = NLPSolver;
+
+        daeOptimization::Initialize(pSimulation, pNLPSolver, pDAESolver, pDataReporter, pLog, initializationFile);
+     }
+
     void StartIterationRun(int iteration)
     {
         if(boost::python::override f = this->get_override("StartIterationRun"))
@@ -687,10 +704,14 @@ public:
         this->daeOptimization::EndIterationRun(iteration);
     }
 
-    daeSimulation_t* GetSimulation_(void) const
+    boost::python::object GetSimulation_(void) const
     {
-        return m_pSimulation;
+        return simulation;
     }
+
+public:
+    boost::python::object simulation;
+    boost::python::object nlpsolver;
 };
 
 }

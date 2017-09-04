@@ -163,10 +163,10 @@ def run(**kwargs):
         print 'iparm[%2d] %7d %3d' % (i, iparm_def[i], iparm[i])
     """
 
-    daeActivity.simulate(simulation, reportingInterval = 10, 
-                                     timeHorizon       = 1000,
-                                     lasolver          = lasolver,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 10, 
+                                            timeHorizon       = 1000,
+                                            lasolver          = lasolver,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

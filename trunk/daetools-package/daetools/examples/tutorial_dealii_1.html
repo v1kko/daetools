@@ -419,15 +419,6 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'># Create SuperLU LA solver</span>
     lasolver <b><span style='color:#0000ff;'>=</span></b> pySuperLU.daeCreateSuperLUSolver()
 
-    <span style='color:#017a31;'># Create and setup two data reporters:</span>
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-
-    <span style='color:#017a31;'># If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.</span>
-    <b>if</b> <span style='color:#cc0000;'>'datareporter'</span> <b>in</b> kwargs:
-        datareporter_arg <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'datareporter'</span>, <span style='color:#3605fb;'>None</span>)
-        datareporter.AddDataReporter(datareporter_arg)
-        <b>del</b> kwargs[<span style='color:#cc0000;'>'datareporter'</span>]
-    
     simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
     <b>if</b> guiRun:
         results_folder <b><span style='color:#0000ff;'>=</span></b> tempfile.mkdtemp(suffix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'-results'</span>, prefix <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'tutorial_deal_II_1-'</span>)
@@ -436,6 +427,8 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         results_folder <b><span style='color:#0000ff;'>=</span></b> os.path.join(os.path.dirname(os.path.abspath(<span style='color:#3605fb;'>__file__</span>)), <span style='color:#cc0000;'>'tutorial_deal_II_1-results'</span>)
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>&quot;The simulation results will be located in: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>&quot;</span> <b><span style='color:#0000ff;'>%</span></b> results_folder)
     
+    <span style='color:#017a31;'># Create and setup two data reporters:</span>
+    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
     <span style='color:#017a31;'># 1. deal.II (exports only FE DOFs in .vtk format to the specified directory)</span>
     feDataReporter <b><span style='color:#0000ff;'>=</span></b> simulation.m.fe_system.CreateDataReporter()
     datareporter.AddDataReporter(feDataReporter)
@@ -447,12 +440,18 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     datareporter.AddDataReporter(tcpipDataReporter)
     <b>if</b> <b>not</b> tcpipDataReporter.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
         sys.exit()
+    
+    <span style='color:#017a31;'># If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.</span>
+    <b>if</b> <span style='color:#cc0000;'>'datareporter'</span> <b>in</b> kwargs:
+        datareporter_arg <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'datareporter'</span>, <span style='color:#3605fb;'>None</span>)
+        datareporter.AddDataReporter(datareporter_arg)
+        <b>del</b> kwargs[<span style='color:#cc0000;'>'datareporter'</span>]
 
-    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 
-                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>,
-                                     lasolver          <b><span style='color:#0000ff;'>=</span></b> lasolver,
-                                     datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
-                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>,
+                                            lasolver          <b><span style='color:#0000ff;'>=</span></b> lasolver,
+                                            datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>

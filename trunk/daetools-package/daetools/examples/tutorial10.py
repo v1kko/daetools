@@ -159,11 +159,11 @@ def saveInitFile(simulation, log):
 
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval            = 10, 
-                                     timeHorizon                  = 500,
-                                     run_after_simulation_init_fn = loadInitFile,
-                                     run_before_simulation_fn     = saveInitFile,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval            = 10, 
+                                            timeHorizon                  = 500,
+                                            run_after_simulation_init_fn = loadInitFile,
+                                            run_before_simulation_fn     = saveInitFile,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

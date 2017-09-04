@@ -20,7 +20,7 @@ from .c99 import daeCodeGenerator_c99
 from .fmi_xml_support import *
 
 class daeCodeGenerator_FMI(fmiModelDescription):
-    def __init__(self):
+    def __init__(self, xml_stylesheet = None):
         fmiModelDescription.__init__(self)        
     
     def generateSimulation(self, simulation, 
@@ -29,7 +29,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                                  callable_object_name, 
                                  arguments, 
                                  additional_files = [], 
-                                 localsAsOutputs = True):
+                                 localsAsOutputs = True,
+                                 add_xml_stylesheet = False):
         try:
             tmp_folder = ''
             if not simulation:
@@ -95,6 +96,14 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
             py_path, py_filename = os.path.split(str(py_simulation_file))
             shutil.copy2(py_simulation_file, os.path.join(resources_dir, py_filename))
+
+            if add_xml_stylesheet:
+                fmi_py_dir = os.path.dirname(os.path.abspath(__file__))
+                #xsl_name = os.path.basename(self.xml_stylesheet)
+                #xsl_name = os.path.splitext(xsl_name)[0]
+                self.xml_stylesheet = 'resources/daetools-fmi.xsl'
+                shutil.copy2(os.path.join(fmi_py_dir, 'daetools-fmi.xsl'), os.path.join(resources_dir, 'daetools-fmi.xsl'))
+                shutil.copy2(os.path.join(fmi_py_dir, 'daetools-fmi.css'), os.path.join(resources_dir, 'daetools-fmi.css'))
             
             # Copy the additional files to the locations relative to the 'resources' folder
             # Additional files are a list of tuples: [('file_path', 'resources_dir_relative_path'), ...]
@@ -190,7 +199,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                         unitsUsed[str(f.variable.VariableType.Units)] = f.variable.VariableType.Units
 
                 elif f.type == 'Local':
-                    # Treat all locals as outputs at the moment
+                    # If localsAsOutputs is true treat all locals as outputs.
                     if self.localsAsOutputs:
                         self._addOutput(f)
                     else:
@@ -523,19 +532,19 @@ class daeCodeGenerator_FMI(fmiModelDescription):
         unit.baseUnit.factor = dae_bu.multiplier
         unit.baseUnit.offset = 0.0
         if dae_bu.L != 0:
-            unit.baseUnit.m = dae_bu.L
+            unit.baseUnit.m = int(dae_bu.L)
         if dae_bu.M != 0:
-            unit.baseUnit.kg = dae_bu.M
+            unit.baseUnit.kg = int(dae_bu.M)
         if dae_bu.T != 0:
-            unit.baseUnit.s = dae_bu.T
+            unit.baseUnit.s = int(dae_bu.T)
         if dae_bu.C != 0:
-            unit.baseUnit.cd = dae_bu.C
+            unit.baseUnit.cd = int(dae_bu.C)
         if dae_bu.I != 0:
-            unit.baseUnit.A = dae_bu.I
+            unit.baseUnit.A = int(dae_bu.I)
         if dae_bu.O != 0:
-            unit.baseUnit.K = dae_bu.O
+            unit.baseUnit.K = int(dae_bu.O)
         if dae_bu.N != 0:
-            unit.baseUnit.mol = dae_bu.N
+            unit.baseUnit.mol = int(dae_bu.N)
 
         # If all are 0, set rad = 1
         if dae_bu.L == 0 and dae_bu.M == 0 and dae_bu.T == 0 and dae_bu.C == 0 and dae_bu.I == 0 and dae_bu.O == 0 and dae_bu.N == 0:

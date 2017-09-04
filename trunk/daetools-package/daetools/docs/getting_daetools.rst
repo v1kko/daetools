@@ -272,7 +272,7 @@ You can also install **DAE Tools** into a python virtual environment:
 
 .. code-block:: bash
 
-   source activate <environment_name>
+   activate <environment_name>
    python setup.py install
 
 ..

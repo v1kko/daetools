@@ -101,11 +101,11 @@ def run(**kwargs):
     # Achtung! Achtung! NLP solver options can only be set after optimization.Initialize()
     # Otherwise seg. fault occurs for some reasons.
     nlpsolver  = pyBONMIN.daeBONMIN()
-    daeActivity.optimize(simulation, reportingInterval       = 1, 
-                                     timeHorizon             = 1,
-                                     nlpsolver               = nlpsolver,
-                                     nlpsolver_setoptions_fn = setOptions,
-                                     **kwargs)
+    return daeActivity.optimize(simulation, reportingInterval       = 1, 
+                                            timeHorizon             = 1,
+                                            nlpsolver               = nlpsolver,
+                                            nlpsolver_setoptions_fn = setOptions,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

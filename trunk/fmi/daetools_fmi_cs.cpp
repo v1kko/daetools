@@ -383,12 +383,17 @@ fmi2Status fmi2DoStep(fmi2Component comp,
         //if(c->debugMode)
         //    c->functions->logger("Integrating from %.6f to %.6f ...\n", stepStartTime, stepTimeHorizon);
 
-        /* Set the time horizon. */
-        c->simulationLoader.SetTimeHorizon(stepTimeHorizon);
+        /* Set the time horizon.
+             -> This is the most likely wrong - the default time horizon should be set in the load simulation function
+                (+ the master can change it in the fmi2SetupExperiment function)!!
+                Therefore, disable it. */
+        //c->simulationLoader.SetTimeHorizon(stepTimeHorizon);
 
-        /* Since we only change assigned variable values we might not need to reinitialize the DAE system.
-           The most likely... Double check this!! */
-        c->simulationLoader.Reinitialize();
+        /* Since only the FMI continuous inputs (which are assigned variables - DOFs) were changed
+           the reinitialisation of the whole DAE system is not required
+           (the DOF values are not part of the DAE system and they are kept separately).
+           (+ it affects the performance if the communication points are close). */
+        //c->simulationLoader.Reinitialize();
 
         /* Integrate until specified time and report data.
            Nota bene:

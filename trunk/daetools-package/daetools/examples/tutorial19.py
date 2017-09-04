@@ -407,9 +407,9 @@ def run(**kwargs):
     test_coolprop_single_phase()
 
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval = 10, 
-                                     timeHorizon       = 500,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 10, 
+                                            timeHorizon       = 500,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

@@ -23,18 +23,19 @@ from daetools.pyDAE.data_reporters import daeCSVFileDataReporter
 
 import whats_the_time
 import tutorial1, tutorial4, tutorial5, tutorial14, tutorial15
-import tutorial_che_1, tutorial_che_2, tutorial_che_3, tutorial_che_7
+import tutorial_che_1, tutorial_che_2, tutorial_che_3, tutorial_che_7, tutorial_che_9
 import tutorial_dealii_1
 
 # Global variables (arguments for the generateSimulation function)
-base_directory              = None
-fmu_name                    = None
-fmu_directory               = None
-py_simulation_file          = None
-callable_object_name        = 'create_simulation_for_cosimulation'
-additional_files            = []
-localsAsOutputs             = True
-
+base_directory        = None
+fmu_name              = None
+fmu_directory         = None
+py_simulation_file    = None
+callable_object_name  = 'run'
+arguments             = 'initializeAndReturn=True'
+additional_files      = []
+localsAsOutputs       = True
+add_xml_stylesheet    = True  
 # Script files to run all FMUs with the ComplianceChecker
 run_fmuCheck_all_fmus_bat    = None
 run_fmuCheck_all_fmus_sh     = None
@@ -50,8 +51,10 @@ def exportFMU(simulation, log):
     global fmu_directory
     global py_simulation_file
     global callable_object_name
+    global arguments
     global additional_files
     global localsAsOutputs
+    global add_xml_stylesheet
     global run_fmuCheck_all_fmus_bat
     global run_fmuCheck_all_fmus_sh
        
@@ -61,10 +64,6 @@ def exportFMU(simulation, log):
     calculateSensitivities = simulation.CalculateSensitivities
     t_stop                 = simulation.TimeHorizon
     numSteps               = int(simulation.TimeHorizon / simulation.ReportingInterval)
-    if calculateSensitivities:
-        arguments = '%s, relativeTolerance=%e, calculateSensitivities=%s' % (simulationClassName, relativeTolerance, calculateSensitivities)
-    else:
-        arguments = '%s, relativeTolerance=%e' % (simulationClassName, relativeTolerance)
     fmu_directory_basename = os.path.basename(fmu_directory)
     fmu_relative_location  = os.path.join(fmu_directory_basename, fmu_name)
     
@@ -130,7 +129,8 @@ def exportFMU(simulation, log):
                           callable_object_name = callable_object_name,
                           arguments            = arguments, 
                           additional_files     = additional_files,
-                          localsAsOutputs      = localsAsOutputs)
+                          localsAsOutputs      = localsAsOutputs,
+                          add_xml_stylesheet   = add_xml_stylesheet)
 
 def open_csv(csv_filename):
     # Open solution files and return variable names and their values.
@@ -141,7 +141,8 @@ def open_csv(csv_filename):
     names = header.split('","')
     dictNames = {}
     for index, name in enumerate(names):
-        dictNames[name.strip('\"\n')] = index
+        name = name.strip('\"\n\r')
+        dictNames[name] = index
 
     # Return to the beginning of the file and get the variable values. 
     values = numpy.loadtxt(csv_filename, delimiter=',', skiprows=1, unpack=True)
@@ -163,9 +164,8 @@ def compare_solutions(csv_ref_path, csv_cc_path, out_file):
         E[varName] = numpy.sqrt((1.0/n) * numpy.sum((ref_solution-cc_solution)**2))
     
     f = open(out_file, 'w')
-    csv_f = csv.writer(f, delimiter = ',')
     for varName, error in sorted(E.items()):
-        csv_f.writerow(['%s'%varName, '%.5e' % error])
+        f.write('\"%s\",%.5e\n' % (varName, error))
     f.close()
     
 def exportSimulationFromTutorial(tutorial_module):
@@ -226,6 +226,7 @@ def generateFMUs():
     exportSimulationFromTutorial(tutorial_che_2)
     exportSimulationFromTutorial(tutorial_che_3)
     exportSimulationFromTutorial(tutorial_che_7)
+    exportSimulationFromTutorial(tutorial_che_9)
     
     # Finite Element tutorials (deal.II)
     mesh_filename    = 'step-49.msh'

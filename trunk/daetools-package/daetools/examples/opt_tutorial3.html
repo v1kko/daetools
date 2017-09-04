@@ -113,10 +113,10 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         nlpsolver <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(algorithm)
     <b>else</b>:
         nlpsolver <b><span style='color:#0000ff;'>=</span></b> pyNLOPT.daeNLOPT(<span style='color:#cc0000;'>'NLOPT_LD_SLSQP'</span>)
-    daeActivity.optimize(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
-                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
-                                     nlpsolver         <b><span style='color:#0000ff;'>=</span></b> nlpsolver,
-                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+    <b>return</b> daeActivity.optimize(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
+                                            nlpsolver         <b><span style='color:#0000ff;'>=</span></b> nlpsolver,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     app <b><span style='color:#0000ff;'>=</span></b> daeCreateQtApplication(sys.argv)

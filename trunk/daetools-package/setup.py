@@ -307,14 +307,15 @@ setup(name = 'daetools',
                                                    ] + docs_html_dirs,
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
-                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)], # ?????
+                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)],
                        'daetools.dae_plotter':     ['images/*.png'],
                        'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*',
                                                     'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
-                                                    fmi_solibs
+                                                    '*.css', '*.xsl', fmi_solibs
                                                    ],
                        'daetools.dae_simulator':   ['images/*.png'],
-                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
+                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', 
+                                                    '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
                      },
       data_files = data_files,
       scripts = ['scripts/create_shortcuts.js',

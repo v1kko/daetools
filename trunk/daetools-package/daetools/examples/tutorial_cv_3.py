@@ -186,7 +186,7 @@ def simulate(Nx):
     
     return times,f,q
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     Nxs = numpy.array([60, 90, 120, 150])
     n = len(Nxs)
     L = 2*numpy.pi

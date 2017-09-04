@@ -192,12 +192,12 @@ temperature_t.AbsoluteTolerance <b><span style='color:#0000ff;'>=</span></b> <sp
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
     lasolver <b><span style='color:#0000ff;'>=</span></b> setupLASolver()
-    daeActivity.simulate(simulation, reportingInterval        <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 
-                                     timeHorizon              <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
-                                     lasolver                 <b><span style='color:#0000ff;'>=</span></b> lasolver,
-                                     relativeTolerance        <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>,
-                                     run_before_simulation_fn <b><span style='color:#0000ff;'>=</span></b> run_code_generators,
-                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval        <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span>, 
+                                            timeHorizon              <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
+                                            lasolver                 <b><span style='color:#0000ff;'>=</span></b> lasolver,
+                                            relativeTolerance        <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-3</span>,
+                                            run_before_simulation_fn <b><span style='color:#0000ff;'>=</span></b> run_code_generators,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>

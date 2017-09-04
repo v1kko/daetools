@@ -349,9 +349,9 @@ def consoleRun():
 # If the keyword arguments **kwargs contain 'guiRun=True' the simulation will be run using the Qt GUI.
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval = 5, 
-                                     timeHorizon       = 100,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 5, 
+                                            timeHorizon       = 100,
+                                            **kwargs)
 
 """
 This part of the code executes if the python script is executed from a shell

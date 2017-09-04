@@ -207,10 +207,10 @@ matplotlib.use(<span style='color:#cc0000;'>'Qt5Agg'</span>)
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeDataReporterLocal()
-    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
-                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>,
-                                     datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
-                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1000</span>,
+                                            datareporter      <b><span style='color:#0000ff;'>=</span></b> datareporter,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     qtApp  <b><span style='color:#0000ff;'>=</span></b> QtWidgets.QApplication(sys.argv)

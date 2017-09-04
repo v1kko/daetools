@@ -266,11 +266,11 @@ def process_data_reporters(simulation, log):
     
 def run(**kwargs):
     simulation = simTutorial()
-    daeActivity.simulate(simulation, reportingInterval       = 10, 
-                                     timeHorizon             = 100,
-                                     datareporter            = setupDataReporters(simulation),
-                                     run_after_simulation_fn = process_data_reporters,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval       = 10, 
+                                            timeHorizon             = 100,
+                                            datareporter            = setupDataReporters(simulation),
+                                            run_after_simulation_fn = process_data_reporters,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

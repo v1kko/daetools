@@ -228,7 +228,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         plt.show()
 
 <span style='color:#017a31;'># Setup everything manually and run in a console</span>
-<b>def</b> run(guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>, qtApp <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>):
+<b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
@@ -269,7 +269,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
     simulation.Run()
     simulation.Finalize()
-    
+
     <span style='color:#017a31;'>###########################################################################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'># Plot the comparison between numerical and analytical sensitivities using the data reporter #</span>
     <span style='color:#017a31;'>###########################################################################################</span><span style='color:#81ca2d;'>###</span>

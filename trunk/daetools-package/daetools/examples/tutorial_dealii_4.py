@@ -257,11 +257,11 @@ def run(**kwargs):
     if not tcpipDataReporter.Connect("", simName):
         sys.exit()
 
-    daeActivity.simulate(simulation, reportingInterval = 60, 
-                                     timeHorizon       = 2*60*60,
-                                     lasolver          = lasolver,
-                                     datareporter      = datareporter,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = 60, 
+                                            timeHorizon       = 2*60*60,
+                                            lasolver          = lasolver,
+                                            datareporter      = datareporter,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

@@ -575,9 +575,9 @@ def run(**kwargs):
     # An exception will be raised at some point when the log function is called for a negative value
     simulation = simTutorial()
     timeHorizon = min(3770.0, simulation.process_info["tend"].value)
-    daeActivity.simulate(simulation, reportingInterval = timeHorizon / 100,
-                                     timeHorizon       = timeHorizon,
-                                     **kwargs)
+    return daeActivity.simulate(simulation, reportingInterval = timeHorizon / 100,
+                                            timeHorizon       = timeHorizon,
+                                            **kwargs)
 
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True

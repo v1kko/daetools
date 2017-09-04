@@ -360,9 +360,9 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
 <span style='color:#017a31;'># If the keyword arguments **kwargs contain 'guiRun=True' the simulation will be run using the Qt GUI.</span>
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>, 
-                                     timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
-                                     <b><span style='color:#0000ff;'>**</span></b>kwargs)
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>This part of the code executes if the python script is executed from a shell</span>

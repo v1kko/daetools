@@ -228,7 +228,7 @@ def simulate(Nx):
     
     return c, c_exact
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     Nxs = numpy.array([40, 60, 80, 120])
     n = len(Nxs)
     hs = L / Nxs

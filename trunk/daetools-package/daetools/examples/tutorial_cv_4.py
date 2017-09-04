@@ -313,7 +313,7 @@ def simulate(Nx, Ny):
     
     return times,u,v,um,vm
 
-def run(guiRun = False, qtApp = None):
+def run(**kwargs):
     Nxs = numpy.array([10, 20, 40, 80])
     Nys = numpy.array([8, 16, 32, 64])
     n = len(Nxs)
