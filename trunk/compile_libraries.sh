@@ -40,8 +40,8 @@ OPTIONS:
 
 LIBRARY:
     all    All libraries and solvers.
-           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt ipopt bonmin nlopt coolprop trilinos deal.ii
-           On Windows equivalent to: boost cblas_clapack mumps idas superlu ipopt bonmin nlopt coolprop trilinos deal.ii 
+           On GNU/Linux equivalent to: boost ref_blas_lapack umfpack idas superlu superlu_mt bonmin nlopt coolprop trilinos deal.ii
+           On Windows equivalent to: boost cblas_clapack idas superlu nlopt coolprop trilinos deal.ii 
 
     Individual libraries/solvers:
     boost            Boost libraries (system, filesystem, thread, python)
@@ -154,13 +154,15 @@ PLATFORM=`uname -s`
 if [[ "${PLATFORM}" == *"MSYS_"* ]]; then
   PLATFORM="Windows"
   # Platform should be set by i.e. vcbuildtools.bat
-  VC_PLAT=`cmd "/C echo %Platform% "`
+  VC_PLAT=`cmd "/C echo %Platform%"`
   echo $VC_PLAT
   if [[ "${VC_PLAT}" == *"X86"* ]]; then
     HOST_ARCH="win32"
   elif [[ "${VC_PLAT}" == *"x86"* ]]; then
     HOST_ARCH="win32"
   elif [[ "${VC_PLAT}" == *"x64"* ]]; then
+    HOST_ARCH="win64"
+  elif [[ "${VC_PLAT}" == *"X64"* ]]; then
     HOST_ARCH="win64"
   else
     echo unknown HOST_ARCH: $HOST_ARCH
@@ -237,6 +239,18 @@ for i; do
   esac
 done
 
+MINGW_MAKE=
+if [[ "${PLATFORM}" == "Windows" ]]; then
+  if [[ "${HOST_ARCH}" == "win32" ]]; then
+    MINGW_MAKE="mingw32-make"
+  elif [[ "${HOST_ARCH}" == "win64" ]]; then
+    MINGW_MAKE="mingw64-make"
+  else
+    echo unknown HOST_ARCH: $HOST_ARCH
+    exit 1
+  fi
+fi
+
 if [ ${PLATFORM} = "Darwin" ]; then
   Ncpu=$(/usr/sbin/system_profiler -detailLevel full SPHardwareDataType | awk '/Total Number Of Cores/ {print $5};')
   echo $Ncpu
@@ -251,11 +265,13 @@ fi
 MAKE="make"
 MAKE_Ncpu="make -j${Ncpu}"
 CMAKE_GENERATOR="Unix Makefiles"
+WGET="wget"
 if [ ${PLATFORM} = "Windows" ]; then
   DAE_COMPILER_FLAGS=""
   MAKE="nmake"
   MAKE_Ncpu="nmake"
   CMAKE_GENERATOR="NMake Makefiles"
+  WGET="wget --no-check-certificate"
 fi
 
 if [ "${DAE_IF_CROSS_COMPILING}" = "0" ]; then
@@ -316,9 +332,10 @@ export DAE_UMFPACK_INSTALL_DIR
 vBOOST=1.62.0
 vBOOST_=1_62_0
 vBONMIN=1.8.4
+vBONMIN_WIN="1.4.1-msvc++-2015"
 vLAPACK=3.4.1
 vCLAPACK=3.2.1
-vMUMPS=4.9.2
+vMUMPS_WIN="4.8.3-gfortran-win"
 vNLOPT=2.4.2
 vIDAS=1.3.0
 vTRILINOS=12.10.1
@@ -341,9 +358,12 @@ BOOST_PYTHON_BUILD_ID=
 
 BOOST_HTTP=http://sourceforge.net/projects/boost/files/boost
 DAETOOLS_HTTP=http://sourceforge.net/projects/daetools/files/gnu-linux-libs
+DAETOOLS_WIN_HTTP=http://sourceforge.net/projects/daetools/files/windows-libs
 LAPACK_HTTP=http://www.netlib.org/lapack
 CLAPACK_HTTP=${DAETOOLS_HTTP}
-MUMPS_HTTP=${DAETOOLS_HTTP}
+MUMPS_WIN_HTTP=${DAETOOLS_WIN_HTTP}
+BONMIN_HTTP=${DAETOOLS_HTTP}
+BONMIN_WIN_HTTP=${DAETOOLS_WIN_HTTP}
 IDAS_HTTP=${DAETOOLS_HTTP}
 BONMIN_HTTP=${DAETOOLS_HTTP}
 #Old: SUPERLU_HTTP=http://crd.lbl.gov/~xiaoye/SuperLU
@@ -437,7 +457,7 @@ configure_boost()
   echo ""
   if [ ${PLATFORM} = "Windows" ]; then
     if [ ! -e boost_${vBOOST_}.zip ]; then
-      wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
+      $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
     fi
     unzip boost_${vBOOST_}.zip
     mv boost_${vBOOST_} boost${PYTHON_VERSION}
@@ -445,7 +465,7 @@ configure_boost()
     cmd "/C bootstrap"
   else
     if [ ! -e boost_${vBOOST_}.tar.gz ]; then
-      wget ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
+      $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
     fi
     tar -xzf boost_${vBOOST_}.tar.gz
     mv boost_${vBOOST_} boost${PYTHON_VERSION}
@@ -540,8 +560,12 @@ compile_boost()
       echo "    : "                                 >> ${BOOST_USER_CONFIG}
       echo "    : <toolset>msvc"                    >> ${BOOST_USER_CONFIG}
       echo "    ;"                                  >> ${BOOST_USER_CONFIG}
-
-      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} \
+	  if [[ $HOST_ARCH == "win64" ]]; then
+	    ADDRESS_MODEL="address-model=64"
+      else
+	    ADDRESS_MODEL=""
+	  fi
+      ./bjam --build-dir=./build --debug-building --layout=system --buildid=${BOOST_BUILD_ID} ${ADDRESS_MODEL} \
              --with-date_time --with-system --with-filesystem --with-regex --with-serialization --with-thread --with-python \
              variant=release link=shared threading=multi runtime-link=shared ${BOOST_MACOSX_FLAGS}
 
@@ -619,10 +643,10 @@ configure_openblas()
   echo "Setting-up openblas..."
   echo ""
   if [ ! -e openblas-${vOPENBLAS}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/openblas-${vOPENBLAS}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/openblas-${vOPENBLAS}.tar.gz
   fi
   if [ ! -e Makefile-openblas.rule ]; then
-    wget ${DAETOOLS_HTTP}/Makefile-openblas.rule
+    $WGET ${DAETOOLS_HTTP}/Makefile-openblas.rule
   fi
   tar -xzf openblas-${vOPENBLAS}.tar.gz
   cp Makefile-openblas.rule openblas/Makefile.rule
@@ -677,10 +701,10 @@ configure_ref_blas_lapack()
   echo "[*] Setting-up reference blas & lapack..."
   echo ""
   if [ ! -e lapack-${vLAPACK}.tgz ]; then
-    wget ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
+    $WGET ${LAPACK_HTTP}/lapack-${vLAPACK}.tgz
   fi
   if [ ! -e daetools_lapack_make.inc ]; then
-    wget ${DAETOOLS_HTTP}/daetools_lapack_make.inc
+    $WGET ${DAETOOLS_HTTP}/daetools_lapack_make.inc
   fi
   tar -xzf lapack-${vLAPACK}.tgz
   mv lapack-${vLAPACK} lapack
@@ -743,7 +767,7 @@ configure_cblas_clapack()
   echo "[*] Setting-up cblas & clapack..."
   echo ""
   if [ ! -e clapack-${vCLAPACK}-CMAKE.tgz ]; then
-    wget ${CLAPACK_HTTP}/clapack-${vCLAPACK}-CMAKE.tgz
+    $WGET ${CLAPACK_HTTP}/clapack-${vCLAPACK}-CMAKE.tgz
   fi
   tar -xzf clapack-${vCLAPACK}-CMAKE.tgz
   mv clapack-${vCLAPACK}-CMAKE clapack
@@ -808,7 +832,7 @@ configure_coolprop()
   echo "[*] Setting-up coolprop..."
   echo ""
   if [ ! -e CoolProp_sources.zip ]; then
-    wget ${COOLPROP_HTTP}/CoolProp_sources.zip
+    $WGET ${COOLPROP_HTTP}/CoolProp_sources.zip
   fi
   unzip CoolProp_sources.zip
   mv CoolProp.sources coolprop
@@ -880,6 +904,11 @@ clean_coolprop()
 #######################################################
 configure_mumps()
 {
+  if [[ "${PLATFORM}" != "Windows" ]]; then
+    echo "Mumps build is for Windows platform with migw32/mingw64 only."
+    exit 1
+  fi
+  
   if [ -e mumps ]; then
     rm -r mumps
   fi
@@ -887,10 +916,10 @@ configure_mumps()
   echo ""
   echo "Setting-up mumps..."
   echo ""
-  if [ ! -e mumps-${vMUMPS}.zip ]; then
-    wget ${DAETOOLS_HTTP}/mumps-${vMUMPS}.zip
+  if [ ! -e mumps-${vMUMPS-WIN}.zip ]; then
+    $WGET ${MUMPS_WIN_HTTP}/mumps-${vMUMPS-WIN}.zip
   fi
-  unzip mumps-${vMUMPS}.zip
+  unzip mumps-${vMUMPS-WIN}.zip
   cd "${TRUNK}"
 
   echo ""
@@ -904,10 +933,11 @@ compile_mumps()
   echo ""
   echo "[*] Building mumps..."
   echo ""
+
   cd blas
-  ${MAKE_Ncpu}
+  ${MINGW_MAKE}
   cd ..
-  ${MAKE_Ncpu} d
+  ${MINGW_MAKE} d
   echo ""
   echo "[*] Done!"
   echo ""
@@ -920,9 +950,9 @@ clean_mumps()
   echo "[*] Cleaning mumps..."
   echo ""
   cd mumps
-  ${MAKE} clean
+  ${MINGW_MAKE} clean
   cd blas
-  ${MAKE} clean
+  ${MINGW_MAKE} clean
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -941,37 +971,37 @@ configure_umfpack()
   echo "[*] Setting-up umfpack and friends..."
   echo ""
   if [ ! -e SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/SuiteSparse_config-${vSUITESPARSE_CONFIG}.tar.gz
   fi
   if [ ! -e CHOLMOD-${vCHOLMOD}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/CHOLMOD-${vCHOLMOD}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/CHOLMOD-${vCHOLMOD}.tar.gz
   fi
   if [ ! -e AMD-${vAMD}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/AMD-${vAMD}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/AMD-${vAMD}.tar.gz
   fi
   if [ ! -e CAMD-${vCAMD}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/CAMD-${vCAMD}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/CAMD-${vCAMD}.tar.gz
   fi
   if [ ! -e COLAMD-${vCOLAMD}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/COLAMD-${vCOLAMD}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/COLAMD-${vCOLAMD}.tar.gz
   fi
   if [ ! -e CCOLAMD-${vCCOLAMD}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/CCOLAMD-${vCCOLAMD}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/CCOLAMD-${vCCOLAMD}.tar.gz
   fi
   if [ ! -e UMFPACK-${vUMFPACK}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/UMFPACK-${vUMFPACK}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/UMFPACK-${vUMFPACK}.tar.gz
   fi
   if [ ! -e SuiteSparse_config.mk ]; then
-    wget ${DAETOOLS_HTTP}/SuiteSparse_config.mk
+    $WGET ${DAETOOLS_HTTP}/SuiteSparse_config.mk
   fi
   #if [ ! -e metis-${vMETIS}.tar.gz ]; then
-  #  wget ${METIS_HTTP}/metis-${vMETIS}.tar.gz
+  #  $WGET ${METIS_HTTP}/metis-${vMETIS}.tar.gz
   #fi
   #if [ ! -e metis.h ]; then
-  #  wget ${DAETOOLS_HTTP}/metis.h
+  #  $WGET ${DAETOOLS_HTTP}/metis.h
   #fi
   #if [ ! -e Makefile-CHOLMOD.patch ]; then
-  #  wget ${DAETOOLS_HTTP}/Makefile-CHOLMOD.patch
+  #  $WGET ${DAETOOLS_HTTP}/Makefile-CHOLMOD.patch
   #fi
 
   mkdir umfpack
@@ -1158,7 +1188,7 @@ configure_idas()
   echo "[*] Setting-up idas..."
   echo ""
   if [ ! -e idas-${vIDAS}.tar.gz ]; then
-    wget ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
+    $WGET ${IDAS_HTTP}/idas-${vIDAS}.tar.gz
   fi
   tar -xzf idas-${vIDAS}.tar.gz
   mv idas-${vIDAS} idas
@@ -1228,7 +1258,7 @@ configure_superlu()
   echo "[*] Setting-up superlu..."
   echo ""
   if [ ! -e superlu_${vSUPERLU}.tar.gz ]; then
-    wget ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
+    $WGET ${SUPERLU_HTTP}/superlu_${vSUPERLU}.tar.gz
   fi
   tar -xzf superlu_${vSUPERLU}.tar.gz
   mv SuperLU_${vSUPERLU} superlu
@@ -1301,10 +1331,10 @@ configure_superlu_mt()
   echo "[*] Setting-up superlu_mt..."
   echo ""
   if [ ! -e superlu_mt_${vSUPERLU_MT}.tar.gz ]; then
-    wget ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
+    $WGET ${SUPERLU_HTTP}/superlu_mt_${vSUPERLU_MT}.tar.gz
   fi
   if [ ! -e superlu_mt_makefiles_${vSUPERLU_MT}.tar.gz ]; then
-    wget ${DAETOOLS_HTTP}/superlu_mt_makefiles_${vSUPERLU_MT}.tar.gz
+    $WGET ${DAETOOLS_HTTP}/superlu_mt_makefiles_${vSUPERLU_MT}.tar.gz
   fi
   tar -xzf superlu_mt_${vSUPERLU_MT}.tar.gz
   mv SuperLU_MT_${vSUPERLU_MT} superlu_mt
@@ -1348,38 +1378,48 @@ clean_superlu_mt()
 #######################################################
 configure_bonmin()
 {
-  if [ -e bonmin ]; then
-    rm -r bonmin
-  fi
+  #if [ -e bonmin ]; then
+  #  rm -r bonmin
+  #fi
   echo ""
   echo "[*] Setting-up bonmin..."
   echo ""
-  if [ ! -e Bonmin-${vBONMIN}.zip ]; then
-    wget ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
+  
+  if [[ "${PLATFORM}" == "Windows" ]]; then
+    if [ ! -e bonmin-${vBONMIN_WIN}.zip ]; then
+      $WGET ${BONMIN_WIN_HTTP}/bonmin-${vBONMIN_WIN}.zip
+    fi
+    #unzip bonmin-${vBONMIN_WIN}.zip
+  
+  else # GNU/Linux and macOS
+    if [ ! -e Bonmin-${vBONMIN}.zip ]; then
+      $WGET ${BONMIN_HTTP}/Bonmin-${vBONMIN}.zip
+    fi
+    unzip Bonmin-${vBONMIN}.zip
+    rm -rf bonmin/Bonmin-${vBONMIN}
+    mv Bonmin-${vBONMIN} bonmin
+
+    cd bonmin
+
+    cd ThirdParty/Mumps
+    sh get.Mumps
+    cd ../..
+
+    cd ThirdParty/Blas
+    sh get.Blas
+    cd ../..
+
+    cd ThirdParty/Lapack
+    sh get.Lapack
+    cd ../..
+
+    mkdir -p build
+    cd build
+    ../configure ${DAE_CROSS_COMPILE_FLAGS} --disable-dependency-tracking --enable-shared=no --enable-static=yes \
+                 ARCHFLAGS="${DAE_COMPILER_FLAGS}" CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" \
+                 FFLAGS="${DAE_COMPILER_FLAGS}" LDFLAGS=""
   fi
-  unzip Bonmin-${vBONMIN}.zip
-  rm -rf bonmin/Bonmin-${vBONMIN}
-  mv Bonmin-${vBONMIN} bonmin
-
-  cd bonmin
-
-  cd ThirdParty/Mumps
-  sh get.Mumps
-  cd ../..
-
-  cd ThirdParty/Blas
-  sh get.Blas
-  cd ../..
-
-  cd ThirdParty/Lapack
-  sh get.Lapack
-  cd ../..
-
-  mkdir -p build
-  cd build
-  ../configure ${DAE_CROSS_COMPILE_FLAGS} --disable-dependency-tracking --enable-shared=no --enable-static=yes \
-               ARCHFLAGS="${DAE_COMPILER_FLAGS}" CFLAGS="${DAE_COMPILER_FLAGS}" CXXFLAGS="${DAE_COMPILER_FLAGS}" \
-               FFLAGS="${DAE_COMPILER_FLAGS}" LDFLAGS=""
+  
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1388,11 +1428,30 @@ configure_bonmin()
 
 compile_bonmin()
 {
-  cd bonmin/build
-  echo "[*] Building bonmin..."
-  ${MAKE_Ncpu}
-  #${MAKE_Ncpu} test
-  ${MAKE} install
+  if [[ "${PLATFORM}" == "Windows" ]]; then
+    cd bonmin
+    
+    if [[ "${HOST_ARCH}" == "win32" ]]; then
+      MS_BUILD_PLATFORM="Win32"
+    elif [[ "${HOST_ARCH}" == "win64" ]]; then
+      MS_BUILD_PLATFORM="x64"
+    else
+      echo unknown HOST_ARCH: $HOST_ARCH
+      exit 1
+    fi
+    
+    echo "msbuild.exe Bonmin.sln /target:rebuild /p:Platform=${MS_BUILD_PLATFORM} /p:Configuration=Release /p:PlatformToolset=v140 /p:UseEnv=true /maxcpucount:3"
+    msbuild.exe Bonmin.sln -target:rebuild -p:Platform="${MS_BUILD_PLATFORM}" -p:Configuration="Release" -p:PlatformToolset="v140" -p:UseEnv=true -maxcpucount:3
+  
+  else # GNU/Linux and macOS
+
+    cd bonmin/build
+    echo "[*] Building bonmin..."
+    ${MAKE_Ncpu}
+    #${MAKE_Ncpu} test
+    ${MAKE} install
+  fi
+  
   echo ""
   echo "[*] Done!"
   echo ""
@@ -1404,8 +1463,14 @@ clean_bonmin()
   echo ""
   echo "[*] Cleaning bonmin..."
   echo ""
-  cd bonmin/build
-  ${MAKE} clean
+  
+  if [[ "${PLATFORM}" == "Windows" ]]; then
+    cd bonmin
+    msbuild.exe Bonmin.sln -target:clean
+  else
+    cd bonmin/build
+    ${MAKE} clean
+  fi
   cd "${TRUNK}"
   echo ""
   echo "[*] Done!"
@@ -1424,13 +1489,13 @@ configure_nlopt()
   echo "[*] Setting-up nlopt..."
   echo ""
   if [ ! -e nlopt-${vNLOPT}.tar.gz ]; then
-    wget ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
+    $WGET ${NLOPT_HTTP}/nlopt-${vNLOPT}.tar.gz
   fi
   if [ ! -e nlopt-config.cmake.h.in ]; then
-    wget ${NLOPT_HTTP}/nlopt-config.cmake.h.in
+    $WGET ${NLOPT_HTTP}/nlopt-config.cmake.h.in
   fi
   if [ ! -e nlopt-CMakeLists.txt ]; then
-    wget ${NLOPT_HTTP}/nlopt-CMakeLists.txt
+    $WGET ${NLOPT_HTTP}/nlopt-CMakeLists.txt
   fi
 
   tar -xzf nlopt-${vNLOPT}.tar.gz
@@ -1501,7 +1566,7 @@ configure_trilinos()
 
   echo "[*] Setting-up trilinos..."
   if [ ! -e trilinos-${vTRILINOS}-Source.tar.gz ]; then
-    wget ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
+    $WGET ${TRILINOS_HTTP}/trilinos-${vTRILINOS}-Source.tar.gz
   fi
 
   tar -xzf trilinos-${vTRILINOS}-Source.tar.gz
@@ -1640,7 +1705,7 @@ configure_dealii()
   echo "[*] Setting-up deal.II..."
   echo ""
   if [ ! -e dealii-${vDEALII}.tar.gz ]; then
-    wget ${DEALII_HTTP}/v${vDEALII}/dealii-${vDEALII}.tar.gz
+    $WGET ${DEALII_HTTP}/v${vDEALII}/dealii-${vDEALII}.tar.gz
   fi
 
   tar -xzf dealii-${vDEALII}.tar.gz

@@ -37,9 +37,10 @@ additional_files      = []
 localsAsOutputs       = True
 add_xml_stylesheet    = True  
 # Script files to run all FMUs with the ComplianceChecker
-run_fmuCheck_all_fmus_bat    = None
-run_fmuCheck_all_fmus_sh     = None
-compare_ref_and_cc_solutions = None
+run_fmuCheck_all_fmus_win32_bat  = None
+run_fmuCheck_all_fmus_win64_bat  = None
+run_fmuCheck_all_fmus_linux64_sh = None
+compare_ref_and_cc_solutions     = None
 
 def formatDescription(simulation):
     description = simulation.m.Description.split('\n')
@@ -55,8 +56,9 @@ def exportFMU(simulation, log):
     global additional_files
     global localsAsOutputs
     global add_xml_stylesheet
-    global run_fmuCheck_all_fmus_bat
-    global run_fmuCheck_all_fmus_sh
+    global run_fmuCheck_all_fmus_win32_bat
+    global run_fmuCheck_all_fmus_win64_bat
+    global run_fmuCheck_all_fmus_linux64_sh
        
     # Create options for the FMI code generator and output files
     simulationClassName    = simulation.__class__.__name__
@@ -88,15 +90,22 @@ def exportFMU(simulation, log):
     
     # Add the generated commands to the files for running all FMUs with the ComplianceChecker
     fmu_cc_sh_rel = os.path.join(fmu_directory_basename, fmu_cc_sh)
-    run_fmuCheck_all_fmus_sh.write('echo \"Executing: sh %s...\"\n' % fmu_cc_sh_rel)
-    run_fmuCheck_all_fmus_sh.write ('cd %s\n' % fmu_name)
-    run_fmuCheck_all_fmus_sh.write ('sh ' + fmu_cc_sh  + '\n')
-    run_fmuCheck_all_fmus_sh.write ('cd ..\n\n')
+    run_fmuCheck_all_fmus_linux64_sh.write('echo \"Executing: sh %s...\"\n' % fmu_cc_sh_rel)
+    run_fmuCheck_all_fmus_linux64_sh.write ('cd %s\n' % fmu_name)
+    run_fmuCheck_all_fmus_linux64_sh.write ('sh ' + fmu_cc_sh  + '\n')
+    run_fmuCheck_all_fmus_linux64_sh.write ('cd ..\n\n')
+    
     fmu_cc_bat_rel = os.path.join(fmu_directory_basename, fmu_cc_bat)
-    run_fmuCheck_all_fmus_bat.write('echo \"Executing: %s...\"\n' % fmu_cc_bat_rel)
-    run_fmuCheck_all_fmus_bat.write ('cd %s\n' % fmu_name)
-    run_fmuCheck_all_fmus_bat.write('call ' + fmu_cc_bat + '\n')
-    run_fmuCheck_all_fmus_bat.write ('cd ..\n\n')
+    run_fmuCheck_all_fmus_win32_bat.write('echo \"Executing: %s...\"\n' % fmu_cc_bat_rel)
+    run_fmuCheck_all_fmus_win32_bat.write ('cd %s\n' % fmu_name)
+    run_fmuCheck_all_fmus_win32_bat.write('call ' + fmu_cc_bat + '\n')
+    run_fmuCheck_all_fmus_win32_bat.write ('cd ..\n\n')
+
+    fmu_cc_bat_rel = os.path.join(fmu_directory_basename, fmu_cc_bat)
+    run_fmuCheck_all_fmus_win64_bat.write('echo \"Executing: %s...\"\n' % fmu_cc_bat_rel)
+    run_fmuCheck_all_fmus_win64_bat.write ('cd %s\n' % fmu_name)
+    run_fmuCheck_all_fmus_win64_bat.write('call ' + fmu_cc_bat + '\n')
+    run_fmuCheck_all_fmus_win64_bat.write ('cd ..\n\n')
     
     # Write the options to create the reference output
     f = open(os.path.join(fmu_directory, '%s_ref.opt' % fmu_name), "w")
@@ -114,7 +123,7 @@ def exportFMU(simulation, log):
     f.write('Compiler:\n')
     f.write('    Microsoft Visual C++ 2015, gcc 6.3\n\n')
     f.write('Available platforms:\n')
-    f.write('    win32, linux64\n\n')
+    f.write('    win32, win64, linux64\n\n')
     f.write('Notes:\n')
     f.write('    \n')
     f.write('Contact:\n')
@@ -253,15 +262,18 @@ if __name__ == "__main__":
     compare_ref_and_cc_solutions.write(inspect.getsource(compare_solutions) + '\n')
     compare_ref_and_cc_solutions.write('if __name__ == "__main__":\n')
    
-    run_fmuCheck_all_fmus_bat = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-win32.bat'),  "w")
-    run_fmuCheck_all_fmus_bat.write('set FMU_CHECK_BIN=../fmuCheck.win32.exe\n\n')
+    run_fmuCheck_all_fmus_win32_bat = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-win32.bat'),  "w")
+    run_fmuCheck_all_fmus_win32_bat.write('set FMU_CHECK_BIN=../fmuCheck.win32.exe\n\n')
+
+    run_fmuCheck_all_fmus_win64_bat = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-win64.bat'),  "w")
+    run_fmuCheck_all_fmus_win64_bat.write('set FMU_CHECK_BIN=../fmuCheck.win64.exe\n\n')
     
-    run_fmuCheck_all_fmus_sh  = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-linux64.sh'), "w")
-    run_fmuCheck_all_fmus_sh.write('#!/bin/bash\n')
-    run_fmuCheck_all_fmus_sh.write('# -*- coding: utf-8 -*-\n\n')
-    run_fmuCheck_all_fmus_sh.write('set -e\n')
-    #run_fmuCheck_all_fmus_sh.write('set -x\n\n')
-    run_fmuCheck_all_fmus_sh.write('export FMU_CHECK_BIN=../fmuCheck.linux64\n\n')
+    run_fmuCheck_all_fmus_linux64_sh  = open(os.path.join(base_directory, 'run_fmuCheck_all_fmus-linux64.sh'), "w")
+    run_fmuCheck_all_fmus_linux64_sh.write('#!/bin/bash\n')
+    run_fmuCheck_all_fmus_linux64_sh.write('# -*- coding: utf-8 -*-\n\n')
+    run_fmuCheck_all_fmus_linux64_sh.write('set -e\n')
+    #run_fmuCheck_all_fmus_linux64_sh.write('set -x\n\n')
+    run_fmuCheck_all_fmus_linux64_sh.write('export FMU_CHECK_BIN=../fmuCheck.linux64\n\n')
         
     # Generate .fmu files
     generateFMUs()

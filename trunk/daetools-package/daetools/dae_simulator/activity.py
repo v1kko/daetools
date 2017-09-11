@@ -145,12 +145,12 @@ class daeActivity(object):
             except Exception as e:
                 log.Message(str(e), 0)
             
+            # Finalize
+            simulation.Finalize()
+            
             # Should it be called before or after simulation.Finalize()??
             if run_after_simulation_fn:
                 run_after_simulation_fn(simulation, log)
-            
-            # Finalize
-            simulation.Finalize()
             
         return simulation
 

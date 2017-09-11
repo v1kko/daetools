@@ -30,16 +30,17 @@ Mandatory packages:
 * Scipy (0.14\ :sup:`+`): `<http://www.scipy.org>`_
 * Matplotlib (1.4\ :sup:`+`): `<http://matplotlib.sourceforge.net>`_
 * pyQt5: `<http://www.riverbankcomputing.co.uk/software/pyqt>`_
-* mayavi2
-* python-lxml
+* lxml: `<http://lxml.de>`_ (Python interface to libxml2 and libxslt)
 
 Optional packages:
 
-* python-xlwt
-* python-h5py
-* python-pandas
-* `PyGraphviz <https://pygraphviz.github.io>`_ 
-* `SAlib <https://github.com/SALib/SALib>`_
+* openpyxl: `<http://www.python-excel.org>`_ (writing data to Excel files)
+* HDF5 for Python: `<http://www.h5py.org>`_ (HDF5 binary data format for large data sets)
+* Pandas: `<http://pandas.pydata.org>`_ (Python data analysis library)
+* Mayavi2: `<http://docs.enthought.com/mayavi/mayavi>`_ (3D scientific data visualization)
+* PyGraphviz: `<https://pygraphviz.github.io>`_ (Python interface to the Graphviz graph layout and visualization package)
+* SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python)
+* PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files)
 
 Optional packages (proprietary):
 
@@ -99,7 +100,7 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-qt4)
      sudo apt-get install python-numpy python-scipy python-matplotlib python-qt5 mayavi2 python-lxml
      # Optional packages:
-     sudo apt-get install python-xlwt python-h5py python-pandas
+     sudo apt-get install python-openpyxl python-h5py python-pandas
      pip install salib pygraphviz
 
 * Red Hat and derivatives (Fedora, CentOS):
@@ -109,7 +110,7 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4)
      sudo yum install numpy scipy python-matplotlib PyQt5 Mayavi python-lxml
      # Optional packages:
-     sudo yum install python-xlwt h5py python-pandas
+     sudo yum install python-openpyxl h5py python-pandas
      pip install salib pygraphviz
 
 * SUSE Linux:
@@ -119,7 +120,7 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-qt4)
      sudo zypper in python-numpy python-scipy python-matplotlib python-qt5 python-lxml
      # Optional packages:
-     sudo zypper in python-xlwt h5py python-pandas
+     sudo zypper in python-openpyxl h5py python-pandas
      pip install salib pygraphviz
 
 * Arch Linux:
@@ -130,14 +131,14 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python2-pyqt4)
      sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt5 mayavi python-lxml
      # Optional packages:
-     sudo pacman -S python2-xlwt python-h5py python-pandas
+     sudo pacman -S python2-openpyxl python-h5py python-pandas
      pip install salib pygraphviz
 
      # Python 3:
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-pyqt4)
      sudo pacman -S python-numpy python-scipy python-matplotlib python-pyqt5 mayavi python-lxml
      # Optional packages:
-     sudo pacman -S python-xlwt python-h5py python-pandas
+     sudo pacman -S python-openpyxl python-h5py python-pandas
      pip3 install salib pygraphviz
 
 Install one of scientific python distributions
@@ -151,8 +152,9 @@ Install one of scientific python distributions
   .. code-block:: bash
 
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
-     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
-     pip install salib pygraphviz
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
+     conda install -c menpo vtk=7
+     pip install salib pygraphviz mayavi
 
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -193,8 +195,9 @@ Install one of scientific python distributions
   .. code-block:: bash
 
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
-     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
-     pip install salib pygraphviz
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
+     conda install -c menpo vtk=7
+     pip install salib pygraphviz mayavi
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -240,8 +243,9 @@ The easiest way is to install one of available scientific python distributions:
   .. code-block:: bash
 
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
-     conda install numpy scipy matplotlib pyqt lxml pandas h5py xlwt
-     pip install salib pygraphviz
+     conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
+     conda install -c menpo vtk=7
+     pip install salib pygraphviz mayavi
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 * `Python(x,y) <https://python-xy.github.io/>`_

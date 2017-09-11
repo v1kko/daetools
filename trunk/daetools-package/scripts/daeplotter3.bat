@@ -1,1 +1,1 @@
-python3 -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"
+python3 -m daetools.dae_plotter.plotter

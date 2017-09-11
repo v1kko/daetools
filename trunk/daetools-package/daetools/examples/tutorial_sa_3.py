@@ -275,8 +275,8 @@ def run(**kwargs):
     # 3. Generation of samples (Morris, FAST or Sobol sampling).
     ###################################################################
     if SA_method == 'Morris':
-        from SALib.sample.morris  import sample
-        from SALib.analyze.morris import analyze
+        from daetools.ext_libs.SALib.sample.morris  import sample
+        from daetools.ext_libs.SALib.analyze.morris import analyze
         
         # Generate samples using the Morris method.
         # Sample size n=85, no. params k=5 => N=(k+1)*n=510 (512 in the referenced article).
@@ -291,8 +291,8 @@ def run(**kwargs):
         theta_0 = param_values[:,4]
     
     elif SA_method == 'Sobol':
-        from SALib.sample.saltelli import sample
-        from SALib.analyze.sobol   import analyze
+        from daetools.ext_libs.SALib.sample.saltelli import sample
+        from daetools.ext_libs.SALib.analyze.sobol   import analyze
         
         # Generate samples using a Saltelli's extension of the Sobol sequence.
         # Sample size n=512, no. params k=5 => N=(2k+2)*n=6144 (as in the referenced article).
@@ -307,8 +307,8 @@ def run(**kwargs):
         theta_0 = param_values[:,4]
     
     elif SA_method == 'FAST':
-        from SALib.sample.fast_sampler import sample
-        from SALib.analyze.fast        import analyze
+        from daetools.ext_libs.SALib.sample.fast_sampler import sample
+        from daetools.ext_libs.SALib.analyze.fast        import analyze
         
         # Generate samples using a FAST method.
         # Sample size n=1230, no. params k=5 => N=k*n=6150.

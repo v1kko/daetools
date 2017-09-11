@@ -156,6 +156,8 @@ if [[ ${PLATFORM} == *"MSYS_"* ]]; then
     HOST_ARCH="win32"
   elif [[ ${VC_PLAT} == *"x64"* ]]; then
     HOST_ARCH="win64"
+  elif [[ "${VC_PLAT}" == *"X64"* ]]; then
+    HOST_ARCH="win64"
   else
     echo unknown HOST_ARCH: $HOST_ARCH
     exit 1
@@ -178,7 +180,7 @@ elif [ ${PLATFORM} = "Linux" ]; then
   QMAKE_SPEC=linux-g++
 elif [ ${PLATFORM} = "Windows" ]; then
   Ncpu=4
-  QMAKE_SPEC=win32-msvc2015
+  QMAKE_SPEC=win32-msvc
 else
   Ncpu=4
   QMAKE_SPEC=win32-g++

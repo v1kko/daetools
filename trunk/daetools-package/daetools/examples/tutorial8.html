@@ -169,22 +169,29 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>    Create daeDelegateDataReporter and add 10 data reporters:</span>
 <span style='color:#017a31;'>     - MyDataReporterLocal</span>
-<span style='color:#017a31;'>       User-defined data reporter to write data to the file 'tutorial8.out'</span>
+<span style='color:#017a31;'>       User-defined data reporter to write data to the file 'tutorial8.out'.</span>
 <span style='color:#017a31;'>     - daeTCPIPDataReporter</span>
-<span style='color:#017a31;'>       Standard data reporter that sends data to the daePlotter</span>
+<span style='color:#017a31;'>       Standard data reporter that sends data to the DAE Plotter application.</span>
 <span style='color:#017a31;'>     - daeMatlabMATFileDataReporter</span>
-<span style='color:#017a31;'>       Exports the results into the Matlab .mat file format</span>
+<span style='color:#017a31;'>       Exports the results into the Matlab .mat file format.</span>
 <span style='color:#017a31;'>     - daePlotDataReporter</span>
-<span style='color:#017a31;'>       Plots selected variables using Matplotlib</span>
+<span style='color:#017a31;'>       Plots selected variables using Matplotlib.</span>
 <span style='color:#017a31;'>     - daeExcelFileDataReporter</span>
-<span style='color:#017a31;'>       Exports the results into MS Excel file format</span>
+<span style='color:#017a31;'>       Exports the results into the Excel .xlsx file format.</span>
 <span style='color:#017a31;'>     - daeJSONFileDataReporter</span>
+<span style='color:#017a31;'>       Exports the results in the JSON format.</span>
 <span style='color:#017a31;'>     - daeXMLFileDataReporter</span>
+<span style='color:#017a31;'>       Exports the results in the XML file format.</span>
 <span style='color:#017a31;'>     - daeHDF5FileDataReporter</span>
+<span style='color:#017a31;'>       Exports the results in the HDF5 format.</span>
 <span style='color:#017a31;'>     - daePandasDataReporter</span>
+<span style='color:#017a31;'>       Creates the Pandas dataset available in the data_frame property.</span>
 <span style='color:#017a31;'>     - daeVTKDataReporter</span>
+<span style='color:#017a31;'>       Exports the results in the binary VTK format (.vtr files).</span>
+<span style='color:#017a31;'>     - daeCSVFileDataReporter</span>
+<span style='color:#017a31;'>       Exports the results in the CSV format.</span>
 
-<span style='color:#017a31;'>    The daeDelegateDataReporter does not process the data but simply delegate all calls</span>
+<span style='color:#017a31;'>    The daeDelegateDataReporter does not process the data but simply delegates all calls</span>
 <span style='color:#017a31;'>    to the contained data reporters.</span>
 <span style='color:#017a31;'>    </span><span style='color:#017a31;'>&quot;&quot;&quot;</span>
     datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
@@ -199,12 +206,15 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     dr8  <b><span style='color:#0000ff;'>=</span></b> daeHDF5FileDataReporter()
     dr9  <b><span style='color:#0000ff;'>=</span></b> daePandasDataReporter()
     dr10 <b><span style='color:#0000ff;'>=</span></b> daeVTKDataReporter()
+    dr11 <b><span style='color:#0000ff;'>=</span></b> daeCSVFileDataReporter()
 
     <span style='color:#017a31;'># Add all data reporters to a list and store the list in the simulation object.</span>
     <span style='color:#017a31;'># The reason is that the data reporter objects are destroyed at the exit of the</span>
     <span style='color:#017a31;'># setupDataReporters function resulting in the dangling pointers and either the</span>
     <span style='color:#017a31;'># segmentation fault or the 'pure virtual method called' errors.</span>
-    simulation._data_reporters_ <b><span style='color:#0000ff;'>=</span></b> [dr1, dr2, dr3, dr4, dr5, dr6, dr7, dr8, dr9, dr10]
+    <span style='color:#017a31;'># Nota bene:</span>
+    <span style='color:#017a31;'>#  From the version 1.7.2 not required anymore.</span>
+    simulation._data_reporters_ <b><span style='color:#0000ff;'>=</span></b> [dr1, dr2, dr3, dr4, dr5, dr6, dr7, dr8, dr9, dr10, dr11]
 
     datareporter.AddDataReporter(dr1)
     datareporter.AddDataReporter(dr2)
@@ -216,35 +226,38 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     datareporter.AddDataReporter(dr8)
     datareporter.AddDataReporter(dr9)
     datareporter.AddDataReporter(dr10)
+    datareporter.AddDataReporter(dr11)
 
     <span style='color:#017a31;'># Connect data reporters</span>
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    filename      <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.out&quot;</span>
-    mat_filename  <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.mat&quot;</span>
-    txt_filename  <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.txt&quot;</span>
-    xls_filename  <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.xls&quot;</span>
-    json_filename <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.json&quot;</span>
-    xml_filename  <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.xml&quot;</span>
-    hdf5_filename <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.hdf5&quot;</span>
-    vtk_filename  <b><span style='color:#0000ff;'>=</span></b> tempfile.gettempdir() <b><span style='color:#0000ff;'>+</span></b> <span style='color:#cc0000;'>&quot;/tutorial8.vtk&quot;</span>
+    modelName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name
+    simName <b><span style='color:#0000ff;'>=</span></b> modelName <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+    out_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.out&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    mat_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.mat&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    xlsx_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.xlsx&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
+    json_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.json&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
+    xml_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.xml&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    hdf5_filename <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.hdf5&quot;</span> <b><span style='color:#0000ff;'>%</span></b> modelName)
+    vtk_directory <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>-vtk&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
+    csv_filename  <b><span style='color:#0000ff;'>=</span></b> os.path.join(tempfile.gettempdir(), <span style='color:#cc0000;'>&quot;</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>.csv&quot;</span>  <b><span style='color:#0000ff;'>%</span></b> modelName)
 
-    dr1.Connect(filename, simName)
-    dr2.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName)
-    dr3.Connect(mat_filename, simName)
-    dr4.Connect(txt_filename, simName)
-    dr5.Connect(xls_filename, simName)
-    dr6.Connect(json_filename, simName)
-    dr7.Connect(xml_filename, simName)
-    dr8.Connect(hdf5_filename, simName)
-    dr9.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName)
-    dr10.Connect(vtk_filename, simName)
+    dr1.Connect(out_filename,   simName)
+    dr2.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,             simName)
+    dr3.Connect(mat_filename,   simName)
+    dr4.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,             simName)
+    dr5.Connect(xlsx_filename,  simName)
+    dr6.Connect(json_filename,  simName)
+    dr7.Connect(xml_filename,   simName)
+    dr8.Connect(hdf5_filename,  simName)
+    dr9.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>,             simName)
+    dr10.Connect(vtk_directory, simName)
+    dr11.Connect(csv_filename,  simName)
 
     <span style='color:#017a31;'># Print the connection status for all data reporters</span>
     <b>for</b> dr <b>in</b> simulation._data_reporters_:
         <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'> (</span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>): </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> (dr.__class__.<span style='color:#3605fb;'>__name__</span>, dr.ConnectString, <span style='color:#cc0000;'>'connected'</span> <b>if</b> dr.IsConnected() <b>else</b> <span style='color:#cc0000;'>'NOT connected'</span>))
 
     <b>return</b> datareporter
-   
+
 <b>def</b> process_data_reporters(simulation, log):
     <b>try</b>:
         simulation._data_reporters_[<span style='color:#cc047c;'>3</span>].Plot(
@@ -285,6 +298,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
-    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+</pre>
 </body>
 </html>

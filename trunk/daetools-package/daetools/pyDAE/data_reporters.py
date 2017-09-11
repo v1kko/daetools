@@ -11,53 +11,79 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
-import os, sys, numpy, itertools
+import os, sys, numpy, json, itertools
 from pyCore import *
 from pyDataReporting import *
 
-class daeVTKDataReporter(daeDataReporterFile):
+def _formatName(name):
+    return daeGetStrippedName(name).split('.')[-1]
+
+class daeVTKDataReporter(daeDataReporterLocal):
     """
-    Saves data in the VTK format (.vtk) using pyEVTK module avaialable
-    at https://bitbucket.org/somada141/pyevtk. Install using: "pip install pyevtk".
-    Nota bene:
-      It is not an original module available at https://bitbucket.org/pauloh/pyevtk.
+    Saves data in the binary VTK format (.vtr) using the pyEVTK module.
+    pyEVTK is included in the daetools installation (daetools.ext_libs.pyevtk).
+    A separate file is written into the specified directory for every time point.
+    In addition, the 'variableName.visit' files are written for use with the VisIt software.
+    Notate bene:
+      - The original is available at https://pypi.python.org/pypi/PyEVTK. 
+        Install using: "pip install pyevtk".
+      - It is not an original module available at https://bitbucket.org/pauloh/pyevtk.
     Does not require VTK installed.
     """
     def __init__(self):
-        daeDataReporterFile.__init__(self)
+        daeDataReporterLocal.__init__(self)
 
-    def WriteDataToFile(self):
+    def Connect(self, ConnectString, ProcessName):
+        """
+        ConnectString is a directory where the .vtr files will be written.
+        """
+        self.ConnectString = ConnectString
+        self.ProcessName   = ProcessName
+        self.base_folder   = ConnectString
+        if not os.path.isdir(self.base_folder):
+            try:
+                os.makedirs(self.base_folder)
+            except Exception as e:
+                print('Cannot create directory %s for VTK files:\n%s' % (self.base_folder, str(e)))
+                return False
+        
+        return True
+
+    def IsConnected(self):
+        return True
+
+    def Disconnect(self):
+        self.WriteFiles()
+        return True
+
+    def WriteFiles(self):
         try:
-            from pyevtk.hl import gridToVTK
-
-            base_folder = self.ConnectString
-            if not os.path.isdir(base_folder):
-                os.mkdir(base_folder)
+            from daetools.ext_libs.pyevtk.hl import gridToVTK
 
             vtk_visit = {}
             for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
-                varName = daeGetStrippedName(variable_name).split('.')[-1]
-                varStrippedName = daeGetStrippedName(variable_name)
+                varName = _formatName(variable_name)
+                
+                x = numpy.array([0.0])
+                y = numpy.array([0.0])
+                z = numpy.array([0.0])
+                nd = len(l_domains)
+                if nd > 3:
+                    break
+
+                if nd == 1:
+                    x = numpy.array(l_domains[0])
+                elif nd == 2:
+                    x = numpy.array(l_domains[0])
+                    y = numpy.array(l_domains[1])
+                elif nd == 3:
+                    x = numpy.array(l_domains[0])
+                    y = numpy.array(l_domains[1])
+                    z = numpy.array(l_domains[2])
+
                 for (t,), time in numpy.ndenumerate(ndarr_times):
-                    filename = '%s - %.5fs' % (varStrippedName, time)
-                    filepath = os.path.join(base_folder, filename)
-                    x = numpy.array([0.0])
-                    y = numpy.array([0.0])
-                    z = numpy.array([0.0])
-                    nd = len(l_domains)
-                    if nd > 3:
-                        break
-
-                    if nd == 1:
-                        x = numpy.array(l_domains[0])
-                    elif nd == 2:
-                        x = numpy.array(l_domains[0])
-                        y = numpy.array(l_domains[1])
-                    elif nd == 3:
-                        x = numpy.array(l_domains[0])
-                        y = numpy.array(l_domains[1])
-                        z = numpy.array(l_domains[2])
-
+                    filename = '%s-%.5f' % (varName, time)
+                    filepath = os.path.join(self.base_folder, filename)
                     if nd == 0:
                         values = numpy.array([ndarr_values[t]])
                     else:
@@ -66,13 +92,13 @@ class daeVTKDataReporter(daeDataReporterFile):
                     values = values.reshape((len(x), len(y), len(z)))
 
                     gridToVTK(filepath, x, y, z, pointData = {varName : values})
-                    if not varStrippedName in vtk_visit:
-                        vtk_visit[varStrippedName] = []
-                    vtk_visit[varStrippedName].append(filename + '.vtr')
+                    if not varName in vtk_visit:
+                        vtk_visit[varName] = []
+                    vtk_visit[varName].append(filename + '.vtr')
 
             for var, files in vtk_visit.items():
                 filename = '%s.visit' % var
-                filepath = os.path.join(base_folder, filename)
+                filepath = os.path.join(self.base_folder, filename)
                 f = open(filepath, 'w')
                 f.write('\n'.join(files))
                 f.close()
@@ -83,48 +109,61 @@ class daeVTKDataReporter(daeDataReporterFile):
 class daeMatlabMATFileDataReporter(daeDataReporterFile):
     """
     Saves data in Matlab MAT format format (.mat) using scipy.io.savemat function.
-    Does not need Matlab installed.
+    Every variable is saved as numpy array (variable names are stripped from illegal characters).
+    In addition, time and domain points for every variable are saved as 'varName.Times' and 'varName.Domains'.
+    Does not require Matlab installed.
     """
     def __init__(self):
         daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
-        mdict = {}
-        for var in self.Process.Variables:
-            mdict[var.Name] = var.Values
-
         try:
             import scipy.io
+
+            mdict = {}
+            variables = self.Process.dictVariables
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
+                name        = _formatName(variable_name)
+                domainNames = [_formatName(d.Name) for d in variables[variable_name].Domains]
+                
+                mdict[name]                  = ndarr_values
+                mdict[name + '.Times']       = ndarr_times
+                mdict[name + '.DomainNames'] = numpy.array(domainNames)
+                mdict[name + '.Domains']     = numpy.array(l_domains)
+                mdict[name + '.Units']       = s_units
+
             scipy.io.savemat(self.ConnectString,
                              mdict,
-                             appendmat=False,
-                             format='5',
-                             long_field_names=False,
-                             do_compression=False,
-                             oned_as='row')
-                             
+                             appendmat        = True,
+                             format           = '5',
+                             long_field_names = True,
+                             do_compression   = False,
+                             oned_as          = 'row')
         except Exception as e:
             print(('Cannot write results in .mat format:\n' + str(e)))
 
-
 class daeJSONFileDataReporter(daeDataReporterFile):
     """
-    Saves data in JSON text format using python json library.
+    Saves data in JSON text format using the Python json library.
     """
     def __init__(self):
         daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
-        mdict = {}
-        for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
-            mdict[daeGetStrippedName(variable_name)] = {'Values'  : ndarr_values.tolist(),
-                                                        'Times'   : ndarr_times.tolist(),
-                                                        'Domains' : l_domains,
-                                                        'Units'   : s_units
-                                                       }
-
         try:
-            import json
+            mdict = {}
+            variables = self.Process.dictVariables
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
+                name        = _formatName(variable_name)
+                domainNames = [_formatName(d.Name) for d in variables[variable_name].Domains]
+                
+                mdict[name] = {'Values'      : ndarr_values.tolist(),
+                               'Times'       : ndarr_times.tolist(),
+                               'DomainNames' : domainNames,
+                               'Domains'     : [d.tolist() for d in l_domains],
+                               'Units'       : s_units
+                              }
+
             f = open(self.ConnectString, 'w')
             f.write(json.dumps(mdict, sort_keys=True, indent=4))
             f.close()
@@ -134,7 +173,13 @@ class daeJSONFileDataReporter(daeDataReporterFile):
    
 class daeHDF5FileDataReporter(daeDataReporterFile):
     """
-    Saves data in HDF5 format using python h5py library.
+    Saves data in HDF5 format using the Python h5py library.
+    A separate group is created for every variable and contain the following data sets:
+     - Values: multidimensional array with the variable values
+     - Times: 1d array with the time points
+     - DomainNames: names of the domains that the variable is distributed on
+     - Domains: multidimensional array with the domain points
+     - Units: variable units as a string
     """
     def __init__(self):
         daeDataReporterFile.__init__(self)
@@ -142,13 +187,19 @@ class daeHDF5FileDataReporter(daeDataReporterFile):
     def WriteDataToFile(self):
         try:
             import h5py
+            
             f = h5py.File(self.ConnectString, "w")
+            variables = self.Process.dictVariables
             for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
-                grp = f.create_group(daeGetStrippedName(variable_name))
-                dsv = grp.create_dataset("Values",  data = ndarr_values)
-                dst = grp.create_dataset("Times",   data = ndarr_times)
-                dsd = grp.create_dataset("Domains", data = l_domains)
-                dsu = grp.create_dataset("Units",   data = s_units)
+                name        = _formatName(variable_name)
+                domainNames = [_formatName(d.Name).encode('utf8') for d in variables[variable_name].Domains]
+                
+                grp = f.create_group(name)
+                dsv = grp.create_dataset("Values",      data = ndarr_values)
+                dst = grp.create_dataset("Times",       data = ndarr_times)
+                dsd = grp.create_dataset("DomainNames", data = domainNames)
+                dsd = grp.create_dataset("Domains",     data = l_domains)
+                dsu = grp.create_dataset("Units",       data = s_units)
 
             f.close()
 
@@ -157,7 +208,8 @@ class daeHDF5FileDataReporter(daeDataReporterFile):
 
 class daeXMLFileDataReporter(daeDataReporterFile):
     """
-    Saves data in XML format (.xml) using python xml library.
+    Saves data in XML format (.xml) using the Python xml library.
+    The numerical data are saved as json strings (for easier parsing). 
     """
     def __init__(self):
         daeDataReporterFile.__init__(self)
@@ -248,52 +300,59 @@ class daeXMLFileDataReporter(daeDataReporterFile):
                 return root
 
             mdict = XmlDictObject()
-            variables = {}
+            xml_variables = {}
+            variables = self.Process.dictVariables
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in sorted(self.Process.dictVariableValues.items()):
+                name        = _formatName(variable_name)
+                domainNames = [_formatName(d.Name) for d in variables[variable_name].Domains]
 
-            for var in self.Process.Variables:
                 variable = {}
-                variable['Units'] = var.Units
-                variable['Times'] = {}
-                variable['Times']['item'] = var.TimeValues.tolist()
-                # ConvertDictToXml complains about multi-dimensional arrays
-                # Hence, flatten nd_array before exporting to xml
-                variable['Values'] = {}
-                variable['Values']['item'] = numpy.ravel(var.Values).tolist()
-                variables[daeGetStrippedName(var.Name)] = variable
-            mdict['Simulation'] = variables
+                variable['Units']       = s_units
+                variable['DomainNames'] = json.dumps(domainNames)
+                variable['Domains']     = json.dumps(numpy.array(l_domains).tolist())
+                variable['Times']       = json.dumps(ndarr_times.tolist())
+                variable['Values']      = json.dumps(ndarr_values.tolist())
+                xml_variables[name] = variable
+            mdict['Simulation'] = xml_variables
 
             root = ConvertDictToXml(mdict)
+            root.set('processName', self.ProcessName)
             tree = ElementTree.ElementTree(root)
             tree.write(self.ConnectString)
             
         except Exception as e:
             print(('Cannot write data in XML format:\n' + str(e)))
 
-           
 class daeExcelFileDataReporter(daeDataReporterFile):
     """
-    Saves data in MS Excel format (.xls) using python xlwt library.
-    Does not need Excel installed (works under GNU/Linux too).
+    Saves data into the Microsoft Excel format (.xlsx) using the openpyxl library
+    (https://openpyxl.readthedocs.io).
+    Does not require Excel installed and works on all operating systems.
     """
     def __init__(self):
         daeDataReporterFile.__init__(self)
 
     def WriteDataToFile(self):
         try:
-            import xlwt
+            import openpyxl
 
-            wb = xlwt.Workbook()
-            # Uses a new property (dictVariableValues) in daeDataReporterLocal to process the data
-            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
-                ws = wb.add_sheet(variable_name)
+            wb = openpyxl.Workbook()
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in sorted(self.Process.dictVariableValues.items()):
+                name = _formatName(variable_name)
+                
+                ws = wb.create_sheet(title = name)
 
-                ws.write(0, 0, 'Times')
-                ws.write(0, 1, 'Values [%s]' % s_units)
+                ws.cell(row = 1, column = 1, value = 'Time [s] / Values [%s]' % s_units)
+                variable_names = ['%s%s' % (name, (list(val_indexes) if val_indexes else '')) for val_indexes, value in numpy.ndenumerate(ndarr_values[0])]
+                v = 2
+                for var_name in variable_names:
+                    ws.cell(row = 1, column = v, value = var_name)
+                    v += 1
                 for (t,), time in numpy.ndenumerate(ndarr_times):
-                    ws.write(t+1, 0, time)
-                    v = 0
+                    ws.cell(row = t+2, column = 1, value = time)
+                    v = 2
                     for val_indexes, value in numpy.ndenumerate(ndarr_values[t]):
-                        ws.write(t+1, v+1, value)
+                        ws.cell(row = t+2, column = v, value = value)
                         v += 1
 
             wb.save(self.ConnectString)
@@ -303,11 +362,11 @@ class daeExcelFileDataReporter(daeDataReporterFile):
 
 class daePandasDataReporter(daeDataReporterLocal):
     """
-    Creates pandas DataSet using pandas library.
+    Creates a dataset using the Pandas library 
+    (available as data_frame property - the Pandas DataFrame object).
     """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
-        self.data_frame = None
 
     def Connect(self, ConnectString, ProcessName):
         return True
@@ -316,33 +375,44 @@ class daePandasDataReporter(daeDataReporterLocal):
         return True
 
     def Disconnect(self):
-        self.GenerateDataSet()
         return True
 
-    def GenerateDataSet(self):
+    @property
+    def data_frame(self):
+        data_frame = None
         try:
-            import pandas
             from pandas import DataFrame
             
-            names = []
-            data  = []
-            times = []
-            units = []
-            for name, var in self.Process.dictVariables.items():
+            names        = []
+            data         = []
+            domains      = []
+            domain_names = []
+            times        = []
+            units        = []
+            
+            variables = self.Process.dictVariables
+            for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
+                name        = _formatName(variable_name)
+                domainNames = [_formatName(d.Name) for d in variables[variable_name].Domains]
+                
                 names.append(name)
-                units.append(var.Units)
-                times.append(var.TimeValues)
-                data.append(var.Values)
+                units.append(s_units)
+                times.append(ndarr_times)
+                domains.append(l_domains)
+                domain_names.append(domainNames)
+                data.append(ndarr_values)
 
-            _data = list(zip(units, times, data))
-            self.data_frame = DataFrame(data = _data, columns = ['Units', 'Times', 'Values'], index = names)
-
+            _data = list(zip(units, domain_names, domains, times, data))
+            data_frame = DataFrame(data = _data, columns = ['Units', 'DomainNames', 'Domains', 'Times', 'Values'], index = names)
+            
         except Exception as e:
             print(('Cannot generate Pandas DataFrame:\n' + str(e)))
-
+    
+        return data_frame
+    
 class daePlotDataReporter(daeDataReporterLocal):
     """
-    Plots the specified variables using Matplotlib (by Caleb Hattingh).
+    Plots the specified variables using the Matplotlib library (by Caleb Hattingh).
     """
     def __init__(self):
         daeDataReporterLocal.__init__(self)
@@ -497,7 +567,8 @@ class daePlotDataReporter(daeDataReporterLocal):
 
 class daeCSVFileDataReporter(daeDataReporterFile):
     """
-    Saves data in .csv file.
+    Saves the results in the comma-separated values (CSV) format.
+    The separator is ',' and the variable names are double quoted '"'.
     """
     def __init__(self, uniqueTimeValues = False):
         daeDataReporterFile.__init__(self)
@@ -511,9 +582,7 @@ class daeCSVFileDataReporter(daeDataReporterFile):
         max_n_times = 0
         variable_names.append('time')
         for variable_name, (ndarr_values, ndarr_times, l_domains, s_units) in self.Process.dictVariableValues.items():
-            name = daeGetStrippedName(variable_name)
-            lname = name.split('.')
-            varName = '.'.join(lname[1:])
+            varName = _formatName(variable_name)
             domain_sizes = [range(len(d)) for d in l_domains]
             indexes = itertools.product(*domain_sizes)
             n_times = ndarr_values.shape[0]

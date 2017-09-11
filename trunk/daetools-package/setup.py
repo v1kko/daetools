@@ -26,17 +26,13 @@ Create the source dist (.tar.gz):
 """
 
 import os, sys, platform, shutil
-from distutils.core import setup
-from distutils import dir_util
+from setuptools import setup, Distribution
 
 daetools_version = '1.7.2'
 
 # Python version
 python_major = str(sys.version_info[0])
 python_minor = str(sys.version_info[1])
-
-# Numpy version (not required anymore)
-#numpy_version = str(''.join(numpy.__version__.split('.')[0:2]))
 
 # System := {'Linux', 'Windows', 'Darwin'}
 daetools_system   = str(platform.system())
@@ -45,12 +41,10 @@ daetools_system   = str(platform.system())
 if platform.system() == 'Darwin':
     daetools_machine = str(platform.machine())
 elif platform.system() == 'Windows':
-    daetools_machine = 'win32'
-    # So far there is no win64 port
-    #if 'AMD64' in platform.machine():
-    #    daetools_machine = 'win64'
-    #else:
-    #    daetools_machine = 'win32'
+    if platform.architecture()[0] == '64bit':
+        daetools_machine = 'win64'
+    else:
+        daetools_machine = 'win32'
 else:
     daetools_machine = str(platform.machine())
 
@@ -281,14 +275,30 @@ daetools_folder  = os.path.join(root_dir, 'daetools')
 docs_html_dirs = [os.path.relpath(f[0], daetools_folder)+'/*.*' for f in os.walk(docs_html_folder)]
 #print('\n'.join(docs_html_dirs))
 
+####################################################################################
+#                   setuptools.setup() function
+####################################################################################
+class BinaryDistribution(Distribution):
+    def has_ext_modules(foo):
+        return True
+
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+    class bdist_wheel(_bdist_wheel):
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+except ImportError:
+    bdist_wheel = None
+
 setup(name = 'daetools',
       version = daetools_version,
       description = 'DAE Tools',
-      long_description = 'Object-oriented equation-based modelling, simulation and optimisation software.',
+      long_description = 'Object-oriented equation-based modelling, simulation and optimisation software',
       author = 'Dragan Nikolic',
-      author_email = 'dnikolic@daetools.com',
+      author_email = 'contact@daetools.com',
       url = 'http://www.daetools.com',
-      license = 'GNU GPL v3',
+      license = 'GPLv3',
       packages = [
                    'daetools',
                    'daetools.pyDAE',
@@ -298,7 +308,15 @@ setup(name = 'daetools',
                    'daetools.dae_plotter',
                    'daetools.dae_simulator',
                    'daetools.examples',
-                   'daetools.unit_tests'
+                   'daetools.unit_tests',
+                   'daetools.ext_libs',
+                   'daetools.ext_libs.pyevtk',
+                   'daetools.ext_libs.SALib',
+                   'daetools.ext_libs.SALib.analyze',
+                   'daetools.ext_libs.SALib.plotting',
+                   'daetools.ext_libs.SALib.sample',
+                   'daetools.ext_libs.SALib.test_functions',
+                   'daetools.ext_libs.SALib.util'
                  ],
       package_data = {
                        'daetools':                 ['*.txt',
@@ -307,7 +325,15 @@ setup(name = 'daetools',
                                                    ] + docs_html_dirs,
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
-                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine)],
+                       'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine),
+                                                    #'%s_%s/*-py%s%s.*'           % (daetools_system, daetools_machine, python_major, python_minor),
+                                                    #'%s_%s/*deal_II-daetools*.*' % (daetools_system, daetools_machine),
+                                                    #'%s_%s/*CapeOpen*.*'         % (daetools_system, daetools_machine),
+                                                    #'%s_%s/*vcomp.*'             % (daetools_system, daetools_machine),
+                                                    #'%s_%s/libg*.*'              % (daetools_system, daetools_machine),
+                                                    #'%s_%s/libquadmath*.*'       % (daetools_system, daetools_machine),
+                                                    #'%s_%s/libstdc*.*'           % (daetools_system, daetools_machine)
+                                                   ],
                        'daetools.dae_plotter':     ['images/*.png'],
                        'daetools.code_generators': ['c99/*.h', 'c99/*.c', 'c99/*.pro', 'c99/*.vcproj', 'c99/Makefile-*',
                                                     'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
@@ -315,7 +341,9 @@ setup(name = 'daetools',
                                                    ],
                        'daetools.dae_simulator':   ['images/*.png'],
                        'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', 
-                                                    '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png']
+                                                    '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png'],
+                       'daetools.ext_libs.SALib':  ['*.txt'],
+                       'daetools.ext_libs.pyevtk': ['*.txt']
                      },
       data_files = data_files,
       scripts = ['scripts/create_shortcuts.js',
@@ -327,7 +355,31 @@ setup(name = 'daetools',
                  'scripts/daeexamples3',
                  'scripts/daeplotter3.bat',
                  'scripts/daeexamples3.bat'],
-      requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5']
+      requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
+      install_requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
+      python_requires = '>=2.7,<=3.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+      platforms = ['GNU/Linux', 'macOS', 'Windows'],
+      classifiers = [ 'Development Status :: 5 - Production/Stable',
+                      'Intended Audience :: Developers',
+                      'Intended Audience :: Science/Research',
+                      'Intended Audience :: Manufacturing',
+                      'Topic :: Scientific/Engineering',
+                      'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+                      'Operating System :: Microsoft :: Windows',
+                      'Operating System :: MacOS',
+                      'Operating System :: POSIX :: Linux',
+                      'Programming Language :: Python :: 2',
+                      'Programming Language :: Python :: 2.7',
+                      'Programming Language :: Python :: 3',
+                      'Programming Language :: Python :: 3.4',
+                      'Programming Language :: Python :: 3.5',
+                      'Programming Language :: Python :: 3.6'
+                     ],
+        keywords = 'modeling simulation optimization sensitivity_analysis parameter_estimation',
+        
+        # Set Pure-lib tag to False and indicate that the distribution being built contains extension modules.
+        distclass = BinaryDistribution,
+        cmdclass  = {'bdist_wheel': bdist_wheel}
      )
 
 if platform.system() == 'Windows':

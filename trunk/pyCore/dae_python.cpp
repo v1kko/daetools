@@ -7,7 +7,7 @@ using namespace boost::python;
 
 // Temporary workaround for Visual Studio 2015 update 3
 //  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
-#if _MSC_FULL_VER  == 190024210
+#if _MSC_VER == 1900
 #if (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 namespace boost
 {
@@ -283,11 +283,8 @@ BOOST_PYTHON_MODULE(pyCore)
     class_< std::vector<float> >("vector_float")
         .def(vector_indexing_suite< std::vector<float> >())
     ;
-    class_< std::vector<unsigned int> >("vector_uint")
-        .def(vector_indexing_suite< std::vector<unsigned int> >())
-    ;
-    class_< std::vector<unsigned long> >("vector_ulong")
-        .def(vector_indexing_suite< std::vector<unsigned long> >())
+    class_< std::vector<size_t> >("vector_size_t")
+        .def(vector_indexing_suite< std::vector<size_t> >())
     ;
     class_< std::vector<int> >("vector_int")
         .def(vector_indexing_suite< std::vector<int> >())

@@ -118,6 +118,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self._copy_solib('Linux',   'x86_64', modelIdentifier, binaries_dir)
             self._copy_solib('Linux',   'i386',   modelIdentifier, binaries_dir)
             self._copy_solib('Windows', 'win32',  modelIdentifier, binaries_dir)
+            self._copy_solib('Windows', 'win64',  modelIdentifier, binaries_dir)
             self._copy_solib('Darwin',  'x86_64', modelIdentifier, binaries_dir)
             self._copy_solib('Darwin',  'i386',   modelIdentifier, binaries_dir)
 
@@ -307,12 +308,10 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             so_ext_pattern = 'dll'
             shared_lib_prefix = ''
             shared_lib_postfix = '1'
-            if platform_machine == 'x86_64':
+            if platform_machine == 'win64':
                 platform_binaries_dir = os.path.join(binaries_dir, 'win64')
             else:
                 platform_binaries_dir = os.path.join(binaries_dir, 'win32')
-            # Modify platform_machine to match daetools naming
-            platform_machine = 'win32'
         elif platform_system == 'Darwin':
             so_ext = 'dylib'
             so_ext_pattern = 'dylib'

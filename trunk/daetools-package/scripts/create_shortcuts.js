@@ -21,7 +21,7 @@ try
 {
   var oLink = oWS.CreateShortcut(strStartmenu + "\\daeExamples" + daetools_suffix +".lnk");
   oLink.TargetPath = pythonw;
-  oLink.Arguments = ' -c "from daetools.examples.run_examples import daeRunExamples; daeRunExamples()"';
+  oLink.Arguments = ' -m daetools.examples.run_examples';
   oLink.Save();
 }
 catch(e)
@@ -32,7 +32,7 @@ try
 {
   var oLink = oWS.CreateShortcut(strStartmenu + "\\daePlotter" + daetools_suffix +".lnk");
   oLink.TargetPath = pythonw;
-  oLink.Arguments = ' -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"';
+  oLink.Arguments = ' -m daetools.dae_plotter.plotter';
   oLink.Save();
 }
 catch(e)
@@ -43,7 +43,7 @@ try
 {
   var oLink = oWS.CreateShortcut(strDesktop + "\\daeExamples" + daetools_suffix +".lnk");
   oLink.TargetPath = pythonw;
-  oLink.Arguments = ' -c "from daetools.examples.run_examples import daeRunExamples; daeRunExamples()"';
+  oLink.Arguments = ' -m daetools.examples.run_examples';
   oLink.Save();
 }
 catch(e)
@@ -54,7 +54,7 @@ try
 {
   var oLink = oWS.CreateShortcut(strDesktop + "\\daePlotter" + daetools_suffix +".lnk");
   oLink.TargetPath = pythonw;
-  oLink.Arguments = ' -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"';
+  oLink.Arguments = ' -m daetools.dae_plotter.plotter';
   oLink.Save();
 }
 catch(e)

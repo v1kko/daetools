@@ -11,7 +11,7 @@ using namespace dae::solver;
 
 // Temporary workaround for Visual Studio 2015 update 3
 //  Error   LNK2019 unresolved external symbol "class ClassName const volatile * __cdecl boost::get_pointer<class ClassName const volatile *>(...)
-#if _MSC_FULL_VER  == 190024210
+#if _MSC_VER == 1900
 #if (defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64))
 namespace boost
 {

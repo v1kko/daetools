@@ -102,7 +102,7 @@ The temperature plot (at t=100s, x=0.5, y=*):
    :width: 500px
 """
 
-import sys
+import os, sys, tempfile
 from time import localtime, strftime
 from daetools.pyDAE import *
 
@@ -243,8 +243,8 @@ class simTutorial(daeSimulation):
 
 def run(**kwargs):
     simulation = simTutorial()
-    return daeActivity.simulate(simulation, reportingInterval = 10, 
-                                            timeHorizon       = 1000,
+    return daeActivity.simulate(simulation, reportingInterval = 5, 
+                                            timeHorizon       = 500,
                                             **kwargs)
 
 if __name__ == "__main__":

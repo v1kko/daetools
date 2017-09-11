@@ -127,9 +127,9 @@ crossCompile{
 
     # DAE Machine := {'i686', 'x86_64', 'win32', 'win64'}
     win32-msvc2015 {
-      MACHINE_COMMAND = "import platform; p={'x86':'win32', 'i386':'win32', 'i686':'win32', 'x64':'win64', 'AMD64':'win64'}; machine = p[platform.machine()]; print(machine)"
+      MACHINE_COMMAND = "import platform; arch = platform.architecture()[0]; p={'32bit':'win32', '64bit':'win64'}; machine = p[arch]; print(machine)"
     } else {
-      MACHINE_COMMAND  = "import platform; p = {'Linux':platform.machine(), 'Darwin':platform.machine(), 'Windows':'win32'}; machine = p[platform.system()]; print(machine)"
+      MACHINE_COMMAND  = "import platform; p = {'Linux':platform.machine(), 'Darwin':platform.machine(), 'Windows':('win32' if platform.architecture()[0] == '32bit' else 'win64')}; machine = p[platform.system()]; print(machine)"
     }
     DAE_MACHINE = $$system($${PYTHON} -c \"$${MACHINE_COMMAND}\")
 
@@ -433,19 +433,28 @@ unix::SUNDIALS_LIBS  = $${SUNDIALS_LIBDIR}/libsundials_idas.a \
 #####################################################################################
 MUMPS_DIR  = ../mumps
 
-win32-msvc2015::G95_LIBDIR = c:/g95/lib/gcc-lib/i686-pc-mingw32/4.1.2
+contains(DAE_MACHINE, win32) {
+    win32-msvc2015::GFORTRAN_LIBDIR = C:/mingw-w64/win32/mingw32/lib/gcc/i686-w64-mingw32/7.1.0
+    message(GFORTRAN_LIBDIR = $${GFORTRAN_LIBDIR})
+}
+
+contains(DAE_MACHINE, win64) {
+    win32-msvc2015::GFORTRAN_LIBDIR = C:/mingw-w64/win64/mingw64/lib/gcc/x86_64-w64-mingw32/7.1.0
+    message(GFORTRAN_LIBDIR = $${GFORTRAN_LIBDIR})
+}
 
 MUMPS_LIBDIR   = $${MUMPS_DIR}/lib \
                  $${MUMPS_DIR}/libseq \
                  $${MUMPS_DIR}/blas \
-                 $${G95_LIBDIR}
+                 $${GFORTRAN_LIBDIR}
 
 win32-msvc2015::MUMPS_LIBS = blas.lib \
                              libmpiseq.lib \
                              libdmumps.lib \
                              libmumps_common.lib \
                              libpord.lib \
-                             libf95.a \
+                             libgfortran.dll.a \
+                             libquadmath.dll.a \
                              libgcc.a
 win32-g++-*::MUMPS_LIBS = -lcoinmumps $${PTHREADS_LIB} $${RT} -lmsvcrt -lkernel32 -luser32 -lshell32 -luuid -lole32 -ladvapi32 -lws2_32
 win64-g++-*::MUMPS_LIBS = -lcoinmumps $${PTHREADS_LIB} $${RT} -lmsvcrt -lkernel32 -luser32 -lshell32 -luuid -lole32 -ladvapi32 -lws2_32
@@ -629,15 +638,11 @@ macx-g++::TRILINOS_LIBS  = -L$${TRILINOS_DIR}/lib -L$${SUPERLU_PATH}/lib \
 # MKL_NUM_THREADS=Ncpu should be set
 # http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #####################################################################################
-win32-msvc2015::MKLPATH =
+win32-msvc2015::MKLPATH = C:/intel/compilers_and_libraries_2017.4.210/windows
 linux-g++::MKLPATH      = /opt/intel
 macx-g++::MKLPATH       = /opt/intel
 
 INTEL_MKL_INCLUDE = $${MKLPATH}/mkl/include
-ARCH = $$QMAKE_HOST.arch
-
-win32-msvc2015::MKL_LIBS       = $${MKLPATH}\ia32\lib
-win32-msvc2015::INTEL_MKL_LIBS = -L$${MKL_LIBS} mkl_intel_c_dll.lib mkl_core_dll.lib mkl_intel_thread_dll.lib libiomp5md.lib
 
 win32-g++-*::MKL_LIBS       =
 win32-g++-*::INTEL_MKL_LIBS =
@@ -645,7 +650,14 @@ win32-g++-*::INTEL_MKL_LIBS =
 win64-g++-*::MKL_LIBS       =
 win64-g++-*::INTEL_MKL_LIBS =
 
-contains($$ARCH, x86) {
+win32-msvc2015::ARCH = $$QMAKE_TARGET.arch
+unix::ARCH           = $$QMAKE_HOST.arch
+message(Building IntelPardiso on $${ARCH} architecture)
+
+contains(ARCH, x86) {
+	win32-msvc2015::MKL_LIBS       = -L$${MKLPATH}/mkl/lib/ia32 -L$${MKLPATH}/compiler/lib/ia32
+	win32-msvc2015::INTEL_MKL_LIBS = $${MKL_LIBS} mkl_intel_c_dll.lib mkl_intel_thread_dll.lib mkl_core_dll.lib libiomp5md.lib
+
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/lib/ia32 -L$${MKLPATH}/mkl/lib/ia32 \
                                 -lmkl_rt \
                                 -ldl -lpthread -lm
@@ -660,6 +672,9 @@ contains($$ARCH, x86) {
 }
 
 contains(ARCH, x86_64) {
+	win32-msvc2015::MKL_LIBS       = -L$${MKLPATH}/mkl/lib/intel64 -L$${MKLPATH}/compiler/lib/intel64
+	win32-msvc2015::INTEL_MKL_LIBS = $${MKL_LIBS} mkl_intel_lp64_dll.lib mkl_intel_thread_dll.lib mkl_core_dll.lib libiomp5md.lib
+
     linux-g++::INTEL_MKL_LIBS = -L$${MKLPATH}/mkl/lib/intel64 \
                                 -lmkl_rt \
                                 -ldl -lpthread -lm

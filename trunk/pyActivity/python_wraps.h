@@ -297,17 +297,17 @@ public:
 
     boost::python::object GetDataReporter_(void)
     {
-        return boost::python::object(boost::ref(m_pDataReporter));
+        return datareporter;
     }
 
     boost::python::object GetLog_(void)
     {
-        return boost::python::object(boost::ref(m_pLog));
+        return log;
     }
 
     boost::python::object GetDAESolver_(void)
     {
-        return boost::python::object(boost::ref(m_pDAESolver));
+        return daesolver;
     }
 
     void SetUpParametersAndDomains(void)

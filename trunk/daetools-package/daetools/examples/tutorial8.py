@@ -158,22 +158,29 @@ def setupDataReporters(simulation):
     """
     Create daeDelegateDataReporter and add 10 data reporters:
      - MyDataReporterLocal
-       User-defined data reporter to write data to the file 'tutorial8.out'
+       User-defined data reporter to write data to the file 'tutorial8.out'.
      - daeTCPIPDataReporter
-       Standard data reporter that sends data to the daePlotter
+       Standard data reporter that sends data to the DAE Plotter application.
      - daeMatlabMATFileDataReporter
-       Exports the results into the Matlab .mat file format
+       Exports the results into the Matlab .mat file format.
      - daePlotDataReporter
-       Plots selected variables using Matplotlib
+       Plots selected variables using Matplotlib.
      - daeExcelFileDataReporter
-       Exports the results into MS Excel file format
+       Exports the results into the Excel .xlsx file format.
      - daeJSONFileDataReporter
+       Exports the results in the JSON format.
      - daeXMLFileDataReporter
+       Exports the results in the XML file format.
      - daeHDF5FileDataReporter
+       Exports the results in the HDF5 format.
      - daePandasDataReporter
+       Creates the Pandas dataset available in the data_frame property.
      - daeVTKDataReporter
+       Exports the results in the binary VTK format (.vtr files).
+     - daeCSVFileDataReporter
+       Exports the results in the CSV format.
 
-    The daeDelegateDataReporter does not process the data but simply delegate all calls
+    The daeDelegateDataReporter does not process the data but simply delegates all calls
     to the contained data reporters.
     """
     datareporter = daeDelegateDataReporter()
@@ -188,12 +195,15 @@ def setupDataReporters(simulation):
     dr8  = daeHDF5FileDataReporter()
     dr9  = daePandasDataReporter()
     dr10 = daeVTKDataReporter()
+    dr11 = daeCSVFileDataReporter()
 
     # Add all data reporters to a list and store the list in the simulation object.
     # The reason is that the data reporter objects are destroyed at the exit of the
     # setupDataReporters function resulting in the dangling pointers and either the
     # segmentation fault or the 'pure virtual method called' errors.
-    simulation._data_reporters_ = [dr1, dr2, dr3, dr4, dr5, dr6, dr7, dr8, dr9, dr10]
+    # Nota bene:
+    #  From the version 1.7.2 not required anymore.
+    simulation._data_reporters_ = [dr1, dr2, dr3, dr4, dr5, dr6, dr7, dr8, dr9, dr10, dr11]
 
     datareporter.AddDataReporter(dr1)
     datareporter.AddDataReporter(dr2)
@@ -205,35 +215,39 @@ def setupDataReporters(simulation):
     datareporter.AddDataReporter(dr8)
     datareporter.AddDataReporter(dr9)
     datareporter.AddDataReporter(dr10)
+    datareporter.AddDataReporter(dr11)
 
     # Connect data reporters
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    filename      = tempfile.gettempdir() + "/tutorial8.out"
-    mat_filename  = tempfile.gettempdir() + "/tutorial8.mat"
-    txt_filename  = tempfile.gettempdir() + "/tutorial8.txt"
-    xls_filename  = tempfile.gettempdir() + "/tutorial8.xls"
-    json_filename = tempfile.gettempdir() + "/tutorial8.json"
-    xml_filename  = tempfile.gettempdir() + "/tutorial8.xml"
-    hdf5_filename = tempfile.gettempdir() + "/tutorial8.hdf5"
-    vtk_filename  = tempfile.gettempdir() + "/tutorial8.vtk"
+    modelName = simulation.m.Name
+    simName   = modelName + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+    directory = tempfile.gettempdir()
+    out_filename  = os.path.join(directory, "%s.out"  % modelName)
+    mat_filename  = os.path.join(directory, "%s.mat"  % modelName)
+    xlsx_filename = os.path.join(directory, "%s.xlsx" % modelName)
+    json_filename = os.path.join(directory, "%s.json" % modelName)
+    xml_filename  = os.path.join(directory, "%s.xml"  % modelName)
+    hdf5_filename = os.path.join(directory, "%s.hdf5" % modelName)
+    vtk_directory = os.path.join(directory, "%s-vtk"  % modelName)
+    csv_filename  = os.path.join(directory, "%s.csv"  % modelName)
 
-    dr1.Connect(filename, simName)
-    dr2.Connect("", simName)
-    dr3.Connect(mat_filename, simName)
-    dr4.Connect(txt_filename, simName)
-    dr5.Connect(xls_filename, simName)
-    dr6.Connect(json_filename, simName)
-    dr7.Connect(xml_filename, simName)
-    dr8.Connect(hdf5_filename, simName)
-    dr9.Connect("", simName)
-    dr10.Connect(vtk_filename, simName)
+    dr1.Connect(out_filename,   simName)
+    dr2.Connect("",             simName)
+    dr3.Connect(mat_filename,   simName)
+    dr4.Connect("",             simName)
+    dr5.Connect(xlsx_filename,  simName)
+    dr6.Connect(json_filename,  simName)
+    dr7.Connect(xml_filename,   simName)
+    dr8.Connect(hdf5_filename,  simName)
+    dr9.Connect("",             simName)
+    dr10.Connect(vtk_directory, simName)
+    dr11.Connect(csv_filename,  simName)
 
     # Print the connection status for all data reporters
     for dr in simulation._data_reporters_:
         print('%s (%s): %s' % (dr.__class__.__name__, dr.ConnectString, 'connected' if dr.IsConnected() else 'NOT connected'))
 
     return datareporter
-   
+
 def process_data_reporters(simulation, log):
     try:
         simulation._data_reporters_[3].Plot(

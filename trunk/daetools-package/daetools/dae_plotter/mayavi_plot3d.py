@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************"""
 import os, sys, math, time, numpy
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from daetools.pyDAE import *
 
 python_major = sys.version_info[0]
@@ -46,7 +46,7 @@ class daeMayavi3DPlot:
             self._cv_dlg = daeChooseVariable(daeChooseVariable.plot3D)
         self._cv_dlg.updateProcessesList(processes)
         self._cv_dlg.setWindowTitle('Choose variable for 3D plot')
-        if self._cv_dlg.exec_() != QtGui.QDialog.Accepted:
+        if self._cv_dlg.exec_() != QtWidgets.QDialog.Accepted:
             return False
             
         variable, domainIndexes, domainPoints, xAxisLabel, yAxisLabel, zAxisLabel, xPoints, yPoints, zPoints, currentTime = self._cv_dlg.getPlot3DData()
