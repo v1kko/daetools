@@ -109,7 +109,7 @@ daeIDASolver::daeIDASolver(void)
 
     daeConfig& cfg = daeConfig::GetConfig();
     m_dRelTolerance                             = cfg.GetFloat("daetools.IDAS.relativeTolerance",                         1e-5);
-    m_dNextTimeAfterReinitialization            = cfg.GetFloat("daetools.IDAS.nextTimeAfterReinitialization",             1e-2);
+    m_dNextTimeAfterReinitialization            = cfg.GetFloat("daetools.IDAS.nextTimeAfterReinitialization",             1e-5);
     m_strSensitivityMethod                      = cfg.GetString("daetools.IDAS.sensitivityMethod",                        "Simultaneous");
     m_bErrorControl                             = cfg.GetBoolean("daetools.IDAS.SensErrCon",					          false);
     m_bPrintInfo                                = cfg.GetBoolean("daetools.IDAS.printInfo",                               false);
@@ -453,7 +453,10 @@ daeMatrix<real_t>& daeIDASolver::GetSensitivities(void)
     if(!m_bCalculateSensitivities)
         daeDeclareAndThrowException(exInvalidCall)
 
-    retval = IDAGetSens(m_pIDA, &m_dCurrentTime, m_pIDASolverData->m_pvectorSVariables);
+    // Do not use m_dCurrentTime since this function can be called after the system has been reset
+    // and tretlast has not been reset to zero (CHECK WHY!!!).
+    real_t currentTime;
+    retval = IDAGetSens(m_pIDA, &currentTime, m_pIDASolverData->m_pvectorSVariables);
     if(!CheckFlag(retval))
     {
         daeDeclareException(exMiscellanous);
@@ -1318,8 +1321,7 @@ int residuals(realtype	time,
     if(pSolver->m_bPrintInfo)
     {
         cout << "---- Residuals function ----" << endl;
-        cout << "Values pointer: " << pdValues << endl;
-        cout << "TimeDerivatives pointer: " << pdTimeDerivatives << endl;
+        cout << "Time: " << toStringFormatted(time, -1, DBL_DIG, false) << endl;
         cout << "Variables:" << endl;
         pSolver->m_arrValues.Print();
         cout << "Time derivatives:" << endl;
@@ -1363,6 +1365,18 @@ int roots(realtype	time,
                                 pSolver->m_arrRoots);
 
     pSolver->OnCalculateConditions();
+
+    if(pSolver->m_bPrintInfo)
+    {
+        cout << "---- Roots function ----" << endl;
+        cout << "Time: " << toStringFormatted(time, -1, DBL_DIG, false) << endl;
+        cout << "Variables:" << endl;
+        pSolver->m_arrValues.Print();
+        cout << "Time derivatives:" << endl;
+        pSolver->m_arrTimeDerivatives.Print();
+        cout << "Roots:" << endl;
+        pSolver->m_arrRoots.Print();
+    }
 
     return 0;
 }
@@ -1413,8 +1427,8 @@ int jacobian(long int    Neq,
     if(pSolver->m_bPrintInfo)
     {
         cout << "---- Jacobian function ----" << endl;
-        cout << "Values pointer: " << pdValues << endl;
-        cout << "TimeDerivatives pointer: " << pdTimeDerivatives << endl;
+        cout << "Time: " << toStringFormatted(time, -1, DBL_DIG, false) << endl;
+        cout << "1/dt: " << toStringFormatted(dInverseTimeStep, -1, DBL_DIG, false) << endl;
         cout << "Variables:" << endl;
         pSolver->m_arrValues.Print();
         cout << "Time derivatives:" << endl;
@@ -1422,6 +1436,7 @@ int jacobian(long int    Neq,
         cout << "Jacobian matrix:" << endl;
         pSolver->m_matJacobian.Print();
     }
+
     return 0;
 }
 
@@ -1486,9 +1501,8 @@ int sens_residuals(int		 Ns,
 
     if(pSolver->m_bPrintInfo)
     {
-        cout << "Sensitivity residuals function:" << endl;
-        cout << "Values pointer: " << pdValues << endl;
-        cout << "TimeDerivatives pointer: " << pdTimeDerivatives << endl;
+        cout << "---- Sensitivity residuals function ----" << endl;
+        cout << "Time: " << toStringFormatted(time, -1, DBL_DIG, false) << endl;
         cout << "Values:" << endl;
         pSolver->m_arrValues.Print();
         cout << "TimeDerivatives:" << endl;

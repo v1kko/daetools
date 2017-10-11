@@ -56,6 +56,7 @@ PROJECT:
         units               Build Units c++ library and its python extension module (pyUnits).
         simulation_loader   Build simulation_loader shared library.
         fmi                 Build FMI wrapper shared library.
+        fmi_ws              Build FMI wrapper shared library that uses daetools FMI web service.
         trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
         superlu             Build SuperLU linear solver and its python extension module (pySuperLU).
         superlu_mt          Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).
@@ -65,6 +66,7 @@ PROJECT:
         ipopt               Build IPOPT nlp solver and its python extension module (pyIPOPT).
         nlopt               Build NLOPT nlp solver and its python extension module (pyNLOPT).
         deal.ii             Build deal.II FEM library and its python extension module (pyDealII).
+        cape_open_thermo    Build Cape Open thermo-physical property package library (cdaeCapeOpenThermoPackage.dll, Windows only).
 EOF
 }
 
@@ -134,6 +136,29 @@ compile()
   echo ""
   echo "[*] Done!"
   cd "${TRUNK}"
+}
+
+compile_cape_open_thermo()
+{
+  if [[ "${PLATFORM}" == "Windows" ]]; then
+    echo ""
+    echo "[*] Compiling cape_open_thermo..."
+    echo ""
+    
+    cd CapeOpenThermoPackage
+    
+    if [[ "${HOST_ARCH}" == "win32" ]]; then
+      MS_BUILD_PLATFORM="x86"
+    elif [[ "${HOST_ARCH}" == "win64" ]]; then
+      MS_BUILD_PLATFORM="x64"
+    else
+      echo unknown HOST_ARCH: $HOST_ARCH
+      exit 1
+    fi
+    
+    echo "msbuild.exe CapeOpenThermoPackage.vcxproj /target:rebuild /p:Platform=${MS_BUILD_PLATFORM} /p:Configuration=Release /p:PlatformToolset=v140 /p:UseEnv=true"
+    msbuild.exe CapeOpenThermoPackage.vcxproj -target:rebuild -p:Platform="${MS_BUILD_PLATFORM}" -p:Configuration="Release" -p:PlatformToolset="v140" -p:UseEnv=true
+  fi
 }
 
 # Default python binary:
@@ -259,6 +284,7 @@ do
     units)            ;;
     simulation_loader);;
     fmi)              ;;
+    fmi_ws)           ;;
     dae)              ;;
     pydae)            ;;
     solvers)          ;;
@@ -271,6 +297,7 @@ do
     ipopt)            ;;
     nlopt)            ;; 
     deal.ii)          ;; 
+    cape_open_thermo) ;; 
     *) echo Unrecognized project: "$project"
        exit
        ;;
@@ -361,6 +388,9 @@ do
         fmi)  compile fmi "-j1"
               ;;
                             
+        fmi_ws)  compile fmi_ws "-j1"
+                 ;;
+                            
         dae)    compile dae "-j$Ncpu"
                 ;;
 
@@ -438,7 +468,10 @@ do
 
         deal.ii) compile pyDealII  "-j1"
                  ;;
-               
+            
+        cape_open_thermo) compile_cape_open_thermo
+                          ;;
+        
         *) echo "??????????????????????"
            echo Unrecognized project: "$project"
            echo "??????????????????????"

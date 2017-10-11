@@ -39,21 +39,21 @@ except:
     
 tutorial_modules = []
 tutorial_modules.append(('whats_the_time', []))
-for i in range(1, 20):
+for i in range(1, 19 + 1):
     tutorial_modules.append(('tutorial%d' % i, []))
-for i in range(1, 5):
+for i in range(1, 4 + 1):
     tutorial_modules.append(('tutorial_adv_%d' % i, []))
-for i in range(1, 11):
+for i in range(1, 11 + 1):
     tutorial_modules.append(('tutorial_cv_%d' % i, []))
-for i in range(1, 10):
+for i in range(1, 9 + 1):
     tutorial_modules.append(('tutorial_che_%d' % i, []))
-for i in range(1, 4):
+for i in range(1, 3 + 1):
     tutorial_modules.append(('tutorial_sa_%d' % i, []))
-for i in range(1, 7):
+for i in range(1, 6 + 1):
     tutorial_modules.append(('tutorial_che_opt_%d' % i, []))
-for i in range(1, 9):
+for i in range(1, 8 + 1):
     tutorial_modules.append(('tutorial_dealii_%d' % i, []))
-for i in range(1, 8):
+for i in range(1, 7 + 1):
     tutorial_modules.append(('opt_tutorial%d' % i, []))
 
 for m_name, data  in tutorial_modules:
@@ -164,10 +164,13 @@ class RunExamples(QtWidgets.QDialog):
         self.setTutorialLink("all-tutorials")
         
     def setTutorialLink(self, module_name):
-        address = join(_examples_dir, "..", "docs", "html", "tutorials-all.html#%s" % module_name)
-        address = "file:///" + os.path.normpath(address)
-        address = address.replace('\\', '/')
+        #address = join(_examples_dir, "..", "docs", "html", "tutorials-all.html#%s" % module_name)
+        #address = "file:///" + os.path.normpath(address)
+        #address = address.replace('\\', '/')
         # The url contains bookmarks (i.e. tutorials-all.html#tutorial1.html) - can't use QUrl.fromLocalFile()
+        
+        # Perhaps it is better to use the file from the daetools website so the docs do not need to be included
+        address = 'http://www.daetools.com/docs/tutorials-all.html#%s' % module_name
         url = QtCore.QUrl(address)
         #print(url)
         self.ui.docstringWeb.load(url)
@@ -231,7 +234,7 @@ class RunExamples(QtWidgets.QDialog):
             if m_name in ["tutorial_che_9", "opt_tutorial4", "opt_tutorial5", "opt_tutorial6",
                           "tutorial_cv_1", "tutorial_cv_2", "tutorial_cv_3", "tutorial_cv_4", 
                           "tutorial_cv_5", "tutorial_cv_6", "tutorial_cv_6", "tutorial_cv_7",
-                          "tutorial_cv_8", "tutorial_cv_9", "tutorial_cv_10",
+                          "tutorial_cv_8", "tutorial_cv_9", "tutorial_cv_10", "tutorial_cv_11",
                           "tutorial_sa_1", "tutorial_sa_2", "tutorial_sa_3"]:
                 self.consoleRunAndShowResults(module)
             else:

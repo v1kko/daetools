@@ -93,7 +93,7 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
     Here, just as an example, a simple variable type with the time units is declared: time_type.
     Normally the time_t variable type should be used for time.
 """
-time_type = daeVariableType("typeNone", s, 0, 1E10,   0, 1e-5)
+time_type = daeVariableType("time_type", s, 0, 1E10,   0, 1e-5)
 
 """
 3. Declare a model by deriving a class from the base daeModel class.
@@ -349,8 +349,9 @@ def consoleRun():
 # If the keyword arguments **kwargs contain 'guiRun=True' the simulation will be run using the Qt GUI.
 def run(**kwargs):
     simulation = simTutorial()
-    return daeActivity.simulate(simulation, reportingInterval = 5, 
-                                            timeHorizon       = 100,
+    return daeActivity.simulate(simulation, reportingInterval     = 5, 
+                                            timeHorizon           = 100,
+                                            reportTimeDerivatives = True,
                                             **kwargs)
 
 """

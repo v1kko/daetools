@@ -235,6 +235,7 @@ def run(**kwargs):
                                             timeHorizon             = 5*60*60,
                                             nlpsolver               = nlpsolver,
                                             nlpsolver_setoptions_fn = setOptions,
+                                            reportSensitivities     = True,
                                             **kwargs)
 
 if __name__ == "__main__":

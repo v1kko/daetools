@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    
+    <title>DAE Tools Web Service Client</title>
+    
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/w3.css">
+    
+    <script type="text/javascript" src="javascript/plotly/plotly.min.js"></script>
+    <script type="text/javascript" src="javascript/web_service.js"></script>
+    <script type="text/javascript" src="javascript/daetools_ws.js"></script>
+    <script type="text/javascript" src="javascript/daetools_ws_tutorials.js"></script>
+    <script type="text/javascript" src="javascript/daetools_ws_ui.js"></script>
+    <style>
+        @media print {
+            div.w3-dae-width { width: 99%; max-width: 99%}
+        }
+        @media screen {
+            div.w3-dae-width {
+                width: 800px; 
+                max-width: 90% }
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <div style="position: fixed; top: 0px; left: 0px; z-index: 3000;
+                    height: 100%; width: 100%; background-color: #FFFFFF">
+            <p style="margin-left: 10px">Please enable JavaScript.</p>
+        </div>
+    </noscript>
+    <div class="w3-display-container w3-display-topmiddle w3-dae-width">
+        <p>
+            <img style="height: 1.2em; display: inline" src="images/daetools.png" alt="">
+            <b>DAE Tools Web Service Client</b> (<a class="" onclick="getServerStatus(webService);" href="javascript:void(0)">status</a>)
+        </p>
+
+        <div class="w3-container w3-padding-16 w3-card-2 w3-round-large">
+            <!-- 1. Tutorials loading -->
+            <header>
+                <b>Load one of the tutorials</b>
+            </header>            
+            <div class="w3-row w3-padding-small">
+                <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setTutorial('tutorial1');">      1       </button>
+                <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setTutorial('tutorial4');">      4       </button>
+                <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setTutorial('tutorial5');">      5       </button>
+                <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setTutorial('tutorial14');">     14      </button>
+                <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setTutorial('tutorial_che_1');"> che_1  </button>
+                <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setTutorial('tutorial_che_9');"> che_9  </button>
+            </div>
+            <i>or:</i>
+            <br/>
+
+            <b>Load simulation by name</b>
+            <div class="w3-cell-row">
+                <div class="w3-cell w3-cell-bottom w3-padding-small" style="width:50%">
+                    <label><i>Available simulations:</i></label>
+                    <select class="w3-select w3-white w3-border" name="simulationName" id="simulationName"> </select>
+                </div>
+                <div class="w3-cell w3-cell-bottom w3-padding-small" style="width:50%">
+                    <label><i>Loader function arguments (JSON format):</i></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="text" name="loaderArguments" id="loaderArguments"/>
+                </div>
+                <div class="w3-cell w3-cell-bottom w3-padding-small">
+                    <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="setSimulationName();" id="loadSimulationByName"> <b>Load</b> </button>
+                </div>
+            </div>
+        </div>
+        <br/>
+        
+        <div class="w3-container w3-padding-16 w3-card-2 w3-round-large">
+            <!-- 2. Inputs -->
+            <div class="w3-cell-row">
+                <div class="w3-cell w3-cell-bottom" style="width:100%">
+                    <label><b>Model Name:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="text" name="modelName" id="modelName" readonly/>
+
+                    <label><b>Time Horizon:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="number" min="0.0" step="any" name="timeHorizon" id="timeHorizon" required/>
+
+                    <label><b>Reporting Interval:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="number" min="0.0" step="any" name="reportingInterval" id="reportingInterval" required/>
+                </div>
+                <div class="w3-cell w3-cell-bottom" style="padding-left: 16px; padding-right: 8px">
+                    <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="runTutorial();" id="runButton"> <b>Run</b> </button>
+                </div>
+            </div>
+
+            <!-- 3. Outputs -->
+            <p><b>Simulation output:</b></p>
+            <pre class="w3-code w3-border w3-small" id="output" style="height:200px; overflow:auto; overflow-y:visible;"></pre>
+            
+            <!-- 4. Progress bar -->
+            <div id="progress-contaner" class="w3-third">
+                <div id="progress" class="w3-container w3-padding-small w3-blue w3-center" style="width:0.0%">50%</div>
+            </div>
+        </div>
+        <br/>
+        
+        <!-- 5. Plots -->
+        <div class="w3-container w3-padding-16 w3-card-2 w3-round-large">
+            <header>
+                <b>Plots:</b>
+            </header>            
+            <div id="plots"></div>
+        </div>
+        <br/>
+    </div>
+    
+    <!-- Message box (not in use) -->
+    <div id="messageBox" class="w3-modal w3-animate-opacity">
+        <div class="w3-modal-content w3-card">
+            <header class="w3-container">
+                <span onclick="document.getElementById('messageBox').style.display='none'" 
+                    class="w3-button w3-display-topright">&times;</span>
+                <h4>Message</h4>
+            </header>
+            <div class="w3-container" id="messageBoxContent">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

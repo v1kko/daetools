@@ -163,7 +163,7 @@ def setOptions(nlpsolver):
     #nlpsolver.SetOption('nlp_scaling_method', 'none') #'user-scaling')
 
 def run(**kwargs):
-    simulation = simCatalystMixing(100, 1.0/100)
+    simulation = simCatalystMixing(200, 1.0/200)
     nlpsolver  = pyIPOPT.daeIPOPT()
     lasolver   = pyTrilinos.daeCreateTrilinosSolver("Amesos_Klu", "")
     relativeTolerance = 1e-6

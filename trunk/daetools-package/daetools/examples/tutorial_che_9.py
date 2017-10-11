@@ -353,7 +353,10 @@ def plot_figures(simulation, log):
     # Plot the Figures 4, 6, 7 and 8 from the article using the data reporter #
     ###########################################################################
     # Get a dictionary with the reported variables
-    dr_data = simulation.DataReporter.DataReporters[1]
+    if not simulation.__drdata__:
+        return
+    
+    dr_data = simulation.__drdata__
     variables = dr_data.Process.dictVariables
 
     # Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).
@@ -544,34 +547,36 @@ def run(**kwargs):
     log          = daePythonStdOutLog()
     daesolver    = daeIDAS()
     simulation   = simTutorial()
-
-    datareporter = daeDelegateDataReporter()
-    dr_tcpip     = daeTCPIPDataReporter()
-    dr_data      = daeNoOpDataReporter()
-    datareporter.AddDataReporter(dr_tcpip)
-    datareporter.AddDataReporter(dr_data)
+  
+    simulation.__drdata__ = None
     
-    # If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.
+    # If datareporter is in the keyword argument do not create local datareporters.
+    # In that case, the figures will not be created.
     if 'datareporter' in kwargs:
-        datareporter_arg = kwargs.get('datareporter', None)
-        datareporter.AddDataReporter(datareporter_arg)
+        datareporter = kwargs.get('datareporter')
         del kwargs['datareporter']
-
-    simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
-    if not dr_tcpip.Connect("", simName):
-        sys.exit()
-
+    else:
+        datareporter = daeDelegateDataReporter()
+        dr_tcpip     = daeTCPIPDataReporter()
+        dr_data      = daeNoOpDataReporter()
+        datareporter.AddDataReporter(dr_data)
+        datareporter.AddDataReporter(dr_tcpip)        
+        simulation.__drdata__ = dr_data
+        simName = simulation.m.Name + strftime(" [%d.%m.%Y %H:%M:%S]", localtime())
+        if not dr_tcpip.Connect("", simName):
+            sys.exit()
+        
     # Do no print progress
     log.PrintProgress = False
 
-    return daeActivity.simulate(simulation, reportingInterval      = 1*60, 
-                                            timeHorizon            = 10*3600,
-                                            log                    = log,
-                                            datareporter           = datareporter,
-                                            calculateSensitivities = True,
-                                            reportTimeDerivatives  = True,
-                                            reportSensitivities    = True,
-                                            run_after_simulation_fn= plot_figures,
+    return daeActivity.simulate(simulation, reportingInterval       = 1*60, 
+                                            timeHorizon             = 10*3600,
+                                            log                     = log,
+                                            datareporter            = datareporter,
+                                            calculateSensitivities  = True,
+                                            reportTimeDerivatives   = True,
+                                            reportSensitivities     = True,
+                                            run_after_simulation_fn = plot_figures,
                                             **kwargs)
 
 if __name__ == "__main__":

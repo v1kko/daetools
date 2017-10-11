@@ -23,6 +23,9 @@ Installation instructions
 
 Create the source dist (.tar.gz):
   python setup.py sdist --formats=gztar
+  
+Create wheel:
+  python setup.py bdist_wheel
 """
 
 import os, sys, platform, shutil
@@ -137,9 +140,15 @@ elif platform.system() == 'Windows':
                     shared_libs.append(os.path.join(shared_libs_dir, f))
 
     for f in shared_libs:
-        shutil.copy(f, 'daetools/pyDAE/{0}'.format(platform_solib_dir))
-        shutil.copy(f, 'daetools/solvers/{0}'.format(platform_solib_dir))
+        shutil.copy(f, os.path.join('daetools', 'pyDAE',   platform_solib_dir))
+        shutil.copy(f, os.path.join('daetools', 'solvers', platform_solib_dir))
 
+    create_shortcuts_f = open(os.path.join('scripts', 'create_daetools_shortcuts.bat'), 'w')
+    create_shortcuts_f.write('set CS_DIR=%~dp0\n')
+    create_shortcuts_f.write('echo %CS_DIR%\n')
+    create_shortcuts_f.write('cscript %%CS_DIR%%create_shortcuts.js %s %s.%s %s\n' % ('pythonw.exe', python_major, python_minor, daetools_version))
+    create_shortcuts_f.close()
+    
     # Achtung!! data files dir must be '' in Windows
     data_files = []
     solibs = [
@@ -322,7 +331,7 @@ setup(name = 'daetools',
                        'daetools':                 ['*.txt',
                                                     '*.cfg',
                                                     'docs/presentations/*.pdf'
-                                                   ] + docs_html_dirs,
+                                                   ], # + docs_html_dirs, <----------- EXCLUDE DOCS
                        'daetools.pyDAE':           solibs,
                        'daetools.solvers':         solibs,
                        'daetools.solibs':          ['%s_%s/*.*' % (daetools_system, daetools_machine),
@@ -339,7 +348,12 @@ setup(name = 'daetools',
                                                     'cxx/*.h', 'cxx/*.cpp', 'cxx/*.pro', 'cxx/*.vcproj', 'cxx/Makefile-*',
                                                     '*.css', '*.xsl', fmi_solibs
                                                    ],
-                       'daetools.dae_simulator':   ['images/*.png'],
+                       'daetools.dae_simulator':   ['*.html',
+                                                    'images/*.*', 
+                                                    'css/*.css',
+                                                    'javascript/*.js',
+                                                    'javascript/plotly/*.*',
+                                                    'javascript/plotly/topojson/*.js'],
                        'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', 
                                                     '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png'],
                        'daetools.ext_libs.SALib':  ['*.txt'],
@@ -347,6 +361,7 @@ setup(name = 'daetools',
                      },
       data_files = data_files,
       scripts = ['scripts/create_shortcuts.js',
+                 'scripts/create_daetools_shortcuts.bat',
                  'scripts/daeplotter',
                  'scripts/daeexamples',
                  'scripts/daeplotter.bat',
@@ -355,9 +370,9 @@ setup(name = 'daetools',
                  'scripts/daeexamples3',
                  'scripts/daeplotter3.bat',
                  'scripts/daeexamples3.bat'],
-      requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
-      install_requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
-      python_requires = '>=2.7,<=3.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+      #requires = ['numpy', 'scipy', 'matplotlib', 'PyQt5', 'lxml', 'pandas', 'h5py', 'openpyxl'],
+      install_requires = ['numpy', 'scipy', 'matplotlib', 'lxml'],
+      python_requires = '>=2.7,<3.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
       platforms = ['GNU/Linux', 'macOS', 'Windows'],
       classifiers = [ 'Development Status :: 5 - Production/Stable',
                       'Intended Audience :: Developers',

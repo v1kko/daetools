@@ -1,158 +1,162 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:template match="/">
     <html>
       <head>
+        <meta charset="UTF-8"/> 
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="stylesheet" href="dae-tools.css" type="text/css" media="all" />
+        <link rel="shortcut icon" href="http://www.daetools.com/favicon.ico" type="image/x-icon"/>
         <script type="text/x-mathjax-config">
             MathJax.Hub.Config({
-            CommonHTML: { linebreaks: { automatic: false } },
-            "HTML-CSS": { linebreaks: { automatic: false } },
-                   SVG: { linebreaks: { automatic: false } }
+                jax: ["input/TeX", "output/HTML-CSS"],
+                tex2jax: { inlineMath: [ ['$','$'] ] },
+                displayAlign: "left",
+                CommonHTML: { linebreaks: { automatic: false}, 
+                              preferredFont: null, 
+                              mtextFontInherit: true, 
+                              styles: { '.MathJax_Display': { "margin": 0 } }
+                            },
+                "HTML-CSS": { linebreaks: { automatic: false}, 
+                              preferredFont: null, 
+                              mtextFontInherit: true,
+                              styles: { '.MathJax_Display': { "margin": 0 } }
+                            },
+                       SVG: { linebreaks: { automatic: false}, 
+                              preferredFont: null, 
+                              mtextFontInherit: true 
+                            }
             });
         </script>
-        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+        <script type="text/javascript" async="true" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
         <title>
-            DAE Tools (www.daetools.com) Model Report: <xsl:value-of select="Model/Name"/>
+            DAE Tools Model Report: <xsl:value-of select="Model/Name"/>
         </title>
-
+        <style>
+            @media print {
+                body.w3-dae-width { width: 99%; }
+            }
+            @media screen {
+                 body.w3-dae-width {
+                    width: 1000px; 
+                    max-width: 90% }
+            }
+            div.w3-left-indent       {padding-left: 30px;}
+            div.w3-bottom-indent     {padding-bottom: 10px;}
+            div.w3-eqn-bottom-indent {padding-bottom: 0.2em;}
+            div.w3-top-bottom-indent {padding-top: 10px; padding-bottom: 10px;}
+        </style>
       </head>
-      <body>
-        <div id="wrap">
-<!--
-        <div id="header">
-            <div id="header-content">
-                <h1 id="logo">
-                    <a href="index.html" title="">
-                        DAE Tools<span class="gray">Project</span>
-                    </a>
-                </h1>
-                <h2 id="slogan">Model the world freely...</h2>
-            </div>
-        </div>
-        <div id="header-line">
-        </div>
--->
-
-        <div id="content-wrap">
-        <div id="content">
-<!--
-        <div id="sidebar">
-            <div class="sidebox">
-                <ul class="sidemenu">
-                    <li><a href="#ChildModels">Child Models</a></li>
-                    <li><a href="#Ports">Ports</a></li>
-                    <li><a href="#Domains" class="top">Domains</a></li>
-                    <li><a href="#Parameters">Parameters</a></li>
-                    <li><a href="#Variables">Variables</a></li>
-                    <li><a href="#Equations">Equations</a></li>
-                    <li><a href="#STNs">State Transition Networks</a></li>
-                </ul>
-            </div>
-        </div>
--->
-        <div id="main">
-
+      <body class="w3-display-container w3-display-topmiddle w3-dae-width">
+        <div>
+            <p>
+                <img style="height: 1.2em; display: inline" src="http://www.daetools.com/img/[d][a][e]_Tools_project.png" alt=""/>
+                <xsl:text> </xsl:text>
+                <a href="http://www.daetools.com"><b>DAE Tools Project</b></a>
+            </p>        
         
-          <div class="post">
+            <div class="w3-card w3-round-large w3-padding">
+            
+                <div class="w3-container">
+                    <h2 style="text-align: center;">
+                        Model: <xsl:copy-of select="Model/Name"/> 
+                    </h2>
+                </div>
 
-            <h3>
-                <a class="dae-tools-project" href="http://www.daetools.com">
-                    DAE Tools<span class="gray"> Project,</span> www.daetools.com
-                </a>
-            </h3>
+                <xsl:if test="Model/Description != ''">
+                    <div class="w3-container">
+                        <b>Description:</b>
+                        <pre class="w3-code w3-small w3-border-0" style="max-height:200px; overflow:auto; overflow-y: visible;">
+                            <xsl:value-of select="Model/Description"/>
+                        </pre>
+                    </div>
+                </xsl:if>
 
-            <h1 style="text-align: center;">
-                Model: <xsl:copy-of select="Model/Name"/> 
-            </h1>
+                <xsl:apply-templates select="Model/Components"/>
+                <xsl:apply-templates select="Model/Ports"/>
+                <xsl:apply-templates select="Model/EventPorts"/>
+                <xsl:apply-templates select="Model/PortConnections"/>
+                <xsl:apply-templates select="Model/EventPortConnections"/>
+                <xsl:apply-templates select="Model/Domains"/>
+                <xsl:apply-templates select="Model/Parameters"/>
+                <xsl:apply-templates select="Model/Variables"/>
+                
+                <xsl:if test="count(Model/Equations/Object) > 0">
+                    <div class="w3-container">
+                        <h3><a name="Equations"></a>Equations</h3>
+                        <xsl:apply-templates select="Model/Equations"/>
+                    </div>
+                </xsl:if>
 
-            <xsl:if test="Model/Description != ''">
-                <pre>
-                    <xsl:value-of select="Model/Description"/>
-                </pre>
-            </xsl:if>
+                <xsl:if test="count(Model/STNs/Object) > 0">
+                    <div class="w3-container">
+                        <h3> <a name="STNs"></a>State Transition Networks</h3>
+                        <xsl:apply-templates select="Model/STNs"/>
+                    </div>
+                </xsl:if>
 
-            <xsl:apply-templates select="Model/Units"/>
-            <xsl:apply-templates select="Model/Ports"/>
-            <xsl:apply-templates select="Model/EventPorts"/>
-            <xsl:apply-templates select="Model/PortConnections"/>
-            <xsl:apply-templates select="Model/EventPortConnections"/>
-            <xsl:apply-templates select="Model/Domains"/>
-            <xsl:apply-templates select="Model/Parameters"/>
-            <xsl:apply-templates select="Model/Variables"/>
-            <xsl:if test="count(Model/Equations/Object) > 0">
-                <h2><a name="Equations"></a>Equations</h2>
-                <xsl:apply-templates select="Model/Equations"/>
-            </xsl:if>
+                <xsl:if test="count(Model/OnEventActions/Object) > 0">
+                    <div class="w3-container">
+                        <h3><a name="OnEventActions"></a>OnEventActions</h3>
+                        <xsl:apply-templates select="Model/OnEventActions"/>
+                    </div>
+                </xsl:if>
+                <br/>
 
-            <xsl:if test="count(Model/STNs/Object) > 0">
-                <h2> <a name="STNs"></a>State Transition Networks</h2>
-                <xsl:apply-templates select="Model/STNs"/>
-            </xsl:if>
-
-            <xsl:if test="count(Model/OnEventActions/Object) > 0">
-                <h2><a name="OnEventActions"></a>OnEventActions</h2>
-                <xsl:apply-templates select="Model/OnEventActions"/>
-            </xsl:if>
-
+            </div>
+            <br/>
         </div>
-
-        </div> <!-- main -->
-
-      </div> <!-- wrap -->
-
-      </div> <!-- content -->
-      </div> <!-- content-wrap -->
-
       </body>
     </html>
   </xsl:template>
 
-
-
+  
   <xsl:template match="Domains">
-    <div>
-      <xsl:if test="count(Object) > 0">
+    <xsl:if test="count(Object) > 0">
+      <div class="w3-container w3-section">
 
-        <h2> <a name="Domains"></a>Domains</h2>
+        <h3> <a name="Domains"></a>Domains</h3>
 
-        <table class="width100pc">
+        <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
           <thead>
-            <tr>
+            <tr class="w3-light-grey">
               <th>Name</th>
               <th>Type</th>
               <th>Units</th>
               <th>Description</th>
             </tr>
           </thead>
+          <colgroup>
+            <col style="width:20%"/>
+            <col style="width:20%"/>
+            <col style="width:20%"/>
+            <col style="width:40%"/>
+          </colgroup>
           <tbody>
             <xsl:for-each select="Object">
               <tr>
                 <td>
-<!--                   <a> -->
                     <xsl:attribute name="name">
                       <xsl:value-of select="@ID"/>
                     </xsl:attribute>
-                    <!--<xsl:value-of select="Name"/>-->
-                    <xsl:copy-of select="MathMLName"/> 
-<!--                   </a> -->
+                    <!-- Add $...$ to display it as inline math? -->
+                    <xsl:value-of select="Name"/>
                 </td>
 
                 <td>
                     <xsl:if test="Type = 'eStructuredGrid'">
-                        StructuredGrid
+                        Structured Grid
                     </xsl:if>
                     <xsl:if test="Type = 'eUnstructuredGrid'">
-                        UnstructuredGrid
+                        Unstructured Grid
                     </xsl:if>
                     <xsl:if test="Type = 'eArray'">
                         Array
                     </xsl:if>
-                    <!--<xsl:value-of select="Type"/>-->
                 </td>
 
                 <td>
-                    <xsl:copy-of select="MathMLUnits"/> 
+                    <xsl:apply-templates select="Units"/>
                 </td>
                 
                 <td>
@@ -164,20 +168,41 @@
           </tbody>
         </table>
 
-      </xsl:if>
-    </div>
+      </div>
+    </xsl:if>
   </xsl:template>
 
+  
+  <xsl:template match="Units">
+    <xsl:for-each select="./*">
+      <xsl:choose>
+        <!-- If exponent is 0 do nothing --> 
+        <xsl:when test="number(.) = 0">
+        </xsl:when>
+        <!-- If exponent is 1 add only the unit i.e. kg --> 
+        <xsl:when test="number(.) = 1">
+            <xsl:value-of select="name()"/>
+            <xsl:text> </xsl:text>
+        </xsl:when>
+        <!-- Otherwise add name ^ exponent i.e. kg^2 --> 
+        <xsl:otherwise>
+            <xsl:value-of select="name()"/>
+            <sup><xsl:value-of select="number(.)"/></sup>
+            <xsl:text> </xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:for-each>
+  </xsl:template>
 
+  
   <xsl:template match="DomainRefs">
     <xsl:for-each select="./ObjectRef">
 
-      <a>
+      <a style="text-decoration: none">
         <xsl:attribute name="href">
           #<xsl:value-of select="@ID"/>
         </xsl:attribute>
-        <!--<xsl:value-of select="."/>-->
-        <xsl:copy-of select="ObjectRefMathML"/> 
+        <xsl:value-of select="."/>
       </a>
 
       <xsl:if test="not(position() = last())">
@@ -187,33 +212,38 @@
     </xsl:for-each>
   </xsl:template>
 
-
-
+  
   <xsl:template match="Parameters">
-    <div>
-      <xsl:if test="count(Object) > 0">
+    <xsl:if test="count(Object) > 0">
+      <div class="w3-container w3-section">
 
-      <h2> <a name="Parameters"></a>Parameters</h2>
+      <h3> <a name="Parameters"></a>Parameters</h3>
 
-      <table class="width100pc">
+      <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
         <thead>
-          <tr>
+          <tr class="w3-light-grey">
             <th align="left">Name</th>
             <th align="left">Units</th>
             <th align="left">Domains</th>
             <th align="left">Description</th>
           </tr>
         </thead>
+        <colgroup>
+            <col style="width:20%"/>
+            <col style="width:20%"/>
+            <col style="width:20%"/>
+            <col style="width:40%"/>
+        </colgroup>
         <tbody>
           <xsl:for-each select="Object">
             <tr>
               <td align="left">
-                <!-- <xsl:value-of select="Name"/>-->
-                 <xsl:copy-of select="MathMLName"/>
+                <!-- Add $...$ to display it as an inline math -->
+                <xsl:value-of select="Name"/>
               </td>
 
               <td align="left">
-                 <xsl:copy-of select="MathMLUnits"/>
+                <xsl:apply-templates select="Units"/>
               </td>
 
               <td align="left">
@@ -229,33 +259,38 @@
         </tbody>
       </table>
 
-      </xsl:if>
-    </div>
+      </div>
+    </xsl:if>
   </xsl:template>
 
-
-
+  
   <xsl:template match="Variables">
-    <div>
-      <xsl:if test="count(Object) > 0">
+    <xsl:if test="count(Object) > 0">
+     <div class="w3-container w3-section">
 
-      <h2> <a name="Variables"></a>Variables</h2>
+      <h3> <a name="Variables"></a>Variables</h3>
 
-      <table class="width100pc">
+      <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
         <thead>
-          <tr>
+          <tr class="w3-light-grey">
             <th align="left">Name</th>
             <th align="left">Type</th>
             <th align="left">Domains</th>
             <th align="left">Description</th>
           </tr>
         </thead>
+        <colgroup>
+            <col style="width:20%"/>
+            <col style="width:20%"/>
+            <col style="width:20%"/>
+            <col style="width:40%"/>
+        </colgroup>
         <tbody>
           <xsl:for-each select="Object">
             <tr>
               <td align="left">
-                 <!--<xsl:value-of select="Name"/>-->
-                 <xsl:copy-of select="MathMLName"/>
+                <!-- Add $...$ to display it as inline math? -->
+                <xsl:value-of select="Name"/>
               </td>
 
               <td align="left">
@@ -275,43 +310,32 @@
         </tbody>
       </table>
 
-      </xsl:if>
-    </div>
+     </div>
+    </xsl:if>
   </xsl:template>
 
-
-  <xsl:template match="Units">
-    <div>
-        <xsl:if test="count(Object) > 0">
-
-            <h2> <a name="Units"></a>Units</h2>
-
-<!--            <xsl:for-each select="Object">
-                <p>
-                    <b>
-                        <xsl:copy-of select="MathMLName"/> 
-                    </b>
-                    <br></br>
-                    
-                    <i>     
-                        <xsl:value-of select="Description"/>
-                    </i>
-                </p>
-            </xsl:for-each>
--->
-
-            <table class="width100pc">
+  
+  <xsl:template match="Components">
+      <xsl:if test="count(Object) > 0">
+         <div class="w3-container w3-section">
+            <h3> <a name="Components"></a>Components</h3>
+            <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
                 <thead>
-                    <tr>
+                    <tr class="w3-light-grey">
                         <th align="left">Name</th>
                         <th align="left">Description</th>
                     </tr>
                 </thead>
+                <colgroup>
+                    <col style="width:40%"/>
+                    <col style="width:60%"/>
+                </colgroup>
                 <tbody>
                     <xsl:for-each select="Object">
                         <tr>
                             <td align="left">
-                                <xsl:copy-of select="MathMLName"/>
+                                <!-- Add $...$ to display it as inline math?? -->
+                                <xsl:value-of select="Name"/>
                             </td>
                             <td align="left">
                                 <xsl:value-of select="Description"/>
@@ -320,43 +344,34 @@
                     </xsl:for-each>
                 </tbody>
             </table>
-
+         </div>
        </xsl:if>
-    </div>
   </xsl:template>
 
 
   <xsl:template match="Ports">
-    <div>
-        <xsl:if test="count(Object) > 0">
-            <h2> <a name="Ports"></a>Ports</h2>
-
-<!--
-            <xsl:for-each select="Object">
-                <p>
-                    <b>
-                        <xsl:value-of select="Name"/>:<xsl:value-of select="PortType"/>
-                    </b>
-                </p>
-            </xsl:for-each>
--->
-
-            <table class="width100pc">
+     <xsl:if test="count(Object) > 0">
+        <div class="w3-container w3-section">
+            <h3> <a name="Ports"></a>Ports</h3>
+            <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
                 <thead>
-                    <tr>
+                    <tr class="w3-light-grey">
                         <th align="left">Name</th>
                         <th align="left">Type</th>
                         <th align="left">Description</th>
                     </tr>
                 </thead>
+                <colgroup>
+                    <col style="width:30%"/>
+                    <col style="width:30%"/>
+                    <col style="width:40%"/>
+                </colgroup>
                 <tbody>
                     <xsl:for-each select="Object">
                         <tr>
                             <td align="left">
-                                <!--<xsl:value-of select="Name"/>-->
-                                <i>  
-                                    <xsl:copy-of select="MathMLName"/> 
-                                </i>
+                                <!-- Add $...$ to display it as inline math?? -->
+                                <xsl:value-of select="Name"/>
                             </td>
 
                             <td align="left">
@@ -371,41 +386,34 @@
                 </tbody>
             </table>
 
-       </xsl:if>
-    </div>
+       </div>
+     </xsl:if>
   </xsl:template>
 
+  
   <xsl:template match="EventPorts">
-    <div>
-        <xsl:if test="count(Object) > 0">
-            <h2> <a name="EventPorts"></a>EventPorts</h2>
-
-<!--
-            <xsl:for-each select="Object">
-                <p>
-                    <b>
-                        <xsl:value-of select="Name"/>:<xsl:value-of select="PortType"/>
-                    </b>
-                </p>
-            </xsl:for-each>
--->
-
-            <table class="width100pc">
+     <xsl:if test="count(Object) > 0">
+        <div class="w3-container w3-section">
+            <h3> <a name="EventPorts"></a>EventPorts</h3>
+            <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
                 <thead>
-                    <tr>
+                    <tr class="w3-light-grey">
                         <th align="left">Name</th>
                         <th align="left">Type</th>
                         <th align="left">Description</th>
                     </tr>
                 </thead>
+                <colgroup>
+                    <col style="width:30%"/>
+                    <col style="width:30%"/>
+                    <col style="width:40%"/>
+                </colgroup>
                 <tbody>
                     <xsl:for-each select="Object">
                         <tr>
                             <td align="left">
-                                <!--<xsl:value-of select="Name"/>-->
-                                <i>
-                                    <xsl:copy-of select="MathMLName"/>
-                                </i>
+                                <!-- Add $...$ to display it as inline math?? -->
+                                <xsl:value-of select="Name"/>
                             </td>
 
                             <td align="left">
@@ -420,48 +428,39 @@
                 </tbody>
             </table>
 
-       </xsl:if>
-    </div>
+       </div>
+    </xsl:if>
   </xsl:template>
 
+  
   <xsl:template match="PortConnections">
-    <div>
-        <xsl:if test="count(Object) > 0">
-            <h2> <a name="PortConnections"></a>Port Connections</h2>
-
-<!--
-            <xsl:for-each select="Object">
-                <p>
-                    <b>
-                        <xsl:value-of select="Name"/>:<xsl:value-of select="PortType"/>
-                    </b>
-                </p>
-            </xsl:for-each>
--->
-
-            <table class="width100pc">
+     <xsl:if test="count(Object) > 0">
+        <div class="w3-container w3-section">
+            <h3> <a name="PortConnections"></a>Port Connections</h3>
+            <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
                 <thead>
-                    <tr>
+                    <tr class="w3-light-grey">
                         <th align="left">Port 1</th>
                         <th align="left">Port 2</th>
                         <th align="left">Description</th>
                     </tr>
                 </thead>
+                <colgroup>
+                    <col style="width:30%"/>
+                    <col style="width:30%"/>
+                    <col style="width:40%"/>
+                </colgroup>
                 <tbody>
                     <xsl:for-each select="Object">
                         <tr>
                             <td align="left">
-                                <!--<xsl:value-of select="Name"/>-->
-                                <i>  
-                                    <xsl:copy-of select="PortFrom/ObjectRefMathML"/> 
-                                </i>
+                                <!-- Add $...$ to display it as inline math? -->
+                                <xsl:value-of select="PortFrom"/>
                             </td>
 
                             <td align="left">
-                                <!--<xsl:value-of select="Name"/>-->
-                                <i>  
-                                    <xsl:copy-of select="PortTo/ObjectRefMathML"/> 
-                                </i>
+                                <!-- Add $...$ to display it as inline math? -->
+                                <xsl:value-of select="PortTo"/>
                             </td>
 
                             <td>     
@@ -472,46 +471,39 @@
                 </tbody>
             </table>
 
-       </xsl:if>
-    </div>
+       </div>
+     </xsl:if>
   </xsl:template>
 
+  
   <xsl:template match="EventPortConnections">
-    <div>
-        <xsl:if test="count(Object) > 0">
-            <h2> <a name="EventPortConnections"></a>Event-Port Connections</h2>
-
-<!--
-            <xsl:for-each select="Object">
-                <p>
-                    <b>
-                        <xsl:value-of select="Name"/>:<xsl:value-of select="PortType"/>
-                    </b>
-                </p>
-            </xsl:for-each>
--->
-
-            <table class="width100pc">
+    <xsl:if test="count(Object) > 0">
+        <div class="w3-container w3-section">
+            <h3> <a name="EventPortConnections"></a>Event-Port Connections</h3>
+            <table class="w3-table w3-striped w3-border w3-bordered" style="word-wrap: break-word; table-layout:fixed">
                 <thead>
-                    <tr>
+                    <tr class="w3-light-grey">
                         <th align="left">Port 1</th>
                         <th align="left">Port 2</th>
                         <th align="left">Description</th>
                     </tr>
                 </thead>
+                <colgroup>
+                    <col style="width:30%"/>
+                    <col style="width:30%"/>
+                    <col style="width:40%"/>
+                </colgroup>
                 <tbody>
                     <xsl:for-each select="Object">
                         <tr>
                             <td align="left">
-                                <i>
-                                    <xsl:copy-of select="PortFrom/ObjectRefMathML"/>
-                                </i>
+                                <!-- Add $...$ to display it as inline math? -->
+                                <xsl:value-of select="PortFrom"/>
                             </td>
 
                             <td align="left">
-                                <i>
-                                    <xsl:copy-of select="PortTo/ObjectRefMathML"/>
-                                </i>
+                                <!-- Add $...$ to display it as inline math? -->
+                                <xsl:value-of select="PortTo"/>
                             </td>
 
                             <td>
@@ -522,215 +514,156 @@
                 </tbody>
             </table>
 
-       </xsl:if>
-    </div>
+       </div>
+    </xsl:if>
   </xsl:template>
 
+  
   <xsl:template match="Equations">
-    <div>
       <xsl:if test="count(Object) > 0">
-
           <xsl:for-each select="Object">
-              <p>
-                <b><i>
-                    <xsl:copy-of select="MathMLName"/>:
-                </i></b>
-              </p>
-
-              <p style="padding-left:15px">
-                 <xsl:copy-of select="Residual"/>
-                 <br/>
-                
-                 <i>     
-                    <xsl:value-of select="Description"/>
-                 </i>
-             </p>
+              <div class="w3-eqn-bottom-indent">
+                  <div class="w3-eqn-bottom-indent">
+                    <!-- Add $...$ to display it as inline math? -->
+                    <xsl:value-of select="Name"/>                   
+                    <xsl:text>:</xsl:text>
+                  </div>
+                  <div class="w3-left-indent" style="overflow: auto; overflow-y: hidden">
+                    <xsl:copy-of select="Residual"/>
+                    <xsl:if test="Description != ''">
+                        <i class="w3-small"> <xsl:value-of select="Description"/> </i>
+                    </xsl:if>                                
+                  </div>
+             </div>
           </xsl:for-each>
-
       </xsl:if>
-    </div>
   </xsl:template>
 
-
-
-  <xsl:template match="DistributedDomainInfos">
-    <table>
-      <tr>
-        <th align="left">Domain</th>
-        <th align="left">Type</th>
-      </tr>
-      <xsl:for-each select="Object">
-        <tr>
-          <td align="left">
-            <a>
-              <xsl:attribute name="href">
-                #<xsl:value-of select="@ID"/>
-              </xsl:attribute>
-              <!--<xsl:value-of select="Domain"/>-->
-              <xsl:copy-of select="MathMLName"/> 
-            </a>
-          </td>
-          <td align="left">
-            <xsl:value-of select="Type"/>
-          </td>
-        </tr>
-      </xsl:for-each>
-    </table>
-  </xsl:template>
-
-
-
+  
   <xsl:template match="STNs">
-    <div>
+    <div>    
       <xsl:for-each select="Object">
 
         <xsl:if test="Type = 'eIF'">
-
-          <div style="padding-left:10px; padding-right:10px;">
-<!--             <ul> -->
+          <div class="w3-bottom-indent">
                 <xsl:for-each select="States/Object">
-<!--                     <li> -->
+                    <div>
+                        <b>
                         <xsl:if test="position() = 1">
-                            IF <xsl:apply-templates select="OnConditionActions/Object/Condition"/>
+                            If <xsl:apply-templates select="OnConditionActions/Object/Condition"/>:
                         </xsl:if>
 
                         <xsl:if test="position() > 1 and position() != last()">
-                            ELSE IF <xsl:apply-templates select="OnConditionActions/Object/Condition"/>
+                            Else if <xsl:apply-templates select="OnConditionActions/Object/Condition"/>:
                         </xsl:if>
 
                         <xsl:if test="position() = last()">
-                            ELSE
+                            Else:
                         </xsl:if>
-                        
-                    <!--
-                        <xsl:if test="count(OnConditionActions/Object) > 0">
-                            <xsl:for-each select="OnConditionActions/Object">
-                                If <xsl:apply-templates select="Condition"/>
-                            </xsl:for-each>
-                        </xsl:if>
-                        
-                        <xsl:if test="count(OnConditionActions/Object) = 0">
-                            Else
-                        </xsl:if>
-                    -->
+                        </b>
 
-                        <br/>
-
-                        <div style="padding-left:10px; padding-right:10px;">
+                        <!-- OnConditionActions and OnEventActions do not make much sense within the IF/ELSE_IF/ELSE blocks-->
+                        <div class="w3-left-indent">
                             <xsl:apply-templates select="Equations"/>
+                        </div>
+                        <div class="w3-left-indent w3-top-bottom-indent">
                             <xsl:apply-templates select="STNs"/>
                         </div>
-<!--                     </li> -->
+                        
+                        <xsl:if test="position() = last()">
+                            <div>
+                                <b>End if</b>
+                            </div>
+                        </xsl:if>
+                    </div>
                 </xsl:for-each>
-<!--             </ul> -->
-
           </div>
         </xsl:if>
 
         <xsl:if test="Type = 'eSTN'">
-          <div style="padding-left:10px; padding-right:10px;">
-            <h3>
-               <xsl:copy-of select="MathMLName"/> 
-            </h3>
-            <p>
-                <i>     
-                    <xsl:value-of select="Description"/>
-                </i>
-            </p>
-
-            <ul>
+            <div class="w3-bottom-indent">
+                <!-- Add $...$ to display it as inline math? -->
+                STN  <xsl:value-of select="Name"/> 
+                <xsl:if test="Description != ''">
+                    <i><span class="w3-text-grey">(<xsl:value-of select="Description"/>) </span></i>
+                </xsl:if>
+                :
                 <xsl:for-each select="States/Object">
-
-                    <li>
-                        <b>
-                            <xsl:copy-of select="MathMLName"/> 
-                        </b>
-                        <br/>
-
-                        <div style="padding-left:10px; padding-right:10px;">
+                    <div class="w3-left-indent">
+                        state <i> <xsl:value-of select="Name"/>: </i>
+                        <div class="w3-left-indent">
                             <xsl:apply-templates select="Equations"/>
+                        </div>
+                        <div class="w3-left-indent">
                             <xsl:apply-templates select="OnConditionActions"/>
+                        </div>
+                        <div class="w3-left-indent">
                             <xsl:apply-templates select="OnEventActions"/>
+                        </div>
+                        <div class="w3-left-indent w3-top-bottom-indent">
                             <xsl:apply-templates select="STNs"/>
                         </div>
-                    </li>
-
+                    </div>
                 </xsl:for-each>
-            </ul>
-
-          </div>
+                
+                End STN
+            </div>
         </xsl:if>
 
       </xsl:for-each>
     </div>
   </xsl:template>
 
-
-
-  <xsl:template match="States">
-    <div>
-      <xsl:for-each select="Object">
-        <a>
-          <xsl:attribute name="name">
-            <xsl:value-of select="@ID"/>
-          </xsl:attribute>
-          <xsl:copy-of select="MathMLName"/> 
-        </a>
-        <xsl:apply-templates select="Equations"/>
-        <xsl:apply-templates select="OnConditionActions"/>
-        <xsl:apply-templates select="OnEventActions"/>
-        <xsl:apply-templates select="STNs"/>
-      </xsl:for-each>
-    </div>
-  </xsl:template>
-
+  
    <xsl:template match="Actions">
-        <xsl:if test="count(Object) > 0">
-            <ul>
-                <xsl:for-each select="Object">
-                    <li>
-                        <xsl:if test="Type = 'eChangeState'">
-                            Switch to: <xsl:copy-of select="StateTo/ObjectRefMathML"/>
-                        </xsl:if>
-                        <xsl:if test="Type = 'eSendEvent'">
-                            Trigger the event on: <xsl:copy-of select="SendEventPort/ObjectRefMathML"/> with the data: <xsl:copy-of select="MathML"/>
-                        </xsl:if>
-                        <xsl:if test="Type = 'eReAssignOrReInitializeVariable'">
-                            Set: <xsl:copy-of select="MathML"/>
-                        </xsl:if>
-                    </li>
-                </xsl:for-each>
-            </ul>
-        </xsl:if>
+        <div>
+            <xsl:if test="count(Object) > 0">
+                <div class="w3-left-indent">
+                    <xsl:for-each select="Object">
+                        <div>
+                            <xsl:if test="Type = 'eChangeState'">
+                                Switch <i><xsl:value-of select="STN"/></i> to <i><xsl:value-of select="StateTo"/></i>
+                            </xsl:if>
+                            <xsl:if test="Type = 'eSendEvent'">
+                                Trigger the event on <i><xsl:value-of select="SendEventPort"/></i> with the data: <i><xsl:copy-of select="Expression"/></i>
+                            </xsl:if>
+                            <xsl:if test="Type = 'eReAssignOrReInitializeVariable'">
+                                Set <i><xsl:value-of select="Variable"/></i> to <i><xsl:copy-of select="Expression"/></i>
+                            </xsl:if>
+                        </div>
+                    </xsl:for-each>
+                </div>
+            </xsl:if>
+        </div>
   </xsl:template>
 
-
+  
   <xsl:template match="OnConditionActions">
     <div>
       <xsl:for-each select="Object">
-        <p>
-            When the condition <xsl:apply-templates select="Condition"/> is satisfied: <br/>
+        <div>
+            When the condition <xsl:apply-templates select="Condition"/> is satisfied:
             <xsl:apply-templates select="Actions"/>
-        </p>
+        </div>
       </xsl:for-each>
     </div>
   </xsl:template>
 
+  
   <xsl:template match="OnEventActions">
     <div>
       <xsl:for-each select="Object">
-        <p>
-            On event received on: <xsl:apply-templates select="EventPort/ObjectRefMathML"/> <br/>
+        <div>
+            On event received on <i><xsl:value-of select="EventPort"/></i>:
             <xsl:apply-templates select="Actions"/>
-        </p>
+        </div>
       </xsl:for-each>
     </div>
   </xsl:template>
 
+  
   <xsl:template match="Condition">
-    <xsl:text>( </xsl:text>
-        <xsl:copy-of select="MathML"/>
-    <xsl:text> )</xsl:text>
+    <xsl:copy-of select="Expression"/>
   </xsl:template>
 
 </xsl:stylesheet>

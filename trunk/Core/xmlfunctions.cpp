@@ -702,37 +702,85 @@ string textCreator::PartialDerivative(size_t order,
 /*********************************************************************************************
     latexCreator
 *********************************************************************************************/
+/*
+std::map<std::string, std::string> create_html_to_latex()
+{
+    std::map<std::string, std::string> html_latex;
+    
+    html_latex["&alpha;"] =   "\\alpha";               
+    html_latex["&beta;"] =    "\\beta";                
+    html_latex["&gamma;"] =   "\\gamma";               
+    html_latex["&delta;"] =   "\\delta";               
+    //html_latex["&epsilon;"] = "\\epsilon";             
+    html_latex["&epsilon;"] = "\\varepsilon";          
+    html_latex["&zeta;"] =    "\\zeta";                
+    html_latex["&eta;"] =     "\\eta";          
+    html_latex["&theta;"] =   "\\theta";    
+    html_latex["&thetasym;"] ="\\vartheta"; 
+    html_latex["&gamma;"] =   "\\gamma";    
+    html_latex["&kappa;"] =   "\\kappa";    
+    html_latex["&lambda;"] =  "\\lambda";   
+    html_latex["&mu;"] =      "\\mu";       
+    html_latex["&nu;"] =      "\\nu";       
+    html_latex["&xi;"] =      "\\xi";
+    html_latex["&omicron;"] = "\\o";        
+    html_latex["&pi;"] =      "\\pi";       
+    html_latex["&rho;"] =     "\\rho";      
+    html_latex["&sigma;"] =   "\\sigma";    
+    html_latex["&sigmaf;"] =  "\\varsigma"; 
+    html_latex["&tau;"] =     "\\tau";
+    html_latex["&upsilon;"]=  "\\upsilon";
+    html_latex["&phi;"] =     "\\phi";
+    html_latex["&chi;"] =     "\\chi";
+    html_latex["&psi;"] =     "\\psi";
+    html_latex["&omega;"] =   "\\omega";
+
+    html_latex["&Gamma;"] =   "\\Gamma";               
+    html_latex["&Delta;"] =   "\\Delta";               
+    html_latex["&Theta;"] =   "\\Theta";             
+    html_latex["&Kappa;"] =   "\\Kappa";             
+    html_latex["&Lambda;"] =  "\\Lambda";
+    html_latex["&Xi;"] =      "\\Xi";    
+    html_latex["&Pi;"] =      "\\Pi";    
+    html_latex["&Sigma;"] =   "\\Sigma";   
+    html_latex["&Upsilon;"] = "\\Upsilon"; 
+    html_latex["&Phi;"] =     "\\Phi";
+    html_latex["&Psi;"] =     "\\Psi";
+    html_latex["&Omega;"] =   "\\Omega";
+
+    return html_latex;
+}
+*/
+
 inline std::string greek_html_to_latex(std::string str)
 {
-    std::string greek_names_latex[41] = {
+    static std::string greek_names_latex[36] = {
     "\\alpha",        "\\theta",       "\\o",           "\\tau",
     "\\beta",         "\\vartheta",    "\\pi",          "\\upsilon",
-    "\\gamma",        "\\gamma",       "\\varpi",       "\\phi",
-    "\\delta",        "\\kappa",       "\\rho",         "\\varphi",
-    "\\epsilon",      "\\lambda",      "\\varrho",      "\\chi",
-    "\\varepsilon",   "\\mu",          "\\sigma",       "\\psi",
-    "\\zeta",         "\\nu",          "\\varsigma",    "\\omega",
-    "\\eta",          "\\xi",
+    "\\gamma",        "\\phi",         "\\delta",       "\\kappa",
+    "\\rho",          "\\epsilon",     "\\lambda",      "\\chi",
+    "\\mu",           "\\sigma",       "\\psi",         "\\zeta",
+    "\\nu",           "\\varsigma",    "\\omega",       "\\eta",
+    "\\xi",
 
     "\\Gamma",        "\\Lambda",      "\\Sigma",       "\\Psi",
     "\\Delta",        "\\Xi",          "\\Upsilon",     "\\Omega",
     "\\Theta",        "\\Pi",          "\\Phi"};
 
-    std::string greek_names_html[41] = {
+    static std::string greek_names_html[36] = {
     "&alpha;",        "&theta;",       "&omicron;",     "&tau;",
     "&beta;",         "&thetasym;",    "&pi;",          "&upsilon;",
-    "&gamma;",        "&gamma;",       "&pi;",       "&phi;",
-    "&delta;",        "&kappa;",       "&rho;",         "&phi;",
-    "&epsilon;",      "&lambda;",      "&rho;",      "&chi;",
-    "&epsilon;",      "&mu;",          "&sigma;",       "&psi;",
-    "&zeta;",         "&nu;",          "&sigmaf;",      "&omega;",
-    "&eta;",          "&xi;",
+    "&gamma;",        "&phi;",         "&delta;",       "&kappa;",
+    "&rho;",          "&epsilon;",     "&lambda;",      "&chi;",
+    "&mu;",           "&sigma;",       "&psi;",         "&zeta;",
+    "&nu;",           "&sigmaf;",      "&omega;",       "&eta;",
+    "&xi;",
 
     "&Gamma;",        "&Lambda;",      "&Sigma;",       "&Psi;",
     "&Delta;",        "&Xi;",          "&Upsilon;",     "&Omega;",
     "&Theta;",        "&Pi;",          "&Phi;"};
 
-    for(int i = 0; i < 41; i++)
+    for(int i = 0; i < 36; i++)
         boost::replace_all(str, greek_names_html[i], greek_names_latex[i]);
     return str;
 }
@@ -740,7 +788,7 @@ inline std::string greek_html_to_latex(std::string str)
 string latexCreator::Constant(real_t value)
 {
 	string strResult;
-	string strValue = toStringFormatted<real_t>(value, 20, 10, false);
+	string strValue = toStringFormatted<real_t>(value, -1, DBL_DIG, false);
 	
 	strResult  = "{ ";
 	if(value < 0)

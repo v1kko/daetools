@@ -338,6 +338,7 @@ def run(**kwargs):
                                             nlpsolver               = nlpsolver,
                                             nlpsolver_setoptions_fn = setOptions,
                                             relativeTolerance       = relativeTolerance,
+                                            reportSensitivities     = True,
                                             **kwargs)
 
 if __name__ == "__main__":

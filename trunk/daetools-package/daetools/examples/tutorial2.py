@@ -252,8 +252,9 @@ class simTutorial(daeSimulation):
              
 def run(**kwargs):
     simulation = simTutorial()
-    return daeActivity.simulate(simulation, reportingInterval = 10, 
-                                            timeHorizon       = 1000,
+    return daeActivity.simulate(simulation, reportingInterval     = 10, 
+                                            timeHorizon           = 1000,
+                                            reportTimeDerivatives = True,
                                             **kwargs)
 
 if __name__ == "__main__":

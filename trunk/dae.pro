@@ -5,7 +5,7 @@ SUBDIRS = Config \
     Core \
     DataReporting \
     Activity \
-    IDAS_DAESolver \ 
+    IDAS_DAESolver \
     Units \
     pyCore \
     pyActivity \
@@ -13,7 +13,8 @@ SUBDIRS = Config \
     pyIDAS \
     pyUnits \
     simulation_loader \
-    fmi
+    fmi \
+    fmi_ws
 
 HEADERS += config.h \
            dae_develop.h \

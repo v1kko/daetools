@@ -154,6 +154,10 @@ class daeNodeGraph(object):
             self._processNode(child, node.LNode, edgeLabel='')
             self._processNode(child, node.RNode, edgeLabel='')
 
+        elif isinstance(node, adDomainIndexNode):
+            label = '%s[%d]' % (node.Domain.Name, node.Index)
+            child = self._newLeaf(parent, label, color='black', edgeLabel=edgeLabel)
+
         elif isinstance(node, adRuntimeParameterNode):
             label = '%s%s' % (node.Parameter.Name, node.DomainIndexes)
             child = self._newLeaf(parent, label, color='green', fontcolor='green', edgeLabel=edgeLabel)

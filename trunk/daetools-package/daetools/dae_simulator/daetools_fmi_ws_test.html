@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    
+    <title>DAE Tools FMI Web Service Client</title>
+    
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/w3.css">
+    
+    <script type="text/javascript" src="javascript/plotly/plotly.min.js"></script>
+    <script type="text/javascript" src="javascript/web_service.js"></script>
+    <script type="text/javascript" src="javascript/daetools_fmi_ws.js"></script>
+    <script type="text/javascript" src="javascript/daetools_fmi_ws_ui.js"></script>
+</head>
+<head>
+<body>
+    <noscript>
+        <div style="position: fixed; top: 0px; left: 0px; z-index: 3000;
+                    height: 100%; width: 100%; background-color: #FFFFFF">
+            <p style="margin-left: 10px">Please enable JavaScript.</p>
+        </div>
+    </noscript>
+    <div class="w3-display-container w3-display-topmiddle" style="width: 800px; max-width: 90%">
+        <p>
+            <img style="height: 1.2em; display: inline" src="images/daetools.png" alt="">
+            <b>DAE Tools FMI Web Service Client</b> (<a class="" onclick="getServerStatus(webService);" href="javascript:void(0)">status</a>)
+        </p>
+
+        <div class="w3-container w3-padding-16 w3-card-2 w3-round-large">
+            <!-- 1. FMU loading -->
+            <div class="w3-cell-row">
+                <div class="w3-cell w3-cell-bottom" style="width:100%">
+                    <label><b>Full path to the DAE Tools FMU "resources" directory:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="text" name="resourceDir" id="resourceDir"/>
+                </div>
+                <div class="w3-cell w3-cell-bottom" style="padding-left: 16px; padding-right: 8px">                    
+                    <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="loadDAEToolsFMU();" id="loadFMUButton"> <b>Load</b> </button>
+                </div>
+            </div>
+        </div>
+        <br/>
+        
+        <div class="w3-container w3-padding-16 w3-card-2 w3-round-large">
+            <!-- 2. Inputs -->
+            <div class="w3-cell-row">
+                <div class="w3-cell w3-cell-bottom" style="width:100%">
+                    <label><b>Model Name:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="text" name="modelName" id="modelName" readonly/>
+                    
+                    <label><b>Start Time:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="number" min="0.0" step="any" name="startTime" id="startTime" readonly/>
+
+                    <label><b>Stop Time:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="number" min="0.0" step="any" name="stopTime" id="stopTime" readonly/>
+
+                    <label><b>Step Size:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="number" min="0.0" step="any" name="step" id="step" readonly/>
+
+                    <label><b>Tolerance:</b></label>
+                    <input class="w3-input w3-round w3-border w3-white" type="number" min="0.0" step="any" name="tolerance" id="tolerance" readonly/>
+                </div>
+                <div class="w3-cell w3-cell-bottom" style="padding-left: 16px; padding-right: 8px">
+                    <button type="button" class="w3-btn w3-round w3-white w3-border" onclick="runSimulation(fmi_simulation, log, plotVariables);" id="runButton"> <b>Run</b> </button>
+                </div>
+            </div>
+
+            <!-- 3. Outputs -->
+            <p><b>Simulation output:</b></p>
+            <pre class="w3-code w3-border w3-small" id="output" style="height:200px; overflow:auto; overflow-y:visible;"></pre>
+            
+            <!-- 4. Progress bar -->
+            <div id="progress-contaner" class="w3-third">
+                <div id="progress" class="w3-container w3-padding-small w3-teal w3-center" style="width:0.0%">1%</div>
+            </div>
+        </div>
+        <br/>
+        
+        <!-- 5. Plots -->
+        <div class="w3-container w3-padding-16 w3-card-2 w3-round-large">
+            <header>
+                <b>Plots:</b>
+            </header>            
+            <div id="plots"></div>
+        </div>
+        <br/>
+    </div>
+
+</body>
+</html>

@@ -112,6 +112,9 @@ def run(**kwargs):
     
     # Enable reporting of all variables
     simulation.m.SetReportingOn(True)
+    
+    # Enable reporting of sensitivities
+    simulation.ReportSensitivities = True
 
     # Set the time horizon and the reporting interval
     simulation.ReportingInterval = 0.5

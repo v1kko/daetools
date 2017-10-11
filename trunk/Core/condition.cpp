@@ -51,13 +51,23 @@ void daeCondition::Open(io::xmlTag_t* pTag)
 
 void daeCondition::Save(io::xmlTag_t* pTag) const
 {
+    std::string strName, strValue;
+
     io::daeSerializable::Save(pTag);
 
+    strName = "Expression";
+    io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+    // Save it as inline math (use $)!
+    strValue = "$" + SetupNodeAsLatex() + "$";
+    pChildTag->SetValue(strValue);
+
+/*
     string strName = "Expression";
     condNode::SaveNode(pTag, strName, m_pSetupConditionNode.get());
 
     strName = "MathML";
     SaveNodeAsMathML(pTag, strName);
+*/
 
     strName = "EventTolerance";
     pTag->Save(strName, m_dEventTolerance);
@@ -69,10 +79,18 @@ void daeCondition::OpenRuntime(io::xmlTag_t* /*pTag*/)
 
 void daeCondition::SaveRuntime(io::xmlTag_t* pTag) const
 {
+    std::string strName, strValue;
+
     io::daeSerializable::Save(pTag);
 
-    string strName = "MathML";
-    SaveNodeAsMathML(pTag, strName);
+    strName = "Expression";
+    io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+    // Save it as inline math (use $)!
+    strValue = "$" + RuntimeNodeAsLatex() + "$";
+    pChildTag->SetValue(strValue);
+
+//    string strName = "MathML";
+//    SaveNodeAsMathML(pTag, strName);
 }
 
 void daeCondition::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const

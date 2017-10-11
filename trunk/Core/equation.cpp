@@ -123,7 +123,7 @@ void daeEquationExecutionInfo::SaveRuntime(io::xmlTag_t* pTag) const
 //	strName = "m_ptrarrDomains";
 //	pTag->SaveObjectRefArray(strName, m_ptrarrDomains);
 
-    daeNodeSaveAsContext c(NULL); //m_pModel);
+    daeNodeSaveAsContext c(m_pEquation->m_pModel);
 
     strName = "EquationEvaluationNode";
     //adNode::SaveNodeAsMathML(pTag, strName, m_EquationEvaluationNode.get(), &c, true);
@@ -217,7 +217,8 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
 
     if(bPrintInfo)
     {
-        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Residual for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
+    // Here we have problem if running in multiple omp threads (seg. fault).
+    //    m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Residual for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
     }
 
     EC.m_pEquationExecutionInfo = this;
@@ -263,12 +264,12 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 
     if(bPrintInfo)
     {
-        size_t count = m_mapIndexes.size();
+    // Here we have problem if running in multiple omp threads (seg. fault).
+    /*  size_t count = m_mapIndexes.size();
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Jacobian for equation no. ") + toString(m_nEquationIndexInBlock) + string(": ") + GetName(), 0);
         m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     Map of variable indexes (size = ") + toString(count) + string(")"), 0);
         //m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("     ") + toString(m_mapIndexes), 0);
-
-        startTime = dae::GetTimeInSeconds();
+    */
     }
 
     /*
@@ -358,12 +359,6 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
         //std::cout << std::endl;
         //std::cout << std::endl;
     }
-
-    if(bPrintInfo)
-    {
-        endTime = dae::GetTimeInSeconds();
-        m_pEquation->m_pModel->m_pDataProxy->LogMessage(string("  Evaluation time = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-    }
 }
 
 void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, const std::vector<size_t>& narrParameterIndexes)
@@ -378,7 +373,8 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
 
     if(bPrintInfo)
     {
-        std::cout << "  SensitivityResidual for " << GetName() << std::endl;
+    // Here we have problem if running in multiple omp threads (seg. fault).
+    //    std::cout << "  SensitivityResidual for " << GetName() << std::endl;
     }
 
     EC.m_pEquationExecutionInfo = this;
@@ -427,7 +423,8 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
 
     if(bPrintInfo)
     {
-        std::cout << "  SensitivityParametersGradient for " << GetName() << std::endl;
+    // Here we have problem if running in multiple omp threads (seg. fault).
+    //    std::cout << "  SensitivityParametersGradient for " << GetName() << std::endl;
     }
 
     EC.m_pEquationExecutionInfo = this;
@@ -1196,7 +1193,7 @@ void daeEquation::SaveNodeAsLatex(io::xmlTag_t* pTag, const string& strObjectNam
 
                         strPoints += toString<size_t>(narrPoints[k]);
                     }
-                    strValue += (boost::format("{\\forall %s \\in \\left{ %s \\right} }") % strDEDI % strPoints).str();
+                    strValue += (boost::format("{\\forall %s \\in \\left\\{ %s \\right\\} }") % strDEDI % strPoints).str();
                 }
                 else
                 {

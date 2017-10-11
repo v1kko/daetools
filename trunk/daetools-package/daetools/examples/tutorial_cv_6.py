@@ -154,8 +154,8 @@ def simulate(Nx):
     ###########################################
     results = dr.Process.dictVariables
     
-    cvar  = results[simulation.m.Name + '.c']
-    c       = cvar.Values[-1, :]        # 2D array [t,x]
+    cvar = results[simulation.m.Name + '.c']
+    c    = cvar.Values[-1, :]  # 2D array [t,x]
     
     return simulation.m.x.Points, c
 
@@ -184,8 +184,8 @@ def run(**kwargs):
     
     ax = plt.subplot(131)
     plt.figure(1, facecolor='white')
-    plt.plot(c[0][0], c[0][1], 'ro', linewidth=1.0, label='c (Nx=20)')
-    plt.plot(c[0][0], c[0][2], 'b-', linewidth=1.0, label='c_exact (Nx=20)')
+    plt.plot(c[0][0], c[0][1], 'ro', linewidth=1.0, label='c (Nx=%d)' % Nxs[0])
+    plt.plot(c[0][0], c[0][2], 'b-', linewidth=1.0, label='c_exact (Nx=%d)' % Nxs[0])
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('c', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)
@@ -194,8 +194,8 @@ def run(**kwargs):
         
     ax = plt.subplot(132)
     plt.figure(1, facecolor='white')
-    plt.plot(c[1][0], c[1][1], 'ro', linewidth=1.0, label='c (Nx=40)')
-    plt.plot(c[1][0], c[1][2], 'b-', linewidth=1.0, label='c_exact (Nx=40)')
+    plt.plot(c[1][0], c[1][1], 'ro', linewidth=1.0, label='c (Nx=%d)' % Nxs[1])
+    plt.plot(c[1][0], c[1][2], 'b-', linewidth=1.0, label='c_exact (Nx=%d)' % Nxs[1])
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('c', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)
@@ -204,8 +204,8 @@ def run(**kwargs):
     
     ax = plt.subplot(133)
     plt.figure(1, facecolor='white')
-    plt.plot(c[2][0], c[2][1], 'ro', linewidth=1.0, label='c (Nx=80)')
-    plt.plot(c[2][0], c[2][2], 'b-', linewidth=1.0, label='c_exact (Nx=80)')
+    plt.plot(c[2][0], c[2][1], 'ro', linewidth=1.0, label='c (Nx=%d)' % Nxs[2])
+    plt.plot(c[2][0], c[2][2], 'b-', linewidth=1.0, label='c_exact (Nx=%d)' % Nxs[2])
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('c', fontsize=fontsize)
     plt.legend(fontsize=fontsize_legend)

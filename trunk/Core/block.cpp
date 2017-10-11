@@ -122,13 +122,13 @@ void daeBlock::CalculateResiduals(real_t			dTime,
     // Update equations if necessary (in general, applicable only to FE equations)
     pTopLevelModel->UpdateEquations(&EC);
 
-    double startTime, endTime;
-    bool bPrintInfo = m_pDataProxy->PrintInfo();
-    if(bPrintInfo)
-    {
-        startTime = dae::GetTimeInSeconds();
-    }
-
+// Commented out because of a seg. fault (can't find the reason).
+//    double startTime, endTime;
+//    bool bPrintInfo = m_pDataProxy->PrintInfo();
+//    if(bPrintInfo)
+//    {
+//        startTime = dae::GetTimeInSeconds();
+//    }
 
 /* Old, serial code
 // First calculate normal equations (non-STN)
@@ -161,13 +161,14 @@ void daeBlock::CalculateResiduals(real_t			dTime,
         pEquationExecutionInfo->Residual(EC);
     }
 
-    if(bPrintInfo)
-    {
-        endTime = dae::GetTimeInSeconds();
-        m_dTotalTimeForResiduals += (endTime - startTime);
-        m_pDataProxy->LogMessage(string("Total time for the current residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-        m_pDataProxy->LogMessage(string("Cumulative time for all residuals evaluations = ") + toStringFormatted(m_dTotalTimeForResiduals, -1, 10) + string("s"), 0);
-    }
+// Commented out because of a seg. fault (can't find the reason).
+//    if(bPrintInfo)
+//    {
+//        endTime = dae::GetTimeInSeconds();
+//        m_dTotalTimeForResiduals += (endTime - startTime);
+//        m_pDataProxy->LogMessage(string("Total time for the current residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+//        m_pDataProxy->LogMessage(string("Cumulative time for all residuals evaluations = ") + toStringFormatted(m_dTotalTimeForResiduals, -1, 10) + string("s"), 0);
+//    }
 }
 
 void daeBlock::CalculateJacobian(real_t				dTime,
@@ -200,12 +201,13 @@ void daeBlock::CalculateJacobian(real_t				dTime,
     // Update equations if necessary (in general, applicable only to FE equations)
     pTopLevelModel->UpdateEquations(&EC);
 
-    double startTime, endTime;
-    bool bPrintInfo = m_pDataProxy->PrintInfo();
-    if(bPrintInfo)
-    {
-        startTime = dae::GetTimeInSeconds();
-    }
+// Commented out because of a seg. fault (can't find the reason).
+//    double startTime, endTime;
+//    bool bPrintInfo = m_pDataProxy->PrintInfo();
+//    if(bPrintInfo)
+//    {
+//        startTime = dae::GetTimeInSeconds();
+//    }
 
 /* Old, serial code
 // First calculate normal equations (non-STN)
@@ -238,13 +240,14 @@ void daeBlock::CalculateJacobian(real_t				dTime,
         pEquationExecutionInfo->Jacobian(EC);
     }
 
-    if(bPrintInfo)
-    {
-        endTime = dae::GetTimeInSeconds();
-        m_dTotalTimeForJacobian += (endTime - startTime);
-        m_pDataProxy->LogMessage(string("Total time for the current Jacobian evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-        m_pDataProxy->LogMessage(string("Cumulative time for all Jacobian evaluations = ") + toStringFormatted(m_dTotalTimeForJacobian, -1, 10) + string("s"), 0);
-    }
+// Commented out because of a seg. fault (can't find the reason).
+//    if(bPrintInfo)
+//    {
+//        endTime = dae::GetTimeInSeconds();
+//        m_dTotalTimeForJacobian += (endTime - startTime);
+//        m_pDataProxy->LogMessage(string("Total time for the current Jacobian evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+//        m_pDataProxy->LogMessage(string("Cumulative time for all Jacobian evaluations = ") + toStringFormatted(m_dTotalTimeForJacobian, -1, 10) + string("s"), 0);
+//    }
 }
 
 // For dynamic models
@@ -279,12 +282,13 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
     // Update equations if necessary (in general, applicable only to FE equations)
     pTopLevelModel->UpdateEquations(&EC);
 
-    double startTime, endTime;
-    bool bPrintInfo = m_pDataProxy->PrintInfo();
-    if(bPrintInfo)
-    {
-        startTime = dae::GetTimeInSeconds();
-    }
+// Commented out because of a seg. fault (can't find the reason).
+//    double startTime, endTime;
+//    bool bPrintInfo = m_pDataProxy->PrintInfo();
+//    if(bPrintInfo)
+//    {
+//        startTime = dae::GetTimeInSeconds();
+//    }
 
 /* Old, serial code
     for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
@@ -318,13 +322,14 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
 
     m_pDataProxy->ResetSensitivityMatrixes();
 
-    if(bPrintInfo)
-    {
-        endTime = dae::GetTimeInSeconds();
-        m_dTotalTimeForSensitivityResiduals += (endTime - startTime);
-        m_pDataProxy->LogMessage(string("Total time for the current sensitivity residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
-        m_pDataProxy->LogMessage(string("Cumulative time for all sensitivity residuals evaluations = ") + toStringFormatted(m_dTotalTimeForSensitivityResiduals, -1, 10) + string("s"), 0);
-    }
+// Commented out because of a seg. fault (can't find the reason).
+//    if(bPrintInfo)
+//    {
+//        endTime = dae::GetTimeInSeconds();
+//        m_dTotalTimeForSensitivityResiduals += (endTime - startTime);
+//        m_pDataProxy->LogMessage(string("Total time for the current sensitivity residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
+//        m_pDataProxy->LogMessage(string("Cumulative time for all sensitivity residuals evaluations = ") + toStringFormatted(m_dTotalTimeForSensitivityResiduals, -1, 10) + string("s"), 0);
+//    }
 }
 
 // For steady-state models (not used anymore)

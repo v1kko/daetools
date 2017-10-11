@@ -295,6 +295,20 @@ def run(**kwargs):
                                             timeHorizon       = 3*60*60, # 3h
                                             **kwargs)
 
+def runAsWebService():
+    # The loader function should have the argument 'initializeAndReturn' set to True.
+    # Optionally, the argument 'datareporter' should be set to daeNoOpDataReporter()
+    # to allow the web service clients to get the results.
+    def loaderFunction(**kwargs):
+        print('Arguments sent by the web service client: %s' % kwargs)
+        return run(initializeAndReturn = True, datareporter = daeNoOpDataReporter(), **kwargs)
+
+    # Add the simulation name to the 'availableSimulations' dictionary.
+    # The value is a Python callable objects that returns an initialised simulation object. 
+    availableSimulations = {}
+    availableSimulations['tutorial_che_1']  = loaderFunction
+    daeSimulationWebService.runSimulationsAsWebService(availableSimulations)
+
 if __name__ == "__main__":
     guiRun = False if (len(sys.argv) > 1 and sys.argv[1] == 'console') else True
     run(guiRun = guiRun)

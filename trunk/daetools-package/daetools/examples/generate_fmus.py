@@ -35,7 +35,9 @@ callable_object_name  = 'run'
 arguments             = 'initializeAndReturn=True'
 additional_files      = []
 localsAsOutputs       = True
-add_xml_stylesheet    = True  
+add_xml_stylesheet    = True
+useWebService         = True
+
 # Script files to run all FMUs with the ComplianceChecker
 run_fmuCheck_all_fmus_win32_bat  = None
 run_fmuCheck_all_fmus_win64_bat  = None
@@ -56,6 +58,7 @@ def exportFMU(simulation, log):
     global additional_files
     global localsAsOutputs
     global add_xml_stylesheet
+    global useWebService
     global run_fmuCheck_all_fmus_win32_bat
     global run_fmuCheck_all_fmus_win64_bat
     global run_fmuCheck_all_fmus_linux64_sh
@@ -139,7 +142,8 @@ def exportFMU(simulation, log):
                           arguments            = arguments, 
                           additional_files     = additional_files,
                           localsAsOutputs      = localsAsOutputs,
-                          add_xml_stylesheet   = add_xml_stylesheet)
+                          add_xml_stylesheet   = add_xml_stylesheet,
+                          useWebService        = useWebService)
 
 def open_csv(csv_filename):
     # Open solution files and return variable names and their values.
@@ -171,6 +175,9 @@ def compare_solutions(csv_ref_path, csv_cc_path, out_file):
         cc_solution  = solution_cc[index_cc]
         n = len(cc_solution)
         E[varName] = numpy.sqrt((1.0/n) * numpy.sum((ref_solution-cc_solution)**2))
+    
+    maxE = numpy.max( list(E.values()) )
+    print('%s: max normalised error = %.3e' % (out_file, maxE))
     
     f = open(out_file, 'w')
     for varName, error in sorted(E.items()):

@@ -885,8 +885,6 @@ double daeSimulationLoader::GetFMIValue(unsigned int fmi_reference) const
         return fmi.parameter->GetValue(fmi.indexes);
     else if(fmi.type == "Input" || fmi.type == "Output" || fmi.type == "Local")
         return fmi.variable->GetValue(fmi.indexes);
-    else if(fmi.type == "STN")
-        return fmi.variable->GetValue(fmi.indexes);
     else
         daeDeclareAndThrowException(exInvalidCall);
 
@@ -925,13 +923,8 @@ void daeSimulationLoader::SetFMIValue(unsigned int fmi_reference, double value)
     const daeFMI2Object_t& fmi = citer->second;
     if(fmi.type == "Parameter")
         fmi.parameter->SetValue(fmi.indexes, value);
-
     else if(fmi.type == "Input")
         fmi.variable->ReAssignValue(fmi.indexes, value);
-
-    else if(fmi.type == "STN")
-        fmi.variable->SetValue(fmi.indexes, value);
-
     else if(fmi.type == "Output" || fmi.type == "Local")
     {
         daeDeclareAndThrowException(exInvalidCall);

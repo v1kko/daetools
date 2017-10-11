@@ -61,7 +61,7 @@ echo tutorial16.py
 $PYTHON $ROOT/tutorial16.py console
 
 echo tutorial17.py
-$PYTHON $ROOT/tutorial17.py console
+#$PYTHON $ROOT/tutorial17.py console
 
 echo tutorial18.py
 $PYTHON $ROOT/tutorial18.py console
@@ -114,6 +114,17 @@ $PYTHON $ROOT/tutorial_che_9.py console
 
 
 
+echo tutorial_sa_1.py
+$PYTHON $ROOT/tutorial_sa_1.py console
+
+echo tutorial_sa_2.py
+$PYTHON $ROOT/tutorial_sa_2.py console
+
+echo tutorial_sa_3.py
+$PYTHON $ROOT/tutorial_sa_3.py console
+
+
+
 echo tutorial_cv_1.py
 $PYTHON $ROOT/tutorial_cv_1.py console
 
@@ -143,6 +154,9 @@ $PYTHON $ROOT/tutorial_cv_9.py console
 
 echo tutorial_cv_10.py
 $PYTHON $ROOT/tutorial_cv_10.py console
+
+echo tutorial_cv_11.py
+$PYTHON $ROOT/tutorial_cv_11.py console
 
 
 

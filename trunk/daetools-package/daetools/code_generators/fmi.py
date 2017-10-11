@@ -21,7 +21,9 @@ from .fmi_xml_support import *
 
 class daeCodeGenerator_FMI(fmiModelDescription):
     def __init__(self, xml_stylesheet = None):
-        fmiModelDescription.__init__(self)        
+        fmiModelDescription.__init__(self) 
+        
+        self.useWebService = False
     
     def generateSimulation(self, simulation, 
                                  directory, 
@@ -30,7 +32,8 @@ class daeCodeGenerator_FMI(fmiModelDescription):
                                  arguments, 
                                  additional_files = [], 
                                  localsAsOutputs = True,
-                                 add_xml_stylesheet = False):
+                                 add_xml_stylesheet = False,
+                                 useWebService = False):
         try:
             tmp_folder = ''
             if not simulation:
@@ -42,6 +45,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             if not callable_object_name:
                 raise RuntimeError('No python callable object name specified for FMU')
             
+            self.useWebService       = useWebService
             self.localsAsOutputs     = localsAsOutputs
             self.wrapperInstanceName = simulation.m.Name
             modelIdentifier          = simulation.m.GetStrippedName()
@@ -143,7 +147,7 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             self.copyright                  = ''
             self.license                    = ''
             self.generationTool             = 'DAE Tools v%s' % daeVersion(True)
-            self.generationDateAndTime      = time.strftime("%d.%m.%Y %H:%M:%S", time.localtime())
+            self.generationDateAndTime      = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.localtime())
             self.variableNamingConvention   = fmiModelDescription.variableNamingConventionStructured
             self.numberOfEventIndicators    = 0
 
@@ -326,11 +330,17 @@ class daeCodeGenerator_FMI(fmiModelDescription):
 
         solibs_dir = os.path.join(daetools.daetools_dir, 'solibs', '%s_%s' % (platform_system, platform_machine))
         daetools_fmu_solib = '%s.%s' % (modelIdentifier, so_ext)
-        daetools_fmi_cs = '%scdaeFMU_CS-py%s%s%s.%s' % (shared_lib_prefix,
-                                                        daetools.python_version_major,
-                                                        daetools.python_version_minor,
+        if self.useWebService:
+            daetools_fmi_cs = '%scdaeFMU_CS_WS%s.%s' % (shared_lib_prefix,
                                                         shared_lib_postfix,
                                                         so_ext)
+        else:
+            daetools_fmi_cs = '%scdaeFMU_CS-py%s%s%s.%s' % (shared_lib_prefix,
+                                                            daetools.python_version_major,
+                                                            daetools.python_version_minor,
+                                                            shared_lib_postfix,
+                                                            so_ext)
+        
         daetools_simulation_loader = '%scdaeSimulationLoader-py%s%s%s.%s' % (shared_lib_prefix,
                                                                              daetools.python_version_major,
                                                                              daetools.python_version_minor,
@@ -350,26 +360,27 @@ class daeCodeGenerator_FMI(fmiModelDescription):
             # Ignore exceptions, since some of binaries are certainly not available
             pass
 
-        try:
-            # Copy SimulationLoader
-            _source = os.path.join(solibs_dir, daetools_simulation_loader)
-            _target = os.path.join(platform_binaries_dir)
-            #print('copy %s %s' % (_source, _target))
-            shutil.copy2(_source, _target)
-        except Exception as e:
-            # Ignore exceptions, since some of binaries are certainly not available
-            pass
+        if not self.useWebService:
+            try:
+                # Copy SimulationLoader
+                _source = os.path.join(solibs_dir, daetools_simulation_loader)
+                _target = os.path.join(platform_binaries_dir)
+                #print('copy %s %s' % (_source, _target))
+                shutil.copy2(_source, _target)
+            except Exception as e:
+                # Ignore exceptions, since some of binaries are certainly not available
+                pass
 
-        try:
-            # Copy boost libs
-            _target = os.path.join(platform_binaries_dir)
-            for _source in boost_files:
-                if os.path.isfile(_source):
-                    #print('copy %s %s' % (_source, _target))
-                    shutil.copy2(_source, _target)
-        except Exception as e:
-            # Ignore exceptions, since some of binaries are certainly not available
-            pass
+            try:
+                # Copy boost libs
+                _target = os.path.join(platform_binaries_dir)
+                for _source in boost_files:
+                    if os.path.isfile(_source):
+                        #print('copy %s %s' % (_source, _target))
+                        shutil.copy2(_source, _target)
+            except Exception as e:
+                # Ignore exceptions, since some of binaries are certainly not available
+                pass
 
     def _addInput(self, fmi_obj):
         sv = fmiScalarVariable()

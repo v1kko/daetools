@@ -117,7 +117,6 @@ class modTutorial(daeModel):
         daeModel.DeclareEquations(self)
 
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
-        eq.BuildJacobianExpressions = True
         eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
 class simTutorial(daeSimulation):
@@ -141,7 +140,7 @@ class simTutorial(daeSimulation):
         # It assumes all time derivatives are initially equal to zero and calculates the non-derivative parts.
         # As a result, the initial temperature will be equal to the temperature of the surroundings (283 K).
         self.InitialConditionMode = eQuasiSteadyState
-
+        
     # daeSimulation class provides the function Run() which is called after successful initialisation
     # to run the simulation. By default, it runs for time period defined by the TimeHorizon property,
     # stopping after each period of time defined by the ReportInterval property to report the data.
@@ -202,6 +201,7 @@ def run(**kwargs):
     simulation = simTutorial()
     return daeActivity.simulate(simulation, reportingInterval = 10, 
                                             timeHorizon       = 500,
+                                            reportTimeDerivatives = True,
                                             **kwargs)
 
 if __name__ == "__main__":

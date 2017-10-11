@@ -45,6 +45,7 @@ LIBRARY:
 
     Individual libraries/solvers:
     boost            Boost libraries (system, filesystem, thread, python)
+    boost_static     Boost static libraries (system, filesystem, thread, regex, no python nor --buildid set)
     ref_blas_lapack  reference BLAS and Lapack libraries
     cblas_clapack    CBLAS and CLapack libraries
     mumps            Mumps linear solver
@@ -241,14 +242,7 @@ done
 
 MINGW_MAKE=
 if [[ "${PLATFORM}" == "Windows" ]]; then
-  if [[ "${HOST_ARCH}" == "win32" ]]; then
-    MINGW_MAKE="mingw32-make"
-  elif [[ "${HOST_ARCH}" == "win64" ]]; then
-    MINGW_MAKE="mingw64-make"
-  else
-    echo unknown HOST_ARCH: $HOST_ARCH
-    exit 1
-  fi
+  MINGW_MAKE="mingw32-make"
 fi
 
 if [ ${PLATFORM} = "Darwin" ]; then
@@ -329,13 +323,13 @@ export DAE_CROSS_COMPILER_PREFIX
 DAE_UMFPACK_INSTALL_DIR="${TRUNK}/umfpack/build"
 export DAE_UMFPACK_INSTALL_DIR
 
-vBOOST=1.62.0
-vBOOST_=1_62_0
-vBONMIN=1.8.4
-vBONMIN_WIN="1.4.1-msvc++-2015"
+vBOOST=1.65.1
+vBOOST_=1_65_1
+vBONMIN=1.8.6
+vBONMIN_WIN="1.8.6-msvc++-2015"
 vLAPACK=3.4.1
 vCLAPACK=3.2.1
-vMUMPS_WIN="4.8.3-gfortran-win"
+vMUMPS_WIN="4.10.0-gfortran-win"
 vNLOPT=2.4.2
 vIDAS=1.3.0
 vTRILINOS=12.10.1
@@ -402,6 +396,7 @@ else
     case "$solver" in
         all)              ;;
         boost)            ;;
+        boost_static)     ;;
         ref_blas_lapack)  ;;
         cblas_clapack)    ;;
         mumps)            ;;
@@ -462,7 +457,10 @@ configure_boost()
     unzip boost_${vBOOST_}.zip
     mv boost_${vBOOST_} boost${PYTHON_VERSION}
     cd boost${PYTHON_VERSION}
-    cmd "/C bootstrap"
+    # There is a problem with executing bootstrap.bat with arguments from bash.
+    # Solution: create a proxy batch file which runs 'bootstrap vc14'. 
+    echo "call bootstrap vc14" > dae_bootstrap.bat
+    cmd "/C dae_bootstrap" 
   else
     if [ ! -e boost_${vBOOST_}.tar.gz ]; then
       $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
@@ -553,7 +551,10 @@ compile_boost()
 
     BOOST_USER_CONFIG=~/user-config.jam
     if [ ${PLATFORM} = "Windows" ]; then
-      echo "using python"                           >  ${BOOST_USER_CONFIG}
+      # There is a problem when there are multiple vc++ version installed.
+      # Therefore, specify the version in the jam file.
+      echo "using msvc : 14.0 : : ;"                >  ${BOOST_USER_CONFIG}
+      echo "using python"                           >> ${BOOST_USER_CONFIG}
       echo "    : "                                 >> ${BOOST_USER_CONFIG}
       echo "    : "                                 >> ${BOOST_USER_CONFIG}
       echo "    : "                                 >> ${BOOST_USER_CONFIG}
@@ -618,6 +619,92 @@ clean_boost()
   echo "[*] Cleaning boost..."
   echo ""
   cd boost${PYTHON_VERSION}
+  ./bjam --clean
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+#######################################################
+#                   BOOST STATIC                      #
+#######################################################
+configure_boost_static()
+{
+  if [ -e boost ]; then
+    rm -r boost
+  fi
+  
+  echo ""
+  echo "[*] Setting-up boost_static"
+  echo ""
+  
+  if [ ${PLATFORM} = "Windows" ]; then
+    if [ ! -e boost_${vBOOST_}.zip ]; then
+      $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.zip
+    fi
+    unzip boost_${vBOOST_}.zip
+    mv boost_${vBOOST_} boost
+    cd boost
+    # There is a problem with executing bootstrap.bat with arguments from bash.
+    # Solution: create a proxy batch file which runs 'bootstrap vc14'. 
+    echo "call bootstrap vc14" > dae_bootstrap.bat
+    cmd "/C dae_bootstrap" 
+    
+  else
+    if [ ! -e boost_${vBOOST_}.tar.gz ]; then
+      $WGET ${BOOST_HTTP}/${vBOOST}/boost_${vBOOST_}.tar.gz
+    fi
+    tar -xzf boost_${vBOOST_}.tar.gz
+    mv boost_${vBOOST_} boost
+    cd boost
+    sh bootstrap.sh
+  fi
+
+  cd "${TRUNK}"
+  echo ""
+  echo "[*] Done!"
+  echo ""
+}
+
+compile_boost_static()
+{
+  cd boost
+  echo ""
+  echo "[*] Building boost_static"
+  echo ""
+
+  if [ ${PLATFORM} = "Windows" ]; then
+    if [[ $HOST_ARCH == "win64" ]]; then
+	    ADDRESS_MODEL="address-model=64"
+    else
+	    ADDRESS_MODEL=""
+	fi
+	
+    # There is a problem when there are multiple vc++ version installed.
+    # Therefore, specify the version in the jam file.
+    echo "using msvc : 14.0 : : ;" >  ${BOOST_USER_CONFIG}
+    
+    ./bjam --build-dir=./build --debug-building --layout=system --with-system --with-thread --with-regex \
+           variant=release link=static threading=multi runtime-link=shared cxxflags="\MD"
+
+  else
+    ./bjam --build-dir=./build --debug-building --layout=system ${ADDRESS_MODEL} --with-system --with-thread --with-regex \
+           variant=release link=static threading=multi runtime-link=shared cxxflags="-fPIC"
+  fi
+
+  echo ""
+  echo "[*] Done!"
+  echo ""
+  cd "${TRUNK}"
+}
+
+clean_boost_static()
+{
+  echo ""
+  echo "[*] Cleaning boost_static..."
+  echo ""
+  cd boost
   ./bjam --clean
   cd "${TRUNK}"
   echo ""
@@ -916,10 +1003,10 @@ configure_mumps()
   echo ""
   echo "Setting-up mumps..."
   echo ""
-  if [ ! -e mumps-${vMUMPS-WIN}.zip ]; then
-    $WGET ${MUMPS_WIN_HTTP}/mumps-${vMUMPS-WIN}.zip
+  if [ ! -e mumps-${vMUMPS_WIN}.zip ]; then
+    $WGET ${MUMPS_WIN_HTTP}/mumps-${vMUMPS_WIN}.zip
   fi
-  unzip mumps-${vMUMPS-WIN}.zip
+  unzip mumps-${vMUMPS_WIN}.zip
   cd "${TRUNK}"
 
   echo ""
@@ -935,7 +1022,7 @@ compile_mumps()
   echo ""
 
   cd blas
-  ${MINGW_MAKE}
+  ${MINGW_MAKE} double
   cd ..
   ${MINGW_MAKE} d
   echo ""
@@ -1378,18 +1465,23 @@ clean_superlu_mt()
 #######################################################
 configure_bonmin()
 {
-  #if [ -e bonmin ]; then
-  #  rm -r bonmin
-  #fi
+  if [ -e bonmin ]; then
+    rm -r bonmin
+  fi
   echo ""
   echo "[*] Setting-up bonmin..."
   echo ""
   
   if [[ "${PLATFORM}" == "Windows" ]]; then
+    # In mumps_c.c, mums_common.h and elapse.h defined(MUMPS_WIN32) should be commented out:
+    #   #if defined(UPPER) /* || defined(MUMPS_WIN32) */
+    # There is Ipopt\MSVisualStudio\v8-ifort\IpOpt\ExportBinaries.bat file that copies headers to include dir.
+    # Other headers should be copied from a GNU/Linux buid.
+
     if [ ! -e bonmin-${vBONMIN_WIN}.zip ]; then
       $WGET ${BONMIN_WIN_HTTP}/bonmin-${vBONMIN_WIN}.zip
     fi
-    #unzip bonmin-${vBONMIN_WIN}.zip
+    unzip bonmin-${vBONMIN_WIN}.zip
   
   else # GNU/Linux and macOS
     if [ ! -e Bonmin-${vBONMIN}.zip ]; then
@@ -1432,7 +1524,7 @@ compile_bonmin()
     cd bonmin
     
     if [[ "${HOST_ARCH}" == "win32" ]]; then
-      MS_BUILD_PLATFORM="Win32"
+      MS_BUILD_PLATFORM="x86"
     elif [[ "${HOST_ARCH}" == "win64" ]]; then
       MS_BUILD_PLATFORM="x64"
     else
@@ -1820,6 +1912,7 @@ do
     all)              if [ "${DO_CONFIGURE}" = "yes" ]; then
                         if [ ${PLATFORM} = "Windows" ]; then
                           configure_boost
+                          configure_boost_static
                           configure_cblas_clapack
                           configure_mumps
                           configure_idas
@@ -1830,6 +1923,7 @@ do
                           configure_dealii
                         else
                           configure_boost
+                          configure_boost_static
                           configure_ref_blas_lapack
                           configure_umfpack
                           configure_idas
@@ -1846,6 +1940,7 @@ do
                       if [ "${DO_BUILD}" = "yes" ]; then
                         if [ ${PLATFORM} = "Windows" ]; then
                           compile_boost
+                          compile_boost_static
                           compile_cblas_clapack
                           compile_mumps
                           compile_idas
@@ -1856,6 +1951,7 @@ do
                           compile_dealii
                         else
                           compile_boost
+                          compile_boost_static
                           compile_ref_blas_lapack
                           compile_umfpack
                           compile_idas
@@ -1872,6 +1968,7 @@ do
                       if [ "${DO_CLEAN}" = "yes" ]; then
                         if [ ${PLATFORM} = "Windows" ]; then
                           clean_boost
+                          clean_boost_static
                           clean_cblas_clapack
                           clean_mumps
                           clean_idas
@@ -1882,6 +1979,7 @@ do
                           clean_dealii
                         else
                           clean_boost
+                          clean_boost_static
                           clean_ref_blas_lapack
                           clean_umfpack
                           clean_idas
@@ -1909,6 +2007,19 @@ do
                       fi
                       ;;
 
+    boost_static)     if [ "${DO_CONFIGURE}" = "yes" ]; then
+                        configure_boost_static
+                      fi
+
+                      if [ "${DO_BUILD}" = "yes" ]; then
+                        compile_boost_static
+                      fi
+
+                      if [ "${DO_CLEAN}" = "yes" ]; then
+                        clean_boost_static
+                      fi
+                      ;;
+                      
     ref_blas_lapack)  if [ "${DO_CONFIGURE}" = "yes" ]; then
                         configure_ref_blas_lapack
                       fi

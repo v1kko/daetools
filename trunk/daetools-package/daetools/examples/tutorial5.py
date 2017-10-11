@@ -67,11 +67,11 @@ class modTutorial(daeModel):
     def __init__(self, Name, Parent = None, Description = ""):
         daeModel.__init__(self, Name, Parent, Description)
 
-        self.m     = daeParameter("m",       kg,           self, "Mass of the copper plate")
-        self.cp    = daeParameter("c_p",     J/(kg*K),     self, "Specific heat capacity of the plate")
-        self.alpha = daeParameter("&alpha;", W/((m**2)*K), self, "Heat transfer coefficient")
-        self.A     = daeParameter("A",       m**2,         self, "Area of the plate")
-        self.Tsurr = daeParameter("T_surr",  K,            self, "Temperature of the surroundings")
+        self.m     = daeParameter("m",        kg,           self, "Mass of the copper plate")
+        self.cp    = daeParameter("c_p",      J/(kg*K),     self, "Specific heat capacity of the plate")
+        self.alpha = daeParameter("&alpha;",  W/((m**2)*K), self, "Heat transfer coefficient")
+        self.A     = daeParameter("A",        m**2,         self, "Area of the plate")
+        self.Tsurr = daeParameter("T_surr", K,            self, "Temperature of the surroundings")
 
         self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
@@ -173,7 +173,7 @@ class simTutorial(daeSimulation):
         
 def run(**kwargs):
     simulation = simTutorial()
-    return daeActivity.simulate(simulation, reportingInterval = 1, 
+    return daeActivity.simulate(simulation, reportingInterval = 2, 
                                             timeHorizon       = 500,
                                             **kwargs)
 

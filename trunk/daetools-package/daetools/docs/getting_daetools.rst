@@ -17,8 +17,8 @@ System requirements
 
 Supported platforms:
     
-* GNU/Linux (i686, x86_64)
-* Windows (32 bit and 32 bit version of DAE Tools on 64 bit)
+* GNU/Linux (i686 and x86_64)
+* Windows (x86 and x64)
 * MacOS (x86_64)
 
 The software works on both python 2 and 3. The binaries are provided for 2.7, 3.4, 3.5 and 3.6.
@@ -39,8 +39,8 @@ Optional packages:
 * Pandas: `<http://pandas.pydata.org>`_ (Python data analysis library)
 * Mayavi2: `<http://docs.enthought.com/mayavi/mayavi>`_ (3D scientific data visualization)
 * PyGraphviz: `<https://pygraphviz.github.io>`_ (Python interface to the Graphviz graph layout and visualization package)
-* SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python)
-* PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files)
+* SALib: `<https://github.com/SALib/SALib>`_ (Sensitivity Analysis in Python; included in ``daetools/ext_libs/SALib``)
+* PyEVTK: `<https://pypi.python.org/pypi/PyEVTK>`_ (data export to binary VTK files; included in ``daetools/ext_libs/pyevtk``)
 
 Optional packages (proprietary):
 
@@ -64,23 +64,23 @@ or from the `SourceForge <https://sourceforge.net/projects/daetools/files>`_ web
 
 .. topic:: Nota bene
 
-    From the version 1.2.1 **DAE Tools** use distutils to distribute python packages and extensions.
+    From the version 1.7.2 **DAE Tools** use ``setuptools`` to distribute python packages and extensions.
 
 .. topic:: Nota bene
 
     From the version 1.6.0 Windows installer is not provided anymore.
 
 The naming convention for the installation files: ``daetools-major.minor.platform-architecture.tar.gz``
-where ``major.minor.build`` represents the version (``1.7.1`` for instance),
+where ``major.minor.build`` represents the version (``1.7.2`` for instance),
 ``platform`` can be ``gnu_linux``, ``win32`` and ``macosx``, and
 ``architecture`` can be ``i686``, ``x86_64`` or ``universal``.
 
-An example: ``daetools-1.7.1-gnu_linux-x86_64.tar.gz`` is the version 1.7.1 for 64 bit GNU/Linux.
+An example: ``daetools-1.7.2-gnu_linux-x86_64.tar.gz`` is the version 1.7.2 for 64 bit GNU/Linux.
 
 For other platforms, architectures and python versions not listed in `System requirements`_
 daetools must be compiled from the source.
 The source code can be downloaded either from the subversion tree or from the download section
-(``daetools-1.7.1-source.tar.gz`` for instance).
+(``daetools-1.7.2-source.tar.gz`` for instance).
 
 Installation
 ============
@@ -100,8 +100,7 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-qt4)
      sudo apt-get install python-numpy python-scipy python-matplotlib python-qt5 mayavi2 python-lxml
      # Optional packages:
-     sudo apt-get install python-openpyxl python-h5py python-pandas
-     pip install salib pygraphviz
+     sudo apt-get install python-openpyxl python-h5py python-pandas python-pygraphviz
 
 * Red Hat and derivatives (Fedora, CentOS):
 
@@ -110,8 +109,7 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4)
      sudo yum install numpy scipy python-matplotlib PyQt5 Mayavi python-lxml
      # Optional packages:
-     sudo yum install python-openpyxl h5py python-pandas
-     pip install salib pygraphviz
+     sudo yum install python-openpyxl h5py python-pandas python-pygraphviz
 
 * SUSE Linux:
 
@@ -120,8 +118,7 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-qt4)
      sudo zypper in python-numpy python-scipy python-matplotlib python-qt5 python-lxml
      # Optional packages:
-     sudo zypper in python-openpyxl h5py python-pandas
-     pip install salib pygraphviz
+     sudo zypper in python-openpyxl h5py python-pandas python-pygraphviz
 
 * Arch Linux:
 
@@ -131,15 +128,13 @@ Use the system's Python
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python2-pyqt4)
      sudo pacman -S python2-numpy python2-scipy python2-matplotlib python2-pyqt5 mayavi python-lxml
      # Optional packages:
-     sudo pacman -S python2-openpyxl python-h5py python-pandas
-     pip install salib pygraphviz
+     sudo pacman -S python2-openpyxl python2-h5py python2-pandas python2-pygraphviz
 
      # Python 3:
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: python-pyqt4)
      sudo pacman -S python-numpy python-scipy python-matplotlib python-pyqt5 mayavi python-lxml
      # Optional packages:
-     sudo pacman -S python-openpyxl python-h5py python-pandas
-     pip3 install salib pygraphviz
+     sudo pacman -S python-openpyxl python-h5py python-pandas python-pygraphviz
 
 Install one of scientific python distributions
 //////////////////////////////////////////////
@@ -154,7 +149,7 @@ Install one of scientific python distributions
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
      conda install -c menpo vtk=7
-     pip install salib pygraphviz mayavi
+     pip install pygraphviz mayavi
 
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
@@ -197,13 +192,13 @@ Install one of scientific python distributions
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
      conda install -c menpo vtk=7
-     pip install salib pygraphviz mayavi
+     pip install pygraphviz mayavi
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 
 Use the system's Python
 ///////////////////////
-First, install the mandatory packages: python, numpy, scipy, matplotlib and pyqt4.
+First, install the mandatory packages: python, numpy, scipy, matplotlib and pyqt.
 As a starting point the following links can be used:
 
 * `Python <http://www.python.org>`_
@@ -245,15 +240,10 @@ The easiest way is to install one of available scientific python distributions:
      # DAE Tools v1.6.1 and newer require PyQt5 (older versions use PyQt4: pyqt=4.11)
      conda install numpy scipy matplotlib pyqt lxml pandas h5py openpyxl
      conda install -c menpo vtk=7
-     pip install salib pygraphviz mayavi
+     pip install pygraphviz mayavi
   
 * `Enthought Canopy <https://www.enthought.com/products/canopy>`_
 * `Python(x,y) <https://python-xy.github.io/>`_
-
-.. topic:: Note
-
-    Only 32-bit version of **DAE Tools** is available for Windows. However, **DAE Tools** can be used on 64-bit
-    versions of Windows by installing the 32-bit python.
 
 To be able to create 3D plots you need to install Mayavi2 package. It can be installed using the following shell command:
 
@@ -471,9 +461,7 @@ Windows
 .. topic:: Nota bene
 
     DAE Tools supported cross-compilation in the versions 1.3.0 to 1.6.0.
-    New versions support ``native MSVC++ compilers`` (v2015 required for python 3.5 and 3.6).
-    For more information about the ``mingw-w64`` toolchain and options read the help sections in 
-    ``compile_libraries.sh`` and ``compile.sh`` scripts.
+    New versions support ``native MSVC++ compilers`` (vc++ 2015 required for python 3.5 and 3.6).
 
 Microsoft VC++
 ++++++++++++++
@@ -488,21 +476,15 @@ when asked select the following options:
 - Add all bash commands to the ``PATH`` (nota bene: it might 'hide' some Windows commands such as ``find``):
   i.e. ``C:\Program Files\Git\cmd;C:\Program Files\Git\mingw32\bin;C:\Program Files\Git\usr\bin``
 
-Then, compile all the third party libraries except the ``bonmin`` by executing ``compile_libraries.sh`` shell script located in the
-``trunk`` directory. The script will download all necessary source archives from the **DAE Tools** SourceForge web-site,
-unpack them, apply changes and compile them. If ``wget`` is missing the source archives must be downloaded manually to the ``trunk`` directory.
-If all dependencies are installed there should not be problems compiling the libraries.
+``wget`` is required to download the source archives from the DAE Tools SourceForge website. 
+If ``wget`` is missing it can be downloaded from `<http://gnuwin32.sourceforge.net/packages/wget.htm>`_.
+The source archives can also be downloaded manually to the ``trunk`` directory.
+
+Next, compile all required third party libraries using the following command:
 
 .. code-block:: bash
 
     sh compile_libraries.sh all
-
-Next, download `bonmin-1.4.1-msvc++-2015.zip <https://sourceforge.net/projects/daetools/files/windows-libs/bonmin-1.4.1-msvc++-2015.zip/download>`_ 
-from the ``DAE Tools`` SourceForge website and unzip it in the ``trunk``. Go to the ``bonmin`` folder and open ``Bonmin.sln`` solution.
-Select all projects, open their proprties and make sure the ``Platform Toolset`` is set to ``Visual Studio 2015 (v140)``,
-build type (must be Release) and the platform (32 or 64 bit).
-The newer compiler versions will also work but the corresponding msvc++ redistributable package must be installed. Build all projects. 
-The compiled static libraries will be located in the ``bonmin/build/lib`` directory.
 
 Finally, compile all **DAE Tools** libraries and python modules by executing ``compile.sh`` shell script located
 in the ``trunk`` directory.

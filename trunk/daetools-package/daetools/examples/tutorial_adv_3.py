@@ -206,7 +206,8 @@ def run_code_generators(simulation, log):
                           arguments            = '', 
                           additional_files     = [],
                           localsAsOutputs      = False,
-                          add_xml_stylesheet   = True)
+                          add_xml_stylesheet   = True,
+                          useWebService        = False)
 
 # This function can be used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.
 # It can have any number of arguments, but must return an initialized daeSimulation object.

@@ -29,7 +29,7 @@ from pyActivity import *
 from pyDataReporting import *
 from pyIDAS import *
 
-# Platform-independent modules
+# Platform-independent modules1
 from .logs import daePythonStdOutLog
 from .variable_types import *
 from .simulation_loader_aux import *
@@ -57,6 +57,8 @@ try:
     from daetools.dae_simulator.simulator            import daeSimulator
     from daetools.dae_simulator.simulation_explorer  import daeSimulationExplorer
     from daetools.dae_simulator.simulation_inspector import daeSimulationInspector
+    from daetools.dae_simulator.daetools_ws          import daeSimulationWebService
+    from daetools.dae_simulator.web_service          import daeWebService
 except ImportError as e:
     print('Cannot import simulator modules. Error: {0}'.format(str(e)))
 

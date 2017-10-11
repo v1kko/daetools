@@ -3,6 +3,7 @@
 #include <boost/python.hpp>
 #include <idas/idas_impl.h>
 #include "mkl_pardiso_sparse_la_solver.h"
+#include "mkl.h"
 
 namespace dae
 {
@@ -49,15 +50,22 @@ daeIntelPardisoSolver::daeIntelPardisoSolver(void)
     iparm[0] = 0; /* 0: Use defaults for all options */
     pardisoinit (pt,  &mtype, iparm);
 
+    mkl_set_dynamic(0);
+
     /* Numbers of processors, value of MKL_NUM_THREADS or OMP_NUM_THREADS */
+    int no_threads = 0;
     char* mkl_no_threads = getenv("MKL_NUM_THREADS");
     char* omp_no_threads = getenv("OMP_NUM_THREADS");
     if(mkl_no_threads != NULL)
-        iparm[2] = atoi(mkl_no_threads);
+        no_threads = atoi(mkl_no_threads);
     else if(omp_no_threads != NULL)
-        iparm[2] = atoi(omp_no_threads);
-    else
-        iparm[2] = 1;
+        no_threads = atoi(omp_no_threads);
+
+    if(no_threads > 0)
+    {
+        mkl_set_num_threads(no_threads);
+        printf("Number of threads = %d\n", no_threads);
+    }
 
     iparm[26] = 1; /* check the sparse matrix representation */
 

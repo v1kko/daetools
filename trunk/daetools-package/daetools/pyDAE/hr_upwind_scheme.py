@@ -28,20 +28,21 @@ theta   = 1.5 # For van Leer minmod (1 <= theta <= 2)
 class daeHRUpwindSchemeEquation(object):
     supported_flux_limiters = []
     
-    def __init__(self, variable, domain, phi, r_epsilon = 1e-10):
+    def __init__(self, variable, domain, phi, r_epsilon = 1e-10, reversedFlow = False):
         """
         """
         if not callable(phi):
             raise RuntimeError('Invalid flux limiter function specified (must be a callable)')
         if not callable(variable):
-            raise RuntimeError('Invalid variable specified (must be daeVariable object or a callable)')
+            raise RuntimeError('Invalid variable specified (must be a daeVariable object or a callable)')
         if not callable(domain):
-            raise RuntimeError('Invalid domain specified (must be daeDomain object)')
+            raise RuntimeError('Invalid domain specified (must be a daeDomain object or a callable)')
 
-        self.c         = variable  # daeVariable object (or a callable)
-        self.x         = domain    # daeDomain object
-        self.phi       = phi       # Flux limiter function (a callable)
-        self.r_epsilon = r_epsilon # epsilon in the upwind ratio (r) expression
+        self.c            = variable  # daeVariable object (or a callable)
+        self.x            = domain    # daeDomain object
+        self.phi          = phi       # Flux limiter function (a callable)
+        self.r_epsilon    = r_epsilon # epsilon in the upwind ratio (r) expression
+        self.reversedFlow = reversedFlow 
 
     def dc_dt(self, i, variable = None):
         """Accumulation term in the cell-centered finite-volume discretisation:
@@ -52,17 +53,23 @@ class daeHRUpwindSchemeEquation(object):
         Nx    = self.x.NumberOfPoints
         if variable:
             if not callable(variable):
-                raise RuntimeError('Invalid variable specified (must be daeVariable object or a callable)')
+                raise RuntimeError('Invalid variable specified (must be a daeVariable object or a callable)')
             c = variable
         else:
             c = self.c
-        dc_dt = lambda i: dt(c(i))
+        dc_dt = lambda j: dt(c(j))
         
-        if i == 0: # Sto ovde imam za 0??
-            return (x[1]-x[0]) * dc_dt(0)
-        else:
-            return (x[i]-x[i-1]) * dc_dt(i)
-    
+        if not self.reversedFlow:
+            if i == 0: # Sto ovde imam za 0??
+                return (x[i+1]-x[i]) * dc_dt(i)
+            else:
+                return (x[i]-x[i-1]) * dc_dt(i)
+        else: # reversible flow
+            if i == Nx-1: # Sto ovde imam za Nx-1??
+                return (x[Nx-1]-x[Nx-2]) * dc_dt(Nx-1)
+            else:
+                return (x[i]-x[i+1]) * dc_dt(i)
+
     def dc_dx(self, i, S = None, variable = None):
         """Convection term in the cell-centered finite-volume discretisation:
             
@@ -82,63 +89,71 @@ class daeHRUpwindSchemeEquation(object):
         """
         if variable:
             if not callable(variable):
-                raise RuntimeError('Invalid variable specified (must be daeVariable object or a callable)')
+                raise RuntimeError('Invalid variable specified (must be a daeVariable object or a callable)')
             c = variable
         else:
             c = self.c
         
-        return self.c_edge_plus(i, c, S) - self.c_edge_plus(i-1, c, S)
-    
+        if not self.reversedFlow:
+            return self._c_edge_plus(i, c, S)     - self._c_edge_plus(i-1, c, S)
+        else: # reversible flow
+            return self._c_edge_plus_rev(i, c, S) - self._c_edge_plus_rev(i+1, c, S)
+            
     def d2c_dx2(self, i, variable = None):
         """Diffusion term in the cell-centered finite-volume discretisation:           
            
            :math:`\left( \partial c_i \over \partial x \\right)_{i + {1 \over 2}} - \left( \partial c_i \over \partial x \\right)_{i - {1 \over 2}}`
         """
         if variable:
+            if not callable(variable):
+                raise RuntimeError('Invalid variable specified (must be a daeVariable object or a callable)')
             c = variable
         else:
             c = self.c
-        return self.dc_dx_edge_plus(i, c) - self.dc_dx_edge_plus(i-1, c)
+
+        if not self.reversedFlow:
+            return self._dc_dx_edge_plus(i, c)     - self._dc_dx_edge_plus(i-1, c)
+        else: # reversible flow
+            return self._dc_dx_edge_plus_rev(i, c) - self._dc_dx_edge_plus_rev(i+1, c)
     
     def source(self, s, i):
         """Source term in the cell-centered finite-volume discretisation: 
             
            :math:`\int_{\Omega_i} s(x) dx`
         """
-        return self._AverageOverCell(s,i)
+        # The cell average shouldn't depend on a flow direction.
+        # Anyhow, everything is fine as long as the grid is uniform.
+        return self._AverageOverCell(s,i) 
 
     ########################################################################
     # Implementation details
     ########################################################################
-    def r(self, i, S = None):
-        # Upwind ratio of consecutive solution gradients
-        # It may include the source term integral S(x)
+    def _r(self, i, S = None):
+        # Upwind ratio of consecutive solution gradients.
+        # It may include the source term integral S(x).
         eps = self.r_epsilon
         c   = self.c
-        cs = lambda i: c(i)-S(i) if S else c(i)
+        cs  = lambda j: c(j)-S(j) if S else c(j)
             
         return (cs(i+1) - cs(i) + eps) / (cs(i) - cs(i-1) + eps)
     
-    def r_rev(self, i, S = None):
-        # Upwind ratio of consecutive solution gradients
-        # It may include the source term integral S(x)
+    def _r_rev(self, i, S = None):
+        # Upwind ratio of consecutive solution gradients for the reversed flow.
+        # It may include the source term integral S(x).
         eps = self.r_epsilon
         c   = self.c
-        cs = lambda i: c(i)-S(i) if S else c(i)
+        cs = lambda j: c(j)-S(j) if S else c(j)
             
-        return (cs(i) - cs(i+1) + eps) / (cs(i+1) - cs(i+2) + eps)
+        return (cs(i-1) - cs(i) + eps) / (cs(i) - cs(i+1) + eps)
 
-    def c_edge_plus(self, i, c, S):
+    def _c_edge_plus(self, i, c, S):
         # c at the i+1/2 face (cell outlet)
         phi = self.phi
-        r   = self.r
+        r   = self._r
         x   = self.x
         Nx  = self.x.NumberOfPoints
-        cs = lambda i: c(i)-S(i) if S else c(i)
-        
-        #if i == 0:      
-        #    # Left face of the first cell: boundary condition
-        #    return cs(0)
+        cs  = lambda j: c(j)-S(j) if S else c(j)
+
         if i == 0:      
             # Right face of the first cell: central interpolation (k=1)
             return 0.5 * (cs(0) + cs(1))
@@ -151,34 +166,34 @@ class daeHRUpwindSchemeEquation(object):
         else:
             raise RuntimeError('c_edge_plus: Invalid index specified: %d (no. points is %d)' % (i, Nx))
 
-    def c_edge_plus_rev(self, i, c, S):
-        # c at the i+1/2 face (cell outlet)
+    def _c_edge_plus_rev(self, i, c, S):
+        # c at the i+1/2 face (cell outlet) for the reversed flow
         phi = self.phi
-        r   = self.r
+        r   = self._r_rev
         x   = self.x
         Nx  = self.x.NumberOfPoints
-        cs = lambda i: c(i)-S(i) if S else c(i)
+        cs  = lambda j: c(j)-S(j) if S else c(j)
         
-        if i == Nx-1:
-            # Right face of the last cell (first in reversible): central interpolation (k=1)  Double check!!
-            return 0.5 * (cs(Nx-1) + cs(Nx-2))
+        if i == 0:
+            # Left face of the last cell (first in the reversed):
+            return cs(i) + 0.5 * (cs(i) - cs(i+1))
         elif i == Nx-1: 
-            # Right face of the last cell: one-sided upwind scheme (k=-1)
-            return cs(i) + 0.5 * (cs(i) - cs(i-1))
+            # Left face of the first cell (last in the reversed):
+            return 0.5 * (cs(Nx-1) + cs(Nx-2))
         elif i > 0 and i < Nx-1:           
             # Other cells: k=1/3
-            return cs(i) + 0.5 * phi(r(i,S)) * (cs(i) - cs(i-1))
+            return cs(i) + 0.5 * phi(r(i,S)) * (cs(i) - cs(i+1))
         else:
-            raise RuntimeError('c_edge_plus: Invalid index specified: %d (no. points is %d)' % (i, Nx))
+            raise RuntimeError('c_edge_plus_rev: Invalid index specified: %d (no. points is %d)' % (i, Nx))
 
-    def dc_dx_edge_plus(self, i, c):
+    def _dc_dx_edge_plus(self, i, c):
         # Diffusion at the i+1/2 face (cell outlet)
         x   = self.x
         Nx  = self.x.NumberOfPoints
 
         if i == 0:
             # Right face of the first cell: biased central-difference
-            return (-8*c(0) + 9*c(1) + c(2)) / (3 * (x[1] - x[0]))
+            return (-8*c(i) + 9*c(i+1) + c(i+2)) / (3 * (x[i+1] - x[i]))
         elif i == Nx-1:
             # Right face of the last cell: biased central-difference
             return (8*c(i) - 9*c(i-1) + c(i-2)) / (3 * (x[i] - x[i-1]))
@@ -187,6 +202,23 @@ class daeHRUpwindSchemeEquation(object):
             return (c(i+1) - c(i)) / (x[i+1] - x[i])
         else:
             raise RuntimeError('dc_dx_edge_plus: Invalid index specified: %d (no. points is %d)' % (i, Nx))
+
+    def _dc_dx_edge_plus_rev(self, i, c):
+        # Diffusion at the i+1/2 face (cell outlet) for the reversed flow
+        x   = self.x
+        Nx  = self.x.NumberOfPoints
+
+        if i == 0:
+            # Left face of the last cell: biased central-difference
+            return (8*c(i) - 9*c(i+1) + c(i+2)) / (3 * (x[i+1] - x[i]))
+        elif i == Nx-1:
+            # Left face of the first cell: biased central-difference
+            return (-8*c(i) + 9*c(i-1) + c(i-2)) / (3 * (x[i] - x[i-1]))
+        elif i > 0 and i < Nx-1:           
+            # Other cells: central-difference O(h^2)
+            return (c(i) - c(i+1)) / (x[i+1] - x[i])
+        else:
+            raise RuntimeError('dc_dx_edge_plus_rev: Invalid index specified: %d (no. points is %d)' % (i, Nx))
 
     def _AverageOverCell(self, f, i):
         """                                   i+1/2
@@ -204,8 +236,8 @@ class daeHRUpwindSchemeEquation(object):
         xp  = self.x.Points
         Nx  = self.x.NumberOfPoints
         if i == 0:
-            # The first cell (double check this!!!)
-            return f(0) * (xp[1] - xp[0])
+            # The first cell
+            return f(i) * (xp[i+1] - xp[i])
         elif i == Nx-1:
             # The last cell
             return f(i) * (xp[i] - xp[i-1]) 
@@ -214,21 +246,7 @@ class daeHRUpwindSchemeEquation(object):
             return f(i) * (xp[i] - xp[i-1])
         else:
             raise RuntimeError('VolumeAverage: Invalid index specified: %d (no. points is %d)' % (i, Nx))
-        
-    """
-    def r_rev(self, i, c):
-        if hasattr(c, '__call__'): # Should be daetools daeVariable
-            return (c(i-1) - c(i) + self.epsilon) / (c(i) - c(i+1) + self.epsilon)
 
-    def c_edge_plus_rev(self, i, c):
-        if i == 0:      # Right face of the first cell: central interpolation (k=1)
-            return 0.5 * (c(0) + c(1))
-        elif i == self.Nx-1: # Right face of the last cell: one-sided upwind scheme (k=-1)
-            return c(i) + 0.5 * (c(i) - c(i-1))
-        else:           # Other cells: k=1/3
-            return c(i) + 0.5 * self.phi(self.r(i, c)) * (c(i) - c(i-1))
-    """
-    
     @staticmethod
     def Phi_CHARM(r):
         """CHARM"""

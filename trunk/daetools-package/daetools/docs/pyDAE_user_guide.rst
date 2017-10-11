@@ -3389,6 +3389,9 @@ Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimul
 - ``additional_files``: paths to the additional files to pack into a .fmu file (empty list by default)
 - ``localsAsOutputs``: if True all variables from the top-level model will be treated as model outputs, otherwise as locals
 - ``add_xml_stylesheet``: if True the xsl file ``daetools-fmi.xsl`` will be added to the modelDescription.xml file
+- ``useWebService``: if True the web service version (``fmi_ws``) shared library will be packed into the fmu file. 
+  DAE Tools FMI web service can be started using: ``python -m daetools.dae_simulator.daetools_ws``. 
+  The fmu will attempt to start it automatically and connect during the initialisation phase.
 
 All tutorials provide ``run(**kwargs)`` function that can be used to run a simulation (using the console or Qt GUI) 
 and for co-simulation to return an initialised simulation object (if the ``initializeAndReturn`` argument is True).

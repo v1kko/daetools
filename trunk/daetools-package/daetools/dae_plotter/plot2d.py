@@ -419,10 +419,10 @@ class dae2DPlot(QtWidgets.QDialog):
             y = line.get_ydata()
             horHeader.append(ylabel)
             for k in range(0, len(x)):
-                newItem = QtWidgets.QTableWidgetItem(str(y[k]))
+                newItem = QtWidgets.QTableWidgetItem('%.14f' % y[k])
                 table.setItem(k, i, newItem)
             for k in range(0, len(x)):
-                verHeader.append(str(x[k]))
+                verHeader.append('%.14f' % x[k])
 
         table.setHorizontalHeaderLabels(horHeader)
         table.setVerticalHeaderLabels(verHeader)

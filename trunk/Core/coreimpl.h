@@ -201,7 +201,7 @@ public:
     string GetNameRelativeToParentModel(void) const;
     string GetStrippedName(void) const;
     string GetStrippedNameRelativeToParentModel(void) const;
-    string GetCanonicalNameAndPrepend(const std::string& prependToName) const;
+    virtual string GetCanonicalNameAndPrepend(const std::string& prependToName) const;
 
 protected:
     string			m_strDescription;
@@ -2000,7 +2000,7 @@ public:
     daePort* GetParentPort(void) const;
     const std::vector<daeDomain*>& Domains(void) const;
 
-    string GetCanonicalNameAndPrepend(const std::string& prependToName) const;
+    virtual string GetCanonicalNameAndPrepend(const std::string& prependToName) const;
 
 public:
     adouble	operator()(void);
@@ -3075,6 +3075,9 @@ public:
     int GetVariableType(void) const;
     real_t GetValue(void) const;
     void SetValue(real_t value);
+
+public:
+    string GetVariableCanonicalNameWithDomains(void) const;
 
 public:
     std::string			m_strName;

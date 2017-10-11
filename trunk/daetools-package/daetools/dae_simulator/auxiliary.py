@@ -13,7 +13,7 @@ You should have received a copy of the GNU General Public License along with the
 DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************
 """
-import sys, json
+import os, sys, json, importlib
 from time import localtime, strftime
 from daetools.pyDAE import *
 from daetools.pyDAE.logs import daePythonStdOutLog 
@@ -90,7 +90,7 @@ def getAvailableLASolvers():
         if 'daetools.solvers.superlu' in sys.modules:
             del sys.modules['daetools.solvers.superlu']
     except Exception as e:
-        print((str(e)))
+        pass
 
     try:
         from daetools.solvers.superlu_mt import pySuperLU_MT
@@ -124,7 +124,7 @@ def getAvailableLASolvers():
         if 'daetools.solvers.pardiso' in sys.modules:
             del sys.modules['daetools.solvers.pardiso']
     except Exception as e:
-        print(e)
+        pass
 
     try:
         from daetools.solvers.intel_pardiso import pyIntelPardiso
@@ -132,7 +132,7 @@ def getAvailableLASolvers():
         if 'daetools.solvers.intel_pardiso' in sys.modules:
             del sys.modules['daetools.solvers.intel_pardiso']
     except Exception as e:
-        print(e)
+        pass
     
     return available_la_solvers
 
@@ -383,7 +383,7 @@ def createLogByName(name):
             return createLog(obj[1])
     return None
 
-def InitializeSimulation(simulation, strDAESolver,
+def initializeSimulation(simulation, strDAESolver,
                                      strLASolver,
                                      strDataReporter,
                                      strDataReporterConnectionString,
@@ -436,7 +436,7 @@ def InitializeSimulation(simulation, strDAESolver,
 
     return daesolver, lasolver, datareporter, log
 
-def InitializeSimulationJSON(simulation, jsonSettings):
+def initializeSimulationJSON(simulation, jsonSettings):
     """
     This function reads all information needed to initialize a simulation
     from the jsonSettings argument, including DAE solver, LA solver, DataReporter, Log etc.
@@ -496,3 +496,51 @@ def InitializeSimulationJSON(simulation, jsonSettings):
     simulation.__rt_objects__ = [daesolver, lasolver, datareporter, log]
 
     return daesolver, lasolver, datareporter, log
+
+def loadTutorial(tutorialName, callableObjectName, arguments):
+    # Get the module name
+    py_module = 'daetools.examples.%s' % tutorialName
+    
+    # Import the tutorial module
+    simulation_module = importlib.import_module(py_module)
+    
+    # Check if the callable exists in the tutorial module.
+    if not hasattr(simulation_module, callableObjectName):
+        raise RuntimeError('The module: %s does not have callable object: %s' % (simulation_module.__name__, callableObjectName))
+
+    # Run the callable to create and initialise the simulation.
+    simulation = eval("simulation_module.%s(%s)" % (callableObjectName, arguments), globals(), locals())
+    
+    return simulation
+
+def loadSimulation(directory, simulationFile, callableObjectName, arguments):
+    # Add directory to sys.path if it is not already there.
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+    
+    # Get the module name
+    py_module = os.path.splitext(simulationFile)[0]
+    
+    # Here we have two options:
+    #  a) If the simulation module is already loaded - reload it.
+    #     This is useful if the module changed but the changes will not be available
+    #     until the python interpreter restarts or the module is reloaded.
+    #  b) If the module has previously not been loaded - import it.
+    #if py_module in sys.modules:
+    #    simulation_module = sys.modules[py_module]
+    #    importlib.reload(simulation_module)
+    #else:
+    #    simulation_module = importlib.import_module(py_module)
+    #
+    # But, there are a number of caveats of doing reload (see importlib.reload(module) documentation).
+    # Therefore, we only import the module and once loaded the changes will not be reflected. 
+    simulation_module = importlib.import_module(py_module)
+    
+    # Check if the callable exists in the simulation module.
+    if not hasattr(simulation_module, callableObjectName):
+        raise RuntimeError('The module: %s does not have callable object: %s' % (simulation_module.__name__, callableObjectName))
+
+    # Run the callable to create and initialise the simulation.
+    simulation = eval("simulation_module.%s(%s)" % (callableObjectName, arguments), globals(), locals())
+    
+    return simulation

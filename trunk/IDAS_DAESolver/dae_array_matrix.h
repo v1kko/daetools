@@ -76,7 +76,7 @@ public:
         {
             if(i != 0)
                 std::cout << ", ";
-            std::cout << data[i];
+            std::cout << toStringFormatted(data[i], -1, DBL_DIG, false);
         }
         std::cout << "};" << std::endl;
         std::cout.flush();
@@ -175,7 +175,7 @@ public:
                 if(bStructureOnly)
                     std::cout << (GetItem(row, col) == 0 ? "-" : "X");
                 else
-                    std::cout << dae::toStringFormatted(GetItem(row, col), 15, 8, true);
+                    std::cout << dae::toStringFormatted(GetItem(row, col), -1, DBL_DIG, false);
             }
             std::cout << std::endl;
         }
@@ -388,7 +388,7 @@ public:
                 if(bStructureOnly)
                     std::cout << (GetItem(i, k) == 0 ? "-" : "X");
                 else
-                    std::cout << dae::toStringFormatted(GetItem(i, k), 15, 8, true);
+                    std::cout << dae::toStringFormatted(GetItem(i, k), -1, DBL_DIG, false);
             }
             std::cout << std::endl;
         }
@@ -706,7 +706,7 @@ public:
                 if(bStructureOnly)
                     std::cout << (n < 0 ? "-" : "X");
                 else
-                    std::cout << dae::toStringFormatted(value, 15, 8, true);
+                    std::cout << dae::toStringFormatted(value, -1, DBL_DIG, false);
             }
             std::cout << std::endl;
         }

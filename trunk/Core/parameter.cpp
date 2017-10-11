@@ -3,60 +3,60 @@
 #include "nodes_array.h"
 #include "units_io.h"
 
-namespace dae 
+namespace dae
 {
-namespace core 
+namespace core
 {
 /******************************************************************
-	daeParameter
+    daeParameter
 *******************************************************************/
 daeParameter::daeParameter(void)
 {
-	m_bReportingOn = false;
-	m_pModel       = NULL;
-	m_pParentPort  = NULL;
+    m_bReportingOn = false;
+    m_pModel       = NULL;
+    m_pParentPort  = NULL;
 }
-	
-daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription, 
-						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
+
+daeParameter::daeParameter(string strName, const unit& units, daeModel* pModel, string strDescription,
+                           daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
     if(!pModel)
     {
         daeDeclareException(exInvalidPointer);
         string msg = "Cannot create the parameter [%s]: the parent model object is a NULL pointer/reference";
         e << (boost::format(msg) % strName).str();
-		throw e;
+        throw e;
     }
-    
-	m_bReportingOn = false;
-	m_Unit         = units;
-	m_pModel       = pModel;
-	m_pParentPort  = NULL;
 
-	pModel->AddParameter(*this, strName, units, strDescription);
-	
-	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+    m_bReportingOn = false;
+    m_Unit         = units;
+    m_pModel       = pModel;
+    m_pParentPort  = NULL;
+
+    pModel->AddParameter(*this, strName, units, strDescription);
+
+    m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
-	
-daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription, 
-						   daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
+
+daeParameter::daeParameter(string strName, const unit& units, daePort* pPort, string strDescription,
+                           daeDomain* d1, daeDomain* d2, daeDomain* d3, daeDomain* d4, daeDomain* d5, daeDomain* d6, daeDomain* d7, daeDomain* d8)
 {
     if(!pPort)
     {
         daeDeclareException(exInvalidPointer);
         string msg = "Cannot create the parameter [%s]: the parent port object is a NULL pointer/reference";
         e << (boost::format(msg) % strName).str();
-		throw e;
+        throw e;
     }
-    
-	m_bReportingOn = false;
-	m_Unit         = units;
-	m_pModel       = NULL;
-	m_pParentPort  = pPort;
 
-	pPort->AddParameter(*this, strName, units, strDescription);
-	
-	m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
+    m_bReportingOn = false;
+    m_Unit         = units;
+    m_pModel       = NULL;
+    m_pParentPort  = pPort;
+
+    pPort->AddParameter(*this, strName, units, strDescription);
+
+    m_ptrDomains = dae::makeVector<daeDomain*>(d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
 daeParameter::~daeParameter(void)
@@ -65,112 +65,114 @@ daeParameter::~daeParameter(void)
 
 void daeParameter::Clone(const daeParameter& rObject)
 {
-	m_Unit           = rObject.m_Unit;
-	m_darrValues	 = rObject.m_darrValues;
-	FindDomains(rObject.m_ptrDomains, m_ptrDomains, m_pModel);
+    m_Unit           = rObject.m_Unit;
+    m_darrValues	 = rObject.m_darrValues;
+    FindDomains(rObject.m_ptrDomains, m_ptrDomains, m_pModel);
 }
 
 void daeParameter::Open(io::xmlTag_t* pTag)
 {
-	string strName;
+    string strName;
 
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer);	
-	
-	m_ptrDomains.clear();
-	m_darrValues.clear();
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
 
-	daeObject::Open(pTag);
+    m_ptrDomains.clear();
+    m_darrValues.clear();
+
+    daeObject::Open(pTag);
 
 //	strName = "Units";
 //	OpenEnum(pTag, strName, m_Unit);
 
-	strName = "DomainRefs";
-	daeFindDomainByID del(m_pModel);
-	pTag->OpenObjectRefArray(strName, m_ptrDomains, &del);
+    strName = "DomainRefs";
+    daeFindDomainByID del(m_pModel);
+    pTag->OpenObjectRefArray(strName, m_ptrDomains, &del);
 }
 
 void daeParameter::Save(io::xmlTag_t* pTag) const
 {
-	string strName, strValue;
+    string strName, strValue;
 
-	daeObject::Save(pTag);
+    daeObject::Save(pTag);
 
-	strName = "Units";
-	units::Save(pTag, strName, m_Unit);
-	
-	strName = "MathMLUnits";
-	io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+    strName = "Units";
+    units::Save(pTag, strName, m_Unit);
 
-	strName = "math";
-	io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
+/*
+    strName = "MathMLUnits";
+    io::xmlTag_t* pChildTag = pTag->AddTag(strName);
 
-	strName = "xmlns";
-	strValue = "http://www.w3.org/1998/Math/MathML";
-	pMathMLTag->AddAttribute(strName, strValue);
-	
-	units::SaveAsPresentationMathML(pMathMLTag, m_Unit);
+    strName = "math";
+    io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
 
-	strName = "DomainRefs";
-	pTag->SaveObjectRefArray(strName, m_ptrDomains);
+    strName = "xmlns";
+    strValue = "http://www.w3.org/1998/Math/MathML";
+    pMathMLTag->AddAttribute(strName, strValue);
+
+    units::SaveAsPresentationMathML(pMathMLTag, m_Unit);
+*/
+
+    strName = "DomainRefs";
+    pTag->SaveObjectRefArray(strName, m_ptrDomains);
 }
 
 void daeParameter::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
 {
-	string strExport, strDomains;
-	boost::format fmtFile(strExport);
+    string strExport, strDomains;
+    boost::format fmtFile(strExport);
 
-	if(c.m_bExportDefinition)
-	{
-		if(eLanguage == ePYDAE)
-		{
-		}
-		else if(eLanguage == eCDAE)
-		{
-			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeParameter %1%;\n";
-			fmtFile.parse(strExport);
-			fmtFile % GetStrippedName();
-		}
-		else
-		{
-			daeDeclareAndThrowException(exNotImplemented); 
-		}		
-	}
-	else
-	{
-		if(eLanguage == ePYDAE)
-		{
-			if(!m_ptrDomains.empty())
-				strDomains = ", [" + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "self.") + "]";
-			
-			strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = daeParameter(\"%2%\", %3%, self, \"%4%\"%5%)\n";
-			fmtFile.parse(strExport);
-			fmtFile % GetStrippedName() 
-					% m_strShortName 
-					% m_Unit.toString() 
-					% m_strDescription
-					% strDomains;
-		}
-		else if(eLanguage == eCDAE)
-		{
-			if(!m_ptrDomains.empty())
-				strDomains = ", " + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "&");
+    if(c.m_bExportDefinition)
+    {
+        if(eLanguage == ePYDAE)
+        {
+        }
+        else if(eLanguage == eCDAE)
+        {
+            strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "daeParameter %1%;\n";
+            fmtFile.parse(strExport);
+            fmtFile % GetStrippedName();
+        }
+        else
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+    }
+    else
+    {
+        if(eLanguage == ePYDAE)
+        {
+            if(!m_ptrDomains.empty())
+                strDomains = ", [" + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "self.") + "]";
 
-			strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", %3%, this, \"%4%\"%5%)";
-			fmtFile.parse(strExport);
-			fmtFile % GetStrippedName() 
-					% m_strShortName 
-					% m_Unit.toString() 
-					% m_strDescription
-					% strDomains;
-		}
-		else
-		{
-			daeDeclareAndThrowException(exNotImplemented); 
-		}
-	}
-	
-	strContent += fmtFile.str();
+            strExport = c.CalculateIndent(c.m_nPythonIndentLevel) + "self.%1% = daeParameter(\"%2%\", %3%, self, \"%4%\"%5%)\n";
+            fmtFile.parse(strExport);
+            fmtFile % GetStrippedName()
+                    % m_strShortName
+                    % m_Unit.toString()
+                    % m_strDescription
+                    % strDomains;
+        }
+        else if(eLanguage == eCDAE)
+        {
+            if(!m_ptrDomains.empty())
+                strDomains = ", " + toString_StrippedRelativeNames<daeDomain*, daeModel*>(m_ptrDomains, m_pModel, "&");
+
+            strExport = ",\n" + c.CalculateIndent(c.m_nPythonIndentLevel) + "%1%(\"%2%\", %3%, this, \"%4%\"%5%)";
+            fmtFile.parse(strExport);
+            fmtFile % GetStrippedName()
+                    % m_strShortName
+                    % m_Unit.toString()
+                    % m_strDescription
+                    % strDomains;
+        }
+        else
+        {
+            daeDeclareAndThrowException(exNotImplemented);
+        }
+    }
+
+    strContent += fmtFile.str();
 }
 
 void daeParameter::OpenRuntime(io::xmlTag_t* pTag)
@@ -178,8 +180,8 @@ void daeParameter::OpenRuntime(io::xmlTag_t* pTag)
 //	string strName;
 
 //	if(!m_pModel)
-//		daeDeclareAndThrowException(exInvalidPointer);	
-	
+//		daeDeclareAndThrowException(exInvalidPointer);
+
 //	m_ptrDomains.clear();
 //	m_darrValues.clear();
 
@@ -198,38 +200,39 @@ void daeParameter::OpenRuntime(io::xmlTag_t* pTag)
 
 void daeParameter::SaveRuntime(io::xmlTag_t* pTag) const
 {
-	string strName, strValue;
+    string strName, strValue;
 
-	daeObject::SaveRuntime(pTag);
+    daeObject::SaveRuntime(pTag);
 
-	strName = "Units";
-	units::Save(pTag, strName, m_Unit);
-	
-	strName = "MathMLUnits";
-	io::xmlTag_t* pChildTag = pTag->AddTag(strName);
+    strName = "Units";
+    units::Save(pTag, strName, m_Unit);
 
-	strName = "math";
-	io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
+/*
+    strName = "MathMLUnits";
+    io::xmlTag_t* pChildTag = pTag->AddTag(strName);
 
-	strName = "xmlns";
-	strValue = "http://www.w3.org/1998/Math/MathML";
-	pMathMLTag->AddAttribute(strName, strValue);
-	
-	units::SaveAsPresentationMathML(pMathMLTag, m_Unit);
+    strName = "math";
+    io::xmlTag_t* pMathMLTag = pChildTag->AddTag(strName);
 
-	strName = "DomainRefs";
-	pTag->SaveObjectRefArray(strName, m_ptrDomains);
+    strName = "xmlns";
+    strValue = "http://www.w3.org/1998/Math/MathML";
+    pMathMLTag->AddAttribute(strName, strValue);
 
-	strName = "Values";
-	pTag->SaveArray(strName, m_darrValues);
+    units::SaveAsPresentationMathML(pMathMLTag, m_Unit);
+*/
+    strName = "DomainRefs";
+    pTag->SaveObjectRefArray(strName, m_ptrDomains);
+
+    strName = "Values";
+    pTag->SaveArray(strName, m_darrValues);
 }
 
 string daeParameter::GetCanonicalName(void) const
 {
-	if(m_pParentPort)
-		return m_pParentPort->GetCanonicalName() + '.' + m_strShortName;
-	else
-		return daeObject::GetCanonicalName();
+    if(m_pParentPort)
+        return m_pParentPort->GetCanonicalName() + '.' + m_strShortName;
+    else
+        return daeObject::GetCanonicalName();
 }
 
 daePort* daeParameter::GetParentPort(void) const
@@ -244,46 +247,46 @@ const std::vector<daeDomain*>& daeParameter::Domains(void) const
 
 bool daeParameter::GetReportingOn(void) const
 {
-	return m_bReportingOn;
+    return m_bReportingOn;
 }
 
 void daeParameter::SetReportingOn(bool bOn)
 {
-	m_bReportingOn = bOn;
+    m_bReportingOn = bOn;
 }
 
 void daeParameter::Initialize(void)
 {
-	vector<daeDomain*>::size_type i;
-	daeDomain* pDomain;
+    vector<daeDomain*>::size_type i;
+    daeDomain* pDomain;
 
-	m_darrValues.clear();
-	size_t nTotalNumberOfPoints = 1;
-	for(i = 0; i < m_ptrDomains.size(); i++)
-	{
-		pDomain = m_ptrDomains[i];
+    m_darrValues.clear();
+    size_t nTotalNumberOfPoints = 1;
+    for(i = 0; i < m_ptrDomains.size(); i++)
+    {
+        pDomain = m_ptrDomains[i];
         if(pDomain->GetNumberOfPoints() == 0)
-		{
+        {
             daeDeclareException(exInvalidCall);
             string msg = "Cannot initialize the parameter [%s]: the number of points in domain [%s] is 0 (the domain is not initialized)";
             e << (boost::format(msg) % GetCanonicalName() % pDomain->GetCanonicalName()).str();
             throw e;
-		}
-		nTotalNumberOfPoints *= pDomain->GetNumberOfPoints();
-	}
-	m_darrValues.resize(nTotalNumberOfPoints);
+        }
+        nTotalNumberOfPoints *= pDomain->GetNumberOfPoints();
+    }
+    m_darrValues.resize(nTotalNumberOfPoints);
 
 // Create stock runtime nodes (adRuntimeParameterNode)
-	//m_ptrarrRuntimeNodes.clear();
-	//size_t ND = m_ptrDomains.size();
-	//size_t* indexes = new size_t[ND];
-	//SetIndexes(indexes, ND, 0);
+    //m_ptrarrRuntimeNodes.clear();
+    //size_t ND = m_ptrDomains.size();
+    //size_t* indexes = new size_t[ND];
+    //SetIndexes(indexes, ND, 0);
 }
 
 //adouble daeParameter::PreCreateRuntimeNodes()
 //{
 //	size_t nTotalNumberOfPoints = m_darrValues.size();
-	
+
 //	m_ptrarrRuntimeNodes.resize(nTotalNumberOfPoints);
 //	for(size_t i = 0; i < nTotalNumberOfPoints; i++)
 //		m_ptrarrRuntimeNodes[i] = adNodePtr(new adRuntimeParameterNode(m_darrValues[i]));
@@ -291,39 +294,39 @@ void daeParameter::Initialize(void)
 
 adouble daeParameter::Create_adouble(const size_t* indexes, const size_t N) const
 {
-	adouble tmp;
-	size_t nIndex;
+    adouble tmp;
+    size_t nIndex;
 
-	if(!indexes)
-		nIndex = 0;
-	else
-		nIndex = CalculateIndex(indexes, N);
+    if(!indexes)
+        nIndex = 0;
+    else
+        nIndex = CalculateIndex(indexes, N);
 
-	tmp.setValue(m_darrValues[nIndex]);
-	tmp.setDerivative(0);
+    tmp.setValue(m_darrValues[nIndex]);
+    tmp.setDerivative(0);
 
-	if(m_pModel->m_pDataProxy->GetGatherInfo())
-	{
-		adRuntimeParameterNode* node = new adRuntimeParameterNode();
-		node->m_pParameter = const_cast<daeParameter*>(this);
+    if(m_pModel->m_pDataProxy->GetGatherInfo())
+    {
+        adRuntimeParameterNode* node = new adRuntimeParameterNode();
+        node->m_pParameter = const_cast<daeParameter*>(this);
         node->m_pdValue    = const_cast<real_t*>(&m_darrValues[nIndex]);
-		if(N > 0)
-		{
-			node->m_narrDomains.resize(N);
-			for(size_t i = 0; i < N; i++)
-				node->m_narrDomains[i] = indexes[i];
-		}
-		tmp.node = adNodePtr(node);
-		tmp.setGatherInfo(true);
-	}
-	return tmp;
+        if(N > 0)
+        {
+            node->m_narrDomains.resize(N);
+            for(size_t i = 0; i < N; i++)
+                node->m_narrDomains[i] = indexes[i];
+        }
+        tmp.node = adNodePtr(node);
+        tmp.setGatherInfo(true);
+    }
+    return tmp;
 }
 
 adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const size_t N) const
 {
-	adouble tmp;
-	adSetupParameterNode* node = new adSetupParameterNode();
-	node->m_pParameter = const_cast<daeParameter*>(this);
+    adouble tmp;
+    adSetupParameterNode* node = new adSetupParameterNode();
+    node->m_pParameter = const_cast<daeParameter*>(this);
 
     if(m_ptrDomains.size() != N)
     {
@@ -332,15 +335,15 @@ adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const 
         e << (boost::format(msg) % GetCanonicalName() % N % m_ptrDomains.size()).str();
         throw e;
     }
-    
+
 // Check if domains in indexes correspond to domains here
-	for(size_t i = 0; i < N; i++)
-	{
-		if(indexes[i].m_eType == eDomainIterator ||
-		   indexes[i].m_eType == eIncrementedDomainIterator)
-		{
-			if(m_ptrDomains[i] != indexes[i].m_pDEDI->m_pDomain)
-			{
+    for(size_t i = 0; i < N; i++)
+    {
+        if(indexes[i].m_eType == eDomainIterator ||
+           indexes[i].m_eType == eIncrementedDomainIterator)
+        {
+            if(m_ptrDomains[i] != indexes[i].m_pDEDI->m_pDomain)
+            {
                 // If it is not the same domain check the number of points
                 // It is acceptable to create a domain iterator on a domain 'x' and iterate over
                 // some other variable which is distributed over another domain but with
@@ -359,42 +362,42 @@ adouble daeParameter::CreateSetupParameter(const daeDomainIndex* indexes, const 
                         m_pModel->m_pDataProxy->LogMessage(msg, 0);
                     }
                 }
-			}
-		}
-	}
-	
-	if(N > 0)
-	{
-		node->m_arrDomains.resize(N);
-		for(size_t i = 0; i < N; i++)
-			node->m_arrDomains[i] = indexes[i];
-	}
-	tmp.node = adNodePtr(node);
-	tmp.setGatherInfo(true);
-	return tmp;
+            }
+        }
+    }
+
+    if(N > 0)
+    {
+        node->m_arrDomains.resize(N);
+        for(size_t i = 0; i < N; i++)
+            node->m_arrDomains[i] = indexes[i];
+    }
+    tmp.node = adNodePtr(node);
+    tmp.setGatherInfo(true);
+    return tmp;
 }
 
 void daeParameter::Fill_adouble_array(vector<adouble>& arrValues, const daeArrayRange* ranges, size_t* indexes, const size_t N, size_t currentN) const
 {
-	if(currentN == N) // create and add adouble to the vector
-	{
-		//arrValues.push_back(Create_adouble(indexes, N));
-		dae_push_back(arrValues, Create_adouble(indexes, N));
-	}
-	else // continue iterating
-	{
-		const daeArrayRange& r = ranges[currentN];
-		
-		vector<size_t> narrPoints;
-	// If the size is 1 it is going to call Fill_adouble_array() only once
-	// Otherwise, narrPoints.size() times
-		r.GetPoints(narrPoints);
-		for(size_t i = 0; i < narrPoints.size(); i++)
-		{
-			indexes[currentN] = narrPoints[i]; // Wasn't it bug below??? It should be narrPoints[i]!!
-			Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
-		}
-		
+    if(currentN == N) // create and add adouble to the vector
+    {
+        //arrValues.push_back(Create_adouble(indexes, N));
+        dae_push_back(arrValues, Create_adouble(indexes, N));
+    }
+    else // continue iterating
+    {
+        const daeArrayRange& r = ranges[currentN];
+
+        vector<size_t> narrPoints;
+    // If the size is 1 it is going to call Fill_adouble_array() only once
+    // Otherwise, narrPoints.size() times
+        r.GetPoints(narrPoints);
+        for(size_t i = 0; i < narrPoints.size(); i++)
+        {
+            indexes[currentN] = narrPoints[i]; // Wasn't it bug below??? It should be narrPoints[i]!!
+            Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
+        }
+
 //		if(r.m_eType == eRangeConstantIndex)
 //		{
 //			indexes[currentN] = r.m_nIndex;
@@ -415,26 +418,26 @@ void daeParameter::Fill_adouble_array(vector<adouble>& arrValues, const daeArray
 //				Fill_adouble_array(arrValues, ranges, indexes, N, currentN + 1);
 //			}
 //		}
-	}
+    }
 }
 
 adouble_array daeParameter::Create_adouble_array(const daeArrayRange* ranges, const size_t N) const
 {
-	if(!m_pModel)
-		daeDeclareAndThrowException(exInvalidPointer); 
-	if(!m_pModel->m_pDataProxy)
-		daeDeclareAndThrowException(exInvalidPointer); 
+    if(!m_pModel)
+        daeDeclareAndThrowException(exInvalidPointer);
+    if(!m_pModel->m_pDataProxy)
+        daeDeclareAndThrowException(exInvalidPointer);
 
 // First create all adoubles (according to the ranges sent)
-// The result is array of values, and if GetGatherMode flag is set 
+// The result is array of values, and if GetGatherMode flag is set
 // also the adNode* in each adouble
-	adouble_array varArray;
-	size_t* indexes = new size_t[N];
-	Fill_adouble_array(varArray.m_arrValues, ranges, indexes, N, 0);
-	delete[] indexes;
+    adouble_array varArray;
+    size_t* indexes = new size_t[N];
+    Fill_adouble_array(varArray.m_arrValues, ranges, indexes, N, 0);
+    delete[] indexes;
 
 // Now I should create adNodeArray* node
-// I rely here on adNode* in each of adouble in varArray.m_arrValues 
+// I rely here on adNode* in each of adouble in varArray.m_arrValues
 // created above
 //	if(m_pModel->m_pDataProxy->GetGatherInfo())
 //	{
@@ -442,11 +445,11 @@ adouble_array daeParameter::Create_adouble_array(const daeArrayRange* ranges, co
 //		varArray.node = adNodeArrayPtr(node);
 //		varArray.setGatherInfo(true);
 //		node->m_pParameter = const_cast<daeParameter*>(this);
-//	
+//
 //		size_t size = varArray.m_arrValues.size();
 //		if(size == 0)
-//			daeDeclareAndThrowException(exInvalidCall); 
-//		
+//			daeDeclareAndThrowException(exInvalidCall);
+//
 //		node->m_ptrarrParameterNodes.resize(size);
 //		for(size_t i = 0; i < size; i++)
 //			node->m_ptrarrParameterNodes[i] = varArray.m_arrValues[i].node;
@@ -454,23 +457,23 @@ adouble_array daeParameter::Create_adouble_array(const daeArrayRange* ranges, co
 //		for(size_t i = 0; i < N; i++)
 //			node->m_arrRanges[i] = ranges[i];
 //	}
-	return varArray;
+    return varArray;
 }
 
 adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* ranges, const size_t N) const
 {
-	adouble_array varArray;
+    adouble_array varArray;
 
-	// Check if domains in indexes correspond to domains here
-	for(size_t i = 0; i < N; i++)
-	{
-		if(ranges[i].m_eType == eRangeDomainIndex)
-		{
-			if(ranges[i].m_domainIndex.m_eType == eDomainIterator ||
-			   ranges[i].m_domainIndex.m_eType == eIncrementedDomainIterator)
-			{
-				if(m_ptrDomains[i] != ranges[i].m_domainIndex.m_pDEDI->m_pDomain)
-				{
+    // Check if domains in indexes correspond to domains here
+    for(size_t i = 0; i < N; i++)
+    {
+        if(ranges[i].m_eType == eRangeDomainIndex)
+        {
+            if(ranges[i].m_domainIndex.m_eType == eDomainIterator ||
+               ranges[i].m_domainIndex.m_eType == eIncrementedDomainIterator)
+            {
+                if(m_ptrDomains[i] != ranges[i].m_domainIndex.m_pDEDI->m_pDomain)
+                {
                     // If it is not the same domain check the number of points
                     // It is acceptable to create a domain iterator on a domain 'x' and iterate over
                     // some other variable which is distributed over another domain but with
@@ -489,54 +492,54 @@ adouble_array daeParameter::CreateSetupParameterArray(const daeArrayRange* range
                             m_pModel->m_pDataProxy->LogMessage(msg, 0);
                         }
                     }
-				}
-			}
-		}
-		else if(ranges[i].m_eType == eRange)
-		{
-			if(m_ptrDomains[i] != ranges[i].m_Range.m_pDomain)
-			{
-				daeDeclareException(exInvalidCall);
-				e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_Range.m_pDomain->GetCanonicalName() 
-				  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
-				  << "in parameter [" << GetCanonicalName() << "] in function array()";
-				throw e;
-			}
-		}
-	}
+                }
+            }
+        }
+        else if(ranges[i].m_eType == eRange)
+        {
+            if(m_ptrDomains[i] != ranges[i].m_Range.m_pDomain)
+            {
+                daeDeclareException(exInvalidCall);
+                e << "You cannot create daeArrayRange with the domain [" << ranges[i].m_Range.m_pDomain->GetCanonicalName()
+                  << "]; you must use the domain [" << m_ptrDomains[i]->GetCanonicalName() << "] as " << i+1 << ". range argument "
+                  << "in parameter [" << GetCanonicalName() << "] in function array()";
+                throw e;
+            }
+        }
+    }
 
-	adSetupParameterNodeArray* node = new adSetupParameterNodeArray();
-	varArray.node = adNodeArrayPtr(node);
-	varArray.setGatherInfo(true);
+    adSetupParameterNodeArray* node = new adSetupParameterNodeArray();
+    varArray.node = adNodeArrayPtr(node);
+    varArray.setGatherInfo(true);
 
-	node->m_pParameter = const_cast<daeParameter*>(this);
-	node->m_arrRanges.resize(N);
-	for(size_t i = 0; i < N; i++)
-		node->m_arrRanges[i] = ranges[i];
+    node->m_pParameter = const_cast<daeParameter*>(this);
+    node->m_arrRanges.resize(N);
+    for(size_t i = 0; i < N; i++)
+        node->m_arrRanges[i] = ranges[i];
 
-	return varArray;
+    return varArray;
 }
 
 daeDomain* daeParameter::GetDomain(size_t nIndex) const
 {
-	if(nIndex >= m_ptrDomains.size())
-	{
-		daeDeclareException(exInvalidCall);
-		e << "Invalid domain index [" << nIndex << "] in parameter [" << GetCanonicalName() << "]";
-		throw e;
-	}
-	
-	return m_ptrDomains[nIndex];
+    if(nIndex >= m_ptrDomains.size())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid domain index [" << nIndex << "] in parameter [" << GetCanonicalName() << "]";
+        throw e;
+    }
+
+    return m_ptrDomains[nIndex];
 }
 
 unit daeParameter::GetUnits(void) const
 {
-	return m_Unit;
+    return m_Unit;
 }
 
 void daeParameter::SetUnits(const unit& units)
 {
-	m_Unit = units;
+    m_Unit = units;
 }
 
 size_t daeParameter::GetNumberOfDomains() const
@@ -546,19 +549,19 @@ size_t daeParameter::GetNumberOfDomains() const
 
 void daeParameter::GetDomains(vector<daeDomain_t*>& ptrarrDomains)
 {
-	ptrarrDomains.clear();
-	for(size_t i = 0; i < m_ptrDomains.size(); i++)
-		ptrarrDomains.push_back(m_ptrDomains[i]);
+    ptrarrDomains.clear();
+    for(size_t i = 0; i < m_ptrDomains.size(); i++)
+        ptrarrDomains.push_back(m_ptrDomains[i]);
 }
 
 void daeParameter::DistributeOnDomain(daeDomain& rDomain)
 {
-	dae_push_back(m_ptrDomains, &rDomain);
+    dae_push_back(m_ptrDomains, &rDomain);
 }
 
 real_t* daeParameter::GetValuePointer(void)
 {
-	return &m_darrValues[0];
+    return &m_darrValues[0];
 }
 
 size_t daeParameter::GetNumberOfPoints(void) const
@@ -584,22 +587,22 @@ size_t daeParameter::GetNumberOfPoints(void) const
 
 size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const
 {
-	size_t		i, j, nIndex, temp;
-	daeDomain	*pDomain;
+    size_t		i, j, nIndex, temp;
+    daeDomain	*pDomain;
 
-	if(m_ptrDomains.size() != N)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != N)
+    {
+        daeDeclareException(exInvalidCall);
         e << "Illegal number of domains (" << N << ") in parameter " << GetCanonicalName() << " (must be " << m_ptrDomains.size() << ")";
         throw e;
-	}
+    }
 
 // Check the pointers and the bounds first
-	for(i = 0; i < N; i++)
-	{
-		pDomain = m_ptrDomains[i];
-		if(!pDomain)
-			daeDeclareAndThrowException(exInvalidPointer);
+    for(i = 0; i < N; i++)
+    {
+        pDomain = m_ptrDomains[i];
+        if(!pDomain)
+            daeDeclareAndThrowException(exInvalidPointer);
         if(indexes[i] >= pDomain->GetNumberOfPoints())
         {
             daeDeclareException(exOutOfBounds);
@@ -610,29 +613,29 @@ size_t daeParameter::CalculateIndex(const size_t* indexes, const size_t N) const
     }
 
 // Calculate the index
-	nIndex = 0;
-	for(i = 0; i < N; i++)
-	{
-		temp = indexes[i];
-		for(j = i+1; j < N; j++)
-			temp *= m_ptrDomains[j]->GetNumberOfPoints();
-		nIndex += temp;
-	}
+    nIndex = 0;
+    for(i = 0; i < N; i++)
+    {
+        temp = indexes[i];
+        for(j = i+1; j < N; j++)
+            temp *= m_ptrDomains[j]->GetNumberOfPoints();
+        nIndex += temp;
+    }
 
-	return nIndex;
+    return nIndex;
 }
 
 void daeParameter::GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& mapDomainsIndexes, size_t nIndexBase) const
 {
     std::vector<size_t> narrDomainIndexes;
     size_t d1, d2, d3, d4, d5, d6, d7, d8;
-	daeDomain *pDomain1, *pDomain2, *pDomain3, 
-		      *pDomain4, *pDomain5, *pDomain6,
-			  *pDomain7, *pDomain8;
+    daeDomain *pDomain1, *pDomain2, *pDomain3,
+              *pDomain4, *pDomain5, *pDomain6,
+              *pDomain7, *pDomain8;
 
     size_t nNoDomains    = m_ptrDomains.size();
     size_t nIndexCounter = 0;
-    
+
     if(nNoDomains == 0)
     {
         narrDomainIndexes.clear();
@@ -746,7 +749,7 @@ void daeParameter::GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& 
         pDomain4 = m_ptrDomains[3];
         pDomain5 = m_ptrDomains[4];
         pDomain6 = m_ptrDomains[5];
-        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || 
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 ||
            !pDomain5 || !pDomain6)
             daeDeclareAndThrowException(exInvalidPointer);
 
@@ -777,7 +780,7 @@ void daeParameter::GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& 
         pDomain5 = m_ptrDomains[4];
         pDomain6 = m_ptrDomains[5];
         pDomain7 = m_ptrDomains[6];
-        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || 
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 ||
            !pDomain5 || !pDomain6 || !pDomain7)
             daeDeclareAndThrowException(exInvalidPointer);
 
@@ -811,7 +814,7 @@ void daeParameter::GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& 
         pDomain6 = m_ptrDomains[5];
         pDomain7 = m_ptrDomains[6];
         pDomain8 = m_ptrDomains[7];
-        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 || 
+        if(!pDomain1 || !pDomain2 || !pDomain3 || !pDomain4 ||
            !pDomain5 || !pDomain6 || !pDomain7 || !pDomain8)
             daeDeclareAndThrowException(exInvalidPointer);
 
@@ -846,10 +849,10 @@ void daeParameter::GetDomainsIndexesMap(std::map<size_t, std::vector<size_t> >& 
 void daeParameter::SetValues(real_t values)
 {
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	m_darrValues.assign(m_darrValues.size(), values);
+    m_darrValues.assign(m_darrValues.size(), values);
 }
 
 void daeParameter::SetValues(const std::vector<real_t>& values)
@@ -974,517 +977,517 @@ quantity daeParameter::GetQuantity(const std::vector<size_t>& narrDomainIndexes)
 
 void daeParameter::SetValue(real_t value)
 {
-	if(m_ptrDomains.size() != 0)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 0 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	m_darrValues[0] = value;
+    m_darrValues[0] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, real_t value)
 {
-	if(m_ptrDomains.size() != 1)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 1)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 1 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[1] = {nDomain1};
-	m_darrValues[CalculateIndex(indexes, 1)] = value;
+    size_t indexes[1] = {nDomain1};
+    m_darrValues[CalculateIndex(indexes, 1)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, real_t value)
 {
-	if(m_ptrDomains.size() != 2)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 2)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 2 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[2] = {nDomain1, nDomain2};
-	m_darrValues[CalculateIndex(indexes, 2)] = value;
+    size_t indexes[2] = {nDomain1, nDomain2};
+    m_darrValues[CalculateIndex(indexes, 2)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, real_t value)
 {
-	if(m_ptrDomains.size() != 3)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 3)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 3 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[3] = {nDomain1, nDomain2, nDomain3};
-	m_darrValues[CalculateIndex(indexes, 3)] = value;
+    size_t indexes[3] = {nDomain1, nDomain2, nDomain3};
+    m_darrValues[CalculateIndex(indexes, 3)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, real_t value)
 {
-	if(m_ptrDomains.size() != 4)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 4)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 4 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[4] = {nDomain1, nDomain2, nDomain3, nDomain4};
-	m_darrValues[CalculateIndex(indexes, 4)] = value;
+    size_t indexes[4] = {nDomain1, nDomain2, nDomain3, nDomain4};
+    m_darrValues[CalculateIndex(indexes, 4)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, real_t value)
 {
-	if(m_ptrDomains.size() != 5)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 5)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 5 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[5] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5};
-	m_darrValues[CalculateIndex(indexes, 5)] = value;
+    size_t indexes[5] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5};
+    m_darrValues[CalculateIndex(indexes, 5)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, real_t value)
 {
-	if(m_ptrDomains.size() != 6)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 6)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 6 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[6] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6};
-	m_darrValues[CalculateIndex(indexes, 6)] = value;
+    size_t indexes[6] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6};
+    m_darrValues[CalculateIndex(indexes, 6)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, real_t value)
 {
-	if(m_ptrDomains.size() != 7)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 7)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 7 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[7] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7};
-	m_darrValues[CalculateIndex(indexes, 7)] = value;
+    size_t indexes[7] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7};
+    m_darrValues[CalculateIndex(indexes, 7)] = value;
 }
 
 void daeParameter::SetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8, real_t value)
 {
-	if(m_ptrDomains.size() != 8)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 8)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid SetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 8 % m_ptrDomains.size()).str();
-		throw e;
-	}
+        throw e;
+    }
 // If not previously initialized, do it now
-	if(m_darrValues.size() == 0)
-		Initialize();
+    if(m_darrValues.size() == 0)
+        Initialize();
 
-	size_t indexes[8] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7, nDomain8};
-	m_darrValues[CalculateIndex(indexes, 8)] = value;
+    size_t indexes[8] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7, nDomain8};
+    m_darrValues[CalculateIndex(indexes, 8)] = value;
 }
 
 real_t daeParameter::GetValue(void)
 {
-	if(m_ptrDomains.size() != 0)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 0 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	return m_darrValues[0];
+    return m_darrValues[0];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1)
 {
-	if(m_ptrDomains.size() != 1)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 1)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 1 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[1] = {nDomain1};
-	return m_darrValues[CalculateIndex(indexes, 1)];
+    size_t indexes[1] = {nDomain1};
+    return m_darrValues[CalculateIndex(indexes, 1)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2)
 {
-	if(m_ptrDomains.size() != 2)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 2)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 2 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[2] = {nDomain1, nDomain2};
-	return m_darrValues[CalculateIndex(indexes, 2)];
+    size_t indexes[2] = {nDomain1, nDomain2};
+    return m_darrValues[CalculateIndex(indexes, 2)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3)
 {
-	if(m_ptrDomains.size() != 3)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 3)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 3 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[3] = {nDomain1, nDomain2, nDomain3};
-	return m_darrValues[CalculateIndex(indexes, 3)];
+    size_t indexes[3] = {nDomain1, nDomain2, nDomain3};
+    return m_darrValues[CalculateIndex(indexes, 3)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4)
 {
-	if(m_ptrDomains.size() != 4)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 4)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 4 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[4] = {nDomain1, nDomain2, nDomain3, nDomain4};
-	return m_darrValues[CalculateIndex(indexes, 4)];
+    size_t indexes[4] = {nDomain1, nDomain2, nDomain3, nDomain4};
+    return m_darrValues[CalculateIndex(indexes, 4)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5)
 {
-	if(m_ptrDomains.size() != 5)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 5)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 5 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[5] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5};
-	return m_darrValues[CalculateIndex(indexes, 5)];
+    size_t indexes[5] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5};
+    return m_darrValues[CalculateIndex(indexes, 5)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6)
 {
-	if(m_ptrDomains.size() != 6)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 6)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 6 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[6] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6};
-	return m_darrValues[CalculateIndex(indexes, 6)];
+    size_t indexes[6] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6};
+    return m_darrValues[CalculateIndex(indexes, 6)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7)
 {
-	if(m_ptrDomains.size() != 7)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 7)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 7 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[7] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7};
-	return m_darrValues[CalculateIndex(indexes, 7)];
+    size_t indexes[7] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7};
+    return m_darrValues[CalculateIndex(indexes, 7)];
 }
 
 real_t daeParameter::GetValue(size_t nDomain1, size_t nDomain2, size_t nDomain3, size_t nDomain4, size_t nDomain5, size_t nDomain6, size_t nDomain7, size_t nDomain8)
 {
-	if(m_ptrDomains.size() != 8)
-	{	
-		daeDeclareException(exInvalidCall);
+    if(m_ptrDomains.size() != 8)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the number of indexes (%d) does not match the number of domains (%d)";
         e << (boost::format(msg) % GetCanonicalName() % 8 % m_ptrDomains.size()).str();
-		throw e;
-	}
-	if(m_darrValues.size() == 0)
-	{	
-		daeDeclareException(exInvalidCall);
+        throw e;
+    }
+    if(m_darrValues.size() == 0)
+    {
+        daeDeclareException(exInvalidCall);
         string msg = "Invalid GetValue call of the parameter [%s]: the parameter value(s) has not been set";
         e << (boost::format(msg) % GetCanonicalName()).str();
-		throw e;
-	}
+        throw e;
+    }
 
-	size_t indexes[8] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7, nDomain8};
-	return m_darrValues[CalculateIndex(indexes, 8)];
+    size_t indexes[8] = {nDomain1, nDomain2, nDomain3, nDomain4, nDomain5, nDomain6, nDomain7, nDomain8};
+    return m_darrValues[CalculateIndex(indexes, 8)];
 }
 
 
 void daeParameter::SetValues(const quantity& q)
 {
-	real_t values = q.scaleTo(m_Unit).getValue();
-	SetValues(values);
+    real_t values = q.scaleTo(m_Unit).getValue();
+    SetValues(values);
 }
 
 void daeParameter::SetValue(const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(value);
 }
 
 void daeParameter::SetValue(size_t nD1, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, nD3, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, nD3, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, nD3, nD4, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, nD3, nD4, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, nD3, nD4, nD5, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, nD3, nD4, nD5, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, nD3, nD4, nD5, nD6, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, value);
 }
 
 void daeParameter::SetValue(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, const quantity& q)
 {
-	real_t value = q.scaleTo(m_Unit).getValue();
-	SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
+    real_t value = q.scaleTo(m_Unit).getValue();
+    SetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8, value);
 }
 
 quantity daeParameter::GetQuantity(void)
 {
-	real_t value = GetValue();
-	return quantity(value, m_Unit);
+    real_t value = GetValue();
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1)
 {
-	real_t value = GetValue(nD1);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2)
 {
-	real_t value = GetValue(nD1, nD2);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3)
 {
-	real_t value = GetValue(nD1, nD2, nD3);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2, nD3);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4)
 {
-	real_t value = GetValue(nD1, nD2, nD3, nD4);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2, nD3, nD4);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5)
 {
-	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2, nD3, nD4, nD5);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6)
 {
-	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7)
 {
-	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7);
+    return quantity(value, m_Unit);
 }
 
 quantity daeParameter::GetQuantity(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8)
 {
-	real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8);
-	return quantity(value, m_Unit);
+    real_t value = GetValue(nD1, nD2, nD3, nD4, nD5, nD6, nD7, nD8);
+    return quantity(value, m_Unit);
 }
 
 
 
 bool daeParameter::CheckObject(vector<string>& strarrErrors) const
 {
-	string strError;
+    string strError;
 
-	bool bCheck = true;
+    bool bCheck = true;
 
-// Check base class	
-	if(!daeObject::CheckObject(strarrErrors))
-		bCheck = false;
+// Check base class
+    if(!daeObject::CheckObject(strarrErrors))
+        bCheck = false;
 
-// Check parameter type	
+// Check parameter type
 //	if(m_eParameterType == ePTUnknown)
 //	{
 //		strError = "Invalid parameter type in parameter [" + GetCanonicalName() + "]";
 //		strarrErrors.push_back(strError);
 //		bCheck = false;
 //	}
-	
-// Check value array	
-	if(m_darrValues.size() == 0)
-	{
-		strError = "Parameter values have not been set for parameter [" + GetCanonicalName() + "]";
-		strarrErrors.push_back(strError);
-		bCheck = false;
-	}
 
-// Check domains	
-	if(m_ptrDomains.size() == 0)
-	{
-		if(m_darrValues.size() != 1)
-		{
-			strError = "Invalid number of values (should be 1) in parameter [" + GetCanonicalName() + "]";
-			strarrErrors.push_back(strError);
-			bCheck = false;
-		}
-	}
-	else
-	{
-		daeDomain* pDomain;	
-		for(size_t i = 0; i < m_ptrDomains.size(); i++)
-		{
-			pDomain = m_ptrDomains[i];
-			if(!pDomain)
-			{
-				strError = "Invalid domain in parameter [" + GetCanonicalName() + "]";
-				strarrErrors.push_back(strError);
-				bCheck = false;
-				continue;
-			}
-			
-			if(!pDomain->CheckObject(strarrErrors))
-				bCheck = false;
-		}
-	}
+// Check value array
+    if(m_darrValues.size() == 0)
+    {
+        strError = "Parameter values have not been set for parameter [" + GetCanonicalName() + "]";
+        strarrErrors.push_back(strError);
+        bCheck = false;
+    }
 
-	return bCheck;
+// Check domains
+    if(m_ptrDomains.size() == 0)
+    {
+        if(m_darrValues.size() != 1)
+        {
+            strError = "Invalid number of values (should be 1) in parameter [" + GetCanonicalName() + "]";
+            strarrErrors.push_back(strError);
+            bCheck = false;
+        }
+    }
+    else
+    {
+        daeDomain* pDomain;
+        for(size_t i = 0; i < m_ptrDomains.size(); i++)
+        {
+            pDomain = m_ptrDomains[i];
+            if(!pDomain)
+            {
+                strError = "Invalid domain in parameter [" + GetCanonicalName() + "]";
+                strarrErrors.push_back(strError);
+                bCheck = false;
+                continue;
+            }
+
+            if(!pDomain->CheckObject(strarrErrors))
+                bCheck = false;
+        }
+    }
+
+    return bCheck;
 }
 
 

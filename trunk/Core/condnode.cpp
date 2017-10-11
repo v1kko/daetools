@@ -263,7 +263,7 @@ void condExpressionNode::Export(std::string& strContent, daeeModelLanguage eLang
 
 string condExpressionNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
 {
-    boost::format fmt("{{\\left( {%s} \\right)} %s {\\left( {%s} \\right)}}");
+    boost::format fmt("{\\left( {%s} %s {%s} \\right)}");
     string lnode = m_pLeft->SaveAsLatex(c);
     string rnode = m_pRight->SaveAsLatex(c);
 
@@ -461,67 +461,109 @@ void condExpressionNode::BuildExpressionsArray(vector< adNodePtr > & ptrarrExpre
     if(!m_pRight)
         daeDeclareAndThrowException(exInvalidPointer);
 
-// First add the mandatory expression: left - right = 0
-    adouble left  = m_pLeft->Evaluate(pExecutionContext);
-    adouble right = m_pRight->Evaluate(pExecutionContext);
-    adouble ad    = left - right;
-
-// This have to be added always!
-    dae_push_back(ptrarrExpressions, ad.node);
-
-// If not set, set it to some default value
+// If not set, use a default value.
     if(dEventTolerance == 0)
     {
         daeConfig& cfg  = daeConfig::GetConfig();
         dEventTolerance = cfg.GetFloat("daetools.core.eventTolerance", 1E-7);
     }
 
+// Create root functions expressions.
+    adouble left  = m_pLeft->Evaluate(pExecutionContext);
+    adouble right = m_pRight->Evaluate(pExecutionContext);
+
+    adouble f_zero  = left - right;
+    adouble f_minus = f_zero + dEventTolerance;
+    adouble f_plus  = f_zero - dEventTolerance;
+
 /*
-    Depending on the type I have to add some additional expressions
-    Explanation:
+    Position of roots:
 
-left-right = f(t)
-    ^
-    |         /
-    |        /
-    |       X (2): ad2 = ad - Et   (l - r = +Et, therefore: l - r - Et = 0)
- ---|------X--(0)----------------------------------------------------------------> Time
-    |     X   (1): ad1 = ad + Et   (l - r = -Et, therefore: l - r + Et = 0)
-    |    /
-    |   /
-    |
-
-
+         f(t) = left-right
+         ^
+         |
+         |         /
+         |        /
+         |      (+)            f_plus  = f_zero - Et   (l - r = +Et, therefore: l - r - Et = 0)
+  f = 0 -|-----(o)-----------  f_zero                  (l - r = 0 )
+         |    (-)              f_minus = f_zero + Et   (l - r = -Et, therefore: l - r + Et = 0)
+         |    /
+         |   /
+         |
+         |----------------------------------------------------------> x = time
 */
-    adouble ad1 = ad + dEventTolerance;
-    adouble ad2 = ad - dEventTolerance;
+
     switch(m_eConditionType)
     {
     case eNotEQ: // !=
-        dae_push_back(ptrarrExpressions, ad1.node);
-        dae_push_back(ptrarrExpressions, ad2.node);
+        // Delete this? No much sense in testing for inequality (no change in sign of root functions)...
+        // Anyhow, leave the operator != available since it may work in certain cases.
+        // It may work if l is equal to r and then it changes the value (to either direction).
+        //
+        // But, IF blocks also require a root function that evaluates to false in order to change the active state.
+        // Unless we change the way how IF blocks operate we need to add all three points.
+        dae_push_back(ptrarrExpressions, f_minus.node);
+        dae_push_back(ptrarrExpressions, f_zero.node);
+        dae_push_back(ptrarrExpressions, f_plus.node);
         break;
 
     case eEQ: // ==
-        dae_push_back(ptrarrExpressions, ad1.node);
-        dae_push_back(ptrarrExpressions, ad2.node);
+        // We can approach equality from both negative and positive directions and since we want only the position
+        // where l = r we need only the f_zero root function.
+        // However, it is very difficult to detect a discontinuity so that the expression l - r is exactly zero.
+        // Anyhow, leave the operator == available since it may work in certain cases.
+        //
+        // But, IF blocks also require a root function that evaluates to false in order to change the active state.
+        // Unless we change the way how IF blocks operate we need to add all three points.
+        dae_push_back(ptrarrExpressions, f_minus.node);
+        dae_push_back(ptrarrExpressions, f_zero.node);
+        dae_push_back(ptrarrExpressions, f_plus.node);
         break;
 
-    case eGT: // >
-        dae_push_back(ptrarrExpressions, ad2.node);
+    case eGT: // operator >
+        // We approach l - r = 0 from the negative side (that is l < r) and want a point where l becomes > than r.
+        // Therefore, we need only the f+ root function.
+        //
+        // But, IF blocks also require a root function that evaluates to false in order to change the active state.
+        // Unless we change the way how IF blocks operate we need to add all three points.
+        dae_push_back(ptrarrExpressions, f_minus.node);
+        dae_push_back(ptrarrExpressions, f_zero.node);
+        dae_push_back(ptrarrExpressions, f_plus.node);
         break;
 
-    case eGTEQ: // >=
-        dae_push_back(ptrarrExpressions, ad1.node);
+    case eGTEQ: // operator >=
+        // We approach l - r = 0 from the negative side (that is l < r) and want a point where l becomes >= than r.
+        // f0 should be sufficient, but what if IDAS detacts the root that is positioned behind l-r = 0 for a very small number?
+        // To be on a safe side add the f- expression, too.
+        //
+        // But, IF blocks also require a root function that evaluates to false in order to change the active state.
+        // Unless we change the way how IF blocks operate we need to add all three points.
+        dae_push_back(ptrarrExpressions, f_minus.node);
+        dae_push_back(ptrarrExpressions, f_zero.node);
+        dae_push_back(ptrarrExpressions, f_plus.node);
         break;
 
-    case eLT: // <
-        dae_push_back(ptrarrExpressions, ad1.node);
+    case eLT: // operator <
+        // We approach l - r = 0 from the positive side (that is l > r) and want a point where l becomes < than r.
+        //
+        // But, IF blocks also require a root function that evaluates to false in order to change the active state.
+        // Unless we change the way how IF blocks operate we need to add all three points.
+        dae_push_back(ptrarrExpressions, f_minus.node);
+        dae_push_back(ptrarrExpressions, f_zero.node);
+        dae_push_back(ptrarrExpressions, f_plus.node);
         break;
 
-    case eLTEQ: // <=
-        dae_push_back(ptrarrExpressions, ad2.node);
-        break;
+    case eLTEQ: // operator <=
+        // We approach l - r = 0 from the positive side (that is l > r) and want a point where l becomes < than r.
+        // f0 should be sufficient, but what if IDAS detacts the root that is positioned after l-r = 0 for a very small number?
+        // To be on a safe side add the f+ expression, too.
+         //
+       // But, IF blocks also require a root function that evaluates to false in order to change the active state.
+        // Unless we change the way how IF blocks operate we need to add all three points.
+        dae_push_back(ptrarrExpressions, f_minus.node);
+        dae_push_back(ptrarrExpressions, f_zero.node);
+        dae_push_back(ptrarrExpressions, f_plus.node);
+       break;
 
     default:
         daeDeclareAndThrowException(exNotImplemented);

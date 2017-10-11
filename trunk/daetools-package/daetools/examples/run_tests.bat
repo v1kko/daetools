@@ -34,6 +34,10 @@ python tutorial_che_7.py console
 python tutorial_che_8.py console
 python tutorial_che_9.py console
 
+python tutorial_sa_1.py console
+python tutorial_sa_2.py console
+python tutorial_sa_3.py console
+
 python tutorial_cv_1.py console
 python tutorial_cv_2.py console
 python tutorial_cv_3.py console
@@ -44,6 +48,7 @@ python tutorial_cv_7.py console
 python tutorial_cv_8.py console
 python tutorial_cv_9.py console
 python tutorial_cv_10.py console
+python tutorial_cv_11.py console
 
 python tutorial_dealii_1.py console
 python tutorial_dealii_2.py console

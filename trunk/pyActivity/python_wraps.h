@@ -205,9 +205,9 @@ public:
         datareporter = DataReporter;
         log          = Log;
 
-        daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(DAESolver);
-        daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(DataReporter);
-        daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(Log);
+        daeDAESolver_t*    pDAESolver    = boost::python::extract<daeDAESolver_t*>(daesolver);
+        daeDataReporter_t* pDataReporter = boost::python::extract<daeDataReporter_t*>(datareporter);
+        daeLog_t*          pLog          = boost::python::extract<daeLog_t*>(log);
 
         daeSimulation::Initialize(pDAESolver, pDataReporter, pLog, bCalculateSensitivities, strJSONRuntimeSettings);
     }

@@ -4305,7 +4305,8 @@ string adSetupExpressionPartialDerivativeNode::SaveAsLatex(const daeNodeSaveAsCo
     vector<string> strarrIndexes;
     string strExpression = node->SaveAsLatex(c);
     string strDomainName = daeGetRelativeName(c->m_pModel, m_pDomain);
-    return latexCreator::PartialDerivative(m_nOrder, strExpression, strDomainName, strarrIndexes, true);
+    std::string ret = latexCreator::PartialDerivative(m_nOrder, strExpression, strDomainName, strarrIndexes, true);
+    return ret;
 }
 
 void adSetupExpressionPartialDerivativeNode::Open(io::xmlTag_t* pTag)

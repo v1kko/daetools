@@ -23,6 +23,7 @@ Code Verification Tests
 :ref:`tutorial_cv_8`      |tcv_8|
 :ref:`tutorial_cv_9`      |tcv_9|
 :ref:`tutorial_cv_10`     |tcv_10|
+:ref:`tutorial_cv_11`     |tcv_11|
 =======================   =================================================================
 
 
@@ -58,6 +59,11 @@ Code Verification Tests
 
 .. |tcv_10| replace:: Code verification using the Method of Exact Solutions 
                       (Rotating Gaussian Hill problem solved using the Finite Elements method).
+               
+.. |tcv_11| replace:: Code verification method using the Method of Exact Solutions
+                      (1D homogeneous transient convection-diffusion equation
+                      solved using the high-resolution upwind finite volume scheme with flux limiter
+                      for the reversed fluid flow).
 
 
 .. begin-command
@@ -65,7 +71,7 @@ Code Verification Tests
 .. _tutorial_cv_1:
 
 Code Verification Test 1
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_1
    :no-members:
@@ -83,7 +89,7 @@ Source code             `tutorial_cv_1.py <../examples/tutorial_cv_1.html>`_
 .. _tutorial_cv_2:
 
 Code Verification Test 2
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_2
    :no-members:
@@ -101,7 +107,7 @@ Source code             `tutorial_cv_2.py <../examples/tutorial_cv_2.html>`_
 .. _tutorial_cv_3:
 
 Code Verification Test 3
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_3
    :no-members:
@@ -119,7 +125,7 @@ Source code             `tutorial_cv_3.py <../examples/tutorial_cv_3.html>`_
 .. _tutorial_cv_4:
 
 Code Verification Test 4
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_4
    :no-members:
@@ -137,7 +143,7 @@ Source code             `tutorial_cv_4.py <../examples/tutorial_cv_4.html>`_
 .. _tutorial_cv_5:
 
 Code Verification Test 5
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_5
    :no-members:
@@ -155,7 +161,7 @@ Source code             `tutorial_cv_5.py <../examples/tutorial_cv_5.html>`_
 .. _tutorial_cv_6:
 
 Code Verification Test 6
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_6
    :no-members:
@@ -173,7 +179,7 @@ Source code             `tutorial_cv_6.py <../examples/tutorial_cv_6.html>`_
 .. _tutorial_cv_7:
 
 Code Verification Test 7
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_7
    :no-members:
@@ -191,7 +197,7 @@ Source code             `tutorial_cv_7.py <../examples/tutorial_cv_7.html>`_
 .. _tutorial_cv_8:
 
 Code Verification Test 8
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_8
    :no-members:
@@ -208,7 +214,7 @@ Source code             `tutorial_cv_8.py <../examples/tutorial_cv_8.html>`_
 .. _tutorial_cv_9:
 
 Code Verification Test 9
-===========================
+========================
 
 .. automodule:: daetools.examples.tutorial_cv_9
     :no-members:
@@ -229,7 +235,7 @@ Source code             `tutorial_cv_9.py <../examples/tutorial_cv_9.html>`_
 .. _tutorial_cv_10:
 
 Code Verification Test 10
-============================
+=========================
 
 .. automodule:: daetools.examples.tutorial_cv_10
     :no-members:
@@ -243,5 +249,22 @@ Runtime model report    `tutorial_cv_10-rt.xml <../examples/tutorial_cv_10-rt.xm
 Source code             `tutorial_cv_10.py <../examples/tutorial_cv_10.html>`_
 =====================   =================================================================
 
+
+.. _tutorial_cv_11:
+
+Code Verification Test 11
+=========================
+
+.. automodule:: daetools.examples.tutorial_cv_11
+    :no-members:
+    :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Model report            `tutorial_cv_11.xml <../examples/tutorial_cv_11.xml>`_
+Runtime model report    `tutorial_cv_11-rt.xml <../examples/tutorial_cv_11-rt.xml>`_
+Source code             `tutorial_cv_11.py <../examples/tutorial_cv_11.html>`_
+=====================   =================================================================
 
 .. end-command

@@ -332,11 +332,11 @@ void daeModel::Save(io::xmlTag_t* pTag) const
     pTag->SaveObjectArray(strName, m_ptrarrEventPortConnections);
 
 // CHILD MODELS
-    strName = "Units";
+    strName = "Components";
     pTag->SaveObjectArray(strName, m_ptrarrComponents);
 
 // MODELARRAYS
-    strName = "UnitArrays";
+    strName = "ComponentsArrays";
     pTag->SaveObjectArray(strName, m_ptrarrComponentArrays);
 
 // PORTARRAYS
@@ -399,11 +399,11 @@ void daeModel::SaveRuntime(io::xmlTag_t* pTag) const
     pTag->SaveRuntimeObjectArray(strName, m_ptrarrEventPortConnections);
 
 // CHILD MODELS
-    strName = "Units";
+    strName = "Components";
     pTag->SaveRuntimeObjectArray(strName, m_ptrarrComponents);
 
 // MODELARRAYS
-    strName = "UnitArrays";
+    strName = "ComponentArrays";
     pTag->SaveRuntimeObjectArray(strName, m_ptrarrComponentArrays);
 
 // PORTARRAYS

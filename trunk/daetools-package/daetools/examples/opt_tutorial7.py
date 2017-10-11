@@ -179,6 +179,7 @@ def run(**kwargs):
                                             optimization            = optimization,
                                             nlpsolver               = nlpsolver,
                                             nlpsolver_setoptions_fn = setOptions,
+                                            reportSensitivities     = True,
                                             **kwargs)
 
 if __name__ == "__main__":

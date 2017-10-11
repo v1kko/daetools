@@ -19,7 +19,7 @@ catch(e)
 
 try
 {
-  var oLink = oWS.CreateShortcut(strStartmenu + "\\daeExamples" + daetools_suffix +".lnk");
+  var oLink = oWS.CreateShortcut(strStartmenu + "\\DAE Tools Examples" + daetools_suffix +".lnk");
   oLink.TargetPath = pythonw;
   oLink.Arguments = ' -m daetools.examples.run_examples';
   oLink.Save();
@@ -30,7 +30,7 @@ catch(e)
 
 try
 {
-  var oLink = oWS.CreateShortcut(strStartmenu + "\\daePlotter" + daetools_suffix +".lnk");
+  var oLink = oWS.CreateShortcut(strStartmenu + "\\DAE Tools Plotter" + daetools_suffix +".lnk");
   oLink.TargetPath = pythonw;
   oLink.Arguments = ' -m daetools.dae_plotter.plotter';
   oLink.Save();
@@ -39,6 +39,29 @@ catch(e)
 {
 }
 
+try
+{
+  var oLink = oWS.CreateShortcut(strStartmenu + "\\DAE Tools Web Service" + daetools_suffix +".lnk");
+  oLink.TargetPath = pythonw;
+  oLink.Arguments = ' -m daetools.dae_simulator.daetools_ws';
+  oLink.Save();
+}
+catch(e)
+{
+}
+
+try
+{
+  var oLink = oWS.CreateShortcut(strStartmenu + "\\DAE Tools FMI Web Service" + daetools_suffix +".lnk");
+  oLink.TargetPath = pythonw;
+  oLink.Arguments = ' -m daetools.dae_simulator.daetools_fmi_ws';
+  oLink.Save();
+}
+catch(e)
+{
+}
+
+/*
 try
 {
   var oLink = oWS.CreateShortcut(strDesktop + "\\daeExamples" + daetools_suffix +".lnk");
@@ -60,4 +83,4 @@ try
 catch(e)
 {
 }
-
+*/

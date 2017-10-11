@@ -16,7 +16,10 @@ from pyCore import *
 from pyDataReporting import *
 
 def _formatName(name):
-    return daeGetStrippedName(name).split('.')[-1]
+    # Strip non alpha-numeric characters and remove the root model name.
+    # I.e. _formatName('model1.model2.var') returns 'model2.var'.
+    lnames = daeGetStrippedName(name).split('.')
+    return '.'.join(lnames[1:])
 
 class daeVTKDataReporter(daeDataReporterLocal):
     """

@@ -175,12 +175,12 @@ class daeExpressionFormatter(object):
             
     def formatIdentifier(self, identifier):
         # Removes illegal characters from domains/parameters/variables/ports/models/... names
-        return identifier.replace('&', '').replace(';', '').replace('(', '_').replace(')', '_').replace(',', '_').replace(' ', '')
+        return identifier.replace('&', '').replace(';', '').replace('(', '_').replace(')', '_').replace(',', '_').replace(' ', '').replace('{', '').replace('}', '').replace('\\', '')
 
     def flattenIdentifier(self, identifier):
         # Removes illegal characters from domains/parameters/variables/ports/models/... names
-        return identifier.replace('.', '_').replace('(', '_').replace(')', '_').replace('[', '_').replace(']', '_').replace(',', '_').replace(' ', '')
-
+        return identifier.replace('.', '_').replace('(', '_').replace(')', '_').replace('[', '_').replace(']', '_').replace(',', '_').replace(' ', '').replace('{', '').replace('}', '').replace('\\', '')
+    
     def formatDomain(self, domainCanonicalName, index, value):
         # ACHTUNG, ACHTUNG!! Take care of indexing of the domain index
         if self.useRelativeNames:
