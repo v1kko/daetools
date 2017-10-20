@@ -10,6 +10,7 @@
 #if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>
 #endif
+#include <cstdint>
 #include <string>
 #include <boost/python.hpp>
 //#include <boost/python/numeric.hpp>
@@ -1902,6 +1903,78 @@ public:
         }
 
         return ad_res;
+    }
+};
+
+/*******************************************************
+    daeLinearInterpolationFunctionWrapper
+*******************************************************/
+class daeLinearInterpolationFunctionWrapper : public daeLinearInterpolationFunction,
+                                              public boost::python::wrapper<daeLinearInterpolationFunction>
+{
+public:
+    daeLinearInterpolationFunctionWrapper(const string& strName, daeModel* pModel, const unit& units,
+                                          boost::python::list x, boost::python::list y, adouble argument)
+        : daeLinearInterpolationFunction(strName, pModel, units)
+    {
+        if(boost::python::len(x) != boost::python::len(y))
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The size of x and y data arrays does not match";
+            throw e;
+        }
+
+        std::vector<real_t> x_arr;
+        std::vector<real_t> y_arr;
+        boost::python::ssize_t i, n;
+
+        n = boost::python::len(x);
+        for(i = 0; i < n; i++)
+        {
+            x_arr.push_back( boost::python::extract<real_t>(x[i]) );
+            y_arr.push_back( boost::python::extract<real_t>(y[i]) );
+        }
+
+        this->InitData(x_arr, y_arr, argument);
+    }
+};
+
+/*******************************************************
+    daeCTypesExternalFunctionWrapper
+*******************************************************/
+class daeCTypesExternalFunctionWrapper : public daeCTypesExternalFunction,
+                                         public boost::python::wrapper<daeCTypesExternalFunction>
+{
+public:
+    daeCTypesExternalFunctionWrapper(const string& strName, daeModel* pModel, const unit& units, boost::python::object ctypes_fun_ptr,  boost::python::dict arguments)
+        : daeCTypesExternalFunction(strName, pModel, units, NULL)
+    {
+        std::string name;
+        boost::python::ssize_t i, n;
+        boost::python::tuple t;
+        daeExternalFunctionArgumentMap_t mapArguments;
+
+        boost::python::object ctypes_addressof = boost::python::import("ctypes").attr("addressof");
+        // Take the address of the ctypes._FuncPtr object and cast it to the function pointer.
+        uintptr_t fun_ptr = boost::python::extract<uintptr_t>(ctypes_addressof(ctypes_fun_ptr));
+        this->m_external_lib_function = *reinterpret_cast<external_lib_function*>(fun_ptr);
+
+        boost::python::list items = arguments.items();
+        n = boost::python::len(items);
+
+        for(i = 0; i < n; i++)
+        {
+            t = boost::python::extract<boost::python::tuple>(items[i]);
+            name  = boost::python::extract<string>(t[0]);
+            boost::python::extract<adouble> get_adouble(t[1]);
+            boost::python::extract<adouble_array> get_adouble_array(t[1]);
+
+            if(get_adouble.check())
+                mapArguments[name] = get_adouble();
+            else if(get_adouble_array.check())
+                daeDeclareAndThrowException(exNotImplemented);
+        }
+        this->daeExternalFunction_t::SetArguments(mapArguments);
     }
 };
 

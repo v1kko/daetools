@@ -26,10 +26,15 @@ HEADERS += stdafx.h \
 
 INCLUDEPATH += ../boost
 
-LIBS += -L../boost/stage/lib -lboost_thread \
-                             -lboost_system \
-                             -lboost_regex \
-                             -lpthread
+unix::LIBS += -L../boost/stage/lib -lboost_thread \
+                                   -lboost_system \
+                                   -lboost_regex \
+                                   -lboost_filesystem \
+                                   -lpthread
+win32-msvc2015::LIBS += -L../boost/stage/lib libboost_thread.lib \
+                                             libboost_system.lib \
+                                             libboost_regex.lib \
+                                             libboost_filesystem.lib
 
 QMAKE_POST_LINK = $${COPY_FILE} \
                   $${DAE_DEST_DIR}/$${SHARED_LIB_PREFIX}$${TARGET}$${SHARED_LIB_POSTFIX}.$${SHARED_LIB_EXT} \

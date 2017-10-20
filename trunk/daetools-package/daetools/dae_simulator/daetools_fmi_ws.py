@@ -17,7 +17,7 @@ import os, sys, json
 import uuid, zipfile, cgitb, importlib, hashlib, threading
 from daetools.pyDAE import *
 from daetools.dae_simulator.fmi_interface import fmi2Component
-from daetools.dae_simulator.web_service import daeWebService
+from daetools.dae_simulator.web_service import daeWebService, ServerError, BadRequest
     
 __WebAppName__  = 'daetools_fmi_ws'
 
@@ -43,10 +43,10 @@ class daeFMI2_CoS_WebService(daeWebService):
             #    return self._sendFile(filepath, 'application/octet-stream', start_response)
             
             if pathInfo != ('/%s' % __WebAppName__):
-                raise RuntimeError('Invalid path %s requested (/%s available)' % (pathInfo, __WebAppName__))    
+                raise BadRequest('Invalid path %s requested (/%s available)' % (pathInfo, __WebAppName__))    
             
             if 'function' not in args:
-                raise RuntimeError('No function argument specified in the query' % pathInfo)    
+                raise BadRequest('No function argument specified in the query: %' % pathInfo)    
             
             function = args['function'].value
                         
@@ -103,10 +103,13 @@ class daeFMI2_CoS_WebService(daeWebService):
                 # but we allow it for the time being.
                 #if simulationID in self.activeObjects:
                 #    simulationID = None
-                #    raise RuntimeError('FMI component: %s (GUID=%s) already instantiated' % (instanceName, guid))
+                #    raise BadRequest('FMI component: %s (GUID=%s) already instantiated' % (instanceName, guid))
 
                 # Create fmi2Component object and load the simulation
-                c = fmi2Component.fmi2Instantiate(instanceName, guid, resourceLocation)
+                try:
+                    c = fmi2Component.fmi2Instantiate(instanceName, guid, resourceLocation)
+                except Exception as e:
+                    raise BadRequest(str(e))
                 
                 # Store the created fmi2Component object in a dictionary
                 self.activeObjects[simulationID] = c
@@ -355,7 +358,15 @@ class daeFMI2_CoS_WebService(daeWebService):
                 return self.jsonSuccess(start_response)
             
             else:
-                return self.jsonError('Invalid function specified: %s' % function, start_response, simulationID) 
+                return self.jsonBadRequest('Invalid function specified: %s' % function, start_response, simulationID) 
+
+        except BadRequest as e:
+            print(str(e))
+            return self.jsonBadRequest(str(e), start_response, simulationID)                
+            
+        except ServerError as e:
+            print(str(e))
+            return self.jsonError(str(e), start_response, simulationID)                
 
         except Exception as e:
             print(str(e))
@@ -365,11 +376,11 @@ class daeFMI2_CoS_WebService(daeWebService):
         # Returns the FMI component from the dictionary fr the given simulationID.
         # Raises an exception if the simulationID has not been sent or it does not exist.
         if 'simulationID' not in args:
-            raise RuntimeError('The query arguments do not contain the simulation ID string')   
+            raise BadRequest('The query arguments do not contain the simulation ID string')   
         
         simulationID = args['simulationID'].value   
         if simulationID not in self.activeObjects:
-            raise RuntimeError('FMI component: %s does not exist or is terminated' % simulationID)
+            raise BadRequest('FMI component: %s does not exist or is terminated' % simulationID)
         
         component = self.activeObjects[simulationID]
         return component, simulationID

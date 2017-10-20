@@ -286,8 +286,8 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
     <span style='color:#017a31;'># 3. Generation of samples (Morris, FAST or Sobol sampling).</span>
     <span style='color:#017a31;'>################################################################</span><span style='color:#81ca2d;'>###</span>
     <b>if</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Morris'</span>:
-        <span style='color:#3605fb;'>from</span> SALib.sample.morris  <span style='color:#3605fb;'>import</span> sample
-        <span style='color:#3605fb;'>from</span> SALib.analyze.morris <span style='color:#3605fb;'>import</span> analyze
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.sample.morris  <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.analyze.morris <span style='color:#3605fb;'>import</span> analyze
         
         <span style='color:#017a31;'># Generate samples using the Morris method.</span>
         <span style='color:#017a31;'># Sample size n=85, no. params k=5 =&gt; N=(k+1)*n=510 (512 in the referenced article).</span>
@@ -302,8 +302,8 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         theta_0 <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>4</span>]
     
     <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'Sobol'</span>:
-        <span style='color:#3605fb;'>from</span> SALib.sample.saltelli <span style='color:#3605fb;'>import</span> sample
-        <span style='color:#3605fb;'>from</span> SALib.analyze.sobol   <span style='color:#3605fb;'>import</span> analyze
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.sample.saltelli <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.analyze.sobol   <span style='color:#3605fb;'>import</span> analyze
         
         <span style='color:#017a31;'># Generate samples using a Saltelli's extension of the Sobol sequence.</span>
         <span style='color:#017a31;'># Sample size n=512, no. params k=5 =&gt; N=(2k+2)*n=6144 (as in the referenced article).</span>
@@ -318,8 +318,8 @@ mass_concentration_t <b><span style='color:#0000ff;'>=</span></b> daeVariableTyp
         theta_0 <b><span style='color:#0000ff;'>=</span></b> param_values[:,<span style='color:#cc047c;'>4</span>]
     
     <b>elif</b> SA_method <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'FAST'</span>:
-        <span style='color:#3605fb;'>from</span> SALib.sample.fast_sampler <span style='color:#3605fb;'>import</span> sample
-        <span style='color:#3605fb;'>from</span> SALib.analyze.fast        <span style='color:#3605fb;'>import</span> analyze
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.sample.fast_sampler <span style='color:#3605fb;'>import</span> sample
+        <span style='color:#3605fb;'>from</span> daetools.ext_libs.SALib.analyze.fast        <span style='color:#3605fb;'>import</span> analyze
         
         <span style='color:#017a31;'># Generate samples using a FAST method.</span>
         <span style='color:#017a31;'># Sample size n=1230, no. params k=5 =&gt; N=k*n=6150.</span>

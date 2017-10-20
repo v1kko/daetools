@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
     if(argc < 2)
     {
-        printf("Usage: fmi_ws_test resource_location\n");
+        printf("Usage: fmi_ws_test 'full path to resource directory'\n");
         return 0;
     }
     std::srand(std::time(0));
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     if(fmi2ExitInitializationMode(c) != fmi2OK)
         exit(-1);
 
-    printf("%-8s", "time");
+    printf("time");
     for(int i = 0; i < N; i++)
-        printf(", %-20s", names[i].c_str());
+        printf(", %s", names[i].c_str());
     printf("\n");
 
     while(t_current < t_horizon)
@@ -64,9 +64,9 @@ int main(int argc, char *argv[])
         if(fmi2GetReal(c, references.data(), N, values.data()) != fmi2OK)
             exit(-1);
 
-        printf("%-8.1f", t_current);
+        printf("%.14f", t_current);
         for(int i = 0; i < N; i++)
-            printf(", %-20.6f", values[i]);
+            printf(", %.14f", values[i]);
         printf("\n");
     }
 

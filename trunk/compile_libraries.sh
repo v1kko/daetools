@@ -674,6 +674,7 @@ compile_boost_static()
   echo "[*] Building boost_static"
   echo ""
 
+  BOOST_USER_CONFIG=~/user-config.jam
   if [ ${PLATFORM} = "Windows" ]; then
     if [[ $HOST_ARCH == "win64" ]]; then
 	    ADDRESS_MODEL="address-model=64"
@@ -685,11 +686,13 @@ compile_boost_static()
     # Therefore, specify the version in the jam file.
     echo "using msvc : 14.0 : : ;" >  ${BOOST_USER_CONFIG}
     
-    ./bjam --build-dir=./build --debug-building --layout=system --with-system --with-thread --with-regex \
+    ./bjam --build-dir=./build --debug-building --layout=system ${ADDRESS_MODEL} \
+           --with-system --with-filesystem --with-thread --with-regex \
            variant=release link=static threading=multi runtime-link=shared cxxflags="\MD"
 
   else
-    ./bjam --build-dir=./build --debug-building --layout=system ${ADDRESS_MODEL} --with-system --with-thread --with-regex \
+    ./bjam --build-dir=./build --debug-building --layout=system \
+           --with-system --with-filesystem --with-thread --with-regex \
            variant=release link=static threading=multi runtime-link=shared cxxflags="-fPIC"
   fi
 

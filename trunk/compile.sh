@@ -214,6 +214,7 @@ fi
 if [ ${Ncpu} -gt 1 ]; then
   Ncpu=$(($Ncpu+1))
 fi
+Ncpu=4
 
 MAKE="make"
 if [ ${PLATFORM} = "Windows" ]; then
@@ -324,6 +325,8 @@ do
                 rm -rf *
                 cd ${TRUNK}
 
+                compile_cape_open_thermo
+                
                 compile dae                "-j$Ncpu" 
 
                 compile LA_SuperLU         "-j1" "CONFIG+=shellSuperLU"

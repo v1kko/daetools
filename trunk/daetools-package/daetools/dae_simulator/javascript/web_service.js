@@ -81,13 +81,21 @@ class daeWebService
         {
             if(httpRequest.status == 200) 
             {
+                // Success: '200 OK'.
                 var response = JSON.parse(httpRequest.responseText);
                 if(response["Status"] == "Success")
                     res.success = true;
                 res.result = response["Result"];
             }
+            else if(httpRequest.status == 400)
+            {
+                // Error in client request: '400 BAD REQUEST'.
+                var response = JSON.parse(httpRequest.responseText);
+                res.reason = response["Reason"];
+            }
             else if(httpRequest.status == 500)
             {
+                // Server error: '500 INTERNAL SERVER ERROR'.
                 var response = JSON.parse(httpRequest.responseText);
                 res.reason = response["Reason"];
             }
@@ -121,18 +129,26 @@ class daeWebService
         httpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         httpRequest.addEventListener('load', function(text) { console.log(text); });
         httpRequest.onreadystatechange = function() {
+            // This function is used for asynchronous request
             if(this.readyState == 4)
             {
                 if(httpRequest.status == 200) 
                 {
+                    // Success: '200 OK'.
                     var response = webApp.getResponse(httpRequest);
                     if(response.success == true)
                         webApp.onSuccess(httpRequest, path, args);
                     else
                         webApp.onError(httpRequest, path, args);
                 }
+                else if(httpRequest.status == 400)
+                {
+                    // Error in client request: '400 BAD REQUEST'.
+                    webApp.onError(httpRequest, path, args);
+                }
                 else if(httpRequest.status == 500)
                 {
+                    // Server error: '500 INTERNAL SERVER ERROR'.
                     webApp.onError(httpRequest, path, args);
                 }
                 else if(httpRequest.status == 0)

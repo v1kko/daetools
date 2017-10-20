@@ -17,7 +17,7 @@ import os, sys, json, numpy, traceback
 import uuid, zipfile, cgitb, importlib, hashlib, threading
 from daetools.pyDAE import *
 from daetools.dae_simulator.auxiliary import loadSimulation, loadTutorial
-from daetools.dae_simulator.web_service import daeWebService
+from daetools.dae_simulator.web_service import daeWebService, ServerError, BadRequest
     
 __WebAppName__  = 'daetools_ws'
 
@@ -45,11 +45,10 @@ class daeSimulationWebService(daeWebService):
             #    return self._sendFile(filepath, 'application/octet-stream', start_response)
             
             if pathInfo != ('/%s' % __WebAppName__):
-                raise RuntimeError('Invalid path %s requested (/%s available)' % (pathInfo, __WebAppName__)) 
+                raise BadRequest('Invalid path %s requested (/%s available)' % (pathInfo, __WebAppName__))
             
             if 'function' not in args:
-                function = 'status'
-                #raise RuntimeError('No function argument specified in the query' % pathInfo)    
+                raise BadRequest('No function argument specified in the query: %s' % pathInfo)
             else:
                 function = args['function'].value
                         
@@ -97,7 +96,10 @@ class daeSimulationWebService(daeWebService):
 
                 # Load the simulation
                 directory, simulationFile = os.path.split(pythonFile)
-                simulation = loadSimulation(directory, simulationFile, loadCallable, arguments)
+                try:
+                    simulation = loadSimulation(directory, simulationFile, loadCallable, arguments)
+                except Exception as e:
+                    raise BadRequest(str(e))
                 
                 # Create model info
                 simulation.__ModelInfo__ = {}
@@ -124,7 +126,11 @@ class daeSimulationWebService(daeWebService):
                 # Load the simulation
                 loadCallable = 'run'
                 arguments    = 'initializeAndReturn=True, datareporter = daeNoOpDataReporter()'
-                simulation = loadTutorial(tutorialName, loadCallable, arguments)
+                
+                try:
+                    simulation = loadTutorial(tutorialName, loadCallable, arguments)
+                except Exception as e:
+                    raise BadRequest(str(e))
                 
                 # Create model info
                 simulation.__ModelInfo__ = {}
@@ -150,17 +156,20 @@ class daeSimulationWebService(daeWebService):
                 arguments      = json.loads(args['arguments'].value)
 
                 if not isinstance(arguments, dict):
-                    raise RuntimeError('The arguments must be a dictionary object')
+                    raise BadRequest('The arguments must be a dictionary object')
 
                 # Load the simulation
                 if simulationName not in self.availableSimulations:
-                    raise RuntimeError('Simulation %s does not exist in the list of available simulations' % simulationName)
+                    raise BadRequest('Simulation %s does not exist in the list of available simulations' % simulationName)
                 
                 simulationCallable = self.availableSimulations[simulationName]
                 if not callable(simulationCallable):
-                    raise RuntimeError('Simulation %s does not provide valid callable for loading' % simulationName)
+                    raise BadRequest('Simulation %s does not provide valid callable for loading' % simulationName)
                 
-                simulation = simulationCallable(**arguments)
+                try:
+                    simulation = simulationCallable(**arguments)
+                except Exception as e:
+                    raise BadRequest(str(e))
                 
                 # Create model info
                 simulation.__ModelInfo__ = {}
@@ -594,24 +603,31 @@ class daeSimulationWebService(daeWebService):
                 return self.jsonResult(response, start_response)
                 
             else:
-                return self.jsonError('Invalid function specified: %s' % function, start_response, simulationID) 
+                return self.jsonBadRequest('Invalid function specified: %s' % function, start_response, simulationID) 
+
+        except BadRequest as e:
+            print(str(e))
+            return self.jsonBadRequest(str(e), start_response, simulationID)                
+            
+        except ServerError as e:
+            print(str(e))
+            return self.jsonError(str(e), start_response, simulationID)                
 
         except Exception as e:
-            #exc_type, exc_value, exc_traceback = sys.exc_info()
-            #traceback.print_exception(exc_type, exc_value, exc_traceback)
-            #ltb = traceback.format_exception(exc_type, exc_value, exc_traceback)
-            #return self.jsonError(''.join(ltb), start_response, simulationID)                
-            return self.jsonError(str(e), start_response, simulationID)                
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
+            ltb = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            return self.jsonError(''.join(ltb), start_response, simulationID)                
 
     def _getSimulation(self, args):
         # Returns the simulation object from the dictionary fr the given simulationID.
         # Raises an exception if the simulationID has not been sent or it does not exist.
         if 'simulationID' not in args:
-            raise RuntimeError('The query arguments do not contain the simulation ID string')   
+            raise BadRequest('The query arguments do not contain the simulation ID string')   
         
         simulationID = args['simulationID'].value   
         if simulationID not in self.activeObjects:
-            raise RuntimeError('Simulation %s does not exist or is terminated' % simulationID)
+            raise BadRequest('Simulation %s does not exist or is terminated' % simulationID)
         
         simulation = self.activeObjects[simulationID]
         return simulation, simulationID

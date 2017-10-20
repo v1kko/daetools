@@ -102,7 +102,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
     <span style='color:#017a31;'># Print options loaded at pyBonmin startup and the user set options:</span>
     nlpsolver.PrintOptions()
-    nlpsolver.PrintUserOptions()
+    <span style='color:#017a31;'>#nlpsolver.PrintUserOptions()</span>
 
     <span style='color:#017a31;'># ClearOptions can clear all options:</span>
     <span style='color:#017a31;'>#nlpsolver.ClearOptions()</span>
@@ -116,6 +116,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
                                             timeHorizon             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>,
                                             nlpsolver               <b><span style='color:#0000ff;'>=</span></b> nlpsolver,
                                             nlpsolver_setoptions_fn <b><span style='color:#0000ff;'>=</span></b> setOptions,
+                                            reportSensitivities     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
                                             <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:

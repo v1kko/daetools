@@ -364,7 +364,10 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
     <span style='color:#017a31;'># Plot the Figures 4, 6, 7 and 8 from the article using the data reporter #</span>
     <span style='color:#017a31;'>########################################################################</span><span style='color:#81ca2d;'>###</span>
     <span style='color:#017a31;'># Get a dictionary with the reported variables</span>
-    dr_data <b><span style='color:#0000ff;'>=</span></b> simulation.DataReporter.DataReporters[<span style='color:#cc047c;'>1</span>]
+    <b>if</b> <b>not</b> simulation.__drdata__:
+        <b>return</b>
+    
+    dr_data <b><span style='color:#0000ff;'>=</span></b> simulation.__drdata__
     variables <b><span style='color:#0000ff;'>=</span></b> dr_data.Process.dictVariables
 
     <span style='color:#017a31;'># Auxiliary functions to get a variable or a sensitivity from the data reporter (as a daeDataReceiverVariable object).</span>
@@ -555,34 +558,36 @@ Keq_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='
     log          <b><span style='color:#0000ff;'>=</span></b> daePythonStdOutLog()
     daesolver    <b><span style='color:#0000ff;'>=</span></b> daeIDAS()
     simulation   <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-
-    datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
-    dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
-    dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
-    datareporter.AddDataReporter(dr_tcpip)
-    datareporter.AddDataReporter(dr_data)
+  
+    simulation.__drdata__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>
     
-    <span style='color:#017a31;'># If datareporter is in the keyword argument add it to the daeDelegateDataReporter and remove from kwargs dict.</span>
+    <span style='color:#017a31;'># If datareporter is in the keyword argument do not create local datareporters.</span>
+    <span style='color:#017a31;'># In that case, the figures will not be created.</span>
     <b>if</b> <span style='color:#cc0000;'>'datareporter'</span> <b>in</b> kwargs:
-        datareporter_arg <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'datareporter'</span>, <span style='color:#3605fb;'>None</span>)
-        datareporter.AddDataReporter(datareporter_arg)
+        datareporter <b><span style='color:#0000ff;'>=</span></b> kwargs.get(<span style='color:#cc0000;'>'datareporter'</span>)
         <b>del</b> kwargs[<span style='color:#cc0000;'>'datareporter'</span>]
-
-    simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
-    <b>if</b> <b>not</b> dr_tcpip.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
-        sys.exit()
-
+    <b>else</b>:
+        datareporter <b><span style='color:#0000ff;'>=</span></b> daeDelegateDataReporter()
+        dr_tcpip     <b><span style='color:#0000ff;'>=</span></b> daeTCPIPDataReporter()
+        dr_data      <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter()
+        datareporter.AddDataReporter(dr_data)
+        datareporter.AddDataReporter(dr_tcpip)        
+        simulation.__drdata__ <b><span style='color:#0000ff;'>=</span></b> dr_data
+        simName <b><span style='color:#0000ff;'>=</span></b> simulation.m.Name <b><span style='color:#0000ff;'>+</span></b> strftime(<span style='color:#cc0000;'>&quot; [</span><span style='color:#cc0000;'>%d</span><span style='color:#cc0000;'>.%m.%Y %H:%M:%S]&quot;</span>, localtime())
+        <b>if</b> <b>not</b> dr_tcpip.Connect(<span style='color:#cc0000;'>&quot;&quot;</span>, simName):
+            sys.exit()
+        
     <span style='color:#017a31;'># Do no print progress</span>
     log.PrintProgress <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
 
-    <b>return</b> daeActivity.simulate(simulation, reportingInterval      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span>, 
-                                            timeHorizon            <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>3600</span>,
-                                            log                    <b><span style='color:#0000ff;'>=</span></b> log,
-                                            datareporter           <b><span style='color:#0000ff;'>=</span></b> datareporter,
-                                            calculateSensitivities <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
-                                            reportTimeDerivatives  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
-                                            reportSensitivities    <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
-                                            run_after_simulation_fn<b><span style='color:#0000ff;'>=</span></b> plot_figures,
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span>, 
+                                            timeHorizon             <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>10</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>3600</span>,
+                                            log                     <b><span style='color:#0000ff;'>=</span></b> log,
+                                            datareporter            <b><span style='color:#0000ff;'>=</span></b> datareporter,
+                                            calculateSensitivities  <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
+                                            reportTimeDerivatives   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
+                                            reportSensitivities     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
+                                            run_after_simulation_fn <b><span style='color:#0000ff;'>=</span></b> plot_figures,
                                             <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:

@@ -434,6 +434,18 @@ const char* DOCSTR_daeScalarExternalFunction = "";
     const char* DOCSTR_daeScalarExternalFunction_Calculate = "";
     const char* DOCSTR_daeScalarExternalFunction_call = "";
 
+const char* DOCSTR_daeLinearInterpolationFunction = "";
+    const char* DOCSTR_daeLinearInterpolationFunction_init = "";
+    const char* DOCSTR_daeLinearInterpolationFunction_Name = "";
+    const char* DOCSTR_daeLinearInterpolationFunction_Calculate = "";
+    const char* DOCSTR_daeLinearInterpolationFunction_call = "";
+
+const char* DOCSTR_daeCTypesExternalFunction = "";
+    const char* DOCSTR_daeCTypesExternalFunction_init = "";
+    const char* DOCSTR_daeCTypesExternalFunction_Name = "";
+    const char* DOCSTR_daeCTypesExternalFunction_Calculate = "";
+    const char* DOCSTR_daeCTypesExternalFunction_call = "";
+
 const char* DOCSTR_daeVectorExternalFunction = "";
     const char* DOCSTR_daeVectorExternalFunction_init = "";
     const char* DOCSTR_daeVectorExternalFunction_Name = "";

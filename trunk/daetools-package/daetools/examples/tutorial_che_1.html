@@ -306,8 +306,23 @@ K2_t <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='c
                                             timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>3</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span><b><span style='color:#0000ff;'>*</span></b><span style='color:#cc047c;'>60</span>, <span style='color:#017a31;'># 3h</span>
                                             <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
+<b>def</b> runAsWebService():
+    <span style='color:#017a31;'># The loader function should have the argument 'initializeAndReturn' set to True.</span>
+    <span style='color:#017a31;'># Optionally, the argument 'datareporter' should be set to daeNoOpDataReporter()</span>
+    <span style='color:#017a31;'># to allow the web service clients to get the results.</span>
+    <b>def</b> loaderFunction(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+        <span style='color:#2a00d6;'>print</span>(<span style='color:#cc0000;'>'Arguments sent by the web service client: </span><span style='color:#cc0000;'>%s</span><span style='color:#cc0000;'>'</span> <b><span style='color:#0000ff;'>%</span></b> kwargs)
+        <b>return</b> run(initializeAndReturn <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>, datareporter <b><span style='color:#0000ff;'>=</span></b> daeNoOpDataReporter(), <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
+    <span style='color:#017a31;'># Add the simulation name to the 'availableSimulations' dictionary.</span>
+    <span style='color:#017a31;'># The value is a Python callable objects that returns an initialised simulation object. </span>
+    availableSimulations <b><span style='color:#0000ff;'>=</span></b> {}
+    availableSimulations[<span style='color:#cc0000;'>'tutorial_che_1'</span>]  <b><span style='color:#0000ff;'>=</span></b> loaderFunction
+    daeSimulationWebService.runSimulationsAsWebService(availableSimulations)
+
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
-    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+</pre>
 </body>
 </html>

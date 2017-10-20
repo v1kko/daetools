@@ -183,6 +183,7 @@ class fmi2Component_ws(daeWebServiceClient):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
+        print('Usage: python daetools_fmi_ws_client.py "full_path_to_resource_directory"')
         sys.exit()
     
     name = 'test-%f' % random.random()
@@ -192,9 +193,10 @@ if __name__ == "__main__":
     c = fmi2Component_ws()
     c.fmi2Instantiate(name, guid, resourceLocation)
     
-    t_current = c.startTime
-    t_step    = c.step
-    t_horizon = c.stopTime
+    t_current   = c.startTime
+    t_step      = c.step
+    t_horizon   = c.stopTime
+    t_tolerance = c.tolerance
     
     references = []
     names      = []    
@@ -203,13 +205,13 @@ if __name__ == "__main__":
             names.append(obj['name'])
             references.append(obj['reference'])
 
-    c.fmi2SetupExperiment(False, 1e-5, t_current, False, t_horizon)
+    c.fmi2SetupExperiment(False, t_tolerance, t_current, False, t_horizon)
     c.fmi2EnterInitializationMode()
     c.fmi2ExitInitializationMode()
     
-    line = '%-8s' % 'time'
+    line = 'time'
     for i in range(len(references)):
-        line += ', %-20s' % names[i]
+        line += ', %s' % names[i]
     print(line)
     
     while t_current < t_horizon:
@@ -218,9 +220,9 @@ if __name__ == "__main__":
         
         values = c.fmi2GetReal(references)
         
-        line = '%-8.1f' % t_current
+        line = '%.14f' % t_current
         for i in range(len(values)):
-            line += ', %-20.6f' % values[i]
+            line += ', %.14f' % values[i]
         print(line)
 
     c.fmi2Terminate()

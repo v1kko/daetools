@@ -2083,6 +2083,39 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("__repr__",	&daepython::daeScalarExternalFunction__repr__)
     ;
 
+    class_<daepython::daeLinearInterpolationFunctionWrapper, boost::noncopyable>("daeLinearInterpolationFunction", DOCSTR_daeLinearInterpolationFunction, no_init)
+        .def(init<const string&, daeModel*, const unit&, list, list, adouble>(( arg("self"),
+                                                                                arg("name"),
+                                                                                arg("parentModel"),
+                                                                                arg("units"),
+                                                                                arg("x"),
+                                                                                arg("y"),
+                                                                                arg("argument")
+                                                                              ), DOCSTR_daeLinearInterpolationFunction_init))
+        .add_property("Name",	&daeLinearInterpolationFunction::GetName, DOCSTR_daeLinearInterpolationFunction_Name)
+
+        .def("__call__",	&daeLinearInterpolationFunction::operator(), ( arg("self") ), DOCSTR_daeLinearInterpolationFunction_call)
+
+        .def("__str__",		&daepython::daeScalarExternalFunction__str__)
+        .def("__repr__",	&daepython::daeScalarExternalFunction__repr__)
+    ;
+
+    class_<daepython::daeCTypesExternalFunctionWrapper, boost::noncopyable>("daeCTypesExternalFunction", DOCSTR_daeCTypesExternalFunction, no_init)
+        .def(init<const string&, daeModel*, const unit&, boost::python::object, dict>(( arg("self"),
+                                                                                        arg("name"),
+                                                                                        arg("parentModel"),
+                                                                                        arg("units"),
+                                                                                        arg("ctypesFunPtr"),
+                                                                                        arg("arguments")
+                                                                                       ), DOCSTR_daeCTypesExternalFunction_init))
+        .add_property("Name",	&daeCTypesExternalFunction::GetName, DOCSTR_daeCTypesExternalFunction_Name)
+
+        .def("__call__",	&daeCTypesExternalFunction::operator(), ( arg("self") ), DOCSTR_daeCTypesExternalFunction_call)
+
+        .def("__str__",		&daepython::daeScalarExternalFunction__str__)
+        .def("__repr__",	&daepython::daeScalarExternalFunction__repr__)
+    ;
+
     class_<daepython::daeVectorExternalFunctionWrapper, boost::noncopyable>("daeVectorExternalFunction", DOCSTR_daeVectorExternalFunction, no_init)
         .def(init<const string&, daeModel*, const unit&, size_t, boost::python::dict>(( arg("self"),
                                                                                         arg("name"),

@@ -31,7 +31,7 @@ Create wheel:
 import os, sys, platform, shutil
 from setuptools import setup, Distribution
 
-daetools_version = '1.7.2'
+daetools_version = '1.7.3'
 
 # Python version
 python_major = str(sys.version_info[0])

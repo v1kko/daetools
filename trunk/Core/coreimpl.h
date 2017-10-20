@@ -3868,6 +3868,60 @@ public:
 };
 
 /*********************************************************************************************
+    daeLinearInterpolationFunction
+**********************************************************************************************/
+class DAE_CORE_API daeLinearInterpolationFunction : public daeScalarExternalFunction
+{
+public:
+    daeLinearInterpolationFunction(const string& strName,
+                                   daeModel* pModel,
+                                   const unit& units);
+    virtual ~daeLinearInterpolationFunction(void);
+
+public:
+    virtual adouble	Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
+
+    void InitData(const std::vector<real_t> &x, const std::vector<real_t> &y, adouble &arg);
+
+protected:
+    std::vector<real_t> x_arr;
+    std::vector<real_t> y_arr;
+};
+
+/*********************************************************************************************
+    daeCTypesExternalFunction
+**********************************************************************************************/
+class DAE_CORE_API daeCTypesExternalFunction : public daeScalarExternalFunction
+{
+public:
+    class adouble_c
+    {
+    public:
+        adouble_c(real_t val, real_t deriv)
+        {
+            value      = val;
+            derivative = deriv;
+        }
+
+        real_t value;
+        real_t derivative;
+    };
+    typedef adouble_c (*external_lib_function)(const adouble_c[], const char*[], int);
+
+    daeCTypesExternalFunction(const string& strName,
+                           daeModel* pModel,
+                           const unit& units,
+                           external_lib_function fun_ptr);
+    virtual ~daeCTypesExternalFunction(void);
+
+public:
+    virtual adouble	Calculate(daeExternalFunctionArgumentValueMap_t& mapValues) const;
+
+protected:
+    external_lib_function m_external_lib_function;
+};
+
+/*********************************************************************************************
     daeVectorExternalFunction
 **********************************************************************************************/
 class DAE_CORE_API daeVectorExternalFunction : public daeExternalFunction_t

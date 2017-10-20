@@ -78,11 +78,11 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
         daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
 
-        <span style='color:#3605fb;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>,       kg,           <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the copper plate&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,     J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>, W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A&quot;</span>,       m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>,         <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of the plate&quot;</span>)
-        <span style='color:#3605fb;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_surr&quot;</span>,  K,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the surroundings&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;m&quot;</span>,        kg,           <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Mass of the copper plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.cp    <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;c_p&quot;</span>,      J<b><span style='color:#0000ff;'>/</span></b>(kg<b><span style='color:#0000ff;'>*</span></b>K),     <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Specific heat capacity of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.alpha <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;&amp;alpha;&quot;</span>,  W<b><span style='color:#0000ff;'>/</span></b>((m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)<b><span style='color:#0000ff;'>*</span></b>K), <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Heat transfer coefficient&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.A     <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;A&quot;</span>,        m<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>,         <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Area of the plate&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.Tsurr <b><span style='color:#0000ff;'>=</span></b> daeParameter(<span style='color:#cc0000;'>&quot;T_surr&quot;</span>, K,            <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the surroundings&quot;</span>)
 
         <span style='color:#3605fb;'>self</span>.Qin   <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;Q_in&quot;</span>,  power_t,       <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Power of the heater&quot;</span>)
         <span style='color:#3605fb;'>self</span>.T     <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;T&quot;</span>,     temperature_t, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;Temperature of the plate&quot;</span>)
@@ -184,12 +184,13 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
         
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1</span>, 
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2</span>, 
                                             timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>500</span>,
                                             <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
-    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+</pre>
 </body>
 </html>

@@ -17,9 +17,6 @@ namespace datareporting
 daeTCPIPDataReporter::daeTCPIPDataReporter()
 {
     m_strName = "TCPIPDataReporter";
-
-    // Start the daetools plotter GUI.
-    boost::process::spawn("python -m daetools.dae_plotter.plotter");
 }
 
 daeTCPIPDataReporter::~daeTCPIPDataReporter()
@@ -63,6 +60,7 @@ bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string&
 
     // Make numberOfRetries attempts to connect.
     // Wait for retryAfter milliseconds before the next attempt.
+    bool plotterStarted = false;
     for(int i = 0; i < numberOfRetries; i++)
     {
         ec = boost::asio::error::host_not_found;
@@ -72,6 +70,21 @@ bool daeTCPIPDataReporter::Connect(const string& strConnectString, const string&
         // Break the for loop if the connection has been established.
         if(!ec)
             break;
+
+        // Failed to connect (it could be that the DAE Plotter application has not been started).
+        // Thus, first time we fail to connect try to start the DAE Plotter application and
+        // retry to connect after some time.
+        if(ec && !plotterStarted)
+        {
+#if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+            boost::process::spawn("python -m daetools.dae_plotter.plotter");
+#elif defined(__linux__)
+            boost::process::spawn("python -m daetools.dae_plotter.plotter");
+#elif defined(__unix__) || defined(__APPLE__)
+            // There is  problem with the boost::process::spawn function in macOS.
+#endif
+            plotterStarted = true;
+        }
 
         // Wait for retryAfterMilliSecs ms before the next attempt.
         boost::this_thread::sleep(boost::posix_time::milliseconds(retryAfterMilliSecs));

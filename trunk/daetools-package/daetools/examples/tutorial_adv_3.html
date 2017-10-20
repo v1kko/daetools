@@ -205,19 +205,20 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
     cg.generateSimulation(simulation, tmp_folder)
 
     <span style='color:#017a31;'># Functional Mock-up Interface for co-simulation</span>
-    <span style='color:#017a31;'># There are two options for loading the simulation:</span>
-    <span style='color:#017a31;'># 1. Use the default function create_simulation_for_cosimulation which accepts</span>
-    <span style='color:#017a31;'>#    a single argument: simulationClassName (here 'simTutorial')</span>
-    <span style='color:#017a31;'># 2. Use a custom function (here create_simulation)</span>
+    <span style='color:#017a31;'># The interface requires a function (or a callable object) that returns an initialised simulation object:</span>
+    <span style='color:#017a31;'># the function run(**kwargs) or any other function can be used (here, for an illustration: create_simulation).</span>
+    <span style='color:#017a31;'># In general, using the function such as run(**kwargs) from daetools tutorials is more flexible.</span>
     <span style='color:#3605fb;'>from</span> daetools.code_generators.fmi <span style='color:#3605fb;'>import</span> daeCodeGenerator_FMI
     cg <b><span style='color:#0000ff;'>=</span></b> daeCodeGenerator_FMI()
     cg.generateSimulation(simulation, 
                           directory            <b><span style='color:#0000ff;'>=</span></b> tmp_folder, 
                           py_simulation_file   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>__file__</span>,
-                          callable_object_name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'create_simulation_for_cosimulation'</span>,
-                          arguments            <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'simTutorial'</span>, 
+                          callable_object_name <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>'create_simulation'</span>,
+                          arguments            <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>''</span>, 
                           additional_files     <b><span style='color:#0000ff;'>=</span></b> [],
-                          localsAsOutputs      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>)
+                          localsAsOutputs      <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>,
+                          add_xml_stylesheet   <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
+                          useWebService        <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>)
 
 <span style='color:#017a31;'># This function can be used by daetools_mex, daetools_s and daetools_fmi_cs to load a simulation.</span>
 <span style='color:#017a31;'># It can have any number of arguments, but must return an initialized daeSimulation object.</span>
@@ -252,6 +253,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 
 <b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
     guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
-    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)</pre>
+    run(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+</pre>
 </body>
 </html>

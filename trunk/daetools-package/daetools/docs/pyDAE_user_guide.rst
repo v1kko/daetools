@@ -1675,7 +1675,7 @@ The source code for a simple :math:`F(x) = x ^ 2` external function is given bel
         eq = self.CreateEquation("...", "...")
         eq.Residual = ... self.F() ...
         
-A more complex example is given in the :ref:`tutorial14` example. There, the external function concept is used to interpolate
+A more complex example is given in the :ref:`tutorial14`. There, the external function concept is used to interpolate
 a set of values using the :py:class:`scipy.interpolate.interp1d` object. 
 
 .. code-block:: python
@@ -1738,7 +1738,95 @@ using its ``t`` ad ``y`` values:
         # The external function units are seconds.
         self.interp1d = extfn_interp1d("interp1d", self, s, times, values, Time())
 
+Alternatively, DAE Tools can utilise functions defined in shared libraries via :py:class:`~pyCore.daeCTypesExternalFunction` class.
+As an argument it accepts a function pointer from libraries loaded using Python ``ctypes``. 
+Sample usage can be found in the :ref:`tutorial14`:
+
+.. code-block:: python
+
+    def DeclareEquations(self):
+        ...
+
+        # Load the library:
+        self.ext_lib = ctypes.CDLL("libheat_function.so")
         
+        # Function arguments:
+        arguments = {}
+        arguments['m']     = self.m() 
+        arguments['cp']    = self.cp()
+        arguments['dT/dt'] = dt(self.T())
+        
+        # Function pointer ('calculate' function is used):
+        function_ptr = self.ext_lib.calculate
+        
+        self.exfnHeat2 = daeCTypesExternalFunction("heat_function", self, W, function_ptr, arguments)
+
+The ``calculate`` function is defined in the ``heat_function`` c shared library:
+
+.. code-block:: c
+
+    #include <string.h>
+
+    typedef struct
+    {
+        double Value;
+        double Derivative;
+    }
+    adouble_c;
+
+    #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
+    #define DLLEXPORT  extern "C" __declspec(dllexport)
+    #else
+    #define DLLEXPORT
+    #endif
+
+    DLLEXPORT adouble_c calculate(const adouble_c values[], const char* names[], int no_arguments);
+
+    adouble_c calculate(const adouble_c values[], const char* names[], int no_arguments)
+    {
+        adouble_c result;
+        memset(&result, 0, sizeof(adouble_c));
+        
+        /* Get the arguments' values. */
+        adouble_c m, cp, dT_dt;
+        for(int i = 0; i < no_arguments; i++)
+        {
+            if(strcmp(names[i], "m") == 0)
+                m = values[i];
+            else if(strcmp(names[i], "cp") == 0)
+                cp = values[i];
+            else if(strcmp(names[i], "dT/dt") == 0)
+                dT_dt = values[i];
+        }
+        
+        /* Calculate the value. */
+        result.Value = m.Value * cp.Value * dT_dt.Value;
+        
+        /* Calculate the derivative. */
+        if(m.Derivative != 0) /* A derivative per 'm' was requested */
+            result.Derivative = m.Derivative * (cp.Value * dT_dt.Value);
+        else if(cp.Derivative != 0) /* A derivative per 'cp' was requested */
+            result.Derivative = cp.Derivative * (m.Value * dT_dt.Value);
+        else if(dT_dt.Derivative != 0) /* A derivative per 'dT_dt' was requested */
+            result.Derivative = dT_dt.Derivative * (m.Value * cp.Value);
+        
+        return result;
+    }
+
+The library can be compiled using the following commands:
+
+.. code-block:: bash
+
+   # GNU/Linux gcc:
+   gcc -fPIC -shared -o libheat_function.so tutorial4_heat_function.c
+   
+   # macOS gcc:
+   gcc -fPIC -dynamiclib -o libheat_function.dylib tutorial14_heat_function.c
+   
+   # Windows vc++:
+   cl /MD tutorial14_heat_function.c /link /out:heat_function.dll
+
+
 Numerical Methods for Partial Differential Equations
 ====================================================
 
@@ -3322,6 +3410,197 @@ The following part of the code support parallelisation:
 In addition, there is an experimental code generator that generates C++ source code with the 
 support for MPI interface.
 
+DAE Tools web services
+======================
+Simulations can be loaded and executed using the Representational state transfer (REST) web service.
+RESTful API is provided for almost complete :py:class:`~pyActivity.daeSimulation` functionality (``daetools_ws``)
+and for all FMI v2 for co-simulation functions (``daetools_fmi_ws``).
+The RESTful API is language-independent and can be used from any language (i.e. JavaScript, Python, C++ ...).
+
+.. figure:: _static/daetools_web_service.png
+    :width: 500 pt
+    :align: center
+    
+    REST web service
+
+Web services can be started using the following commands:
+
+.. code-block:: bash
+
+    # DAE Tools simulations web service.
+    # By default, starts the web service on the "localhost" (http://127.0.0.1:8001)
+    python -m daetools.dae_simulator.daetools_ws
+
+.. code-block:: python
+
+    # Individual simulations as a web service.
+    # Add the simulation names to the 'availableSimulations' dictionary and start the service.
+    # The loaderFunction is a Python callable object that returns an initialised simulation object
+    # and will be called when a client requests a simulation by name. 
+    availableSimulations = {}
+    availableSimulations['tutorial_che_1']  = loaderFunction
+    daeSimulationWebService.runSimulationsAsWebService(availableSimulations)
+
+.. code-block:: bash
+
+    # FMI v2 web service.
+    # By default, starts the web service on the "localhost" (http://127.0.0.1:8002)
+    python -m daetools.dae_simulator.daetools_fmi_ws
+
+JavaScript client classes are developed for both types of web services. 
+Classes are located in the ``daetools/dae_simulator`` folder. ``web_service.js`` contains the web 
+service client, ``daetools_ws.js`` contains :py:class:`~pyActivity.daeSimulation` interface and 
+``daetools_fmi_ws.js`` contains FMI interface.
+
+JavaScript client interface for ``daetools_ws`` simulations web service:
+
+.. code-block:: javascript
+    
+    class daeSimulation
+    {
+        LoadSimulation(pythonFile, loadCallable, args); 
+        LoadTutorial(tutorialName); 
+        LoadSimulationByName(simulationName, args); 
+        AvailableSimulations(); 
+        Finalize(); 
+        get ModelInfo(); 
+        get Name(); 
+        get DataReporter();
+        get DAESolver();
+        get CurrentTime();
+        get TimeHorizon();
+        set TimeHorizon(timeHorizon);
+        get ReportingInterval();
+        set ReportingInterval(reportingInterval);
+        Run(); 
+        SolveInitial(); 
+        Reinitialize(); 
+        Reset(); 
+        ReportData(); 
+        Integrate(stopAtDiscontinuity, reportDataAroundDiscontinuities); 
+        IntegrateForTimeInterval(timeInterval, stopAtDiscontinuity, reportDataAroundDiscontinuities); 
+        IntegrateUntilTime(time, stopAtDiscontinuity, reportDataAroundDiscontinuities); 
+        GetParameterValue(name); 
+        GetVariableValue(name); 
+        GetActiveState(stnName); 
+        SetParameterValue(name, value); 
+        ReAssignValue(name, value); 
+        ReSetInitialCondition(name, value); 
+        SetActiveState(stnName, activeState); 
+    }
+
+JavaScript client interface for ``daetools_fmi_ws`` FMI web service:
+
+.. code-block:: javascript
+    
+    class daeFMI2Simulation 
+    {
+        fmi2Instantiate(instanceName, guid, resourceLocation); 
+        fmi2Terminate(); 
+        fmi2FreeInstance(); 
+        fmi2SetupExperiment(toleranceDefined, tolerance, startTime, stopTimeDefined, stopTime); 
+        fmi2EnterInitializationMode(); 
+        fmi2ExitInitializationMode(); 
+        fmi2Reset(); 
+        fmi2DoStep(currentCommunicationPoint, communicationStepSize, noSetFMUStatePriorToCurrentPoint); 
+        fmi2CancelStep(); 
+        fmi2GetReal(valReferences); 
+        fmi2SetReal(valReferences, values); 
+        fmi2GetString(valReferences); 
+        fmi2SetString(valReferences, values); 
+        fmi2GetBoolean(valReferences);
+        fmi2SetBoolean(valReferences, values);
+        fmi2GetInteger(valReferences);
+        fmi2SetInteger(valReferences, values);
+    }
+
+A sample simulation in JavaScript is given in the following listing:
+
+.. code-block:: javascript
+    
+    // Create the web service client.
+    var webService = new daeWebService('127.0.0.1', 8001, 'daetools_ws');
+    
+    // Create the simulation object.
+    var simulation = new daeSimulation(webService);
+    
+    // Load simulation by name (if it has been started as a web service):
+    simulation.LoadSimulationByName('simulationName', JSON.stringify(args));
+    // or load one of tutorials:
+    simulation.LoadTutorial('tutorialName');
+    // or load simulation by specifying a path to Python file, loading function and its arguments:
+    simulation.LoadSimulation('pythonFile', 'loadCallable', args) 
+    
+    var reportingInterval = simulation.ReportingInterval;
+    var timeHorizon       = simulation.TimeHorizon;
+    var currentTime       = simulation.CurrentTime;
+
+    // Get the consistent initial conditions.
+    simulation.SolveInitial();    
+    
+    // Integrate the system in a loop until the time horizon is reached.
+    while(currentTime < timeHorizon)
+    {
+        // Get the next time (based on the TimeHorizon and the ReportingInterval).
+        // Do not allow to get past the TimeHorizon.
+        var t = currentTime + reportingInterval;
+        if(t > timeHorizon)
+            t = timeHorizon;
+
+        // If a discontinuity is found, loop until the end of the integration period.
+        // The data will be reported around discontinuities!
+        while(t > currentTime)
+        {
+            log('Integrating from ' + currentTime.toFixed(2) + ' to ' + t.toFixed(2) + ' ...');
+            currentTime = simulation.IntegrateUntilTime(t, true, true);
+        }
+        
+        // After the integration period, report the data. 
+        simulation.ReportData()
+        
+        // Set the simulation progress.
+        var newProgress = Math.ceil(100.0 * currentTime / timeHorizon)
+        setProgress(newProgress);
+    }
+    
+    // Clean up.
+    simulation.Finalize();
+
+Calls to the above functions translate to HTTP requests. For instance, a call to simulation.IntegrateUntilTime(100.0, true, true)
+results in a HTTP request sent to the ``daetools_ws`` web service:
+``http://127.0.0.1:8001/daetools_ws?simulationID=ba2a694a-b591-11e7-9f58-680715e7b846&function=IntegrateUntilTime&time=100.0&stopAtDiscontinuity=true&reportDataAroundDiscontinuities=true``.
+The response is returned in JSON format.
+
+Sample html pages with the Graphical User Interface (GUI) using JavaScript and Plotly.js library
+are provided for both types of web services and presented in figure below. Web pages are located
+in the ``daetools/dae_simulator`` folder: 
+`daetools_ws_test.html <daetools_ws_test.html>`_ and 
+`daetools_fmi_ws_test.html <daetools_fmi_ws_test.html>`_.
+
+.. figure:: _static/daetools_ws_html.png
+    :width: 500 pt
+    :align: center
+    
+    HTML+JavaScript GUI for ``daetools_ws`` web service client
+
+.. figure:: _static/daetools_ws_html_plots.png
+    :width: 500 pt
+    :align: center
+    
+    Plots produced by HTML GUI for ``daetools_ws`` web service client using Plotly.js library
+    
+.. figure:: _static/daetools_fmi_ws_html.png
+    :width: 500 pt
+    :align: center
+    
+    HTML+JavaScript GUI for ``daetools_fmi_ws`` web service client
+    
+.. figure:: _static/daetools_fmi_ws_html_plots.png
+    :width: 500 pt
+    :align: center
+    
+    Plots produced by ``daetools_fmi_ws`` web service client using Plotly.js library
+    
 
 Generating code for other modelling languages
 =============================================

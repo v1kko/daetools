@@ -152,7 +152,7 @@
   DAE Tools Project, \url{http://www.daetools.com}
 }
 %\logo{\includegraphics{../images/[d][a][e]_Tools_project.png}}
-\date{16 August 2017} 
+\date{16 October 2017} 
 
 \hypersetup{
 pdfauthor = {Dragan Nikolić: dnikolic@daetools.com},
@@ -1081,31 +1081,46 @@ Current approaches to mathematical modelling:
     \end{columns}
 \end{frame}
 
-\begin{frame}[plain]{Use Case 7 - Web application / Web service}
+\begin{frame}[plain]{Use Case 7 - Software as a service}
     \begin{center}
-        \alert{Network Interchange format for NEuroscience (NineML)}
+        \alert{DAE Tools simulations as a web service}
     \end{center}   
-    \small{DAE Tools serves as \alert{AL components validator/report generator}}
     
+    \small {
     \begin{itemize}
-        \item Three flavours:
-        \begin{itemize}
-            \item \alert{Desktop application} (Python + Qt GUI)
-            \item \alert{Web application} (jQuery GUI)
-            \item \alert{Web service} with REST API (Apache server + Python WSGI)
-        \end{itemize}
-        \item Inputs:
+        \item RESTful API (JavaScript, Python, C++, ...)
             \begin{itemize}
-                \item Abstraction Layer component to test
-                \item Parameters and inlet ports values, initial conditions
-                \item One or more tests (optional)
+                \item DAE Tools simulations (daetools\_ws)
+                \item DAE Tools FMU objects (daetools\_fmi\_ws)
             \end{itemize}
-        \item Outputs:
+        \item Benefits:
             \begin{itemize}
-                \item Model report (pdf, html)
-                \item Test(s) results (variable plots)
+                \item Application servers or individual simulations as a service
+                \item Attractive Graphical User Interface
             \end{itemize}
     \end{itemize}
+    }
+    \begin{center}
+        \includegraphics[align=c, width=0.75\textwidth]{daetools_web_service.png}
+    \end{center}
+\end{frame}
+
+\begin{frame}[plain]{Use Case 7 - Software as a service (cont'd)}
+    \small{Sample HTML GUI (JavaScript + plotly.js plotting library):}
+    
+    \begin{columns}[t]
+      \begin{column}{0.45\paperwidth}
+        \begin{center}
+            \includegraphics[align=c, width=\textwidth]{daetools_ws_html.png}
+        \end{center}
+      \end{column}
+
+      \begin{column}{0.45\paperwidth}
+        \begin{center}
+            \includegraphics[align=c, width=\textwidth]{daetools_ws_html_plots.png}
+        \end{center}
+      \end{column}
+    \end{columns}
 \end{frame}
 
 % \appendix

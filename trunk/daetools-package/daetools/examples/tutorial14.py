@@ -20,7 +20,9 @@ __doc__ = """
 In this tutorial we introduce the external functions concept that can handle and execute
 functions in external libraries. The daeScalarExternalFunction-derived external function
 object is used to calculate the heat transferred and to interpolate a set of values
-using the scipy.interpolate.interp1d object.
+using the scipy.interpolate.interp1d object. In addition, functions defined in shared 
+libraries (.so in GNU/Linux, .dll in Windows and .dylib in macOS) can be used via
+ctypes Python library and daeCTypesExternalFunction class.
 
 In this example we use the same model as in the tutorial 5 with few additional equations.
 
@@ -32,9 +34,14 @@ The simulation output should show the following messages at the end of simulatio
    scipy.interp1d statistics:
      interp1d called 1703 times (cache value used 770 times)
 
-The plot of the 'Heat_ext' variable:
+The plot of the 'Heat_ext1' variable:
 
 .. image:: _static/tutorial14-results.png
+   :width: 500px
+
+The plot of the 'Heat_ext2' variable:
+
+.. image:: _static/tutorial14-results1.png
    :width: 500px
 
 The plot of the 'Value_interp' variable:
@@ -43,7 +50,7 @@ The plot of the 'Value_interp' variable:
    :width: 500px
 """
 
-import sys
+import os, sys, platform, ctypes
 import numpy, scipy.interpolate
 from time import localtime, strftime
 from daetools.pyDAE import *
@@ -52,13 +59,13 @@ from daetools.pyDAE import *
 from pyUnits import m, kg, s, K, Pa, mol, J, W
 
 class extfnHeatTransferred(daeScalarExternalFunction):
-    def __init__(self, Name, Model, units, m, cp, dT):
+    def __init__(self, Name, Model, units, m, cp, dT_dt):
         # Instantiate the scalar external function by specifying
         # the arguments dictionary {'name' : adouble-object}
         arguments = {}
-        arguments["m"]  = m
-        arguments["cp"] = cp
-        arguments["dT"] = dT
+        arguments["m"]     = m
+        arguments["cp"]    = cp
+        arguments["dT/dt"] = dT_dt
 
         daeScalarExternalFunction.__init__(self, Name, Model, units, arguments)
     
@@ -73,12 +80,12 @@ class extfnHeatTransferred(daeScalarExternalFunction):
         #    used to evaluate function or its partial derivatives per its arguments
         #    (partial derivatives are used to fill in a Jacobian matrix necessary to solve
         #    a system of non-linear equations using the Newton method).
-        m  = values["m"]
-        cp = values["cp"]
-        dT = values["dT"]
+        m     = values["m"]
+        cp    = values["cp"]
+        dT_dt = values["dT/dt"]
         
         # 2. Always calculate the value of a function (derivative part is zero by default)
-        res = adouble(m.Value * cp.Value * dT.Value)
+        res = adouble(m.Value * cp.Value * dT_dt.Value)
         
         # 3. If a function derivative per one of its arguments is requested,
         #    a derivative part of that argument will be non-zero.
@@ -86,17 +93,17 @@ class extfnHeatTransferred(daeScalarExternalFunction):
         #    using the chain rule: f'(x) = x' * df(x)/dx
         if m.Derivative != 0:
             # A derivative per 'm' was requested
-            res.Derivative = m.Derivative * (cp.Value * dT.Value)
+            res.Derivative = m.Derivative * (cp.Value * dT_dt.Value)
         elif cp.Derivative != 0:
             # A derivative per 'cp' was requested
-            res.Derivative = cp.Derivative * (m.Value * dT.Value)
-        elif dT.Derivative != 0:
-            # A derivative per 'dT' was requested
-            res.Derivative = dT.Derivative * (m.Value * cp.Value)
+            res.Derivative = cp.Derivative * (m.Value * dT_dt.Value)
+        elif dT_dt.Derivative != 0:
+            # A derivative per 'dT_dt' was requested
+            res.Derivative = dT_dt.Derivative * (m.Value * cp.Value)
         
-        #print('Heat(m=(%f,%f), cp=(%f,%f), dT=(%f,%f)) = (%f,%f)' % (m.Value,m.Derivative,
+        #print('Heat(m=(%f,%f), cp=(%f,%f), dT_dt=(%f,%f)) = (%f,%f)' % (m.Value,m.Derivative,
         #                                                             cp.Value,cp.Derivative,
-        #                                                             dT.Value,dT.Derivative,
+        #                                                             dT_dt.Value,dT_dt.Derivative,
         #                                                             res.Value,res.Derivative))
 
         # 4. Return the result as a adouble object (contains both value and derivative)
@@ -161,8 +168,9 @@ class modTutorial(daeModel):
         self.Qin   = daeVariable("Q_in",  power_t,       self, "Power of the heater")
         self.T     = daeVariable("T",     temperature_t, self, "Temperature of the plate")
         
-        self.Heat     = daeVariable("Heat",     power_t, self, "Heat transferred")
-        self.Heat_ext = daeVariable("Heat_ext", power_t, self, "Heat transferred calculated using an external function")
+        self.Heat      = daeVariable("Heat",      power_t, self, "Heat transferred")
+        self.Heat_ext1 = daeVariable("Heat_ext1", power_t, self, "Heat transferred calculated using an external function")
+        self.Heat_ext2 = daeVariable("Heat_ext2", power_t, self, "Heat transferred calculated using an external function")
 
         self.Value        = daeVariable("Value",        time_t, self, "Simple value")
         self.Value_interp = daeVariable("Value_interp", time_t, self, "Simple value calculated using an external function that wraps scipy.interp1d")
@@ -170,29 +178,65 @@ class modTutorial(daeModel):
     def DeclareEquations(self):
         daeModel.DeclareEquations(self)
 
-        #
-        # Scalar external function #1
-        #
-        # Create external function
-        # It has to be created in DeclareEquations since it accesses the params/vars values
-        self.exfnHeat = extfnHeatTransferred("Heat", self, W, self.m(), self.cp(), dt(self.T()))
-
         eq = self.CreateEquation("HeatBalance", "Integral heat balance equation")
         eq.Residual = self.m() * self.cp() * dt(self.T()) - self.Qin() + self.alpha() * self.A() * (self.T() - self.Tsurr())
 
         eq = self.CreateEquation("Heat", "")
         eq.Residual = self.Heat() - self.m() * self.cp() * dt(self.T())
 
-        eq = self.CreateEquation("Heat_ext", "")
-        eq.Residual = self.Heat_ext() - self.exfnHeat()
+        #
+        # Scalar external function #1
+        #
+        # Create external function
+        # It has to be created in DeclareEquations since it accesses the params/vars values
+        self.exfnHeat1 = extfnHeatTransferred("Heat", self, W, self.m(), self.cp(), dt(self.T()))
+
+        eq = self.CreateEquation("Heat_ext1", "")
+        eq.Residual = self.Heat_ext1() - self.exfnHeat1()
 
         #
-        # Scalar external function #2
+        # Scalar external function #3
+        #
+        # Create ctypes external function
+        # Use the function calculate from the shared library.
+        plat = str(platform.system())
+        if plat == 'Linux':
+            lib_name = 'libheat_function.so'
+        elif plat == 'Darwin':
+            lib_name = 'libheat_function.dylib'
+        elif plat == 'Windows':
+            lib_name = 'heat_function.dll'
+        else:
+            lib_name = 'unknown'
+        lib_dir  = os.path.realpath(os.path.dirname(__file__))
+        lib_path = os.path.join(lib_dir, lib_name)
+        # Load the shared library using ctypes.
+        self.ext_lib = ctypes.CDLL(lib_path)
+        
+        # Arguments for the external function.
+        arguments = {}
+        arguments['m']     = self.m() 
+        arguments['cp']    = self.cp()
+        arguments['dT/dt'] = dt(self.T())
+        
+        # Function pointer, here we use 'calculate' function defined in the 'heat_function' shared library.
+        function_ptr = self.ext_lib.calculate
+        
+        self.exfnHeat2 = daeCTypesExternalFunction("heat_function", self, W, function_ptr, arguments)
+
+        eq = self.CreateEquation("Heat_ext2", "")
+        eq.Residual = self.Heat_ext2() - self.exfnHeat2()
+
+        #
+        # Scalar external function #3
         #
         # Create scipy interp1d interpolation external function
         times  = numpy.arange(0.0, 1000.0)
         values = 2*times
         self.interp1d = extfn_interp1d("interp1d", self, s, times, values, Time())
+        
+        # Alternatively, C++ implementation of 1D linear interpolation in daeLinearInterpolationFunction can be used.
+        #self.interp1d = daeLinearInterpolationFunction("daetools_interp1d", self, s, times.tolist(), values.tolist(), Time())
 
         eq = self.CreateEquation("Value", "")
         eq.Residual = self.Value() - 2*Time()
@@ -248,8 +292,8 @@ class simTutorial(daeSimulation):
 
 def run(**kwargs):
     simulation = simTutorial()
-    res = daeActivity.simulate(simulation, reportingInterval       = 0.5, 
-                                           timeHorizon             = 500,
+    res = daeActivity.simulate(simulation, reportingInterval = 0.5, 
+                                           timeHorizon       = 500,
                                            **kwargs)
     # Print some interp1d stats
     print('\n\nscipy.interp1d statistics:')

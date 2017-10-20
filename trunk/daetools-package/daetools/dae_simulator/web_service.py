@@ -26,8 +26,16 @@ except ImportError:
     from urlparse import urlparse
 
 # cgi traceback
-logdir = os.path.join(os.path.expanduser('~'), 'daetools_ws')
-cgitb.enable(display = 0, logdir = logdir, format = 'html') 
+#logdir = os.path.join(os.path.expanduser('~'), 'daetools_ws')
+#cgitb.enable(display = 0, logdir = logdir, format = 'html') 
+
+class BadRequest(RuntimeError):
+    # Results in: 400 Bad Request response
+    pass
+
+class ServerError(RuntimeError):
+    # Results in: 500 Internal Server Error response
+    pass
 
 class daeWebService(object):
     # The base class for web applications/web services.
@@ -75,6 +83,17 @@ class daeWebService(object):
         arguments   = cgi.FieldStorage(fp = environ['wsgi.input'], environ = environ) 
         pathInfo    = environ['PATH_INFO']
         return pathInfo, arguments
+        
+    def jsonBadRequest(self, reason, start_response, simulationID):
+        # Returns the bad request error status to the client.
+        # The argument reason is a string with the exception description.
+        # It is not a fatal error, thus DO NOT delete the current object identified by its simulationID.
+        if simulationID and simulationID in self.activeObjects:
+            del self.activeObjects[simulationID]
+        obj = {'Status': 'Error',
+               'Reason': reason,
+               'Result': None}
+        return self._sendResponse_json(obj, '400 Bad Request', start_response)
         
     def jsonError(self, reason, start_response, simulationID):
         # Returns the error status to the client.

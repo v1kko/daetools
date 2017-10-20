@@ -104,7 +104,7 @@ __doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;
 <span style='color:#017a31;'>    Here, just as an example, a simple variable type with the time units is declared: time_type.</span>
 <span style='color:#017a31;'>    Normally the time_t variable type should be used for time.</span>
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
-time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;typeNone&quot;</span>, s, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E10</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-5</span>)
+time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;time_type&quot;</span>, s, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E10</span>,   <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-5</span>)
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
 <span style='color:#017a31;'>3. Declare a model by deriving a class from the base daeModel class.</span>
@@ -360,8 +360,9 @@ time_type <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span sty
 <span style='color:#017a31;'># If the keyword arguments **kwargs contain 'guiRun=True' the simulation will be run using the Qt GUI.</span>
 <b>def</b> run(<b><span style='color:#0000ff;'>**</span></b>kwargs):
     simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial()
-    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>, 
-                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>5</span>, 
+                                            timeHorizon           <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>100</span>,
+                                            reportTimeDerivatives <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>True</span>,
                                             <b><span style='color:#0000ff;'>**</span></b>kwargs)
 
 <span style='color:#017a31;'>&quot;&quot;&quot;</span>
