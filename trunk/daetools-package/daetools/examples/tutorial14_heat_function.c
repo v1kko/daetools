@@ -12,11 +12,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************************/
 /* Compilation:
     - GNU/Linux gcc:
-        gcc -fPIC -shared -o libheat_function.so tutorial4_heat_function.c
+        gcc -fPIC -shared -std=c99 -o libheat_function.so tutorial14_heat_function.c
     - macOS gcc:
        gcc -fPIC -dynamiclib -o libheat_function.dylib tutorial14_heat_function.c
     - Windows vc++:
-        cl /MD tutorial14_heat_function.c /link /out:heat_function.dll
+        cl /LD tutorial14_heat_function.c /link /dll /out:heat_function.dll
 */
 #include <stdio.h>
 #include <float.h>
@@ -30,7 +30,7 @@ typedef struct
 adouble_c;
 
 #if defined(_WIN32) || defined(WIN32) || defined(WIN64) || defined(_WIN64)
-#define DLLEXPORT  extern "C" __declspec(dllexport)
+#define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT
 #endif

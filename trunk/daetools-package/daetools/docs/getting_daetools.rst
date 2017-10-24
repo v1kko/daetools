@@ -353,6 +353,7 @@ It is also possible to compile individual libraries using one of the following o
 
     Individual libraries/solvers:
       boost            Boost libraries (system, filesystem, thread, python)
+      boost_static     Boost static libraries (system, filesystem, thread, regex, no python nor --buildid set)
       ref_blas_lapack  reference BLAS and Lapack libraries
       cblas_clapack    CBLAS and CLapack libraries
       mumps            Mumps linear solver
@@ -398,6 +399,7 @@ It is also possible to compile individual libraries using one of the following o
         units               Build Units c++ library and its python extension module (pyUnits).
         simulation_loader   Build simulation_loader shared library.
         fmi                 Build FMI wrapper shared library.
+        fmi_ws              Build FMI wrapper shared library that uses daetools FMI web service.
         trilinos            Build Trilinos Amesos/AztecOO linear solver and its python extension module (pyTrilinos).
         superlu             Build SuperLU linear solver and its python extension module (pySuperLU).
         superlu_mt          Build SuperLU_MT linear solver and its python extension module (pySuperLU_MT).

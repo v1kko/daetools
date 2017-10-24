@@ -354,8 +354,8 @@ setup(name = 'daetools',
                                                     'javascript/*.js',
                                                     'javascript/plotly/*.*',
                                                     'javascript/plotly/topojson/*.js'],
-                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh', 
-                                                    '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png'],
+                       'daetools.examples' :       ['*.pt', '*.init', '*.xsl', '*.css', '*.xml', '*.html', '*.sh',  '*.c', '*.so',
+                                                    '*.dylib', '*.dll', '*.bat', '*.png', 'meshes/*.msh', 'meshes/*.geo', 'meshes/*.png'],
                        'daetools.ext_libs.SALib':  ['*.txt'],
                        'daetools.ext_libs.pyevtk': ['*.txt']
                      },
@@ -405,6 +405,6 @@ if platform.system() == 'Windows':
     script_folder    = os.path.join(script_folder, 'scripts')
     pythonw_path     = os.path.join(sys.prefix, 'pythonw.exe')
     python_version   = '%s.%s' % (python_major, python_minor)
-    cmd = 'cscript %s\create_shortcuts.js %s %s %s' % (script_folder, pythonw_path, python_version, daetools_version)
+    cmd = 'cscript %s\create_shortcuts.js %s %s %s %s' % (script_folder, pythonw_path, python_version, daetools_version, daetools_machine)
     print('Creating shortcuts: %s ...' % cmd)
     os.system(cmd)

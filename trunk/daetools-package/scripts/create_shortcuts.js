@@ -1,11 +1,12 @@
 var oWS = WScript.CreateObject("WScript.Shell");
 var fso = new ActiveXObject("Scripting.FileSystemObject");
 
-var pythonw          = WScript.Arguments.Item(0)
-var python_version   = WScript.Arguments.Item(1)
-var daetools_version = WScript.Arguments.Item(2)
+var pythonw          = WScript.Arguments.Item(0);
+var python_version   = WScript.Arguments.Item(1);
+var daetools_version = WScript.Arguments.Item(2);
+var daetools_machine = WScript.Arguments.Item(3);
 
-var daetools_suffix =  "_"+ daetools_version + "_py" + python_version;
+var daetools_suffix =  "_" + daetools_version + "_py" + python_version + "-" + daetools_machine;
 
 strStartmenu = oWS.SpecialFolders("StartMenu") + "\\DAE Tools" + daetools_suffix ;
 strDesktop = oWS.SpecialFolders("Desktop");

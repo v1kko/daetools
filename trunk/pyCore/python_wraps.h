@@ -10,7 +10,7 @@
 #if defined(__MACH__) || defined(__APPLE__)
 #include <python.h>
 #endif
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <boost/python.hpp>
 //#include <boost/python/numeric.hpp>

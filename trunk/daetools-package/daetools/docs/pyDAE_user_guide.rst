@@ -1824,7 +1824,7 @@ The library can be compiled using the following commands:
    gcc -fPIC -dynamiclib -o libheat_function.dylib tutorial14_heat_function.c
    
    # Windows vc++:
-   cl /MD tutorial14_heat_function.c /link /out:heat_function.dll
+   cl /LD tutorial14_heat_function.c /link /dll /out:heat_function.dll
 
 
 Numerical Methods for Partial Differential Equations
@@ -2025,24 +2025,22 @@ as given in the example below:
 
     class modTutorial(daeModel):
         def __init__(self, Name, Parent = None, Description = ""):
-            daeModel.__init__(self, Name, Parent, Description)
-        
-            # 1. Declare the HR upwnd scheme object in the __init__ function:
-            #     - c is a state variable
-            #     - x is a domain object
-            #     - u is velocity
-            #     - Phi_Koren is a flux limiter function
-            self.hr = daeHRUpwindSchemeEquation(self.c, self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
+            daeModel.__init__(self, Name, Parent, Description)        
             
         def DeclareEquations(self):
             daeModel.DeclareEquations(self)
 
-            hr = self.hr
             xp = self.x.Points
             Nx = self.x.NumberOfPoints
             
             c = lambda i: self.c(i)    
             
+            # 1. Declare the HR upwind scheme object:
+            #     - c is a state variable
+            #     - x is a domain object
+            #     - Phi_Koren is a flux limiter function
+            hr = daeHRUpwindSchemeEquation(self.c, self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
+
             # 2. Define the source term function
             def s(i):
                 return self.c(i)**2
@@ -2079,21 +2077,20 @@ The example above now becomes:
         def __init__(self, Name, Parent = None, Description = ""):
             daeModel.__init__(self, Name, Parent, Description)
         
-            # 1. Declare the HR upwind scheme object in the __init__ function:
-            #     - c is a state variable
-            #     - x is a domain object
-            #     - u is velocity
-            #     - Phi_Koren is a flux limiter function
-            self.hr = daeHRUpwindSchemeEquation(self.c, self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
-            
         def DeclareEquations(self):
             daeModel.DeclareEquations(self)
 
-            hr = self.hr
             xp = self.x.Points
             Nx = self.x.NumberOfPoints
             
             c = lambda i: self.c(i)    
+            
+            # 1. Declare the HR upwind scheme object:
+            #     - c is a state variable
+            #     - x is a domain object
+            #     - u is velocity
+            #     - Phi_Koren is a flux limiter function
+            hr = daeHRUpwindSchemeEquation(self.c, self.x, daeHRUpwindSchemeEquation.Phi_Koren, 1e-10)
             
             # 2. Consistent discretisation of convection and source terms:
             #    Calculate an analytical integral of the source term S = 1/u * Integral(s(x)*dx)
@@ -2601,7 +2598,9 @@ The sample configuration file is given below:
         "datareporting":
         {
             "tcpipDataReceiverAddress"  : "127.0.0.1",
-            "tcpipDataReceiverPort"     : 50000
+            "tcpipDataReceiverPort"     : 50000,
+            "tcpipNumberOfRetries"      : 10,
+            "tcpipRetryAfterMilliSecs"  : 1000
         },
         "logging":
         {
@@ -3091,7 +3090,7 @@ It can be started using the following commands:
     # Windows:
     daeplotter.bat
 
-    # Alternatively, te following can be also used:
+    # Platform independent:
     python -m daetools.dae_plotter.plotter
     # or
     python -c "from daetools.dae_plotter.plotter import daeStartPlotter; daeStartPlotter()"
@@ -3574,8 +3573,8 @@ The response is returned in JSON format.
 Sample html pages with the Graphical User Interface (GUI) using JavaScript and Plotly.js library
 are provided for both types of web services and presented in figure below. Web pages are located
 in the ``daetools/dae_simulator`` folder: 
-`daetools_ws_test.html <daetools_ws_test.html>`_ and 
-`daetools_fmi_ws_test.html <daetools_fmi_ws_test.html>`_.
+`daetools_ws_test.html <http://www.daetools.com/ws/daetools_ws_test.html>`_ and 
+`daetools_fmi_ws_test.html <http://www.daetools.com/ws/daetools_fmi_ws_test.html>`_.
 
 .. figure:: _static/daetools_ws_html.png
     :width: 500 pt
@@ -3669,7 +3668,7 @@ Here, the :py:meth:`~daetools.code_generators.daeCodeGenerator_FMI.generateSimul
 - ``localsAsOutputs``: if True all variables from the top-level model will be treated as model outputs, otherwise as locals
 - ``add_xml_stylesheet``: if True the xsl file ``daetools-fmi.xsl`` will be added to the modelDescription.xml file
 - ``useWebService``: if True the web service version (``fmi_ws``) shared library will be packed into the fmu file. 
-  DAE Tools FMI web service can be started using: ``python -m daetools.dae_simulator.daetools_ws``. 
+  DAE Tools FMI web service can be started using: ``python -m daetools.dae_simulator.daetools_fmi_ws``. 
   The fmu will attempt to start it automatically and connect during the initialisation phase.
 
 All tutorials provide ``run(**kwargs)`` function that can be used to run a simulation (using the console or Qt GUI) 
@@ -4227,10 +4226,10 @@ are the :py:class:`~pyActivity.daeOptimization` and the NLP/MINLP solver objects
 .. [#optimisation] `Mathematical optimization <https://en.wikipedia.org/wiki/Mathematical_optimization>`_
         
 
-Executing Parameter Estimations
-===============================
+..
+    Executing Parameter Estimations
+    ===============================
 
-
-Thermo-physical Property Packages
-================================
+    Thermo-physical Property Packages
+    ================================
 

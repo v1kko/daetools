@@ -22,7 +22,7 @@ from daetools.code_generators.fmi import daeCodeGenerator_FMI
 from daetools.pyDAE.data_reporters import daeCSVFileDataReporter
 
 import whats_the_time
-import tutorial1, tutorial4, tutorial5, tutorial14, tutorial15
+import tutorial1, tutorial4, tutorial5, tutorial15
 import tutorial_che_1, tutorial_che_2, tutorial_che_3, tutorial_che_7, tutorial_che_9
 import tutorial_dealii_1
 
@@ -36,7 +36,7 @@ arguments             = 'initializeAndReturn=True'
 additional_files      = []
 localsAsOutputs       = True
 add_xml_stylesheet    = True
-useWebService         = True
+useWebService         = False
 
 # Script files to run all FMUs with the ComplianceChecker
 run_fmuCheck_all_fmus_win32_bat  = None
@@ -234,7 +234,6 @@ def generateFMUs():
     exportSimulationFromTutorial(tutorial1)
     exportSimulationFromTutorial(tutorial4)
     exportSimulationFromTutorial(tutorial5)
-    exportSimulationFromTutorial(tutorial14)
     exportSimulationFromTutorial(tutorial15)
 
     # Chemical Engineering examples
