@@ -3032,7 +3032,7 @@ void daeModel::CollectAllSTNsAsVector(vector<daeSTN*>& ptrarrSTNs) const
         pModel->CollectAllSTNsAsVector(ptrarrSTNs);
     }
 
-// Finally, ill it with STNs in each modelarray
+// Finally, fill it with STNs in each modelarray
     for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
     {
         pModelArray = m_ptrarrComponentArrays[i];
@@ -3277,8 +3277,9 @@ daeBlock* daeModel::DoBlockDecomposition(void)
     pBlock->m_nNumberOfEquations      = nNoEquations;
     pBlock->m_nTotalNumberOfVariables = m_pDataProxy->GetTotalNumberOfVariables();
 
-// Here I reserve memory for m_ptrarrEquationExecutionInfos vector
-    pBlock->m_ptrarrEquationExecutionInfos.reserve(m_ptrarrEEIfromModels.size());
+// Reserve memory for EquationExecutionInfos vectors
+    pBlock->m_ptrarrEquationExecutionInfos.reserve(m_ptrarrEEIfromModels.size());                            // Only those from models (excluding STNs)
+    pBlock->m_ptrarrEquationExecutionInfos_ActiveSet.reserve(ptrarrAllEquationExecutionInfosInModel.size()); // All (including those in active states)
 
     for(i = 0; i < nNoEquations; i++)
     {
@@ -3507,13 +3508,13 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
         pSTN->SetIndexesWithinBlockToEquationExecutionInfos(pBlock, nEquationIndex);
     }
 
-// Now, after associating overall and block indexes build Jacobian expressions, if requested
+// Now, after associating overall and block indexes build Jacobian expressions, if requested.
 // That will also associate block indexes in adRuntimeVariable/adRuntimeTimeDerivative with those in the block
 // because the function Evaluate() for runtime nodes will be called for the first time here.
     for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
     {
         pEquationExec = m_ptrarrEEIfromModels[i];
-
+        // Build Jacobian expressions
         if(pEquationExec->m_pEquation->m_bBuildJacobianExpressions)
             pEquationExec->BuildJacobianExpressions();
     }
@@ -3521,7 +3522,44 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
     for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
     {
         pSTN = m_ptrarrAllSTNs[i];
+        // Build Jacobian expressions
         pSTN->BuildJacobianExpressions();
+    }
+
+// Now, create compute stack, if requested.
+// First estimate size for the big vector with all compute stacks and then creeate it.
+    uint32_t noItems = 0;
+    for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
+    {
+        pEquationExec = m_ptrarrEEIfromModels[i];
+        // Get compute stack size
+        noItems += adNode::GetComputeStackSize(pEquationExec->m_EquationEvaluationNode.get());
+    }
+    for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
+    {
+        pSTN = m_ptrarrAllSTNs[i];
+        // Get compute stack size
+        noItems += pSTN->GetComputeStackSize();
+    }
+
+    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
+    {
+        // Reserve and allocate memory for the estimated number of items to avoid frequent memory reallocation.
+        pBlock->m_arrAllComputeStacks.reserve(noItems);
+
+        for(size_t i = 0; i < m_ptrarrEEIfromModels.size(); i++)
+        {
+            pEquationExec = m_ptrarrEEIfromModels[i];
+            // Create compute stack
+            pEquationExec->CreateComputeStack(pBlock);
+        }
+        for(size_t i = 0; i < m_ptrarrAllSTNs.size(); i++)
+        {
+            pSTN = m_ptrarrAllSTNs[i];
+            // Create compute stack
+            pSTN->CreateComputeStack(pBlock);
+        }
+        //printf("m_arrAllComputeStacks.size() = %d (noItems = %d)\n", pBlock->m_arrAllComputeStacks.size(), noItems);
     }
 
 // Initialize the block
@@ -3542,7 +3580,7 @@ void daeModel::PopulateBlockIndexes(daeBlock* pBlock)
     m_ptrarrAllSTNs.clear();
 }
 
-void daeModel::SetDefaultInitialGuesses(void)
+void daeModel::SetDefaultInitialGuessesAndConstraints(void)
 {
     size_t i;
     daeModel* pModel;
@@ -3560,7 +3598,9 @@ void daeModel::SetDefaultInitialGuesses(void)
         pVariableType = pVariable->GetVariableType();
         if(!pVariableType)
             daeDeclareAndThrowException(exInvalidPointer);
+
         pVariable->SetInitialGuesses(pVariableType->GetInitialGuess());
+        pVariable->SetValueConstraints(pVariableType->GetValueConstraint());
     }
 
     daePort* pPort;
@@ -3579,7 +3619,9 @@ void daeModel::SetDefaultInitialGuesses(void)
             pVariableType = pVariable->GetVariableType();
             if(!pVariableType)
                 daeDeclareAndThrowException(exInvalidPointer);
+
             pVariable->SetInitialGuesses(pVariableType->GetInitialGuess());
+            pVariable->SetValueConstraints(pVariableType->GetValueConstraint());
         }
     }
 
@@ -3588,19 +3630,19 @@ void daeModel::SetDefaultInitialGuesses(void)
         pModel = m_ptrarrComponents[i];
         if(!pModel)
             daeDeclareAndThrowException(exInvalidPointer);
-        pModel->SetDefaultInitialGuesses();
+        pModel->SetDefaultInitialGuessesAndConstraints();
     }
 
     for(i = 0; i < m_ptrarrPortArrays.size(); i++)
     {
         pPortArray = m_ptrarrPortArrays[i];
-        pPortArray->SetDefaultInitialGuesses();
+        pPortArray->SetDefaultInitialGuessesAndConstraints();
     }
 
     for(i = 0; i < m_ptrarrComponentArrays.size(); i++)
     {
         pModelArray = m_ptrarrComponentArrays[i];
-        pModelArray->SetDefaultInitialGuesses();
+        pModelArray->SetDefaultInitialGuessesAndConstraints();
     }
 }
 
@@ -4117,8 +4159,8 @@ void daeModel::InitializeStage3(daeLog_t* pLog)
         throw e;
     }
 
-// Set default initial guesses and abs. tolerances
-    SetDefaultInitialGuesses();
+// Set default initial guesses, value constraints and absolute tolerances
+    SetDefaultInitialGuessesAndConstraints();
     SetDefaultAbsoluteTolerances();
 }
 

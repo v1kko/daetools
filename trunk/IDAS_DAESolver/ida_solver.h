@@ -44,7 +44,7 @@ public:
     virtual void						SetInitialConditionMode(daeeInitialConditionMode eMode);
     virtual daeBlock_t*					GetBlock(void) const;
     virtual daeLog_t*					GetLog(void) const;
-    virtual void						RefreshRootFunctions(void);
+    virtual void						RefreshEquationSetAndRootFunctions(void);
     virtual void						Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivities = false);
     virtual void						Reset(void);
     virtual daeMatrix<real_t>&			GetSensitivities(void);

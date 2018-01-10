@@ -48,6 +48,11 @@ DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #include <float.h>
 #include <stack>
 
+namespace computestack
+{
+#include "compute_stack.h"
+}
+
 namespace dae
 {
 namespace core
@@ -55,6 +60,8 @@ namespace core
 using units::base_unit;
 using units::unit;
 using units::quantity;
+using computestack::adComputeStackItem_t;
+using computestack::adJacobianMatrixItem_t;
 
 /*********************************************************************************************
     daeCondition
@@ -533,9 +540,10 @@ public:
     adNodePtr derivative;
 };
 
+#include "compute_stack.h"
+
 class daeNodeSaveAsContext;
 class DAE_CORE_API adNode : public daeExportable_t
-
 {
 public:
     virtual ~adNode(void){}
@@ -576,6 +584,10 @@ public:
                                     bool bAppendEqualToZero = false);
     static adJacobian Derivative(adNodePtr node, size_t nOverallVariableIndex);
     static adNodePtr  SimplifyNode(adNodePtr node);
+    static void       CreateComputeStack(adNode* node, std::vector<adComputeStackItem_t>& computeStack, daeBlock_t* pBlock, real_t scaling = 1.0);
+    static uint32_t   GetComputeStackSize(adNode* node);
+    static void       EstimateComputeStackSizes(const std::vector<adComputeStackItem_t>& computeStack, size_t start, size_t end,
+                                                int& max_valueSize, int& max_lvalueSize, int& max_rvalueSize);
 };
 
 // Originally, it has been cloning nodes every time. Now it just returns the existing node.
@@ -662,7 +674,6 @@ public:
     static condNode*	OpenNode(io::xmlTag_t* pTag, const string& strObjectName, io::daeOnOpenObjectDelegate_t<condNode>* ood = NULL);
     static void			SaveNodeAsMathML(io::xmlTag_t* pTag, const string& strObjectName, const condNode* node, const daeNodeSaveAsContext* c);
 };
-
 
 }
 }

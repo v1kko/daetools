@@ -467,7 +467,7 @@ public:
     virtual REAL   GetItem(size_t i) const       = 0;
     virtual void   SetItem(size_t i, REAL value) = 0;
     virtual size_t GetSize(void) const           = 0;
-
+    virtual REAL*  Data()                        = 0;
 };
 
 /*********************************************************************************************
@@ -492,8 +492,13 @@ public:
     virtual REAL	GetItem(size_t row, size_t col) const       = 0;
     virtual void	SetItem(size_t row, size_t col, REAL value) = 0;
 
-    virtual size_t	GetNrows(void) const                        = 0;
-    virtual size_t	GetNcols(void) const                        = 0;
+    virtual size_t	GetNrows(void) const = 0;
+    virtual size_t	GetNcols(void) const = 0;
+
+    // Depending on matrix type these functions might or might not be implemented.
+    // They exist for dense matrices.
+    virtual REAL*   GetRow(size_t row)    = 0;
+    virtual REAL*   GetColumn(size_t col) = 0;
 };
 
 /******************************************************************

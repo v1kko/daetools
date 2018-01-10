@@ -123,7 +123,7 @@ class modTutorial(daeModel):
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = dT_dx(x,y)
 
-        eq = self.CreateEquation("BC_right", " Neumann boundary conditions at the right edge (insulated)")
+        eq = self.CreateEquation("BC_right", "Neumann boundary conditions at the right edge (insulated)")
         x = eq.DistributeOnDomain(self.x, eUpperBound)
         y = eq.DistributeOnDomain(self.y, eClosedClosed)
         eq.Residual = dT_dx(x,y)
@@ -198,7 +198,7 @@ class simTutorial(daeSimulation):
         # The degrees of freedom can be fixed by assigning the variable value by using a function AssignValue:
         self.m.rho.AssignValue(8960 * kg/(m**3))
 
-        # To help the DAE solver it is possible to set initial guesses of of the variables.
+        # To help the DAE solver it is possible to set initial guesses of the variables.
         # Closer the initial guess is to the solution - faster the solver will converge to the solution
         # Just for fun, here we will try to obstruct the solver by setting the initial guess which is rather far from the solution.
         # Despite that, the solver will successfully initialize the system! 

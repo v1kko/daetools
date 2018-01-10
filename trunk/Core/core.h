@@ -89,8 +89,7 @@ enum daeeEquationCalculationMode
     eCalculate,
     eCreateFunctionsIFsSTNs,
     eCalculateJacobian,
-    eCalculateSensitivityResiduals,
-    eCalculateSensitivityParametersGradients
+    eCalculateSensitivityResiduals
 };
 
 enum daeeModelType
@@ -155,7 +154,8 @@ enum daeeUnaryFunctions
     eArcSinh,
     eArcCosh,
     eArcTanh,
-    eErf
+    eErf,
+    eScaling // used only in compute stack contexts
 };
 
 enum daeeBinaryFunctions
@@ -284,6 +284,14 @@ enum daeeModelLanguage
     ePYDAE
 };
 
+enum daeeVariableValueConstraint
+{
+    eNoConstraint = 0,
+    eValueGTEQ =  1,  // >= 0
+    eValueLTEQ = -1,  // <= 0
+    eValueGT   =  2,  // > 0
+    eValueLT   = -2,  // < 0
+};
 
 /******************************************************************
     daeObject_t
@@ -322,6 +330,8 @@ public:
     virtual void	SetUnits(const unit& u)					= 0;
     virtual real_t	GetAbsoluteTolerance(void) const		= 0;
     virtual void	SetAbsoluteTolerance(real_t dTolerance)	= 0;
+    virtual daeeVariableValueConstraint	GetValueConstraint(void) const			= 0;
+    virtual void	SetValueConstraint(daeeVariableValueConstraint eConstraint)	= 0;
 };
 
 /******************************************************************
@@ -860,7 +870,8 @@ public:
     virtual void	FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues,
                                                                              daeArray<real_t>& arrTimeDerivatives,
                                                                              daeArray<real_t>& arrInitialConditionsTypes,
-                                                                             daeArray<real_t>& arrAbsoluteTolerances) = 0;
+                                                                             daeArray<real_t>& arrAbsoluteTolerances,
+                                                                             daeArray<real_t>& arrValueConstraints) = 0;
 
 
     virtual size_t	GetNumberOfEquations(void) const = 0;
@@ -871,7 +882,7 @@ public:
 
     virtual bool	              CheckForDiscontinuities(void) = 0;
     virtual daeeDiscontinuityType ExecuteOnConditionActions(void) = 0;
-    virtual void	              RebuildExpressionMap(void) = 0;
+    virtual void	              RebuildActiveEquationSetAndRootExpressions(void) = 0;
 
     virtual void	CalcNonZeroElements(int& NNZ) = 0;
     virtual void	FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix) = 0;

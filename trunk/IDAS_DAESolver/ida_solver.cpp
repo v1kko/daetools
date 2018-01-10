@@ -240,7 +240,7 @@ void daeIDASolver::Initialize(daeBlock_t* pBlock,
     CreateLinearSolver();
 
 // Rebuild the expression map and set the number of roots
-    RefreshRootFunctions();
+    RefreshEquationSetAndRootFunctions();
 }
 
 void daeIDASolver::CreateArrays(void)
@@ -252,12 +252,14 @@ void daeIDASolver::SetInitialOptions(void)
 {
     daeRawDataArray<real_t> arrAbsoluteTolerances;
     daeRawDataArray<real_t> arrInitialConditionsTypes;
-    realtype *pVariableValues, *pTimeDerivatives, *pInitialConditionsTypes, *pAbsoluteTolerances;
+    daeRawDataArray<real_t> arrValueConstraints;
+    realtype *pVariableValues, *pTimeDerivatives, *pInitialConditionsTypes, *pAbsoluteTolerances, *pValueConstraints;
 
     pVariableValues         = NV_DATA_S(m_pIDASolverData->m_vectorVariables);
     pTimeDerivatives        = NV_DATA_S(m_pIDASolverData->m_vectorTimeDerivatives);
     pInitialConditionsTypes = NV_DATA_S(m_pIDASolverData->m_vectorInitialConditionsTypes);
     pAbsoluteTolerances		= NV_DATA_S(m_pIDASolverData->m_vectorAbsTolerances);
+    pValueConstraints		= NV_DATA_S(m_pIDASolverData->m_vectorValueConstraints);
 
     /*
        We have to fill the initial values of Variables and Time derivatives, set the
@@ -270,6 +272,7 @@ void daeIDASolver::SetInitialOptions(void)
     m_arrTimeDerivatives.InitArray(m_nNumberOfEquations,	  pTimeDerivatives);
     arrInitialConditionsTypes.InitArray(m_nNumberOfEquations, pInitialConditionsTypes);
     arrAbsoluteTolerances.InitArray(m_nNumberOfEquations,     pAbsoluteTolerances);
+    arrValueConstraints.InitArray(m_nNumberOfEquations,       pValueConstraints);
 
     if(m_eInitialConditionMode == eQuasiSteadyState)
         memset(pTimeDerivatives, 0, m_nNumberOfEquations*sizeof(realtype));
@@ -277,7 +280,8 @@ void daeIDASolver::SetInitialOptions(void)
     m_pBlock->FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(m_arrValues,
                                                                        m_arrTimeDerivatives,
                                                                        arrInitialConditionsTypes,
-                                                                       arrAbsoluteTolerances);
+                                                                       arrAbsoluteTolerances,
+                                                                       arrValueConstraints);
 
 // Determine if the model is dynamic or steady-state
     m_bIsModelDynamic = m_pBlock->IsModelDynamic();
@@ -338,6 +342,29 @@ void daeIDASolver::CreateIDA(void)
         daeDeclareException(exMiscellanous);
         e << "Sundials IDAS solver cowardly refused to set residual data; " << CreateIDAErrorMessage(retval);
         throw e;
+    }
+
+
+    real_t* pValueConstraints = NV_DATA_S(m_pIDASolverData->m_vectorValueConstraints);
+    bool constraintsSet = false;
+    for(size_t i = 0; i < m_nNumberOfEquations; i++)
+    {
+        if(pValueConstraints[i] != 0.0) // zero means no constraint set
+        {
+            constraintsSet = true;
+            break;
+        }
+    }
+    // If all constraints are 0.0 - no constraints were set; therefore, do not call IDASetConstraints
+    if(constraintsSet)
+    {
+        retval = IDASetConstraints(m_pIDA, m_pIDASolverData->m_vectorValueConstraints);
+        if(!CheckFlag(retval))
+        {
+            daeDeclareException(exMiscellanous);
+            e << "Sundials IDAS solver cowardly refused to set value constraints; " << CreateIDAErrorMessage(retval);
+            throw e;
+        }
     }
 
     real_t fval;
@@ -579,7 +606,7 @@ void daeIDASolver::CreateLinearSolver(void)
     }
 }
 
-void daeIDASolver::RefreshRootFunctions(void)
+void daeIDASolver::RefreshEquationSetAndRootFunctions(void)
 {
     int	retval;
     size_t nNoRoots;
@@ -587,7 +614,7 @@ void daeIDASolver::RefreshRootFunctions(void)
     if(!m_pBlock)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    m_pBlock->RebuildExpressionMap();
+    m_pBlock->RebuildActiveEquationSetAndRootExpressions();
     nNoRoots = m_pBlock->GetNumberOfRoots();
 
     retval = IDARootInit(m_pIDA, (int)nNoRoots, roots);
@@ -664,7 +691,7 @@ void daeIDASolver::SolveInitial(void)
         if(m_pBlock->CheckForDiscontinuities())
         {
             m_pBlock->ExecuteOnConditionActions();
-            RefreshRootFunctions();
+            RefreshEquationSetAndRootFunctions();
             ResetIDASolver(true, m_dCurrentTime, false);
 
             // debug
@@ -739,7 +766,7 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
         m_pLog->Message(strMessage, 0);
     }
 
-    RefreshRootFunctions();
+    RefreshEquationSetAndRootFunctions();
     ResetIDASolver(bCopyDataFromBlock, m_dCurrentTime, bResetSensitivities);
 
     for(iCounter = 0; iCounter < m_iNumberOfSTNRebuildsDuringInitialization; iCounter++)
@@ -787,7 +814,7 @@ void daeIDASolver::Reinitialize(bool bCopyDataFromBlock, bool bResetSensitivitie
         if(m_pBlock->CheckForDiscontinuities())
         {
             m_pBlock->ExecuteOnConditionActions();
-            RefreshRootFunctions();
+            RefreshEquationSetAndRootFunctions();
             ResetIDASolver(true, m_dCurrentTime, false);
 
             // debug

@@ -206,6 +206,18 @@ public:
         return deal_ii_matrix.m();
     }
 
+    virtual REAL* GetRow(size_t row)
+    {
+        daeDeclareException(exNotImplemented);
+        return NULL;
+    }
+
+    virtual REAL* GetColumn(size_t col)
+    {
+        daeDeclareException(exNotImplemented);
+        return NULL;
+    }
+
 protected:
     SparseMatrix<REAL>& deal_ii_matrix;
 };
@@ -245,6 +257,18 @@ public:
     virtual size_t GetNcols(void) const
     {
         return deal_ii_matrix.m();
+    }
+
+    virtual REAL* GetRow(size_t row)
+    {
+        daeDeclareException(exNotImplemented);
+        return NULL;
+    }
+
+    virtual REAL* GetColumn(size_t col)
+    {
+        daeDeclareException(exNotImplemented);
+        return NULL;
     }
 
 protected:
@@ -288,6 +312,12 @@ public:
         return deal_ii_vector.size();
     }
 
+    REAL* Data()
+    {
+        daeDeclareException(exNotImplemented);
+        return NULL;
+    }
+
 protected:
     Vector<REAL>& deal_ii_vector;
 };
@@ -327,6 +357,12 @@ public:
     size_t GetSize(void) const
     {
         return deal_ii_vector.size();
+    }
+
+    REAL* Data()
+    {
+        daeDeclareException(exNotImplemented);
+        return NULL;
     }
 
 protected:
@@ -2080,6 +2116,8 @@ public:
     virtual unsigned int i() const = 0;
     virtual unsigned int j() const = 0;
     virtual unsigned int component(unsigned int index) const = 0;
+
+    virtual double cell_diameter() const = 0;
 };
 
 template<int dim>
@@ -2119,6 +2157,31 @@ public:
             return (boost::format("(%f)") % m_value).str();
         else
             return (boost::format("%f") % m_value).str();
+    }
+
+public:
+    double m_value;
+};
+
+template<int dim>
+class feNode_cell_diameter : public feNode<dim>
+{
+public:
+    feNode_cell_diameter()
+    {
+    }
+
+public:
+    feRuntimeNumber<dim> Evaluate(const feCellContext<dim>* pCellContext) const
+    {
+        // i.e. cell_diameter is used for calculation of an isotropic artificial diffusivity (beta * h * ||u||).
+        double cell_diameter = pCellContext->cell_diameter();
+        return feRuntimeNumber<dim>(cell_diameter);
+    }
+
+    std::string ToString() const
+    {
+        return "cell_diameter()";
     }
 
 public:
@@ -3532,6 +3595,12 @@ template<int dim>
 feExpression<dim> constant(double value)
 {
     return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_constant<dim>(value) ) );
+}
+
+template<int dim>
+feExpression<dim> cell_diameter()
+{
+    return feExpression<dim>( typename feExpression<dim>::feNodePtr( new feNode_cell_diameter<dim>() ) );
 }
 
 // Scalar-data functions

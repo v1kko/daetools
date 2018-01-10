@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>tutorial20.py</title>
+</head>
+<!-- Highlighting: "Python" -->
+<body>
+<pre style='color:#1f1c1b;background-color:#ffffff;'>
+<span style='color:#017a31;'>#!/usr/bin/env python</span>
+<span style='color:#017a31;'># -*- coding: utf-8 -*-</span>
+
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>                            tutorial20.py</span>
+<span style='color:#017a31;'>                DAE Tools: pyDAE module, www.daetools.com</span>
+<span style='color:#017a31;'>                Copyright (C) Dragan Nikolic</span>
+<span style='color:#017a31;'>***********************************************************************************</span>
+<span style='color:#017a31;'>DAE Tools is free software; you can redistribute it and/or modify it under the</span>
+<span style='color:#017a31;'>terms of the GNU General Public License version 3 as published by the Free Software</span>
+<span style='color:#017a31;'>Foundation. DAE Tools is distributed in the hope that it will be useful, but WITHOUT</span>
+<span style='color:#017a31;'>ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</span>
+<span style='color:#017a31;'>PARTICULAR PURPOSE. See the GNU General Public License for more details.</span>
+<span style='color:#017a31;'>You should have received a copy of the GNU General Public License along with the</span>
+<span style='color:#017a31;'>DAE Tools software; if not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span style='color:#017a31;'>************************************************************************************</span>
+<span style='color:#017a31;'>&quot;&quot;&quot;</span>
+__doc__ <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+<span style='color:#cc0000;'>This tutorial illustrates the support variable constraints available in Sundials IDA solver.</span>
+<span style='color:#cc0000;'>Benchmarks are available from `Matlab documentation </span>
+<span style='color:#cc0000;'>&lt;https://www.mathworks.com/help/matlab/math/nonnegative-ode-solution.html&gt;`_.</span>
+
+<span style='color:#cc0000;'>In DAE Tools contraints follow the Sundials IDA solver implementation and can be </span>
+<span style='color:#cc0000;'>specified using the valueConstraint argument of the daeVariableType class __init__</span>
+<span style='color:#cc0000;'>function:</span>
+
+<span style='color:#cc0000;'> - eNoConstraint (default)</span>
+<span style='color:#cc0000;'> - eValueGTEQ: imposes &gt;= 0 constraint</span>
+<span style='color:#cc0000;'> - eValueLTEQ: imposes &lt;= 0 constraint</span>
+<span style='color:#cc0000;'> - eValueGT:   imposes &gt; 0 constraint</span>
+<span style='color:#cc0000;'> - eValueLT:   imposes &lt; 0 constraint</span>
+
+<span style='color:#cc0000;'>and changed for individual variables using daeVariable.SetValueConstraint functions. </span>
+<span style='color:#cc0000;'>&quot;&quot;&quot;</span>
+
+<span style='color:#3605fb;'>import</span> sys, numpy
+<span style='color:#3605fb;'>from</span> time <span style='color:#3605fb;'>import</span> localtime, strftime
+<span style='color:#3605fb;'>from</span> daetools.pyDAE <span style='color:#3605fb;'>import</span> <b><span style='color:#0000ff;'>*</span></b>
+
+<span style='color:#017a31;'># Impose &gt;= constraint on y value using the eValueGTEQ flag. </span>
+type_y <b><span style='color:#0000ff;'>=</span></b> daeVariableType(<span style='color:#cc0000;'>&quot;type_y&quot;</span>, unit(), <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1E10</span>, <span style='color:#cc047c;'>0</span>, <span style='color:#cc047c;'>1e-5</span>, eValueGTEQ)
+
+<b>class</b> modTutorial1(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#3605fb;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y&quot;</span>, type_y, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+
+        <span style='color:#017a31;'># Auxiliary objects to make equations more readable </span>
+        y     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y()
+        dy_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.y())
+
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> dy_dt <b><span style='color:#0000ff;'>+</span></b> numpy.fabs(y)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+<b>class</b> modTutorial2(daeModel):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>None</span>, Description <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc0000;'>&quot;&quot;</span>):
+        daeModel.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>, Name, Parent, Description)
+
+        <span style='color:#3605fb;'>self</span>.y <b><span style='color:#0000ff;'>=</span></b> daeVariable(<span style='color:#cc0000;'>&quot;y&quot;</span>, type_y, <span style='color:#3605fb;'>self</span>, <span style='color:#cc0000;'>&quot;&quot;</span>)
+
+    <b>def</b> DeclareEquations(<span style='color:#3605fb;'>self</span>):
+        daeModel.DeclareEquations(<span style='color:#3605fb;'>self</span>)
+
+        <span style='color:#017a31;'># 0 &lt; eps &lt;&lt; 1</span>
+        epsilon <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1e-6</span>
+        
+        <span style='color:#017a31;'># Auxiliary objects to make equations more readable </span>
+        t     <b><span style='color:#0000ff;'>=</span></b> Time()
+        y     <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.y()
+        dy_dt <b><span style='color:#0000ff;'>=</span></b> dt(<span style='color:#3605fb;'>self</span>.y())
+        
+        eq <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>self</span>.CreateEquation(<span style='color:#cc0000;'>&quot;y&quot;</span>)
+        eq.Residual <b><span style='color:#0000ff;'>=</span></b> epsilon <b><span style='color:#0000ff;'>*</span></b> dy_dt <b><span style='color:#0000ff;'>-</span></b> ((<span style='color:#cc047c;'>1</span><b><span style='color:#0000ff;'>-</span></b>t)<b><span style='color:#0000ff;'>*</span></b>y <b><span style='color:#0000ff;'>-</span></b> y<b><span style='color:#0000ff;'>**</span></b><span style='color:#cc047c;'>2</span>)
+        eq.CheckUnitsConsistency <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span>
+
+<b>class</b> simTutorial1(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial1(<span style='color:#cc0000;'>&quot;tutorial20(1)&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <b>pass</b>
+
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.y.SetInitialCondition(<span style='color:#cc047c;'>1.0</span>)
+
+<b>class</b> simTutorial2(daeSimulation):
+    <b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>):
+        daeSimulation.<b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#3605fb;'>self</span>)
+        <span style='color:#3605fb;'>self</span>.m <b><span style='color:#0000ff;'>=</span></b> modTutorial2(<span style='color:#cc0000;'>&quot;tutorial20(2)&quot;</span>)
+        <span style='color:#3605fb;'>self</span>.m.Description <b><span style='color:#0000ff;'>=</span></b> __doc__
+
+    <b>def</b> SetUpParametersAndDomains(<span style='color:#3605fb;'>self</span>):
+        <b>pass</b>
+
+    <b>def</b> SetUpVariables(<span style='color:#3605fb;'>self</span>):
+        <span style='color:#3605fb;'>self</span>.m.y.SetInitialCondition(<span style='color:#cc047c;'>1.0</span>)
+
+<b>def</b> run1(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial1()
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>1.0</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>40.0</span>,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
+<b>def</b> run2(<b><span style='color:#0000ff;'>**</span></b>kwargs):
+    simulation <b><span style='color:#0000ff;'>=</span></b> simTutorial2()
+    <b>return</b> daeActivity.simulate(simulation, reportingInterval <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>0.05</span>, 
+                                            timeHorizon       <b><span style='color:#0000ff;'>=</span></b> <span style='color:#cc047c;'>2.0</span>,
+                                            <b><span style='color:#0000ff;'>**</span></b>kwargs)
+
+<b>if</b> <span style='color:#3605fb;'>__name__</span> <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>&quot;__main__&quot;</span>:
+    guiRun <b><span style='color:#0000ff;'>=</span></b> <span style='color:#3605fb;'>False</span> <b>if</b> (<span style='color:#2a00d6;'>len</span>(sys.argv) <b><span style='color:#0000ff;'>&gt;</span></b> <span style='color:#cc047c;'>1</span> <b>and</b> sys.argv[<span style='color:#cc047c;'>1</span>] <b><span style='color:#0000ff;'>==</span></b> <span style='color:#cc0000;'>'console'</span>) <b>else</b> <span style='color:#3605fb;'>True</span>
+    run1(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+    run2(guiRun <b><span style='color:#0000ff;'>=</span></b> guiRun)
+</pre>
+</body>
+</html>

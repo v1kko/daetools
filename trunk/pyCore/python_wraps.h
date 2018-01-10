@@ -28,6 +28,10 @@
 #include "../Core/nodes.h"
 #include "../Core/nodes_array.h"
 
+using computestack::daeeOpCode;
+using computestack::daeeOpResultLocation;
+using computestack::adComputeStackItem_t;
+
 namespace daepython
 {
 template<typename TYPE1, typename TYPE2>
@@ -164,6 +168,8 @@ string adNode__str__(const adNode& self);
 string adNode__repr__(const adNode& self);
 string adouble_array__str__(const adouble_array& self);
 string adouble_array__repr__(const adouble_array& self);
+string adComputeStackItem__str__(const adComputeStackItem_t& self);
+string adComputeStackItem__repr__(const adComputeStackItem_t& self);
 
 string daeOptimizationVariable__str__(const daeOptimizationVariable& self);
 string daeOptimizationVariable__repr__(const daeOptimizationVariable& self);
@@ -200,6 +206,16 @@ string daeScalarExternalFunction__repr__(daeScalarExternalFunction& self);
 
 string daeVectorExternalFunction__str__(daeVectorExternalFunction& self);
 string daeVectorExternalFunction__repr__(daeVectorExternalFunction& self);
+
+string adComputeStackItem_variableName(adComputeStackItem_t& self);
+daeeOpCode adComputeStackItem_opCode(adComputeStackItem_t& self);
+boost::python::object adComputeStackItem_function(adComputeStackItem_t& self);
+daeeOpResultLocation adComputeStackItem_resultLocation(adComputeStackItem_t& self);
+int adComputeStackItem_tag(adComputeStackItem_t& self);
+double adComputeStackItem_data_value(adComputeStackItem_t& self);
+uint32_t adComputeStackItem_data_dofIndex(adComputeStackItem_t& self);
+uint32_t adComputeStackItem_data_blockIndex(adComputeStackItem_t& self);
+uint32_t adComputeStackItem_data_overallIndex(adComputeStackItem_t& self);
 
 /*******************************************************
     Common functions
@@ -1125,6 +1141,17 @@ void qSetInitialGuess6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t
 void qSetInitialGuess7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, const quantity& q);
 void qSetInitialGuess8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, const quantity& q);
 
+void lSetValueConstraint1(daeVariable& var, boost::python::list indexes, daeeVariableValueConstraint constraint);
+void SetValueConstraint0(daeVariable& var, daeeVariableValueConstraint constraint);
+void SetValueConstraint1(daeVariable& var, size_t n1, daeeVariableValueConstraint constraint);
+void SetValueConstraint2(daeVariable& var, size_t n1, size_t n2, daeeVariableValueConstraint constraint);
+void SetValueConstraint3(daeVariable& var, size_t n1, size_t n2, size_t n3, daeeVariableValueConstraint constraint);
+void SetValueConstraint4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, daeeVariableValueConstraint constraint);
+void SetValueConstraint5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, daeeVariableValueConstraint constraint);
+void SetValueConstraint6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, daeeVariableValueConstraint constraint);
+void SetValueConstraint7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, daeeVariableValueConstraint constraint);
+void SetValueConstraint8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, daeeVariableValueConstraint constraint);
+
 void AssignValues(daeVariable& var, real_t values);
 void AssignValues2(daeVariable& var, boost::python::object nd_values);
 void qAssignValues(daeVariable& var, const quantity& q);
@@ -1144,6 +1171,9 @@ void qReSetInitialConditions(daeVariable& var, const quantity& q);
 void SetInitialGuesses(daeVariable& var, real_t values);
 void SetInitialGuesses2(daeVariable& var, boost::python::object nd_values);
 void qSetInitialGuesses(daeVariable& var, const quantity& q);
+
+void SetValueConstraints(daeVariable& var, daeeVariableValueConstraint constraints);
+void SetValueConstraints2(daeVariable& var, boost::python::object nd_values);
 
 /*******************************************************
     daeActionWrapper
@@ -1218,6 +1248,7 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
     daeEquationExecutionInfo
 *******************************************************/
 adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self);
+boost::python::list daeEquationExecutionInfo_GetComputeStack(daeEquationExecutionInfo& self);
 boost::python::list daeEquationExecutionInfo_GetVariableIndexes(daeEquationExecutionInfo& self);
 boost::python::dict daeEquationExecutionInfo_JacobianExpressions(daeEquationExecutionInfo& self);
 

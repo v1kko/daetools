@@ -93,6 +93,7 @@ const char* DOCSTR_daeVariableType = "";
     const char* DOCSTR_daeVariableType_UpperBound = "";
     const char* DOCSTR_daeVariableType_InitialGuess = "";
     const char* DOCSTR_daeVariableType_AbsoluteTolerance = "";
+    const char* DOCSTR_daeVariableType_SetValueConstraint = "";
 
 const char* DOCSTR_daeFMI2Object_t = "";
     const char* DOCSTR_daeFMI2Object_t_reference = "";
@@ -374,6 +375,7 @@ const char* DOCSTR_daeFiniteElementObject = "";
 
 const char* DOCSTR_daeEquationExecutionInfo = "";
     const char* DOCSTR_daeEquationExecutionInfo_Node = "";
+    const char* DOCSTR_daeEquationExecutionInfo_GetComputeStack = "";
     const char* DOCSTR_daeEquationExecutionInfo_Name = "";
     const char* DOCSTR_daeEquationExecutionInfo_VariableIndexes = "";
     const char* DOCSTR_daeEquationExecutionInfo_EquationType = "";

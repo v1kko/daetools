@@ -19,7 +19,7 @@ Installation instructions
   python setup.py install
 
 - Windows (.exe) [unused now]:
-  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.7.1" --bitmap wininst.bmp
+  python setup.py bdist_wininst --user-access-control force --install-script daetools_win_install.py --title "DAE Tools 1.8.0" --bitmap wininst.bmp
 
 Create the source dist (.tar.gz):
   python setup.py sdist --formats=gztar
@@ -31,7 +31,7 @@ Create wheel:
 import os, sys, platform, shutil
 from setuptools import setup, Distribution
 
-daetools_version = '1.7.3'
+daetools_version = '1.8.0'
 
 # Python version
 python_major = str(sys.version_info[0])

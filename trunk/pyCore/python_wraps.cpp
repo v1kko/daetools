@@ -433,9 +433,9 @@ string daeVariableType__repr__(const daeVariableType& self)
     c.m_pModel             = NULL;
     string strUnits = units::Export(ePYDAE, c, self.GetUnits());
 
-    return (boost::format("daeVariableType(name=\"%1%\", units=%2%, lowerBound=%3%, upperBound=%4%, initialGuess=%5%, absoluteTolerance=%6%)") %
+    return (boost::format("daeVariableType(name=\"%1%\", units=%2%, lowerBound=%3%, upperBound=%4%, initialGuess=%5%, absoluteTolerance=%6%, valueConstraint=%7%)") %
             self.GetName() % strUnits % self.GetLowerBound() %
-            self.GetUpperBound() % self.GetInitialGuess() % self.GetAbsoluteTolerance()).str();
+            self.GetUpperBound() % self.GetInitialGuess() % self.GetAbsoluteTolerance() % self.GetValueConstraint()).str();
 }
 
 string daeDomainIndex__repr__(const daeDomainIndex& self)
@@ -815,6 +815,191 @@ string daeAction__str__(daeAction& self)
 string daeAction__repr__(daeAction& self)
 {
     return daeGetStrippedRelativeName(NULL, &self);
+}
+
+string adComputeStackItem_variableName(adComputeStackItem_t& self)
+{
+#ifdef ComputeStackDebug
+    return self.variableName;
+#else
+    return string("");
+#endif
+}
+
+daeeOpCode adComputeStackItem_opCode(adComputeStackItem_t& self)
+{
+    return (daeeOpCode)self.opCode;
+}
+
+boost::python::object adComputeStackItem_function(adComputeStackItem_t& self)
+{
+    if(self.opCode == computestack::eOP_Unary)
+        return boost::python::object((daeeUnaryFunctions)self.function);
+    else if(self.opCode == computestack::eOP_Binary)
+        return boost::python::object((daeeBinaryFunctions)self.function);
+    else
+        return boost::python::object(-1);
+}
+
+daeeOpResultLocation adComputeStackItem_resultLocation(adComputeStackItem_t& self)
+{
+    return (daeeOpResultLocation)self.resultLocation;
+}
+
+int adComputeStackItem_tag(adComputeStackItem_t& self)
+{
+    return (int)self.data.value;
+}
+
+
+double adComputeStackItem_data_value(adComputeStackItem_t& self)
+{
+    return self.data.value;
+}
+
+uint32_t adComputeStackItem_data_dofIndex(adComputeStackItem_t& self)
+{
+    return self.data.dof_indexes.dofIndex;
+}
+
+uint32_t adComputeStackItem_data_blockIndex(adComputeStackItem_t& self)
+{
+    return self.data.indexes.blockIndex;
+}
+
+uint32_t adComputeStackItem_data_overallIndex(adComputeStackItem_t& self)
+{
+    if(self.opCode == computestack::eOP_DegreeOfFreedom)
+        return self.data.dof_indexes.overallIndex;
+    else
+        return self.data.indexes.overallIndex;
+}
+
+string adComputeStackItem__str__(const adComputeStackItem_t& self)
+{
+    return adComputeStackItem__repr__(self);
+}
+
+string adComputeStackItem__repr__(const adComputeStackItem_t& self)
+{
+    std::string res;
+    if(self.opCode == computestack::eOP_Constant)
+        res += "adComputeStackItem_t(opCode = eOP_Constant";
+    else if(self.opCode == computestack::eOP_Time)
+        res += "adComputeStackItem_t(opCode = eOP_Time";
+    else if(self.opCode == computestack::eOP_InverseTimeStep)
+        res += "adComputeStackItem_t(opCode = eOP_InverseTimeStep";
+    else if(self.opCode == computestack::eOP_Variable)
+        res += "adComputeStackItem_t(opCode = eOP_Variable";
+    else if(self.opCode == computestack::eOP_DegreeOfFreedom)
+        res += "adComputeStackItem_t(opCode = eOP_DegreeOfFreedom";
+    else if(self.opCode == computestack::eOP_TimeDerivative)
+        res += "adComputeStackItem_t(opCode = eOP_TimeDerivative";
+    else if(self.opCode == computestack::eOP_Unary)
+        res += "adComputeStackItem_t(opCode = eOP_Unary";
+    else if(self.opCode == computestack::eOP_Binary)
+        res += "adComputeStackItem_t(opCode = eOP_Binary";
+    else
+        res += "adComputeStackItem_t(opCode = eOP_Unknown";
+
+    if(self.resultLocation == computestack::eOP_Result_to_value)
+        res += ", resultLocation = eOP_Result_to_value";
+    else if(self.resultLocation == computestack::eOP_Result_to_lvalue)
+        res += ", resultLocation = eOP_Result_to_lvalue";
+    else if(self.resultLocation == computestack::eOP_Result_to_rvalue)
+        res += ", resultLocation = eOP_Result_to_rvalue";
+    else
+        res += ", resultLocation = eOP_Result_Unknown";
+
+    if(self.opCode == computestack::eOP_Constant)
+    {
+        res += ", value = " + toString<double>(self.data.value);
+    }
+    else if(self.opCode == computestack::eOP_Variable || self.opCode == computestack::eOP_TimeDerivative)
+    {
+        res += ", blockIndex = "   + toString<uint32_t>(self.data.indexes.blockIndex);
+        res += ", overallIndex = " + toString<uint32_t>(self.data.indexes.overallIndex);
+        //res += ", isAssigned = " + toString<bool>(bool(self.isAssigned));
+    }
+    else if(self.opCode == computestack::eOP_DegreeOfFreedom)
+    {
+        res += ", overallIndex = " + toString<uint32_t>(self.data.dof_indexes.overallIndex);
+        res += ", dofIndex = "     + toString<uint32_t>(self.data.dof_indexes.dofIndex);
+    }
+    else if(self.opCode == computestack::eOP_Unary)
+    {
+        res += ", function = ";
+        daeeUnaryFunctions eValue = daeeUnaryFunctions(self.function);
+        if(eValue == eSign)
+            res += string("eSign");
+        else if(eValue == eSqrt)
+            res += string("eSqrt");
+        else if(eValue == eExp)
+            res += string("eExp");
+        else if(eValue == eLog)
+            res += string("eLog");
+        else if(eValue == eLn)
+            res += string("eLn");
+        else if(eValue == eAbs)
+            res += string("eAbs");
+        else if(eValue == eSin)
+            res += string("eSin");
+        else if(eValue == eCos)
+            res += string("eCos");
+        else if(eValue == eTan)
+            res += string("eTan");
+        else if(eValue == eArcSin)
+            res += string("eArcSin");
+        else if(eValue == eArcCos)
+            res += string("eArcCos");
+        else if(eValue == eArcTan)
+            res += string("eArcTan");
+        else if(eValue == eCeil)
+            res += string("eCeil");
+        else if(eValue == eFloor)
+            res += string("eFloor");
+        else if(eValue == eSinh)
+            res += string("eSinh");
+        else if(eValue == eCosh)
+            res += string("eCosh");
+        else if(eValue == eTanh)
+            res += string("eTanh");
+        else if(eValue == eArcSinh)
+            res += string("eArcSinh");
+        else if(eValue == eArcCosh)
+            res += string("eArcCosh");
+        else if(eValue == eArcTanh)
+            res += string("eArcTanh");
+        else if(eValue == eErf)
+            res += string("eErf");
+        else
+            res += string("unknown");
+    }
+    else if(self.opCode == computestack::eOP_Binary)
+    {
+        res += ", function = ";
+        daeeBinaryFunctions eValue = daeeBinaryFunctions(self.function);
+        if(eValue == ePlus)
+            res += string("ePlus");
+        else if(eValue == eMinus)
+            res += string("eMinus");
+        else if(eValue == eMulti)
+            res += string("eMulti");
+        else if(eValue == eDivide)
+            res += string("eDivide");
+        else if(eValue == ePower)
+            res += string("ePower");
+        else if(eValue == eMin)
+            res += string("eMin");
+        else if(eValue == eMax)
+            res += string("eMax");
+        else if(eValue == eArcTan2)
+            res += string("eArcTan2");
+        else
+            res += string("unknown");
+    }
+    res += ")";
+    return res;
 }
 
 string adNode__str__(const adNode& self)
@@ -3784,6 +3969,73 @@ void SetInitialCondition8(daeVariable& var, size_t n1, size_t n2, size_t n3, siz
     var.SetInitialCondition(n1, n2, n3, n4, n5, n6, n7, n8, value);
 }
 
+void lSetValueConstraint1(daeVariable& var, boost::python::list indexes, daeeVariableValueConstraint constraint)
+{
+    std::vector<size_t> narrIndexes;
+    boost::python::ssize_t n = boost::python::len(indexes);
+    narrIndexes.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::extract<size_t> index(indexes[i]);
+
+        if(index.check())
+            narrIndexes[i] = index();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of index [" << i << "] in the list of indexes in SetValueConstraint for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetValueConstraint(narrIndexes, constraint);
+}
+
+void SetValueConstraint0(daeVariable& var, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(constraint);
+}
+
+void SetValueConstraint1(daeVariable& var, size_t n1, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, constraint);
+}
+
+void SetValueConstraint2(daeVariable& var, size_t n1, size_t n2, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, constraint);
+}
+
+void SetValueConstraint3(daeVariable& var, size_t n1, size_t n2, size_t n3, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, n3, constraint);
+}
+
+void SetValueConstraint4(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, n3, n4, constraint);
+}
+
+void SetValueConstraint5(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, n3, n4, n5, constraint);
+}
+
+void SetValueConstraint6(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, n3, n4, n5, n6, constraint);
+}
+
+void SetValueConstraint7(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, n3, n4, n5, n6, n7, constraint);
+}
+
+void SetValueConstraint8(daeVariable& var, size_t n1, size_t n2, size_t n3, size_t n4, size_t n5, size_t n6, size_t n7, size_t n8, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraint(n1, n2, n3, n4, n5, n6, n7, n8, constraint);
+}
+
 void lReSetInitialCondition1(daeVariable& var, boost::python::list indexes, real_t value)
 {
     std::vector<size_t> narrIndexes;
@@ -4423,6 +4675,64 @@ void qSetInitialGuesses(daeVariable& var, const quantity& q)
     var.SetInitialGuesses(q);
 }
 
+
+void SetValueConstraints(daeVariable& var, daeeVariableValueConstraint constraint)
+{
+    var.SetValueConstraints(constraint);
+}
+
+void SetValueConstraints2(daeVariable& var, boost::python::object nd_values)
+{
+/* NUMPY */
+    boost::python::object numpy = boost::python::import("numpy");
+
+    // Check the shape of ndarray
+    boost::python::tuple shape = boost::python::extract<boost::python::tuple>(nd_values.attr("shape"));
+    if(len(shape) != var.GetNumberOfDomains())
+    {
+        daeDeclareException(exInvalidCall);
+        e << "Invalid number of dimensions (" << len(shape) << ") of the array of values in SetValueConstraints for variable " << var.GetCanonicalName()
+          << "; the required number of dimensions is " << var.GetNumberOfDomains();
+        throw e;
+    }
+    for(size_t k = 0; k < len(shape); k++)
+    {
+        size_t dim_avail = boost::python::extract<size_t>(shape[k]);
+        size_t dim_req   = var.GetDomain(k)->GetNumberOfPoints();
+        if(dim_req != dim_avail)
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid shape of the array of values in SetValueConstraints for variable " << var.GetCanonicalName()
+              << "; dimension " << k << " has " << dim_avail << " points (required is " << dim_req << ")";
+            throw e;
+        }
+    }
+
+    // The ndarray must be flattened before use (in the row-major c-style order)
+    boost::python::object arg("C");
+    boost::python::object values = nd_values.attr("ravel")(arg);
+    boost::python::ssize_t n = boost::python::extract<boost::python::ssize_t>(values.attr("size"));
+    std::vector<daeeVariableValueConstraint> constraints;
+    constraints.resize(n);
+
+    for(boost::python::ssize_t i = 0; i < n; i++)
+    {
+        boost::python::object obj = values.attr("__getitem__")(i);
+
+        boost::python::extract<daeeVariableValueConstraint> rValue(obj);
+
+        if(rValue.check())
+            constraints[i] = rValue();
+        else
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Invalid type of item [" << i << "] in the list of values in SetValueConstraints for variable " << var.GetCanonicalName();
+            throw e;
+        }
+    }
+    var.SetValueConstraints(constraints);
+}
+
 /*******************************************************
     daePort
 *******************************************************/
@@ -4513,6 +4823,11 @@ boost::python::list daeEquation_DistributedEquationDomainInfos(daeEquation& self
 adNode* daeEquationExecutionInfo_GetNode(daeEquationExecutionInfo& self)
 {
     return self.GetEquationEvaluationNodeRawPtr();
+}
+
+boost::python::list daeEquationExecutionInfo_GetComputeStack(daeEquationExecutionInfo& self)
+{
+    return getListFromVectorByValue(self.GetComputeStack());
 }
 
 //void daeFiniteElementEquationExecutionInfo_SetNode(daeFiniteElementEquationExecutionInfo& self, adouble a)

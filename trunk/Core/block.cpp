@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "coreimpl.h"
+#include "../IDAS_DAESolver/dae_array_matrix.h"
 #include <omp.h>
 
 namespace dae
@@ -109,56 +110,81 @@ void daeBlock::CalculateResiduals(real_t			dTime,
     SetValuesArray(&arrValues);
     SetTimeDerivativesArray(&arrTimeDerivatives);
     SetResidualArray(&arrResiduals);
+    SetInverseTimeStep(0.0);
 
-    daeExecutionContext EC;
-    EC.m_pBlock						= this;
-    EC.m_pDataProxy					= m_pDataProxy;
-    EC.m_dInverseTimeStep			= GetInverseTimeStep();
-    EC.m_pEquationExecutionInfo		= NULL;
-    EC.m_eEquationCalculationMode	= eCalculate;
-
-    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-
-    // Update equations if necessary (in general, applicable only to FE equations)
-    pTopLevelModel->UpdateEquations(&EC);
-
-// Commented out because of a seg. fault (can't find the reason).
-//    double startTime, endTime;
-//    bool bPrintInfo = m_pDataProxy->PrintInfo();
-//    if(bPrintInfo)
-//    {
-//        startTime = dae::GetTimeInSeconds();
-//    }
-
-/* Old, serial code
-// First calculate normal equations (non-STN)
-    for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
     {
-        daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
-        pEquationExecutionInfo->Residual(EC);
+        computestack::daeComputeStackEvaluationContext_t EC;
+        EC.equationCalculationMode                       = eCalculate;
+        EC.currentParameterIndexForSensitivityEvaluation = -1;
+        EC.currentVariableIndexForJacobianEvaluation     = -1;
+        EC.numberOfVariables                             = m_nNumberOfEquations;
+        EC.valuesStackSize  = 5;
+        EC.lvaluesStackSize = 20;
+        EC.rvaluesStackSize = 5;
+        EC.currentTime     = dTime;
+        EC.inverseTimeStep = 0; // Should not be needed here. Double check...
+
+        const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
+
+        const adComputeStackItem_t* computeStacks            = &m_arrAllComputeStacks[0];
+        const uint32_t*             activeEquationSetIndexes = &m_arrActiveEquationSetIndexes[0];
+
+        const real_t* dofs            = (arrDOFs.size() > 0 ? &arrDOFs[0] : NULL);
+        const real_t* values          = arrValues.Data();
+        const real_t* timeDerivatives = arrTimeDerivatives.Data();
+              real_t* residuals       = arrResiduals.Data();
+
+        #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
+        for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+        {
+            calculate_cs_residual(computeStacks,
+                                  ei,
+                                  activeEquationSetIndexes,
+                                  EC,
+                                  dofs,
+                                  values,
+                                  timeDerivatives,
+                                  residuals);
+        }
     }
-
-// Now calculate STN equations
-    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+    else
     {
-        pSTN = m_ptrarrSTNs[i];
-        pSTN->CalculateResiduals(EC);
-    }
-*/
+        daeExecutionContext EC;
+        EC.m_pBlock						= this;
+        EC.m_pDataProxy					= m_pDataProxy;
+        EC.m_dInverseTimeStep			= GetInverseTimeStep();
+        EC.m_pEquationExecutionInfo		= NULL;
+        EC.m_eEquationCalculationMode	= eCalculate;
 
-    // Calls PyEval_InitThreads() and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
-    //std::cout << typeid(*_allowThreads_).name() << std::endl;
+        daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
 
-    // OpenMP version
-    std::vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
-    GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+        // Update equations if necessary (in general, applicable only to FE equations)
+        pTopLevelModel->UpdateEquations(&EC);
 
-    #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
-    for(int i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
-    {
-        daeEquationExecutionInfo* pEquationExecutionInfo = ptrarrEquationExecutionInfos[i];
-        pEquationExecutionInfo->Residual(EC);
+    // Commented out because of a seg. fault (can't find the reason).
+    //    double startTime, endTime;
+    //    bool bPrintInfo = m_pDataProxy->PrintInfo();
+    //    if(bPrintInfo)
+    //    {
+    //        startTime = dae::GetTimeInSeconds();
+    //    }
+
+        if(m_ptrarrEquationExecutionInfos_ActiveSet.empty())
+            daeDeclareAndThrowException(exInvalidCall);
+
+        // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
+        boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+        //std::cout << typeid(*_allowThreads_).name() << std::endl;
+
+        // OpenMP version
+        // m_ptrarrEquationExecutionInfos_ActiveSet should be previously updated with the currently active equation set.
+        #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
+        for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
+        {
+            daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos_ActiveSet[i];
+            pEquationExecutionInfo->Residual(EC);
+        }
     }
 
 // Commented out because of a seg. fault (can't find the reason).
@@ -169,6 +195,14 @@ void daeBlock::CalculateResiduals(real_t			dTime,
 //        m_pDataProxy->LogMessage(string("Total time for the current residuals evaluation = ") + toStringFormatted(endTime - startTime, -1, 10) + string("s"), 0);
 //        m_pDataProxy->LogMessage(string("Cumulative time for all residuals evaluations = ") + toStringFormatted(m_dTotalTimeForResiduals, -1, 10) + string("s"), 0);
 //    }
+}
+
+static void setJacobianMatrixItem(void* matrix, uint32_t row, uint32_t col, real_t value)
+{
+    daeMatrix<real_t>* mat = (daeMatrix<real_t>*)matrix;
+    if(!mat)
+        daeDeclareAndThrowException(exInvalidCall);
+    mat->SetItem(row, col, value);
 }
 
 void daeBlock::CalculateJacobian(real_t				dTime,
@@ -189,55 +223,135 @@ void daeBlock::CalculateJacobian(real_t				dTime,
     SetJacobianMatrix(&matJacobian);
     SetInverseTimeStep(dInverseTimeStep);
 
-    daeExecutionContext EC;
-    EC.m_pBlock						= this;
-    EC.m_pDataProxy					= m_pDataProxy;
-    EC.m_dInverseTimeStep			= GetInverseTimeStep();
-    EC.m_pEquationExecutionInfo		= NULL;
-    EC.m_eEquationCalculationMode	= eCalculateJacobian;
-
-    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-
-    // Update equations if necessary (in general, applicable only to FE equations)
-    pTopLevelModel->UpdateEquations(&EC);
-
-// Commented out because of a seg. fault (can't find the reason).
-//    double startTime, endTime;
-//    bool bPrintInfo = m_pDataProxy->PrintInfo();
-//    if(bPrintInfo)
-//    {
-//        startTime = dae::GetTimeInSeconds();
-//    }
-
-/* Old, serial code
-// First calculate normal equations (non-STN)
-    for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
     {
-        daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
-        pEquationExecutionInfo->Jacobian(EC);
+        computestack::daeComputeStackEvaluationContext_t EC;
+        EC.equationCalculationMode                       = eCalculateJacobian;
+        EC.currentParameterIndexForSensitivityEvaluation = -1;
+        EC.currentVariableIndexForJacobianEvaluation     = -1;
+        EC.numberOfVariables                             = m_nNumberOfEquations;
+        EC.valuesStackSize  = 5;
+        EC.lvaluesStackSize = 20;
+        EC.rvaluesStackSize = 5;
+        EC.currentTime     = dTime;
+        EC.inverseTimeStep = dInverseTimeStep;
+
+        const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
+
+        const adComputeStackItem_t*   computeStacks             = &m_arrAllComputeStacks[0];
+        const uint32_t*               activeEquationSetIndexes  = &m_arrActiveEquationSetIndexes[0];
+        const adJacobianMatrixItem_t* computeStackJacobianItems = &m_arrComputeStackJacobianItems[0];
+        uint32_t                      noJacobianItems           = m_arrComputeStackJacobianItems.size();
+
+        const real_t* dofs            = (arrDOFs.size() > 0 ? &arrDOFs[0] : NULL);
+        const real_t* values          = arrValues.Data();
+        const real_t* timeDerivatives = arrTimeDerivatives.Data();
+
+        daeDenseMatrix*            dense_mat = dynamic_cast< daeDenseMatrix*>(&matJacobian);
+        daeCSRMatrix<real_t, int>* crs_mat   = dynamic_cast< daeCSRMatrix<real_t, int>* >(&matJacobian);
+        if(dense_mat)
+        {
+            // IDA solver uses the column wise data
+            if(dense_mat->data_access != eColumnWise)
+                daeDeclareAndThrowException(exInvalidCall);
+
+            real_t** jacobian = dense_mat->data;
+
+            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
+            for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+            {
+                calculate_cs_jacobian_dns(computeStacks,
+                                          ji,
+                                          activeEquationSetIndexes,
+                                          computeStackJacobianItems,
+                                          EC,
+                                          dofs,
+                                          values,
+                                          timeDerivatives,
+                                          jacobian);
+            }
+        }
+        else if(crs_mat)
+        {
+            int* IA   = crs_mat->IA;
+            int* JA   = crs_mat->JA;
+            real_t* A = crs_mat->A;
+
+            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
+            for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+            {
+                calculate_cs_jacobian_csr(computeStacks,
+                                          ji,
+                                          activeEquationSetIndexes,
+                                          computeStackJacobianItems,
+                                          EC,
+                                          dofs,
+                                          values,
+                                          timeDerivatives,
+                                          IA,
+                                          JA,
+                                          A);
+            }
+        }
+        else
+        {
+            // For daeEpetraCSRMatrix and other no-CSR matrix storage types.
+            computestack::jacobian_fn jac_fn = &setJacobianMatrixItem;
+            void*                     matrix = (void*)&matJacobian;
+
+            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
+            for(uint32_t ji = 0; ji < noJacobianItems; ji++)
+            {
+                calculate_cs_jacobian_gen(computeStacks,
+                                          ji,
+                                          activeEquationSetIndexes,
+                                          computeStackJacobianItems,
+                                          EC,
+                                          dofs,
+                                          values,
+                                          timeDerivatives,
+                                          matrix,
+                                          jac_fn);
+            }
+        }
     }
-
-// Now calculate STN equations
-    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+    else
     {
-        pSTN = m_ptrarrSTNs[i];
-        pSTN->CalculateJacobian(EC);
-    }
-*/
+        daeExecutionContext EC;
+        EC.m_pBlock						= this;
+        EC.m_pDataProxy					= m_pDataProxy;
+        EC.m_dInverseTimeStep			= GetInverseTimeStep();
+        EC.m_pEquationExecutionInfo		= NULL;
+        EC.m_eEquationCalculationMode	= eCalculateJacobian;
 
-    // Calls PyEval_InitThreads() and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+        daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
 
-    // OpenMP version
-    std::vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
-    GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+        // Update equations if necessary (in general, applicable only to FE equations)
+        pTopLevelModel->UpdateEquations(&EC);
 
-    #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
-    for(int i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
-    {
-        //std::cout << "  thread id " << omp_get_thread_num() << " calculating Jacobian for equation " << i << std::endl;
-        daeEquationExecutionInfo* pEquationExecutionInfo = ptrarrEquationExecutionInfos[i];
-        pEquationExecutionInfo->Jacobian(EC);
+    // Commented out because of a seg. fault (can't find the reason).
+    //    double startTime, endTime;
+    //    bool bPrintInfo = m_pDataProxy->PrintInfo();
+    //    if(bPrintInfo)
+    //    {
+    //        startTime = dae::GetTimeInSeconds();
+    //    }
+
+        if(m_ptrarrEquationExecutionInfos_ActiveSet.empty())
+            daeDeclareAndThrowException(exInvalidCall);
+
+        // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
+        boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+
+        // OpenMP version
+        // m_ptrarrEquationExecutionInfos_ActiveSet should be previously updated with the currently active equation set.
+        #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
+        for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
+        {
+            //std::cout << "  thread id " << omp_get_thread_num() << " calculating Jacobian for equation " << i << std::endl;
+            daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos_ActiveSet[i];
+            pEquationExecutionInfo->Jacobian(EC);
+        }
     }
 
 // Commented out because of a seg. fault (can't find the reason).
@@ -266,58 +380,95 @@ void daeBlock::CalculateSensitivityResiduals(real_t						dTime,
     m_pDataProxy->SetCurrentTime(dTime);
     SetValuesArray(&arrValues);
     SetTimeDerivativesArray(&arrTimeDerivatives);
+    SetInverseTimeStep(0.0);
     m_pDataProxy->SetSensitivityMatrixes(&matSValues,
                                          &matSTimeDerivatives,
                                          &matSResiduals);
 
-    daeExecutionContext EC;
-    EC.m_pBlock						= this;
-    EC.m_pDataProxy					= m_pDataProxy;
-    EC.m_dInverseTimeStep			= GetInverseTimeStep(); // ??????
-    EC.m_pEquationExecutionInfo		= NULL;
-    EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
-
-    daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
-
-    // Update equations if necessary (in general, applicable only to FE equations)
-    pTopLevelModel->UpdateEquations(&EC);
-
-// Commented out because of a seg. fault (can't find the reason).
-//    double startTime, endTime;
-//    bool bPrintInfo = m_pDataProxy->PrintInfo();
-//    if(bPrintInfo)
-//    {
-//        startTime = dae::GetTimeInSeconds();
-//    }
-
-/* Old, serial code
-    for(size_t i = 0; i < m_ptrarrEquationExecutionInfos.size(); i++)
+    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
     {
-        daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos[i];
-        pEquationExecutionInfo->SensitivityResiduals(EC, narrParameterIndexes);
+        computestack::daeComputeStackEvaluationContext_t EC;
+        EC.equationCalculationMode                       = eCalculateSensitivityResiduals;
+        EC.currentParameterIndexForSensitivityEvaluation = -1;
+        EC.currentVariableIndexForJacobianEvaluation     = -1;
+        EC.numberOfVariables                             = m_nNumberOfEquations;
+        EC.valuesStackSize  = 5;
+        EC.lvaluesStackSize = 20;
+        EC.rvaluesStackSize = 5;
+        EC.currentTime     = dTime;
+        EC.inverseTimeStep = 0; // Should not be needed here. Double check...
+
+        const std::vector<real_t>& arrDOFs = m_pDataProxy->GetAssignedVarsValues();
+
+        const adComputeStackItem_t* computeStacks            = &m_arrAllComputeStacks[0];
+        const uint32_t*             activeEquationSetIndexes = &m_arrActiveEquationSetIndexes[0];
+
+        const real_t* dofs            = (arrDOFs.size() > 0 ? &arrDOFs[0] : NULL);
+        const real_t* values          = arrValues.Data();
+        const real_t* timeDerivatives = arrTimeDerivatives.Data();
+
+        daeDenseMatrix* sens_res_mat = dynamic_cast< daeDenseMatrix*>(&matSResiduals);
+        if(!sens_res_mat)
+            daeDeclareAndThrowException(exInvalidPointer);
+
+        for(size_t p = 0; p < narrParameterIndexes.size(); p++)
+        {
+            const real_t* svalues    = matSValues.GetRow(p);
+            const real_t* sdvalues   = matSTimeDerivatives.GetRow(p);
+                  real_t* sresiduals = matSResiduals.GetRow(p);
+
+            EC.currentParameterIndexForSensitivityEvaluation = narrParameterIndexes[p];
+
+            #pragma omp parallel for firstprivate(EC) if(m_bUseOpenMP)
+            for(uint32_t ei = 0; ei < m_nNumberOfEquations; ei++)
+            {
+                calculate_cs_sens_residual(computeStacks,
+                                           ei,
+                                           activeEquationSetIndexes,
+                                           EC,
+                                           dofs,
+                                           values,
+                                           timeDerivatives,
+                                           svalues,
+                                           sdvalues,
+                                           sresiduals);
+            }
+        }
     }
-
-// In general, neither objective function nor constraints can be within an STN
-    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+    else
     {
-        pSTN = m_ptrarrSTNs[i];
-        pSTN->CalculateSensitivityResiduals(EC, narrParameterIndexes);
-    }
-*/
+        daeExecutionContext EC;
+        EC.m_pBlock						= this;
+        EC.m_pDataProxy					= m_pDataProxy;
+        EC.m_dInverseTimeStep			= 0; // Should not be needed here. Double check...
+        EC.m_pEquationExecutionInfo		= NULL;
+        EC.m_eEquationCalculationMode	= eCalculateSensitivityResiduals;
 
-    // Calls PyEval_InitThreads() and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
-    boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+        daeModel* pTopLevelModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
 
-    // OpenMP version
-    std::vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
-    GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
+        // Update equations if necessary (in general, applicable only to FE equations)
+        pTopLevelModel->UpdateEquations(&EC);
 
-    #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
-    for(int i = 0; i < ptrarrEquationExecutionInfos.size(); i++)
-    {
+    // Commented out because of a seg. fault (can't find the reason).
+    //    double startTime, endTime;
+    //    bool bPrintInfo = m_pDataProxy->PrintInfo();
+    //    if(bPrintInfo)
+    //    {
+    //        startTime = dae::GetTimeInSeconds();
+    //    }
 
-        daeEquationExecutionInfo* pEquationExecutionInfo = ptrarrEquationExecutionInfos[i];
-        pEquationExecutionInfo->SensitivityResiduals(EC, narrParameterIndexes);
+        // Calls PyEval_InitThreads and PyEval_SaveThread in the constructor, and PyEval_RestoreThread in the destructor
+        boost::shared_ptr<daeAllowThreads_t> _allowThreads_ = pTopLevelModel->CreateAllowThreads();
+
+        // OpenMP version
+        // m_ptrarrEquationExecutionInfos_ActiveSet should be previously updated with the currently active equation set.
+        #pragma omp parallel for firstprivate(EC) if (m_bUseOpenMP)
+        for(int i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
+        {
+
+            daeEquationExecutionInfo* pEquationExecutionInfo = m_ptrarrEquationExecutionInfos_ActiveSet[i];
+            pEquationExecutionInfo->SensitivityResiduals(EC, narrParameterIndexes);
+        }
     }
 
     m_pDataProxy->ResetSensitivityMatrixes();
@@ -338,6 +489,8 @@ void daeBlock::CalculateSensitivityParametersGradients(const std::vector<size_t>
                                                        daeArray<real_t>&		  arrTimeDerivatives,
                                                        daeMatrix<real_t>&		  matSResiduals)
 {
+    daeDeclareAndThrowException(exInvalidCall);
+/*
     size_t i;
     daeSTN* pSTN;
     daeEquationExecutionInfo* pEquationExecutionInfo;
@@ -373,6 +526,7 @@ void daeBlock::CalculateSensitivityParametersGradients(const std::vector<size_t>
     }
 
     m_pDataProxy->ResetSensitivityMatrixes();
+*/
 }
 
 void daeBlock::CalcNonZeroElements(int& NNZ)
@@ -418,7 +572,8 @@ void daeBlock::FillSparseMatrix(daeSparseMatrix<real_t>* pMatrix)
 void daeBlock::FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues,
                                                                         daeArray<real_t>& arrTimeDerivatives,
                                                                         daeArray<real_t>& arrInitialConditionsTypes,
-                                                                        daeArray<real_t>& arrAbsoluteTolerances)
+                                                                        daeArray<real_t>& arrAbsoluteTolerances,
+                                                                        daeArray<real_t>& arrValueConstraints)
 {
     map<size_t, size_t>::iterator iter;
 
@@ -436,6 +591,7 @@ void daeBlock::FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray
     // Here I need information which variables are differential
     const real_t* pBlockIDs               = m_pDataProxy->GetVariableTypesGatheredPointer();
     const real_t* pBlockAbsoluteTolerance = m_pDataProxy->GetAbsoluteTolerancesPointer();
+    const real_t* pBlockValuesConstraints = m_pDataProxy->GetVariableValuesConstraintsPointer();
 
     for(iter = m_mapVariableIndexes.begin(); iter != m_mapVariableIndexes.end(); iter++)
     {
@@ -443,6 +599,7 @@ void daeBlock::FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray
         arrTimeDerivatives.SetItem       (iter->second, pBlockInitialConditions[iter->first]);
         arrInitialConditionsTypes.SetItem(iter->second, pBlockIDs[iter->first]);
         arrAbsoluteTolerances.SetItem    (iter->second, pBlockAbsoluteTolerance[iter->first]);
+        arrValueConstraints.SetItem      (iter->second, pBlockValuesConstraints[iter->first]);
     }
 }
 
@@ -624,7 +781,10 @@ void daeBlock::Initialize(void)
         pSTN->CheckDiscontinuities();
     }
 */
-    RebuildExpressionMap();
+
+    // RebuildActiveEquationSetAndRootExpressions will be called in the DAESolver::Initialize function.
+    // Perhaps it should not be called here?
+    //RebuildActiveEquationSetAndRootExpressions();
 }
 
 bool daeBlock::CheckForDiscontinuities(void)
@@ -690,22 +850,73 @@ daeeDiscontinuityType daeBlock::ExecuteOnConditionActions(void)
     return eResult;
 }
 
-void daeBlock::RebuildExpressionMap()
+void daeBlock::RebuildActiveEquationSetAndRootExpressions()
 {
-    size_t i;
-    daeSTN* pSTN;
-
+// 1. (Re-)build the root expressions.
     m_mapExpressionInfos.clear();
 
-// First rebuild for the top level model
+    // First rebuild for the top level model
     daeModel* pModel = dynamic_cast<daeModel*>(m_pDataProxy->GetTopLevelModel());
     pModel->AddExpressionsToBlock(this);
 
-// Then for all othe STNs
-    for(i = 0; i < m_ptrarrSTNs.size(); i++)
+    // Then for all other STNs
+    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
     {
-        pSTN = m_ptrarrSTNs[i];
+        daeSTN* pSTN = m_ptrarrSTNs[i];
         pSTN->AddExpressionsToBlock(this);
+    }
+
+// 2. (Re-)build the active equations set.
+    // I could optimize this function by skipping addition of m_ptrarrEquationExecutionInfos every time!!
+    // a) Add EEIs from models (excluding STNs).
+    m_ptrarrEquationExecutionInfos_ActiveSet.clear();
+    m_ptrarrEquationExecutionInfos_ActiveSet.reserve(m_nNumberOfEquations);
+
+    m_ptrarrEquationExecutionInfos_ActiveSet.insert(m_ptrarrEquationExecutionInfos_ActiveSet.begin(),
+                                                    m_ptrarrEquationExecutionInfos.begin(),
+                                                    m_ptrarrEquationExecutionInfos.end());
+
+    // b) Add EEIs from active states of all STNs/IFs.
+    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
+    {
+        daeSTN* pSTN = m_ptrarrSTNs[i];
+        pSTN->CollectEquationExecutionInfos(m_ptrarrEquationExecutionInfos_ActiveSet);
+    }
+
+// 3. (Re-)build the jacobian items for the active equation set.
+    if(m_pDataProxy->GetEvaluationMode() == eUseComputeStack)
+    {
+        m_arrComputeStackJacobianItems.clear();
+        m_arrActiveEquationSetIndexes.clear();
+
+        size_t nnz = 0;
+        for(size_t i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
+        {
+            daeEquationExecutionInfo* pEEI = m_ptrarrEquationExecutionInfos_ActiveSet[i];
+            nnz += pEEI->m_mapIndexes.size();
+        }
+        m_arrComputeStackJacobianItems.reserve(nnz);
+        m_arrActiveEquationSetIndexes.reserve(m_nNumberOfEquations);
+
+        adJacobianMatrixItem_t jd;
+        for(size_t i = 0; i < m_ptrarrEquationExecutionInfos_ActiveSet.size(); i++)
+        {
+            daeEquationExecutionInfo* pEEI = m_ptrarrEquationExecutionInfos_ActiveSet[i];
+
+            m_arrActiveEquationSetIndexes.push_back( pEEI->m_nComputeStackIndex );
+
+            for(std::map<size_t, size_t>::iterator it = pEEI->m_mapIndexes.begin(); it != pEEI->m_mapIndexes.end(); it++)
+            {
+                jd.equationIndex = i;
+                jd.overallIndex  = it->first;
+                jd.blockIndex    = it->second;
+                m_arrComputeStackJacobianItems.push_back(jd);
+            }
+        }
+
+        //printf("m_arrAllComputeStacks          = %d\n", m_arrAllComputeStacks.size());
+        //printf("m_arrActiveEquationSetIndexes  = %d\n", m_arrActiveEquationSetIndexes.size());
+        //printf("m_arrComputeStackJacobianItems = %d\n", m_arrComputeStackJacobianItems.size());
     }
 }
 
@@ -793,16 +1004,9 @@ void daeBlock::AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecu
     m_ptrarrEquationExecutionInfos.push_back(pEquationExecutionInfo);
 }
 
-void daeBlock::GetEquationExecutionInfos(vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos)
+vector<daeEquationExecutionInfo*>& daeBlock::GetEquationExecutionInfos_ActiveSet()
 {
-    daeSTN* pSTN;
-
-    ptrarrEquationExecutionInfos = m_ptrarrEquationExecutionInfos;
-    for(size_t i = 0; i < m_ptrarrSTNs.size(); i++)
-    {
-        pSTN = m_ptrarrSTNs[i];
-        pSTN->CollectEquationExecutionInfos(ptrarrEquationExecutionInfos);
-    }
+    return m_ptrarrEquationExecutionInfos_ActiveSet;
 }
 
 size_t daeBlock::GetNumberOfEquations() const
@@ -893,7 +1097,7 @@ void daeBlock::SetValuesArray(daeArray<real_t>* pValues)
     m_parrValues = pValues;
 }
 
-daeArray<real_t>* daeBlock::GetValuesAray(void) const
+daeArray<real_t>* daeBlock::GetValuesArray(void) const
 {
     return m_parrValues;
 }

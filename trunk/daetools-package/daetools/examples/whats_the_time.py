@@ -85,6 +85,7 @@ from pyUnits import m, kg, s, K, Pa, mol, J, W
      - UpperBound: float (not enforced at the moment)
      - InitialGuess: float
      - AbsoluteTolerance: float
+     - ValueConstraint: daeeVariableValueConstraint (default is eNoConstraint - no constraint set)
     
     Standard variable types are defined in variable_types.py and can be imported with:
 

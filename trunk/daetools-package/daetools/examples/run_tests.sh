@@ -40,7 +40,7 @@ echo tutorial9.py
 $PYTHON $ROOT/tutorial9.py console
 
 echo tutorial10.py
-$PYTHON $ROOT/tutorial10.py console
+#$PYTHON $ROOT/tutorial10.py console
 
 echo tutorial11.py
 $PYTHON $ROOT/tutorial11.py console
@@ -52,7 +52,7 @@ echo tutorial13.py
 $PYTHON $ROOT/tutorial13.py console
 
 echo tutorial14.py
-$PYTHON $ROOT/tutorial14.py console
+#$PYTHON $ROOT/tutorial14.py console
 
 echo tutorial15.py
 $PYTHON $ROOT/tutorial15.py console
@@ -67,7 +67,7 @@ echo tutorial18.py
 $PYTHON $ROOT/tutorial18.py console
 
 echo tutorial19.py
-$PYTHON $ROOT/tutorial19.py console
+#$PYTHON $ROOT/tutorial19.py console
 
 
 
@@ -95,13 +95,13 @@ echo tutorial_che_3.py
 $PYTHON $ROOT/tutorial_che_3.py console
 
 echo tutorial_che_4.py
-$PYTHON $ROOT/tutorial_che_4.py console
+#$PYTHON $ROOT/tutorial_che_4.py console
 
 echo tutorial_che_5.py
-$PYTHON $ROOT/tutorial_che_5.py console
+#$PYTHON $ROOT/tutorial_che_5.py console
 
 echo tutorial_che_6.py
-$PYTHON $ROOT/tutorial_che_6.py console
+#$PYTHON $ROOT/tutorial_che_6.py console
 
 echo tutorial_che_7.py
 $PYTHON $ROOT/tutorial_che_7.py console
@@ -213,13 +213,13 @@ $PYTHON $ROOT/opt_tutorial7.py console
 
 
 echo tutorial_che_opt_1.py
-$PYTHON $ROOT/tutorial_che_opt_1.py console
+#$PYTHON $ROOT/tutorial_che_opt_1.py console
 
 echo tutorial_che_opt_2.py
-$PYTHON $ROOT/tutorial_che_opt_2.py console
+#$PYTHON $ROOT/tutorial_che_opt_2.py console
 
 echo tutorial_che_opt_3.py
-$PYTHON $ROOT/tutorial_che_opt_3.py console
+#$PYTHON $ROOT/tutorial_che_opt_3.py console
 
 echo tutorial_che_opt_4.py
 $PYTHON $ROOT/tutorial_che_opt_4.py console

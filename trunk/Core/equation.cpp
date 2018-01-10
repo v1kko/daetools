@@ -18,6 +18,11 @@ daeEquationExecutionInfo::daeEquationExecutionInfo(daeEquation* pEquation)
 
     m_dScaling  = 1.0;
     m_pEquation = pEquation;
+    m_nEquationIndexInBlock = -1;
+    m_nComputeStackIndex           = -1;
+    m_nComputeStack_max_valueSize  = 0;
+    m_nComputeStack_max_lvalueSize = 0;
+    m_nComputeStack_max_rvalueSize = 0;
 }
 
 daeEquationExecutionInfo::~daeEquationExecutionInfo()
@@ -161,6 +166,26 @@ const std::map< size_t, std::pair<size_t, adNodePtr> >& daeEquationExecutionInfo
     return m_mapJacobianExpressions;
 }
 
+const std::vector<adComputeStackItem_t>& daeEquationExecutionInfo::GetComputeStack() const
+{
+    return std::vector<adComputeStackItem_t>();
+}
+
+uint8_t daeEquationExecutionInfo::GetComputeStack_max_valueSize() const
+{
+    return m_nComputeStack_max_valueSize;
+}
+
+uint8_t daeEquationExecutionInfo::GetComputeStack_max_lvalueSize() const
+{
+    return m_nComputeStack_max_lvalueSize;
+}
+
+uint8_t daeEquationExecutionInfo::GetComputeStack_max_rvalueSize() const
+{
+    return m_nComputeStack_max_rvalueSize;
+}
+
 void daeEquationExecutionInfo::GatherInfo(daeExecutionContext& EC, daeModel* pModel)
 {
 // Here m_pDataProxy->GatherInfo is true!!
@@ -226,6 +251,24 @@ void daeEquationExecutionInfo::Residual(daeExecutionContext& EC)
     try
     {
         __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+
+    /* ComputeStack evaluation
+        adComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+        adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
+        if(__ad.getValue() != __ad1.getValue())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The residual values of the " << GetName() << " equation not equal: " << __ad.getValue() << " and " << __ad1.getValue();
+            throw e;
+        }
+        if(__ad.getDerivative() != __ad1.getDerivative())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The residual derivatives of the " << GetName() << " equation not equal: "
+              << toStringFormatted(__ad.getDerivative(), -1, 14) << " and " << toStringFormatted(__ad1.getDerivative(), -1, 14);
+            throw e;
+        }
+    */
     }
     catch(std::exception& se)
     {
@@ -298,6 +341,24 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
             try
             {
                 __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+
+            /* ComputeStack evaluation
+                adComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+                adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
+                if(__ad.getValue() != __ad1.getValue())
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "The Jacobian values of the " << GetName() << " equation not equal: " << __ad.getValue() << " and " << __ad1.getValue();
+                    throw e;
+                }
+                if(__ad.getDerivative() != __ad1.getDerivative())
+                {
+                    daeDeclareException(exInvalidCall);
+                    e << "The Jacobian derivatives of the " << GetName() << " equation not equal: "
+                      << toStringFormatted(__ad.getDerivative(), -1, 14) << " and " << toStringFormatted(__ad1.getDerivative(), -1, 14);
+                    throw e;
+                }
+            */
             }
             catch(std::exception& se)
             {
@@ -321,9 +382,6 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
     }
     else
     {
-        //std::cout << "  JacobianExpressions of the equation [" << GetName() << "]" << std::endl;
-        //std::cout << "    ";
-
         // Achtung, Achtung!!
         // Jacobian expressions must be calculated using the eCalculate mode (not eCalculateJacobian)
         EC.m_eEquationCalculationMode = eCalculate;
@@ -356,8 +414,6 @@ void daeEquationExecutionInfo::Jacobian(daeExecutionContext& EC)
 
             EC.m_pBlock->SetJacobian(m_nEquationIndexInBlock, iter->second.first, __ad.getValue());
         }
-        //std::cout << std::endl;
-        //std::cout << std::endl;
     }
 }
 
@@ -388,6 +444,24 @@ void daeEquationExecutionInfo::SensitivityResiduals(daeExecutionContext& EC, con
         try
         {
             __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
+
+        /*  ComputeStack evaluation
+            adComputeStackItem_t* computeStack = &EC.m_pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+            adouble __ad1 = adNode::EvaluateComputeStack(computeStack, &EC) * m_dScaling;
+            if(__ad.getValue() != __ad1.getValue())
+            {
+                daeDeclareException(exInvalidCall);
+                e << "The sensitivitity values of the " << GetName() << " equation not equal: " << __ad.getValue() << " and " << __ad1.getValue();
+                throw e;
+            }
+            if(__ad.getDerivative() != __ad1.getDerivative())
+            {
+                daeDeclareException(exInvalidCall);
+                e << "The sensitivitity derivatives of the " << GetName() << " equation not equal: "
+                  << toStringFormatted(__ad.getDerivative(), -1, 14) << " and " << toStringFormatted(__ad1.getDerivative(), -1, 14);
+                throw e;
+            }
+        */
         }
         catch(std::exception& se)
         {
@@ -437,6 +511,59 @@ void daeEquationExecutionInfo::SensitivityParametersGradients(daeExecutionContex
         __ad = m_EquationEvaluationNode->Evaluate(&EC) * m_dScaling;
         EC.m_pDataProxy->SetSResValue(i, m_nEquationIndexInBlock, __ad.getDerivative());
     }
+}
+
+void daeEquationExecutionInfo::CreateComputeStack(daeBlock* pBlock)
+{
+    // Create compute stack array.
+    m_nComputeStackIndex = pBlock->m_arrAllComputeStacks.size();
+    adNode::CreateComputeStack(m_EquationEvaluationNode.get(), pBlock->m_arrAllComputeStacks, pBlock, m_dScaling);
+    //adComputeStackItem_t item = pBlock->m_arrAllComputeStacks[m_nComputeStackIndex];
+    //int stackSize = item.tag;
+    //printf("  stackSize = %d\n", stackSize);
+
+    //pBlock->m_arrAllComputeStacks.insert(pBlock->m_arrAllComputeStacks.begin(),
+    //                                     m_EquationComputeStack.begin(), m_EquationComputeStack.end());
+
+    // Estimate the maximum storage for stacks used during the evaluation.
+    // That is useful for allocation of the constant size arrays serving as an underlying stack storage (i.e. in OpenCL).
+    int max_valueSize, max_lvalueSize, max_rvalueSize;
+    size_t start = m_nComputeStackIndex;
+    size_t end   = pBlock->m_arrAllComputeStacks.size();
+    adNode::EstimateComputeStackSizes(pBlock->m_arrAllComputeStacks, start, end,
+                                      max_valueSize, max_lvalueSize, max_rvalueSize);
+
+    // Check the validity of the returned stack sizes.
+    if(max_valueSize < 0 || max_lvalueSize < 0 || max_rvalueSize < 0)
+        throw std::runtime_error((boost::format("Invalid size of of compute stacks: val=%d, lval=%d, rval=%d (must be larger than 0)") % max_valueSize % max_lvalueSize % max_rvalueSize).str());
+    if(max_valueSize >= 255 || max_lvalueSize >= 255 || max_rvalueSize >= 255)
+        throw std::runtime_error((boost::format("Invalid size of of compute stacks: val=%d, lval=%d, rval=%d (must be less than 255)") % max_valueSize % max_lvalueSize % max_rvalueSize).str());
+
+    //printf("daeEquationExecutionInfo: %s (%d, %d, %d)\n", this->GetName().c_str(), max_valueSize, max_lvalueSize, max_rvalueSize);
+
+    m_nComputeStack_max_valueSize  = (uint8_t)max_valueSize;
+    m_nComputeStack_max_lvalueSize = (uint8_t)max_lvalueSize;
+    m_nComputeStack_max_rvalueSize = (uint8_t)max_rvalueSize;
+
+/*
+    // Initialise isAssigned and block indexes since they were set to ULONG_MAX in the runtime node constructor.
+    // In runtime nodes they won't get updated until the first call to evaluate.
+    for(size_t i = 0; i < m_EquationComputeStack.size(); i++)
+    {
+        adComputeStackItem_t& item = m_EquationComputeStack[i];
+        if(item.opCode == eOP_Variable || item.opCode == eOP_TimeDerivative)
+        {
+            item.data.indexes.blockIndex = pBlock->FindVariableBlockIndex(item.data.indexes.overallIndex);
+            if(pBlock->m_pDataProxy->GetVariableType(item.data.indexes.overallIndex) == cnAssigned)
+                item.isAssigned = 1;
+            else
+                item.isAssigned = 0;
+
+            //printf("blockIndex = %d", (int)item.data.indexes.blockIndex);
+            //printf(", overallIndex = %d\n", (int)item.data.indexes.overallIndex);
+        }
+    }
+*/
 }
 
 // Operates on adRuntimeNodes

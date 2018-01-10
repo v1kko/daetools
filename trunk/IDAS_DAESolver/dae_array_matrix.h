@@ -156,6 +156,40 @@ public:
         return Ncol;
     }
 
+    virtual real_t* GetRow(size_t row)
+    {
+        // Get the pointer to the specified row.
+        // Works only for row-wise memory layout (c-style).
+        if(!data)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(row >= Nrow)
+            daeDeclareAndThrowException(exOutOfBounds);
+
+        if(data_access == eRowWise)
+            return data[row];
+        else
+            daeDeclareAndThrowException(exInvalidCall);
+
+        return NULL;
+    }
+
+    virtual real_t* GetColumn(size_t col)
+    {
+        // Get the pointer to the specified column.
+        // Works only for column-wise memory layout (fortran-style).
+        if(!data)
+            daeDeclareAndThrowException(exInvalidPointer);
+        if(col >= Ncol)
+            daeDeclareAndThrowException(exOutOfBounds);
+
+        if(data_access == eColumnWise)
+            return data[col];
+        else
+            daeDeclareAndThrowException(exInvalidCall);
+
+        return NULL;
+    }
+
     void InitMatrix(size_t nrows, size_t ncols, real_t** pData, daeeMatrixAccess access)
     {
         Nrow        = nrows;
@@ -367,6 +401,18 @@ public:
     virtual size_t GetNcols(void) const
     {
         return Ncol;
+    }
+
+    virtual real_t* GetRow(size_t row)
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+        return NULL;
+    }
+
+    virtual real_t* GetColumn(size_t col)
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+        return NULL;
     }
 
     void InitMatrix(size_t nrows, size_t ncols, real_t* pData, daeeMatrixAccess access)
@@ -617,6 +663,18 @@ public:
     size_t GetNcols(void) const
     {
         return N;
+    }
+
+    FLOAT* GetRow(size_t row)
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+        return NULL;
+    }
+
+    FLOAT* GetColumn(size_t col)
+    {
+        daeDeclareAndThrowException(exNotImplemented);
+        return NULL;
     }
 
     INT CalcIndex(size_t i, size_t j) const

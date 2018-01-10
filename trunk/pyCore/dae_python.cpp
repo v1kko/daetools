@@ -184,6 +184,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eArcSinh",	dae::core::eArcSinh)
         .value("eArcCosh",	dae::core::eArcCosh)
         .value("eArcTanh",	dae::core::eArcTanh)
+        .value("eScaling",	dae::core::eScaling)
         .export_values()
     ;
 
@@ -234,6 +235,15 @@ BOOST_PYTHON_MODULE(pyCore)
         .export_values()
     ;
 
+    enum_<daeeVariableValueConstraint>("daeeVariableValueConstraint")
+        .value("eNoConstraint",	dae::core::eNoConstraint)
+        .value("eValueGTEQ",    dae::core::eValueGTEQ)
+        .value("eValueLTEQ",    dae::core::eValueLTEQ)
+        .value("eValueGT",      dae::core::eValueGT)
+        .value("eValueLT",      dae::core::eValueLT)
+        .export_values()
+    ;
+
     enum_<daeeActionType>("daeeActionType")
         .value("eUnknownAction",                    dae::core::eUnknownAction)
         .value("eChangeState",                      dae::core::eChangeState)
@@ -271,6 +281,27 @@ BOOST_PYTHON_MODULE(pyCore)
         .value("eVapor",            dae::tpp::eVapor)
         .value("eLiquid",           dae::tpp::eLiquid)
         .value("eSolid",            dae::tpp::eSolid)
+        .export_values()
+    ;
+
+    enum_<computestack::daeeOpCode>("daeeOpCode")
+        .value("eOP_Unknown",           computestack::eOP_Unknown)
+        .value("eOP_Constant",          computestack::eOP_Constant)
+        .value("eOP_Time",              computestack::eOP_Time)
+        .value("eOP_InverseTimeStep",   computestack::eOP_InverseTimeStep)
+        .value("eOP_Variable",          computestack::eOP_Variable)
+        .value("eOP_DegreeOfFreedom",   computestack::eOP_DegreeOfFreedom)
+        .value("eOP_TimeDerivative",    computestack::eOP_TimeDerivative)
+        .value("eOP_Unary",             computestack::eOP_Unary)
+        .value("eOP_Binary",            computestack::eOP_Binary)
+        .export_values()
+    ;
+
+    enum_<computestack::daeeOpResultLocation>("daeeOpResultLocation")
+        .value("eOP_Result_Unknown",    computestack::eOP_Result_Unknown)
+        .value("eOP_Result_to_value",   computestack::eOP_Result_to_value)
+        .value("eOP_Result_to_lvalue",  computestack::eOP_Result_to_lvalue)
+        .value("eOP_Result_to_rvalue",  computestack::eOP_Result_to_rvalue)
         .export_values()
     ;
 
@@ -378,6 +409,21 @@ BOOST_PYTHON_MODULE(pyCore)
     class_<daeNodeSaveAsContext>("daeNodeSaveAsContext")
         .def(init< optional<daeModel*> >((arg("self"), arg("model") = NULL)))
         .def_readwrite("Model",	&daeNodeSaveAsContext::m_pModel)
+    ;
+
+    class_<adComputeStackItem_t>("adComputeStackItem_t", no_init)
+        .add_property("opCode",         &daepython::adComputeStackItem_opCode)
+        .add_property("function",       &daepython::adComputeStackItem_function)
+        .add_property("value",          &daepython::adComputeStackItem_data_value)
+        .add_property("dofIndex",       &daepython::adComputeStackItem_data_dofIndex)
+        .add_property("blockIndex",     &daepython::adComputeStackItem_data_blockIndex)
+        .add_property("overallIndex",   &daepython::adComputeStackItem_data_overallIndex)
+        .add_property("resultLocation", &daepython::adComputeStackItem_resultLocation)
+        .add_property("tag",            &daepython::adComputeStackItem_tag)
+#ifdef ComputeStackDebug
+        .add_property("variableName",   &daepython::adComputeStackItem_variableName)
+#endif
+        .def("__str__",                 &daepython::adComputeStackItem__str__)
     ;
 
     class_<adNode, boost::noncopyable>("adNode", no_init)
@@ -885,14 +931,15 @@ BOOST_PYTHON_MODULE(pyCore)
     def("d2_array",	 &daepython::ad_d2_array,    (arg("adarr"), arg("domain"), arg("discretizationMethod") = eCFDM, arg("options") = boost::python::dict()), DOCSTR_d2_array);
 
     class_<daeVariableType>("daeVariableType", DOCSTR_daeVariableType, no_init)
-        .def(init<string, unit, real_t, real_t, real_t, real_t>( ( arg("self"),
-                                                                   arg("name"),
-                                                                   arg("units"),
-                                                                   arg("lowerBound"),
-                                                                   arg("upperBound"),
-                                                                   arg("initialGuess"),
-                                                                   arg("absTolerance")
-                                                                  ), DOCSTR_daeVariableType_init))
+        .def(init<string, unit, real_t, real_t, real_t, real_t, daeeVariableValueConstraint>( ( arg("self"),
+                                                                                                arg("name"),
+                                                                                                arg("units"),
+                                                                                                arg("lowerBound"),
+                                                                                                arg("upperBound"),
+                                                                                                arg("initialGuess"),
+                                                                                                arg("absTolerance"),
+                                                                                                arg("valueConstraint") = eNoConstraint
+                                                                                              ), DOCSTR_daeVariableType_init))
 
         .add_property("Name",				&daeVariableType::GetName,				&daeVariableType::SetName,              DOCSTR_daeVariableType_Name)
         .add_property("Units",				&daeVariableType::GetUnits,				&daeVariableType::SetUnits,             DOCSTR_daeVariableType_Units)
@@ -900,6 +947,7 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("UpperBound",			&daeVariableType::GetUpperBound,		&daeVariableType::SetUpperBound,        DOCSTR_daeVariableType_UpperBound)
         .add_property("InitialGuess",		&daeVariableType::GetInitialGuess,		&daeVariableType::SetInitialGuess,      DOCSTR_daeVariableType_InitialGuess)
         .add_property("AbsoluteTolerance",	&daeVariableType::GetAbsoluteTolerance, &daeVariableType::SetAbsoluteTolerance, DOCSTR_daeVariableType_AbsoluteTolerance)
+        .add_property("ValueConstraint",	&daeVariableType::GetValueConstraint,   &daeVariableType::SetValueConstraint,   DOCSTR_daeVariableType_SetValueConstraint)
 
         .def("__repr__",					&daepython::daeVariableType__repr__)
     ;
@@ -1276,6 +1324,17 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReSetInitialCondition", &daepython::ReSetInitialCondition7)
         .def("ReSetInitialCondition", &daepython::ReSetInitialCondition8)
 
+        .def("SetValueConstraint", &daepython::lSetValueConstraint1)
+        .def("SetValueConstraint", &daepython::SetValueConstraint0)
+        .def("SetValueConstraint", &daepython::SetValueConstraint1)
+        .def("SetValueConstraint", &daepython::SetValueConstraint2)
+        .def("SetValueConstraint", &daepython::SetValueConstraint3)
+        .def("SetValueConstraint", &daepython::SetValueConstraint4)
+        .def("SetValueConstraint", &daepython::SetValueConstraint5)
+        .def("SetValueConstraint", &daepython::SetValueConstraint6)
+        .def("SetValueConstraint", &daepython::SetValueConstraint7)
+        .def("SetValueConstraint", &daepython::SetValueConstraint8)
+
         .def("SetValue", &daepython::qSetVariableValue0)
         .def("SetValue", &daepython::qSetVariableValue1)
         .def("SetValue", &daepython::qSetVariableValue2)
@@ -1366,6 +1425,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .def("ReSetInitialConditions",	&daepython::qReSetInitialConditions)
 
         .def("SetAbsoluteTolerances",	&daeVariable::SetAbsoluteTolerances)
+
+        .def("SetValueConstraints", &daepython::SetValueConstraints)
+        .def("SetValueConstraints", &daepython::SetValueConstraints2)
+
 
         .def("GetDomainsIndexesMap",    &daepython::daeVariable_GetDomainsIndexesMap,
                                         ( arg("self"), arg("indexBase") ), DOCSTR_daeVariable_GetDomainIndexesMap)
@@ -1839,6 +1902,10 @@ BOOST_PYTHON_MODULE(pyCore)
         .add_property("JacobianExpressions", &daepython::daeEquationExecutionInfo_JacobianExpressions, DOCSTR_daeEquationExecutionInfo_JacobianExpressions)
         .add_property("Equation",            make_function(&daeEquationExecutionInfo::GetEquation, return_internal_reference<>()),
                                              DOCSTR_daeEquationExecutionInfo_Equation)
+        .add_property("ComputeStack",	             &daepython::daeEquationExecutionInfo_GetComputeStack, DOCSTR_daeEquationExecutionInfo_GetComputeStack)
+        .def_readonly("ComputeStack_max_valueSize",  &daeEquationExecutionInfo::GetComputeStack_max_valueSize)
+        .def_readonly("ComputeStack_max_lvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_lvalueSize)
+        .def_readonly("ComputeStack_max_rvalueSize", &daeEquationExecutionInfo::GetComputeStack_max_rvalueSize)
     ;
 
     class_<daeEquation, bases<daeObject>, boost::noncopyable>("daeEquation", DOCSTR_daeEquation, no_init)

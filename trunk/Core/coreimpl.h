@@ -86,6 +86,12 @@ enum daeeResultType
     eToStack
 };
 
+enum daeeEvaluationMode
+{
+    eUseEvaluationTree = 0,
+    eUseComputeStack
+};
+
 /******************************************************************
     daeRuntimeCheck_t
 *******************************************************************/
@@ -114,7 +120,8 @@ public:
                     real_t dLowerBound,
                     real_t dUpperBound,
                     real_t dInitialGuess,
-                    real_t dAbsoluteTolerance);
+                    real_t dAbsoluteTolerance,
+                    daeeVariableValueConstraint eValueConstraint = eNoConstraint);
     virtual ~daeVariableType(void);
 
 public:
@@ -130,6 +137,8 @@ public:
     virtual void	SetUnits(const unit& u);
     virtual real_t	GetAbsoluteTolerance(void) const;
     virtual void	SetAbsoluteTolerance(real_t dTolerance);
+    virtual daeeVariableValueConstraint	GetValueConstraint(void) const;
+    virtual void	SetValueConstraint(daeeVariableValueConstraint eValueConstraint);
 
 public:
     bool operator ==(const daeVariableType& other);
@@ -151,6 +160,7 @@ protected:
     real_t	m_dUpperBound;
     real_t	m_dInitialGuess;
     real_t	m_dAbsoluteTolerance;
+    daeeVariableValueConstraint m_eValueConstraint;
     friend class daeModel;
     friend class daeVariable;
 };
@@ -445,9 +455,14 @@ public:
     std::string GetName(void) const;
 
     const std::map< size_t, std::pair<size_t, adNodePtr> >& GetJacobianExpressions() const;
+    const std::vector<adComputeStackItem_t>& GetComputeStack() const;
+    uint8_t GetComputeStack_max_valueSize() const;
+    uint8_t GetComputeStack_max_lvalueSize() const;
+    uint8_t GetComputeStack_max_rvalueSize() const;
 
 protected:
     void BuildJacobianExpressions();
+    void CreateComputeStack(daeBlock* pBlock);
 
 protected:
     real_t                      m_dScaling;
@@ -457,6 +472,12 @@ protected:
     daeEquation*                m_pEquation;
     adNodePtr                   m_EquationEvaluationNode;
     std::map< size_t, std::pair<size_t, adNodePtr> > m_mapJacobianExpressions;
+
+    uint32_t                            m_nComputeStackIndex;
+    //std::vector<adComputeStackItem_t>   m_EquationComputeStack;
+    uint8_t                             m_nComputeStack_max_valueSize;
+    uint8_t                             m_nComputeStack_max_lvalueSize;
+    uint8_t                             m_nComputeStack_max_rvalueSize;
 
     friend class daeEquation;
     friend class daeFiniteElementEquation;
@@ -627,6 +648,7 @@ public:
         m_pdVariablesTypes			= NULL;
         m_pdVariablesTypesGathered	= NULL;
         m_pdAbsoluteTolerances		= NULL;
+        m_pdVariableValuesConstraints = NULL;
         m_pTopLevelModel			= NULL;
         m_pLog						= NULL;
         m_pBlock					= NULL;
@@ -646,6 +668,11 @@ public:
         m_bResetLAMatrixAfterDiscontinuity = cfg.GetBoolean("daetools.core.resetLAMatrixAfterDiscontinuity", true);
         m_bPrintInfo                       = cfg.GetBoolean("daetools.core.printInfo", false);
         m_bCheckForInfinite                = cfg.GetBoolean("daetools.core.checkForInfiniteNumbers", false);
+        std::string evaluationMode         = cfg.GetString("daetools.core.equations.evaluationMode", "useEvaluationTree");
+        if(evaluationMode == "useComputeStack")
+            m_eEvaluationMode = eUseComputeStack;
+        else
+            m_eEvaluationMode = eUseEvaluationTree;
     }
 
 
@@ -676,6 +703,11 @@ public:
             delete[] m_pdAbsoluteTolerances;
             m_pdAbsoluteTolerances = NULL;
         }
+        if(m_pdVariableValuesConstraints)
+        {
+            delete[] m_pdVariableValuesConstraints;
+            m_pdVariableValuesConstraints = NULL;
+        }
 //		if(m_pCondition)
 //		{
 //			delete m_pCondition;
@@ -700,6 +732,9 @@ public:
 
         m_pdAbsoluteTolerances	= new real_t[m_nTotalNumberOfVariables];
         memset(m_pdAbsoluteTolerances, 0, m_nTotalNumberOfVariables * sizeof(real_t));
+
+        m_pdVariableValuesConstraints	= new real_t[m_nTotalNumberOfVariables];
+        memset(m_pdVariableValuesConstraints, 0, m_nTotalNumberOfVariables * sizeof(real_t));
 
         m_pTopLevelModel = pTopLevelModel;
         m_pLog           = pLog;
@@ -882,7 +917,32 @@ public:
 
     void AssignValue(size_t nOverallIndex, real_t Value)
     {
-        m_mapAssignedValues[nOverallIndex] = Value;
+        std::map<size_t, size_t>::iterator it = m_mapAssignedVarsIndexes.find(nOverallIndex);
+
+        if(it == m_mapAssignedVarsIndexes.end())
+        {
+            // The overall index does not exist in the map and should be inserted into the map and the vector.
+            // In this case, the local index is equal to current vector size.
+            size_t dofIndex = m_arrAssignedVarsValues.size();
+
+            m_mapAssignedVarsIndexes[nOverallIndex] = dofIndex;
+            m_arrAssignedVarsValues.push_back(Value);
+        }
+        else
+        {
+            // The overall index exists in the map.
+            // The local index is already in the map.
+            size_t dofIndex = it->second;
+            m_arrAssignedVarsValues[dofIndex] = Value;
+        }
+
+        // This should not happen, but just in case something went wrong.
+        if(m_mapAssignedVarsIndexes.size() != m_arrAssignedVarsValues.size())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "The size of m_mapAssignedVarsIndexes map and  m_mapAssignedVarsIndexes vector does not mach";
+            throw e;
+        }
     }
 
     void SetInitialCondition(size_t nOverallIndex, real_t Value, daeeInitialConditionMode eMode)
@@ -967,6 +1027,21 @@ public:
             m_pdAbsoluteTolerances[nOverallIndex] = Value;
     }
 
+    daeeVariableValueConstraint GetValueConstraint(size_t nOverallIndex) const
+    {
+        if(!m_pdVariableValuesConstraints)
+            daeDeclareAndThrowException(exInvalidPointer);
+        int constraint = (int)m_pdVariableValuesConstraints[nOverallIndex];
+        return (daeeVariableValueConstraint)constraint;
+    }
+
+    void SetValueConstraint(size_t nOverallIndex, daeeVariableValueConstraint constraint)
+    {
+    // If called repeatedly during optimization it has no effect
+        if(m_pdVariableValuesConstraints)
+            m_pdVariableValuesConstraints[nOverallIndex] = (real_t)constraint;
+    }
+
     real_t* GetInitialValuesPointer(void) const
     {
         return m_pdInitialValues;
@@ -996,6 +1071,11 @@ public:
     real_t* GetAbsoluteTolerancesPointer(void) const
     {
         return m_pdAbsoluteTolerances;
+    }
+
+    real_t* GetVariableValuesConstraintsPointer(void) const
+    {
+        return m_pdVariableValuesConstraints;
     }
 /* End of initialization phase functions */
 
@@ -1101,15 +1181,25 @@ public:
 
     void ReAssignValue(size_t nOverallIndex, real_t Value)
     {
-        m_mapAssignedValues[nOverallIndex] = Value;
+        std::map<size_t, size_t>::iterator it = m_mapAssignedVarsIndexes.find(nOverallIndex);
+
+        if(it == m_mapAssignedVarsIndexes.end())
+        {
+            daeDeclareException(exInvalidCall);
+            e << "Cannot re-assign the variable value - the overall index is not in the map";
+            throw e;
+        }
+
+        size_t dofIndex = it->second;
+        m_arrAssignedVarsValues[dofIndex] = Value;
 
         SetReinitializationFlag(true);
     }
 
-    real_t GetReAssignedValue(size_t nOverallIndex) const
-    {
-        return m_mapAssignedValues.find(nOverallIndex)->second;
-    }
+    //real_t GetReAssignedValue(size_t nOverallIndex) const
+    //{
+    //    return m_mapAssignedValues.find(nOverallIndex)->second;
+    //}
 
 // S value: S[nParameterIndex][nVariableIndex]
     real_t GetSValue(size_t nParameterIndex, size_t nVariableIndex) const
@@ -1162,6 +1252,16 @@ public:
     const std::vector<real_t*>& GetTimeDerivativesReferences(void) const
     {
         return m_pdarrTimeDerivativesReferences;
+    }
+
+    const std::map<size_t, size_t>& GetAssignedVarsIndexes(void) const
+    {
+        return m_mapAssignedVarsIndexes;
+    }
+
+    const std::vector<real_t>& GetAssignedVarsValues(void) const
+    {
+        return m_arrAssignedVarsValues;
     }
 
     void LogMessage(const string& strMessage, size_t nSeverity) const
@@ -1246,14 +1346,17 @@ public:
             m_pdarrTimeDerivativesReferences[iter->first] = &pdTimeDerivatives[iter->second];
         }
 
-    // m_mapAssignedValues<nOverallIndex, dValue>
-        for(std::map<size_t, real_t>::iterator iter = m_mapAssignedValues.begin(); iter != m_mapAssignedValues.end(); iter++)
+    // m_mapAssignedVarsIndexes<overallIndex, dofIndex>
+    // dofIndex is an index in the m_arrAssignedVarsValues array.
+        for(std::map<size_t, size_t>::iterator iter = m_mapAssignedVarsIndexes.begin(); iter != m_mapAssignedVarsIndexes.end(); iter++)
         {
         // Achtung: They must not be previously set!
             if(m_pdarrValuesReferences[iter->first])
                 daeDeclareAndThrowException(exInvalidCall);
 
-            m_pdarrValuesReferences[iter->first] = &(iter->second);
+            size_t overallIndex = iter->first;
+            size_t dofIndex     = iter->second;
+            m_pdarrValuesReferences[overallIndex] = &m_arrAssignedVarsValues[dofIndex];
         }
     }
 
@@ -1281,6 +1384,11 @@ public:
         {
             delete[] m_pdAbsoluteTolerances;
             m_pdAbsoluteTolerances = NULL;
+        }
+        if(m_pdVariableValuesConstraints)
+        {
+            delete[] m_pdVariableValuesConstraints;
+            m_pdVariableValuesConstraints = NULL;
         }
 
         m_pTopLevelModel->CleanUpSetupData();
@@ -1337,6 +1445,21 @@ public:
         m_pmatSResiduals       = pSResiduals;
     }
 
+    daeMatrix<real_t>* GetSTimeDerivatives()
+    {
+        return m_pmatSTimeDerivatives;
+    }
+
+    daeMatrix<real_t>* GetSValues()
+    {
+        return m_pmatSValues;
+    }
+
+    daeMatrix<real_t>* GetSResiduals()
+    {
+        return m_pmatSResiduals;
+    }
+
     void ResetSensitivityMatrixes(void)
     {
         m_pmatSValues          = NULL;
@@ -1387,9 +1510,19 @@ public:
     void PrintAssignedVariables() const
     {
         std::cout << "PrintAssignedVariables" << std::endl;
-        for(std::map<size_t, real_t>::const_iterator iter = m_mapAssignedValues.begin(); iter != m_mapAssignedValues.end(); iter++)
-            std::cout << "(" << iter->first << ", " << iter->second << ") ";
+        for(std::map<size_t, size_t>::const_iterator iter = m_mapAssignedVarsIndexes.begin(); iter != m_mapAssignedVarsIndexes.end(); iter++)
+            std::cout << "(" << iter->first << ", " << m_arrAssignedVarsValues[iter->second] << ") ";
         std::cout << std::endl;
+    }
+
+    daeeEvaluationMode GetEvaluationMode(void) const
+    {
+        return m_eEvaluationMode;
+    }
+
+    void SetEvaluationMode(daeeEvaluationMode eEvaluationMode)
+    {
+        m_eEvaluationMode = eEvaluationMode;
     }
 
 protected:
@@ -1401,7 +1534,8 @@ protected:
 
     std::vector<real_t*>			m_pdarrValuesReferences;
     std::vector<real_t*>			m_pdarrTimeDerivativesReferences;
-    std::map<size_t, real_t>		m_mapAssignedValues;
+    std::map<size_t, size_t>		m_mapAssignedVarsIndexes;
+    std::vector<real_t>             m_arrAssignedVarsValues;
 
 // These are just temporary arrays used during the initialization phase
     real_t*							m_pdInitialValues;
@@ -1409,6 +1543,7 @@ protected:
     real_t*							m_pdAbsoluteTolerances;
     real_t*							m_pdVariablesTypes;
     real_t*							m_pdVariablesTypesGathered;
+    real_t*							m_pdVariableValuesConstraints;
 
     bool							m_bGatherInfo;
     real_t							m_dCurrentTime;
@@ -1418,6 +1553,7 @@ protected:
     bool                            m_bCheckForInfinite;
     bool							m_bIsModelDynamic;
     bool							m_bCopyDataFromBlock;
+    daeeEvaluationMode              m_eEvaluationMode;
 
     daeeInitialConditionMode		m_eInitialConditionMode;
     size_t							m_nNumberOfParameters;
@@ -1480,7 +1616,8 @@ public:
     virtual void	FillAbsoluteTolerancesInitialConditionsAndInitialGuesses(daeArray<real_t>& arrValues,
                                                                              daeArray<real_t>& arrTimeDerivatives,
                                                                              daeArray<real_t>& arrInitialConditionsTypes,
-                                                                             daeArray<real_t>& arrAbsoluteTolerances);
+                                                                             daeArray<real_t>& arrAbsoluteTolerances,
+                                                                             daeArray<real_t>& arrValueConstraints);
 
     virtual size_t	GetNumberOfEquations(void) const;
     virtual size_t	GetNumberOfRoots(void) const;
@@ -1493,7 +1630,7 @@ public:
 
     virtual void	SetBlockData(daeArray<real_t>& arrValues, daeArray<real_t>& arrTimeDerivatives);
     virtual void	CreateIndexMappings(real_t* pdValues, real_t* pdTimeDerivatives);
-    virtual void	RebuildExpressionMap(void);
+    virtual void	RebuildActiveEquationSetAndRootExpressions(void);
 
     virtual real_t	GetTime(void) const;
     virtual void	SetTime(real_t time);
@@ -1532,7 +1669,7 @@ public:
 
 public:
     void AddEquationExecutionInfo(daeEquationExecutionInfo* pEquationExecutionInfo);
-    void GetEquationExecutionInfos(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfos);
+    std::vector<daeEquationExecutionInfo*>& GetEquationExecutionInfos_ActiveSet();
 
     bool CheckOverlappingAndAddVariables(const std::vector<size_t>& narrVariablesInEquation);
     void AddVariables(const std::map<size_t, size_t>& mapIndexes);
@@ -1545,10 +1682,10 @@ public:
     // first - index in block;   second - index in core
     std::map<size_t, size_t>& GetVariableIndexesMap(void);
 
-protected:
+public:
 // Used internally by the block during calculation of Residuals/Jacobian/Hesian
     void				SetValuesArray(daeArray<real_t>* pValues);
-    daeArray<real_t>*	GetValuesAray(void) const;
+    daeArray<real_t>*	GetValuesArray(void) const;
 
     void				SetTimeDerivativesArray(daeArray<real_t>* pTimeDerivatives);
     daeArray<real_t>*	GetTimeDerivativesArray(void) const;
@@ -1559,14 +1696,14 @@ protected:
     daeArray<real_t>*	GetResidualArray(void) const;
     void				SetResidualArray(daeArray<real_t>* pResidual);
 
-    void				SetSValuesMatrix(daeMatrix<real_t>* pSValues);
-    daeMatrix<real_t>*	GetSValuesMatrix(void) const;
+    //void				SetSValuesMatrix(daeMatrix<real_t>* pSValues);
+    //daeMatrix<real_t>*	GetSValuesMatrix(void) const;
 
-    void				SetSTimeDerivativesMatrix(daeMatrix<real_t>* pSTimeDerivatives);
-    daeMatrix<real_t>*	GetSTimeDerivativesMatrix(void) const;
+    //void				SetSTimeDerivativesMatrix(daeMatrix<real_t>* pSTimeDerivatives);
+    //daeMatrix<real_t>*	GetSTimeDerivativesMatrix(void) const;
 
-    void				SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals);
-    daeMatrix<real_t>*	GetSResidualsMatrix(void) const;
+    //void				SetSResidualsMatrix(daeMatrix<real_t>* pSResiduals);
+    //daeMatrix<real_t>*	GetSResidualsMatrix(void) const;
 
 public:
     bool	m_bInitializeMode;
@@ -1574,7 +1711,21 @@ public:
     size_t	m_nNumberOfEquations;
     size_t  m_nTotalNumberOfVariables;
 
+    // Contains EEIs from models (excluding equations in STN/IF blocks).
+    // This is a constant vector populated during the initilisation of the simulation.
+    // EEIs from STNs can be obtained from m_ptrarrSTNs vector.
     std::vector<daeEquationExecutionInfo*>	m_ptrarrEquationExecutionInfos;
+
+    // All currently active EEIs: m_ptrarrEquationExecutionInfos + EEIs from m_ptrarrSTNs.
+    // It changes after every discontinuity that causes a change in active states.
+    std::vector<daeEquationExecutionInfo*>	m_ptrarrEquationExecutionInfos_ActiveSet;
+
+    std::vector<adComputeStackItem_t>   m_arrAllComputeStacks;
+    std::vector<adJacobianMatrixItem_t> m_arrComputeStackJacobianItems;
+    std::vector<uint32_t>               m_arrActiveEquationSetIndexes;
+
+    // Contains STNs from all models; they may contain nested STNs/IFs.
+    // It can be used to colect currently active equations in STNs/IFs.
     std::vector<daeSTN*>					m_ptrarrSTNs;
 
     std::map<size_t, daeExpressionInfo>		m_mapExpressionInfos;
@@ -1609,6 +1760,7 @@ public:
     size_t m_nVariableIndexesEnd;
 #endif
 
+    friend class daeEquationExecutionInfo;
 };
 
 /******************************************************************
@@ -1975,6 +2127,19 @@ public:
     virtual void    ReSetInitialCondition(const std::vector<size_t>& narrDomainIndexes, const quantity& dInitialCondition);
     virtual void	ReSetInitialConditions(const quantity& dInitialConditions);
     virtual void	ReSetInitialConditions(const std::vector<quantity>& initialConditions);
+
+    virtual void	SetValueConstraint(daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, size_t nD3, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, size_t nD3, size_t nD4, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraint(size_t nD1, size_t nD2, size_t nD3, size_t nD4, size_t nD5, size_t nD6, size_t nD7, size_t nD8, daeeVariableValueConstraint eConstraint);
+    virtual void    SetValueConstraint(const std::vector<size_t>& narrDomainIndexes, daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraints(daeeVariableValueConstraint eConstraint);
+    virtual void	SetValueConstraints(const std::vector<daeeVariableValueConstraint>& constraints);
 
     virtual void	SetAbsoluteTolerances(real_t dAbsTolerances);
 
@@ -2893,7 +3058,7 @@ protected:
     daeBlock*	DoBlockDecomposition(void);
     void        PopulateBlockIndexes(daeBlock* pBlock);
     void		SetDefaultAbsoluteTolerances(void);
-    void		SetDefaultInitialGuesses(void);
+    void		SetDefaultInitialGuessesAndConstraints(void);
     void		BuildUpSTNsAndEquations(void);
     void		CreatePortConnectionEquations(void);
 
@@ -3032,7 +3197,7 @@ protected:
     virtual void CollectEquationExecutionInfosFromModels(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
     virtual void CollectEquationExecutionInfosFromSTNs(std::vector<daeEquationExecutionInfo*>& ptrarrEquationExecutionInfo) const	= 0;
     virtual void SetDefaultAbsoluteTolerances(void)                                                                                 = 0;
-    virtual void SetDefaultInitialGuesses(void)                                                                                     = 0;
+    virtual void SetDefaultInitialGuessesAndConstraints(void)                                                                       = 0;
     virtual void BuildExpressions(daeBlock* pBlock)                                                                                 = 0;
     virtual bool CheckDiscontinuities(void)                                                                                         = 0;
     virtual void AddExpressionsToBlock(daeBlock* pBlock)                                                                            = 0;
@@ -3123,11 +3288,11 @@ public:
     void   SetVariablesStartingIndex(size_t nVariablesStartingIndex);
 
 protected:
-    virtual void DeclareData(void)					= 0;
-    virtual void InitializeParameters(void)			= 0;
-    virtual void InitializeVariables(void)			= 0;
-    virtual void SetDefaultAbsoluteTolerances(void)	= 0;
-    virtual void SetDefaultInitialGuesses(void)		= 0;
+    virtual void DeclareData(void)                              = 0;
+    virtual void InitializeParameters(void)                     = 0;
+    virtual void InitializeVariables(void)                      = 0;
+    virtual void SetDefaultAbsoluteTolerances(void)             = 0;
+    virtual void SetDefaultInitialGuessesAndConstraints(void)	= 0;
     virtual void InitializeBlockIndexes(const std::map<size_t, size_t>& mapOverallIndex_BlockIndex) = 0;
     virtual void CreateOverallIndex_BlockIndex_VariableNameMap(std::map<size_t, std::pair<size_t, string> >& mapOverallIndex_BlockIndex_VariableName,
                                                                const std::map<size_t, size_t>& mapOverallIndex_BlockIndex) = 0;
@@ -3295,6 +3460,8 @@ protected:
     void            AddEquationsOverallIndexes(std::map<size_t, std::vector<size_t> >& mapIndexes);
     void			SetIndexesWithinBlockToEquationExecutionInfos(daeBlock* pBlock, size_t& nEquationIndex);
     void            BuildJacobianExpressions();
+    void            CreateComputeStack(daeBlock* pBlock);
+    uint32_t        GetComputeStackSize();
 
     void			CalculateResiduals(daeExecutionContext& EC);
     void			CalculateJacobian(daeExecutionContext& EC);

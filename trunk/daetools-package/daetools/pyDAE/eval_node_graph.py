@@ -190,3 +190,96 @@ class daeNodeGraph(object):
         else:
             raise RuntimeError('Not supported node: %s' % type(node))
 
+class daeComputeStackGraph(object):
+    def __init__(self, rootLabel, computeStackItems):
+        # node is a Runtime Node object
+        self.counter = 0
+
+        self.graph = pgv.AGraph()
+        self._processItems(computeStackItems)
+    
+    def SaveGraph(self, filename, layout = 'dot'):
+        # Layouts: dot|neato|circo|twopi|fdp|nop
+        # The best layout is made by 'dot'
+        self.graph.layout(layout)
+        self.graph.draw(layout + '-' + filename)
+
+    def _addNode(self, labelChild, shape='ellipse', color='black', fontcolor='black', edgeLabel='', edgeColor='gray50'):
+        child = str(self.counter)
+        self.counter += 1
+        
+        self.graph.add_node(child, label = str(labelChild), shape = shape, color = color, fontcolor = fontcolor)
+        
+        return child
+
+    def _processItems(self, computeStackItems):
+        lvalue = []
+        rvalue = []
+        value  = []
+        for item in computeStackItems:
+            if item.opCode == eOP_Constant:
+                label = '%.6e' % item.value
+                child = self._addNode(label, color='darkorchid', fontcolor='darkorchid')
+            
+            elif item.opCode == eOP_Time:
+                label = 'time'
+                child = self._addNode(label, color='black')
+
+            elif item.opCode == eOP_InverseTimeStep:
+                label = '1/dt'
+                child = self._addNode(label, color='black')
+
+            elif item.opCode == eOP_Unary:
+                label = str(item.function)            
+                child = self._addNode(label, shape='ellipse', color='black')
+                arg_node = value.pop()
+                self.graph.add_edge(child, arg_node, color = 'gray50')
+
+            elif item.opCode == eOP_Binary:
+                label = ''
+                if item.function == ePlus:
+                    label = '+'
+                elif item.function == eMinus:
+                    label = '-'
+                elif item.function == eMulti:
+                    label = '*'
+                elif item.function == eDivide:
+                    label = '/'
+                elif item.function == ePower:
+                    label = '**'
+                elif item.function == eMin:
+                    label = 'min'
+                elif item.function == eMax:
+                    label = 'max'
+                elif item.function == eArcTan2:
+                    label = 'atan2'
+                child = self._addNode(label, shape='circle', color='black')
+                l_node = lvalue.pop()
+                r_node = rvalue.pop()
+                self.graph.add_edge(child, l_node, color = 'gray50')
+                self.graph.add_edge(child, r_node, color = 'gray50')
+
+            elif item.opCode == eOP_Variable:
+                if hasattr(item, 'variableName') and item.variableName != '':
+                    label = '%s(oi=%d,bi=%d)' % (item.variableName, item.overallIndex, item.blockIndex)
+                else:
+                    label = 'var(oi=%d,bi=%d)' % (item.overallIndex, item.blockIndex)
+                child = self._addNode(label, color='blue', fontcolor='blue')
+
+            elif item.opCode == eOP_TimeDerivative:
+                if hasattr(item, 'variableName') and item.variableName != '':
+                    label = 'dt(%s){oi=%d,bi=%d}' % (item.variableName, item.overallIndex, item.blockIndex)
+                else:
+                    label = 'dt{oi=%d,bi=%d}' % (item.overallIndex, item.blockIndex)
+                child = self._addNode(label, color='red', fontcolor='red')
+                    
+            else:
+                raise RuntimeError('Not supported node: %s' % type(node))
+
+            if item.resultLocation == eOP_Result_to_value:
+                value.append(child)
+            elif item.resultLocation == eOP_Result_to_lvalue:
+                lvalue.append(child)
+            elif item.resultLocation == eOP_Result_to_rvalue:
+                rvalue.append(child)
+    

@@ -1005,6 +1005,10 @@ BOOST_PYTHON_MODULE(pyDealII)
     def("constant_2D", &constant<2>, ( arg("value") ));
     def("constant_3D", &constant<3>, ( arg("value") ));
 
+    def("cell_diameter_1D", &cell_diameter<1>);
+    def("cell_diameter_2D", &cell_diameter<2>);
+    def("cell_diameter_3D", &cell_diameter<3>);
+
     def("phi_1D", &phi<1>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_2D", &phi<2>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));
     def("phi_3D", &phi<3>, ( arg("variableName"), arg("shapeFunction"), arg("quadraturePoint") ));

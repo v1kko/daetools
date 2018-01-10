@@ -45,7 +45,7 @@
             div.w3-top-bottom-indent {padding-top: 10px; padding-bottom: 10px;}
         </style>
       </head>
-      <body class="w3-display-container w3-display-topmiddle w3-twothird">
+      <body class="w3-display-container w3-display-topmiddle w3-dae-width">
         <div>
             <p>
                 <img style="height: 1.2em; display: inline" src="http://www.daetools.com/img/[d][a][e]_Tools_project.png" alt=""/>

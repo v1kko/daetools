@@ -195,7 +195,7 @@ class modTutorial(daeModel):
         eq.Residual = self.Heat_ext1() - self.exfnHeat1()
 
         #
-        # Scalar external function #3
+        # Scalar external function #2
         #
         # Create ctypes external function
         # Use the function calculate from the shared library.

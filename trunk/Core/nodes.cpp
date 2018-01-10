@@ -1529,10 +1529,10 @@ adouble adRuntimeVariableNode::Evaluate(const daeExecutionContext* pExecutionCon
             }
         }
     }
-    else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
-    {
-        return adouble(value, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
-    }
+    //else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
+    //{
+    //    return adouble(value, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == m_nOverallIndex ? 1 : 0) );
+    //}
     else
     {
     // Achtung!! If a variable is assigned its derivative must always be zero!
@@ -1752,12 +1752,12 @@ adouble adRuntimeTimeDerivativeNode::Evaluate(const daeExecutionContext* pExecut
                        pExecutionContext->m_pDataProxy->GetSDValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation, m_nBlockIndex)
                        );
     }
-    else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
-    {
-        //I can never rich this point, since the model must be steady-state to call CalculateGradients function
-        daeDeclareAndThrowException(exInvalidCall)
-        return adouble(0, 0);
-    }
+    //else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
+    //{
+    //    //I can never reach this point, since the model must be steady-state to call CalculateGradients function
+    //    daeDeclareAndThrowException(exInvalidCall)
+    //    return adouble(0, 0);
+    //}
     else
     {
         return adouble(pExecutionContext->m_pBlock->GetTimeDerivative(m_nBlockIndex),
@@ -2201,6 +2201,8 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
     case eErf:
         val = erf(node->Evaluate(pExecutionContext));
         break;
+    case eScaling:
+        daeDeclareAndThrowException(exNotImplemented);
     default:
         daeDeclareAndThrowException(exNotImplemented);
         return adouble();
@@ -2275,6 +2277,8 @@ adouble adUnaryNode::Evaluate(const daeExecutionContext* pExecutionContext) cons
                 case eErf:
                     fun = "erf";
                     break;
+                case eScaling:
+                    daeDeclareAndThrowException(exNotImplemented);
                 default:
                     daeDeclareAndThrowException(exNotImplemented);
                     return adouble();
@@ -2333,6 +2337,9 @@ const quantity adUnaryNode::GetQuantity(void) const
         return atanh(node->GetQuantity());
     case eErf:
         return erf(node->GetQuantity());
+    case eScaling:
+        daeDeclareAndThrowException(exNotImplemented);
+        return quantity();
     default:
         daeDeclareAndThrowException(exNotImplemented);
         return quantity();
@@ -2554,6 +2561,8 @@ void adUnaryNode::Export(std::string& strContent, daeeModelLanguage eLanguage, d
         node->Export(strContent, eLanguage, c);
         strContent += ")";
         break;
+    case eScaling:
+        daeDeclareAndThrowException(exNotImplemented);
     default:
         daeDeclareAndThrowException(exNotImplemented);
     }
@@ -2775,8 +2784,10 @@ string adUnaryNode::SaveAsLatex(const daeNodeSaveAsContext* c) const
         strResult += node->SaveAsLatex(c);
         strResult += " \\right) ";
         break;
+    case eScaling:
+        daeDeclareAndThrowException(exNotImplemented);
     default:
-        daeDeclareAndThrowException(exXMLIOError);
+        daeDeclareAndThrowException(exNotImplemented);
     }
 
     return strResult;
@@ -2874,6 +2885,9 @@ void adUnaryNode::SaveAsContentMathML(io::xmlTag_t* pTag, const daeNodeSaveAsCon
         break;
     case eErf:
         strName  = "erf";
+        break;
+    case eScaling:
+        daeDeclareAndThrowException(exNotImplemented);
         break;
     default:
         daeDeclareAndThrowException(exXMLIOError);
@@ -3199,6 +3213,8 @@ void adUnaryNode::SaveAsPresentationMathML(io::xmlTag_t* pTag, const daeNodeSave
             strName  = "mo";
             strValue = ")";
             mrowout->AddTag(strName, strValue);
+    case eScaling:
+        daeDeclareAndThrowException(exNotImplemented);
     default:
         daeDeclareAndThrowException(exXMLIOError);
     }
@@ -3947,7 +3963,7 @@ bool adBinaryNode::IsLinear(void) const
         return false;
     }
 
-// Just in case I somehow rich this point
+// Just in case I somehow reach this point
     return false;
 }
 
@@ -5030,10 +5046,10 @@ adouble adFloatCoefficientVariableSumNode::Evaluate(const daeExecutionContext* p
                                                    pExecutionContext->m_pDataProxy->GetSValue(pExecutionContext->m_nIndexInTheArrayOfCurrentParameterForSensitivityEvaluation, fcvp.blockIndex) );
             }
         }
-        else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
-        {
-            sum += fcvp.coefficient * adouble(value, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == overallIndex ? 1 : 0) );
-        }
+        //else if(pExecutionContext->m_eEquationCalculationMode == eCalculateSensitivityParametersGradients)
+        //{
+        //    sum += fcvp.coefficient * adouble(value, (pExecutionContext->m_nCurrentParameterIndexForSensitivityEvaluation == overallIndex ? 1 : 0) );
+        //}
         else if(pExecutionContext->m_eEquationCalculationMode == eCalculateJacobian)
         {
             sum += fcvp.coefficient * adouble(value, (pExecutionContext->m_nCurrentVariableIndexForJacobianEvaluation == overallIndex ? 1 : 0) );

@@ -110,7 +110,7 @@ class modTutorial(daeModel):
         self.n_components = int(numpy.sum([dof.Multiplicity for dof in dofs]))
 
         meshes_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meshes')
-        mesh_file  = os.path.join(meshes_dir, 'square(0,1)x(0,1)-64x64.msh')
+        mesh_file  = os.path.join(meshes_dir, 'square(0,1)x(0,1)-96x96.msh')
 
         # Store the object so it does not go out of scope while still in use by daetools
         self.fe_system = dealiiFiniteElementSystem_2D(meshFilename    = mesh_file,     # path to mesh
@@ -157,6 +157,10 @@ class modTutorial(daeModel):
         xyz     = xyz_2D(fe_q)
         JxW     = JxW_2D(fe_q)
         
+        #h       = cell_diameter_2D()
+        #sqrt_fe = feExpression_2D.sqrt
+        #kappa_art = 0.25 * h * sqrt_fe(u_dof*u_dof)
+        
         self.gammaFun = TemperatureSource_2D()
         gamma = function_value_2D("gamma", self.gammaFun, xyz)
         
@@ -195,14 +199,15 @@ class modTutorial(daeModel):
 
         # Contributions from the heat convection-diffusion equation:
         Mij_T_accumulation = phi_T_i * phi_T_j * JxW
-        Aij_T_convection   = (u_dof, phi_T_i, dphi_T_j * JxW)
         #Aij_T_convection   = u_dof*(phi_T_i*dphi_T_j * JxW) # -> Tensor<rank=1,float> * Tensor<rank=1,adouble> 
+        Aij_T_convection   = (u_dof, phi_T_i, dphi_T_j * JxW)
         Aij_T_diffusion    = kappa * (dphi_T_i * dphi_T_j) * JxW
+        #Aij_T_diffusion    = (kappa + kappa_art, dphi_T_i, dphi_T_j * JxW)
         Fi_T_source        = phi_T_i * gamma * JxW
 
         # Total contributions (using the new way - python lists of expressions or tuples):
         Mij = [Mij_T_accumulation]
-        Aij = [Aij_u_gradient + Aij_p_gradient + Aij_continuity + Aij_T_diffusion,  Aij_T_convection]
+        Aij = [Aij_u_gradient + Aij_p_gradient + Aij_continuity, Aij_T_diffusion,  Aij_T_convection]
         Fi  = [Fi_T_source, Fi_buoyancy]
         
         weakForm = dealiiFiniteElementWeakForm_2D(Aij = Aij,

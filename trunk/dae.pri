@@ -11,8 +11,8 @@
 # DAE Tools software; if not, see <http://www.gnu.org/licenses/>.
 #************************************************************************************
 DAE_TOOLS_MAJOR = 1
-DAE_TOOLS_MINOR = 7
-DAE_TOOLS_BUILD = 3
+DAE_TOOLS_MINOR = 8
+DAE_TOOLS_BUILD = 0
 
 # DAE Tools version (major, minor, build)
 VERSION = $${DAE_TOOLS_MAJOR}.$${DAE_TOOLS_MINOR}.$${DAE_TOOLS_BUILD}
@@ -190,6 +190,9 @@ macx-g++::SOLIBS_RPATH_SL       = -Wl,-rpath,\'@loader_path\'
 #                       Compiler flags
 ####################################################################################
 CONFIG += rtti
+
+# For profiling with Valgrind
+#unix::QMAKE_CXXFLAGS += -g
 
 # OpenMP
 unix::QMAKE_CXXFLAGS           += -fopenmp

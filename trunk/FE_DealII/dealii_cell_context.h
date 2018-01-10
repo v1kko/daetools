@@ -779,6 +779,11 @@ public:
         return fe.system_to_component_index(index).first;
     }
 
+    virtual double cell_diameter() const
+    {
+        return m_fe_values.get_cell()->diameter();
+    }
+
 public:
     FE_VALUES&                      m_fe_values;
     daeModel*                       m_model;

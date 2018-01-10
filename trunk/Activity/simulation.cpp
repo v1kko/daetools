@@ -339,14 +339,12 @@ void daeSimulation::Initialize(daeDAESolver_t* pDAESolver,
 
 std::vector<daeEquationExecutionInfo*> daeSimulation::GetEquationExecutionInfos(void) const
 {
-    vector<daeEquationExecutionInfo*> ptrarrEquationExecutionInfos;
-
     daeBlock* pBlock = dynamic_cast<daeBlock*>(m_ptrBlock);
     if(!pBlock)
         daeDeclareAndThrowException(exInvalidPointer);
 
-    pBlock->GetEquationExecutionInfos(ptrarrEquationExecutionInfos);
-    return ptrarrEquationExecutionInfos;
+    std::vector<daeEquationExecutionInfo*>& arrEEI_ActiveSet = pBlock->GetEquationExecutionInfos_ActiveSet();
+    return arrEEI_ActiveSet;
 }
 
 size_t daeSimulation::GetNumberOfEquations(void) const

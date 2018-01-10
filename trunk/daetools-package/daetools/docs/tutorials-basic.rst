@@ -88,6 +88,12 @@ Basic Tutorials
 :ref:`tutorial19`         |t_19|
 =======================   =================================================================
 
+.. rubric:: Variable constraints:
+
+=======================   =================================================================
+:ref:`tutorial20`         |t_20|
+=======================   =================================================================
+
 
 .. |witt| replace:: Importing DAE Tools pyDAE module(s), units and variable types
                     developing models, setting up a simulation, declaring auxiliary
@@ -138,6 +144,8 @@ Basic Tutorials
 .. |t_18| replace:: Using DAE Tools variables and NumPy functions to generate and solve a simple ODE system.
 
 .. |t_19| replace:: Using thermophysical property packages in DAE Tools.
+
+.. |t_20| replace:: Specifying variable constraints in DAE Tools.
 
 
 .. begin-command
@@ -498,6 +506,22 @@ Tutorial 19
 Model report            `tutorial19.xml <../examples/tutorial19.xml>`_
 Runtime model report    `tutorial19-rt.xml <../examples/tutorial19-rt.xml>`_
 Source code             `tutorial19.py <../examples/tutorial19.html>`_
+=====================   =================================================================
+
+
+.. _tutorial20:
+
+Tutorial 20
+===========
+
+.. automodule:: daetools.examples.tutorial20
+   :no-members:
+   :no-undoc-members:
+
+.. rubric:: Files
+
+=====================   =================================================================
+Source code             `tutorial20.py <../examples/tutorial20.html>`_
 =====================   =================================================================
 
 

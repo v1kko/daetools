@@ -19,7 +19,8 @@ daeVariableType::daeVariableType(string strName,
                                  real_t dLowerBound,
                                  real_t dUpperBound,
                                  real_t dInitialGuess,
-                                 real_t dAbsoluteTolerance)
+                                 real_t dAbsoluteTolerance,
+                                 daeeVariableValueConstraint eValueConstraint)
 {
     m_dInitialGuess		  = dInitialGuess;
     m_dLowerBound		  = dLowerBound;
@@ -27,16 +28,18 @@ daeVariableType::daeVariableType(string strName,
     m_Units               = units;
     m_strName             = strName;
     m_dAbsoluteTolerance  = dAbsoluteTolerance;
+    m_eValueConstraint    = eValueConstraint;
 }
 
 bool daeVariableType::operator ==(const daeVariableType& other)
 {
-    return  (m_dInitialGuess	   == other.m_dInitialGuess) &&
-            (m_dLowerBound		   == other.m_dLowerBound)   &&
-            (m_dUpperBound		   == other.m_dUpperBound)   &&
-            (m_Units               == other.m_Units)         &&
-            (m_strName             == other.m_strName)       &&
-            (m_dAbsoluteTolerance  == other.m_dAbsoluteTolerance);
+    return  (m_dInitialGuess	   == other.m_dInitialGuess)      &&
+            (m_dLowerBound		   == other.m_dLowerBound)        &&
+            (m_dUpperBound		   == other.m_dUpperBound)        &&
+            (m_Units               == other.m_Units)              &&
+            (m_strName             == other.m_strName)            &&
+            (m_dAbsoluteTolerance  == other.m_dAbsoluteTolerance) &&
+            (m_eValueConstraint    == other.m_eValueConstraint);
 }
 
 bool daeVariableType::operator !=(const daeVariableType& other)
@@ -108,6 +111,16 @@ void daeVariableType::SetAbsoluteTolerance(real_t dTolerance)
     m_dAbsoluteTolerance = dTolerance;
 }
 
+daeeVariableValueConstraint daeVariableType::GetValueConstraint(void) const
+{
+    return m_eValueConstraint;
+}
+
+void daeVariableType::SetValueConstraint(daeeVariableValueConstraint eValueConstraint)
+{
+    m_eValueConstraint = eValueConstraint;
+}
+
 void daeVariableType::Open(io::xmlTag_t* pTag)
 {
     string strName;
@@ -129,6 +142,9 @@ void daeVariableType::Open(io::xmlTag_t* pTag)
 
     strName = "AbsoluteTolerance";
     pTag->Open(strName, m_dAbsoluteTolerance);
+
+//  strName = "ValueConstraint";
+//  OpenEnum(pTag, strName, m_eValueConstraint);
 }
 
 void daeVariableType::Save(io::xmlTag_t* pTag) const
@@ -152,6 +168,9 @@ void daeVariableType::Save(io::xmlTag_t* pTag) const
 
     strName = "AbsoluteTolerance";
     pTag->Save(strName, m_dAbsoluteTolerance);
+
+    strName = "ValueConstraint";
+    SaveEnum(pTag, strName, m_eValueConstraint);
 }
 
 void daeVariableType::Export(std::string& strContent, daeeModelLanguage eLanguage, daeModelExportContext& c) const
@@ -216,6 +235,9 @@ void daeVariableType::SaveRuntime(io::xmlTag_t* pTag) const
 
     strName = "AbsoluteTolerance";
     pTag->Save(strName, m_dAbsoluteTolerance);
+
+    strName = "ValueConstraint";
+    SaveEnum(pTag, strName, m_eValueConstraint);
 }
 
 bool daeVariableType::CheckObject(vector<string>& strarrErrors) const
